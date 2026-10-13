@@ -112,7 +112,8 @@ export const teamAnswerModeSchema = z.preprocess((value) => (value === 'shared' 
 
 /**
  * Visual themes for the phones, projector and host control. Hues only; light and dark mode stay the device's choice.
- * The first seven are playful, the last five (graphite onwards) are subdued for formal company events.
+ * The first seven are playful, the next five (graphite to bordeaux) are subdued for formal company events,
+ * and `custom` takes the host's own colours from `customTheme`.
  */
 export const gameThemes = [
   'classic',
@@ -127,15 +128,40 @@ export const gameThemes = [
   'petrol',
   'stone',
   'bordeaux',
+  'custom',
 ] as const
 export type GameTheme = (typeof gameThemes)[number]
+
+/**
+ * The host's own theme (`theme: 'custom'`), in the terms every theme is built from: the main hue,
+ * the accent hue (degrees on the colour wheel) and the colour strength (1 is as vivid as Classic,
+ * 0 is black and white). Lightness stays the app's, so text keeps its contrast in both colour modes
+ * whatever is picked.
+ */
+export const customThemeSchema = z.object({
+  hue: z.number().int().min(0).max(359),
+  accent: z.number().int().min(0).max(359),
+  chroma: z.number().min(0).max(1.2),
+})
+export type CustomTheme = z.infer<typeof customThemeSchema>
 
 /**
  * Six fixed answer colours (one per option index), independent of the theme so answers stand out from the background.
  * Muted and corporate are the low-saturation sets for formal events.
  */
-export const answerPalettes = ['vivid', 'candy', 'neon', 'earth', 'muted', 'corporate'] as const
+export const answerPalettes = ['vivid', 'candy', 'neon', 'earth', 'muted', 'corporate', 'custom'] as const
 export type AnswerPalette = (typeof answerPalettes)[number]
+
+/**
+ * The host's own answer colours (`answerPalette: 'custom'`): any colour per option index, as
+ * `#rrggbb`. The text on each is picked by the app (white or dark, whichever reads better).
+ */
+export const customPaletteSchema = z
+  .array(z.string().regex(/^#[0-9a-f]{6}$/i).toLowerCase())
+  .length(6)
+export type CustomPalette = z.infer<typeof customPaletteSchema>
+/** Vivid's colours, the custom palette's starting point. */
+export const defaultCustomPalette: CustomPalette = ['#db1a2b', '#1957d2', '#f9cc21', '#098926', '#f77f00', '#7a31ca']
 
 /** What marks each answer option besides its colour. */
 export const answerSymbols = ['shapes', 'letters', 'numbers', 'icons'] as const
@@ -168,12 +194,16 @@ export const gameSettingsSchema = z
     answerStyle: z.enum(['plain', 'colourful']).default('colourful'),
     /** Colours of the answer options on phones (when colourful), the projector and the result bars. */
     answerPalette: z.enum(answerPalettes).default('vivid'),
+    /** The colours of the custom answer palette; kept when another palette is picked, so switching back restores them. */
+    customPalette: customPaletteSchema.default(() => [...defaultCustomPalette]),
     /** Symbols shown on the answer options next to the text. */
     answerSymbols: z.enum(answerSymbols).default('shapes'),
     /** Final results (podium, ranks, answer review) on phones and the projector: as soon as the game ends, or when the host releases them. */
     finalResults: z.enum(['immediately', 'onRelease']).default('immediately'),
     /** Colour theme of the game views. */
     theme: z.enum(gameThemes).default('classic'),
+    /** The colours of the custom theme; kept when another theme is picked, so switching back restores them. */
+    customTheme: customThemeSchema.default({ hue: 277, accent: 330, chroma: 1 }),
   })
   .superRefine(checkTeams)
 export type GameSettings = z.infer<typeof gameSettingsSchema>

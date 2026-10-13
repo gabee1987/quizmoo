@@ -1,4 +1,4 @@
-import type { GameSettings } from '@quizmoo/shared'
+import { defaultCustomPalette, type GameSettings } from '@quizmoo/shared'
 import type { GameQuiz } from './types.js'
 
 /** One question of each type with deterministic ids, 20 s and 1000 points each. */
@@ -68,6 +68,8 @@ export function fixtureSettings(overrides: Partial<GameSettings> = {}): GameSett
     answerSymbols: 'shapes',
     finalResults: 'immediately',
     theme: 'classic',
+    customTheme: { hue: 277, accent: 330, chroma: 1 },
+    customPalette: [...defaultCustomPalette],
     ...overrides,
   }
 }

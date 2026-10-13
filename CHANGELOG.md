@@ -101,6 +101,11 @@
 - The end-of-game review on the phones says "Your team's answer" for team answers, and when the captain did not confirm.
 - Quizmoo can be installed as an app (home screen icon, opens like an app). The service worker keeps only the app's own files; games, the API and images always come from the server. A page a phone has opened still loads without the network and shows "Connection lost".
 - The admin's names page no longer nests a list inside a paragraph.
+- The new game dialog is much bigger: the setting groups are tabs on the left with their summaries, the whole group's settings on the right, and Create game always in view; on a phone it fills the screen.
+- A "Custom" theme with the host's own colours: a colour wheel for the main and the accent colour and a colour strength from muted to vivid. Text stays readable in light and dark mode whatever is picked.
+- The custom theme shows a small lobby card in its colours, so the accent colour's effect is visible while picking, and the colour strength goes down to black and white.
+- "Custom" answer colours: any colour per answer, black and white included; the text on each answer is white or dark, whichever reads better.
+- The quiz editor's settings panel takes the whole width beside the phone preview (the question form folds away while it is open) and shows the settings in two columns.
 
 ### Development
 - The web dev server runs on port 15173, away from the 5173+ ports other local Vite projects take.

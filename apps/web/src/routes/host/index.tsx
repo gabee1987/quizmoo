@@ -318,7 +318,7 @@ function HostHome() {
               <Badge variant="secondary">{t('host.questionCount', { count: quiz.questionCount })}</Badge>
               <Badge variant="outline">{t(`host.create.modes.${quiz.settings.mode}`)}</Badge>
               <Badge variant="outline">
-                <span className="size-2.5 rounded-full" style={{ background: themeSwatches(quiz.settings.theme)[0] }} />
+                <span className="size-2.5 rounded-full" style={{ background: themeSwatches(quiz.settings.theme, quiz.settings.customTheme)[0] }} />
                 {t(`host.create.themeOptions.${quiz.settings.theme}`)}
               </Badge>
             </div>

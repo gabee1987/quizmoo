@@ -27,6 +27,7 @@ From the user:
 - **A limit of 20 to 30 teams.**
 - **Late joining is a host option:** off, nobody joins after the start (as now); on, latecomers can join a running game.
 - **The captaincy can be given away at any point** of the game, not only in the lobby.
+- **Mixed play (13 October test notes):** individuals and teams compete with each other in one game, not only as one-person teams.
 
 Proposed (confirm or change before implementation):
 - **One setting with three choices, "Who makes the teams":**
@@ -46,6 +47,11 @@ Proposed (confirm or change before implementation):
   - Earlier questions count as unanswered: 0 points, and nothing is held against the team's average.
 - **Captaincy at any time:** the captain or the host can pass it in every phase except finished, also during a question. The new captain can confirm the team's answer at once.
 - **Team of one in captain decides:** already done in phase 21 (its answer counts without a confirmation); player-created teams of one rely on it.
+- **Mixed play:** a fourth "Who makes the teams" option is not needed; instead a team game gets "Players may play on their own" (off by default). The join page then offers "On my own" next to the teams.
+  - A solo player has no team (`teamId: null`) and appears in the same standings as the teams: the scoreboard, podium and results rank teams and solo players together by score.
+  - Points are comparable: a one-answer team scores one answer's points per question, an "Everyone counts" team the average of its members, a solo player their own points.
+  - Solo players are marked with their avatar, teams with their name; the projector's top 10 mixes both.
+  - The host can move a solo player into a team and back (as any move).
 - **Old quizzes:** saved team names are ignored by the editor. When a game is created, they prefill the new game dialog's team list once, so nothing a host typed is lost.
 
 ## Scope
@@ -70,6 +76,8 @@ In:
   - pass the crown at any time
   - latecomers shown as they arrive.
 - **Phone:** "Pass the captaincy" available during the game too (game menu or team card).
+
+In (mixed play): the setting, "On my own" on the join page, solo players in the team standings (scoreboard, podium, results, CSV), engine support for players without a team in a team game.
 
 Out: team chat, team avatars or colours, a roster of expected player names, merging teams, players leaving a team on their own after joining.
 

@@ -247,8 +247,6 @@
       "shuffle": "Shuffle answer options",
       "submit": "Create game",
       "groupsHelp": "The game starts with the quiz's settings. Change any group for this game only.",
-      "change": "Change",
-      "done": "Done",
       "reset": "Reset",
       "changedForGame": "Changed for this game",
       "noBonuses": "No bonuses, fixed order",
@@ -289,7 +287,8 @@
         "navy": "Navy",
         "petrol": "Petrol",
         "stone": "Stone",
-        "bordeaux": "Bordeaux"
+        "bordeaux": "Bordeaux",
+        "custom": "Custom"
       },
       "answerPalette": "Answer colours",
       "answerPaletteHelp": "The answer buttons and the result bars on the phones and the projector, independent of the theme. Muted and Corporate are the calmer sets.",
@@ -299,7 +298,8 @@
         "neon": "Neon",
         "earth": "Earth",
         "muted": "Muted",
-        "corporate": "Corporate"
+        "corporate": "Corporate",
+        "custom": "Custom"
       },
       "answerSymbols": "Answer symbols",
       "answerSymbolsOptions": {
@@ -324,7 +324,24 @@
         "sameHelp": "You pick the mode; teams can't change it."
       },
       "teamAnswerMode": "Mode for every team",
-      "teamAnswerSame": "Same for all teams: {{mode}}"
+      "teamAnswerSame": "Same for all teams: {{mode}}",
+      "customTheme": {
+        "title": "Your colours",
+        "main": "Main colour",
+        "accent": "Accent colour",
+        "strength": "Colour strength",
+        "muted": "Black and white",
+        "vivid": "Vivid",
+        "help": "Drag the handles on the wheel, or use the arrow keys. The main colour shows on buttons and the countdown; the accent on the lobby card's ring, the avatar bubble and the winner's card. Strength at zero is black and white. Text stays readable in light and dark mode whatever you pick.",
+        "sample": "What players see in the lobby",
+        "sampleName": "You're in, Anna!",
+        "sampleButton": "Main colour"
+      },
+      "customPalette": {
+        "title": "Your answer colours",
+        "answer": "Answer {{n}}",
+        "help": "Pick any colour, black and white too. The app picks the text colour (white or dark) so it stays readable. The symbols still tell answers apart when two colours are close."
+      }
     },
     "newQuiz": "New quiz",
     "edit": "Edit",

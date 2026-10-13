@@ -48,8 +48,9 @@ import { TypePicker } from '../../features/editor/type-picker'
 import { useAutosave, type SaveStatus } from '../../features/editor/use-autosave'
 import { errorsUnder, validateQuiz } from '../../features/editor/validate'
 import { CreateGameDialog } from '../../features/host/create-game-dialog'
-import { GameSettingsForm, settingsSummary } from '../../features/host/game-settings-form'
+import { GameSettingsForm, settingsSummary, type SettingsSection } from '../../features/host/game-settings-form'
 import { ApiError, apiFetch, errorCode } from '../../lib/api'
+import { paletteVars } from '../../lib/themes'
 
 export const Route = createFileRoute('/host/quizzes/$quizId')({
   component: QuizEditorPage,
@@ -343,32 +344,45 @@ function Editor({ quiz }: { quiz: Quiz }) {
       )}
     </div>
   )
+  const settingsGroup = (section: SettingsSection) => (
+    <section className="flex flex-col gap-4 rounded-2xl border p-4" aria-labelledby={`settings-group-${section}`}>
+      <h3 id={`settings-group-${section}`} className="text-lg font-extrabold">
+        {t(`host.batch.groups.${section}`)}
+      </h3>
+      <GameSettingsForm value={draft.settings} onChange={(settings) => setDraft((d) => ({ ...d, settings }))} sections={[section]} />
+    </section>
+  )
+  // Two columns where the panel is wide enough (the docked panel on laptops, a wide sheet):
+  // game flow and scoring beside the look, the longest group, so there is less to scroll.
   const settingsBody = (
-    <div className="flex flex-col gap-5">
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="quiz-description" className="font-semibold">
-          {t('editor.description')}
-        </Label>
-        <Textarea
-          id="quiz-description"
-          value={draft.description}
-          maxLength={500}
-          rows={3}
-          onChange={(e) => setDraft((d) => ({ ...d, description: e.target.value }))}
-        />
-      </div>
-      <div className="flex flex-col gap-3">
-        <h3 className="font-extrabold">{t('editor.gameSettings')}</h3>
-        <p className="text-sm text-muted-foreground">{t('editor.gameSettingsHelp')}</p>
-        <GameSettingsForm value={draft.settings} onChange={(settings) => setDraft((d) => ({ ...d, settings }))} />
-      </div>
-      <div className="flex flex-col gap-2 border-t pt-5">
-        <h3 className="font-extrabold">{t('editor.deleteQuiz')}</h3>
-        <p className="text-sm text-muted-foreground">{t('editor.deleteQuizHelp')}</p>
-        <Button variant="destructive" className="self-start" onClick={() => setDeleting(true)}>
-          <Trash2Icon aria-hidden="true" />
-          {t('editor.deleteQuiz')}
-        </Button>
+    <div className="@container">
+      <div className="grid items-start gap-5 @3xl:grid-cols-2">
+        <div className="flex flex-col gap-5">
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="quiz-description" className="font-semibold">
+              {t('editor.description')}
+            </Label>
+            <Textarea
+              id="quiz-description"
+              value={draft.description}
+              maxLength={500}
+              rows={3}
+              onChange={(e) => setDraft((d) => ({ ...d, description: e.target.value }))}
+            />
+            <p className="text-sm text-muted-foreground">{t('editor.gameSettingsHelp')}</p>
+          </div>
+          {settingsGroup('flow')}
+          {settingsGroup('scoring')}
+        </div>
+        <div className="flex flex-col gap-5">{settingsGroup('look')}</div>
+        <div className="flex flex-col gap-2 border-t pt-5 @3xl:col-span-2">
+          <h3 className="font-extrabold">{t('editor.deleteQuiz')}</h3>
+          <p className="text-sm text-muted-foreground">{t('editor.deleteQuizHelp')}</p>
+          <Button variant="destructive" className="self-start" onClick={() => setDeleting(true)}>
+            <Trash2Icon aria-hidden="true" />
+            {t('editor.deleteQuiz')}
+          </Button>
+        </div>
       </div>
     </div>
   )
@@ -377,7 +391,7 @@ function Editor({ quiz }: { quiz: Quiz }) {
   return (
     <TooltipProvider delayDuration={200}>
       {/* data-palette colours the option badges in the editor like the answers in the game. */}
-      <div data-palette={draft.settings.answerPalette} className="mx-auto flex w-full max-w-[100rem] flex-col gap-4 pb-20 lg:pb-0">
+      <div data-palette={draft.settings.answerPalette} style={paletteVars(draft.settings)} className="mx-auto flex w-full max-w-[100rem] flex-col gap-4 pb-20 lg:pb-0">
         {/* Sticky from sm: on phones the bar wraps to two rows and the bottom bar already holds the navigation.
             No background of its own: the page behind has a gradient wash a solid strip would not match. */}
         <div className="z-30 sm:sticky sm:top-2">
@@ -445,13 +459,16 @@ function Editor({ quiz }: { quiz: Quiz }) {
           At xl four columns, list | form | preview | settings, with the spacing inside the side columns
           (no grid gap, so a closed column takes no room). Opening the settings animates the columns
           with a soft spring: the list column closes while the list slides out to the left, the form
-          narrows, and the settings column opens with the panel sliding in from the right.
-          Each side panel sits in a clipping wrapper, anchored to the edge that moves.
+          folds away (the settings do not change it, so the room goes to them), and the settings
+          column opens over the rest of the width with the panel sliding in from the right; the
+          preview stays, as it shows what the settings change. The settings column is a length
+          (the grid's width minus the preview), not 1fr, so it animates. Each side panel sits in a
+          clipping wrapper, anchored to the edge that moves.
         */}
         <div
           className={cn(
-            'grid items-start gap-4 lg:grid-cols-[17rem_minmax(0,1fr)] xl:gap-0 xl:transition-[grid-template-columns] xl:duration-700 xl:ease-spring-soft',
-            docked ? 'xl:grid-cols-[0rem_minmax(0,1fr)_22rem_27.5rem]' : 'xl:grid-cols-[18.5rem_minmax(0,1fr)_22rem_0rem]',
+            '@container/editor grid items-start gap-4 lg:grid-cols-[17rem_minmax(0,1fr)] xl:gap-0 xl:transition-[grid-template-columns] xl:duration-700 xl:ease-spring-soft',
+            docked ? 'xl:grid-cols-[0rem_minmax(0,1fr)_22rem_calc(100%-22rem)]' : 'xl:grid-cols-[18.5rem_minmax(0,1fr)_22rem_0rem]',
           )}
         >
           <div className="hidden min-w-0 items-start justify-end self-stretch lg:flex xl:overflow-x-clip" inert={docked}>
@@ -467,7 +484,10 @@ function Editor({ quiz }: { quiz: Quiz }) {
             </aside>
           </div>
 
-          <section className="flex min-w-0 flex-col gap-4">
+          <section
+            className={cn('flex min-w-0 flex-col gap-4 xl:transition-opacity xl:duration-300', docked && 'xl:overflow-x-clip xl:opacity-0')}
+            inert={docked}
+          >
             {selected ? (
               <div key={selected.id} className="flex animate-fade-up flex-col gap-4 rounded-2xl border bg-card p-4 shadow-soft sm:p-5">
                 <QuestionToolbar
@@ -515,7 +535,9 @@ function Editor({ quiz }: { quiz: Quiz }) {
               className={cn(
                 // Fits the window from where it starts (below the top bar), so a short question
                 // never makes the page scroll next to the panel's own scrollbar.
-                'sticky top-22 ml-6 flex max-h-[calc(100dvh-11rem)] w-[26rem] shrink-0 flex-col overflow-hidden rounded-2xl border bg-card shadow-soft',
+                // As wide as the open column (the editor's width minus the preview and the margin),
+                // so it keeps its size while the column animates and slides instead of squeezing.
+                'sticky top-22 ml-6 flex max-h-[calc(100dvh-11rem)] w-[calc(100cqw-23.5rem)] shrink-0 flex-col overflow-hidden rounded-2xl border bg-card shadow-soft',
                 'transition-[translate,opacity] duration-600 ease-spring',
                 !docked && 'translate-x-16 opacity-0',
               )}
@@ -564,7 +586,7 @@ function Editor({ quiz }: { quiz: Quiz }) {
 
         {/* Narrower screens have no room beside the form: the settings slide over it. */}
         <Sheet open={settingsOpen && !wide} onOpenChange={setSettingsOpen}>
-          <SheetContent side="right" className="w-full gap-0 sm:max-w-lg">
+          <SheetContent side="right" className="w-full gap-0 sm:max-w-2xl lg:max-w-4xl">
             <SheetHeader>
               <SheetTitle className="text-lg font-extrabold">{t('editor.settings')}</SheetTitle>
               <SheetDescription className="text-sm">{settingsSummary(draft.settings, t)}</SheetDescription>

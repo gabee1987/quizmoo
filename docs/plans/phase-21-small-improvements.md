@@ -16,6 +16,8 @@ Several small changes chosen by the user, collected on one branch instead of one
 | 4 | A clearly visible answer selection | `Make the selected answer stand out in every theme` |
 | 5 | Installable app (PWA) | `Make Quizmoo installable as an app` |
 | 6 | Scheduled games and a public lobby link | `Schedule games and share the join link ahead` |
+| 7 | A bigger new game dialog (added 13 October) | `Give the new game dialog room for every setting` |
+| 8 | A custom theme with a colour wheel (added 13 October) | `Add a custom theme with the host's own colours` |
 
 Each item ends with its own check; the branch ends with `pnpm verify` and `pnpm e2e` locally.
 
@@ -114,3 +116,29 @@ Items 1 to 5 are done; item 6 waits for the user's confirmation of its proposed 
 - 1: fixed in `FormAlert` itself, which every form error uses, instead of the names page alone.
 - 4: the check badge sits where the check was (the end of the option), not on a corner; the team pick stack keeps the corner.
 - 5: no precaching of every code chunk at install: 50 phones would download the editor and results code over the venue wifi on their first visit. Pages a phone has opened work offline; built assets are cached as they load. The icons are the cow on the indigo tile, rendered from `logo.svg`.
+
+## 7. A bigger new game dialog
+
+From the user: the new game dialog needs to be bigger so more settings are visible at once.
+
+Done: a large dialog (up to 72rem wide, the full height on a laptop, the whole screen on a phone). The three groups are tabs on the left with their summaries and "changed for this game" marks; the chosen group's whole form is on the right; Cancel and Create game stay at the bottom; the reset per group is above its form. Checked in laptop and phone screenshots.
+
+## 8. A custom theme with a colour wheel
+
+From the user: a separate theme whose colours the host picks from a colour wheel, for a professional look.
+
+Done: theme `custom` with `customTheme: { hue, accent, chroma }` (game setting, default Classic's colours, kept when another theme is picked). A colour wheel with Main and Accent handles (drag, or arrow keys; each a slider for screen readers) and a "Colour strength" slider from muted to vivid. Lightness stays the app's, so text keeps its contrast in both colour modes whatever is picked. The editor preview, the quiz cards, the phones, the projector and the host control follow it (CSS variables set by `themeVars`). Tests: settings schema, `themeVars`, the wheel's keyboard; screenshots of the picker and a phone in light and dark mode.
+
+Follow-up from the user's testing: the accent handle showed no change in the preview (the accent is used only on the lobby card's ring, the avatar bubble, the winner's card and a background glow, none of which the question preview shows), and black and white should be possible. Done: a live lobby card in the custom colours under the wheel, a help line naming where each colour shows, and the strength slider down to 0 (black and white; `chroma` minimum 0). The user chose to keep two colours: the built-in themes have two as well, the third swatch is the background shade of the main colour.
+
+## 9. Custom answer colours
+
+From the user: a custom option for the answer colours too.
+
+Done: answer palette `custom` with `customPalette` (six `#rrggbb` colours, default Vivid's, kept when another palette is picked). Each answer gets the browser's own colour picker (any colour, black and white included, as the user chose over hue-only handles); the text on it is white or dark, whichever has the higher contrast (`textOn`). `paletteVars` sets `--option-N` and `--option-N-fg` inline next to `data-palette="custom"` (`useGameTheme` on `<html>`, the editor and its preview on their wrappers). Tests: settings schema, `textOn`, `paletteVars`, `gameVars`; screenshots of the picker and a phone in light and dark mode.
+
+## 10. A bigger settings panel in the quiz editor
+
+From the user: the settings panel that slides in from the right should be bigger so there is less to scroll; the question form can be hidden while it is open, as the settings do not change it.
+
+Done: from 1280 px, opening the settings folds the question form away and the panel takes all the width beside the phone preview (which stays, as it shows the settings' effect), still sliding in from the right. Inside, two columns: description, Game flow and Scoring on the left, Look on the right, each group in its own box. Below 1280 px the sheet is wider (up to 56rem) and uses the same two columns when it has room. Checked at 1280, 1440 and 1920 px, with no horizontal scroll.

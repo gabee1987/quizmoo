@@ -247,8 +247,6 @@
       "shuffle": "Keverd össze a válaszokat",
       "submit": "Játék létrehozása",
       "groupsHelp": "A játék a kvíz beállításaival indul. Bármelyik csoportot átállíthatod csak erre a játékra.",
-      "change": "Módosítás",
-      "done": "Kész",
       "reset": "Visszaállítás",
       "changedForGame": "Erre a játékra átállítva",
       "noBonuses": "Nincs bónusz, kötött sorrend",
@@ -289,7 +287,8 @@
         "navy": "Sötétkék",
         "petrol": "Petrol",
         "stone": "Kő",
-        "bordeaux": "Bordó"
+        "bordeaux": "Bordó",
+        "custom": "Saját színek"
       },
       "answerPalette": "Válaszok színei",
       "answerPaletteHelp": "A válaszgombok és az eredménysávok színei a telefonokon és a kivetítőn, a témától függetlenül. A Tompa és a Céges a nyugodtabb.",
@@ -299,7 +298,8 @@
         "neon": "Neon",
         "earth": "Földszínek",
         "muted": "Tompa",
-        "corporate": "Céges"
+        "corporate": "Céges",
+        "custom": "Egyéni"
       },
       "answerSymbols": "Válaszok jelei",
       "answerSymbolsOptions": {
@@ -324,7 +324,24 @@
         "sameHelp": "Te választod ki a módot, a csapatok nem változtathatják meg."
       },
       "teamAnswerMode": "Mód minden csapatnak",
-      "teamAnswerSame": "Minden csapatnak: {{mode}}"
+      "teamAnswerSame": "Minden csapatnak: {{mode}}",
+      "customTheme": {
+        "title": "A te színeid",
+        "main": "Fő szín",
+        "accent": "Kiemelő szín",
+        "strength": "Színerősség",
+        "muted": "Fekete-fehér",
+        "vivid": "Élénk",
+        "help": "Húzd a kerék fogantyúit, vagy használd a nyilakat. A fő szín a gombokon és a visszaszámlálón látszik, a kiemelő szín a váróterem kártyájának keretén, az avatár hátterén és a győztes kártyáján. A színerősség nullán fekete-fehér. A szöveg világos és sötét módban is jól olvasható marad, bármit választasz.",
+        "sample": "Így látják a játékosok a váróteremben",
+        "sampleName": "Bent vagy, Anna!",
+        "sampleButton": "Fő szín"
+      },
+      "customPalette": {
+        "title": "Saját válaszszínek",
+        "answer": "{{n}}. válasz",
+        "help": "Bármilyen színt választhatsz, a feketét és a fehéret is. A szöveg színét (fehér vagy sötét) az alkalmazás választja, hogy olvasható maradjon. A jelek akkor is megkülönböztetik a válaszokat, ha két szín hasonló."
+      }
     },
     "newQuiz": "Új kvíz",
     "edit": "Szerkesztés",
