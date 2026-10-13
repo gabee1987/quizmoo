@@ -26,7 +26,7 @@ It uses the dev database, which is the user's data (see `database`).
 - Phone shots at 390 × 844, laptop at 1440 × 900, projector at 1920 × 1080; take both colour modes when colours changed. Assert the claim when there is one (e.g. "no scroll": `scrollHeight <= innerHeight`), then look at the picture.
 - Small details (borders, joins, 1–2 px overlaps) are checked at `deviceScaleFactor` 1, 1.25 and 1.5 as well, enlarged with nearest-neighbour scaling: a 3× render hides 1 px rounding gaps that the user's Windows laptop shows. When the user sends a screenshot that disagrees with yours, enlarge theirs first and compare before changing anything.
 - Selectors: `getByRole(..., { name, exact: true })`. Loose names match more than meant ("Pear" also matched "Appearance").
-- Write scripts with the Write tool, not shell heredocs: backticks in a quoted `node -e` string get eaten, and `cat > file` can hang the shell.
+- Write scripts with the Write tool, not shell heredocs: backticks in a quoted `node -e` string get eaten, `cat > file` can hang the shell, and `\r\n` inside a heredoc'd Python string lands in the file as a real line break. Python on Windows writes `\r\n` in text mode: open files with `newline=''` when a script must touch them.
 
 ## Performance measurement
 

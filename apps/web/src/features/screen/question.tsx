@@ -1,5 +1,6 @@
 import type { HostSnapshot } from '@quizmoo/shared'
 import { useTranslation } from 'react-i18next'
+import { answerProgress } from '@/lib/answer-progress'
 import { PausedNote } from '../../components/paused-note'
 import { Timer } from '../../components/timer'
 import { stagger } from '../../lib/motion'
@@ -9,13 +10,14 @@ export function ScreenQuestion({ host, clockOffset }: { host: HostSnapshot; cloc
   const { t } = useTranslation()
   const question = host.question
   if (!question) return null
+  const progress = answerProgress(host)
   return (
     <div className="flex flex-1 flex-col gap-6">
       <div className="flex items-center justify-between text-3xl font-semibold text-muted-foreground">
         <span>{t('play.questionOf', { index: host.questionIndex + 1, count: host.questionCount })}</span>
         {/* Keyed by the count so it pops with every answer. */}
-        <span key={host.answeredCount} className="animate-pop rounded-full bg-secondary px-5 py-1 text-secondary-foreground">
-          {t('host.game.answered', { answered: host.answeredCount, count: host.players.length })}
+        <span key={progress.answered} className="animate-pop rounded-full bg-secondary px-5 py-1 text-secondary-foreground">
+          {t(progress.teams ? 'host.game.teamsAnswered' : 'host.game.answered', { answered: progress.answered, count: progress.count })}
         </span>
       </div>
       {host.questionEndsAt !== null && (

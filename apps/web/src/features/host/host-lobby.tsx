@@ -41,7 +41,13 @@ export function HostLobby({
             {t('host.game.start')}
           </Button>
         )}
-        <LobbyPlayers host={host} clockOffset={clockOffset} onKick={(playerId) => void send({ type: 'kick', playerId })} />
+        <LobbyPlayers
+          host={host}
+          clockOffset={clockOffset}
+          onKick={(playerId) => void send({ type: 'kick', playerId })}
+          onTeamMode={(mode, teamId) => void send({ type: 'teamMode', mode, ...(teamId && { teamId }) })}
+          onCaptain={(playerId) => void send({ type: 'captain', playerId })}
+        />
         <MessageBox announcement={host.announcement} clockOffset={clockOffset} onCommand={send} />
         <Button variant="outline" className="self-start" onClick={endGame}>
           {t('host.game.end')}

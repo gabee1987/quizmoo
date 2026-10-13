@@ -7,6 +7,7 @@ import {
   joinPlayer,
   next,
   releaseResults,
+  setTeamMode,
   showScoreboard,
   skipQuestion,
   startGame,
@@ -412,5 +413,78 @@ describe('final results held until the host releases them', () => {
     expect(player.me.score).toBe(1000)
     expect(player.myResults![0]).toMatchObject({ correct: true, points: 1000 })
     expect(toHostSnapshot(state, T0, { includeAnswers: true }).playersWaiting).toBe(false)
+  })
+})
+
+describe('team answers in snapshots', () => {
+  const A = { type: 'single', optionId: 'a' } as const
+  const B = { type: 'single', optionId: 'b' } as const
+
+  /** Red (majority): p1, p2, p3; Blue (shared): p4, p5. */
+  function teams(): GameState {
+    let state = createGame(fixtureQuiz(), fixtureSettings({ mode: 'team', teamNames: ['Red', 'Blue'] }), '123456', 'g', T0)
+    for (const [n, team] of [[1, 'team-1'], [2, 'team-1'], [3, 'team-1'], [4, 'team-2'], [5, 'team-2']] as const) {
+      state = joinPlayer(state, { id: `p${n}`, name: `Player ${n}`, teamId: team, token: `tok-${n}` })
+    }
+    state = setTeamMode(setTeamMode(state, { teamId: 'team-1', mode: 'majority' }), { teamId: 'team-2', mode: 'shared' })
+    return startGame(state, T0)
+  }
+  const send = (state: GameState, playerId: string, answer: typeof A | typeof B, at: number) =>
+    submitAnswer(state, { playerId, questionId: 'q-single', answer }, at)
+
+  it('shows each team its own votes or shared answer and never another team’s', () => {
+    let state = send(teams(), 'p1', A, T0 + 1000)
+    state = send(state, 'p2', B, T0 + 2000)
+    state = send(state, 'p3', B, T0 + 3000)
+    state = send(state, 'p4', A, T0 + 4000)
+
+    const red = toPlayerSnapshot(state, 'p1', T0 + 5000)
+    expect(red.teamLive).toEqual({
+      answer: B,
+      setBy: null,
+      votes: [
+        { answer: B, playerIds: ['p2', 'p3'] },
+        { answer: A, playerIds: ['p1'] },
+      ],
+    })
+    expect(red.myAnswer).toEqual(A)
+    expect(JSON.stringify(red)).not.toContain('"p4"]')
+
+    const blue = toPlayerSnapshot(state, 'p5', T0 + 5000)
+    expect(blue.teamLive).toEqual({ answer: A, setBy: 'p4', votes: [] })
+    // The shared answer is the member's own while the question runs.
+    expect(blue.myAnswer).toEqual(A)
+    expect(JSON.stringify(blue.teamLive)).not.toContain('p2')
+  })
+
+  it('gives every team its mode, captain and whether it has answered', () => {
+    const state = send(teams(), 'p4', A, T0 + 1000)
+    const snapshot = toHostSnapshot(state, T0 + 2000)
+    // Equal scores: by name, Blue first.
+    expect(snapshot.teams.map((t) => [t.id, t.answerMode, t.captainId, t.answered])).toEqual([
+      ['team-2', 'shared', 'p4', true],
+      ['team-1', 'majority', 'p1', false],
+    ])
+    expect(snapshot.answeredCount).toBe(2)
+  })
+
+  it('gives the host room the team answers, the public screen none', () => {
+    const state = send(send(teams(), 'p1', B, T0 + 1000), 'p4', A, T0 + 2000)
+    expect(toHostSnapshot(state, T0, { includeAnswers: true }).teamAnswers).toEqual([
+      { teamId: 'team-1', answer: B, setBy: null, correct: null, points: 0 },
+      { teamId: 'team-2', answer: A, setBy: 'p4', correct: null, points: 0 },
+    ])
+    expect(toHostSnapshot(state, T0).teamAnswers).toBeNull()
+  })
+
+  it('counts a team answer once in the reveal and moves team ranks by its points', () => {
+    let state = send(send(send(teams(), 'p1', B, T0 + 1000), 'p2', B, T0 + 1000), 'p4', A, T0 + 5000)
+    state = endQuestion(state)
+    const snapshot = toHostSnapshot(state, T0)
+    // Players who carry an answer, while the bars count each team once.
+    expect(snapshot.reveal?.answeredCount).toBe(5)
+    expect(snapshot.reveal?.distribution).toMatchObject({ a: 1, b: 1 })
+    expect(snapshot.teams.find((t) => t.id === 'team-2')).toMatchObject({ score: 875, rank: 1, previousRank: 1 })
+    expect(toPlayerSnapshot(state, 'p5', T0)).toMatchObject({ lastPoints: 875, lastCorrect: true, myAnswer: A, teamLive: null })
   })
 })

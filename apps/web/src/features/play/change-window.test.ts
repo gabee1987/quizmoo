@@ -32,6 +32,14 @@ describe('changeWindow', () => {
     expect(changeWindow(answered({ answerLockSec: 5 }), NOW + 15_001)).toBeNull()
   })
 
+  it('lets a shared team change its answer without answer changes, up to the end', () => {
+    const team = { mode: 'team', me: { teamId: 'red' }, teams: [{ id: 'red', answerMode: 'shared' }] } as unknown as Partial<PlayerSnapshot>
+    expect(changeWindow(answered({ answerChanges: false, answerLockSec: 5 }, team), NOW + 18_000)).toEqual({ secondsLeft: 2, paused: false })
+    expect(changeWindow(answered({ answerLockSec: 5 }, team), NOW + 18_000)).toBeNull()
+    const majority = { ...team, teams: [{ id: 'red', answerMode: 'majority' }] } as unknown as Partial<PlayerSnapshot>
+    expect(changeWindow(answered({ answerChanges: false }, majority), NOW)).toBeNull()
+  })
+
   it('stands still while paused', () => {
     expect(changeWindow(answered({}, { pausedAt: NOW + 5_000 }), NOW + 60_000)).toEqual({ secondsLeft: 15, paused: true })
   })

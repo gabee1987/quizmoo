@@ -1,7 +1,16 @@
-import { fallbackAvatar, type GameResults, type PodiumPlace, type ResultPlayer, type ResultQuestion } from '@quizmoo/shared'
+import {
+  fallbackAvatar,
+  type Answer,
+  type GameResults,
+  type PodiumPlace,
+  type Question,
+  type ResultPlayer,
+  type ResultQuestion,
+} from '@quizmoo/shared'
 import { resultsPendingFor } from './engine.js'
 import { denseRank } from './scoring.js'
-import { isRevealed, revealInfo } from './snapshots.js'
+import { isRevealed, revealInfo, teamAnswers } from './snapshots.js'
+import { captainOf, teamMode } from './team-answers.js'
 import type { GameState } from './types.js'
 
 /**
@@ -19,6 +28,7 @@ export function toResults(state: GameState): GameResults {
       ...revealInfo(state, question),
       index,
       averageTimeMs: times.length > 0 ? Math.round(times.reduce((sum, t) => sum + t, 0) / times.length) : null,
+      teamAnswers: teamAnswers(state, index) ?? [],
     }
   })
 
@@ -40,6 +50,9 @@ export function toResults(state: GameState): GameResults {
     // Final standings: nothing is pending, so there is no earlier rank to compare with.
     previousRank: t.rank,
     memberCount: players.filter((p) => p.teamId === t.id).length,
+    answerMode: teamMode(t),
+    captainId: captainOf(state, t),
+    answered: false,
   }))
   const podium: PodiumPlace[] = (
     state.settings.mode === 'team' ? teams.map((t) => ({ ...t, avatar: null })) : rankedPlayers
@@ -65,15 +78,19 @@ export function toResults(state: GameState): GameResults {
 
 export type CsvLanguage = 'hu' | 'en'
 
-const csvHeaders: Record<CsvLanguage, { rank: string; name: string; team: string; total: string }> = {
-  hu: { rank: 'Helyezés', name: 'Név', team: 'Csapat', total: 'Összesen' },
-  en: { rank: 'Rank', name: 'Name', team: 'Team', total: 'Total' },
+const csvHeaders: Record<
+  CsvLanguage,
+  { rank: string; name: string; team: string; total: string; teamAnswer: string; true: string; false: string }
+> = {
+  hu: { rank: 'Helyezés', name: 'Név', team: 'Csapat', total: 'Összesen', teamAnswer: 'Csapat válasza', true: 'Igaz', false: 'Hamis' },
+  en: { rank: 'Rank', name: 'Name', team: 'Team', total: 'Total', teamAnswer: 'Team answer', true: 'True', false: 'False' },
 }
 
 /**
  * Player table as CSV for Excel: UTF-8 with BOM (keeps accents), `;` separator
  * (the Hungarian Excel default), CRLF lines. One column per question with its points;
- * empty where the player did not answer.
+ * empty where the player did not answer. Teams that answered as one follow after an empty
+ * line with their answer to each question.
  */
 export function toCsv(results: GameResults, language: CsvLanguage): string {
   const headers = csvHeaders[language]
@@ -88,7 +105,43 @@ export function toCsv(results: GameResults, language: CsvLanguage): string {
       ...p.points.map((points) => points ?? ''),
     ]),
   ]
+  const answeringTeams = results.teams.filter((t) => results.questions.some((q) => q.teamAnswers.some((a) => a.teamId === t.id)))
+  if (answeringTeams.length > 0) {
+    rows.push([], [headers.teamAnswer, headers.team, '', '', ...results.questions.map((q) => `${q.index + 1}. ${q.question.text}`)])
+    for (const team of answeringTeams) {
+      rows.push([
+        '',
+        team.name,
+        '',
+        '',
+        ...results.questions.map((q) => {
+          const answer = q.teamAnswers.find((a) => a.teamId === team.id)?.answer
+          return answer ? answerText(q.question, answer, headers) : ''
+        }),
+      ])
+    }
+  }
   return '﻿' + rows.map((row) => row.map(csvField).join(';')).join('\r\n') + '\r\n'
+}
+
+/** An answer as the player saw it: option texts, true or false, the text or the number. */
+function answerText(question: Question, answer: Answer, labels: { true: string; false: string }): string {
+  const option = (id: string) => ('options' in question ? (question.options.find((o) => o.id === id)?.text ?? '') : '')
+  switch (answer.type) {
+    case 'single':
+    case 'poll':
+      return option(answer.optionId)
+    case 'multiple':
+      return answer.optionIds.map(option).join(', ')
+    case 'order':
+      return answer.optionIds.map(option).join(' > ')
+    case 'truefalse':
+      return answer.value ? labels.true : labels.false
+    case 'text':
+      return answer.value
+    case 'number':
+      return String(answer.value)
+  }
 }
 
 function csvField(value: string | number): string {

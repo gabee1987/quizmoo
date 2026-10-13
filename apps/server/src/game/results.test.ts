@@ -97,6 +97,26 @@ describe('toCsv', () => {
     expect(lines.slice(1)).toEqual(['1;Anna;Red;1000;1000;0', '1;Csilla;Red;1000;;1000', '2;Bence;Blue;0;0;', ''])
   })
 
+  it('adds the answers of teams that answer as one, after the players', () => {
+    const results = toResults(finishedGame({ mode: 'team', teamNames: ['Red', 'Blue'], teamAnswer: 'majority' }))
+    expect(results.questions[0]!.teamAnswers).toEqual([
+      { teamId: 'team-1', answer: { type: 'single', optionId: 'a' }, setBy: null, correct: true, points: 1000 },
+      { teamId: 'team-2', answer: { type: 'single', optionId: 'b' }, setBy: null, correct: false, points: 0 },
+    ])
+    // Q2: Red's 1:1 tie goes to Anna's earlier, wrong vote; Blue did not vote.
+    expect(results.questions[1]!.teamAnswers.map((a) => a.answer)).toEqual([{ type: 'multiple', optionIds: ['a'] }, null])
+    expect(toCsv(results, 'en').split('\r\n').slice(1)).toEqual([
+      '1;Anna;Red;1000;1000;0',
+      '1;Csilla;Red;1000;1000;0',
+      '2;Bence;Blue;0;0;',
+      '',
+      'Team answer;Team;;;1. Capital of Hungary?;2. Which are even?',
+      ';Red;;;Budapest;2',
+      ';Blue;;;Debrecen;',
+      '',
+    ])
+  })
+
   it('quotes separators and defuses formula-like names', () => {
     const results = toResults(finishedGame())
     results.players[0]!.name = '=HYPERLINK("x")'

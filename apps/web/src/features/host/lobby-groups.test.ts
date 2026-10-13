@@ -16,7 +16,7 @@ const player = (id: string, teamId: string | null = null): PlayerPublic => ({
   correctCount: 0,
   roundPoints: 0,
 })
-const team = (id: string): TeamPublic => ({ id, name: id, score: 0, rank: 1, previousRank: 1, memberCount: 0 })
+const team = (id: string): TeamPublic => ({ id, name: id, score: 0, rank: 1, previousRank: 1, memberCount: 0, answerMode: 'average', captainId: null, answered: false })
 
 describe('lobbyGroups', () => {
   it('puts everyone in one group without a team in classic mode, in the given order', () => {

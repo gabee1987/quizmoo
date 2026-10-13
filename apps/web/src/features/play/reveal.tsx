@@ -5,9 +5,11 @@ import { CheckIcon, CrossIcon } from '../../components/icons'
 import { RankArrow } from '../../components/rank-arrow'
 import { stagger, useCountUp } from '../../lib/motion'
 import { CorrectAnswer } from '../questions/correct-answer'
+import { formatAnswer } from '../questions/format-answer'
+import { myTeamMode } from './change-window'
 
 export function Reveal({ snapshot }: { snapshot: PlayerSnapshot }) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const points = useCountUp(snapshot.lastPoints ?? 0, 900, 350)
   if (snapshot.answersHidden) return <AnswerKept answered={snapshot.myAnswer !== null} />
 
@@ -44,6 +46,12 @@ export function Reveal({ snapshot }: { snapshot: PlayerSnapshot }) {
           </span>
         )}
         <h1 className="text-3xl font-black">{title}</h1>
+        {/* One answer for the whole team: say which one counted. */}
+        {question && snapshot.myAnswer && (myTeamMode(snapshot) === 'majority' || myTeamMode(snapshot) === 'shared') && (
+          <p className="font-bold wrap-break-word">
+            {t('play.team.teamAnswered', { answer: formatAnswer(snapshot.myAnswer, question, t, i18n.language) })}
+          </p>
+        )}
         {!isPoll && snapshot.lastPoints !== null && <p className="text-2xl font-black tabular-nums">{t('play.points', { count: points })}</p>}
         {/* Streak bonus: from the second correct answer in a row. */}
         {correct === true && snapshot.settings.streakBonus && snapshot.me.streak >= 2 && (

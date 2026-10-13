@@ -1,6 +1,15 @@
-import { fallbackAvatar, streakBonusFor, type Answer, type Avatar, type GameSettings, type Question } from '@quizmoo/shared'
+import {
+  fallbackAvatar,
+  streakBonusFor,
+  type Answer,
+  type Avatar,
+  type GameSettings,
+  type Question,
+  type TeamAnswerMode,
+} from '@quizmoo/shared'
 import { isNameAllowed } from './names.js'
 import { isCorrect, pointsFor } from './scoring.js'
+import { answersAsOne, captainOf, membersOf, teamAnswerNow, teamAnswered, teamGain, teamMode } from './team-answers.js'
 import {
   EngineError,
   MAX_PLAYERS,
@@ -30,7 +39,7 @@ export function createGame(
   if (settings.mode === 'team') {
     settings.teamNames.forEach((name, i) => {
       const teamId = `team-${i + 1}`
-      teams[teamId] = { id: teamId, name, score: 0 }
+      teams[teamId] = { id: teamId, name, score: 0, answerMode: settings.teamAnswer, captainId: null, answers: {} }
     })
   }
   return {
@@ -67,7 +76,7 @@ export interface JoinInput {
 /** Adds a player in the lobby. A known token reclaims that player in any phase instead. */
 export function joinPlayer(state: GameState, input: JoinInput): GameState {
   const existing = findByToken(state, input.token)
-  if (existing) return withPlayer(state, { ...existing, connected: true, disconnectedAt: null })
+  if (existing) return withCaptains(withPlayer(state, { ...existing, connected: true, disconnectedAt: null }))
 
   if (state.phase !== 'lobby') throw new EngineError('errors.gameAlreadyStarted')
   const name = input.name.trim()
@@ -81,31 +90,35 @@ export function joinPlayer(state: GameState, input: JoinInput): GameState {
     if (!input.teamId || !state.teams[input.teamId]) throw new EngineError('errors.unknownTeam')
     teamId = input.teamId
   }
-  return withPlayer(state, {
-    id: input.id,
-    name,
-    teamId,
-    avatar: input.avatar ?? fallbackAvatar(input.id),
-    streak: 0,
-    token: input.token,
-    connected: true,
-    disconnectedAt: null,
-    score: 0,
-    answers: {},
-  })
+  const joinOrder = Math.max(0, ...Object.values(state.players).map((p) => p.joinOrder ?? 0)) + 1
+  return withCaptains(
+    withPlayer(state, {
+      id: input.id,
+      name,
+      teamId,
+      avatar: input.avatar ?? fallbackAvatar(input.id),
+      streak: 0,
+      token: input.token,
+      connected: true,
+      joinOrder,
+      disconnectedAt: null,
+      score: 0,
+      answers: {},
+    }),
+  )
 }
 
 export function reconnectPlayer(state: GameState, token: string): GameState {
   const player = findByToken(state, token)
   if (!player) throw new EngineError('errors.playerNotFound')
-  return withPlayer(state, { ...player, connected: true, disconnectedAt: null })
+  return withCaptains(withPlayer(state, { ...player, connected: true, disconnectedAt: null }))
 }
 
 /** Unknown ids are ignored: a kicked player's socket may still disconnect afterwards. */
 export function disconnectPlayer(state: GameState, playerId: string, now: number): GameState {
   const player = state.players[playerId]
   if (!player) return state
-  return withPlayer(state, { ...player, connected: false, disconnectedAt: now })
+  return withCaptains(withPlayer(state, { ...player, connected: false, disconnectedAt: now }))
 }
 
 /** Removes the player. Team scores already earned are kept; the player stops counting from the next question. */
@@ -113,7 +126,51 @@ export function kickPlayer(state: GameState, playerId: string): GameState {
   if (state.phase === 'finished') throw new EngineError('errors.invalidTransition')
   if (!state.players[playerId]) throw new EngineError('errors.playerNotFound')
   const { [playerId]: _removed, ...players } = state.players
-  return { ...state, players }
+  return withCaptains({ ...state, players })
+}
+
+/**
+ * Sets a team's answer mode in the lobby; without `teamId` every team's (host only). With
+ * `byPlayerId` it is a captain choosing their own team's mode, allowed when `teamsChoose` is on.
+ */
+export function setTeamMode(
+  state: GameState,
+  input: { teamId?: string | undefined; mode: TeamAnswerMode; byPlayerId?: string | undefined },
+): GameState {
+  if (state.settings.mode !== 'team') throw new EngineError('errors.invalidTransition')
+  if (state.phase !== 'lobby') throw new EngineError('errors.gameAlreadyStarted')
+  let teamIds = input.teamId === undefined ? Object.keys(state.teams) : [input.teamId]
+  if (input.byPlayerId !== undefined) {
+    const player = state.players[input.byPlayerId]
+    if (!player?.teamId) throw new EngineError('errors.playerNotFound')
+    if (!state.settings.teamsChoose) throw new EngineError('errors.invalidTransition')
+    if (captainOf(state, state.teams[player.teamId]!) !== player.id) throw new EngineError('errors.notCaptain')
+    teamIds = [player.teamId]
+  }
+  const teams = { ...state.teams }
+  for (const teamId of teamIds) {
+    const team = teams[teamId]
+    if (!team) throw new EngineError('errors.unknownTeam')
+    teams[teamId] = { ...team, answerMode: input.mode }
+  }
+  return { ...state, teams }
+}
+
+/**
+ * Makes `playerId` the captain of their team in the lobby: by the host, or with `byPlayerId`
+ * by the team's current captain passing it on. An offline player keeps it only while no
+ * teammate is online.
+ */
+export function setCaptain(state: GameState, input: { playerId: string; byPlayerId?: string | undefined }): GameState {
+  if (state.settings.mode !== 'team') throw new EngineError('errors.invalidTransition')
+  if (state.phase !== 'lobby') throw new EngineError('errors.gameAlreadyStarted')
+  const player = state.players[input.playerId]
+  const team = player?.teamId ? state.teams[player.teamId] : undefined
+  if (!player || !team) throw new EngineError('errors.playerNotFound')
+  if (input.byPlayerId !== undefined && captainOf(state, team) !== input.byPlayerId) {
+    throw new EngineError('errors.notCaptain')
+  }
+  return withCaptains({ ...state, teams: { ...state.teams, [team.id]: { ...team, captainId: player.id } } })
 }
 
 export function startGame(state: GameState, now: number): GameState {
@@ -139,6 +196,8 @@ export function submitAnswer(state: GameState, input: SubmitInput, now: number):
   if (state.pausedAt) throw new EngineError('errors.gamePaused')
   const question = currentQuestion(state)
   if (question.id !== input.questionId) throw new EngineError('errors.questionClosed')
+  const team = player.teamId ? state.teams[player.teamId] : undefined
+  if (team && teamMode(team) === 'shared') return submitSharedAnswer(state, team, player.id, question, input.answer, now)
   const previous = player.answers[question.id]
   if (previous) {
     if (!state.settings.answerChanges) throw new EngineError('errors.alreadyAnswered')
@@ -163,14 +222,59 @@ export function submitAnswer(state: GameState, input: SubmitInput, now: number):
   })
 }
 
+/**
+ * Shared mode: any member sets the team's one answer and anyone can change it while the question
+ * runs (the last change counts, with its time), up to the lock-in when answer changes are on.
+ */
+function submitSharedAnswer(
+  state: GameState,
+  team: Team,
+  playerId: string,
+  question: Question,
+  answer: Answer,
+  now: number,
+): GameState {
+  const previous = team.answers?.[question.id]
+  if (previous && JSON.stringify(previous.answer) === JSON.stringify(answer)) return state
+  const lockSec = state.settings.answerChanges ? state.settings.answerLockSec : 0
+  if (previous && now > state.questionEndsAt! - lockSec * 1000) throw new EngineError('errors.answerLocked')
+  if (!answerFits(question, answer)) throw new EngineError('errors.invalidAnswer')
+  const record = {
+    answer,
+    at: now,
+    timeMs: Math.max(0, now - (state.questionStartedAt ?? now)),
+    byPlayerId: playerId,
+    points: 0,
+    correct: null,
+  }
+  return { ...state, teams: { ...state.teams, [team.id]: { ...team, answers: { ...team.answers, [question.id]: record } } } }
+}
+
+/**
+ * Every connected player has answered, so the question can close before its time: in classic
+ * mode each player; in team mode every team with someone connected has its answer.
+ */
+export function allAnswered(state: GameState): boolean {
+  if (state.phase !== 'question') return false
+  const question = state.quiz.questions[state.questionIndex]
+  if (!question) return false
+  if (state.settings.mode === 'team') {
+    const teams = Object.values(state.teams).filter((t) => membersOf(state, t.id).some((m) => m.connected))
+    return teams.length > 0 && teams.every((t) => teamAnswered(state, t, question.id))
+  }
+  const connected = Object.values(state.players).filter((p) => p.connected)
+  return connected.length > 0 && connected.every((p) => p.answers[question.id])
+}
+
 /** Scores the current question and reveals it. Host-graded text waits for `gradeText`. */
 export function endQuestion(state: GameState): GameState {
   if (state.phase !== 'question') throw new EngineError('errors.invalidTransition')
   const question = currentQuestion(state)
   const awaitingGrading = question.type === 'text' && question.acceptedAnswers.length === 0
-  const players = scorePlayers(state, question, (answer) => isCorrect(question, answer))
-  const teams = awaitingGrading ? state.teams : addTeamGains(state.teams, players, question.id)
-  return { ...state, phase: 'reveal', players, teams, awaitingGrading, pausedAt: null }
+  const resolved = resolveTeamAnswers(state, question.id)
+  const players = scorePlayers(resolved, question, (answer) => isCorrect(question, answer))
+  const teams = awaitingGrading ? resolved.teams : addTeamGains(resolved.teams, players, question.id)
+  return { ...resolved, phase: 'reveal', players, teams, awaitingGrading, pausedAt: null }
 }
 
 /** Host grading of a text question without accepted answers. Listed players are correct, every other answer wrong. */
@@ -178,6 +282,11 @@ export function gradeText(state: GameState, correctPlayerIds: readonly string[])
   if (state.phase !== 'reveal' || !state.awaitingGrading) throw new EngineError('errors.invalidTransition')
   const question = currentQuestion(state)
   const correctIds = new Set(correctPlayerIds)
+  // A team answers as one: marking any member marks the team's answer.
+  for (const team of Object.values(state.teams)) {
+    const members = membersOf(state, team.id)
+    if (answersAsOne(team) && members.some((m) => correctIds.has(m.id))) members.forEach((m) => correctIds.add(m.id))
+  }
   const players = scorePlayers(state, question, (_answer, playerId) => correctIds.has(playerId))
   return {
     ...state,
@@ -215,7 +324,12 @@ export function skipQuestion(state: GameState, now: number): GameState {
     const { [questionId]: _discarded, ...answers } = player.answers
     players[player.id] = { ...player, answers }
   }
-  const skipped = { ...state, players, pausedAt: null }
+  const teams: Record<string, Team> = {}
+  for (const team of Object.values(state.teams)) {
+    const { [questionId]: _discarded, ...answers } = team.answers ?? {}
+    teams[team.id] = { ...team, answers }
+  }
+  const skipped = { ...state, players, teams, pausedAt: null }
   return scoreboardAfterEachQuestion(state) ? { ...skipped, phase: 'scoreboard' } : advance(skipped, now)
 }
 
@@ -390,6 +504,42 @@ function withPlayer(state: GameState, player: Player): GameState {
   return { ...state, players: { ...state.players, [player.id]: player } }
 }
 
+/** Keeps a captain on every team with members after joins, drops, returns and kicks (see `captainOf`). */
+function withCaptains(state: GameState): GameState {
+  if (state.settings.mode !== 'team') return state
+  let teams = state.teams
+  for (const team of Object.values(state.teams)) {
+    const captainId = captainOf(state, team)
+    if (captainId !== (team.captainId ?? null)) teams = { ...teams, [team.id]: { ...team, captainId } }
+  }
+  return teams === state.teams ? state : { ...state, teams }
+}
+
+/**
+ * Fixes each one-answer team's answer (the shared one, or the majority of the votes) and gives
+ * every member a copy to score, so all members score the team's answer; a team without an
+ * answer leaves its members without one.
+ */
+function resolveTeamAnswers(state: GameState, questionId: string): GameState {
+  const players = { ...state.players }
+  const teams = { ...state.teams }
+  for (const team of Object.values(state.teams)) {
+    if (!answersAsOne(team)) continue
+    const record = teamAnswerNow(state, team, questionId)
+    if (record) teams[team.id] = { ...team, answers: { ...team.answers, [questionId]: record } }
+    for (const member of membersOf(state, team.id)) {
+      const { [questionId]: _vote, ...answers } = member.answers
+      players[member.id] = {
+        ...member,
+        answers: record
+          ? { ...answers, [questionId]: { answer: record.answer, at: record.at, timeMs: record.timeMs, points: 0, correct: null } }
+          : answers,
+      }
+    }
+  }
+  return { ...state, players, teams }
+}
+
 function findByToken(state: GameState, token: string): Player | undefined {
   return Object.values(state.players).find((p) => p.token === token)
 }
@@ -457,7 +607,10 @@ function scorePlayers(
   return players
 }
 
-/** Each team gains the rounded mean of its current members' points; members without an answer count as 0. */
+/**
+ * Each team gains the rounded mean of its current members' points (members without an answer
+ * count as 0); a one-answer team gains its answer's points, which are also stored on its answer.
+ */
 function addTeamGains(
   teams: Record<string, Team>,
   players: Record<string, Player>,
@@ -466,9 +619,14 @@ function addTeamGains(
   const result: Record<string, Team> = {}
   for (const team of Object.values(teams)) {
     const members = Object.values(players).filter((p) => p.teamId === team.id)
-    const total = members.reduce((sum, p) => sum + (p.answers[questionId]?.points ?? 0), 0)
-    const gain = members.length === 0 ? 0 : Math.round(total / members.length)
-    result[team.id] = { ...team, score: team.score + gain }
+    const gain = teamGain(team, members.map((p) => p.answers[questionId]?.points ?? 0))
+    const record = team.answers?.[questionId]
+    const scored = members[0]?.answers[questionId]
+    const answers =
+      record && scored && answersAsOne(team)
+        ? { ...team.answers, [questionId]: { ...record, points: scored.points, bonus: scored.bonus ?? 0, correct: scored.correct } }
+        : team.answers
+    result[team.id] = { ...team, score: team.score + gain, ...(answers && { answers }) }
   }
   return result
 }

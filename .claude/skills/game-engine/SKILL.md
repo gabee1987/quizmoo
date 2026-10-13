@@ -32,14 +32,14 @@ interface Player {
   score: number
   answers: Record<string /* questionId */, { answer: Answer; at: number; points: number; correct: boolean | null }>
 }
-interface Team { id: string; name: string; score: number }
+interface Team { id: string; name: string; score: number; answerMode?; captainId?; answers? }  // see team-modes
 ```
 
 `GameState` must be JSON-serialisable as is: it is persisted to Postgres on every transition and restored on boot.
 
 ## Commands
 
-Each command is `(state, input, now) => GameState` and returns a new object (no mutation). Invalid commands throw `EngineError` whose `code` is an i18n key (`errors.gameNotFound`, `errors.gameAlreadyStarted`, `errors.nameTaken`, `errors.gameFull`, `errors.notYourTurn`, `errors.questionClosed`, `errors.alreadyAnswered`, `errors.answerLocked`, `errors.invalidAnswer`, `errors.unknownTeam`, `errors.invalidTransition`).
+Each command is `(state, input, now) => GameState` and returns a new object (no mutation). Invalid commands throw `EngineError` whose `code` is an i18n key (`errors.gameNotFound`, `errors.gameAlreadyStarted`, `errors.nameTaken`, `errors.gameFull`, `errors.notYourTurn`, `errors.questionClosed`, `errors.alreadyAnswered`, `errors.answerLocked`, `errors.invalidAnswer`, `errors.unknownTeam`, `errors.notCaptain`, `errors.invalidTransition`).
 
 | Command | Allowed in | Effect |
 |---|---|---|
@@ -52,6 +52,7 @@ Each command is `(state, input, now) => GameState` and returns a new object (no 
 | `pause(now)` / `resume(now)` | question (pause: running and before the deadline; resume: paused) | `pausedAt` set / cleared; `submitAnswer` throws `errors.gamePaused` while paused; resume moves `questionStartedAt` and `questionEndsAt` by the pause; `endQuestion`, `skipQuestion`, `endGame` and opening a question clear it |
 | `showQuestion(index)` / `closeQuestion()` | reveal or scoreboard, not `awaitingGrading`, not `answersHidden(state, 'screen')`, `0 <= index <= questionIndex` | `reviewIndex` set / cleared; snapshots then show that question as phase `reveal` with `reviewing: true`, own results, no round points (ranks do not move); `next`, `showScoreboard` and `endGame` clear it |
 | `kickPlayer(playerId)` | any except finished | removes player, recomputes nothing (their past points stay out of team totals from then on) |
+| `setTeamMode({ teamId?, mode, byPlayerId? })` / `setCaptain({ playerId, byPlayerId? })` | lobby, team mode | team answer mode and captain; rules in `team-modes` |
 | `startGame()` | lobby, at least 1 player, at least 1 question | goes to question 0 |
 | `submitAnswer(playerId, questionId, answer)` | question, before `questionEndsAt`, once per player per question unless `settings.answerChanges` | records answer, answer type must match question type; with `answerChanges` a different answer replaces the record (new `at` and `timeMs`) until `questionEndsAt - answerLockSec` (then `errors.answerLocked`; first answers still taken until the end), and an identical one returns the state unchanged so a retry keeps its time |
 | `endQuestion()` | question | scores all answers, goes to reveal; sets `awaitingGrading` for host-graded text |
@@ -61,7 +62,7 @@ Each command is `(state, input, now) => GameState` and returns a new object (no 
 | `extendTime(seconds)` | question | pushes `questionEndsAt` |
 | `endGame()` | any | finished, sets `finishedAt` |
 
-`endQuestion` is also what the realtime layer calls when every connected player has answered, so "all answered" is not an engine concern.
+`endQuestion` is also what the realtime layer calls when `allAnswered(state)` is true (every connected player, or in team mode every team with someone online, has its answer; see `team-modes`).
 
 ## Snapshots
 

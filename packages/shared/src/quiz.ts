@@ -101,6 +101,13 @@ export const gameModes = ['classic', 'team'] as const
 export type GameMode = (typeof gameModes)[number]
 
 /**
+ * How a team answers in team mode: every member answers and the team gets the average,
+ * the team's answer is the members' majority vote, or one shared answer any member sets.
+ */
+export const teamAnswerModes = ['average', 'majority', 'shared'] as const
+export type TeamAnswerMode = (typeof teamAnswerModes)[number]
+
+/**
  * Visual themes for the phones, projector and host control. Hues only; light and dark mode stay the device's choice.
  * The first seven are playful, the last five (graphite onwards) are subdued for formal company events.
  */
@@ -146,6 +153,10 @@ export const gameSettingsSchema = z
     shuffleOptions: z.boolean().default(false),
     /** Team names prepared by the host (team mode only). Players pick one when joining. */
     teamNames: z.array(z.string().trim().min(1).max(40)).max(20).default([]),
+    /** How every team answers (team mode only); the host can change a team's mode in the lobby. */
+    teamAnswer: z.enum(teamAnswerModes).default('average'),
+    /** Each team's captain may pick the team's answer mode in the lobby. */
+    teamsChoose: z.boolean().default(false),
     /** When correct answers, right/wrong and scores reach players and the projector: after each question or only at the end. */
     revealAnswers: z.enum(['afterQuestion', 'atEnd']).default('afterQuestion'),
     /** Scoreboard after every question, or only when the host asks for it (and at the end). */

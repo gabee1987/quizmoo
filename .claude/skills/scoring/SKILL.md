@@ -34,7 +34,7 @@ Ordering questions store the correct order as the option order. `toPublicQuestio
 
 ## Teams and ranks
 
-Team mode: after scoring a question, each team's gain is `round(mean(points of all its current members))`, members without an answer counting as 0. Individual scores are still kept and shown.
+Team mode: after scoring a question, an `average` team's gain is `round(mean(points of all its current members))`, members without an answer counting as 0. A `majority` or `shared` team scores one answer, copied to every member, and gains its points once (`team-modes`). Individual scores are still kept and shown.
 
 Ranks: dense ranking by score descending, ties share a rank; stable on name for display.
 

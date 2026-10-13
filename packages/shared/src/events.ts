@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { MAX_PLAYERS, announcementDurationSchema, announcementTextSchema, answerSchema, avatarSchema } from './game.js'
 import type { HostSnapshot, PlayerSnapshot } from './game.js'
+import { teamAnswerModes } from './quiz.js'
 
 // ---- Client -> server payloads (validated with zod on the server) --------
 
@@ -30,6 +31,14 @@ export const playerAnswerSchema = z.object({
 })
 export type PlayerAnswer = z.infer<typeof playerAnswerSchema>
 
+/** A captain picks their team's answer mode in the lobby (when teams may choose). */
+export const playerTeamModeSchema = z.object({ mode: z.enum(teamAnswerModes) })
+export type PlayerTeamMode = z.infer<typeof playerTeamModeSchema>
+
+/** A captain passes the captaincy to a teammate in the lobby. */
+export const playerCaptainSchema = z.object({ playerId: z.string().min(1) })
+export type PlayerCaptain = z.infer<typeof playerCaptainSchema>
+
 export const hostCommandSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('start') }),
   /** Next question, or finish after the last one. */
@@ -42,6 +51,10 @@ export const hostCommandSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('extendTime'), seconds: z.number().int().min(1).max(120) }),
   z.object({ type: z.literal('endQuestion') }),
   z.object({ type: z.literal('kick'), playerId: z.string().min(1) }),
+  /** Lobby, team mode: a team's answer mode, or every team's without `teamId`. */
+  z.object({ type: z.literal('teamMode'), mode: z.enum(teamAnswerModes), teamId: z.string().min(1).optional() }),
+  /** Lobby, team mode: makes the player their team's captain. */
+  z.object({ type: z.literal('captain'), playerId: z.string().min(1) }),
   /** Host grading of a text question without accepted answers: listed players are correct. */
   z.object({ type: z.literal('gradeText'), correctPlayerIds: z.array(z.string().min(1)).max(MAX_PLAYERS) }),
   z.object({ type: z.literal('end') }),
@@ -71,6 +84,8 @@ export interface ErrorPayload {
 export interface ClientToServerEvents {
   'player:join': (data: PlayerJoin, ack: (res: { token: string } | ErrorPayload) => void) => void
   'player:answer': (data: PlayerAnswer, ack: (res: { ok: true } | ErrorPayload) => void) => void
+  'player:teamMode': (data: PlayerTeamMode, ack: (res: { ok: true } | ErrorPayload) => void) => void
+  'player:captain': (data: PlayerCaptain, ack: (res: { ok: true } | ErrorPayload) => void) => void
   'host:attach': (data: { pin: string }, ack: (res: { ok: true } | ErrorPayload) => void) => void
   'host:command': (data: HostCommand, ack: (res: { ok: true } | ErrorPayload) => void) => void
   'screen:attach': (data: { pin: string }, ack: (res: { ok: true } | ErrorPayload) => void) => void

@@ -98,3 +98,22 @@ $env:E2E_USERNAME="admin"; $env:E2E_PASSWORD="..."; pnpm e2e
 5. Close the captain's phone. Expected: the other member becomes captain at once.
 6. Play a question with a 2:1 vote in a majority team. Expected: the team scores the majority answer; the phones say "your team answered …".
 7. Check the projector count ("teams answered") and the results page team answers.
+
+## Results
+
+- Settings `teamAnswer` (average, majority, shared) and `teamsChoose`; `Team.answerMode`, `captainId` and `answers`; `Player.joinOrder`. Games saved before read as average with the first member as captain.
+- Pure helpers in `apps/server/src/game/team-answers.ts`: captains (`captainOf`), vote keys, tally, majority with ties and the lower median, the team's answer so far, "team has answered", team gains. Engine commands `setTeamMode` and `setCaptain`; captains kept on join, drop, return and kick; shared answers in `submitAnswer`; `endQuestion` resolves each one-answer team's answer, copies it to every member and scores it once; `allAnswered` is the early-close rule per mode.
+- Snapshots: `TeamPublic` has the mode, captain and `answered`; the player snapshot has `teamLive` (own team only); the host room gets `teamAnswers`; results questions carry `teamAnswers` and the CSV lists them after the players.
+- Events `player:teamMode` and `player:captain`, host commands `teamMode` and `captain`, error `errors.notCaptain`.
+- Phone: team card in the lobby (members, crown, mode, the captain's mode picker and "Pass the captaincy"), majority tally and shared "… picked: …" in the answered view, "Your team answered: …" on the reveal. Host: mode per team and for all teams, crown buttons on the tiles, team answers in the live question. Projector and host count teams once a team answers as one.
+- Tests: `team-answers.test.ts` (28), snapshot (4), results (1) and realtime (1) cases, `answer-progress.test.ts` (2), `change-window.test.ts` (1), e2e `team-answers.e2e.ts`.
+
+## Deviations
+
+- Captain order uses a join counter (`Player.joinOrder`), not the players' key order: games are stored as `jsonb`, which does not keep key order.
+- `answeredCount` and `correctCount` stay per player (every member carries the team's answer), so "x% right" keeps the player count as its base; only the distribution bars count a one-answer team's answer once.
+- Shared mode on the phone: once the team has an answer, every member sees the answered view with "… picked: …" and "Change answer" (always available, until the lock-in when answer changes are on), rather than the question staying open with the team's answer selected. It reuses phase 18's change flow.
+- The phase 18 lock-in applies to shared answers only when "Change answers" is on, since the lock-in setting sits under it.
+- Grading a text question: marking any member of a one-answer team marks the team's answer.
+- "Teams choose" is set when the game is created; the host does not toggle it in the lobby (they can still set any team's mode there). Manual test 3 is adjusted to that.
+- Not checked by the agent in a browser and the e2e spec not run: no host credentials in this session.

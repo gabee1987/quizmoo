@@ -3,7 +3,9 @@ import {
   hostCommandSchema,
   pinSchema,
   playerAnswerSchema,
+  playerCaptainSchema,
   playerJoinSchema,
+  playerTeamModeSchema,
   type ClientToServerEvents,
   type ErrorPayload,
   type HostCommand,
@@ -15,6 +17,7 @@ import { SESSION_COOKIE, verifySession } from '../auth/session.js'
 import type { Db } from '../db/index.js'
 import {
   EngineError,
+  allAnswered,
   announce,
   clearAnnouncement,
   closeQuestion,
@@ -29,6 +32,8 @@ import {
   pause,
   releaseResults,
   resume,
+  setCaptain,
+  setTeamMode,
   showQuestion,
   showScoreboard,
   skipQuestion,
@@ -162,9 +167,31 @@ export function registerSocketHandlers(io: AppSocketServer, { manager, db, parse
         if (!parsed.success) return invalidInput
         manager.apply(pin, (state, now) => {
           const answered = submitAnswer(state, { playerId, ...parsed.data }, now)
-          // No need to wait for the timer once every connected player has answered.
-          return allConnectedAnswered(answered) ? endQuestion(answered) : answered
+          // No need to wait for the timer once every connected player (or team) has answered.
+          return allAnswered(answered) ? endQuestion(answered) : answered
         })
+        return { ok: true as const }
+      }),
+    )
+
+    socket.on('player:teamMode', (data, ack) =>
+      respond(ack, () => {
+        const { pin, playerId, role } = socket.data
+        if (role !== 'player' || !pin || !playerId) return { error: 'errors.playerNotFound' }
+        const parsed = playerTeamModeSchema.safeParse(data)
+        if (!parsed.success) return invalidInput
+        manager.apply(pin, (state) => setTeamMode(state, { mode: parsed.data.mode, byPlayerId: playerId }))
+        return { ok: true as const }
+      }),
+    )
+
+    socket.on('player:captain', (data, ack) =>
+      respond(ack, () => {
+        const { pin, playerId, role } = socket.data
+        if (role !== 'player' || !pin || !playerId) return { error: 'errors.playerNotFound' }
+        const parsed = playerCaptainSchema.safeParse(data)
+        if (!parsed.success) return invalidInput
+        manager.apply(pin, (state) => setCaptain(state, { playerId: parsed.data.playerId, byPlayerId: playerId }))
         return { ok: true as const }
       }),
     )
@@ -255,6 +282,10 @@ function runHostCommand(state: GameState, command: HostCommand, now: number): Ga
       return endQuestion(state)
     case 'kick':
       return kickPlayer(state, command.playerId)
+    case 'teamMode':
+      return setTeamMode(state, { mode: command.mode, teamId: command.teamId })
+    case 'captain':
+      return setCaptain(state, { playerId: command.playerId })
     case 'gradeText':
       return gradeText(state, command.correctPlayerIds)
     case 'end':
@@ -274,12 +305,4 @@ function runHostCommand(state: GameState, command: HostCommand, now: number): Ga
     case 'closeQuestion':
       return closeQuestion(state)
   }
-}
-
-function allConnectedAnswered(state: GameState): boolean {
-  if (state.phase !== 'question') return false
-  const question = state.quiz.questions[state.questionIndex]
-  if (!question) return false
-  const connected = Object.values(state.players).filter((p) => p.connected)
-  return connected.length > 0 && connected.every((p) => p.answers[question.id])
 }

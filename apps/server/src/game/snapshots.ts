@@ -11,12 +11,26 @@ import {
   type Question,
   type QuestionStat,
   type RevealInfo,
+  type TeamAnswerPublic,
+  type TeamLive,
   type TeamPublic,
 } from '@quizmoo/shared'
 import { normalise } from './normalise.js'
 import { displayOrder } from './order.js'
 import { answersHidden, resultsPendingFor } from './engine.js'
 import { denseRank } from './scoring.js'
+import {
+  answersAsOne,
+  captainOf,
+  countedAnswers,
+  hasAnswered,
+  teamAnswerNow,
+  teamAnswered,
+  teamGain,
+  teamMode,
+  voteTally,
+  votesOf,
+} from './team-answers.js'
 import { EngineError, type GameState, type Player, type ResultsAudience } from './types.js'
 
 /** Strips every correct-answer field. Built per type so a new field is never leaked by accident. */
@@ -66,7 +80,38 @@ export function toHostSnapshot(state: GameState, now: number, { includeAnswers =
     currentAnswers: includeAnswers ? currentAnswers(state, base.questionIndex) : null,
     live: includeAnswers && state.phase === 'question' && question ? revealInfo(state, question) : null,
     playersWaiting: includeAnswers && resultsPendingFor(state, 'players'),
+    teamAnswers: includeAnswers ? teamAnswers(state, base.questionIndex) : null,
   }
+}
+
+/** The one-answer teams' answers to a question: the stored ones, or while it runs what they have so far. Null without such teams. */
+export function teamAnswers(state: GameState, index: number): TeamAnswerPublic[] | null {
+  const question = state.quiz.questions[index]
+  const teams = Object.values(state.teams).filter(answersAsOne)
+  if (!question || teams.length === 0) return null
+  return teams.map((team) => {
+    const record = teamAnswerNow(state, team, question.id)
+    return {
+      teamId: team.id,
+      answer: record?.answer ?? null,
+      setBy: record?.byPlayerId ?? null,
+      correct: record?.correct ?? null,
+      points: record?.points ?? 0,
+    }
+  })
+}
+
+/** The player's team's answer while a question runs, majority and shared modes only. Never another team's. */
+function teamLive(state: GameState, player: Player): TeamLive | null {
+  const team = player.teamId ? state.teams[player.teamId] : undefined
+  const question = state.quiz.questions[state.questionIndex]
+  if (state.phase !== 'question' || !team || !question || !answersAsOne(team)) return null
+  const record = teamAnswerNow(state, team, question.id)
+  const votes =
+    teamMode(team) === 'majority'
+      ? voteTally(votesOf(state, team.id, question.id)).map((g) => ({ answer: g.answer, playerIds: g.votes.map((v) => v.playerId) }))
+      : []
+  return { answer: record?.answer ?? null, setBy: record?.byPlayerId ?? null, votes }
 }
 
 export function toPlayerSnapshot(state: GameState, playerId: string, now: number, seq = 0): PlayerSnapshot {
@@ -77,10 +122,14 @@ export function toPlayerSnapshot(state: GameState, playerId: string, now: number
   // The question on the screens (a question shown again: the player's own result on it).
   const question = state.quiz.questions[base.questionIndex]
   const record = question ? player.answers[question.id] : undefined
+  const live = teamLive(state, player)
+  // Shared mode: the team's answer is the player's while the question runs.
+  const shared = live && live.setBy ? live.answer : null
   return {
     ...base,
     me,
-    myAnswer: record?.answer ?? null,
+    myAnswer: record?.answer ?? shared,
+    teamLive: live,
     lastPoints: base.reveal ? (record?.points ?? 0) : null,
     lastBonus: base.reveal ? (record?.bonus ?? 0) : null,
     lastCorrect: base.reveal ? (record?.correct ?? null) : null,
@@ -158,9 +207,8 @@ function baseSnapshot(state: GameState, now: number, audience: ResultsAudience, 
   const previousTeamRank = rankLookup(
     Object.values(state.teams).map((team) => {
       const members = players.filter((p) => p.teamId === team.id)
-      const gain = members.reduce((sum, p) => sum + roundPoints(p), 0)
-      // Mirrors addTeamGains: a team gains the rounded mean of its members' points.
-      return { id: team.id, name: team.name, score: team.score - (members.length === 0 ? 0 : Math.round(gain / members.length)) }
+      // Mirrors addTeamGains.
+      return { id: team.id, name: team.name, score: team.score - teamGain(team, members.map(roundPoints)) }
     }),
   )
 
@@ -185,6 +233,9 @@ function baseSnapshot(state: GameState, now: number, audience: ResultsAudience, 
     rank: t.rank,
     previousRank: previousTeamRank.get(t.id) ?? t.rank,
     memberCount: players.filter((p) => p.teamId === t.id).length,
+    answerMode: teamMode(t),
+    captainId: captainOf(state, t),
+    answered: inQuestion && question ? teamAnswered(state, t, question.id) : false,
   }))
 
   return {
@@ -200,12 +251,12 @@ function baseSnapshot(state: GameState, now: number, audience: ResultsAudience, 
     pausedAt: inQuestion ? (state.pausedAt ?? null) : null,
     reviewing,
     serverNow: now,
-    answeredCount: question ? players.filter((p) => p.answers[question.id]).length : 0,
+    answeredCount: question ? players.filter((p) => hasAnswered(state, p, question.id)).length : 0,
     players: rankedPlayers,
     teams: rankedTeams,
     reveal: revealed ? revealInfo(state, question) : null,
     awaitingGrading: reviewing ? false : state.awaitingGrading,
-    questionStats: questionStats(state, players),
+    questionStats: questionStats(state),
     settings: state.settings,
     answersHidden: answersHidden(state, audience),
     resultsPending: resultsPendingFor(state, audience),
@@ -224,14 +275,13 @@ export function revealInfo(state: GameState, question: Question): RevealInfo {
   if ('options' in question) for (const option of question.options) distribution[option.id] = 0
   if (question.type === 'truefalse') Object.assign(distribution, { true: 0, false: 0 })
 
-  let correctCount = 0
-  let answeredCount = 0
+  // Counted per player (a team's members share its answer), so shares of all players stay right.
+  const players = Object.values(state.players)
+  const answeredCount = players.filter((p) => hasAnswered(state, p, question.id)).length
+  const correctCount = players.filter((p) => p.answers[question.id]?.correct === true).length
   const correctKeys = new Set<string>(staticCorrectKeys(question))
-  for (const player of Object.values(state.players)) {
-    const record = player.answers[question.id]
-    if (!record) continue
-    answeredCount += 1
-    if (record.correct === true) correctCount += 1
+  // The bars count a one-answer team's answer once.
+  for (const record of countedAnswers(state, question)) {
     // Ordering: per item, how many players put it in its right place.
     const keys =
       question.type === 'order' && record.answer.type === 'order'
@@ -264,10 +314,10 @@ function staticCorrectKeys(question: Question): string[] {
 }
 
 /** Stats for every question revealed so far (the current one once it is revealed). */
-function questionStats(state: GameState, players: Player[]): QuestionStat[] {
+function questionStats(state: GameState): QuestionStat[] {
   const lastRevealed = isRevealed(state) ? state.questionIndex : state.questionIndex - 1
   return state.quiz.questions.slice(0, Math.max(0, lastRevealed + 1)).map((question, index) => {
-    const records = players.flatMap((p) => (p.answers[question.id] ? [p.answers[question.id]!] : []))
+    const records = Object.values(state.players).flatMap((p) => (p.answers[question.id] ? [p.answers[question.id]!] : []))
     const totalTime = records.reduce((sum, r) => sum + r.timeMs, 0)
     return {
       questionId: question.id,

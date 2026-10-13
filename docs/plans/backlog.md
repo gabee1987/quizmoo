@@ -54,6 +54,7 @@ Collected while testing phases 9 to 12. Effort as above.
 - Join and login home screen with the big animated cow (phase 16).
 - Host lobby rebuilt around the QR code, with player tiles (phase 17).
 - Players can change their answer until the time is up or a lock-in a few seconds before; the last answer counts, with its time (phase 18).
+- Teams can answer as one: majority vote or a shared answer, with captains, chosen by the host or by each team (phase 19).
 
 ### Open
 

@@ -457,6 +457,47 @@ describeDb('sockets (database)', () => {
     expect((await revealed).lastCorrect).toBe(true)
   })
 
+  it('team modes: captains choose and pass on, votes stay in the team, the question closes once every team has its answer', async () => {
+    const pin = await newGame({ mode: 'team', teamNames: ['Red', 'Blue'], teamAnswer: 'shared', teamsChoose: true })
+    const hostSocket = await host(pin)
+    async function teamPlayer(name: string, teamId: string) {
+      const socket = await connect()
+      const snapshot = nextSnapshot<PlayerSnapshot>(socket, 'game:player')
+      expect(await socket.emitWithAck('player:join', { pin, name, teamId })).toEqual({ token: expect.any(String) })
+      return { socket, me: (await snapshot).me }
+    }
+    const anna = await teamPlayer('Anna', 'team-1')
+    const bence = await teamPlayer('Bence', 'team-1')
+    const cecil = await teamPlayer('Cecil', 'team-2')
+
+    expect(await bence.socket.emitWithAck('player:teamMode', { mode: 'majority' })).toEqual({ error: 'errors.notCaptain' })
+    expect(await anna.socket.emitWithAck('player:teamMode', { mode: 'majority' })).toEqual({ ok: true })
+    expect(await anna.socket.emitWithAck('player:captain', { playerId: bence.me.id })).toEqual({ ok: true })
+    expect(await anna.socket.emitWithAck('player:captain', { playerId: anna.me.id })).toEqual({ error: 'errors.notCaptain' })
+    const lobby = nextSnapshot<HostSnapshot>(hostSocket, 'game:host', (s) => s.teams.some((t) => t.captainId === cecil.me.id && t.answerMode === 'shared'))
+    expect(await command(hostSocket, { type: 'captain', playerId: cecil.me.id })).toEqual({ ok: true })
+    const red = (await lobby).teams.find((t) => t.id === 'team-1')!
+    expect([red.answerMode, red.captainId]).toEqual(['majority', bence.me.id])
+
+    const question = nextSnapshot<PlayerSnapshot>(anna.socket, 'game:player', (s) => s.phase === 'question')
+    await command(hostSocket, { type: 'start' })
+    const q = (await question).question!
+    const vote = { questionId: q.id, answer: { type: 'single', optionId: 'a' } }
+
+    const tally = nextSnapshot<PlayerSnapshot>(bence.socket, 'game:player', (s) => (s.teamLive?.votes.length ?? 0) > 0)
+    expect(await anna.socket.emitWithAck('player:answer', vote)).toEqual({ ok: true })
+    expect((await tally).teamLive!.votes).toEqual([{ answer: vote.answer, playerIds: [anna.me.id] }])
+    const blue = nextSnapshot<PlayerSnapshot>(cecil.socket, 'game:player', (s) => s.myAnswer !== null)
+    expect(await cecil.socket.emitWithAck('player:answer', { ...vote, answer: { type: 'single', optionId: 'b' } })).toEqual({ ok: true })
+    expect(JSON.stringify((await blue).teamLive)).not.toContain(anna.me.id)
+
+    const revealed = nextSnapshot<PlayerSnapshot>(bence.socket, 'game:player', (s) => s.phase === 'reveal')
+    expect(await bence.socket.emitWithAck('player:answer', vote)).toEqual({ ok: true })
+    const reveal = await revealed
+    expect(reveal.lastCorrect).toBe(true)
+    expect(reveal.reveal!.answeredCount).toBe(3)
+  })
+
   it('a token reclaims the same player with its score after a disconnect', async () => {
     const pin = await newGame()
     const hostSocket = await host(pin)

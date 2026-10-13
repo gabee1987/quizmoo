@@ -163,7 +163,14 @@
           "shortBreak": "Short break",
           "lastQuestion": "Last question!"
         }
-      }
+      },
+      "allTeamsMode": "All teams:",
+      "teamMode": "Answer mode of {{team}}",
+      "makeCaptain": "Make {{name}} captain",
+      "teamAnswers": "Team answers",
+      "teamDone": "Done",
+      "teamsAnswered_one": "{{answered}} of {{count}} teams answered",
+      "teamsAnswered_other": "{{answered}} of {{count}} teams answered"
     },
     "shown": {
       "onScreen": {
@@ -210,7 +217,7 @@
         "classic": "Classic",
         "classicHelp": "Everyone plays for themselves.",
         "team": "Teams",
-        "teamHelp": "Players pick a team; the team score is the average of its members."
+        "teamHelp": "Players join teams and score together as a team."
       },
       "teams": "Teams",
       "teamName": "Team name",
@@ -295,7 +302,19 @@
         "letters": "Letters",
         "numbers": "Numbers",
         "icons": "Icons"
-      }
+      },
+      "teamAnswer": "How teams answer",
+      "teamAnswerOptions": {
+        "average": "Everyone answers",
+        "averageHelp": "Each member answers; the team gets the average of their points.",
+        "majority": "Majority vote",
+        "majorityHelp": "Everyone votes; the answer most members gave counts for the team.",
+        "shared": "One shared answer",
+        "sharedHelp": "Anyone in the team can set or change the team's one answer; the last one counts."
+      },
+      "teamAnswerChosen": "{{mode}}, teams choose",
+      "teamsChoose": "Teams choose their mode",
+      "teamsChooseHelp": "Each team's captain can pick in the lobby how the team answers."
     },
     "newQuiz": "New quiz",
     "edit": "Edit",
@@ -411,7 +430,25 @@
     "movedDown_one": "Down {{count}} place",
     "movedDown_other": "Down {{count}} places",
     "wellPlayed": "Well played!",
-    "champion": "Winner"
+    "champion": "Winner",
+    "team": {
+      "answers": "Your team answers: {{mode}}",
+      "members": "Team members",
+      "captain": "Captain",
+      "youLead": "You're the captain",
+      "chooseMode": "How should your team answer?",
+      "passCaptaincy": "Pass the captaincy",
+      "answerSet": "Your team has an answer!",
+      "voteSent": "Vote sent!",
+      "pickedBy": "{{name}} picked: {{answer}}",
+      "pickedByYou": "You picked: {{answer}}",
+      "votes": "Your team's votes",
+      "voteCount_one": "{{count}} vote",
+      "voteCount_other": "{{count}} votes",
+      "teamsAnswered_one": "{{answered}} of {{count}} teams answered",
+      "teamsAnswered_other": "{{answered}} of {{count}} teams answered",
+      "teamAnswered": "Your team answered: {{answer}}"
+    }
   },
   "screen": {
     "joinAt": "Join at",
@@ -641,7 +678,8 @@
     "wrongCurrentPassword": "The current password is wrong.",
     "samePassword": "The new password must differ from the current one.",
     "gameNotFinished": "End the game first.",
-    "answerNotSent": "Your answer was not sent. Tap again."
+    "answerNotSent": "Your answer was not sent. Tap again.",
+    "notCaptain": "Only your team's captain can do that."
   },
   "nav": {
     "label": "Host menu",
@@ -701,6 +739,8 @@
     "members": "Members",
     "sortedAscending": "sorted ascending",
     "sortedDescending": "sorted descending",
-    "screenHint": "Space or → next, ← back, P pause"
+    "screenHint": "Space or → next, ← back, P pause",
+    "teamAnswers": "Team answers",
+    "noTeamAnswer": "No answer"
   }
 }

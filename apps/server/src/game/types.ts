@@ -1,4 +1,4 @@
-import type { Announcement, Answer, Avatar, GamePhase, GameSettings, Quiz } from '@quizmoo/shared'
+import type { Announcement, Answer, Avatar, GamePhase, GameSettings, Quiz, TeamAnswerMode } from '@quizmoo/shared'
 
 export { MAX_PLAYERS } from '@quizmoo/shared'
 
@@ -26,16 +26,36 @@ export interface Player {
   /** Secret used to reclaim the player after a reconnect. Never sent in snapshots. */
   token: string
   connected: boolean
+  /** 1 for the first player to join, then counting up: the earliest connected member takes over a team's captaincy. Missing in games saved before it existed. */
+  joinOrder?: number
   /** Unix ms when the last connection dropped; null while connected. Missing in games saved before it existed. */
   disconnectedAt?: number | null
   score: number
   answers: Record<string, PlayerAnswerRecord>
 }
 
+/** A team's one answer to a question (majority and shared modes). */
+export interface TeamAnswerRecord {
+  answer: Answer
+  at: number
+  timeMs: number
+  /** Who set it (shared mode); null for a majority answer. */
+  byPlayerId: string | null
+  points: number
+  bonus?: number
+  correct: boolean | null
+}
+
 export interface Team {
   id: string
   name: string
   score: number
+  /** Missing in games saved before team answer modes existed (average). */
+  answerMode?: TeamAnswerMode
+  /** Missing or null until the team has a member. */
+  captainId?: string | null
+  /** The team's answers by question id (majority and shared modes). Missing in games saved before it existed. */
+  answers?: Record<string, TeamAnswerRecord>
 }
 
 /** The quiz frozen into a game. Its default settings are not part of it: the game has its own. */

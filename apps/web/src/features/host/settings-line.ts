@@ -1,11 +1,12 @@
 import type { HostSnapshot } from '@quizmoo/shared'
 import type { TFunction } from 'i18next'
-import { answerChangesLabel } from './game-settings-form'
+import { answerChangesLabel, teamAnswerLabel } from './game-settings-form'
 
 /** The game's settings that differ from a plain game, as short labels for the host control. */
 export function settingsLine(host: HostSnapshot, t: TFunction): string[] {
   return [
     t(`host.create.modes.${host.settings.mode}`),
+    host.settings.mode === 'team' ? teamAnswerLabel(host.settings, t) : null,
     host.settings.speedBonus ? t('host.create.speedBonus') : null,
     host.settings.streakBonus ? t('host.create.streakBonus') : null,
     answerChangesLabel(host.settings, t),

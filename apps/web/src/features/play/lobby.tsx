@@ -2,6 +2,7 @@ import type { PlayerSnapshot } from '@quizmoo/shared'
 import { useTranslation } from 'react-i18next'
 import { PlayerAvatar } from '../../components/player-avatar'
 import { WaitingDots } from '../../components/waiting-dots'
+import { TeamCard } from './team-card'
 
 export function Lobby({ snapshot }: { snapshot: PlayerSnapshot }) {
   const { t } = useTranslation()
@@ -16,6 +17,7 @@ export function Lobby({ snapshot }: { snapshot: PlayerSnapshot }) {
           <p className="rounded-full bg-secondary px-3 py-1 font-bold text-secondary-foreground">{t('play.yourTeam', { team: team.name })}</p>
         )}
       </div>
+      {team && <TeamCard snapshot={snapshot} team={team} />}
       <p className="flex items-center gap-2 font-semibold text-muted-foreground">
         {t('play.waitingForHost')}
         <WaitingDots />

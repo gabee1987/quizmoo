@@ -1,5 +1,12 @@
 import { z } from 'zod'
-import { gameModes, type GameMode, type GameSettings, type Question, type QuestionType } from './quiz.js'
+import {
+  gameModes,
+  type GameMode,
+  type GameSettings,
+  type Question,
+  type QuestionType,
+  type TeamAnswerMode,
+} from './quiz.js'
 
 /** Players per game: about 50 expected at an event, plus headroom. */
 export const MAX_PLAYERS = 60
@@ -86,6 +93,36 @@ export interface TeamPublic {
   /** Rank before the current question's points were added; equals `rank` outside a reveal. */
   previousRank: number
   memberCount: number
+  answerMode: TeamAnswerMode
+  /** Null while the team has no members. */
+  captainId: string | null
+  /** While a question runs: the team has its answer (shared: set; otherwise every connected member answered). */
+  answered: boolean
+}
+
+/** A one-answer team's answer to a question (majority and shared modes). */
+export interface TeamAnswerPublic {
+  teamId: string
+  /** Null when the team gave no answer. */
+  answer: Answer | null
+  /** Who set it in shared mode; null for a majority answer. */
+  setBy: string | null
+  /** Null while the question runs, for polls and for ungraded text. */
+  correct: boolean | null
+  points: number
+}
+
+/**
+ * The player's own team's answer while a question runs (majority and shared modes). Players never
+ * receive another team's.
+ */
+export interface TeamLive {
+  /** Shared mode: the team's answer; majority mode: what the votes so far give. */
+  answer: Answer | null
+  /** Shared mode: who set it last. */
+  setBy: string | null
+  /** Majority mode: the votes so far by answer, most first, with who gave them. Empty in shared mode. */
+  votes: { answer: Answer; playerIds: string[] }[]
 }
 
 /** Omit applied to each member of a union separately (plain Omit keeps only the shared keys). */
@@ -215,13 +252,20 @@ export interface HostSnapshot extends GameSnapshotBase {
   live: RevealInfo | null
   /** The players' phones still wait for the final results. Host room only; false on the public screen. */
   playersWaiting: boolean
+  /**
+   * Host room only, team mode: the answers of one-answer teams to the question on the screens
+   * (while it runs, the shared answer or the majority so far). Null on the public screen.
+   */
+  teamAnswers: TeamAnswerPublic[] | null
 }
 
 /** What a player's phone receives. */
 export interface PlayerSnapshot extends GameSnapshotBase {
   me: PlayerPublic
-  /** Answer the player submitted for the current question, if any. */
+  /** Answer the player submitted for the current question, if any (in shared mode the team's answer). */
   myAnswer: Answer | null
+  /** The player's team's answer while a question runs, in majority and shared modes; otherwise null. */
+  teamLive: TeamLive | null
   /** Points earned on the last revealed question (streak bonus included). */
   lastPoints: number | null
   /** The streak bonus within `lastPoints`; null outside a reveal. */
@@ -273,6 +317,8 @@ export interface ResultQuestion extends RevealInfo {
   index: number
   /** Mean answer time in ms over everyone who answered; null when nobody did. */
   averageTimeMs: number | null
+  /** The answers of one-answer teams (majority and shared modes); empty otherwise. */
+  teamAnswers: TeamAnswerPublic[]
 }
 
 export interface ResultPlayer {

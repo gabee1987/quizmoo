@@ -3,6 +3,7 @@ import {
   answerSymbols,
   gameSettingsSchema,
   gameThemes,
+  teamAnswerModes,
   type AnswerPalette,
   type AnswerSymbols,
   type GameSettings,
@@ -27,7 +28,7 @@ export function settingsError(settings: GameSettings): string | null {
 
 /** The settings in each group of the form; a batch edit changes a group as a whole. */
 export const settingsSections = {
-  flow: ['mode', 'teamNames', 'revealAnswers', 'scoreboard', 'finalResults'],
+  flow: ['mode', 'teamNames', 'teamAnswer', 'teamsChoose', 'revealAnswers', 'scoreboard', 'finalResults'],
   look: ['theme', 'answerPalette', 'answerSymbols', 'answerStyle'],
   scoring: ['speedBonus', 'streakBonus', 'answerChanges', 'answerLockSec', 'shuffleOptions'],
 } as const satisfies Record<string, readonly (keyof GameSettings)[]>
@@ -40,6 +41,7 @@ export function sectionSummary(settings: GameSettings, section: SettingsSection,
     flow: [
       t(`host.create.modes.${settings.mode}`),
       settings.mode === 'team' ? settings.teamNames.join(', ') : null,
+      settings.mode === 'team' ? teamAnswerLabel(settings, t) : null,
       `${t('host.create.revealAnswers')}: ${t(`host.create.revealAnswersOptions.${settings.revealAnswers}`)}`,
       settings.revealAnswers === 'afterQuestion'
         ? `${t('host.create.scoreboard')}: ${t(`host.create.scoreboardOptions.${settings.scoreboard}`)}`
@@ -63,6 +65,12 @@ export function sectionSummary(settings: GameSettings, section: SettingsSection,
 }
 
 /** Short label of the answer changes setting, or null when it is off. */
+/** How teams answer, e.g. "Majority vote" or "Majority vote, teams choose". */
+export function teamAnswerLabel(settings: GameSettings, t: TFunction): string {
+  const mode = t(`host.create.teamAnswerOptions.${settings.teamAnswer}`)
+  return settings.teamsChoose ? t('host.create.teamAnswerChosen', { mode }) : mode
+}
+
 export function answerChangesLabel(settings: GameSettings, t: TFunction): string | null {
   if (!settings.answerChanges) return null
   return settings.answerLockSec > 0
@@ -178,6 +186,27 @@ export function GameSettingsForm({
               </div>
               {error && <p className="text-sm font-semibold text-destructive">{t(error)}</p>}
             </fieldset>
+          )}
+          {value.mode === 'team' && (
+            <>
+              <ChoiceCards
+                legend={t('host.create.teamAnswer')}
+                value={value.teamAnswer}
+                columns={1}
+                choices={teamAnswerModes.map((mode) => ({
+                  value: mode,
+                  label: t(`host.create.teamAnswerOptions.${mode}`),
+                  description: t(`host.create.teamAnswerOptions.${mode}Help`),
+                }))}
+                onChange={(teamAnswer) => set({ teamAnswer })}
+              />
+              <SwitchRow
+                label={t('host.create.teamsChoose')}
+                description={t('host.create.teamsChooseHelp')}
+                checked={value.teamsChoose}
+                onChange={(teamsChoose) => set({ teamsChoose })}
+              />
+            </>
           )}
         </>
       )}

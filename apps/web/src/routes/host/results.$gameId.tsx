@@ -137,7 +137,7 @@ function ResultsPage() {
           ) : (
             <ol className="grid gap-3 xl:grid-cols-2">
               {data.questions.map((question) => (
-                <QuestionStats key={question.question.id} question={question} playerCount={data.players.length} />
+                <QuestionStats key={question.question.id} question={question} playerCount={data.players.length} teams={data.teams} />
               ))}
             </ol>
           )}

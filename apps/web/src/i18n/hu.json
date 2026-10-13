@@ -163,7 +163,14 @@
           "shortBreak": "Egy kis szünet",
           "lastQuestion": "Utolsó kérdés!"
         }
-      }
+      },
+      "allTeamsMode": "Minden csapat:",
+      "teamMode": "{{team}} válaszmódja",
+      "makeCaptain": "{{name}} legyen a kapitány",
+      "teamAnswers": "A csapatok válaszai",
+      "teamDone": "Kész",
+      "teamsAnswered_one": "{{count}} csapatból {{answered}} válaszolt",
+      "teamsAnswered_other": "{{count}} csapatból {{answered}} válaszolt"
     },
     "shown": {
       "onScreen": {
@@ -210,7 +217,7 @@
         "classic": "Klasszikus",
         "classicHelp": "Mindenki magáért játszik.",
         "team": "Csapatos",
-        "teamHelp": "Mindenki választ egy csapatot; a csapat pontja a tagok átlaga."
+        "teamHelp": "A játékosok csapatokba állnak, és együtt gyűjtik a pontot."
       },
       "teams": "Csapatok",
       "teamName": "Csapatnév",
@@ -295,7 +302,19 @@
         "letters": "Betűk",
         "numbers": "Számok",
         "icons": "Ikonok"
-      }
+      },
+      "teamAnswer": "Hogyan válaszolnak a csapatok?",
+      "teamAnswerOptions": {
+        "average": "Mindenki válaszol",
+        "averageHelp": "Mindenki külön válaszol, a csapat a tagok pontjainak átlagát kapja.",
+        "majority": "Többségi szavazás",
+        "majorityHelp": "Mindenki szavaz, és az a válasz számít, amelyiket a legtöbben adták.",
+        "shared": "Közös válasz",
+        "sharedHelp": "Bárki beállíthatja vagy átírhatja a csapat egyetlen válaszát, az utolsó számít."
+      },
+      "teamAnswerChosen": "{{mode}}, a csapatok választhatnak",
+      "teamsChoose": "A csapatok maguk választanak",
+      "teamsChooseHelp": "A csapatkapitány a várakozóban kiválaszthatja, hogyan válaszol a csapata."
     },
     "newQuiz": "Új kvíz",
     "edit": "Szerkesztés",
@@ -411,7 +430,25 @@
     "movedDown_one": "{{count}} hellyel hátrébb",
     "movedDown_other": "{{count}} hellyel hátrébb",
     "wellPlayed": "Szép játék!",
-    "champion": "Győztes"
+    "champion": "Győztes",
+    "team": {
+      "answers": "Így válaszol a csapatod: {{mode}}",
+      "members": "Csapattagok",
+      "captain": "Kapitány",
+      "youLead": "Te vagy a kapitány",
+      "chooseMode": "Hogyan válaszoljon a csapatod?",
+      "passCaptaincy": "Átadom a kapitányságot",
+      "answerSet": "Megvan a csapat válasza!",
+      "voteSent": "Leadtad a szavazatod!",
+      "pickedBy": "{{name}} ezt választotta: {{answer}}",
+      "pickedByYou": "Ezt választottad: {{answer}}",
+      "votes": "A csapatod szavazatai",
+      "voteCount_one": "{{count}} szavazat",
+      "voteCount_other": "{{count}} szavazat",
+      "teamsAnswered_one": "{{count}} csapatból {{answered}} válaszolt",
+      "teamsAnswered_other": "{{count}} csapatból {{answered}} válaszolt",
+      "teamAnswered": "A csapatod válasza: {{answer}}"
+    }
   },
   "screen": {
     "joinAt": "Csatlakozz itt",
@@ -641,7 +678,8 @@
     "wrongCurrentPassword": "A jelenlegi jelszó hibás.",
     "samePassword": "Az új jelszónak különböznie kell a jelenlegitől.",
     "gameNotFinished": "Előbb fejezd be a játékot.",
-    "answerNotSent": "A válaszod nem ment el. Koppints újra."
+    "answerNotSent": "A válaszod nem ment el. Koppints újra.",
+    "notCaptain": "Ezt csak a csapatkapitány teheti meg."
   },
   "nav": {
     "label": "Játékvezetői menü",
@@ -701,6 +739,8 @@
     "members": "Tagok",
     "sortedAscending": "növekvő sorrend",
     "sortedDescending": "csökkenő sorrend",
-    "screenHint": "Szóköz vagy → tovább, ← vissza, P szünet"
+    "screenHint": "Szóköz vagy → tovább, ← vissza, P szünet",
+    "teamAnswers": "A csapatok válaszai",
+    "noTeamAnswer": "Nem válaszolt"
   }
 }

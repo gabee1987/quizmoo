@@ -162,7 +162,7 @@ Quizmoo: a browser-based, mobile-first live quiz (Kahoot-like) for team events, 
 - The user runs every git command. The agent never runs `git`, not even read-only commands (`log`, `show`, `diff`, `status`): read the files, `CHANGELOG.md` and `docs/plans/` instead, and `gh` for pull request state.
 - Branches: `main` (production only), `develop` (integration), `feature/*`, `fix/*`, `chore/*` off `develop`.
 - Work is organised in phases under `docs/plans/`, implemented with the `implement-phase` skill. Every phase or task ends with the delivery report defined in the `git-workflow` skill: branch, one-line commit message (sentence case, no type prefix, e.g. "Add socket game sessions"), verification command, tests added, manual test list.
-- Skills in `.claude/skills/`, one small file per topic. Process: `implement-phase`, `git-workflow`, `verification`, `browser-checks`. Server: `game-engine`, `scoring`, `realtime`, `server-api`, `database`. Web: `web-ui`, `game-screens`, `quiz-editor`, `design-system`, `motion`, `socket-client`. Both: `i18n`. Session learnings go into the matching skill (see `implement-phase`).
+- Skills in `.claude/skills/`, one small file per topic. Process: `implement-phase`, `git-workflow`, `verification`, `browser-checks`. Server: `game-engine`, `scoring`, `realtime`, `server-api`, `database`. Web: `web-ui`, `game-screens`, `quiz-editor`, `design-system`, `motion`, `socket-client`. Both: `i18n`, `team-modes`. Session learnings go into the matching skill (see `implement-phase`).
 
 ### Commands
 - Install: `pnpm install`
@@ -208,7 +208,7 @@ Prefer single-file or single-test runs during iteration. Full suites are for the
 When the user corrects your approach, append a one-line rule here before ending the session. Write it concretely ("Always use X for Y"), never abstractly ("be careful with Y"). If an existing line already covers the correction, tighten it instead of adding a new one. Remove lines when the underlying issue goes away (model upgrades, refactors, process changes).
 
 - The user runs PowerShell on Windows: write commands in delivery reports and manual tests as `$env:VAR="value"; command`, never `VAR=value command`.
-- While the user's dev server runs, edit source files with the Edit/Write tools, never `cat > file` or `sed -i` in the shell: Vite can read a truncated empty file, and `sed -i` replaces the file so `tsx watch` stops seeing later changes to it (the API keeps running stale code).
+- While the user's dev server runs, edit source files with the Edit/Write tools, never `cat > file`, `sed -i` or a script that rewrites the file: Vite can read a truncated empty file, and `sed -i` replaces the file so `tsx watch` stops seeing later changes to it (the API keeps running stale code).
 - After a burst of server edits while the user's `dev:lan` runs, check that the API on port 3000 restarted after the last edit (process start time vs file times) before browser-testing or handing over; `tsx watch` can miss changes made seconds apart. If it did not, tell the user to restart `dev:lan`.
 - After editing `styles.css` while `dev:lan` runs, check that Vite serves the change (`curl -s localhost:<vite port>/src/styles.css | grep <new class>`); a long-running Vite can keep serving a stale compiled stylesheet. If it does, tell the user to restart `dev:lan` in the handover.
 

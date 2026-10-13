@@ -86,6 +86,13 @@
 - An optional lock-in stops changes 5 or 10 seconds before the end; a player who has not answered yet can still answer until the time is up.
 - On the phone, the answered view offers "Change answer" with the seconds left; changing shows the question again with the previous answer selected, and "Keep it" goes back.
 
+### Team answers
+- New team mode settings: how teams answer ("Everyone answers" as before, "Majority vote" or "One shared answer") and "Teams choose their mode", which lets each team's captain pick in the lobby.
+- Every team has a captain: the first to join, shown with a crown. The captain can pass it on, the host can give it to anyone, and if the captain's phone drops, the earliest teammate online takes over.
+- Majority vote: the answer most members gave counts for the whole team (a tie goes to the first answer, number questions take the median). Members see the team's votes live.
+- One shared answer: any member sets the team's answer and anyone can change it; everyone sees who picked what.
+- Teams that answer as one score their answer once; the projector and host count teams, the host sees each team's answer live, and the results page and CSV list the team answers.
+
 ### Host lobby
 - While players join, the host control is one layout around the QR code: the QR code, the PIN in big digits, the join link and "Open projector" in one card, with Start and the players next to it.
 - Players appear as avatar tiles that pop in, grouped by team in team mode; offline players show a dashed tile and how long they have been away; each tile has a small remove button.
