@@ -1,9 +1,10 @@
 import { expect, test, type Browser, type Page } from '@playwright/test'
 
 /**
- * Phase 19: a team game where Red shares one answer and Blue's captain picks a majority vote in
- * the lobby. Red's members change the shared answer; Blue's tied vote goes to the first one; the
- * question closes once both teams have their answer and every member scores the team's answer.
+ * Phase 20: a team game where teams choose. Red keeps "Captain decides": its members suggest, the
+ * captain confirms the less popular answer and it counts; on the next question nobody confirms and
+ * the majority counts. Blue's captain picks a majority vote in the lobby, and the host switches
+ * Blue to "Everyone counts" on the scoreboard.
  */
 
 const username = process.env.E2E_USERNAME
@@ -26,7 +27,7 @@ async function phone(browser: Browser, who: string) {
   return page
 }
 
-test('teams answer as one: a shared answer and a majority vote', async ({ browser, page }) => {
+test('teams choose: the captain decides, a majority vote, and the fallback', async ({ browser, page }) => {
   test.skip(!username || !password, 'Set E2E_USERNAME and E2E_PASSWORD to a host account')
   watch(page, 'host')
   page.on('dialog', (dialog) => void dialog.accept())
@@ -48,8 +49,19 @@ test('teams answer as one: a shared answer and a majority vote', async ({ browse
       ],
       correctOptionId: 'a',
     },
+    {
+      type: 'single',
+      text: 'Largest lake?',
+      timeLimitSec: 60,
+      options: [
+        { id: 'a', text: 'Balaton' },
+        { id: 'b', text: 'Velence' },
+      ],
+      correctOptionId: 'a',
+    },
   ]
-  const settings = { mode: 'team', teamNames: ['Red', 'Blue'], teamAnswer: 'shared', teamsChoose: true }
+  // Teams choose and start on captain decides: the defaults.
+  const settings = { mode: 'team', teamNames: ['Red', 'Blue'] }
   const { quiz } = (await (
     await page.request.post('/api/quizzes', { data: { title: `E2E teams ${Date.now()}`, questions, settings } })
   ).json()) as { quiz: { id: string } }
@@ -58,12 +70,13 @@ test('teams answer as one: a shared answer and a majority vote', async ({ browse
 
   try {
     await page.goto(`/host/games/${pin}`)
-    await expect(page.getByText('One shared answer, teams choose')).toBeVisible()
+    await expect(page.getByText('Teams choose', { exact: false }).first()).toBeVisible()
 
     const players: Record<string, Page> = {}
     for (const [name, team] of [
       ['Red One', 'Red'],
       ['Red Two', 'Red'],
+      ['Red Three', 'Red'],
       ['Blue One', 'Blue'],
       ['Blue Two', 'Blue'],
     ] as const) {
@@ -75,11 +88,17 @@ test('teams answer as one: a shared answer and a majority vote', async ({ browse
       await expect(p.getByText(/You.re in/)).toBeVisible()
       players[name] = p
     }
-    const [redOne, redTwo, blueOne, blueTwo] = [players['Red One']!, players['Red Two']!, players['Blue One']!, players['Blue Two']!]
+    const [redOne, redTwo, redThree, blueOne, blueTwo] = [
+      players['Red One']!,
+      players['Red Two']!,
+      players['Red Three']!,
+      players['Blue One']!,
+      players['Blue Two']!,
+    ]
 
-    await test.step('the first to join leads the team and picks its mode', async () => {
+    await test.step('every team starts on captain decides; Blue picks a majority vote', async () => {
+      await expect(redTwo.getByText('Your team answers: Captain decides')).toBeVisible()
       await expect(redOne.getByText("You're the captain")).toBeVisible()
-      await expect(redTwo.getByText("You're the captain")).toHaveCount(0)
       await blueOne.getByRole('radio', { name: /Majority vote/ }).click()
       await expect(blueTwo.getByText('Your team answers: Majority vote')).toBeVisible()
       await expect(page.getByRole('combobox', { name: 'Answer mode of Blue' })).toHaveText('Majority vote')
@@ -87,22 +106,49 @@ test('teams answer as one: a shared answer and a majority vote', async ({ browse
 
     await page.getByRole('button', { name: 'Start', exact: true }).click()
 
-    await test.step('any Red member sets and changes the shared answer', async () => {
-      await redOne.getByRole('button', { name: 'Debrecen', exact: true }).click()
-      await expect(redTwo.getByText('Red One picked: Debrecen')).toBeVisible()
-      await redTwo.getByRole('button', { name: 'Change answer' }).click()
-      await redTwo.getByRole('button', { name: 'Budapest', exact: true }).click()
-      await expect(redOne.getByText('Red Two picked: Budapest')).toBeVisible()
-      await expect(page.getByText('1 of 2 teams answered')).toBeVisible()
+    await test.step("Red's captain confirms the less popular suggestion, and it counts", async () => {
+      await expect(redOne.getByRole('heading', { name: 'Capital of Hungary?' })).toBeVisible()
+      await redTwo.getByRole('button', { name: 'Debrecen', exact: true }).click()
+      await redThree.getByRole('button', { name: 'Debrecen', exact: true }).click()
+      await expect(redTwo.getByText('Waiting for your captain…')).toBeVisible()
+      // The captain sees both teammates on Debrecen; Blue sees none of Red's picks.
+      await expect(redOne.getByRole('button', { name: 'Picked by Red Two, Red Three' })).toBeVisible()
+      await expect(blueOne.getByRole('button', { name: /Picked by Red/ })).toHaveCount(0)
+      await redOne.getByRole('button', { name: 'Picked by Red Two, Red Three' }).click()
+      await expect(redOne.getByText('Team picks (2/3)')).toBeVisible()
+      await redOne.getByRole('button', { name: 'Budapest', exact: true }).click()
+      await redOne.getByRole('button', { name: 'Confirm for the team' }).click()
+      await expect(redTwo.getByText('Red One confirmed: Budapest')).toBeVisible()
+      await expect(page.getByText('Confirmed', { exact: true })).toBeVisible()
     })
 
     await test.step('Blue votes 1:1, the first vote counts for every member', async () => {
       await blueOne.getByRole('button', { name: 'Budapest', exact: true }).click()
-      await expect(blueOne.getByText("Your team's votes")).toBeVisible()
       await blueTwo.getByRole('button', { name: 'Debrecen', exact: true }).click()
       await expect(blueTwo.getByText('Correct!', { exact: true })).toBeVisible()
       await expect(blueTwo.getByText('Your team answered: Budapest')).toBeVisible()
-      await expect(redOne.getByText('Correct!', { exact: true })).toBeVisible()
+      await expect(redThree.getByText('Correct!', { exact: true })).toBeVisible()
+      await expect(redThree.getByText('Your team answered: Budapest')).toBeVisible()
+    })
+
+    await test.step('on the scoreboard the host switches Blue to everyone counts', async () => {
+      await page.getByRole('button', { name: 'Show scoreboard', exact: true }).click()
+      await page.getByRole('combobox', { name: 'Answer mode of Blue' }).click()
+      await page.getByRole('option', { name: 'Everyone counts', exact: true }).click()
+      await page.getByRole('button', { name: 'Next question', exact: true }).click()
+    })
+
+    await test.step("nobody in Red confirms: the team's majority counts and the phones say so", async () => {
+      await redTwo.getByRole('button', { name: 'Velence', exact: true }).click()
+      await redThree.getByRole('button', { name: 'Velence', exact: true }).click()
+      await blueOne.getByRole('button', { name: 'Balaton', exact: true }).click()
+      await blueTwo.getByRole('button', { name: 'Balaton', exact: true }).click()
+      await expect(page.getByText('Suggesting (2 of 3)')).toBeVisible()
+      await page.getByRole('button', { name: 'End question', exact: true }).click()
+      await expect(redOne.getByText("Your captain did not confirm, so the team's majority counted.")).toBeVisible()
+      await expect(redOne.getByText('Your team answered: Velence')).toBeVisible()
+      await expect(page.getByText('(Majority, not confirmed)')).toBeVisible()
+      await expect(blueTwo.getByText('Correct!', { exact: true })).toBeVisible()
     })
 
     await page.getByRole('button', { name: 'End game', exact: true }).click()

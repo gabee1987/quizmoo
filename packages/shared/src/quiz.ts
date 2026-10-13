@@ -101,11 +101,14 @@ export const gameModes = ['classic', 'team'] as const
 export type GameMode = (typeof gameModes)[number]
 
 /**
- * How a team answers in team mode: every member answers and the team gets the average,
- * the team's answer is the members' majority vote, or one shared answer any member sets.
+ * How a team answers in team mode: the members suggest and the captain confirms the team's answer,
+ * the members' majority vote counts, or every member answers and the team gets the average ("Everyone counts").
  */
-export const teamAnswerModes = ['average', 'majority', 'shared'] as const
+export const teamAnswerModes = ['captain', 'majority', 'average'] as const
 export type TeamAnswerMode = (typeof teamAnswerModes)[number]
+
+/** A team answer mode; quizzes and games saved with the removed "one shared answer" play it as captain decides. */
+export const teamAnswerModeSchema = z.preprocess((value) => (value === 'shared' ? 'captain' : value), z.enum(teamAnswerModes))
 
 /**
  * Visual themes for the phones, projector and host control. Hues only; light and dark mode stay the device's choice.
@@ -153,10 +156,10 @@ export const gameSettingsSchema = z
     shuffleOptions: z.boolean().default(false),
     /** Team names prepared by the host (team mode only). Players pick one when joining. */
     teamNames: z.array(z.string().trim().min(1).max(40)).max(20).default([]),
-    /** How every team answers (team mode only); the host can change a team's mode in the lobby. */
-    teamAnswer: z.enum(teamAnswerModes).default('average'),
+    /** Team mode: every team's starting mode when teams choose, otherwise the mode of every team. */
+    teamAnswer: teamAnswerModeSchema.default('captain'),
     /** Each team's captain may pick the team's answer mode in the lobby. */
-    teamsChoose: z.boolean().default(false),
+    teamsChoose: z.boolean().default(true),
     /** When correct answers, right/wrong and scores reach players and the projector: after each question or only at the end. */
     revealAnswers: z.enum(['afterQuestion', 'atEnd']).default('afterQuestion'),
     /** Scoreboard after every question, or only when the host asks for it (and at the end). */

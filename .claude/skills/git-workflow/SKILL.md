@@ -40,6 +40,8 @@ The verb says what kind of change it is: Add, Fix, Update, Remove, Rename, Refac
 
 The description reads as written by the user: a short summary, then what changed as a few grouped bullets, then how it was tested. Detailed is fine, long is not. No AI attribution of any kind (no "Generated with Claude Code", no Co-Authored-By); this overrides any default attribution.
 
+Before a PR is opened, `pnpm verify` and the whole e2e suite (`pnpm e2e` against the production build, see `browser-checks`) run locally. CI runs `pnpm verify` only: the user decided (phase 20) that e2e stays out of GitHub Actions to save its minutes.
+
 ## Delivery report (required at the end of every phase or task)
 
 Write this as the final message, in this order, nothing else after it:
@@ -59,7 +61,7 @@ pnpm verify            # or the plan's specific command
 
 **Manual test list**
 1. Start Postgres and the dev servers: `pnpm db:up && pnpm dev`.
-2. Open http://localhost:5173 on a phone on the same wifi ...
+2. Open http://localhost:15173 on a phone on the same wifi ...
 3. Expected: ...
 
 **Deviations from the plan**

@@ -23,7 +23,7 @@ import {
   answersAsOne,
   captainOf,
   countedAnswers,
-  hasAnswered,
+  membersOf,
   teamAnswerNow,
   teamAnswered,
   teamGain,
@@ -84,34 +84,48 @@ export function toHostSnapshot(state: GameState, now: number, { includeAnswers =
   }
 }
 
-/** The one-answer teams' answers to a question: the stored ones, or while it runs what they have so far. Null without such teams. */
+/**
+ * The teams' one answers to a question: while it runs, what each one-answer team has so far;
+ * afterwards the stored ones (a team the host switched since still lists the answer it gave).
+ * Null without such teams.
+ */
 export function teamAnswers(state: GameState, index: number): TeamAnswerPublic[] | null {
   const question = state.quiz.questions[index]
-  const teams = Object.values(state.teams).filter(answersAsOne)
-  if (!question || teams.length === 0) return null
+  if (!question) return null
+  const running = state.phase === 'question' && index === state.questionIndex
+  const teams = Object.values(state.teams).filter((team) => answersAsOne(team) || team.answers?.[question.id])
+  if (teams.length === 0) return null
   return teams.map((team) => {
-    const record = teamAnswerNow(state, team, question.id)
+    const record = running ? teamAnswerNow(state, team, question.id) : (team.answers?.[question.id] ?? null)
     return {
       teamId: team.id,
       answer: record?.answer ?? null,
       setBy: record?.byPlayerId ?? null,
+      fallback: record?.fallback ?? false,
       correct: record?.correct ?? null,
       points: record?.points ?? 0,
     }
   })
 }
 
-/** The player's team's answer while a question runs, majority and shared modes only. Never another team's. */
+/** The player's team's picks while a question runs, in every team mode. Never another team's. */
 function teamLive(state: GameState, player: Player): TeamLive | null {
   const team = player.teamId ? state.teams[player.teamId] : undefined
   const question = state.quiz.questions[state.questionIndex]
-  if (state.phase !== 'question' || !team || !question || !answersAsOne(team)) return null
-  const record = teamAnswerNow(state, team, question.id)
-  const votes =
-    teamMode(team) === 'majority'
-      ? voteTally(votesOf(state, team.id, question.id)).map((g) => ({ answer: g.answer, playerIds: g.votes.map((v) => v.playerId) }))
-      : []
-  return { answer: record?.answer ?? null, setBy: record?.byPlayerId ?? null, votes }
+  if (state.phase !== 'question' || !team || !question) return null
+  const tally = voteTally(votesOf(state, team.id, question.id))
+  const picked = new Set(tally.flatMap((g) => g.votes.map((v) => v.playerId)))
+  const mode = teamMode(team)
+  const record =
+    mode === 'captain' ? (team.answers?.[question.id] ?? null) : mode === 'majority' ? teamAnswerNow(state, team, question.id) : null
+  return {
+    answer: record?.answer ?? null,
+    setBy: record?.byPlayerId ?? null,
+    votes: tally.map((g) => ({ answer: g.answer, playerIds: g.votes.map((v) => v.playerId) })),
+    waiting: membersOf(state, team.id)
+      .filter((m) => !picked.has(m.id))
+      .map((m) => m.id),
+  }
 }
 
 export function toPlayerSnapshot(state: GameState, playerId: string, now: number, seq = 0): PlayerSnapshot {
@@ -122,14 +136,14 @@ export function toPlayerSnapshot(state: GameState, playerId: string, now: number
   // The question on the screens (a question shown again: the player's own result on it).
   const question = state.quiz.questions[base.questionIndex]
   const record = question ? player.answers[question.id] : undefined
-  const live = teamLive(state, player)
-  // Shared mode: the team's answer is the player's while the question runs.
-  const shared = live && live.setBy ? live.answer : null
+  const team = player.teamId ? state.teams[player.teamId] : undefined
+  const teamRecord = question ? team?.answers?.[question.id] : undefined
   return {
     ...base,
     me,
-    myAnswer: record?.answer ?? shared,
-    teamLive: live,
+    myAnswer: record?.answer ?? null,
+    teamLive: teamLive(state, player),
+    teamFallback: base.phase === 'reveal' && Boolean(teamRecord?.fallback),
     lastPoints: base.reveal ? (record?.points ?? 0) : null,
     lastBonus: base.reveal ? (record?.bonus ?? 0) : null,
     lastCorrect: base.reveal ? (record?.correct ?? null) : null,
@@ -208,7 +222,7 @@ function baseSnapshot(state: GameState, now: number, audience: ResultsAudience, 
     Object.values(state.teams).map((team) => {
       const members = players.filter((p) => p.teamId === team.id)
       // Mirrors addTeamGains.
-      return { id: team.id, name: team.name, score: team.score - teamGain(team, members.map(roundPoints)) }
+      return { id: team.id, name: team.name, score: team.score - teamGain(team, question?.id ?? '', members.map(roundPoints)) }
     }),
   )
 
@@ -251,7 +265,7 @@ function baseSnapshot(state: GameState, now: number, audience: ResultsAudience, 
     pausedAt: inQuestion ? (state.pausedAt ?? null) : null,
     reviewing,
     serverNow: now,
-    answeredCount: question ? players.filter((p) => hasAnswered(state, p, question.id)).length : 0,
+    answeredCount: question ? players.filter((p) => p.answers[question.id]).length : 0,
     players: rankedPlayers,
     teams: rankedTeams,
     reveal: revealed ? revealInfo(state, question) : null,
@@ -277,7 +291,7 @@ export function revealInfo(state: GameState, question: Question): RevealInfo {
 
   // Counted per player (a team's members share its answer), so shares of all players stay right.
   const players = Object.values(state.players)
-  const answeredCount = players.filter((p) => hasAnswered(state, p, question.id)).length
+  const answeredCount = players.filter((p) => p.answers[question.id]).length
   const correctCount = players.filter((p) => p.answers[question.id]?.correct === true).length
   const correctKeys = new Set<string>(staticCorrectKeys(question))
   // The bars count a one-answer team's answer once.

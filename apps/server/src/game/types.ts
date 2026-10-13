@@ -34,13 +34,15 @@ export interface Player {
   answers: Record<string, PlayerAnswerRecord>
 }
 
-/** A team's one answer to a question (majority and shared modes). */
+/** A team's one answer to a question (captain decides and majority vote). */
 export interface TeamAnswerRecord {
   answer: Answer
   at: number
   timeMs: number
-  /** Who set it (shared mode); null for a majority answer. */
+  /** The captain who confirmed it (or the member who set it in the removed shared mode); null for a majority answer. */
   byPlayerId: string | null
+  /** Captain decides without a confirmation: the majority counted. Missing in games saved before it existed. */
+  fallback?: boolean
   points: number
   bonus?: number
   correct: boolean | null
@@ -50,11 +52,11 @@ export interface Team {
   id: string
   name: string
   score: number
-  /** Missing in games saved before team answer modes existed (average). */
-  answerMode?: TeamAnswerMode
+  /** Missing in games saved before team answer modes existed (average); 'shared' in games saved while it existed (captain). */
+  answerMode?: TeamAnswerMode | 'shared'
   /** Missing or null until the team has a member. */
   captainId?: string | null
-  /** The team's answers by question id (majority and shared modes). Missing in games saved before it existed. */
+  /** The team's answers by question id (captain decides and majority vote). Missing in games saved before it existed. */
   answers?: Record<string, TeamAnswerRecord>
 }
 

@@ -160,3 +160,23 @@ $env:E2E_USERNAME="admin"; $env:E2E_PASSWORD="..."; pnpm e2e
 7. Close the captain's phone mid-question. Expected: another member becomes captain and can confirm.
 8. On the scoreboard, the host switches a team to "Everyone counts". Expected: it applies from the next question; during a question the control is not offered.
 9. Create a game with "Same for all teams: Majority vote". Expected: no picker on any phone.
+
+## Results
+
+- `pnpm verify` passes: server 319 tests (with the test database), web 132 tests, builds.
+- `pnpm e2e` passes on the production build (:3999), 11 specs; `team-answers.e2e.ts` rewritten as planned (Red's captain confirms the minority answer, Blue picks a majority vote, the host switches Blue on the scoreboard, Red's unconfirmed majority counts with the note).
+- Screenshots checked: settings form (teams choose, same for all), phone lobby (captain picker, one-person team without it), captain and member question views in light and dark mode with a team of 8 (six on one option: three avatars and "+3", no horizontal scroll), the picks panel, a text question with picks in the panel, the confirmed view, the fallback reveal, the host's live status ("Suggesting (7 of 8)", "Confirmed"), the host reveal's fallback mark, the host's team modes on the scoreboard.
+
+## Deviations
+
+- "Teams choose" fixes the starting mode to captain decides; the host form shows the mode cards only for "Same for all teams".
+- The host cannot change modes while an answer waits for grading either (the gain of the graded question depends on it).
+- Team gains, grading and the distribution bars follow the team's stored answer for that question, not its current mode, so a host change between questions never rewrites past questions.
+- `TeamLive` carries `votes` (picks grouped by answer, as in phase 19) plus `waiting`, instead of a separate list of picks; a new `PlayerSnapshot.teamFallback` drives the phone's fallback note; `TeamAnswerPublic.fallback` the host's and the results' marks.
+- In captain decides the phone stays on the question view (suggestions change freely) until the captain confirms. The captain confirms their own pick with "Confirm for the team", or any teammate's pick with "Use" in the panel, for every question type.
+- Added on the user's request during the phase: the web dev port moved to 15173, and the e2e job was removed from CI (e2e runs locally before each PR).
+
+## Known gaps
+
+- A one-person team in captain decides still confirms its own answer; without it the majority (its own pick) counts and the phone shows the captain note.
+- The end-of-game review on the phones does not label a team answer as the team's.

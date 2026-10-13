@@ -21,6 +21,7 @@ import {
   announce,
   clearAnnouncement,
   closeQuestion,
+  confirmTeamAnswer,
   disconnectPlayer,
   endGame,
   endQuestion,
@@ -169,6 +170,20 @@ export function registerSocketHandlers(io: AppSocketServer, { manager, db, parse
           const answered = submitAnswer(state, { playerId, ...parsed.data }, now)
           // No need to wait for the timer once every connected player (or team) has answered.
           return allAnswered(answered) ? endQuestion(answered) : answered
+        })
+        return { ok: true as const }
+      }),
+    )
+
+    socket.on('player:confirmTeamAnswer', (data, ack) =>
+      respond(ack, () => {
+        const { pin, playerId, role } = socket.data
+        if (role !== 'player' || !pin || !playerId) return { error: 'errors.playerNotFound' }
+        const parsed = playerAnswerSchema.safeParse(data)
+        if (!parsed.success) return invalidInput
+        manager.apply(pin, (state, now) => {
+          const confirmed = confirmTeamAnswer(state, { playerId, ...parsed.data }, now)
+          return allAnswered(confirmed) ? endQuestion(confirmed) : confirmed
         })
         return { ok: true as const }
       }),

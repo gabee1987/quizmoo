@@ -4,7 +4,7 @@ import { OptionButton } from '../../components/option-button'
 import { stagger } from '../../lib/motion'
 import type { QuestionProps } from './types'
 
-export function TrueFalse({ mode, disabled, pending, large, colourful, symbols, initial, onSubmit }: QuestionProps<'truefalse'>) {
+export function TrueFalse({ mode, disabled, pending, large, colourful, symbols, initial, onSubmit, picks, onPicks }: QuestionProps<'truefalse'>) {
   const { t } = useTranslation()
   const [chosen, setChosen] = useState<boolean | null>(initial?.type === 'truefalse' ? initial.value : null)
   const choices = [
@@ -24,6 +24,8 @@ export function TrueFalse({ mode, disabled, pending, large, colourful, symbols, 
             colourful={colourful ?? large ?? false}
             selected={chosen === choice.value}
             pending={(pending ?? false) && chosen === choice.value}
+            picks={picks && (picks[String(choice.value)] ?? [])}
+            onPicks={onPicks}
             disabled={mode === 'display' || disabled}
             className="animate-pop"
             style={stagger(index, 70, 150)}

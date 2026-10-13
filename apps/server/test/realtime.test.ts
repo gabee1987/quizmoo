@@ -457,8 +457,8 @@ describeDb('sockets (database)', () => {
     expect((await revealed).lastCorrect).toBe(true)
   })
 
-  it('team modes: captains choose and pass on, votes stay in the team, the question closes once every team has its answer', async () => {
-    const pin = await newGame({ mode: 'team', teamNames: ['Red', 'Blue'], teamAnswer: 'shared', teamsChoose: true })
+  it('team modes: captains choose and pass on, picks stay in the team, the captain confirms, the question closes once every team has its answer', async () => {
+    const pin = await newGame({ mode: 'team', teamNames: ['Red', 'Blue'], teamAnswer: 'captain', teamsChoose: true })
     const hostSocket = await host(pin)
     async function teamPlayer(name: string, teamId: string) {
       const socket = await connect()
@@ -469,12 +469,13 @@ describeDb('sockets (database)', () => {
     const anna = await teamPlayer('Anna', 'team-1')
     const bence = await teamPlayer('Bence', 'team-1')
     const cecil = await teamPlayer('Cecil', 'team-2')
+    const dora = await teamPlayer('Dora', 'team-2')
 
     expect(await bence.socket.emitWithAck('player:teamMode', { mode: 'majority' })).toEqual({ error: 'errors.notCaptain' })
     expect(await anna.socket.emitWithAck('player:teamMode', { mode: 'majority' })).toEqual({ ok: true })
     expect(await anna.socket.emitWithAck('player:captain', { playerId: bence.me.id })).toEqual({ ok: true })
     expect(await anna.socket.emitWithAck('player:captain', { playerId: anna.me.id })).toEqual({ error: 'errors.notCaptain' })
-    const lobby = nextSnapshot<HostSnapshot>(hostSocket, 'game:host', (s) => s.teams.some((t) => t.captainId === cecil.me.id && t.answerMode === 'shared'))
+    const lobby = nextSnapshot<HostSnapshot>(hostSocket, 'game:host', (s) => s.teams.some((t) => t.captainId === cecil.me.id && t.answerMode === 'captain'))
     expect(await command(hostSocket, { type: 'captain', playerId: cecil.me.id })).toEqual({ ok: true })
     const red = (await lobby).teams.find((t) => t.id === 'team-1')!
     expect([red.answerMode, red.captainId]).toEqual(['majority', bence.me.id])
@@ -487,15 +488,28 @@ describeDb('sockets (database)', () => {
     const tally = nextSnapshot<PlayerSnapshot>(bence.socket, 'game:player', (s) => (s.teamLive?.votes.length ?? 0) > 0)
     expect(await anna.socket.emitWithAck('player:answer', vote)).toEqual({ ok: true })
     expect((await tally).teamLive!.votes).toEqual([{ answer: vote.answer, playerIds: [anna.me.id] }])
-    const blue = nextSnapshot<PlayerSnapshot>(cecil.socket, 'game:player', (s) => s.myAnswer !== null)
+    const blue = nextSnapshot<PlayerSnapshot>(dora.socket, 'game:player', (s) => (s.teamLive?.votes.length ?? 0) > 0)
     expect(await cecil.socket.emitWithAck('player:answer', { ...vote, answer: { type: 'single', optionId: 'b' } })).toEqual({ ok: true })
+    expect((await blue).teamLive!.waiting).toEqual([dora.me.id])
     expect(JSON.stringify((await blue).teamLive)).not.toContain(anna.me.id)
 
-    const revealed = nextSnapshot<PlayerSnapshot>(bence.socket, 'game:player', (s) => s.phase === 'reveal')
+    // Red is complete, Blue only suggested: the question stays open until Blue's captain confirms.
+    const redDone = nextSnapshot<HostSnapshot>(hostSocket, 'game:host', (s) => s.teams.find((t) => t.id === 'team-1')?.answered === true)
     expect(await bence.socket.emitWithAck('player:answer', vote)).toEqual({ ok: true })
+    expect((await redDone).phase).toBe('question')
+    expect(await bence.socket.emitWithAck('player:confirmTeamAnswer', vote)).toEqual({ error: 'errors.invalidTransition' })
+    expect(await dora.socket.emitWithAck('player:confirmTeamAnswer', vote)).toEqual({ error: 'errors.notCaptain' })
+    expect(await cecil.socket.emitWithAck('player:confirmTeamAnswer', { questionId: q.id, answer: { type: 'single' } })).toEqual({
+      error: 'errors.invalidInput',
+    })
+
+    const revealed = nextSnapshot<PlayerSnapshot>(cecil.socket, 'game:player', (s) => s.phase === 'reveal')
+    expect(await cecil.socket.emitWithAck('player:confirmTeamAnswer', vote)).toEqual({ ok: true })
     const reveal = await revealed
+    // Cecil suggested b but confirmed a: the confirmation counts.
     expect(reveal.lastCorrect).toBe(true)
-    expect(reveal.reveal!.answeredCount).toBe(3)
+    expect(reveal.teamFallback).toBe(false)
+    expect(reveal.reveal!.answeredCount).toBe(4)
   })
 
   it('a token reclaims the same player with its score after a disconnect', async () => {

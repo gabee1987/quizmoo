@@ -170,7 +170,12 @@
       "teamAnswers": "A csapatok válaszai",
       "teamDone": "Kész",
       "teamsAnswered_one": "{{count}} csapatból {{answered}} válaszolt",
-      "teamsAnswered_other": "{{count}} csapatból {{answered}} válaszolt"
+      "teamsAnswered_other": "{{count}} csapatból {{answered}} válaszolt",
+      "teamModes": "Csapatmódok",
+      "teamModesHelp": "A változás a következő kérdéstől érvényes.",
+      "teamConfirmed": "Véglegesítve",
+      "teamSuggesting": "Javaslatok ({{picked}}/{{count}})",
+      "teamFallback": "Többség, nem véglegesítették"
     },
     "shown": {
       "onScreen": {
@@ -305,16 +310,21 @@
       },
       "teamAnswer": "Hogyan válaszolnak a csapatok?",
       "teamAnswerOptions": {
-        "average": "Mindenki válaszol",
-        "averageHelp": "Mindenki külön válaszol, a csapat a tagok pontjainak átlagát kapja.",
+        "captain": "A kapitány dönt",
+        "captainHelp": "Mindenki javasol egy választ, a kapitány látja a csapat tippjeit, és ő véglegesíti, melyik számít.",
         "majority": "Többségi szavazás",
         "majorityHelp": "Mindenki szavaz, és az a válasz számít, amelyiket a legtöbben adták.",
-        "shared": "Közös válasz",
-        "sharedHelp": "Bárki beállíthatja vagy átírhatja a csapat egyetlen válaszát, az utolsó számít."
+        "average": "Mindenki számít",
+        "averageHelp": "Mindenki külön válaszol, a csapat a tagok pontjainak átlagát kapja."
       },
-      "teamAnswerChosen": "{{mode}}, a csapatok választhatnak",
-      "teamsChoose": "A csapatok maguk választanak",
-      "teamsChooseHelp": "A csapatkapitány a várakozóban kiválaszthatja, hogyan válaszol a csapata."
+      "teamsChooseOptions": {
+        "choose": "A csapatok választanak",
+        "chooseHelp": "A kapitány a várakozóban választja ki a csapat módját. Alapból a kapitány dönt.",
+        "same": "Minden csapatnak ugyanaz",
+        "sameHelp": "Te választod ki a módot, a csapatok nem változtathatják meg."
+      },
+      "teamAnswerMode": "Mód minden csapatnak",
+      "teamAnswerSame": "Minden csapatnak: {{mode}}"
     },
     "newQuiz": "Új kvíz",
     "edit": "Szerkesztés",
@@ -438,16 +448,25 @@
       "youLead": "Te vagy a kapitány",
       "chooseMode": "Hogyan válaszoljon a csapatod?",
       "passCaptaincy": "Átadom a kapitányságot",
-      "answerSet": "Megvan a csapat válasza!",
       "voteSent": "Leadtad a szavazatod!",
-      "pickedBy": "{{name}} ezt választotta: {{answer}}",
-      "pickedByYou": "Ezt választottad: {{answer}}",
-      "votes": "A csapatod szavazatai",
-      "voteCount_one": "{{count}} szavazat",
-      "voteCount_other": "{{count}} szavazat",
       "teamsAnswered_one": "{{count}} csapatból {{answered}} válaszolt",
       "teamsAnswered_other": "{{count}} csapatból {{answered}} válaszolt",
-      "teamAnswered": "A csapatod válasza: {{answer}}"
+      "teamAnswered": "A csapatod válasza: {{answer}}",
+      "confirm": "Véglegesítem",
+      "confirmed": "Megvan a csapat válasza!",
+      "confirmedBy": "{{name}} véglegesítette: {{answer}}",
+      "confirmedByYou": "Véglegesítetted: {{answer}}",
+      "waitingCaptain": "Várjuk a kapitányt…",
+      "suggest": "Válassz, a kapitány dönt.",
+      "youDecide": "Te döntesz: válaszd ki és véglegesítsd a csapat válaszát.",
+      "picks": "A csapat tippjei",
+      "picksCount": "A csapat tippjei ({{picked}}/{{count}})",
+      "pickedBy": "Ezt választotta: {{names}}",
+      "thinking": "gondolkodik…",
+      "you": "Te",
+      "useAnswer": "Ez legyen",
+      "useAnswerFor": "{{name}} tippje legyen a csapat válasza",
+      "fallback": "A kapitány nem véglegesített, ezért a csapat többségi válasza számított."
     }
   },
   "screen": {

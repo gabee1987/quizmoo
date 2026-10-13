@@ -47,11 +47,12 @@ export function Reveal({ snapshot }: { snapshot: PlayerSnapshot }) {
         )}
         <h1 className="text-3xl font-black">{title}</h1>
         {/* One answer for the whole team: say which one counted. */}
-        {question && snapshot.myAnswer && (myTeamMode(snapshot) === 'majority' || myTeamMode(snapshot) === 'shared') && (
+        {question && snapshot.myAnswer && (myTeamMode(snapshot) === 'majority' || myTeamMode(snapshot) === 'captain') && (
           <p className="font-bold wrap-break-word">
             {t('play.team.teamAnswered', { answer: formatAnswer(snapshot.myAnswer, question, t, i18n.language) })}
           </p>
         )}
+        {snapshot.teamFallback && <p className="text-sm font-semibold">{t('play.team.fallback')}</p>}
         {!isPoll && snapshot.lastPoints !== null && <p className="text-2xl font-black tabular-nums">{t('play.points', { count: points })}</p>}
         {/* Streak bonus: from the second correct answer in a row. */}
         {correct === true && snapshot.settings.streakBonus && snapshot.me.streak >= 2 && (

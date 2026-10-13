@@ -77,7 +77,7 @@ export function LobbyPlayers({
                   value={team.answerMode}
                   options={modeOptions}
                   onChange={(mode) => onTeamMode(mode, team.id)}
-                  className="w-44"
+                  className="w-56"
                 />
               </div>
             )}

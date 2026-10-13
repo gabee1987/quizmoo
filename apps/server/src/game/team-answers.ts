@@ -5,11 +5,13 @@ import type { GameState, Player, PlayerAnswerRecord, Team, TeamAnswerRecord } fr
 // Team answer modes (team mode only): who leads a team, how a team's one answer comes about,
 // and when a team has answered. Pure helpers over the game state.
 
+/** The team's answer mode; games saved before modes existed are average, the removed shared mode plays as captain decides. */
 export function teamMode(team: Team): TeamAnswerMode {
-  return team.answerMode ?? 'average'
+  const mode = team.answerMode ?? 'average'
+  return mode === 'shared' ? 'captain' : mode
 }
 
-/** The team scores one answer per question (majority or shared), not its members' average. */
+/** The team scores one answer per question (captain decides or majority vote), not its members' average. */
 export function answersAsOne(team: Team): boolean {
   return teamMode(team) !== 'average'
 }
@@ -103,45 +105,38 @@ function lowerMedian<T>(sorted: readonly T[]): T | undefined {
 }
 
 /**
- * The team's answer to a question as it stands: the stored one (shared mode, or once revealed),
- * else the majority of the votes so far. Null for average teams and teams without an answer.
+ * The team's answer to a question as it stands: the stored one (confirmed by the captain, or once
+ * revealed), else the majority of the votes or suggestions so far, which in captain decides is the
+ * fallback. Null for average teams and teams without an answer.
  */
 export function teamAnswerNow(state: GameState, team: Team, questionId: string): TeamAnswerRecord | null {
   if (!answersAsOne(team)) return null
   const stored = team.answers?.[questionId]
   if (stored) return stored
-  if (teamMode(team) !== 'majority') return null
   const majority = majorityAnswer(votesOf(state, team.id, questionId))
-  return majority && { ...majority, byPlayerId: null, points: 0, correct: null }
+  return majority && { ...majority, byPlayerId: null, fallback: teamMode(team) === 'captain', points: 0, correct: null }
 }
 
 /**
- * The team has its answer: shared once it is set; majority and average once someone answered
- * and every connected member has.
+ * The team has its answer: captain decides once the captain confirmed; majority and average once
+ * someone answered and every connected member has.
  */
 export function teamAnswered(state: GameState, team: Team, questionId: string): boolean {
-  if (teamMode(team) === 'shared') return Boolean(team.answers?.[questionId])
+  if (teamMode(team) === 'captain') return Boolean(team.answers?.[questionId])
   const members = membersOf(state, team.id)
   return members.some((m) => m.answers[questionId]) && members.every((m) => !m.connected || m.answers[questionId])
 }
 
-/** Whether the player has an answer to the question: their own, or their team's shared one. */
-export function hasAnswered(state: GameState, player: Player, questionId: string): boolean {
-  if (player.answers[questionId]) return true
-  const team = player.teamId ? state.teams[player.teamId] : undefined
-  return Boolean(team && teamMode(team) === 'shared' && team.answers?.[questionId])
-}
-
 /**
- * Every answer that counts once in the distribution bars: a one-answer team's answer once
- * (when it is stored), everyone else's own answer (majority votes while the question runs).
+ * Every answer that counts once in the distribution bars: a team's stored answer once (confirmed
+ * or revealed), everyone else's own answer (votes and suggestions while the question runs).
  */
 export function countedAnswers(state: GameState, question: Question): (PlayerAnswerRecord | TeamAnswerRecord)[] {
   const records: (PlayerAnswerRecord | TeamAnswerRecord)[] = []
   const teamsCounted = new Set<string>()
   for (const player of Object.values(state.players)) {
     const team = player.teamId ? state.teams[player.teamId] : undefined
-    const teamRecord = team && answersAsOne(team) ? team.answers?.[question.id] : undefined
+    const teamRecord = team?.answers?.[question.id]
     if (team && teamRecord) {
       if (!teamsCounted.has(team.id)) records.push(teamRecord)
       teamsCounted.add(team.id)
@@ -153,9 +148,13 @@ export function countedAnswers(state: GameState, question: Question): (PlayerAns
   return records
 }
 
-/** A team's gain on a question: one answer's points for a one-answer team, else the rounded mean of its members' points. */
-export function teamGain(team: Team, memberPoints: readonly number[]): number {
+/**
+ * A team's gain on a question: one answer's points when the team answered it as one (its members
+ * all carry that answer), else the rounded mean of its members' points. Decided by the stored
+ * answer, not the current mode, which the host may change between questions.
+ */
+export function teamGain(team: Team, questionId: string, memberPoints: readonly number[]): number {
   if (memberPoints.length === 0) return 0
-  if (answersAsOne(team)) return memberPoints[0]!
+  if (team.answers?.[questionId]) return memberPoints[0]!
   return Math.round(memberPoints.reduce((sum, p) => sum + p, 0) / memberPoints.length)
 }

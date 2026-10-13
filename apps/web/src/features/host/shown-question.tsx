@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { DistributionBars } from '../../components/distribution-bars'
 import { PlayerAvatar } from '../../components/player-avatar'
 import { CorrectAnswer } from '../questions/correct-answer'
+import { TeamAnswerList } from '../results/team-answer-list'
 
 /**
  * The question the screens show between questions (its reveal, the scoreboard after it, or a
@@ -101,6 +102,7 @@ export function ShownQuestion({ host }: { host: HostSnapshot }) {
       </dl>
 
       <DistributionBars reveal={reveal} symbols={host.settings.answerSymbols} />
+      <TeamAnswerList entries={host.teamAnswers ?? []} teams={host.teams} question={question} />
 
       {missing.length > 0 && (
         <div className="flex flex-col gap-2">

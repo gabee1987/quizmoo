@@ -64,13 +64,13 @@ export function sectionSummary(settings: GameSettings, section: SettingsSection,
   return items.filter((item): item is string => Boolean(item))
 }
 
-/** Short label of the answer changes setting, or null when it is off. */
-/** How teams answer, e.g. "Majority vote" or "Majority vote, teams choose". */
+/** How teams answer: "Teams choose", or "Same for all teams: Majority vote". */
 export function teamAnswerLabel(settings: GameSettings, t: TFunction): string {
-  const mode = t(`host.create.teamAnswerOptions.${settings.teamAnswer}`)
-  return settings.teamsChoose ? t('host.create.teamAnswerChosen', { mode }) : mode
+  if (settings.teamsChoose) return t('host.create.teamsChooseOptions.choose')
+  return t('host.create.teamAnswerSame', { mode: t(`host.create.teamAnswerOptions.${settings.teamAnswer}`) })
 }
 
+/** Short label of the answer changes setting, or null when it is off. */
 export function answerChangesLabel(settings: GameSettings, t: TFunction): string | null {
   if (!settings.answerChanges) return null
   return settings.answerLockSec > 0
@@ -191,21 +191,29 @@ export function GameSettingsForm({
             <>
               <ChoiceCards
                 legend={t('host.create.teamAnswer')}
-                value={value.teamAnswer}
+                value={value.teamsChoose ? 'choose' : 'same'}
                 columns={1}
-                choices={teamAnswerModes.map((mode) => ({
-                  value: mode,
-                  label: t(`host.create.teamAnswerOptions.${mode}`),
-                  description: t(`host.create.teamAnswerOptions.${mode}Help`),
+                choices={(['choose', 'same'] as const).map((option) => ({
+                  value: option,
+                  label: t(`host.create.teamsChooseOptions.${option}`),
+                  description: t(`host.create.teamsChooseOptions.${option}Help`),
                 }))}
-                onChange={(teamAnswer) => set({ teamAnswer })}
+                // Teams that choose all start on captain decides.
+                onChange={(option) => set(option === 'choose' ? { teamsChoose: true, teamAnswer: 'captain' } : { teamsChoose: false })}
               />
-              <SwitchRow
-                label={t('host.create.teamsChoose')}
-                description={t('host.create.teamsChooseHelp')}
-                checked={value.teamsChoose}
-                onChange={(teamsChoose) => set({ teamsChoose })}
-              />
+              {!value.teamsChoose && (
+                <ChoiceCards
+                  legend={t('host.create.teamAnswerMode')}
+                  value={value.teamAnswer}
+                  columns={1}
+                  choices={teamAnswerModes.map((mode) => ({
+                    value: mode,
+                    label: t(`host.create.teamAnswerOptions.${mode}`),
+                    description: t(`host.create.teamAnswerOptions.${mode}Help`),
+                  }))}
+                  onChange={(teamAnswer) => set({ teamAnswer })}
+                />
+              )}
             </>
           )}
         </>

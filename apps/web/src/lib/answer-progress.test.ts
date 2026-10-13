@@ -25,7 +25,7 @@ describe('answerProgress', () => {
   })
 
   it('counts teams with members once a team answers as one', () => {
-    const teams = [team('a', 'shared', 2, true), team('b', 'average', 3, false), team('c', 'majority', 0, false)]
+    const teams = [team('a', 'captain', 2, true), team('b', 'average', 3, false), team('c', 'majority', 0, false)]
     expect(answerProgress(snapshot('team', teams))).toEqual({ teams: true, answered: 1, count: 2 })
   })
 })

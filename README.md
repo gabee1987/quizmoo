@@ -50,7 +50,7 @@ pnpm db:up                                   # PostgreSQL in Docker
 Copy-Item .env.example .env                  # set SESSION_SECRET
 pnpm --filter @quizmoo/server db:migrate
 $env:SEED_ADMIN_USERNAME="admin"; $env:SEED_ADMIN_PASSWORD="<at least 10 characters>"; pnpm --filter @quizmoo/server seed
-pnpm dev                                     # API on :3000, web app on http://localhost:5173
+pnpm dev                                     # API on :3000, web app on http://localhost:15173
 ```
 
 `pnpm dev:lan` does the same but prints an address phones on the same wifi can open.

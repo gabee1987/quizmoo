@@ -1,4 +1,5 @@
 import type { Answer, AnswerSymbols, PublicQuestion } from '@quizmoo/shared'
+import type { PickPlayer } from '../../components/pick-stack'
 
 export type QuestionMode = 'answer' | 'display'
 
@@ -18,4 +19,8 @@ export interface QuestionProps<Q extends PublicQuestion['type']> {
   /** The answer given before, shown selected when the player changes it. */
   initial?: Answer | null | undefined
   onSubmit?: (answer: Answer) => void
+  /** Team mode: teammates' picks per option ('true' / 'false' for true or false); options only, not typed answers. */
+  picks?: Record<string, PickPlayer[]> | undefined
+  /** Tapping a pick stack. */
+  onPicks?: (() => void) | undefined
 }

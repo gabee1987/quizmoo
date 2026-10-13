@@ -7,7 +7,7 @@ import { stagger } from '../../lib/motion'
 import type { QuestionProps } from './types'
 
 /** Toggle options, then confirm. */
-export function MultipleChoice({ question, mode, disabled, pending, large, colourful, symbols, initial, onSubmit }: QuestionProps<'multiple'>) {
+export function MultipleChoice({ question, mode, disabled, pending, large, colourful, symbols, initial, onSubmit, picks, onPicks }: QuestionProps<'multiple'>) {
   const { t } = useTranslation()
   const [selected, setSelected] = useState<string[]>(initial?.type === 'multiple' ? initial.optionIds : [])
   const toggle = (id: string) =>
@@ -27,6 +27,8 @@ export function MultipleChoice({ question, mode, disabled, pending, large, colou
             large={large ?? false}
             colourful={colourful ?? large ?? false}
             selected={selected.includes(option.id)}
+            picks={picks && (picks[option.id] ?? [])}
+            onPicks={onPicks}
             disabled={mode === 'display' || disabled}
             className="animate-pop"
             style={stagger(index, 70, 150)}

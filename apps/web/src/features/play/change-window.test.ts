@@ -32,12 +32,18 @@ describe('changeWindow', () => {
     expect(changeWindow(answered({ answerLockSec: 5 }), NOW + 15_001)).toBeNull()
   })
 
-  it('lets a shared team change its answer without answer changes, up to the end', () => {
-    const team = { mode: 'team', me: { teamId: 'red' }, teams: [{ id: 'red', answerMode: 'shared' }] } as unknown as Partial<PlayerSnapshot>
-    expect(changeWindow(answered({ answerChanges: false, answerLockSec: 5 }, team), NOW + 18_000)).toEqual({ secondsLeft: 2, paused: false })
-    expect(changeWindow(answered({ answerLockSec: 5 }, team), NOW + 18_000)).toBeNull()
-    const majority = { ...team, teams: [{ id: 'red', answerMode: 'majority' }] } as unknown as Partial<PlayerSnapshot>
-    expect(changeWindow(answered({ answerChanges: false }, majority), NOW)).toBeNull()
+  it('in captain decides opens only for the captain, once the team answer is confirmed', () => {
+    const team = (captainId: string, confirmed: boolean) =>
+      ({
+        mode: 'team',
+        me: { id: 'me', teamId: 'red' },
+        teams: [{ id: 'red', answerMode: 'captain', captainId }],
+        teamLive: { answer: confirmed ? { type: 'single', optionId: 'a' } : null, setBy: null, votes: [], waiting: [] },
+      }) as unknown as Partial<PlayerSnapshot>
+    expect(changeWindow(answered({}, team('me', true)), NOW)).toEqual({ secondsLeft: 20, paused: false })
+    expect(changeWindow(answered({}, team('me', false)), NOW)).toBeNull()
+    expect(changeWindow(answered({}, team('other', true)), NOW)).toBeNull()
+    expect(changeWindow(answered({ answerChanges: false }, team('me', true)), NOW)).toBeNull()
   })
 
   it('stands still while paused', () => {

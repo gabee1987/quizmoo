@@ -55,6 +55,7 @@ Collected while testing phases 9 to 12. Effort as above.
 - Host lobby rebuilt around the QR code, with player tiles (phase 17).
 - Players can change their answer until the time is up or a lock-in a few seconds before; the last answer counts, with its time (phase 18).
 - Teams can answer as one: majority vote or a shared answer, with captains, chosen by the host or by each team (phase 19).
+- Teams choose their mode by default; captain decides with live team picks and a majority fallback; the shared answer mode removed (phase 20).
 
 ### Open
 

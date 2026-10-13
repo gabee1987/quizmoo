@@ -26,7 +26,7 @@ Finished plans are deleted once their branch is merged: `CHANGELOG.md` records w
 | 17 | Host lobby around the QR code | `feature/host-lobby` | done |
 | 18 | [Change answers until a deadline](phase-18-change-answers.md) | `feature/change-answers` | done |
 | 19 | [Team answers: captains, majority vote, shared answer](phase-19-team-answers.md) | `feature/team-answers` | done |
-| 20 | [Teams choose, captain decides](phase-20-team-captain.md) | `feature/team-captain` | planned |
+| 20 | [Teams choose, captain decides](phase-20-team-captain.md) | `feature/team-captain` | done |
 
 ## Conventions every plan follows
 
