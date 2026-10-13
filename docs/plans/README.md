@@ -27,6 +27,9 @@ Finished plans are deleted once their branch is merged: `CHANGELOG.md` records w
 | 18 | [Change answers until a deadline](phase-18-change-answers.md) | `feature/change-answers` | done |
 | 19 | [Team answers: captains, majority vote, shared answer](phase-19-team-answers.md) | `feature/team-answers` | done |
 | 20 | [Teams choose, captain decides](phase-20-team-captain.md) | `feature/team-captain` | done |
+| 21 | [A clearly visible answer selection](phase-21-selection-visibility.md) | `fix/answer-selection` | planned |
+| 22 | [The host's own message presets](phase-22-message-presets.md) | `feature/message-presets` | planned |
+| 23 | [Flexible teams set up per game](phase-23-flexible-teams.md) | `feature/flexible-teams` | planned |
 
 ## Conventions every plan follows
 
