@@ -95,6 +95,13 @@
 - Teams that answer as one score their answer once; the projector and host count teams, the host sees each team's answer and whether it is confirmed, and the results page and CSV list the team answers.
 - Games and quizzes saved with the earlier "One shared answer" mode play as "Captain decides".
 
+### Small improvements
+- The selected answer stands out on every answer colour, palette and theme: a ring in the theme's colour around the option and a round check badge, in light and dark mode.
+- A team of one in "Captain decides" just answers: no confirmation, no captain note.
+- The end-of-game review on the phones says "Your team's answer" for team answers, and when the captain did not confirm.
+- Quizmoo can be installed as an app (home screen icon, opens like an app). The service worker keeps only the app's own files; games, the API and images always come from the server. A page a phone has opened still loads without the network and shows "Connection lost".
+- The admin's names page no longer nests a list inside a paragraph.
+
 ### Development
 - The web dev server runs on port 15173, away from the 5173+ ports other local Vite projects take.
 - CI runs typecheck, tests and build only; the end-to-end suite runs locally before each pull request.

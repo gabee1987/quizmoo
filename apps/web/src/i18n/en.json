@@ -466,7 +466,8 @@
       "you": "You",
       "useAnswer": "Use",
       "useAnswerFor": "Confirm {{name}}'s pick for the team",
-      "fallback": "Your captain did not confirm, so the team's majority counted."
+      "fallback": "Your captain did not confirm, so the team's majority counted.",
+      "teamAnswerLabel": "Your team's answer"
     }
   },
   "screen": {

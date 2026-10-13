@@ -9,7 +9,7 @@ import {
 } from '@quizmoo/shared'
 import { isNameAllowed } from './names.js'
 import { isCorrect, pointsFor } from './scoring.js'
-import { answersAsOne, captainOf, membersOf, teamAnswerNow, teamAnswered, teamGain, teamMode } from './team-answers.js'
+import { answersAsOne, captainOf, membersOf, needsConfirmation, teamAnswerNow, teamAnswered, teamGain, teamMode } from './team-answers.js'
 import {
   EngineError,
   MAX_PLAYERS,
@@ -201,7 +201,7 @@ export function submitAnswer(state: GameState, input: SubmitInput, now: number):
   if (question.id !== input.questionId) throw new EngineError('errors.questionClosed')
   const team = player.teamId ? state.teams[player.teamId] : undefined
   // Captain decides: a member's answer is a suggestion, which changes freely until the captain confirms.
-  const suggestion = team !== undefined && teamMode(team) === 'captain'
+  const suggestion = team !== undefined && needsConfirmation(state, team)
   const previous = player.answers[question.id]
   if (previous) {
     if (!state.settings.answerChanges && !suggestion) throw new EngineError('errors.alreadyAnswered')

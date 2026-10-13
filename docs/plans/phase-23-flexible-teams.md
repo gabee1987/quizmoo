@@ -45,7 +45,7 @@ Proposed (confirm or change before implementation):
   - A latecomer joins like anyone else (in team mode: an existing team, or a new one if players may create teams) and can answer the running question.
   - Earlier questions count as unanswered: 0 points, and nothing is held against the team's average.
 - **Captaincy at any time:** the captain or the host can pass it in every phase except finished, also during a question. The new captain can confirm the team's answer at once.
-- **Team of one in captain decides:** the player's own answer is the team's answer, with no confirmation step and no "captain did not confirm" note. This fixes the gap left by phase 20.
+- **Team of one in captain decides:** already done in phase 21 (its answer counts without a confirmation); player-created teams of one rely on it.
 - **Old quizzes:** saved team names are ignored by the editor. When a game is created, they prefill the new game dialog's team list once, so nothing a host typed is lost.
 
 ## Scope
@@ -60,8 +60,7 @@ In:
   - teams created on join, renamed, removed, empty-team cleanup
   - moving players
   - late join by setting
-  - `setCaptain` in every phase but finished
-  - a team of one's answer counting as confirmed.
+  - `setCaptain` in every phase but finished.
 - **Realtime:** the new host commands and join payload, validated, with i18n errors (`errors.teamNameTaken`, `errors.teamLimit`, `errors.teamNameNotAllowed`).
 - **Join page:** the team list with member counts and "New team" (name field) when the setup allows it; the latecomer's join into a running game.
 - **New game dialog:** "Who makes the teams", the team list, "Players can join late". The quiz editor's settings lose the team names.
@@ -93,7 +92,7 @@ apps/web/e2e/flexible-teams.e2e.ts (new), team-answers.e2e.ts
 
 1. **Settings and schemas.** New fields, commands, payloads, limits; quiz settings without team names, old ones read. Check: schema tests (defaults, old quizzes, limits), typecheck.
 2. **Engine.**
-   - Create on join, rename, remove, cleanup, move, late join, captain at any time, team of one.
+   - Create on join, rename, remove, cleanup, move, late join, captain at any time.
    - Check: engine tests, covering:
      - the 31st team refused
      - duplicate and filtered names
@@ -102,7 +101,6 @@ apps/web/e2e/flexible-teams.e2e.ts (new), team-answers.e2e.ts
      - a move during a question refused
      - a late join with late joining off and on
      - a captain passed mid-question who then confirms
-     - a team of one scoring its answer without confirmation and closing early.
 3. **Realtime.** Commands and join payload. Check: realtime tests (create, join, move, late join, errors).
 4. **New game dialog and editor.** Check: screenshots; a game created from an old quiz has its team names.
 5. **Join page.** Team list and "New team", late join. Check: phone screenshots in both colour modes, 30 teams (list scrolls, "New team" gone).

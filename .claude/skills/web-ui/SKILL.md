@@ -24,6 +24,10 @@ Topic skills: `game-screens` (phone, projector, host control and results layouts
 
 `/host/*` routes have a layout route that loads `/api/auth/me` and redirects to `/login` on 401. `/play/$pin` and `/screen/$pin` need no login.
 
+## Installable app
+
+`public/manifest.webmanifest`, the icons in `public/icons/` (rendered from `logo.svg`) and `public/sw.js`, registered in `main.tsx` in production builds only. The worker caches hashed `/assets/*` as they load and other app files network-first; it must never answer `/api/*` or `/socket.io/*`. Bump its `CACHE` name when its caching rules change.
+
 ## Data
 
 - REST data (quizzes, results, me) goes through TanStack Query with `queryKey` arrays like `['quizzes']`, `['quiz', id]`. Mutations invalidate the keys they affect. The API client is one `apiFetch<T>(path, init)` helper in `src/lib/api.ts` that throws `ApiError { status, code }` where `code` is the i18n key from the server.

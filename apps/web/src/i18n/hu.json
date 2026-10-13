@@ -466,7 +466,8 @@
       "you": "Te",
       "useAnswer": "Ez legyen",
       "useAnswerFor": "{{name}} tippje legyen a csapat válasza",
-      "fallback": "A kapitány nem véglegesített, ezért a csapat többségi válasza számított."
+      "fallback": "A kapitány nem véglegesített, ezért a csapat többségi válasza számított.",
+      "teamAnswerLabel": "A csapatod válasza"
     }
   },
   "screen": {

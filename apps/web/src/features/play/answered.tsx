@@ -9,7 +9,7 @@ import { CheckIcon } from '../../components/icons'
 import { WaitingDots } from '../../components/waiting-dots'
 import { stagger } from '../../lib/motion'
 import { formatAnswer } from '../questions/format-answer'
-import { changeWindow, myTeamMode } from './change-window'
+import { captainDecides, changeWindow, myTeamMode, myTeamSize } from './change-window'
 import { TeamPicksPanel } from './team-picks-panel'
 
 export function Answered({
@@ -24,7 +24,9 @@ export function Answered({
   const { t, i18n } = useTranslation()
   const [picksOpen, setPicksOpen] = useState(true)
   const teamMode = myTeamMode(snapshot)
-  const live = snapshot.teamLive
+  const decides = captainDecides(snapshot)
+  // A team of one has nobody to show picks to.
+  const live = myTeamSize(snapshot) > 1 ? snapshot.teamLive : null
   // Ticks only while the answer can change. Server time, like the timer.
   const now = useNow(snapshot.settings.answerChanges) + clockOffset
   const change = changeWindow(snapshot, now)
@@ -37,9 +39,9 @@ export function Answered({
         <CheckIcon className="size-16" drawn />
       </span>
       <h1 className="animate-fade-up text-3xl font-black" style={stagger(1, 0, 200)}>
-        {teamMode === 'captain' ? t('play.team.confirmed') : teamMode === 'majority' ? t('play.team.voteSent') : t('play.answerSent')}
+        {decides ? t('play.team.confirmed') : teamMode === 'majority' ? t('play.team.voteSent') : t('play.answerSent')}
       </h1>
-      {teamMode === 'captain' && live?.answer && (
+      {decides && live?.answer && (
         <p className="animate-fade-up text-lg font-bold wrap-break-word" style={stagger(1, 0, 260)}>
           {confirmedBy?.id === snapshot.me.id
             ? t('play.team.confirmedByYou', { answer: formatAnswer(live.answer, snapshot.question, t, i18n.language) })

@@ -292,6 +292,10 @@ export interface PlayerQuestionResult {
   answer: Answer | null
   correct: boolean | null
   points: number
+  /** The answer was the player's team's one answer (captain decides or majority vote, more than one member). */
+  teamAnswer: boolean
+  /** That team answer was the majority because the captain did not confirm. */
+  fallback: boolean
 }
 
 // ---- HTTP payloads about a running game ------------------------------------

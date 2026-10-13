@@ -33,17 +33,19 @@ describe('changeWindow', () => {
   })
 
   it('in captain decides opens only for the captain, once the team answer is confirmed', () => {
-    const team = (captainId: string, confirmed: boolean) =>
+    const team = (captainId: string, confirmed: boolean, memberCount = 3) =>
       ({
         mode: 'team',
         me: { id: 'me', teamId: 'red' },
-        teams: [{ id: 'red', answerMode: 'captain', captainId }],
+        teams: [{ id: 'red', answerMode: 'captain', captainId, memberCount }],
         teamLive: { answer: confirmed ? { type: 'single', optionId: 'a' } : null, setBy: null, votes: [], waiting: [] },
       }) as unknown as Partial<PlayerSnapshot>
     expect(changeWindow(answered({}, team('me', true)), NOW)).toEqual({ secondsLeft: 20, paused: false })
     expect(changeWindow(answered({}, team('me', false)), NOW)).toBeNull()
     expect(changeWindow(answered({}, team('other', true)), NOW)).toBeNull()
     expect(changeWindow(answered({ answerChanges: false }, team('me', true)), NOW)).toBeNull()
+    // A team of one answers like a classic player: its own answer opens the window.
+    expect(changeWindow(answered({}, team('me', false, 1)), NOW)).toEqual({ secondsLeft: 20, paused: false })
   })
 
   it('stands still while paused', () => {
