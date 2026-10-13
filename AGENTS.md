@@ -173,7 +173,7 @@ Quizmoo: a browser-based, mobile-first live quiz (Kahoot-like) for team events, 
 - Lint: not configured yet
 - Typecheck: `pnpm typecheck`
 - Migrate and seed: `pnpm --filter @quizmoo/server db:migrate`, then `SEED_ADMIN_USERNAME=admin SEED_ADMIN_PASSWORD=<10+ chars> pnpm --filter @quizmoo/server seed`
-- Run locally: `pnpm db:up` (Postgres in Docker), copy `.env.example` to `.env`, then `pnpm dev` (server on :3000, Vite on :5173 proxying `/api` and `/socket.io`)
+- Run locally: `pnpm db:up` (Postgres in Docker), copy `.env.example` to `.env`, then `pnpm dev` (server on :3000, Vite on :15173 proxying `/api` and `/socket.io`)
 - Test with phones on the same wifi: `pnpm dev:lan` (detects the LAN IP and a free port, sets `APP_ORIGIN` so QR codes point there, prints the URLs)
 
 Prefer single-file or single-test runs during iteration. Full suites are for the final verification pass.

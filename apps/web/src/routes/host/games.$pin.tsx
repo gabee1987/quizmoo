@@ -17,6 +17,7 @@ import { PlayAgainButton } from '../../features/host/play-again-button'
 import { PlayerPanel } from '../../features/host/player-panel'
 import { ReviewPanel } from '../../features/host/review-panel'
 import { ShownQuestion } from '../../features/host/shown-question'
+import { TeamModesPanel } from '../../features/host/team-modes-panel'
 import { RoundTripBadge } from '../../features/host/round-trip-badge'
 import { settingsLine } from '../../features/host/settings-line'
 import { RankList } from '../../features/play/scoreboard'
@@ -102,6 +103,7 @@ function HostGamePage() {
         )}
       </div>
       <div className="flex min-w-0 flex-col gap-6">
+        <TeamModesPanel host={host} onTeamMode={(mode, teamId) => void send({ type: 'teamMode', mode, teamId })} />
         <PlayerPanel host={host} clockOffset={clockOffset} onKick={(playerId) => void send({ type: 'kick', playerId })} />
         <ReviewPanel host={host} onShowQuestion={(index) => void send({ type: 'showQuestion', index })} />
       </div>

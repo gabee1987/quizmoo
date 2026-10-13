@@ -53,6 +53,18 @@ export function LiveQuestion({ host, clockOffset }: { host: HostSnapshot; clockO
             const team = host.teams.find((x) => x.id === entry.teamId)
             if (!team) return null
             const setBy = host.players.find((p) => p.id === entry.setBy)
+            // Captain decides: "Confirmed", or how many have suggested so far (the answer shown is the fallback).
+            const suggested = host.currentAnswers?.filter((a) => a.teamId === team.id).length ?? 0
+            const status =
+              team.answerMode === 'captain'
+                ? team.answered
+                  ? t('host.game.teamConfirmed')
+                  : suggested > 0
+                    ? t('host.game.teamSuggesting', { picked: suggested, count: team.memberCount })
+                    : null
+                : team.answered
+                  ? t('host.game.teamDone')
+                  : null
             return (
               <li key={entry.teamId} className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5 rounded-xl bg-muted/60 px-3 py-2">
                 <span className="font-bold">{team.name}</span>
@@ -61,7 +73,7 @@ export function LiveQuestion({ host, clockOffset }: { host: HostSnapshot; clockO
                   {entry.answer ? formatAnswer(entry.answer, live?.question ?? question, t, i18n.language) : '…'}
                   {setBy && <span className="text-xs text-muted-foreground"> · {setBy.name}</span>}
                 </span>
-                {team.answered && <Badge variant="secondary">{t('host.game.teamDone')}</Badge>}
+                {status && <Badge variant="secondary">{status}</Badge>}
               </li>
             )
           })}

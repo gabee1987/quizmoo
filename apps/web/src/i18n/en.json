@@ -170,7 +170,12 @@
       "teamAnswers": "Team answers",
       "teamDone": "Done",
       "teamsAnswered_one": "{{answered}} of {{count}} teams answered",
-      "teamsAnswered_other": "{{answered}} of {{count}} teams answered"
+      "teamsAnswered_other": "{{answered}} of {{count}} teams answered",
+      "teamModes": "Team modes",
+      "teamModesHelp": "Changes apply from the next question.",
+      "teamConfirmed": "Confirmed",
+      "teamSuggesting": "Suggesting ({{picked}} of {{count}})",
+      "teamFallback": "Majority, not confirmed"
     },
     "shown": {
       "onScreen": {
@@ -305,16 +310,21 @@
       },
       "teamAnswer": "How teams answer",
       "teamAnswerOptions": {
-        "average": "Everyone answers",
-        "averageHelp": "Each member answers; the team gets the average of their points.",
+        "captain": "Captain decides",
+        "captainHelp": "Everyone suggests an answer; the captain sees the team's picks and confirms the one that counts.",
         "majority": "Majority vote",
         "majorityHelp": "Everyone votes; the answer most members gave counts for the team.",
-        "shared": "One shared answer",
-        "sharedHelp": "Anyone in the team can set or change the team's one answer; the last one counts."
+        "average": "Everyone counts",
+        "averageHelp": "Each member answers; the team gets the average of their points."
       },
-      "teamAnswerChosen": "{{mode}}, teams choose",
-      "teamsChoose": "Teams choose their mode",
-      "teamsChooseHelp": "Each team's captain can pick in the lobby how the team answers."
+      "teamsChooseOptions": {
+        "choose": "Teams choose",
+        "chooseHelp": "Each team's captain picks the mode in the lobby. Teams start on Captain decides.",
+        "same": "Same for all teams",
+        "sameHelp": "You pick the mode; teams can't change it."
+      },
+      "teamAnswerMode": "Mode for every team",
+      "teamAnswerSame": "Same for all teams: {{mode}}"
     },
     "newQuiz": "New quiz",
     "edit": "Edit",
@@ -438,16 +448,25 @@
       "youLead": "You're the captain",
       "chooseMode": "How should your team answer?",
       "passCaptaincy": "Pass the captaincy",
-      "answerSet": "Your team has an answer!",
       "voteSent": "Vote sent!",
-      "pickedBy": "{{name}} picked: {{answer}}",
-      "pickedByYou": "You picked: {{answer}}",
-      "votes": "Your team's votes",
-      "voteCount_one": "{{count}} vote",
-      "voteCount_other": "{{count}} votes",
       "teamsAnswered_one": "{{answered}} of {{count}} teams answered",
       "teamsAnswered_other": "{{answered}} of {{count}} teams answered",
-      "teamAnswered": "Your team answered: {{answer}}"
+      "teamAnswered": "Your team answered: {{answer}}",
+      "confirm": "Confirm for the team",
+      "confirmed": "Team answer confirmed!",
+      "confirmedBy": "{{name}} confirmed: {{answer}}",
+      "confirmedByYou": "You confirmed: {{answer}}",
+      "waitingCaptain": "Waiting for your captain…",
+      "suggest": "Pick an answer; your captain decides.",
+      "youDecide": "You decide: pick the team's answer and confirm it.",
+      "picks": "Team picks",
+      "picksCount": "Team picks ({{picked}}/{{count}})",
+      "pickedBy": "Picked by {{names}}",
+      "thinking": "thinking…",
+      "you": "You",
+      "useAnswer": "Use",
+      "useAnswerFor": "Confirm {{name}}'s pick for the team",
+      "fallback": "Your captain did not confirm, so the team's majority counted."
     }
   },
   "screen": {

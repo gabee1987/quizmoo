@@ -1,5 +1,5 @@
 import type { Answer, PlayerSnapshot } from '@quizmoo/shared'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { FormAlert } from '@/components/form-alert'
@@ -8,10 +8,12 @@ import { Button } from '@/components/ui/button'
 import { useNow } from '@/lib/clock'
 import { Timer } from '../../components/timer'
 import { stagger } from '../../lib/motion'
-import { sendAnswer } from '../../lib/socket'
+import { emitAck, sendAnswer } from '../../lib/socket'
 import { QuestionInput } from '../questions/question-input'
 import { Answered } from './answered'
-import { changeWindow } from './change-window'
+import { changeWindow, confirmsForTeam, myTeamMode } from './change-window'
+import { TeamPicksPanel } from './team-picks-panel'
+import { picksByOption } from './team-picks'
 
 /** Question phase. Keyed by question id by the caller, so local state resets per question. */
 export function Question({ snapshot, clockOffset }: { snapshot: PlayerSnapshot; clockOffset: number }) {
@@ -21,17 +23,27 @@ export function Question({ snapshot, clockOffset }: { snapshot: PlayerSnapshot; 
   const [error, setError] = useState<string | null>(null)
   // Showing the question again to change the answer; falls back to the answered view when the lock-in starts.
   const [changing, setChanging] = useState(false)
+  const [picksOpen, setPicksOpen] = useState(false)
+  const picksRef = useRef<HTMLDetailsElement>(null)
   const now = useNow(changing) + clockOffset
   const question = snapshot.question
   const paused = snapshot.pausedAt !== null
+  const teamMode = myTeamMode(snapshot)
+  const live = snapshot.teamLive
+  const captain = confirmsForTeam(snapshot)
+  // Captain decides: the team is done once the captain confirms; members' picks are suggestions until then.
+  const confirmed = teamMode === 'captain' && Boolean(live?.answer)
+  const done = teamMode === 'captain' ? confirmed : snapshot.myAnswer !== null
 
   if (!question) return null
-  if (snapshot.myAnswer && !(changing && changeWindow(snapshot, now))) {
+  if (done && !(changing && changeWindow(snapshot, now))) {
     return <Answered snapshot={snapshot} clockOffset={clockOffset} onChange={() => setChanging(true)} />
   }
 
   async function submit(answer: Answer) {
     if (!question) return
+    // The captain changing a confirmed answer confirms the new one at once.
+    if (captain && confirmed) return confirm(answer)
     setPending(true)
     setError(null)
     // Stays pending through a reconnect and one retry.
@@ -39,7 +51,7 @@ export function Question({ snapshot, clockOffset }: { snapshot: PlayerSnapshot; 
     if (!('error' in res)) {
       setChanging(false)
     } else if (res.error === 'errors.answerLocked') {
-      // The previous answer stands; back to the answered view.
+      // The previous answer stands (or the captain has confirmed meanwhile); back to the answered view.
       toast.error(t(res.error), { id: res.error })
       setChanging(false)
     } else {
@@ -50,6 +62,31 @@ export function Question({ snapshot, clockOffset }: { snapshot: PlayerSnapshot; 
     // On success the next snapshot carries myAnswer and switches to the answered view (a changed answer at once).
     setPending(false)
   }
+
+  async function confirm(answer: Answer) {
+    if (!question) return
+    setPending(true)
+    const res = await emitAck('player:confirmTeamAnswer', { questionId: question.id, answer })
+    if ('error' in res) toast.error(t(res.error), { id: res.error })
+    else setChanging(false)
+    setPending(false)
+  }
+
+  function showPicks() {
+    setPicksOpen(true)
+    // The panel sits below the options; bring it up on a small screen.
+    requestAnimationFrame(() => picksRef.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' }))
+  }
+
+  const players = (ids: string[]) =>
+    ids.flatMap((id) => {
+      const player = snapshot.players.find((p) => p.id === id)
+      return player ? [{ id: player.id, name: player.name, avatar: player.avatar }] : []
+    })
+  const picks = live ? Object.fromEntries(Object.entries(picksByOption(live, snapshot.me.id)).map(([key, ids]) => [key, players(ids)])) : undefined
+  const teamNote =
+    teamMode !== 'captain' ? null : captain ? t('play.team.youDecide') : snapshot.myAnswer ? t('play.team.waitingCaptain') : t('play.team.suggest')
+  const disabled = pending || closed || paused
 
   return (
     <div className="flex flex-1 flex-col gap-4">
@@ -84,23 +121,47 @@ export function Question({ snapshot, clockOffset }: { snapshot: PlayerSnapshot; 
         </div>
       )}
       {error && <FormAlert>{t(error)}</FormAlert>}
+      {teamNote && (
+        <p role="status" className="text-center text-sm font-bold">
+          {teamNote}
+        </p>
+      )}
       <div className="flex flex-2 flex-col">
         <QuestionInput
           question={question}
           mode="answer"
-          disabled={pending || closed || paused}
+          disabled={disabled}
           pending={pending}
           colourful={snapshot.settings.answerStyle === 'colourful'}
           symbols={snapshot.settings.answerSymbols}
-          initial={snapshot.myAnswer}
+          initial={confirmed ? live?.answer : snapshot.myAnswer}
           onSubmit={(a) => void submit(a)}
+          picks={picks}
+          onPicks={showPicks}
         />
-        {snapshot.myAnswer && (
+        {/* The captain confirms their own pick; a teammate's is confirmed from the panel. */}
+        {captain && !confirmed && snapshot.myAnswer && (
+          <Button size="lg" className="mt-3" disabled={disabled} onClick={() => void confirm(snapshot.myAnswer!)}>
+            {t('play.team.confirm')}
+          </Button>
+        )}
+        {changing && (
           <Button variant="ghost" className="mt-3" disabled={pending} onClick={() => setChanging(false)}>
             {t('play.keepAnswer')}
           </Button>
         )}
       </div>
+      {live && (
+        <TeamPicksPanel
+          ref={picksRef}
+          snapshot={snapshot}
+          live={live}
+          open={picksOpen}
+          onOpenChange={setPicksOpen}
+          onUse={captain ? (answer) => void confirm(answer) : undefined}
+          disabled={disabled}
+        />
+      )}
     </div>
   )
 }

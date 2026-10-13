@@ -30,6 +30,16 @@ describe('gameSettingsSchema', () => {
     expect(gameSettingsSchema.parse({}).answerStyle).toBe('colourful')
   })
 
+  it('lets teams choose by default, every team starting on captain decides', () => {
+    expect(gameSettingsSchema.parse({})).toMatchObject({ teamsChoose: true, teamAnswer: 'captain' })
+  })
+
+  it('plays the removed shared answer as captain decides and keeps the other saved modes', () => {
+    expect(gameSettingsSchema.parse({ teamAnswer: 'shared', teamsChoose: false }).teamAnswer).toBe('captain')
+    expect(gameSettingsSchema.parse({ teamAnswer: 'average', teamsChoose: false })).toMatchObject({ teamAnswer: 'average', teamsChoose: false })
+    expect(gameSettingsSchema.safeParse({ teamAnswer: 'loudest' }).success).toBe(false)
+  })
+
   it('rejects an unknown theme, palette or symbol set', () => {
     expect(gameSettingsSchema.safeParse({ theme: 'lava' }).success).toBe(false)
     expect(gameSettingsSchema.safeParse({ answerPalette: 'rainbow' }).success).toBe(false)

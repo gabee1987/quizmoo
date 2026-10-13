@@ -38,7 +38,7 @@ if (!ip) {
   console.error('No LAN address found. Connect to wifi or set LAN_IP, e.g. $env:LAN_IP="192.168.1.50".')
   process.exit(1)
 }
-const webPort = await freePort(Number(process.env.WEB_PORT ?? 5173))
+const webPort = await freePort(Number(process.env.WEB_PORT ?? 15173))
 const origin = `http://${ip}:${webPort}`
 
 console.log(`

@@ -29,7 +29,7 @@ runs, in order, `pnpm typecheck`, `pnpm test`, `pnpm build`. All three must exit
 | Build web + server bundles | `pnpm build` |
 | Start Postgres (Docker) | `pnpm db:up` |
 | Apply migrations | `pnpm --filter @quizmoo/server db:migrate` |
-| Dev servers (API :3000, Vite :5173) | `pnpm dev` |
+| Dev servers (API :3000, Vite :15173) | `pnpm dev` |
 
 Use single-file runs while iterating. The full `pnpm verify` is for the final pass.
 

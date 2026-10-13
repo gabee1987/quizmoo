@@ -100,8 +100,8 @@ describe('toCsv', () => {
   it('adds the answers of teams that answer as one, after the players', () => {
     const results = toResults(finishedGame({ mode: 'team', teamNames: ['Red', 'Blue'], teamAnswer: 'majority' }))
     expect(results.questions[0]!.teamAnswers).toEqual([
-      { teamId: 'team-1', answer: { type: 'single', optionId: 'a' }, setBy: null, correct: true, points: 1000 },
-      { teamId: 'team-2', answer: { type: 'single', optionId: 'b' }, setBy: null, correct: false, points: 0 },
+      { teamId: 'team-1', answer: { type: 'single', optionId: 'a' }, setBy: null, fallback: false, correct: true, points: 1000 },
+      { teamId: 'team-2', answer: { type: 'single', optionId: 'b' }, setBy: null, fallback: false, correct: false, points: 0 },
     ])
     // Q2: Red's 1:1 tie goes to Anna's earlier, wrong vote; Blue did not vote.
     expect(results.questions[1]!.teamAnswers.map((a) => a.answer)).toEqual([{ type: 'multiple', optionIds: ['a'] }, null])

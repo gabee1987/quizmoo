@@ -9,7 +9,8 @@ export default defineConfig({
   // `@/` is the shadcn/ui convention for imports from src.
   resolve: { alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) } },
   server: {
-    port: 5173,
+    // Well above 5173+, which other local Vite projects take first.
+    port: 15173,
     // In development the API and socket live on the Fastify server.
     proxy: {
       '/api': 'http://localhost:3000',

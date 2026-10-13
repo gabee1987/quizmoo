@@ -56,7 +56,8 @@ export function TeamCard({ snapshot, team }: { snapshot: PlayerSnapshot; team: T
           {t('play.team.youLead')}
         </p>
       )}
-      {isCaptain && snapshot.settings.teamsChoose && (
+      {/* A team of one has nobody to decide with: it plays the mode it starts with. */}
+      {isCaptain && snapshot.settings.teamsChoose && members.length > 1 && (
         <ChoiceCards
           legend={t('play.team.chooseMode')}
           value={team.answerMode}

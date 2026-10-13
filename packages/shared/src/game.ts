@@ -96,33 +96,40 @@ export interface TeamPublic {
   answerMode: TeamAnswerMode
   /** Null while the team has no members. */
   captainId: string | null
-  /** While a question runs: the team has its answer (shared: set; otherwise every connected member answered). */
+  /** While a question runs: the team has its answer (captain decides: confirmed; otherwise every connected member answered). */
   answered: boolean
 }
 
-/** A one-answer team's answer to a question (majority and shared modes). */
+/** A one-answer team's answer to a question (captain decides and majority vote). */
 export interface TeamAnswerPublic {
   teamId: string
   /** Null when the team gave no answer. */
   answer: Answer | null
-  /** Who set it in shared mode; null for a majority answer. */
+  /** The captain who confirmed it; null for a majority answer. */
   setBy: string | null
+  /**
+   * Captain decides without a confirmation: the majority of the suggestions counted (while the
+   * question runs: what it would be now).
+   */
+  fallback: boolean
   /** Null while the question runs, for polls and for ungraded text. */
   correct: boolean | null
   points: number
 }
 
 /**
- * The player's own team's answer while a question runs (majority and shared modes). Players never
- * receive another team's.
+ * The player's own team's picks while a question runs (team mode). Players never receive another
+ * team's.
  */
 export interface TeamLive {
-  /** Shared mode: the team's answer; majority mode: what the votes so far give. */
+  /** Captain decides: the confirmed answer, null until then; majority vote: what the votes so far give; otherwise null. */
   answer: Answer | null
-  /** Shared mode: who set it last. */
+  /** Captain decides: the captain who confirmed it. */
   setBy: string | null
-  /** Majority mode: the votes so far by answer, most first, with who gave them. Empty in shared mode. */
+  /** The members' picks so far by answer, most first, with who gave them. */
   votes: { answer: Answer; playerIds: string[] }[]
+  /** Members without a pick yet, in join order. */
+  waiting: string[]
 }
 
 /** Omit applied to each member of a union separately (plain Omit keeps only the shared keys). */
@@ -254,7 +261,7 @@ export interface HostSnapshot extends GameSnapshotBase {
   playersWaiting: boolean
   /**
    * Host room only, team mode: the answers of one-answer teams to the question on the screens
-   * (while it runs, the shared answer or the majority so far). Null on the public screen.
+   * (while it runs, the confirmed answer or the majority so far). Null on the public screen.
    */
   teamAnswers: TeamAnswerPublic[] | null
 }
@@ -262,10 +269,12 @@ export interface HostSnapshot extends GameSnapshotBase {
 /** What a player's phone receives. */
 export interface PlayerSnapshot extends GameSnapshotBase {
   me: PlayerPublic
-  /** Answer the player submitted for the current question, if any (in shared mode the team's answer). */
+  /** Answer the player submitted for the current question, if any (a team suggestion or vote while it runs). */
   myAnswer: Answer | null
-  /** The player's team's answer while a question runs, in majority and shared modes; otherwise null. */
+  /** The player's team's picks while a question runs, in team mode; otherwise null. */
   teamLive: TeamLive | null
+  /** The revealed question's team answer was the majority because the captain did not confirm. */
+  teamFallback: boolean
   /** Points earned on the last revealed question (streak bonus included). */
   lastPoints: number | null
   /** The streak bonus within `lastPoints`; null outside a reveal. */
@@ -317,7 +326,7 @@ export interface ResultQuestion extends RevealInfo {
   index: number
   /** Mean answer time in ms over everyone who answered; null when nobody did. */
   averageTimeMs: number | null
-  /** The answers of one-answer teams (majority and shared modes); empty otherwise. */
+  /** The answers of one-answer teams (captain decides and majority vote); empty otherwise. */
   teamAnswers: TeamAnswerPublic[]
 }
 

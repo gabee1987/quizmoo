@@ -2,7 +2,7 @@ import { defineConfig } from '@playwright/test'
 
 /**
  * End-to-end tests against a running app: the Docker image or `node apps/server/dist/index.js`
- * (http://localhost:3000, the default), or `pnpm dev` (E2E_BASE_URL=http://localhost:5173).
+ * (http://localhost:3000, the default), or `pnpm dev` (E2E_BASE_URL=http://localhost:15173).
  * The host account comes from E2E_USERNAME / E2E_PASSWORD.
  *
  * Locally the installed Chrome is used (no browser download); CI sets E2E_CHANNEL=chromium

@@ -25,6 +25,7 @@ It uses the dev database, which is the user's data (see `database`).
 - Each script creates its own quiz and games with a fixed prefix (e.g. "Shots p16") and deletes every quiz and game with that prefix in a `finally` block, also after a failure.
 - Phone shots at 390 × 844, laptop at 1440 × 900, projector at 1920 × 1080; take both colour modes when colours changed. Assert the claim when there is one (e.g. "no scroll": `scrollHeight <= innerHeight`), then look at the picture.
 - Small details (borders, joins, 1–2 px overlaps) are checked at `deviceScaleFactor` 1, 1.25 and 1.5 as well, enlarged with nearest-neighbour scaling: a 3× render hides 1 px rounding gaps that the user's Windows laptop shows. When the user sends a screenshot that disagrees with yours, enlarge theirs first and compare before changing anything.
+- Wait 1.5–2 s after a phase change before a screenshot: entrance animations and count-ups are otherwise caught half-way (faded cards, "+0 points"); a `fullPage` shot right after a change is the worst case.
 - Selectors: `getByRole(..., { name, exact: true })`. Loose names match more than meant ("Pear" also matched "Appearance").
 - Write scripts with the Write tool, not shell heredocs: backticks in a quoted `node -e` string get eaten, `cat > file` can hang the shell, and `\r\n` inside a heredoc'd Python string lands in the file as a real line break. Python on Windows writes `\r\n` in text mode: open files with `newline=''` when a script must touch them.
 
@@ -50,4 +51,4 @@ A failed run can leave "E2E" quizzes and games behind; delete them before rerunn
 
 - Edit source files with the Edit/Write tools while `dev:lan` runs, never `sed -i` or `cat >` (see AGENTS.md learnings).
 - After server edits check that the API on :3000 restarted after the last edit; after `styles.css` changes check that Vite serves the new classes (`curl -s localhost:<vite port>/src/styles.css | grep <class>`). If not, tell the user to restart `dev:lan`.
-- Port 5173 can belong to another of the user's projects; read the port `dev:lan` printed.
+- The web dev port is 15173 (5173+ belong to the user's other Vite projects); `dev:lan` moves up if it is taken, so read the port it printed.

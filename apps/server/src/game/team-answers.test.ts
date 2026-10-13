@@ -2,6 +2,7 @@ import type { Answer, GameSettings, Question } from '@quizmoo/shared'
 import { describe, expect, it } from 'vitest'
 import {
   allAnswered,
+  confirmTeamAnswer,
   createGame,
   disconnectPlayer,
   endQuestion,
@@ -12,6 +13,7 @@ import {
   reconnectPlayer,
   setCaptain,
   setTeamMode,
+  showScoreboard,
   skipQuestion,
   startGame,
   submitAnswer,
@@ -36,6 +38,11 @@ function teamGame(settings: Partial<GameSettings> = {}, quiz: GameQuiz = fixture
 function answer(state: GameState, playerId: string, value: Answer, at: number): GameState {
   const question = state.quiz.questions[state.questionIndex]!
   return submitAnswer(state, { playerId, questionId: question.id, answer: value }, at)
+}
+
+function confirm(state: GameState, playerId: string, value: Answer, at: number): GameState {
+  const question = state.quiz.questions[state.questionIndex]!
+  return confirmTeamAnswer(state, { playerId, questionId: question.id, answer: value }, at)
 }
 
 function expectCode(fn: () => unknown, code: string) {
@@ -144,69 +151,141 @@ describe('team answer modes', () => {
   })
 
   it('lets the host set one team or every team in the lobby', () => {
-    let state = setTeamMode(teamGame(), { mode: 'shared' })
-    expect(Object.values(state.teams).map(teamMode)).toEqual(['shared', 'shared'])
+    let state = setTeamMode(teamGame(), { mode: 'captain' })
+    expect(Object.values(state.teams).map(teamMode)).toEqual(['captain', 'captain'])
     state = setTeamMode(state, { teamId: 'team-2', mode: 'majority' })
-    expect(Object.values(state.teams).map(teamMode)).toEqual(['shared', 'majority'])
-    expectCode(() => setTeamMode(state, { teamId: 'team-9', mode: 'shared' }), 'errors.unknownTeam')
+    expect(Object.values(state.teams).map(teamMode)).toEqual(['captain', 'majority'])
+    expectCode(() => setTeamMode(state, { teamId: 'team-9', mode: 'captain' }), 'errors.unknownTeam')
   })
 
   it('lets only a captain choose, and only when teams may choose', () => {
-    expectCode(() => setTeamMode(teamGame(), { mode: 'shared', byPlayerId: 'p1' }), 'errors.invalidTransition')
+    expectCode(() => setTeamMode(teamGame(), { mode: 'captain', byPlayerId: 'p1' }), 'errors.invalidTransition')
     const state = teamGame({ teamsChoose: true })
-    expectCode(() => setTeamMode(state, { mode: 'shared', byPlayerId: 'p2' }), 'errors.notCaptain')
-    const chosen = setTeamMode(state, { mode: 'shared', byPlayerId: 'p1' })
-    expect(Object.values(chosen.teams).map(teamMode)).toEqual(['shared', 'average'])
+    expectCode(() => setTeamMode(state, { mode: 'captain', byPlayerId: 'p2' }), 'errors.notCaptain')
+    const chosen = setTeamMode(state, { mode: 'captain', byPlayerId: 'p1' })
+    expect(Object.values(chosen.teams).map(teamMode)).toEqual(['captain', 'average'])
   })
 
-  it('locks the modes when the game starts', () => {
-    expectCode(() => setTeamMode(startGame(teamGame(), T0), { mode: 'shared' }), 'errors.gameAlreadyStarted')
-  })
-})
-
-describe('shared answer', () => {
-  const shared = () => startGame(teamGame({ teamAnswer: 'shared' }), T0)
-
-  it('keeps one team answer that any member sets and changes, last change counting', () => {
-    let state = answer(shared(), 'p1', B, T0 + 2000)
-    state = answer(state, 'p2', A, T0 + 5000)
-    expect(state.teams['team-1']!.answers!['q-single']).toMatchObject({ answer: A, byPlayerId: 'p2', timeMs: 5000 })
-    expect(state.players.p1!.answers['q-single']).toBeUndefined()
-    state = endQuestion(state)
-    // The change's time: 875, scored once for the team and copied to every member.
-    expect(state.teams['team-1']!.score).toBe(875)
-    expect(['p1', 'p2', 'p3'].map((id) => state.players[id]!.answers['q-single']!.points)).toEqual([875, 875, 875])
-    expect(state.teams['team-1']!.answers!['q-single']).toMatchObject({ points: 875, correct: true })
-    expect(state.teams['team-2']!.score).toBe(0)
+  it('stops teams choosing once the game starts', () => {
+    const started = startGame(teamGame({ teamsChoose: true }), T0)
+    expectCode(() => setTeamMode(started, { mode: 'majority', byPlayerId: 'p1' }), 'errors.gameAlreadyStarted')
   })
 
-  it('takes the same answer again as a no-op', () => {
-    const state = answer(shared(), 'p1', A, T0 + 2000)
-    expect(answer(state, 'p2', A, T0 + 4000)).toBe(state)
+  it('lets the host change a mode between questions, not during one, effective from the next question', () => {
+    let state = startGame(teamGame({ teamAnswer: 'majority' }), T0)
+    expectCode(() => setTeamMode(state, { teamId: 'team-1', mode: 'average' }), 'errors.invalidTransition')
+    // A 1:1 tie goes to the first vote: A at 5 s, 875 for the team.
+    state = endQuestion(answer(answer(state, 'p1', A, T0 + 5000), 'p2', B, T0 + 6000))
+    state = showScoreboard(state)
+    state = setTeamMode(state, { teamId: 'team-1', mode: 'average' })
+    expect(teamMode(state.teams['team-1']!)).toBe('average')
+    // The revealed question keeps the team's answer.
+    expect(state.teams['team-1']!.answers!['q-single']!.answer).toEqual(A)
+    state = next(state, T0 + 31_000)
+    state = endQuestion(answer(state, 'p1', { type: 'multiple', optionIds: ['a', 'c'] }, T0 + 31_000))
+    expect(state.teams['team-1']!.answers!['q-multiple']).toBeUndefined()
+    expect(state.teams['team-1']!.score).toBe(875 + Math.round(1000 / 3))
   })
 
-  it('stops changes at the lock-in when answer changes are on, but takes a first answer', () => {
-    let state = startGame(teamGame({ teamAnswer: 'shared', answerChanges: true, answerLockSec: 5 }), T0)
-    state = answer(state, 'p1', B, T0 + 2000)
-    expectCode(() => answer(state, 'p2', A, T0 + 15_001), 'errors.answerLocked')
-    expect(answer(state, 'p4', A, T0 + 19_000).teams['team-2']!.answers!['q-single']!.answer).toEqual(A)
-  })
-
-  it('scores the team answer once also when the host grades it', () => {
+  it('keeps the modes while the host grades an answer', () => {
     const quiz = fixtureQuiz()
     const graded = quiz.questions.find((q) => q.id === 'q-text') as Extract<Question, { type: 'text' }>
     graded.acceptedAnswers = []
     quiz.questions = [graded]
-    let state = startGame(teamGame({ teamAnswer: 'shared', speedBonus: false }, quiz), T0)
-    state = endQuestion(answer(state, 'p2', { type: 'text', value: 'Győr' }, T0 + 1000))
-    state = gradeText(state, ['p3'])
-    expect(state.teams['team-1']!.score).toBe(1000)
-    expect(state.players.p1!.score).toBe(1000)
+    const state = endQuestion(startGame(teamGame({}, quiz), T0))
+    expectCode(() => setTeamMode(state, { mode: 'captain' }), 'errors.invalidTransition')
+  })
+})
+
+describe('captain decides', () => {
+  const captainGame = (settings: Partial<GameSettings> = {}) => startGame(teamGame({ teamAnswer: 'captain', ...settings }), T0)
+
+  it('scores the answer the captain confirms, also against the suggestions, timed at the confirmation', () => {
+    let state = answer(captainGame(), 'p2', B, T0 + 1000)
+    state = answer(state, 'p3', B, T0 + 2000)
+    state = confirm(state, 'p1', A, T0 + 5000)
+    expect(state.teams['team-1']!.answers!['q-single']).toMatchObject({ answer: A, byPlayerId: 'p1', timeMs: 5000 })
+    state = endQuestion(state)
+    expect(state.teams['team-1']!.score).toBe(875)
+    expect(['p1', 'p2', 'p3'].map((id) => state.players[id]!.answers['q-single']!.points)).toEqual([875, 875, 875])
+    expect(state.teams['team-1']!.answers!['q-single']).toMatchObject({ points: 875, correct: true })
+    expect(state.teams['team-1']!.answers!['q-single']!.fallback).toBeUndefined()
   })
 
-  it('discards the team answer when the question is skipped', () => {
-    const state = skipQuestion(answer(shared(), 'p1', A, T0 + 2000), T0 + 3000)
+  it('lets members change a suggestion until the captain confirms, also without answer changes', () => {
+    let state = answer(captainGame(), 'p2', B, T0 + 1000)
+    state = answer(state, 'p2', A, T0 + 2000)
+    expect(state.players.p2!.answers['q-single']!.answer).toEqual(A)
+    state = confirm(state, 'p1', A, T0 + 3000)
+    expectCode(() => answer(state, 'p2', B, T0 + 4000), 'errors.answerLocked')
+    // A first suggestion is still taken.
+    expect(answer(state, 'p3', B, T0 + 4000).players.p3!.answers['q-single']!.answer).toEqual(B)
+  })
+
+  it('takes a confirmation only from the team captain, and only in captain decides', () => {
+    expectCode(() => confirm(captainGame(), 'p2', A, T0 + 1000), 'errors.notCaptain')
+    expectCode(() => confirm(startGame(teamGame({ teamAnswer: 'majority' }), T0), 'p1', A, T0 + 1000), 'errors.invalidTransition')
+    expectCode(() => confirm(captainGame(), 'p1', { type: 'single', optionId: 'zz' }, T0 + 1000), 'errors.invalidAnswer')
+  })
+
+  it('keeps a confirmation final unless answer changes are on, then changeable until the lock-in', () => {
+    const state = confirm(captainGame(), 'p1', B, T0 + 1000)
+    expect(confirm(state, 'p1', B, T0 + 2000)).toBe(state)
+    expectCode(() => confirm(state, 'p1', A, T0 + 2000), 'errors.alreadyAnswered')
+    const changing = confirm(captainGame({ answerChanges: true, answerLockSec: 5 }), 'p1', B, T0 + 1000)
+    expect(confirm(changing, 'p1', A, T0 + 2000).teams['team-1']!.answers!['q-single']).toMatchObject({ answer: A, timeMs: 2000 })
+    expectCode(() => confirm(changing, 'p1', A, T0 + 15_001), 'errors.answerLocked')
+  })
+
+  it("counts the suggestions' majority when the captain does not confirm, and marks it", () => {
+    let state = answer(captainGame(), 'p1', B, T0 + 1000)
+    state = answer(state, 'p2', A, T0 + 2000)
+    state = answer(state, 'p3', A, T0 + 4000)
+    state = endQuestion(state)
+    expect(state.teams['team-1']!.answers!['q-single']).toMatchObject({ answer: A, byPlayerId: null, fallback: true, correct: true })
+    // Lower median of 2 s and 4 s: 2 s, 950.
+    expect(state.teams['team-1']!.score).toBe(950)
+    expect(state.players.p1!.answers['q-single']).toMatchObject({ answer: A, points: 950 })
+  })
+
+  it('lets the new captain confirm after a handover during the question', () => {
+    let state = answer(captainGame(), 'p2', A, T0 + 1000)
+    state = disconnectPlayer(state, 'p1', T0 + 2000)
+    expectCode(() => confirm(state, 'p1', B, T0 + 3000), 'errors.notCaptain')
+    state = confirm(state, 'p2', A, T0 + 3000)
+    expect(state.teams['team-1']!.answers!['q-single']!.byPlayerId).toBe('p2')
+  })
+
+  it('closes early once every team with someone online has confirmed, not on suggestions alone', () => {
+    let state = confirm(captainGame(), 'p1', A, T0 + 1000)
+    state = answer(answer(state, 'p4', A, T0 + 1000), 'p5', A, T0 + 1000)
+    expect(allAnswered(state)).toBe(false)
+    expect(allAnswered(confirm(state, 'p4', A, T0 + 2000))).toBe(true)
+  })
+
+  it('scores the confirmed answer once also when the host grades it', () => {
+    const quiz = fixtureQuiz()
+    const graded = quiz.questions.find((q) => q.id === 'q-text') as Extract<Question, { type: 'text' }>
+    graded.acceptedAnswers = []
+    quiz.questions = [graded]
+    let state = startGame(teamGame({ teamAnswer: 'captain', speedBonus: false }, quiz), T0)
+    state = endQuestion(confirm(state, 'p1', { type: 'text', value: 'Győr' }, T0 + 1000))
+    state = gradeText(state, ['p3'])
+    expect(state.teams['team-1']!.score).toBe(1000)
+    expect(state.players.p2!.score).toBe(1000)
+  })
+
+  it('discards the confirmation when the question is skipped', () => {
+    const state = skipQuestion(confirm(captainGame(), 'p1', A, T0 + 2000), T0 + 3000)
     expect(state.teams['team-1']!.answers!['q-single']).toBeUndefined()
+  })
+
+  it('plays a team saved in the removed shared mode as captain decides, its answer counting as confirmed', () => {
+    const old: GameState = JSON.parse(JSON.stringify(startGame(teamGame(), T0)))
+    old.teams['team-1']!.answerMode = 'shared'
+    old.teams['team-1']!.answers = { 'q-single': { answer: B, at: T0 + 1000, timeMs: 1000, byPlayerId: 'p2', points: 0, correct: null } }
+    expect(teamMode(old.teams['team-1']!)).toBe('captain')
+    expect(endQuestion(old).teams['team-1']!.answers!['q-single']).toMatchObject({ answer: B, correct: false })
   })
 })
 
@@ -220,7 +299,7 @@ describe('majority team', () => {
     state = endQuestion(state)
     expect(state.teams['team-1']!.score).toBe(0)
     expect(state.players.p1!.answers['q-single']).toMatchObject({ answer: B, correct: false, points: 0 })
-    expect(state.teams['team-1']!.answers!['q-single']).toMatchObject({ answer: B, byPlayerId: null, correct: false })
+    expect(state.teams['team-1']!.answers!['q-single']).toMatchObject({ answer: B, byPlayerId: null, fallback: false, correct: false })
   })
 
   it('scores a right majority once, at the median time of its votes', () => {
@@ -249,16 +328,16 @@ describe('majority team', () => {
 })
 
 describe('a game mixing the modes', () => {
-  it('scores average, majority and shared teams side by side', () => {
-    let state = createGame(fixtureQuiz(), fixtureSettings({ mode: 'team', teamNames: ['Avg', 'Maj', 'Shr'] }), '123456', 'g', T0)
+  it('scores average, majority and captain teams side by side', () => {
+    let state = createGame(fixtureQuiz(), fixtureSettings({ mode: 'team', teamNames: ['Avg', 'Maj', 'Cap'] }), '123456', 'g', T0)
     for (const [n, team] of [[1, 'team-1'], [2, 'team-1'], [3, 'team-2'], [4, 'team-2'], [5, 'team-3'], [6, 'team-3']] as const) {
       state = joinPlayer(state, { id: `p${n}`, name: `Player ${n}`, teamId: team, token: `tok-${n}` })
     }
-    state = setTeamMode(setTeamMode(state, { teamId: 'team-2', mode: 'majority' }), { teamId: 'team-3', mode: 'shared' })
+    state = setTeamMode(setTeamMode(state, { teamId: 'team-2', mode: 'majority' }), { teamId: 'team-3', mode: 'captain' })
     state = startGame(state, T0)
     state = answer(state, 'p1', A, T0 + 5000) // average: (875 + 0) / 2
     state = answer(state, 'p3', A, T0 + 5000) // majority: one vote, 875
-    state = answer(state, 'p6', A, T0 + 10_000) // shared: 750
+    state = confirm(state, 'p5', A, T0 + 10_000) // captain: 750
     expect(allAnswered(state)).toBe(false)
     state = answer(state, 'p2', B, T0 + 6000)
     state = answer(state, 'p4', B, T0 + 7000) // a 1:1 tie goes to the first vote
@@ -276,12 +355,5 @@ describe('early close in team mode', () => {
     expect(allAnswered(state)).toBe(false)
     state = disconnectPlayer(state, 'p3', T0 + 2000)
     expect(allAnswered(state)).toBe(true)
-  })
-
-  it('closes once each shared team has its answer', () => {
-    let state = startGame(teamGame({ teamAnswer: 'shared' }), T0)
-    state = answer(state, 'p2', A, T0 + 1000)
-    expect(allAnswered(state)).toBe(false)
-    expect(allAnswered(answer(state, 'p5', B, T0 + 2000))).toBe(true)
   })
 })

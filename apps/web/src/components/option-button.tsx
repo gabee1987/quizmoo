@@ -4,6 +4,7 @@ import type { ButtonHTMLAttributes } from 'react'
 import { cn } from '@/lib/cn'
 import { CheckIcon, OptionSymbol } from './icons'
 import { optionFill, optionVars } from './option-colours'
+import { PickStack, type PickPlayer } from './pick-stack'
 
 /**
  * Answer option. Plain (a neutral card with a coloured symbol badge) or coloured in its palette
@@ -20,10 +21,19 @@ export function OptionButton({
   pending = false,
   large = false,
   colourful = large,
+  picks,
+  onPicks,
   className,
   style,
   ...props
 }: ButtonHTMLAttributes<HTMLButtonElement> & {
+  /**
+   * Team mode on a phone: teammates who picked this option, shown as an avatar stack on its
+   * corner (a sibling of the button, so the option keeps one wrapper while picks come and go).
+   */
+  picks?: readonly PickPlayer[] | undefined
+  /** Tapping the stack: opens the team's picks with names. */
+  onPicks?: (() => void) | undefined
   index: number
   label: string
   imageId?: string | undefined
@@ -51,18 +61,18 @@ export function OptionButton({
         'border-2 shadow-[0_4px_0_0_var(--secondary-edge)] enabled:hover:-translate-y-0.5 enabled:active:translate-y-1 enabled:active:shadow-none',
         selected ? 'border-primary bg-primary text-primary-foreground' : 'bg-card text-card-foreground enabled:hover:border-ring',
       )
-  return (
+  const button = (
     <button
       type="button"
       aria-pressed={selected}
       {...props}
-      style={{ ...optionVars(index), ...style }}
+      style={{ ...optionVars(index), ...(picks === undefined && style) }}
       className={cn(
         'flex items-center gap-3 rounded-2xl text-left font-bold transition-[transform,box-shadow,filter] duration-150 ease-out outline-none select-none focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-default motion-reduce:transition-none',
         size,
         look,
         dimmed && 'opacity-40',
-        className,
+        picks === undefined && className,
       )}
     >
       {colourful ? (
@@ -84,5 +94,12 @@ export function OptionButton({
         selected && <CheckIcon className="size-6 shrink-0" />
       )}
     </button>
+  )
+  if (picks === undefined) return button
+  return (
+    <div className={cn('relative grid', className)} style={style}>
+      {button}
+      <PickStack players={picks} onClick={onPicks} className="absolute -top-3 right-3" />
+    </div>
   )
 }

@@ -130,15 +130,18 @@ export function kickPlayer(state: GameState, playerId: string): GameState {
 }
 
 /**
- * Sets a team's answer mode in the lobby; without `teamId` every team's (host only). With
- * `byPlayerId` it is a captain choosing their own team's mode, allowed when `teamsChoose` is on.
+ * Sets a team's answer mode; without `teamId` every team's. With `byPlayerId` it is a captain
+ * choosing their own team's mode, in the lobby and when `teamsChoose` is on. The host may also
+ * change modes between questions (reveal, not while grading, and scoreboard), from the next question on.
  */
 export function setTeamMode(
   state: GameState,
   input: { teamId?: string | undefined; mode: TeamAnswerMode; byPlayerId?: string | undefined },
 ): GameState {
   if (state.settings.mode !== 'team') throw new EngineError('errors.invalidTransition')
-  if (state.phase !== 'lobby') throw new EngineError('errors.gameAlreadyStarted')
+  if (input.byPlayerId !== undefined && state.phase !== 'lobby') throw new EngineError('errors.gameAlreadyStarted')
+  const betweenQuestions = (state.phase === 'reveal' && !state.awaitingGrading) || state.phase === 'scoreboard'
+  if (state.phase !== 'lobby' && !betweenQuestions) throw new EngineError('errors.invalidTransition')
   let teamIds = input.teamId === undefined ? Object.keys(state.teams) : [input.teamId]
   if (input.byPlayerId !== undefined) {
     const player = state.players[input.byPlayerId]
@@ -197,13 +200,15 @@ export function submitAnswer(state: GameState, input: SubmitInput, now: number):
   const question = currentQuestion(state)
   if (question.id !== input.questionId) throw new EngineError('errors.questionClosed')
   const team = player.teamId ? state.teams[player.teamId] : undefined
-  if (team && teamMode(team) === 'shared') return submitSharedAnswer(state, team, player.id, question, input.answer, now)
+  // Captain decides: a member's answer is a suggestion, which changes freely until the captain confirms.
+  const suggestion = team !== undefined && teamMode(team) === 'captain'
   const previous = player.answers[question.id]
   if (previous) {
-    if (!state.settings.answerChanges) throw new EngineError('errors.alreadyAnswered')
+    if (!state.settings.answerChanges && !suggestion) throw new EngineError('errors.alreadyAnswered')
     // The same answer again (a retry, or a second tap) keeps its time.
     if (JSON.stringify(previous.answer) === JSON.stringify(input.answer)) return state
-    if (now > state.questionEndsAt - state.settings.answerLockSec * 1000) throw new EngineError('errors.answerLocked')
+    if (suggestion && team.answers?.[question.id]) throw new EngineError('errors.answerLocked')
+    if (now > state.questionEndsAt - lockSec(state) * 1000) throw new EngineError('errors.answerLocked')
   }
   if (!answerFits(question, input.answer)) throw new EngineError('errors.invalidAnswer')
 
@@ -223,31 +228,43 @@ export function submitAnswer(state: GameState, input: SubmitInput, now: number):
 }
 
 /**
- * Shared mode: any member sets the team's one answer and anyone can change it while the question
- * runs (the last change counts, with its time), up to the lock-in when answer changes are on.
+ * Captain decides: the team's captain confirms the team's answer, any answer (not only a suggested
+ * one), timed at the confirmation. It is final unless answer changes are on; then it changes until
+ * the lock-in like any answer.
  */
-function submitSharedAnswer(
-  state: GameState,
-  team: Team,
-  playerId: string,
-  question: Question,
-  answer: Answer,
-  now: number,
-): GameState {
+export function confirmTeamAnswer(state: GameState, input: SubmitInput, now: number): GameState {
+  const player = state.players[input.playerId]
+  if (!player) throw new EngineError('errors.playerNotFound')
+  const team = player.teamId ? state.teams[player.teamId] : undefined
+  if (!team || teamMode(team) !== 'captain') throw new EngineError('errors.invalidTransition')
+  if (state.phase !== 'question' || state.questionEndsAt === null || now > state.questionEndsAt) {
+    throw new EngineError('errors.questionClosed')
+  }
+  if (state.pausedAt) throw new EngineError('errors.gamePaused')
+  const question = currentQuestion(state)
+  if (question.id !== input.questionId) throw new EngineError('errors.questionClosed')
+  if (captainOf(state, team) !== player.id) throw new EngineError('errors.notCaptain')
   const previous = team.answers?.[question.id]
-  if (previous && JSON.stringify(previous.answer) === JSON.stringify(answer)) return state
-  const lockSec = state.settings.answerChanges ? state.settings.answerLockSec : 0
-  if (previous && now > state.questionEndsAt! - lockSec * 1000) throw new EngineError('errors.answerLocked')
-  if (!answerFits(question, answer)) throw new EngineError('errors.invalidAnswer')
+  if (previous) {
+    if (JSON.stringify(previous.answer) === JSON.stringify(input.answer)) return state
+    if (!state.settings.answerChanges) throw new EngineError('errors.alreadyAnswered')
+    if (now > state.questionEndsAt - lockSec(state) * 1000) throw new EngineError('errors.answerLocked')
+  }
+  if (!answerFits(question, input.answer)) throw new EngineError('errors.invalidAnswer')
   const record = {
-    answer,
+    answer: input.answer,
     at: now,
     timeMs: Math.max(0, now - (state.questionStartedAt ?? now)),
-    byPlayerId: playerId,
+    byPlayerId: player.id,
     points: 0,
     correct: null,
   }
   return { ...state, teams: { ...state.teams, [team.id]: { ...team, answers: { ...team.answers, [question.id]: record } } } }
+}
+
+/** Seconds before the end when changes stop; only with answer changes on. */
+function lockSec(state: GameState): number {
+  return state.settings.answerChanges ? state.settings.answerLockSec : 0
 }
 
 /**
@@ -282,10 +299,10 @@ export function gradeText(state: GameState, correctPlayerIds: readonly string[])
   if (state.phase !== 'reveal' || !state.awaitingGrading) throw new EngineError('errors.invalidTransition')
   const question = currentQuestion(state)
   const correctIds = new Set(correctPlayerIds)
-  // A team answers as one: marking any member marks the team's answer.
+  // A team that answered as one: marking any member marks the team's answer.
   for (const team of Object.values(state.teams)) {
     const members = membersOf(state, team.id)
-    if (answersAsOne(team) && members.some((m) => correctIds.has(m.id))) members.forEach((m) => correctIds.add(m.id))
+    if (team.answers?.[question.id] && members.some((m) => correctIds.has(m.id))) members.forEach((m) => correctIds.add(m.id))
   }
   const players = scorePlayers(state, question, (_answer, playerId) => correctIds.has(playerId))
   return {
@@ -516,7 +533,7 @@ function withCaptains(state: GameState): GameState {
 }
 
 /**
- * Fixes each one-answer team's answer (the shared one, or the majority of the votes) and gives
+ * Fixes each one-answer team's answer (the captain's confirmed one, else the majority of the votes) and gives
  * every member a copy to score, so all members score the team's answer; a team without an
  * answer leaves its members without one.
  */
@@ -619,11 +636,11 @@ function addTeamGains(
   const result: Record<string, Team> = {}
   for (const team of Object.values(teams)) {
     const members = Object.values(players).filter((p) => p.teamId === team.id)
-    const gain = teamGain(team, members.map((p) => p.answers[questionId]?.points ?? 0))
+    const gain = teamGain(team, questionId, members.map((p) => p.answers[questionId]?.points ?? 0))
     const record = team.answers?.[questionId]
     const scored = members[0]?.answers[questionId]
     const answers =
-      record && scored && answersAsOne(team)
+      record && scored
         ? { ...team.answers, [questionId]: { ...record, points: scored.points, bonus: scored.bonus ?? 0, correct: scored.correct } }
         : team.answers
     result[team.id] = { ...team, score: team.score + gain, ...(answers && { answers }) }
