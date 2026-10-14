@@ -295,6 +295,22 @@ describeDb('persist (database)', () => {
     manager.close()
   })
 
+  it('persist: a scheduled game is kept until 12 hours after its time, not after its creation', async () => {
+    const store = createGameStore(db)
+    const manager = new GameManager(store, quietLog)
+    const scheduledAt = Date.now() + 2 * RESTORE_WINDOW_MS
+    const { state } = await manager.create({ ...createInput, id: 'game-scheduled', hostId, quizId: null, scheduledAt })
+    await manager.flush()
+
+    const ids = async (now: number) => (await store.loadActive(now)).map((g) => g.state.id)
+    expect(await ids(Date.now() + RESTORE_WINDOW_MS + 1000)).toContain(state.id)
+    expect(await ids(scheduledAt + RESTORE_WINDOW_MS - 1000)).toContain(state.id)
+    expect(await ids(scheduledAt + RESTORE_WINDOW_MS + 1000)).not.toContain(state.id)
+    const row = (await db.select().from(games).where(eq(games.id, state.id)))[0]!
+    expect([row.phase, row.state.phase]).toEqual(['finished', 'finished'])
+    manager.close()
+  })
+
   it('persist: restores finished games while any results wait for release, not fully released ones', async () => {
     const store = createGameStore(db)
     const manager = new GameManager(store, quietLog)
@@ -411,6 +427,32 @@ describeDb('sockets (database)', () => {
     expect(await other.emitWithAck('player:join', { pin, name: ' anna ' })).toEqual({ error: 'errors.nameTaken' })
     expect(await other.emitWithAck('player:join', { pin: '999999', name: 'X' })).toEqual({ error: 'errors.gameNotFound' })
     expect(await other.emitWithAck('player:join', { pin: 'abc', name: 'X' })).toEqual({ error: 'errors.invalidInput' })
+  })
+
+  it('a scheduled game refuses players until the host opens joining, and the host can move the time', async () => {
+    const res = await built.app.inject({
+      method: 'POST',
+      url: '/api/games',
+      headers: { cookie: hostCookie },
+      payload: { quizId, scheduledAt: Date.now() + 60 * 60 * 1000 },
+    })
+    const { pin } = res.json()
+    const early = await connect()
+    expect(await early.emitWithAck('player:join', { pin, name: 'Anna' })).toEqual({ error: 'errors.gameNotOpenYet' })
+
+    const hostSocket = await host(pin)
+    const later = Date.now() + 2 * 60 * 60 * 1000
+    expect(await command(hostSocket, { type: 'schedule', at: later })).toEqual({ ok: true })
+    expect(built.manager.get(pin)!.state.scheduledAt).toBe(later)
+    expect(await command(hostSocket, { type: 'schedule', at: Date.now() - 1000 })).toEqual({ error: 'errors.invalidSchedule' })
+
+    const opened = nextSnapshot<HostSnapshot>(hostSocket, 'game:host')
+    expect(await command(hostSocket, { type: 'openJoining' })).toEqual({ ok: true })
+    expect((await opened).scheduledAt).toBeLessThanOrEqual(Date.now())
+    const { ack } = await player(pin, 'Anna')
+    expect(ack.token).toEqual(expect.any(String))
+    // Someone is in: the time cannot move any more.
+    expect(await command(hostSocket, { type: 'schedule', at: later })).toEqual({ error: 'errors.gameAlreadyStarted' })
   })
 
   it('rejects host commands from a socket without a session or attach', async () => {

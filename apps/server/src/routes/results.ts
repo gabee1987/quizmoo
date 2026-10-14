@@ -5,7 +5,7 @@ import { z } from 'zod'
 import { requireSession } from '../auth/require-session.js'
 import type { Db } from '../db/index.js'
 import { games } from '../db/schema.js'
-import { EngineError, releaseResults, toCsv, toResults, type GameState } from '../game/index.js'
+import { EngineError, joiningOpen, releaseResults, toCsv, toResults, type GameState } from '../game/index.js'
 import type { GameManager } from '../realtime/game-manager.js'
 import { parseOr400 } from './http.js'
 
@@ -61,6 +61,7 @@ export async function resultRoutes(app: FastifyInstance, { db, manager }: Result
         playerCount: sql<number>`(select count(*) from jsonb_object_keys(${games.state}->'players'))::int`,
         createdAt: games.createdAt,
         finishedAt: games.finishedAt,
+        scheduledAt: sql<string | null>`(${games.state}->>'scheduledAt')::bigint`,
       })
       .from(games)
       .where(eq(games.hostId, request.user!.id))
@@ -70,6 +71,7 @@ export async function resultRoutes(app: FastifyInstance, { db, manager }: Result
       phase: row.phase as GameHistoryItem['phase'],
       createdAt: row.createdAt.toISOString(),
       finishedAt: row.finishedAt?.toISOString() ?? null,
+      scheduledAt: row.scheduledAt === null ? null : new Date(Number(row.scheduledAt)).toISOString(),
     }))
     return { games: items }
   })
@@ -110,11 +112,17 @@ export async function resultRoutes(app: FastifyInstance, { db, manager }: Result
       .send(toCsv(toResults(state), query.lang))
   })
 
-  /** Deletes a finished game and with it its results. Running games are ended first from the host control. */
+  /**
+   * Deletes a finished game and with it its results, or cancels a scheduled game whose joining has
+   * not opened (nobody can be in it). Running games are ended first from the host control.
+   */
   app.delete('/api/games/:gameId', auth, async (request: GameRequest, reply) => {
-    const state = await ownGame(request, reply)
-    if (!state) return reply
-    if (state.phase !== 'finished') return reply.code(409).send({ error: 'errors.gameNotFinished' })
+    const saved = await ownGame(request, reply)
+    if (!saved) return reply
+    // The live state is newer than the saved one (its save may still be queued).
+    const state = manager.byId(saved.id)?.state ?? saved
+    const scheduled = state.phase === 'lobby' && !joiningOpen(state, Date.now())
+    if (state.phase !== 'finished' && !scheduled) return reply.code(409).send({ error: 'errors.gameNotFinished' })
     await manager.discard(state.id)
     await db.delete(games).where(and(eq(games.id, state.id), eq(games.hostId, request.user!.id)))
     return reply.code(204).send()

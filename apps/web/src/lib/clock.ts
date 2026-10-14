@@ -40,3 +40,26 @@ export function useCountdown(endsAt: number | null, clockOffset: number): number
 
   return remaining
 }
+
+/** The longest setTimeout delay browsers honour (about 24.8 days); later times are checked again then. */
+const MAX_TIMEOUT_MS = 2 ** 31 - 1
+
+/** Whether the server time `at` has passed; flips to true on time without polling. Null counts as passed. */
+export function useTimeReached(at: number | null, clockOffset: number): boolean {
+  const reached = () => at === null || Date.now() + clockOffset >= at
+  const [value, setValue] = useState(reached)
+  useEffect(() => {
+    setValue(reached())
+    if (at === null) return
+    let timer: ReturnType<typeof setTimeout>
+    const arm = () => {
+      const left = at - (Date.now() + clockOffset)
+      if (left <= 0) return setValue(true)
+      timer = setTimeout(arm, Math.min(left, MAX_TIMEOUT_MS))
+    }
+    arm()
+    return () => clearTimeout(timer)
+    // reached only depends on at and clockOffset.
+  }, [at, clockOffset])
+  return value
+}

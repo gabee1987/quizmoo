@@ -84,8 +84,8 @@ function HostHome() {
     })
 
   const play = useMutation({
-    mutationFn: ({ quizId, settings }: { quizId: string; settings: GameSettings }) =>
-      apiFetch<{ pin: string }>('/api/games', { method: 'POST', body: JSON.stringify({ quizId, settings }) }),
+    mutationFn: ({ quizId, settings, scheduledAt }: { quizId: string; settings: GameSettings; scheduledAt?: number | undefined }) =>
+      apiFetch<{ pin: string }>('/api/games', { method: 'POST', body: JSON.stringify({ quizId, settings, scheduledAt }) }),
     onSuccess: ({ pin }) => void navigate({ to: '/host/games/$pin', params: { pin } }),
     onError: toastError,
   })
@@ -345,7 +345,7 @@ function HostHome() {
           quizTitle={creating.title}
           quizSettings={creating.settings}
           pending={play.isPending}
-          onCreate={(settings) => play.mutate({ quizId: creating.id, settings })}
+          onCreate={(settings, scheduledAt) => play.mutate({ quizId: creating.id, settings, scheduledAt })}
           onCancel={() => {
             setCreating(null)
             play.reset()

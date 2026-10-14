@@ -106,6 +106,9 @@
 - The custom theme shows a small lobby card in its colours, so the accent colour's effect is visible while picking, and the colour strength goes down to black and white.
 - "Custom" answer colours: any colour per answer, black and white included; the text on each answer is white or dark, whichever reads better.
 - The quiz editor's settings panel takes the whole width beside the phone preview (the question form folds away while it is open) and shows the settings in two columns.
+- Games can be scheduled up to 30 days ahead ("Later" in the new game dialog): the PIN and the join link are reserved at once to share, the join page shows when the game starts, and joining opens at that time. The host can open it early, move the time or call it off; scheduled games come first in the games list. The host still presses Start.
+- "Copy link" in the host lobby.
+- The start time is picked on the app's own calendar: a month grid that bubbles open with the same wobble as the buttons, hours and minutes in 24-hour style, all usable with the keyboard.
 
 ### Development
 - The web dev server runs on port 15173, away from the 5173+ ports other local Vite projects take.

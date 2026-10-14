@@ -41,7 +41,9 @@
       "food": "Finomságok",
       "fantasy": "Mesés lények",
       "fun": "Játék és móka"
-    }
+    },
+    "scheduled": "Ekkor kezdünk: {{date}}",
+    "scheduledHelp": "Addig nem lehet csatlakozni. Hagyd nyitva ezt az oldalt: amikor kezdünk, itt tudsz beszállni."
   },
   "home": {
     "tagline": "Gondolkodj. Válaszolj. Győzd le a csordát!",
@@ -58,6 +60,7 @@
     "loading": "Egy pillanat…",
     "next": "Tovább",
     "cancel": "Mégse",
+    "save": "Mentés",
     "add": "Hozzáadás",
     "delete": "Törlés",
     "removeItem": "{{name}} törlése",
@@ -175,7 +178,9 @@
       "teamModesHelp": "A változás a következő kérdéstől érvényes.",
       "teamConfirmed": "Véglegesítve",
       "teamSuggesting": "Javaslatok ({{picked}}/{{count}})",
-      "teamFallback": "Többség, nem véglegesítették"
+      "teamFallback": "Többség, nem véglegesítették",
+      "copyLink": "Link másolása",
+      "linkCopied": "Kimásoltuk a linket."
     },
     "shown": {
       "onScreen": {
@@ -341,7 +346,15 @@
         "title": "Saját válaszszínek",
         "answer": "{{n}}. válasz",
         "help": "Bármilyen színt választhatsz, a feketét és a fehéret is. A szöveg színét (fehér vagy sötét) az alkalmazás választja, hogy olvasható maradjon. A jelek akkor is megkülönböztetik a válaszokat, ha két szín hasonló."
-      }
+      },
+      "when": "Mikor kezdődik?",
+      "whenOptions": {
+        "now": "Most",
+        "later": "Később"
+      },
+      "startsAt": "Kezdés",
+      "laterHelp": "A PIN-kód és a link már most a tiéd, megoszthatod. A játékosok a megadott időtől csatlakozhatnak, a játékot te indítod.",
+      "scheduleSubmit": "Időzítés"
     },
     "newQuiz": "Új kvíz",
     "edit": "Szerkesztés",
@@ -388,7 +401,16 @@
       "updated": "Legutóbb szerkesztett",
       "title": "Cím"
     },
-    "noMatches": "Nincs kvíz erre: „{{query}}”."
+    "noMatches": "Nincs kvíz erre: „{{query}}”.",
+    "scheduled": {
+      "title": "Időzített játék",
+      "opensAt": "Csatlakozni ettől lehet: {{date}}",
+      "help": "Oszd meg a linket vagy a QR-kódot már most. Aki előbb nyitja meg, látja, mikor kezdünk.",
+      "openNow": "Megnyitom most",
+      "changeTime": "Időpont módosítása",
+      "cancel": "Lefújom a játékot",
+      "confirmCancel": "Lefújod az időzített játékot? A PIN-kód és a link megszűnik."
+    }
   },
   "play": {
     "youAreIn": "Bent vagy, {{name}}!",
@@ -716,7 +738,9 @@
     "samePassword": "Az új jelszónak különböznie kell a jelenlegitől.",
     "gameNotFinished": "Előbb fejezd be a játékot.",
     "answerNotSent": "A válaszod nem ment el. Koppints újra.",
-    "notCaptain": "Ezt csak a csapatkapitány teheti meg."
+    "notCaptain": "Ezt csak a csapatkapitány teheti meg.",
+    "gameNotOpenYet": "Ez a játék még nem kezdődött el. Nézz vissza a megadott időpontban.",
+    "invalidSchedule": "Válassz egy jövőbeli időpontot, legfeljebb 30 napon belül."
   },
   "nav": {
     "label": "Játékvezetői menü",
@@ -738,7 +762,11 @@
     "date": "Időpont",
     "mode": "Mód",
     "playerCount": "Játékosok",
-    "status": "Állapot"
+    "status": "Állapot",
+    "scheduled": "Időzítve",
+    "cancel": "Lefújás",
+    "cancelTitle": "Lefújod a játékot?",
+    "cancelBody": "A(z) „{{title}}” ({{date}}) időzített játék törlődik, a PIN-kód és a link megszűnik."
   },
   "results": {
     "title": "Eredmények",
@@ -779,5 +807,14 @@
     "screenHint": "Szóköz vagy → tovább, ← vissza, P szünet",
     "teamAnswers": "A csapatok válaszai",
     "noTeamAnswer": "Nem válaszolt"
+  },
+  "datePicker": {
+    "title": "Válassz dátumot és időt",
+    "previousMonth": "Előző hónap",
+    "nextMonth": "Következő hónap",
+    "time": "Időpont",
+    "hour": "Óra",
+    "minute": "Perc",
+    "done": "Kész"
   }
 }

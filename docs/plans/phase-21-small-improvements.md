@@ -68,7 +68,7 @@ Check: Lighthouse's installability check (or Chrome's Application panel) on the 
 
 ## 6. Scheduled games and a public lobby link
 
-Proposed (confirm before this item starts):
+Proposed, confirmed by the user on 14 October:
 - The new game dialog gets "Start later": a date and time, up to 30 days ahead. The game is created at once with its PIN reserved, so the join link and QR code can be shared ahead (copy link, open the QR on its own page).
 - Opening the link before the time shows the quiz title and "Starts at 19:00" (in the phone's language and time zone); joining opens at the scheduled time.
 - The host can open the lobby early ("Open now"), move the time, or cancel; the game history lists scheduled games first.
@@ -102,9 +102,10 @@ $env:E2E_BASE_URL="http://localhost:3999"; $env:E2E_USERNAME="admin"; $env:E2E_P
 
 ## Results
 
-Items 1 to 5 are done; item 6 waits for the user's confirmation of its proposed defaults.
+Every item is done.
 
-- `pnpm verify` passes: server 322 tests, web 133 tests, builds. `pnpm e2e` passes on the production build, all 11 specs, with the service worker active.
+- `pnpm verify` passes: server 338 tests, web 144 tests, builds. `pnpm e2e` passes on the production build, all 11 specs, with the service worker active.
+- 6: `scheduledAt` in the game state; engine `schedule`, `openJoining`, `joiningOpen` and `errors.gameNotOpenYet` / `errors.invalidSchedule`; host commands `schedule` and `openJoining`; `POST /api/games` takes `scheduledAt`; the public info carries it with `serverNow`; `DELETE /api/games/:gameId` calls off a scheduled game; the restore window counts from the later of creation and the scheduled time. Tests: engine (join refused before the time and without a clock, the 30-day limit, moving the time, open now, token rejoin), routes (create, public info, invalid times, call off, history), sockets (join refused, host moves the time and opens), persist (a game two days ahead is restored, closed 12 hours after its time). Screenshots of the dialog, the host lobby and the games list at laptop and phone width, the waiting join page in light and dark mode, and the whole flow (open now, a phone joins, call off) with no console errors.
 - 1: `FormAlert` is a `div` (it held lists in a `p`); `form-alert.test.tsx` fails with the old markup and passes with the new.
 - 2: `needsConfirmation` (engine) and `captainDecides` (web): captain decides needs a confirmation only with more than one member. Tests: a team of one scores without a confirmation or fallback mark, its answer is final, and it closes the question early; the phone's change window for a team of one.
 - 3: `PlayerQuestionResult.teamAnswer` and `fallback`; snapshot test; phone screenshot of the review.
@@ -115,6 +116,8 @@ Items 1 to 5 are done; item 6 waits for the user's confirmation of its proposed 
 
 - 1: fixed in `FormAlert` itself, which every form error uses, instead of the names page alone.
 - 4: the check badge sits where the check was (the end of the option), not on a corner; the team pick stack keeps the corner.
+- 6: from the user's testing, the browser's own date field became `DateTimePicker`, a calendar in the app's design (Radix popover that bubbles open with the buttons' squash and stretch (`bubble-pop`), anchored to a still wrapper so the field's own press wobble does not shake it, the weeks rising in with it, 24-hour hour and minute selects, arrow keys, Page Up and Down, Home and End); start times show in 24-hour style in both languages.
+- 6: "Open now" moves `scheduledAt` to that moment instead of clearing it, so the restore window and the games list keep a time. Calling a scheduled game off deletes it (nobody can be in it), instead of leaving an empty finished game in the history. The waiting join page asks the server every 30 seconds, so it notices "Open now" or a new time; at the time it shows the name form by itself. The projector's lobby is unchanged: its QR code leads to the waiting page. "Copy link" in the host lobby appears only where the browser allows the clipboard (HTTPS or localhost).
 - 5: no precaching of every code chunk at install: 50 phones would download the editor and results code over the venue wifi on their first visit. Pages a phone has opened work offline; built assets are cached as they load. The icons are the cow on the indigo tile, rendered from `logo.svg`.
 
 ## 7. A bigger new game dialog

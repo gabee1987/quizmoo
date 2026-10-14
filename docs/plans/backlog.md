@@ -21,13 +21,11 @@ Candidate features after the design phases (9 to 12). None is planned in detail 
 | Quiz sharing between hosts | Team of organisers | M | Owner plus editors per quiz; permission checks on every route |
 | PDF results report | Hand-out after the event | M | Server-side rendering; no third-party service |
 | Projector branding | Company logo and event name on the lobby and podium | S | Upload once per host; shown by theme |
-| Scheduled games and public lobby link | Pre-share the join link before the event | S | PIN reserved ahead; lobby opens at a time |
 
 ## Platform
 
 | Feature | Why | Effort | Notes |
 |---|---|---|---|
-| Installable app (PWA) | Faster repeat joins, home screen icon | S | Manifest and a minimal service worker that does not cache the API or sockets |
 | Admin dashboard | See running games, player counts, errors | M | Reuses `/api/health` data; admin only |
 | Metrics endpoint | Operations in the cloud | S | Prometheus-style counters; protected |
 | Password reset | Host forgot the password | M | Needs e-mail delivery, which is a third-party service (compliance review) or an admin-side reset link instead |
@@ -56,6 +54,7 @@ Collected while testing phases 9 to 12. Effort as above.
 - Players can change their answer until the time is up or a lock-in a few seconds before; the last answer counts, with its time (phase 18).
 - Teams can answer as one: majority vote or a shared answer, with captains, chosen by the host or by each team (phase 19).
 - Teams choose their mode by default; captain decides with live team picks and a majority fallback; the shared answer mode removed (phase 20).
+- Clearly visible answer selection, a team of one answers without confirming, team answers labelled in the review, installable app, bigger new game dialog, custom theme and answer colours, bigger editor settings panel, scheduled games with a shareable link, names page markup (phase 21).
 
 ### Open
 
@@ -65,5 +64,4 @@ Collected while testing phases 9 to 12. Effort as above.
 | Rooms with their own admin | Feature | L | Each room (workspace) has an admin; only its members see and edit its quizzes and games. Today every quiz and game belongs to one host account. Needs a rooms table, membership and roles, permission checks on every route and socket attach, migration of existing quizzes. |
 | Play-through preview in the editor | Feature | M | The host plays the quiz on a phone-like frame (question, answer, reveal) without starting a game. Reuses the phone screens with a local fake snapshot; no server state. |
 | Host live dashboard and hints | Feature | L | One coherent view of the running game: answers in, who is stuck or offline, per-question stats, standings. Hints or messages to selected players (host-to-player messages were out of scope in phase 12). |
-| Names page markup | Fix | S | The admin "Surprise me" names page nests a list inside a paragraph; React's development build reports it as invalid HTML (seen when the e2e suite runs against the dev server). Production is unaffected. |
 | Sounds for key moments | Feature | M | Short playful sounds for important events and messages, switched on per quiz. Generated in the browser (Web Audio) to avoid licensed audio files; projector only, phones silent by default. Same as the "Sounds and music" item above. |

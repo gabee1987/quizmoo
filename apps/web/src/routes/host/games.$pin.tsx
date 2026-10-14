@@ -79,6 +79,7 @@ function HostGamePage() {
           host={host}
           clockOffset={clockOffset}
           joinUrl={info.data?.joinUrl ?? null}
+          gameId={info.data?.gameId ?? null}
           connected={status === 'connected'}
           send={send}
         />

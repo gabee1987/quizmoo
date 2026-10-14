@@ -1,7 +1,7 @@
 import type { Avatar, GamePublicInfo } from '@quizmoo/shared'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
-import { CameraIcon, CheckIcon, DicesIcon, Loader2Icon, PlayIcon } from 'lucide-react'
+import { CalendarClockIcon, CameraIcon, CheckIcon, DicesIcon, Loader2Icon, PlayIcon } from 'lucide-react'
 import { Suspense, lazy, useEffect, useRef, useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { z } from 'zod'
@@ -13,6 +13,8 @@ import { HomeHero } from '@/components/home-hero'
 import { PinInput } from '@/components/pin-input'
 import { Button } from '@/components/ui/button'
 import { TextField } from '../components/text-field'
+import { useTimeReached } from '@/lib/clock'
+import { formatStart } from '@/lib/schedule'
 import { apiFetch, errorCode } from '../lib/api'
 import { randomAvatar } from '../lib/avatars'
 import { PIN_PATTERN } from '../lib/pin'
@@ -53,9 +55,16 @@ function JoinPage() {
     queryFn: () => apiFetch<GamePublicInfo>(`/api/games/${pin}/public`),
     enabled: pinValid,
     retry: false,
+    // Waiting for a scheduled game: notice when the host opens it early or moves the time.
+    refetchInterval: (query) => {
+      const data = query.state.data
+      return data?.scheduledAt && data.scheduledAt > data.serverNow ? 30_000 : false
+    },
   })
   const game = info.data
   const teamMode = game?.mode === 'team'
+  // A scheduled game: the name form appears at its time, by the server's clock.
+  const open = useTimeReached(game?.scheduledAt ?? null, game ? game.serverNow - info.dataUpdatedAt : 0)
 
   // Typed the last digit and the game is there: close the keyboard and bring the name field up.
   const pinBox = useRef<HTMLDivElement>(null)
@@ -162,7 +171,18 @@ function JoinPage() {
               ))}
           </div>
           {/* Name, avatar and team come once the PIN has found a game: they belong to that game. */}
-          {game ? (
+          {game && !open && game.scheduledAt !== null ? (
+            <div ref={nameSection} role="status" className="flex animate-pop scroll-mt-4 flex-col items-center gap-3 text-center">
+              <p className="w-full rounded-xl bg-secondary px-4 py-2 font-bold text-secondary-foreground wrap-break-word">
+                {game.quizTitle}
+              </p>
+              <CalendarClockIcon className="size-10 text-primary" aria-hidden="true" />
+              <p className="text-xl font-black text-balance">
+                {t('join.scheduled', { date: formatStart(game.scheduledAt, i18n.language) })}
+              </p>
+              <p className="text-sm text-muted-foreground">{t('join.scheduledHelp')}</p>
+            </div>
+          ) : game ? (
             <div ref={nameSection} className="flex animate-pop scroll-mt-4 flex-col gap-5">
               <p className="rounded-xl bg-secondary px-4 py-2 text-center font-bold text-secondary-foreground wrap-break-word">
                 {game.quizTitle}

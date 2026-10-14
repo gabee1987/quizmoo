@@ -41,7 +41,9 @@
       "food": "Food",
       "fantasy": "Fantasy",
       "fun": "Fun and games"
-    }
+    },
+    "scheduled": "Starts {{date}}",
+    "scheduledHelp": "Joining opens then. Keep this page open: you can join here when it starts."
   },
   "home": {
     "tagline": "Think. Quiz. Outsmart the herd!",
@@ -58,6 +60,7 @@
     "loading": "Loading…",
     "next": "Next",
     "cancel": "Cancel",
+    "save": "Save",
     "add": "Add",
     "delete": "Delete",
     "removeItem": "Remove {{name}}",
@@ -175,7 +178,9 @@
       "teamModesHelp": "Changes apply from the next question.",
       "teamConfirmed": "Confirmed",
       "teamSuggesting": "Suggesting ({{picked}} of {{count}})",
-      "teamFallback": "Majority, not confirmed"
+      "teamFallback": "Majority, not confirmed",
+      "copyLink": "Copy link",
+      "linkCopied": "Link copied."
     },
     "shown": {
       "onScreen": {
@@ -341,7 +346,15 @@
         "title": "Your answer colours",
         "answer": "Answer {{n}}",
         "help": "Pick any colour, black and white too. The app picks the text colour (white or dark) so it stays readable. The symbols still tell answers apart when two colours are close."
-      }
+      },
+      "when": "When does it start?",
+      "whenOptions": {
+        "now": "Now",
+        "later": "Later"
+      },
+      "startsAt": "Start time",
+      "laterHelp": "The PIN and the link are yours now, ready to share. Players can join from that time on; you start the game.",
+      "scheduleSubmit": "Schedule"
     },
     "newQuiz": "New quiz",
     "edit": "Edit",
@@ -388,7 +401,16 @@
       "updated": "Last edited",
       "title": "Title"
     },
-    "noMatches": "No quiz matches “{{query}}”."
+    "noMatches": "No quiz matches “{{query}}”.",
+    "scheduled": {
+      "title": "Scheduled game",
+      "opensAt": "Players can join from {{date}}",
+      "help": "Share the link or the QR code now. Anyone who opens it early sees when it starts.",
+      "openNow": "Open now",
+      "changeTime": "Change time",
+      "cancel": "Call off game",
+      "confirmCancel": "Call off this scheduled game? The PIN and the link stop working."
+    }
   },
   "play": {
     "youAreIn": "You're in, {{name}}!",
@@ -716,7 +738,9 @@
     "samePassword": "The new password must differ from the current one.",
     "gameNotFinished": "End the game first.",
     "answerNotSent": "Your answer was not sent. Tap again.",
-    "notCaptain": "Only your team's captain can do that."
+    "notCaptain": "Only your team's captain can do that.",
+    "gameNotOpenYet": "This game has not opened yet. Come back at the start time.",
+    "invalidSchedule": "Pick a time in the future, at most 30 days ahead."
   },
   "nav": {
     "label": "Host menu",
@@ -738,7 +762,11 @@
     "date": "Date",
     "mode": "Mode",
     "playerCount": "Players",
-    "status": "Status"
+    "status": "Status",
+    "scheduled": "Scheduled",
+    "cancel": "Call off",
+    "cancelTitle": "Call off game?",
+    "cancelBody": "The scheduled game \"{{title}}\" ({{date}}) will be deleted and its PIN and link stop working."
   },
   "results": {
     "title": "Results",
@@ -779,5 +807,14 @@
     "screenHint": "Space or → next, ← back, P pause",
     "teamAnswers": "Team answers",
     "noTeamAnswer": "No answer"
+  },
+  "datePicker": {
+    "title": "Pick a date and time",
+    "previousMonth": "Previous month",
+    "nextMonth": "Next month",
+    "time": "Time",
+    "hour": "Hour",
+    "minute": "Minute",
+    "done": "Done"
   }
 }

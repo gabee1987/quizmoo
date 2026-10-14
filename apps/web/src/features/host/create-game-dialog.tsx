@@ -1,12 +1,14 @@
 import type { GameSettings } from '@quizmoo/shared'
-import { PlayIcon, RotateCcwIcon } from 'lucide-react'
-import { useState, type FormEvent } from 'react'
+import { CalendarClockIcon, PlayIcon, RotateCcwIcon } from 'lucide-react'
+import { useId, useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { DateTimePicker } from '@/components/date-time-picker'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { cn } from '@/lib/cn'
+import { defaultStart, latestStart, scheduleError } from '@/lib/schedule'
 import {
   GameSettingsForm,
   allSections,
@@ -22,6 +24,7 @@ import {
  * scoring) as tabs with their summaries on the left, the chosen group's whole form on the right,
  * and Start always in view. A group changed for this game says so and can be reset to the quiz's
  * own settings. On phones it fills the screen with the tabs across the top.
+ * "Later" in the footer schedules the game: the PIN is reserved at once and joining opens at that time.
  */
 export function CreateGameDialog({
   quizTitle,
@@ -33,17 +36,24 @@ export function CreateGameDialog({
   quizTitle: string
   quizSettings: GameSettings
   pending: boolean
-  onCreate: (settings: GameSettings) => void
+  /** `scheduledAt` (unix ms) when the host picked "Later". */
+  onCreate: (settings: GameSettings, scheduledAt?: number) => void
   onCancel: () => void
 }) {
   const { t } = useTranslation()
+  const startsAtId = useId()
   const [settings, setSettings] = useState(quizSettings)
   const [active, setActive] = useState<SettingsSection>('flow')
-  const error = settingsError(settings)
+  const [later, setLater] = useState(false)
+  const [scheduledAt, setScheduledAt] = useState(() => defaultStart(Date.now()))
+  const timeError = later ? scheduleError(scheduledAt, Date.now()) : null
+  const error = settingsError(settings) ?? timeError
 
   function submit(e: FormEvent) {
     e.preventDefault()
-    if (!error) onCreate(settings)
+    if (error) return
+    if (later) onCreate(settings, scheduledAt)
+    else onCreate(settings)
   }
 
   return (
@@ -132,15 +142,53 @@ export function CreateGameDialog({
             ))}
           </Tabs>
 
-          <div className="flex shrink-0 flex-wrap items-center gap-2 border-t bg-card px-5 py-4 md:justify-end md:px-7">
-            {error && <p className="w-full text-sm font-semibold text-destructive md:w-auto md:flex-1">{t(error)}</p>}
+          <div className="flex shrink-0 flex-wrap items-center gap-x-4 gap-y-2 border-t bg-card px-5 py-4 md:justify-end md:px-7">
+            <fieldset className="flex w-full flex-wrap items-center gap-2 md:w-auto md:flex-1">
+              <legend className="sr-only">{t('host.create.when')}</legend>
+              <div className="flex rounded-xl bg-muted p-1">
+                {(['now', 'later'] as const).map((option) => (
+                  <Button
+                    key={option}
+                    type="button"
+                    size="sm"
+                    variant={(option === 'later') === later ? 'default' : 'ghost'}
+                    aria-pressed={(option === 'later') === later}
+                    onClick={() => setLater(option === 'later')}
+                  >
+                    {t(`host.create.whenOptions.${option}`)}
+                  </Button>
+                ))}
+              </div>
+              {later && (
+                <span className="flex items-center gap-2">
+                  <label htmlFor={startsAtId} className="text-sm font-semibold">
+                    {t('host.create.startsAt')}
+                  </label>
+                  <DateTimePicker
+                    id={startsAtId}
+                    value={scheduledAt}
+                    min={Date.now()}
+                    max={latestStart(Date.now())}
+                    invalid={timeError !== null}
+                    describedBy={`${startsAtId}-help`}
+                    onChange={setScheduledAt}
+                  />
+                </span>
+              )}
+              {later && (
+                <p id={`${startsAtId}-help`} className="w-full text-sm text-muted-foreground">
+                  {t('host.create.laterHelp')}
+                </p>
+              )}
+            </fieldset>
+            {error && <p className="w-full text-sm font-semibold text-destructive md:w-auto">{t(error)}</p>}
             <div className="flex flex-1 gap-2 md:flex-none">
               <Button type="button" variant="secondary" className="flex-1 md:flex-none" onClick={onCancel}>
                 {t('common.cancel')}
               </Button>
               <Button type="submit" className="flex-1 md:flex-none" disabled={pending || error !== null}>
-                <PlayIcon aria-hidden="true" />
-                {t('host.create.submit')}
+                {later ? <CalendarClockIcon aria-hidden="true" /> : <PlayIcon aria-hidden="true" />}
+                {later ? t('host.create.scheduleSubmit') : t('host.create.submit')}
               </Button>
             </div>
           </div>

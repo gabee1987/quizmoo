@@ -286,6 +286,7 @@ function baseSnapshot(state: GameState, now: number, audience: ResultsAudience, 
     resultsPending: resultsPendingFor(state, audience),
     announcement: state.announcement ?? null,
     nextPin: state.nextPin ?? null,
+    scheduledAt: state.scheduledAt ?? null,
   }
 }
 

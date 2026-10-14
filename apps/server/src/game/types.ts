@@ -92,6 +92,11 @@ export interface GameState {
   pausedAt?: number | null
   /** Index of a revealed question the host put back on the screens; null otherwise. Missing in games saved before it existed. */
   reviewIndex?: number | null
+  /**
+   * Unix ms when joining opens (a scheduled game) or opened ("Open now" moves it to that moment);
+   * kept afterwards, as the restore window counts from it. Null or missing for a game never scheduled.
+   */
+  scheduledAt?: number | null
 }
 
 /** Who sees the final results: the projector (podium) or the players' phones. */

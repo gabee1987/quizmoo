@@ -8,6 +8,7 @@ description: Drizzle and PostgreSQL conventions for apps/server: schema, migrati
 - Drizzle with the `postgres` driver. Schema in `db/schema.ts`, migrations generated with `pnpm --filter @quizmoo/server db:generate` into `apps/server/drizzle/`, applied with `db:migrate`. Never edit a generated migration that has been applied; add a new one.
 - Migrations run automatically at server start in production (`migrate()` from `drizzle-orm/postgres-js/migrator`) so Railway/Render deploys need no extra step.
 - Queries live in the route or manager that uses them. No repository layer.
+- Comparing a raw `sql` expression with a time: pass ``sql`${date.toISOString()}::timestamptz` ``, not a `Date`. Drizzle maps a `Date` only against a typed column; next to a raw expression the driver throws `ERR_INVALID_ARG_TYPE`.
 - JSON columns are typed with `$type<>()` from shared types and validated with Zod on write.
 - Images: accept `image/jpeg`, `image/png`, `image/webp` up to 5 MB, resize with `sharp` to max 1280 px on the long edge, store as WebP. Reject anything else with 400.
 

@@ -1,9 +1,10 @@
+import type { GameHistoryItem } from '@quizmoo/shared'
 import { eq } from 'drizzle-orm'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { createUser } from '../src/auth/users.js'
 import type { Db } from '../src/db/index.js'
 import { games, quizzes } from '../src/db/schema.js'
-import { endGame, endQuestion, joinPlayer, startGame, submitAnswer } from '../src/game/index.js'
+import { endGame, endQuestion, joinPlayer, openJoining, startGame, submitAnswer } from '../src/game/index.js'
 import { fixtureQuiz } from '../src/game/fixtures.js'
 import { DAY_MS, deleteExpiredGames } from '../src/retention.js'
 import { buildTestApp, sessionCookie } from './helpers/app.js'
@@ -141,6 +142,33 @@ describeDb('results routes and retention (database)', () => {
     expect((await del(gameId)).statusCode).toBe(204)
     expect(built.manager.get(pin)).toBeUndefined()
     expect((await get(`/api/games/${gameId}/results`)).json()).toEqual({ error: 'errors.notFound' })
+  })
+
+  it('cancels a scheduled game before joining opens, not after, and lists it with its time', async () => {
+    const del = (gameId: string) => built.app.inject({ method: 'DELETE', url: `/api/games/${gameId}`, headers: { cookie: alice } })
+    const scheduledAt = Date.now() + 60 * 60 * 1000
+    const schedule = async () => {
+      const res = await built.app.inject({
+        method: 'POST',
+        url: '/api/games',
+        headers: { cookie: alice },
+        payload: { quizId: 'quiz-test_alice', scheduledAt },
+      })
+      return built.manager.get(res.json().pin)!.state
+    }
+    const listed = async (gameId: string) =>
+      ((await get('/api/games')).json().games as GameHistoryItem[]).find((g) => g.gameId === gameId)
+
+    const opened = await schedule()
+    await built.manager.flush()
+    expect((await listed(opened.id))?.scheduledAt).toBe(new Date(scheduledAt).toISOString())
+    built.manager.apply(opened.pin, (state, now) => openJoining(state, now))
+    expect((await del(opened.id)).json()).toEqual({ error: 'errors.gameNotFinished' })
+
+    const cancelled = await schedule()
+    expect((await del(cancelled.id)).statusCode).toBe(204)
+    expect(built.manager.get(cancelled.pin)).toBeUndefined()
+    expect(await listed(cancelled.id)).toBeUndefined()
   })
 
   describe('deleteExpiredGames', () => {

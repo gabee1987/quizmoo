@@ -48,11 +48,12 @@ Error shape everywhere: `{ error: '<i18n key>' }`. Status codes: 400 invalid inp
 | `PATCH /api/quizzes/batch` | owner of all | `{ ids, settings?, questions?: { timeLimitSec?, points? } }` -> `{ updated }`; merged per quiz and fully validated, all or nothing |
 | `POST /api/images` | session | multipart, returns `{ id }` |
 | `GET /api/images/:id` | - | image bytes, long cache headers |
-| `POST /api/games` | session | `{ quizId, settings }` -> creates lobby, returns `{ pin }` |
+| `POST /api/games` | session | `{ quizId, settings, scheduledAt? }` -> creates lobby (scheduled: joining opens then; `400 errors.invalidSchedule`), returns `{ pin }` |
+| `GET /api/games/:pin/public` | - | join page info: title, mode, phase, teams, join URL, `scheduledAt`, `serverNow` |
 | `GET /api/games` | session | own games (gameId, pin, quiz title, mode, phase, player count, dates) |
 | `GET /api/games/:gameId/results` | owner | full results JSON |
 | `GET /api/games/:gameId/results.csv?lang=hu\|en` | owner | CSV export |
-| `DELETE /api/games/:gameId` | owner | delete a finished game and its results |
+| `DELETE /api/games/:gameId` | owner | delete a finished game and its results, or call off a scheduled game before joining opens |
 
 Quiz question ids and option ids are generated server-side with `nanoid(8)` when missing, so the editor can send new questions without ids.
 

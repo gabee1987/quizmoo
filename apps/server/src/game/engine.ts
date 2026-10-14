@@ -1,4 +1,5 @@
 import {
+  MAX_SCHEDULE_DAYS,
   fallbackAvatar,
   streakBonusFor,
   type Answer,
@@ -21,6 +22,8 @@ import {
 } from './types.js'
 
 // Pure commands: (state, input, now) => new state. No I/O, no timers, no clock.
+
+const DAY_MS = 24 * 60 * 60 * 1000
 
 /**
  * New lobby. With `settings.shuffleOptions` the option order of choice questions is
@@ -73,12 +76,16 @@ export interface JoinInput {
   avatar?: Avatar | undefined
 }
 
-/** Adds a player in the lobby. A known token reclaims that player in any phase instead. */
-export function joinPlayer(state: GameState, input: JoinInput): GameState {
+/**
+ * Adds a player in the lobby. A known token reclaims that player in any phase instead.
+ * A scheduled game takes new players from its opening time on (`now` is needed then; without it joining stays closed).
+ */
+export function joinPlayer(state: GameState, input: JoinInput, now?: number): GameState {
   const existing = findByToken(state, input.token)
   if (existing) return withCaptains(withPlayer(state, { ...existing, connected: true, disconnectedAt: null }))
 
   if (state.phase !== 'lobby') throw new EngineError('errors.gameAlreadyStarted')
+  if (!joiningOpen(state, now)) throw new EngineError('errors.gameNotOpenYet')
   const name = input.name.trim()
   if (!isNameAllowed(name)) throw new EngineError('errors.nameNotAllowed')
   const key = nameKey(name)
@@ -174,6 +181,30 @@ export function setCaptain(state: GameState, input: { playerId: string; byPlayer
     throw new EngineError('errors.notCaptain')
   }
   return withCaptains({ ...state, teams: { ...state.teams, [team.id]: { ...team, captainId: player.id } } })
+}
+
+/** Whether new players may join a lobby: always, unless it is scheduled and its time has not come. */
+export function joiningOpen(state: GameState, now: number | undefined): boolean {
+  const at = state.scheduledAt ?? null
+  return at === null || (now !== undefined && now >= at)
+}
+
+/**
+ * Sets when joining opens: a lobby nobody has joined yet, at a time after `now` and at most
+ * `MAX_SCHEDULE_DAYS` ahead (else `errors.invalidSchedule`). Used when a game is created for later
+ * and when the host moves the time.
+ */
+export function schedule(state: GameState, at: number, now: number): GameState {
+  if (state.phase !== 'lobby' || Object.keys(state.players).length > 0) throw new EngineError('errors.gameAlreadyStarted')
+  if (at <= now || at > now + MAX_SCHEDULE_DAYS * DAY_MS) throw new EngineError('errors.invalidSchedule')
+  return { ...state, scheduledAt: at }
+}
+
+/** "Open now": a scheduled lobby takes players from this moment. Unchanged when joining is open already. */
+export function openJoining(state: GameState, now: number): GameState {
+  if (state.phase !== 'lobby') throw new EngineError('errors.gameAlreadyStarted')
+  if (joiningOpen(state, now)) return state
+  return { ...state, scheduledAt: now }
 }
 
 export function startGame(state: GameState, now: number): GameState {

@@ -1,32 +1,39 @@
 import type { HostCommand, HostSnapshot } from '@quizmoo/shared'
-import { MonitorIcon, PlayIcon } from 'lucide-react'
+import { CopyIcon, MonitorIcon, PlayIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { toast } from 'sonner'
 import { QrCode } from '@/components/qr-code'
 import { Button } from '@/components/ui/button'
+import { useTimeReached } from '@/lib/clock'
 import { openProjector } from '@/lib/projector'
 import { LobbyPlayers } from './lobby-players'
 import { MessageBox } from './message-box'
 import { RoundTripBadge } from './round-trip-badge'
+import { ScheduledCard } from './scheduled-card'
 import { settingsLine } from './settings-line'
 
 /**
  * The host control while players join: the way in (QR code, PIN, link) as the centre, Start and the
  * players next to it. Laptop: two columns; phone: the join card first with a smaller QR code.
+ * A scheduled game shows its opening time first, until joining opens.
  */
 export function HostLobby({
   host,
   clockOffset,
   joinUrl,
+  gameId,
   connected,
   send,
 }: {
   host: HostSnapshot
   clockOffset: number
   joinUrl: string | null
+  gameId: string | null
   connected: boolean
   send: (command: HostCommand) => Promise<boolean>
 }) {
   const { t } = useTranslation()
+  const open = useTimeReached(host.scheduledAt, clockOffset)
   const endGame = () => {
     if (window.confirm(t('host.game.confirmEnd'))) void send({ type: 'end' })
   }
@@ -34,6 +41,7 @@ export function HostLobby({
     <div className="mx-auto grid w-full max-w-6xl gap-6 lg:grid-cols-2 lg:items-start">
       <JoinStage host={host} joinUrl={joinUrl} connected={connected} />
       <div className="flex min-w-0 flex-col gap-6">
+        {!open && host.scheduledAt !== null && <ScheduledCard scheduledAt={host.scheduledAt} gameId={gameId} send={send} />}
         {/* Start appears with the first player; ending the game is the rare action, so it waits at the bottom. */}
         {host.players.length > 0 && (
           <Button size="xl" className="w-full animate-pop" onClick={() => void send({ type: 'start' })}>
@@ -89,6 +97,21 @@ function JoinStage({ host, joinUrl, connected }: { host: HostSnapshot; joinUrl: 
               <p className="text-sm font-bold text-muted-foreground">{t('screen.joinAt')}</p>
               <p className="font-semibold break-all">{joinUrl}</p>
             </div>
+          )}
+          {/* The clipboard needs a secure context (HTTPS or localhost); on a LAN address the link above is selectable. */}
+          {joinUrl && typeof navigator.clipboard?.writeText === 'function' && (
+            <Button
+              variant="outline"
+              onClick={() =>
+                void navigator.clipboard.writeText(joinUrl).then(
+                  () => toast.success(t('host.game.linkCopied')),
+                  () => toast.error(t('errors.internal')),
+                )
+              }
+            >
+              <CopyIcon aria-hidden="true" />
+              {t('host.game.copyLink')}
+            </Button>
           )}
           <Button asChild variant="secondary">
             {/* A second click brings the same projector window up instead of opening another one. */}

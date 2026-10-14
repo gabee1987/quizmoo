@@ -294,8 +294,8 @@ function Editor({ quiz }: { quiz: Quiz }) {
   }, [])
 
   const play = useMutation({
-    mutationFn: (settings: GameSettings) =>
-      apiFetch<{ pin: string }>('/api/games', { method: 'POST', body: JSON.stringify({ quizId: quiz.id, settings }) }),
+    mutationFn: ({ settings, scheduledAt }: { settings: GameSettings; scheduledAt?: number | undefined }) =>
+      apiFetch<{ pin: string }>('/api/games', { method: 'POST', body: JSON.stringify({ quizId: quiz.id, settings, scheduledAt }) }),
     onSuccess: ({ pin }) => void navigate({ to: '/host/games/$pin', params: { pin } }),
     onError: toastError,
   })
@@ -619,7 +619,7 @@ function Editor({ quiz }: { quiz: Quiz }) {
             quizTitle={draft.title}
             quizSettings={draft.settings}
             pending={play.isPending}
-            onCreate={(settings) => play.mutate(settings)}
+            onCreate={(settings, scheduledAt) => play.mutate({ settings, scheduledAt })}
             onCancel={() => {
               setStarting(false)
               play.reset()

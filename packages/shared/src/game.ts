@@ -11,6 +11,11 @@ import {
 /** Players per game: about 50 expected at an event, plus headroom. */
 export const MAX_PLAYERS = 60
 
+/** A game can be scheduled this far ahead; joining opens at the scheduled time. */
+export const MAX_SCHEDULE_DAYS = 30
+/** When joining opens: a unix ms time, at most `MAX_SCHEDULE_DAYS` ahead (checked against the clock by the engine). */
+export const scheduledAtSchema = z.number().int().positive()
+
 export const gamePhases =['lobby', 'question', 'reveal', 'scoreboard', 'finished'] as const
 export type GamePhase = (typeof gamePhases)[number]
 
@@ -220,6 +225,11 @@ export interface GameSnapshotBase {
   reviewing: boolean
   /** Server time at snapshot creation, lets clients compute their clock offset. */
   serverNow: number
+  /**
+   * Unix ms when joining opens (a scheduled game) or opened ("Open now" sets it to that moment);
+   * null for a game that was never scheduled. Joining is refused while `serverNow < scheduledAt`.
+   */
+  scheduledAt: number | null
   answeredCount: number
   players: PlayerPublic[]
   teams: TeamPublic[]
@@ -308,6 +318,10 @@ export const gamePublicInfoSchema = z.object({
   teams: z.array(z.object({ id: z.string(), name: z.string() })),
   /** Link players open, also encoded in the QR code. */
   joinUrl: z.string(),
+  /** A scheduled game's opening time (unix ms); null when it was never scheduled. */
+  scheduledAt: z.number().nullable(),
+  /** Server time of the answer, so the page can tell whether joining is open without trusting the phone's clock. */
+  serverNow: z.number(),
 })
 export type GamePublicInfo = z.infer<typeof gamePublicInfoSchema>
 
@@ -390,4 +404,6 @@ export interface GameHistoryItem {
   /** ISO timestamps. */
   createdAt: string
   finishedAt: string | null
+  /** When joining opens or opened, for a scheduled game; otherwise null. */
+  scheduledAt: string | null
 }
