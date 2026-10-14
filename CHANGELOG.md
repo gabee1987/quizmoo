@@ -118,8 +118,8 @@
 - A game keeps the quick messages it was created with, also through a restart. "Save" next to Send adds the typed message to the host's messages and to the running game at once; "Edit" changes a quick message's time or takes it out of this game only.
 - Game defaults: new quizzes start with the host's usual game settings instead of the app's.
 - The settings are stored per host account, reachable only by that host, and deleted with the account.
-- Motion: the sidebar's highlight springs to the chosen page, toasts are wider on laptops and bubble in and out, tab panels, rows and the unsaved changes bar animate in and out instead of blinking, and panels spring to their new height. The settings tabs are bigger and coloured, and the unsaved changes bar stands apart from the page under it.
-- The quiz editor's settings on a phone use the full width, with a one-line summary in the header.
+- Motion: the sidebar's highlight springs to the chosen page, toasts are as wide as the page's panels and bubble in and out, rows moved with the arrows or shortcuts slide past each other (quick messages, the editor's question list, the ordering question), tab panels, rows and the unsaved changes bar animate in and out instead of blinking, and panels spring to their new height. The settings tabs are bigger and coloured, and the unsaved changes bar stands apart from the page under it.
+- The quiz editor's settings on a phone use the full width, with a one-line summary in the header and the same space on both sides when a scrollbar shows.
 
 ### Development
 - The web dev server runs on port 15173, away from the 5173+ ports other local Vite projects take.

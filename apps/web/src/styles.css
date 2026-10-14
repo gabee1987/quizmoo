@@ -674,10 +674,20 @@
     height 400ms,
     box-shadow 200ms;
 }
-/* Wider on laptops (Sonner sets its 356 px inline), still the full width on phones. */
+/*
+ * From sm up, as wide as the page's panels (max-w-3xl, Sonner sets its 356 px inline); still the
+ * full width on phones. Beside the host sidebar (w-60 plus a gap-8) the page's column is centred
+ * 136 px right of the window's centre, and so are the toasts.
+ */
 @media (min-width: 640px) {
   .toaster {
-    --width: 460px !important;
+    --width: min(48rem, calc(100vw - 2rem)) !important;
+  }
+}
+@media (min-width: 1024px) {
+  body:has([data-host-sidebar]) .toaster[data-x-position='center'] {
+    --width: min(48rem, calc(100vw - 2rem - 272px)) !important;
+    left: calc(50% + 136px) !important;
   }
 }
 /*

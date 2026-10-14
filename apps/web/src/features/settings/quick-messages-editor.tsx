@@ -3,11 +3,12 @@ import { DndContext, closestCenter, type UniqueIdentifier } from '@dnd-kit/core'
 import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { ArrowDownIcon, ArrowUpIcon, GripVerticalIcon, LanguagesIcon, PlusIcon, RotateCcwIcon, XIcon } from 'lucide-react'
-import { useCallback, useId, useMemo, useState, type FormEvent } from 'react'
+import { useCallback, useId, useMemo, useRef, useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/cn'
+import { useFlip } from '@/lib/flip'
 import { useMotionOk } from '@/lib/motion'
 import { dragMove, useSortableAccessibility, useSortableSensors } from '@/lib/sortable'
 import { move, newId } from '../editor/draft'
@@ -43,6 +44,9 @@ export function QuickMessagesEditor({
   const full = messages.length >= MAX_QUICK_MESSAGES
   const restored = restoreBuiltIns(messages)
   const missingBuiltIns = restored.length - messages.length
+  // The arrows slide the rows into their new places; a removed row's neighbours close the gap.
+  const list = useRef<HTMLDivElement>(null)
+  const flip = useFlip(list)
 
   const update = (index: number, message: QuickMessage) => onMessages(messages.map((m, i) => (i === index ? message : m)))
 
@@ -54,7 +58,7 @@ export function QuickMessagesEditor({
   }
 
   return (
-    <div className="flex flex-col gap-2">
+    <div ref={list} className="flex flex-col gap-2">
       <p className="text-sm font-semibold text-muted-foreground tabular-nums">
         {t('settings.messages.count', { n: messages.length, max: MAX_QUICK_MESSAGES })}
       </p>
@@ -77,8 +81,14 @@ export function QuickMessagesEditor({
               entering={!initialIds.has(message.id)}
               last={index === messages.length - 1}
               onChange={(next) => update(index, next)}
-              onMove={(to) => onMessages(move(messages, index, to))}
-              onRemove={() => onMessages(messages.filter((m) => m.id !== message.id))}
+              onMove={(to) => {
+                flip(message.id)
+                onMessages(move(messages, index, to))
+              }}
+              onRemove={() => {
+                flip()
+                onMessages(messages.filter((m) => m.id !== message.id))
+              }}
             />
           ))}
         </SortableContext>
@@ -151,6 +161,7 @@ function MessageRow({
   return (
     <div
       ref={setNodeRef}
+      data-flip-id={message.id}
       style={{ transform: CSS.Translate.toString(transform), transition }}
       onAnimationEnd={(e) => {
         if (leaving && e.target === e.currentTarget) onRemove()

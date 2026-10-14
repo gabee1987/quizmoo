@@ -2,10 +2,11 @@ import type { Question } from '@quizmoo/shared'
 import { DndContext, DragOverlay, closestCenter, type UniqueIdentifier } from '@dnd-kit/core'
 import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { useCallback, useMemo, useState, type KeyboardEventHandler, type ReactNode } from 'react'
+import { useCallback, useMemo, useRef, useState, type KeyboardEventHandler, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { GripVerticalIcon } from 'lucide-react'
 import { cn } from '@/lib/cn'
+import { useFlipOnReorder } from '@/lib/flip'
 import { dragMove, useSortableAccessibility, useSortableSensors } from '@/lib/sortable'
 import { typeIcons } from './type-picker'
 
@@ -34,6 +35,10 @@ export function QuestionList({
   const accessibility = useSortableAccessibility(ids, name)
   const [activeId, setActiveId] = useState<string | null>(null)
   const activeIndex = activeId ? ids.indexOf(activeId) : -1
+  // Moves from the toolbar or the shortcuts slide the rows into place; a drag animates itself.
+  const listRef = useRef<HTMLOListElement>(null)
+  const dragged = useRef(false)
+  useFlipOnReorder(listRef, ids.join(), selectedId, dragged)
 
   return (
     <DndContext
@@ -45,11 +50,14 @@ export function QuestionList({
       onDragEnd={(event) => {
         setActiveId(null)
         const moved = dragMove(ids, event)
-        if (moved) onMove(moved.from, moved.to)
+        if (moved) {
+          dragged.current = true
+          onMove(moved.from, moved.to)
+        }
       }}
     >
       <SortableContext items={ids} strategy={verticalListSortingStrategy}>
-        <ol className="flex flex-col gap-1.5" aria-label={t('editor.questionCount', { count: questions.length })}>
+        <ol ref={listRef} className="flex flex-col gap-1.5" aria-label={t('editor.questionCount', { count: questions.length })}>
           {questions.map((question, index) => (
             <SortableRow
               key={question.id}
@@ -100,6 +108,7 @@ function SortableRow({
   return (
     <li
       ref={setNodeRef}
+      data-flip-id={question.id}
       style={{ transform: CSS.Translate.toString(transform), transition }}
       className={cn('touch-manipulation', isDragging && 'opacity-30')}
       {...pointerListeners}

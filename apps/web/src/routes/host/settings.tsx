@@ -157,18 +157,19 @@ function SettingsForm({ saved }: { saved: HostSettings }) {
 
       {/*
        * Stays in reach while either section is edited; the bottom tab bar is below it on phones.
-       * The page background fades in above it and rings it, so content scrolling under it stays apart.
+       * A blurred halo of the page colour behind it (no edges, so no box) keeps content scrolling
+       * under it apart, and on phones fills the gap down to the tab bar.
        */}
       {saveBar.mounted && (
         <div
           onAnimationEnd={saveBar.onAnimationEnd}
           className={cn(
-            // On phones it reaches down to the bottom tab bar, so nothing shows between the two.
-            'sticky bottom-[calc(4rem+env(safe-area-inset-bottom))] z-30 -mx-2 bg-linear-to-t from-background from-60% to-transparent px-2 pt-8 pb-3 lg:bottom-0 lg:pb-4',
+            'sticky bottom-[calc(4rem+env(safe-area-inset-bottom)+0.75rem)] z-30 isolate lg:bottom-4',
+            'before:absolute before:-inset-x-3 before:-top-10 before:-bottom-5 before:-z-10 before:rounded-[3rem] before:bg-background/90 before:blur-2xl lg:before:-inset-x-10 lg:before:-top-14 lg:before:-bottom-8',
             saveBar.leaving ? 'pointer-events-none animate-pop-out' : 'animate-pop',
           )}
         >
-          <div className="flex flex-wrap items-center gap-3 rounded-2xl border-2 border-primary bg-[color-mix(in_srgb,var(--primary)_9%,var(--card))] p-3 shadow-[0_4px_0_0_var(--primary-edge),0_18px_40px_-12px_var(--shadow-color)]">
+          <div className="flex flex-wrap items-center gap-3 rounded-2xl border-2 border-primary bg-[color-mix(in_srgb,var(--primary)_9%,var(--card))] p-3 shadow-[0_4px_0_0_var(--primary-edge)]">
             <p className="flex min-w-0 flex-1 items-center gap-2 font-bold">
               <CircleAlertIcon className={cn('size-5 shrink-0', problem ? 'text-destructive' : 'text-primary')} aria-hidden="true" />
               {problem ? <span className="text-destructive">{t(problem)}</span> : t('settings.unsaved')}

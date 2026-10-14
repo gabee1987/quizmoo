@@ -50,7 +50,9 @@ export function HostNav({ user }: { user: User }) {
   return (
     <>
       {/* Laptop: sidebar */}
+      {/* data-host-sidebar: the toasts centre on the page's column beside it (styles.css). */}
       <nav
+        data-host-sidebar
         aria-label={t('nav.label')}
         className="hidden lg:sticky lg:top-4 lg:flex lg:w-60 lg:shrink-0 lg:flex-col lg:gap-1 lg:self-start"
       >

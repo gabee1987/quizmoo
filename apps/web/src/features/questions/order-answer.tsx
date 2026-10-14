@@ -3,10 +3,11 @@ import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-
 import { CSS } from '@dnd-kit/utilities'
 import type { Answer, Option } from '@quizmoo/shared'
 import { ChevronDownIcon, ChevronUpIcon, GripVerticalIcon, Loader2Icon } from 'lucide-react'
-import { useCallback, useState, type KeyboardEventHandler } from 'react'
+import { useCallback, useRef, useState, type KeyboardEventHandler } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/cn'
+import { useFlip } from '@/lib/flip'
 import { dragMove, useInstantSortableSensors, useSortableAccessibility } from '@/lib/sortable'
 import { stagger } from '../../lib/motion'
 import { move } from '../editor/draft'
@@ -32,9 +33,12 @@ export function OrderAnswer({ question, mode, disabled, pending, large, initial,
   const accessibility = useSortableAccessibility(ids, name)
   const answering = mode === 'answer'
   const locked = !answering || disabled
+  // The arrows slide the two items past each other; a drag animates itself.
+  const listRef = useRef<HTMLOListElement>(null)
+  const flip = useFlip(listRef)
 
   const list = (
-    <ol className={cn('flex flex-col', large ? 'gap-4' : 'gap-2.5')}>
+    <ol ref={listRef} className={cn('flex flex-col', large ? 'gap-4' : 'gap-2.5')}>
       {items.map((item, index) => (
         <OrderItem
           key={item.id}
@@ -43,7 +47,10 @@ export function OrderAnswer({ question, mode, disabled, pending, large, initial,
           count={items.length}
           large={large ?? false}
           locked={locked ?? false}
-          onMove={(to) => setItems((current) => move(current, index, to))}
+          onMove={(to) => {
+            flip(item.id)
+            setItems((current) => move(current, index, to))
+          }}
         />
       ))}
     </ol>
@@ -116,6 +123,7 @@ function OrderItem({
   return (
     // The pop runs on the wrapper: the sortable transform on the item would cancel it.
     <li
+      data-flip-id={item.id}
       className={cn(!entered && 'animate-pop')}
       style={entered ? undefined : stagger(index, 70, 150)}
       onAnimationEnd={(e) => {

@@ -596,7 +596,10 @@ function Editor({ quiz }: { quiz: Quiz }) {
               {/* One line on phones: the header stays put while the settings scroll under it. */}
               <SheetDescription className="line-clamp-1 text-sm sm:line-clamp-none">{settingsSummary(draft.settings, t)}</SheetDescription>
             </SheetHeader>
-            <div className="overflow-y-auto px-4 pt-4 pb-[calc(1.5rem+env(safe-area-inset-bottom))] sm:px-5">{settingsBody}</div>
+            {/* The scrollbar's gutter on both sides, so a classic scrollbar does not make the right side wider. */}
+            <div className="overflow-y-auto px-4 pt-4 pb-[calc(1.5rem+env(safe-area-inset-bottom))] [scrollbar-gutter:stable_both-edges] sm:px-5">
+              {settingsBody}
+            </div>
           </SheetContent>
         </Sheet>
 
