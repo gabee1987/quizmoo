@@ -34,7 +34,7 @@ test('a phone survives going offline; host messages reach phones and the project
 
   // A quiz and a game of its own, removed at the end.
   const questions = [{ type: 'truefalse', text: 'Connection check', correct: true, timeLimitSec: 120 }]
-  const created = await page.request.post('/api/quizzes', { data: { title: `E2E connection ${Date.now()}`, questions } })
+  const created = await page.request.post('/api/quizzes', { data: { title: `E2E connection ${Date.now()}`, questions, settings: {} } })
   const { quiz } = (await created.json()) as { quiz: { id: string } }
   const { pin } = (await (await page.request.post('/api/games', { data: { quizId: quiz.id } })).json()) as { pin: string }
   const { gameId } = (await (await page.request.get(`/api/games/${pin}`)).json()) as { gameId: string }

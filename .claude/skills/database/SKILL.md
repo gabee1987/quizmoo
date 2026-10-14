@@ -14,7 +14,7 @@ description: Drizzle and PostgreSQL conventions for apps/server: schema, migrati
 
 ## Host settings
 
-`host_settings`: one row per host (`user_id` primary key, cascade on delete), `settings` jsonb stored as sent and read with `readHostSettings` / `parseHostSettings` (`routes/me.ts`): a stored field that no longer validates falls back to its own default without losing the others. Games copy what they need (quick messages) at creation into their state; nothing public ever reads this table.
+`host_settings`: one row per host (`user_id` primary key, cascade on delete), `settings` jsonb stored as sent and read with `readHostSettings` / `parseHostSettings` (`routes/me.ts`): a stored field that no longer validates falls back to its own default without losing the others; rows saved before built-in and own quick messages were one list (`hiddenBuiltIns`) are merged with `mergeLegacyQuickMessages` on read. Games copy what they need (quick messages) at creation into their state; nothing public ever reads this table.
 
 ## Results and retention
 

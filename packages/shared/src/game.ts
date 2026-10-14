@@ -7,7 +7,7 @@ import {
   type QuestionType,
   type TeamAnswerMode,
 } from './quiz.js'
-import type { GameQuickMessages } from './host.js'
+import type { QuickMessage } from './host.js'
 
 /** Players per game: about 50 expected at an event, plus headroom. */
 export const MAX_PLAYERS = 60
@@ -276,7 +276,7 @@ export interface HostSnapshot extends GameSnapshotBase {
    */
   teamAnswers: TeamAnswerPublic[] | null
   /** The message box's quick messages for this game. Host room only; null on the public screen. */
-  quickMessages: GameQuickMessages | null
+  quickMessages: QuickMessage[] | null
 }
 
 /** What a player's phone receives. */

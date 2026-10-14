@@ -345,7 +345,11 @@ function Editor({ quiz }: { quiz: Quiz }) {
     </div>
   )
   const settingsGroup = (section: SettingsSection) => (
-    <section className="flex flex-col gap-4 rounded-2xl border p-4" aria-labelledby={`settings-group-${section}`}>
+    // A card from sm up; on phones a plain section under a line, so the options get the whole width.
+    <section
+      className="flex flex-col gap-4 border-t pt-5 sm:rounded-2xl sm:border sm:p-4"
+      aria-labelledby={`settings-group-${section}`}
+    >
       <h3 id={`settings-group-${section}`} className="text-lg font-extrabold">
         {t(`host.batch.groups.${section}`)}
       </h3>
@@ -587,11 +591,12 @@ function Editor({ quiz }: { quiz: Quiz }) {
         {/* Narrower screens have no room beside the form: the settings slide over it. */}
         <Sheet open={settingsOpen && !wide} onOpenChange={setSettingsOpen}>
           <SheetContent side="right" className="w-full gap-0 sm:max-w-2xl lg:max-w-4xl">
-            <SheetHeader>
+            <SheetHeader className="border-b pr-14">
               <SheetTitle className="text-lg font-extrabold">{t('editor.settings')}</SheetTitle>
-              <SheetDescription className="text-sm">{settingsSummary(draft.settings, t)}</SheetDescription>
+              {/* One line on phones: the header stays put while the settings scroll under it. */}
+              <SheetDescription className="line-clamp-1 text-sm sm:line-clamp-none">{settingsSummary(draft.settings, t)}</SheetDescription>
             </SheetHeader>
-            <div className="overflow-y-auto px-4 pb-6">{settingsBody}</div>
+            <div className="overflow-y-auto px-4 pt-4 pb-[calc(1.5rem+env(safe-area-inset-bottom))] sm:px-5">{settingsBody}</div>
           </SheetContent>
         </Sheet>
 

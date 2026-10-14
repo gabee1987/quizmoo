@@ -2,47 +2,64 @@ import { z } from 'zod'
 import { announcementDurationSchema, announcementTextSchema } from './game.js'
 import { gameSettingsSchema } from './quiz.js'
 
-/** The message box's own messages, translated on the host's screen. A host can hide any of them. */
+/** The app's own quick messages, translated on the host's screen. Every host list starts with them. */
 export const builtInMessages = ['getReady', 'shortBreak', 'lastQuestion'] as const
 export type BuiltInMessage = (typeof builtInMessages)[number]
 
-/** A host's own quick messages, in the library and in each game. */
-export const MAX_QUICK_MESSAGES = 20
+/** Quick messages in a host's list, and in each game. */
+export const MAX_QUICK_MESSAGES = 25
 
-/** A host's own message, sent as typed. Without `durationSec` it stays until cleared. */
-export const quickMessageSchema = z.object({
-  id: z.string().min(1).max(16),
-  text: announcementTextSchema,
-  durationSec: announcementDurationSchema.nullable().default(null),
+const idSchema = z.string().min(1).max(16)
+const durationSchema = announcementDurationSchema.nullable().default(null)
+
+/** A built-in message: shown in the host's language. Its id is its name. Editing its text turns it into an own message. */
+export const builtInQuickMessageSchema = z.object({
+  id: idSchema,
+  builtIn: z.enum(builtInMessages),
+  durationSec: durationSchema,
 })
+/** A host's own message, sent as typed. Without `durationSec` it stays until cleared. */
+export const ownQuickMessageSchema = z.object({
+  id: idSchema,
+  text: announcementTextSchema,
+  durationSec: durationSchema,
+})
+export const quickMessageSchema = z.union([builtInQuickMessageSchema, ownQuickMessageSchema])
 export type QuickMessage = z.infer<typeof quickMessageSchema>
+export type OwnQuickMessage = z.infer<typeof ownQuickMessageSchema>
 
-const quickMessagesSchema = z
+/** The three built-in messages, in their usual order: a new host's list. */
+export const defaultQuickMessages = (): QuickMessage[] =>
+  builtInMessages.map((name) => ({ id: name, builtIn: name, durationSec: null }))
+
+/** One ordered list of quick messages, built-in and own together; each id once. */
+export const quickMessagesSchema = z
   .array(quickMessageSchema)
   .max(MAX_QUICK_MESSAGES)
   .refine((messages) => new Set(messages.map((m) => m.id)).size === messages.length, 'errors.invalidInput')
 
-const hiddenSchema = z.array(z.enum(builtInMessages)).max(builtInMessages.length)
-
-/** The quick messages a game shows: copied from the host's settings when it is created. */
-export const gameQuickMessagesSchema = z.object({
-  hidden: hiddenSchema.default([]),
-  own: quickMessagesSchema.default([]),
-})
-export type GameQuickMessages = z.infer<typeof gameQuickMessagesSchema>
+/**
+ * Before the lists were merged, built-ins were kept apart (`hiddenBuiltIns` in host settings,
+ * `{ hidden, own }` in games). Reads such a value as one list: the visible built-ins, then the own ones.
+ */
+export function mergeLegacyQuickMessages(hidden: unknown, own: unknown): QuickMessage[] {
+  const hiddenNames = Array.isArray(hidden) ? hidden : []
+  const visible = defaultQuickMessages().filter((m) => !hiddenNames.includes(m.id))
+  const parsed = z.array(ownQuickMessageSchema).safeParse(own)
+  return [...visible, ...(parsed.success ? parsed.data : [])].slice(0, MAX_QUICK_MESSAGES)
+}
 
 /**
  * One host account's own settings, kept across quizzes and games. Stored as sent and read through
  * this schema, so fields added later get their defaults from old rows. Never holds player data.
  */
 export const hostSettingsSchema = z.object({
-  quickMessages: quickMessagesSchema.default([]),
-  hiddenBuiltIns: hiddenSchema.default([]),
+  quickMessages: quickMessagesSchema.default(defaultQuickMessages),
   /** New quizzes start with these game settings; null means the app's defaults. */
   gameDefaults: gameSettingsSchema.nullable().default(null),
 })
 export type HostSettings = z.infer<typeof hostSettingsSchema>
 
-/** "Save to my messages": one message added to the library (and to the running game). */
-export const newQuickMessageSchema = quickMessageSchema.omit({ id: true })
+/** "Save to my messages": one own message added to the list (and to the running game). */
+export const newQuickMessageSchema = ownQuickMessageSchema.omit({ id: true })
 export type NewQuickMessage = z.infer<typeof newQuickMessageSchema>

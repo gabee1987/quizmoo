@@ -1,16 +1,29 @@
 import { gameSettingsSchema, type HostSettings } from '@quizmoo/shared'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute, useBlocker } from '@tanstack/react-router'
-import { KeyRoundIcon, MegaphoneIcon, RotateCcwIcon, SaveIcon, SlidersHorizontalIcon } from 'lucide-react'
+import {
+  CircleAlertIcon,
+  KeyRoundIcon,
+  MegaphoneIcon,
+  PaletteIcon,
+  RotateCcwIcon,
+  RouteIcon,
+  SaveIcon,
+  SlidersHorizontalIcon,
+  TrophyIcon,
+} from 'lucide-react'
 import { useState, type ComponentType, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
+import { SmoothHeight } from '@/components/smooth-height'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { cn } from '@/lib/cn'
+import { usePresence } from '@/lib/presence'
 import { toastError } from '@/lib/toast'
 import { ConfirmDialog } from '../../components/dialog'
-import { GameSettingsForm, allSections, settingsError } from '../../features/host/game-settings-form'
+import { GameSettingsForm, allSections, settingsError, type SettingsSection } from '../../features/host/game-settings-form'
 import { hostSettingsQueryOptions, saveHostSettings } from '../../features/settings/host-settings'
 import { PasswordForm } from '../../features/settings/password-form'
 import { QuickMessagesEditor } from '../../features/settings/quick-messages-editor'
@@ -18,6 +31,12 @@ import { QuickMessagesEditor } from '../../features/settings/quick-messages-edit
 export const Route = createFileRoute('/host/settings')({
   component: SettingsPage,
 })
+
+const sectionIcons: Record<SettingsSection, ComponentType<{ className?: string }>> = {
+  flow: RouteIcon,
+  look: PaletteIcon,
+  scoring: TrophyIcon,
+}
 
 /** My settings: what belongs to the host account and outlasts quizzes and games. */
 function SettingsPage() {
@@ -33,11 +52,10 @@ function SettingsPage() {
       {settings.isPending ? (
         <Skeleton className="h-96 rounded-2xl" />
       ) : settings.isError ? null : (
-        // Keyed by the stored settings: a change saved elsewhere ("Save to my messages" in a game) starts a fresh draft.
-        <SettingsForm key={JSON.stringify(settings.data)} saved={settings.data} />
+        <SettingsForm saved={settings.data} />
       )}
       <Section id="account" icon={KeyRoundIcon} title={t('auth.passwordChange.title')}>
-        <PasswordForm className="max-w-sm" onDone={() => toast.success(t('settings.passwordSaved'))} />
+        <PasswordForm onDone={() => toast.success(t('settings.passwordSaved'))} />
       </Section>
     </div>
   )
@@ -47,10 +65,19 @@ function SettingsForm({ saved }: { saved: HostSettings }) {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
   const [draft, setDraft] = useState(saved)
+  // A change saved elsewhere ("Save to my messages" in a game) starts a fresh draft.
+  const [base, setBase] = useState(saved)
+  if (JSON.stringify(saved) !== JSON.stringify(base)) {
+    setBase(saved)
+    setDraft(saved)
+  }
   const dirty = JSON.stringify(draft) !== JSON.stringify(saved)
   const defaults = draft.gameDefaults ?? gameSettingsSchema.parse({})
-  const problem =
-    draft.quickMessages.some((m) => !m.text.trim()) ? 'settings.messages.textRequired' : draft.gameDefaults && settingsError(draft.gameDefaults)
+  const problem = draft.quickMessages.some((m) => 'text' in m && !m.text.trim())
+    ? 'settings.messages.textRequired'
+    : draft.gameDefaults && settingsError(draft.gameDefaults)
+  const saveBar = usePresence(dirty)
+  const resetButton = usePresence(draft.gameDefaults !== null)
 
   const save = useMutation({
     mutationFn: () => saveHostSettings(draft),
@@ -67,59 +94,93 @@ function SettingsForm({ saved }: { saved: HostSettings }) {
   return (
     <>
       <Section icon={MegaphoneIcon} title={t('settings.messages.title')} help={t('settings.messages.help')}>
-        <QuickMessagesEditor
-          messages={draft.quickMessages}
-          hidden={draft.hiddenBuiltIns}
-          onMessages={(quickMessages) => setDraft((d) => ({ ...d, quickMessages }))}
-          onHidden={(hiddenBuiltIns) => setDraft((d) => ({ ...d, hiddenBuiltIns }))}
-        />
+        <SmoothHeight>
+          <QuickMessagesEditor
+            messages={draft.quickMessages}
+            onMessages={(quickMessages) => setDraft((d) => ({ ...d, quickMessages }))}
+          />
+        </SmoothHeight>
       </Section>
 
       <Section icon={SlidersHorizontalIcon} title={t('settings.defaults.title')} help={t('settings.defaults.help')}>
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <p className="text-sm font-semibold text-muted-foreground">
+        <div className="flex min-h-9 flex-wrap items-center justify-between gap-2">
+          <p key={String(!!draft.gameDefaults)} className="animate-panel-swap text-sm font-semibold text-muted-foreground">
             {draft.gameDefaults ? t('settings.defaults.own') : t('settings.defaults.app')}
           </p>
-          {draft.gameDefaults && (
-            <Button variant="outline" size="sm" onClick={() => setDraft((d) => ({ ...d, gameDefaults: null }))}>
+          {resetButton.mounted && (
+            <Button
+              variant="outline"
+              size="sm"
+              className={resetButton.leaving ? 'pointer-events-none animate-pop-out' : 'animate-pop'}
+              onAnimationEnd={resetButton.onAnimationEnd}
+              onClick={() => setDraft((d) => ({ ...d, gameDefaults: null }))}
+            >
               <RotateCcwIcon aria-hidden="true" />
               {t('settings.defaults.reset')}
             </Button>
           )}
         </div>
         <Tabs defaultValue="flow" className="gap-4">
-          <TabsList>
-            {allSections.map((section) => (
-              <TabsTrigger key={section} value={section}>
-                {t(`host.batch.groups.${section}`)}
-              </TabsTrigger>
-            ))}
+          <TabsList className="h-auto! w-full gap-1 rounded-2xl p-1.5">
+            {allSections.map((section) => {
+              const Icon = sectionIcons[section]
+              return (
+                <TabsTrigger
+                  key={section}
+                  value={section}
+                  className={cn(
+                    'group/tab min-h-12 gap-2 rounded-xl px-2 text-base font-extrabold sm:px-4',
+                    'transition-[color,background-color,box-shadow,transform] duration-300 ease-spring hover:bg-card/60',
+                    'data-[state=active]:border-transparent! data-[state=active]:bg-primary! data-[state=active]:text-primary-foreground!',
+                    'data-[state=active]:shadow-[0_3px_0_0_var(--primary-edge)]! data-[state=active]:-translate-y-px',
+                  )}
+                >
+                  <Icon className="size-5! transition-transform duration-500 ease-spring group-data-[state=active]/tab:animate-wiggle" />
+                  {t(`host.batch.groups.${section}`)}
+                </TabsTrigger>
+              )
+            })}
           </TabsList>
-          {allSections.map((section) => (
-            <TabsContent key={section} value={section}>
-              <GameSettingsForm
-                value={defaults}
-                onChange={(gameDefaults) => setDraft((d) => ({ ...d, gameDefaults }))}
-                sections={[section]}
-              />
-            </TabsContent>
-          ))}
+          <SmoothHeight>
+            {allSections.map((section) => (
+              <TabsContent key={section} value={section}>
+                <GameSettingsForm
+                  value={defaults}
+                  onChange={(gameDefaults) => setDraft((d) => ({ ...d, gameDefaults }))}
+                  sections={[section]}
+                />
+              </TabsContent>
+            ))}
+          </SmoothHeight>
         </Tabs>
       </Section>
 
-      {/* Stays in reach while either section is edited; the bottom tab bar is below it on phones. */}
-      {dirty && (
-        <div className="sticky bottom-20 z-30 flex flex-wrap items-center gap-3 rounded-2xl border bg-card p-3 shadow-soft animate-pop lg:bottom-4">
-          <p className="min-w-0 flex-1 font-semibold">
-            {problem ? <span className="text-destructive">{t(problem)}</span> : t('settings.unsaved')}
-          </p>
-          <Button variant="ghost" onClick={() => setDraft(saved)}>
-            {t('settings.discard')}
-          </Button>
-          <Button disabled={!!problem || save.isPending} onClick={() => save.mutate()}>
-            <SaveIcon aria-hidden="true" />
-            {t('common.save')}
-          </Button>
+      {/*
+       * Stays in reach while either section is edited; the bottom tab bar is below it on phones.
+       * The page background fades in above it and rings it, so content scrolling under it stays apart.
+       */}
+      {saveBar.mounted && (
+        <div
+          onAnimationEnd={saveBar.onAnimationEnd}
+          className={cn(
+            // On phones it reaches down to the bottom tab bar, so nothing shows between the two.
+            'sticky bottom-[calc(4rem+env(safe-area-inset-bottom))] z-30 -mx-2 bg-linear-to-t from-background from-60% to-transparent px-2 pt-8 pb-3 lg:bottom-0 lg:pb-4',
+            saveBar.leaving ? 'pointer-events-none animate-pop-out' : 'animate-pop',
+          )}
+        >
+          <div className="flex flex-wrap items-center gap-3 rounded-2xl border-2 border-primary bg-[color-mix(in_srgb,var(--primary)_9%,var(--card))] p-3 shadow-[0_4px_0_0_var(--primary-edge),0_18px_40px_-12px_var(--shadow-color)]">
+            <p className="flex min-w-0 flex-1 items-center gap-2 font-bold">
+              <CircleAlertIcon className={cn('size-5 shrink-0', problem ? 'text-destructive' : 'text-primary')} aria-hidden="true" />
+              {problem ? <span className="text-destructive">{t(problem)}</span> : t('settings.unsaved')}
+            </p>
+            <Button variant="ghost" onClick={() => setDraft(saved)}>
+              {t('settings.discard')}
+            </Button>
+            <Button disabled={!!problem || save.isPending} onClick={() => save.mutate()}>
+              <SaveIcon aria-hidden="true" />
+              {t('common.save')}
+            </Button>
+          </div>
         </div>
       )}
 

@@ -1,4 +1,11 @@
-import { MAX_QUICK_MESSAGES, hostSettingsSchema, newQuickMessageSchema, type HostSettings, type QuickMessage } from '@quizmoo/shared'
+import {
+  MAX_QUICK_MESSAGES,
+  hostSettingsSchema,
+  mergeLegacyQuickMessages,
+  newQuickMessageSchema,
+  type HostSettings,
+  type OwnQuickMessage,
+} from '@quizmoo/shared'
 import { eq } from 'drizzle-orm'
 import type { FastifyInstance } from 'fastify'
 import { nanoid } from 'nanoid'
@@ -12,9 +19,12 @@ import { parseOr400 } from './http.js'
  * longer validates (a game setting changed in a later version) falls back to its default alone.
  */
 export function parseHostSettings(raw: unknown): HostSettings {
-  const whole = hostSettingsSchema.safeParse(raw)
+  const stored = (raw && typeof raw === 'object' ? raw : {}) as Record<string, unknown>
+  // Rows saved before the built-in and own messages were one list.
+  const row =
+    'hiddenBuiltIns' in stored ? { ...stored, quickMessages: mergeLegacyQuickMessages(stored.hiddenBuiltIns, stored.quickMessages) } : stored
+  const whole = hostSettingsSchema.safeParse(row)
   if (whole.success) return whole.data
-  const row = (raw && typeof raw === 'object' ? raw : {}) as Record<string, unknown>
   const fields = Object.entries(hostSettingsSchema.shape).map(([key, schema]) => {
     const field = schema.safeParse(row[key])
     return [key, field.success ? field.data : schema.parse(undefined)]
@@ -57,7 +67,7 @@ export async function meRoutes(app: FastifyInstance, { db }: { db: Db }) {
     if (!input) return reply
     const settings = await readHostSettings(db, request.user!.id)
     if (settings.quickMessages.length >= MAX_QUICK_MESSAGES) return reply.code(409).send({ error: 'errors.quickMessagesFull' })
-    const message: QuickMessage = { id: nanoid(8), ...input }
+    const message: OwnQuickMessage = { id: nanoid(8), ...input }
     await saveHostSettings(db, request.user!.id, { ...settings, quickMessages: [...settings.quickMessages, message] })
     return reply.code(201).send({ message })
   })

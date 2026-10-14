@@ -35,6 +35,7 @@ import {
   pause,
   releaseResults,
   removeQuickMessage,
+  setQuickMessageTime,
   resume,
   schedule,
   setCaptain,
@@ -319,6 +320,8 @@ function runHostCommand(state: GameState, command: HostCommand, now: number): Ga
       return addQuickMessage(state, command.message)
     case 'removeQuickMessage':
       return removeQuickMessage(state, command.id)
+    case 'setQuickMessageTime':
+      return setQuickMessageTime(state, command.id, command.durationSec)
     case 'pause':
       return pause(state, now)
     case 'resume':

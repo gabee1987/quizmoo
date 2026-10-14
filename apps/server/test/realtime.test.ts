@@ -5,7 +5,7 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } 
 import { createUser } from '../src/auth/users.js'
 import type { Db } from '../src/db/index.js'
 import { games, quizzes } from '../src/db/schema.js'
-import { announce, endGame, extendTime, joinPlayer, pause, releaseResults, resume, startGame, submitAnswer } from '../src/game/index.js'
+import { announce, endGame, extendTime, joinPlayer, pause, quickMessagesOf, releaseResults, resume, startGame, submitAnswer } from '../src/game/index.js'
 import { fixtureQuiz, fixtureSettings } from '../src/game/fixtures.js'
 import {
   FINISHED_TTL_MS,
@@ -458,24 +458,26 @@ describeDb('sockets (database)', () => {
   it("copies the host's quick messages into a new game, which keeps its own copy through a restart", async () => {
     const save = (payload: object) =>
       built.app.inject({ method: 'PUT', url: '/api/me/settings', headers: { cookie: hostCookie }, payload })
-    await save({ quickMessages: [{ id: 'm1', text: 'Pizza is here!', durationSec: 30 }], hiddenBuiltIns: ['lastQuestion'] })
+    const pizza = { id: 'm1', text: 'Pizza is here!', durationSec: 30 }
+    const lastQuestion = { id: 'lastQuestion', builtIn: 'lastQuestion', durationSec: null }
+    await save({ quickMessages: [pizza, lastQuestion] })
     const pin = await newGame()
     // Later edits to the library leave the game alone.
     await save({ quickMessages: [] })
     const hostSocket = await host(pin)
-    const added = nextSnapshot<HostSnapshot>(hostSocket, 'game:host', (s) => s.quickMessages!.own.length === 2)
+    const added = nextSnapshot<HostSnapshot>(hostSocket, 'game:host', (s) => s.quickMessages!.length === 3)
     const back = { id: 'm2', text: 'Back in 5', durationSec: null }
     expect(await command(hostSocket, { type: 'addQuickMessage', message: back })).toEqual({ ok: true })
-    expect((await added).quickMessages).toEqual({
-      hidden: ['lastQuestion'],
-      own: [{ id: 'm1', text: 'Pizza is here!', durationSec: 30 }, back],
-    })
+    expect((await added).quickMessages).toEqual([pizza, lastQuestion, back])
     expect(await command(hostSocket, { type: 'addQuickMessage', message: { id: 'm3', text: '' } })).toEqual({ error: 'errors.invalidInput' })
+    const timed = nextSnapshot<HostSnapshot>(hostSocket, 'game:host', (s) => s.quickMessages![1]!.durationSec === 10)
+    expect(await command(hostSocket, { type: 'setQuickMessageTime', id: 'lastQuestion', durationSec: 10 })).toEqual({ ok: true })
+    await timed
 
     await built.manager.flush()
     const restored = new GameManager(createGameStore(db), quietLog)
     await restored.restore()
-    expect(restored.get(pin)!.state.quickMessages!.own.map((m) => m.id)).toEqual(['m1', 'm2'])
+    expect(quickMessagesOf(restored.get(pin)!.state)).toEqual([pizza, { ...lastQuestion, durationSec: 10 }, back])
     restored.close()
     await save({})
   })

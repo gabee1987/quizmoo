@@ -39,6 +39,7 @@ async function expectAccessible(page: Page, name: string) {
 
 const quizBody = (title: string) => ({
   title,
+  settings: {},
   questions: [
     {
       id: 'q1',

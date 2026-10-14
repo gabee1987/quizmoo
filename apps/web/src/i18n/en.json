@@ -168,6 +168,11 @@
         "removeFromGame": "Remove \"{{text}}\" from this game",
         "saveToMine": "Save",
         "savedToMine": "Saved to your messages",
+        "customTime": "custom",
+        "secondsUnit": "s",
+        "customSeconds": "How many seconds is it shown?",
+        "timeOf": "How long \"{{text}}\" is shown",
+        "editHelp": "Changes here apply to this game only. Edit your list in My settings.",
         "presets": {
           "getReady": "Get ready!",
           "shortBreak": "Short break",
@@ -748,7 +753,7 @@
     "notCaptain": "Only your team's captain can do that.",
     "gameNotOpenYet": "This game has not opened yet. Come back at the start time.",
     "invalidSchedule": "Pick a time in the future, at most 30 days ahead.",
-    "quickMessagesFull": "You have 20 messages already. Remove one in My settings first."
+    "quickMessagesFull": "Your message list is full. Remove one in My settings first."
   },
   "nav": {
     "label": "Host menu",
@@ -769,15 +774,15 @@
     "leaveBody": "Your changes to My settings are not saved yet.",
     "messages": {
       "title": "Quick messages",
-      "help": "One tap sends them from the message box during a game. A game keeps the messages it started with.",
-      "builtIn": "Built-in",
-      "shown": "Shown",
-      "hidden": "Hidden",
-      "own": "Your messages",
-      "empty": "None yet. Add one below, or save one from the message box during a game.",
+      "help": "One tap sends them from the message box during a game. Edit, remove or reorder any of them. A game keeps the messages it started with.",
+      "builtIn": "Built-in, follows the language",
+      "count": "{{n}} / {{max}} messages",
+      "empty": "No messages. Add one below, or bring back the built-in ones.",
       "new": "New message",
       "add": "Add",
-      "full": "20 messages is the limit",
+      "full": "{{max}} messages is the limit",
+      "restore_one": "Bring back the built-in message",
+      "restore_other": "Bring back {{count}} built-in messages",
       "messageN": "Message {{n}}",
       "drag": "Move message {{n}}",
       "moveUp": "Move message {{n}} up",

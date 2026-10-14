@@ -114,10 +114,12 @@
 
 ### My settings
 - Every host account has a My settings page (in the navigation, where "Change password" was): quick messages, game defaults and the password change.
-- Quick messages: up to 20 of the host's own, each with its own time (until cleared, 10, 30 or 60 s, or any 5 to 600 s), reordered by dragging, with the keyboard or with the arrows; any built-in message can be hidden. In a game they follow the built-in ones in the message box and one click sends them with their own time, unless a time is picked first.
-- A game keeps the quick messages it was created with, also through a restart. "Save" next to Send adds the typed message to the host's messages and to the running game at once; "Edit" takes a quick message out of this game only.
+- Quick messages are one list of up to 25: the built-in ones (in the app's language until their text is edited) and the host's own. Any of them can be edited, removed, timed (until cleared, 10, 30 or 60 s, or any 5 to 600 s) and reordered by dragging, with the keyboard or with the arrows; removed built-in ones can be brought back. One click in the message box sends a message with its own time, unless a time (now also a custom number of seconds) is picked first.
+- A game keeps the quick messages it was created with, also through a restart. "Save" next to Send adds the typed message to the host's messages and to the running game at once; "Edit" changes a quick message's time or takes it out of this game only.
 - Game defaults: new quizzes start with the host's usual game settings instead of the app's.
 - The settings are stored per host account, reachable only by that host, and deleted with the account.
+- Motion: the sidebar's highlight springs to the chosen page, toasts are wider on laptops and bubble in and out, tab panels, rows and the unsaved changes bar animate in and out instead of blinking, and panels spring to their new height. The settings tabs are bigger and coloured, and the unsaved changes bar stands apart from the page under it.
+- The quiz editor's settings on a phone use the full width, with a one-line summary in the header.
 
 ### Development
 - The web dev server runs on port 15173, away from the 5173+ ports other local Vite projects take.

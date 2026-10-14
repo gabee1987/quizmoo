@@ -16,6 +16,7 @@ From the user:
 - Host ownership is per logged-in host account, not only game settings: "a more robust host ownership".
 - Quick messages can be saved before the game (on the page) and during it (from the host control).
 - This is its own branch.
+- After testing the first commit (14 October 2026): built-in and own quick messages become one list, still translated until edited, with a way to bring removed built-ins back; a message's time can be changed in a game for that game only, and the message box gets a custom time; a host home dashboard replaces the quiz list as `/host` (the list moves to `/host/quizzes`), as its own commit before branding; plus motion and layout fixes (sidebar, toasts, tabs, save bar, panel changes, password width, the editor's settings on phones).
 - Confirmed on 14 October 2026: two commits on the branch, first the page with quick messages, game defaults and the password, then branding. A game copies the quick messages at creation. Game defaults apply to new quizzes only. Branding on the phones' lobby has its own switch in the new game dialog, so it can be turned off there while the projector keeps it.
 
 The rest, as proposed and confirmed:
@@ -143,3 +144,8 @@ First commit (quick messages, game defaults, password):
 - "Save to my messages" uses its own `POST /api/me/quick-messages`, which appends one message, so saving from a game never overwrites edits made on the page.
 - The message box's time row starts on "own time": each quick message uses its own time unless the host picks one.
 - The reserved `teamLists` field is not added yet: the schema's defaults let phase 23 add it without a migration.
+
+Second commit (fixes after testing):
+- One quick message list instead of built-ins kept apart: `hiddenBuiltIns` is gone, built-in rows are `{ id, builtIn }`. Old rows and games are merged on read (`mergeLegacyQuickMessages`), no migration. The limit is 25 in all, so a host with 20 own messages and the three built-ins keeps them all.
+- New host command `setQuickMessageTime` (this game only).
+- Planned next on this branch: the host dashboard (its own commit), then branding.

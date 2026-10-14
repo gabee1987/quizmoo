@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { MAX_PLAYERS, announcementDurationSchema, announcementTextSchema, answerSchema, avatarSchema, scheduledAtSchema } from './game.js'
 import type { HostSnapshot, PlayerSnapshot } from './game.js'
-import { quickMessageSchema } from './host.js'
+import { ownQuickMessageSchema } from './host.js'
 import { teamAnswerModes } from './quiz.js'
 
 // ---- Client -> server payloads (validated with zod on the server) --------
@@ -66,9 +66,15 @@ export const hostCommandSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('announce'), text: announcementTextSchema, durationSec: announcementDurationSchema.optional() }),
   z.object({ type: z.literal('clearAnnouncement') }),
   /** "Save to my messages": the message, already saved to the host's library, joins this game's quick messages. */
-  z.object({ type: z.literal('addQuickMessage'), message: quickMessageSchema }),
-  /** Takes a quick message (an own message's id, or a built-in's name) out of this game only. */
+  z.object({ type: z.literal('addQuickMessage'), message: ownQuickMessageSchema }),
+  /** Takes a quick message out of this game only. */
   z.object({ type: z.literal('removeQuickMessage'), id: z.string().min(1).max(16) }),
+  /** Changes how long a quick message stays (null: until cleared), in this game only. */
+  z.object({
+    type: z.literal('setQuickMessageTime'),
+    id: z.string().min(1).max(16),
+    durationSec: announcementDurationSchema.nullable(),
+  }),
   /** Stops the running question's clock; answers wait until `resume`. */
   z.object({ type: z.literal('pause') }),
   z.object({ type: z.literal('resume') }),

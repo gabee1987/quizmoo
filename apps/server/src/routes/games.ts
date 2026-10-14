@@ -6,7 +6,7 @@ import { z } from 'zod'
 import { requireSession } from '../auth/require-session.js'
 import type { Db } from '../db/index.js'
 import { quizzes } from '../db/schema.js'
-import { EngineError, setNextGame } from '../game/index.js'
+import { EngineError, quickMessagesOf, setNextGame } from '../game/index.js'
 import type { GameManager } from '../realtime/game-manager.js'
 import { parseOr400 } from './http.js'
 import { readHostSettings } from './me.js'
@@ -50,7 +50,7 @@ export async function gameRoutes(app: FastifyInstance, { db, manager, appOrigin 
         hostId: request.user!.id,
         quizId: quiz.id,
         scheduledAt: body.scheduledAt,
-        quickMessages: { hidden: host.hiddenBuiltIns, own: host.quickMessages },
+        quickMessages: host.quickMessages,
       })
     } catch (error) {
       if (error instanceof EngineError) return reply.code(400).send({ error: error.code })
@@ -77,7 +77,7 @@ export async function gameRoutes(app: FastifyInstance, { db, manager, appOrigin 
       settings: old.state.settings,
       hostId: old.hostId,
       quizId: old.quizId,
-      quickMessages: old.state.quickMessages,
+      quickMessages: quickMessagesOf(old.state),
     })
     manager.apply(old.state.pin, (state) => setNextGame(state, game.state.pin))
     return reply.code(201).send({ pin: game.state.pin })

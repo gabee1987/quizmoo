@@ -1,35 +1,32 @@
-import { MAX_QUICK_MESSAGES, builtInMessages, type BuiltInMessage, type QuickMessage } from '@quizmoo/shared'
+import { MAX_QUICK_MESSAGES, type QuickMessage } from '@quizmoo/shared'
 import { DndContext, closestCenter, type UniqueIdentifier } from '@dnd-kit/core'
 import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { ArrowDownIcon, ArrowUpIcon, GripVerticalIcon, PlusIcon, XIcon } from 'lucide-react'
+import { ArrowDownIcon, ArrowUpIcon, GripVerticalIcon, LanguagesIcon, PlusIcon, RotateCcwIcon, XIcon } from 'lucide-react'
 import { useCallback, useId, useMemo, useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
-import { SelectField } from '@/components/select-field'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Switch } from '@/components/ui/switch'
 import { cn } from '@/lib/cn'
+import { useMotionOk } from '@/lib/motion'
 import { dragMove, useSortableAccessibility, useSortableSensors } from '@/lib/sortable'
 import { move, newId } from '../editor/draft'
-import { MESSAGE_DURATIONS } from './host-settings'
+import { DurationField } from './duration-field'
+import { messageText, restoreBuiltIns } from './host-settings'
 
 const MAX_LENGTH = 200
 
 /**
- * The message box's quick messages: the built-in ones (each can be hidden) and the host's own,
- * written, timed, reordered by dragging or with the arrows, and removed here.
+ * The message box's quick messages as one list: the built-in ones (in the app's language until
+ * their text is edited) and the host's own, each timed, reordered by dragging or with the arrows,
+ * and removed here. Built-in ones that were removed can be brought back.
  */
 export function QuickMessagesEditor({
   messages,
-  hidden,
   onMessages,
-  onHidden,
 }: {
   messages: QuickMessage[]
-  hidden: BuiltInMessage[]
   onMessages: (messages: QuickMessage[]) => void
-  onHidden: (hidden: BuiltInMessage[]) => void
 }) {
   const { t } = useTranslation()
   const sensors = useSortableSensors()
@@ -40,8 +37,12 @@ export function QuickMessagesEditor({
   )
   const accessibility = useSortableAccessibility(ids, name)
   const [text, setText] = useState('')
+  // Rows already there when the list opened stay still; added ones pop in.
+  const [initialIds] = useState(() => new Set(ids))
   const inputId = useId()
   const full = messages.length >= MAX_QUICK_MESSAGES
+  const restored = restoreBuiltIns(messages)
+  const missingBuiltIns = restored.length - messages.length
 
   const update = (index: number, message: QuickMessage) => onMessages(messages.map((m, i) => (i === index ? message : m)))
 
@@ -53,84 +54,65 @@ export function QuickMessagesEditor({
   }
 
   return (
-    <div className="flex flex-col gap-5">
-      <fieldset className="flex flex-col">
-        <legend className="mb-1 font-semibold">{t('settings.messages.builtIn')}</legend>
-        {builtInMessages.map((message) => (
-          <BuiltInRow
-            key={message}
-            label={t(`host.game.message.presets.${message}`)}
-            shown={!hidden.includes(message)}
-            onShown={(shown) => onHidden(shown ? hidden.filter((m) => m !== message) : [...hidden, message])}
-          />
-        ))}
-      </fieldset>
-
-      <fieldset className="flex flex-col gap-2">
-        <legend className="mb-2 font-semibold">
-          {t('settings.messages.own')}{' '}
-          <span className="font-normal text-muted-foreground tabular-nums">
-            {messages.length} / {MAX_QUICK_MESSAGES}
-          </span>
-        </legend>
-        {messages.length === 0 && <p className="text-sm text-muted-foreground">{t('settings.messages.empty')}</p>}
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          accessibility={accessibility}
-          onDragEnd={(event) => {
-            const moved = dragMove(ids, event)
-            if (moved) onMessages(move(messages, moved.from, moved.to))
-          }}
+    <div className="flex flex-col gap-2">
+      <p className="text-sm font-semibold text-muted-foreground tabular-nums">
+        {t('settings.messages.count', { n: messages.length, max: MAX_QUICK_MESSAGES })}
+      </p>
+      {messages.length === 0 && <p className="text-sm text-muted-foreground">{t('settings.messages.empty')}</p>}
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        accessibility={accessibility}
+        onDragEnd={(event) => {
+          const moved = dragMove(ids, event)
+          if (moved) onMessages(move(messages, moved.from, moved.to))
+        }}
+      >
+        <SortableContext items={ids} strategy={verticalListSortingStrategy}>
+          {messages.map((message, index) => (
+            <MessageRow
+              key={message.id}
+              message={message}
+              index={index}
+              entering={!initialIds.has(message.id)}
+              last={index === messages.length - 1}
+              onChange={(next) => update(index, next)}
+              onMove={(to) => onMessages(move(messages, index, to))}
+              onRemove={() => onMessages(messages.filter((m) => m.id !== message.id))}
+            />
+          ))}
+        </SortableContext>
+      </DndContext>
+      <form className="mt-1 flex gap-2" onSubmit={add}>
+        <label htmlFor={inputId} className="sr-only">
+          {t('settings.messages.new')}
+        </label>
+        <Input
+          id={inputId}
+          value={text}
+          maxLength={MAX_LENGTH}
+          disabled={full}
+          placeholder={full ? t('settings.messages.full', { max: MAX_QUICK_MESSAGES }) : t('settings.messages.new')}
+          onChange={(e) => setText(e.target.value)}
+        />
+        <Button type="submit" variant="secondary" disabled={full || !text.trim()}>
+          <PlusIcon aria-hidden="true" />
+          {t('settings.messages.add')}
+        </Button>
+      </form>
+      {missingBuiltIns > 0 && (
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="animate-pop self-start"
+          disabled={restored.length > MAX_QUICK_MESSAGES}
+          onClick={() => onMessages(restored)}
         >
-          <SortableContext items={ids} strategy={verticalListSortingStrategy}>
-            {messages.map((message, index) => (
-              <MessageRow
-                key={message.id}
-                message={message}
-                index={index}
-                last={index === messages.length - 1}
-                onChange={(next) => update(index, next)}
-                onMove={(to) => onMessages(move(messages, index, to))}
-                onRemove={() => onMessages(messages.filter((_, i) => i !== index))}
-              />
-            ))}
-          </SortableContext>
-        </DndContext>
-        <form className="mt-1 flex gap-2" onSubmit={add}>
-          <label htmlFor={inputId} className="sr-only">
-            {t('settings.messages.new')}
-          </label>
-          <Input
-            id={inputId}
-            value={text}
-            maxLength={MAX_LENGTH}
-            disabled={full}
-            placeholder={full ? t('settings.messages.full') : t('settings.messages.new')}
-            onChange={(e) => setText(e.target.value)}
-          />
-          <Button type="submit" variant="secondary" disabled={full || !text.trim()}>
-            <PlusIcon aria-hidden="true" />
-            {t('settings.messages.add')}
-          </Button>
-        </form>
-      </fieldset>
-    </div>
-  )
-}
-
-function BuiltInRow({ label, shown, onShown }: { label: string; shown: boolean; onShown: (shown: boolean) => void }) {
-  const { t } = useTranslation()
-  const id = useId()
-  return (
-    <div className="flex min-h-12 items-center justify-between gap-4 border-b py-1.5 last:border-b-0">
-      <label htmlFor={id} className={cn('cursor-pointer font-semibold', !shown && 'text-muted-foreground line-through')}>
-        {label}
-      </label>
-      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-        <span aria-hidden="true">{shown ? t('settings.messages.shown') : t('settings.messages.hidden')}</span>
-        <Switch id={id} checked={shown} onCheckedChange={onShown} />
-      </div>
+          <RotateCcwIcon aria-hidden="true" />
+          {t('settings.messages.restore', { count: missingBuiltIns })}
+        </Button>
+      )}
     </div>
   )
 }
@@ -138,6 +120,7 @@ function BuiltInRow({ label, shown, onShown }: { label: string; shown: boolean; 
 function MessageRow({
   message,
   index,
+  entering,
   last,
   onChange,
   onMove,
@@ -145,24 +128,36 @@ function MessageRow({
 }: {
   message: QuickMessage
   index: number
+  entering: boolean
   last: boolean
   onChange: (message: QuickMessage) => void
   onMove: (to: number) => void
   onRemove: () => void
 }) {
   const { t } = useTranslation()
+  const motionOk = useMotionOk()
   const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } = useSortable({
     id: message.id,
   })
+  // Removing plays the row out first; the list drops it when the animation ends.
+  const [leaving, setLeaving] = useState(false)
   const n = index + 1
-  const empty = !message.text.trim()
+  const text = messageText(message, t)
+  const builtIn = 'builtIn' in message
+  const empty = !text.trim()
   const errorId = useId()
+  const remove = () => (motionOk ? setLeaving(true) : onRemove())
+
   return (
     <div
       ref={setNodeRef}
       style={{ transform: CSS.Translate.toString(transform), transition }}
+      onAnimationEnd={(e) => {
+        if (leaving && e.target === e.currentTarget) onRemove()
+      }}
       className={cn(
         'flex flex-col gap-2 rounded-2xl border-2 bg-card p-2',
+        leaving ? 'pointer-events-none animate-pop-out' : entering && 'animate-pop',
         isDragging && 'relative z-10 shadow-lg ring-2 ring-primary',
       )}
     >
@@ -178,20 +173,15 @@ function MessageRow({
           <GripVerticalIcon className="size-4" aria-hidden="true" />
         </button>
         <Input
-          value={message.text}
+          value={text}
           maxLength={MAX_LENGTH}
           aria-label={t('settings.messages.messageN', { n })}
           aria-invalid={empty || undefined}
           aria-describedby={empty ? errorId : undefined}
-          onChange={(e) => onChange({ ...message, text: e.target.value })}
+          // Editing a built-in message makes it the host's own text, no longer translated.
+          onChange={(e) => onChange({ id: message.id, text: e.target.value, durationSec: message.durationSec })}
         />
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon-sm"
-          aria-label={t('settings.messages.remove', { n })}
-          onClick={onRemove}
-        >
+        <Button type="button" variant="ghost" size="icon-sm" aria-label={t('settings.messages.remove', { n })} onClick={remove}>
           <XIcon aria-hidden="true" />
         </Button>
       </div>
@@ -202,6 +192,12 @@ function MessageRow({
       )}
       <div className="flex flex-wrap items-end gap-2 pl-7">
         <DurationField value={message.durationSec} onChange={(durationSec) => onChange({ ...message, durationSec })} />
+        {builtIn && (
+          <span className="mb-2.5 flex items-center gap-1 text-xs font-bold text-muted-foreground">
+            <LanguagesIcon className="size-3.5" aria-hidden="true" />
+            {t('settings.messages.builtIn')}
+          </span>
+        )}
         <div className="ml-auto flex gap-1">
           <Button
             type="button"
@@ -225,64 +221,6 @@ function MessageRow({
           </Button>
         </div>
       </div>
-    </div>
-  )
-}
-
-type Choice = 'stays' | 'custom' | (typeof MESSAGE_DURATIONS)[number] & number
-
-/** Until cleared, 10, 30 or 60 s, or any other number of seconds from 5 to 600. */
-function DurationField({ value, onChange }: { value: number | null; onChange: (value: number | null) => void }) {
-  const { t } = useTranslation()
-  const preset = value === null || (MESSAGE_DURATIONS as readonly (number | null)[]).includes(value)
-  const [custom, setCustom] = useState(!preset)
-  const [seconds, setSeconds] = useState(String(value ?? 45))
-  const inputId = useId()
-  const choice: Choice = custom ? 'custom' : value === null ? 'stays' : (value as Choice)
-  const options: { value: Choice; label: string }[] = [
-    { value: 'stays', label: t('host.game.message.stays') },
-    ...MESSAGE_DURATIONS.filter((d) => d !== null).map((d) => ({ value: d as Choice, label: t('host.game.message.seconds', { count: d }) })),
-    { value: 'custom', label: t('settings.messages.custom') },
-  ]
-
-  function commit(raw: string) {
-    const parsed = Math.round(Number(raw))
-    const clamped = Number.isFinite(parsed) ? Math.min(600, Math.max(5, parsed)) : 30
-    setSeconds(String(clamped))
-    onChange(clamped)
-  }
-
-  return (
-    <div className="flex items-end gap-2">
-      <SelectField
-        className="w-44"
-        label={t('host.game.message.duration')}
-        value={choice}
-        options={options}
-        onChange={(next) => {
-          setCustom(next === 'custom')
-          if (next === 'custom') commit(seconds)
-          else onChange(next === 'stays' ? null : next)
-        }}
-      />
-      {custom && (
-        <div className="flex flex-col gap-2">
-          <label htmlFor={inputId} className="text-sm font-semibold">
-            {t('settings.messages.customSeconds')}
-          </label>
-          <Input
-            id={inputId}
-            type="number"
-            inputMode="numeric"
-            min={5}
-            max={600}
-            className="w-24"
-            value={seconds}
-            onChange={(e) => setSeconds(e.target.value)}
-            onBlur={(e) => commit(e.target.value)}
-          />
-        </div>
-      )}
     </div>
   )
 }

@@ -1,14 +1,14 @@
 import {
   MAX_QUICK_MESSAGES,
   MAX_SCHEDULE_DAYS,
-  builtInMessages,
+  defaultQuickMessages,
   fallbackAvatar,
+  mergeLegacyQuickMessages,
   streakBonusFor,
   type Answer,
   type Avatar,
-  type BuiltInMessage,
-  type GameQuickMessages,
   type GameSettings,
+  type OwnQuickMessage,
   type Question,
   type QuickMessage,
   type TeamAnswerMode,
@@ -486,29 +486,36 @@ export function clearAnnouncement(state: GameState): GameState {
   return { ...state, announcement: null }
 }
 
-/** This game's quick messages; none hidden and no own ones in games saved before they existed. */
-export function quickMessagesOf(state: GameState): GameQuickMessages {
-  return state.quickMessages ?? { hidden: [], own: [] }
+/**
+ * This game's quick messages, in order. Games saved before they existed get the built-in ones;
+ * games saved while built-in and own messages were kept apart are read as one list.
+ */
+export function quickMessagesOf(state: GameState): QuickMessage[] {
+  const stored = state.quickMessages
+  if (!stored) return defaultQuickMessages()
+  return Array.isArray(stored) ? stored : mergeLegacyQuickMessages(stored.hidden, stored.own)
 }
 
 /** "Save to my messages": adds an own message to this game's quick messages. Adding the same id again changes nothing. */
-export function addQuickMessage(state: GameState, message: QuickMessage): GameState {
+export function addQuickMessage(state: GameState, message: OwnQuickMessage): GameState {
   const current = quickMessagesOf(state)
-  if (current.own.some((m) => m.id === message.id)) return state
-  if (current.own.length >= MAX_QUICK_MESSAGES) throw new EngineError('errors.quickMessagesFull')
-  return { ...state, quickMessages: { ...current, own: [...current.own, message] } }
+  if (current.some((m) => m.id === message.id)) return state
+  if (current.length >= MAX_QUICK_MESSAGES) throw new EngineError('errors.quickMessagesFull')
+  return { ...state, quickMessages: [...current, message] }
 }
 
-/** Takes a quick message out of this game only: an own message by id, or a built-in one by name. */
+/** Takes a quick message, built-in or own, out of this game only. */
 export function removeQuickMessage(state: GameState, id: string): GameState {
   const current = quickMessagesOf(state)
-  if ((builtInMessages as readonly string[]).includes(id)) {
-    const name = id as BuiltInMessage
-    if (current.hidden.includes(name)) return state
-    return { ...state, quickMessages: { ...current, hidden: [...current.hidden, name] } }
-  }
-  if (!current.own.some((m) => m.id === id)) return state
-  return { ...state, quickMessages: { ...current, own: current.own.filter((m) => m.id !== id) } }
+  if (!current.some((m) => m.id === id)) return state
+  return { ...state, quickMessages: current.filter((m) => m.id !== id) }
+}
+
+/** How long a quick message stays when sent with its own time (null: until cleared), in this game only. */
+export function setQuickMessageTime(state: GameState, id: string, durationSec: number | null): GameState {
+  const current = quickMessagesOf(state)
+  if (!current.some((m) => m.id === id && m.durationSec !== durationSec)) return state
+  return { ...state, quickMessages: current.map((m) => (m.id === id ? { ...m, durationSec } : m)) }
 }
 
 /**

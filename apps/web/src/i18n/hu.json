@@ -168,6 +168,11 @@
         "removeFromGame": "Vedd ki ebből a játékból: {{text}}",
         "saveToMine": "Mentés",
         "savedToMine": "Elmentettük az üzeneteid közé",
+        "customTime": "egyéni",
+        "secondsUnit": "mp",
+        "customSeconds": "Hány másodpercig látszik?",
+        "timeOf": "Meddig látszik: „{{text}}”",
+        "editHelp": "Az itteni változások csak erre a játékra szólnak. A listádat a Beállításaimban szerkesztheted.",
         "presets": {
           "getReady": "Készüljetek!",
           "shortBreak": "Egy kis szünet",
@@ -748,7 +753,7 @@
     "notCaptain": "Ezt csak a csapatkapitány teheti meg.",
     "gameNotOpenYet": "Ez a játék még nem kezdődött el. Nézz vissza a megadott időpontban.",
     "invalidSchedule": "Válassz egy jövőbeli időpontot, legfeljebb 30 napon belül.",
-    "quickMessagesFull": "Már 20 üzeneted van. Előbb törölj egyet a Beállításaimban."
+    "quickMessagesFull": "Megtelt az üzenetlistád. Előbb törölj egyet a Beállításaimban."
   },
   "nav": {
     "label": "Játékvezetői menü",
@@ -769,15 +774,15 @@
     "leaveBody": "A Beállításaimban tett változásokat még nem mentetted.",
     "messages": {
       "title": "Gyors üzenetek",
-      "help": "Játék közben egy koppintással elküldheted őket az üzenetdobozból. Egy játék azokkal az üzenetekkel megy végig, amelyekkel elindult.",
-      "builtIn": "Beépített",
-      "shown": "Látszik",
-      "hidden": "Rejtve",
-      "own": "Saját üzeneteid",
-      "empty": "Még nincs egy sem. Adj hozzá egyet lent, vagy ments el egyet játék közben az üzenetdobozból.",
+      "help": "Játék közben egy koppintással elküldheted őket az üzenetdobozból. Bármelyiket átírhatod, törölheted vagy átrendezheted. Egy játék azokkal az üzenetekkel megy végig, amelyekkel elindult.",
+      "builtIn": "Beépített, a nyelvvel együtt vált",
+      "count": "{{n}} / {{max}} üzenet",
+      "empty": "Nincs egy üzeneted sem. Adj hozzá egyet lent, vagy hozd vissza a beépítetteket.",
       "new": "Új üzenet",
       "add": "Hozzáadás",
-      "full": "Legfeljebb 20 üzeneted lehet",
+      "full": "Legfeljebb {{max}} üzeneted lehet",
+      "restore_one": "A beépített üzenet visszahozása",
+      "restore_other": "{{count}} beépített üzenet visszahozása",
       "messageN": "{{n}}. üzenet",
       "drag": "{{n}}. üzenet áthelyezése",
       "moveUp": "{{n}}. üzenet feljebb",

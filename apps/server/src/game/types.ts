@@ -1,4 +1,14 @@
-import type { Announcement, Answer, Avatar, GamePhase, GameQuickMessages, GameSettings, Quiz, TeamAnswerMode } from '@quizmoo/shared'
+import type {
+  Announcement,
+  Answer,
+  Avatar,
+  GamePhase,
+  GameSettings,
+  OwnQuickMessage,
+  Quiz,
+  QuickMessage,
+  TeamAnswerMode,
+} from '@quizmoo/shared'
 
 export { MAX_PLAYERS } from '@quizmoo/shared'
 
@@ -97,8 +107,12 @@ export interface GameState {
    * kept afterwards, as the restore window counts from it. Null or missing for a game never scheduled.
    */
   scheduledAt?: number | null
-  /** The message box's quick messages, copied from the host's settings at creation. Missing in games saved before it existed (none hidden, no own ones). */
-  quickMessages?: GameQuickMessages
+  /**
+   * The message box's quick messages, copied from the host's settings at creation. Missing in games
+   * saved before they existed; `{ hidden, own }` in games saved before built-in and own were one list.
+   * Read through `quickMessagesOf`.
+   */
+  quickMessages?: QuickMessage[] | { hidden: string[]; own: OwnQuickMessage[] }
 }
 
 /** Who sees the final results: the projector (podium) or the players' phones. */

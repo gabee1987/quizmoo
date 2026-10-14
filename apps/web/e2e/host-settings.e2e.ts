@@ -1,9 +1,10 @@
 import { expect, test, type Page } from '@playwright/test'
 
 /**
- * My settings: the host saves a quick message with its own time on the page, sends it with one
- * click in a game (the phone shows it), saves another one mid-game and finds it on the page.
- * The host's own settings are put back afterwards.
+ * My settings: the host removes a built-in quick message and saves an own one with its own time on
+ * the page, sends it with one click in a game (the phone shows it), changes a message's time for
+ * this game only, saves another one mid-game and finds it on the page. The host's own settings
+ * are put back afterwards.
  */
 
 const username = process.env.E2E_USERNAME
@@ -30,20 +31,22 @@ test('quick messages from My settings, sent and saved during a game', async ({ b
 
   const original = (await (await page.request.get('/api/me/settings')).json()).settings as object
   const questions = [{ type: 'truefalse', text: 'Cows say moo.', correct: true, timeLimitSec: 60 }]
-  const created = await page.request.post('/api/quizzes', { data: { title: `E2E host settings ${Date.now()}`, questions } })
+  const created = await page.request.post('/api/quizzes', { data: { title: `E2E host settings ${Date.now()}`, questions, settings: {} } })
   const { quiz } = (await created.json()) as { quiz: { id: string } }
   let gameId: string | null = null
 
   try {
-    await page.request.put('/api/me/settings', { data: { quickMessages: [], hiddenBuiltIns: [], gameDefaults: null } })
+    // The defaults: the three built-in messages.
+    await page.request.put('/api/me/settings', { data: {} })
 
-    await test.step('save a quick message with its own time on My settings', async () => {
+    await test.step('remove a built-in message and save an own one with its own time on My settings', async () => {
       await page.getByRole('link', { name: 'My settings' }).click()
+      await page.getByRole('button', { name: 'Remove message 3' }).click()
+      await expect(page.getByRole('textbox', { name: 'Message 3', exact: true })).toHaveCount(0)
       await page.getByLabel('New message').fill('Pizza is here!')
       await page.getByRole('button', { name: 'Add', exact: true }).click()
-      await page.getByRole('combobox', { name: 'Shown' }).click()
+      await page.getByRole('combobox', { name: 'Shown' }).last().click()
       await page.getByRole('option', { name: '30 s' }).click()
-      await page.getByRole('switch', { name: 'Last question!' }).click()
       await page.getByRole('button', { name: 'Save', exact: true }).click()
       await expect(page.getByText('Settings saved')).toBeVisible()
     })
@@ -66,12 +69,27 @@ test('quick messages from My settings, sent and saved during a game', async ({ b
       await expect(page.getByText(/disappears in (29|30) s/)).toBeVisible()
     })
 
+    await test.step("change a message's time for this game only", async () => {
+      await page.getByRole('button', { name: 'Edit', exact: true }).click()
+      await page.getByRole('combobox', { name: 'How long "Short break" is shown' }).click()
+      await page.getByRole('option', { name: '10 s' }).click()
+      await page.getByRole('button', { name: 'Done', exact: true }).click()
+      await expect(page.getByRole('button', { name: 'Short break 10 s', exact: true })).toBeVisible()
+    })
+
     await test.step('save another one mid-game: in the game at once and on My settings', async () => {
       await page.getByLabel('Message', { exact: true }).fill('Back in 5')
       await page.getByRole('button', { name: 'Save', exact: true }).click()
       await expect(page.getByRole('button', { name: 'Back in 5', exact: true })).toBeVisible()
-      const settings = (await (await page.request.get('/api/me/settings')).json()).settings as { quickMessages: { text: string }[] }
-      expect(settings.quickMessages.map((m) => m.text)).toEqual(['Pizza is here!', 'Back in 5'])
+      const settings = (await (await page.request.get('/api/me/settings')).json()).settings as {
+        quickMessages: { text?: string; builtIn?: string; durationSec: number | null }[]
+      }
+      expect(settings.quickMessages.map((m) => `${m.text ?? m.builtIn}:${m.durationSec}`)).toEqual([
+        'getReady:null',
+        'shortBreak:null',
+        'Pizza is here!:30',
+        'Back in 5:null',
+      ])
     })
 
     await page.getByRole('button', { name: 'End game', exact: true }).click()

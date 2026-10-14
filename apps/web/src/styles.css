@@ -351,6 +351,8 @@
   --animate-panel-in: panel-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
   --animate-dialog-pop: dialog-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
   --animate-bubble-pop: bubble-pop 0.6s ease-out both;
+  --animate-pop-out: pop-out 0.32s ease-in both;
+  --animate-panel-swap: panel-swap 0.5s var(--ease-spring) both;
 
   /* Menus and select lists spring open from their trigger (transform-origin is set by Radix). */
   @keyframes menu-pop {
@@ -429,6 +431,36 @@
       opacity: 0;
     }
     to {
+      transform: none;
+      opacity: 1;
+    }
+  }
+  /* The way out of `pop`: a little swell, then it shrinks away. */
+  @keyframes pop-out {
+    0% {
+      transform: none;
+      opacity: 1;
+    }
+    30% {
+      transform: scale(1.04, 0.94);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(0.6);
+      opacity: 0;
+    }
+  }
+  /* New content in a panel (a tab, a section that changed): rises in with a soft wobble. */
+  @keyframes panel-swap {
+    0% {
+      transform: translateY(10px) scale(0.985, 0.97);
+      opacity: 0;
+    }
+    55% {
+      transform: translateY(-2px) scale(1.005, 1.01);
+      opacity: 1;
+    }
+    100% {
       transform: none;
       opacity: 1;
     }
@@ -641,6 +673,40 @@
     opacity 300ms,
     height 400ms,
     box-shadow 200ms;
+}
+/* Wider on laptops (Sonner sets its 356 px inline), still the full width on phones. */
+@media (min-width: 640px) {
+  .toaster {
+    --width: 460px !important;
+  }
+}
+/*
+ * Toasts fall in like the host's messages and wobble back up when they go. `backwards`, not
+ * `both`: once it lands, Sonner's own transform stacks the toasts again. Sonner keeps a closing
+ * toast for 200 ms, which is all the way out gets.
+ */
+.toaster [data-sonner-toast][data-mounted='true']:not([data-removed='true']) {
+  --note-fly: -120px;
+  transform-origin: 50% 0;
+  animation: note-in 0.7s ease-out backwards;
+}
+.toaster [data-sonner-toast][data-removed='true'][data-swipe-out='false'] {
+  transform-origin: 50% 0;
+  animation: toast-out 0.2s ease-in both;
+}
+@keyframes toast-out {
+  0% {
+    transform: none;
+    opacity: 1;
+  }
+  40% {
+    transform: translateY(3px) scale(1, 0.84);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-48px) scale(0.84, 1.16);
+    opacity: 0;
+  }
 }
 .note-success,
 .toaster [data-sonner-toast][data-type='success'] {

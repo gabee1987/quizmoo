@@ -1,4 +1,4 @@
-import { gameSettingsSchema, type GameQuickMessages, type GameSettings } from '@quizmoo/shared'
+import { gameSettingsSchema, type GameSettings, type QuickMessage } from '@quizmoo/shared'
 import {
   EngineError,
   createGame,
@@ -92,7 +92,7 @@ export class GameManager {
     quizId: string | null
     scheduledAt?: number | undefined
     /** The host's quick messages, copied in: later edits to the library leave this game alone. */
-    quickMessages?: GameQuickMessages | undefined
+    quickMessages?: QuickMessage[] | undefined
   }) {
     const now = this.now()
     const pin = generatePin((candidate) => this.games.has(candidate))
