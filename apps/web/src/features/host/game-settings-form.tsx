@@ -6,6 +6,8 @@ import {
   teamAnswerModes,
   type AnswerPalette,
   type AnswerSymbols,
+  type CustomPalette,
+  type CustomTheme,
   type GameSettings,
 } from '@quizmoo/shared'
 import type { TFunction } from 'i18next'
@@ -13,12 +15,14 @@ import { XIcon } from 'lucide-react'
 import { useId, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ChoiceCards } from '@/components/choice-cards'
+import { ColourWheel } from '@/components/colour-wheel'
 import { OptionSymbol } from '@/components/icons'
 import { OPTION_COLOURS } from '@/components/option-colours'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
-import { themeSwatches } from '@/lib/themes'
+import { PlayerAvatar } from '@/components/player-avatar'
+import { paletteVars, textOn, themeSwatches, themeVars } from '@/lib/themes'
 
 /** i18n key of the first settings problem (team names), or null when the settings are valid. */
 export function settingsError(settings: GameSettings): string | null {
@@ -29,7 +33,7 @@ export function settingsError(settings: GameSettings): string | null {
 /** The settings in each group of the form; a batch edit changes a group as a whole. */
 export const settingsSections = {
   flow: ['mode', 'teamNames', 'teamAnswer', 'teamsChoose', 'revealAnswers', 'scoreboard', 'finalResults'],
-  look: ['theme', 'answerPalette', 'answerSymbols', 'answerStyle'],
+  look: ['theme', 'customTheme', 'answerPalette', 'customPalette', 'answerSymbols', 'answerStyle'],
   scoring: ['speedBonus', 'streakBonus', 'answerChanges', 'answerLockSec', 'shuffleOptions'],
 } as const satisfies Record<string, readonly (keyof GameSettings)[]>
 export type SettingsSection = keyof typeof settingsSections
@@ -51,7 +55,9 @@ export function sectionSummary(settings: GameSettings, section: SettingsSection,
     look: [
       `${t('host.create.theme')}: ${t(`host.create.themeOptions.${settings.theme}`)}`,
       t(`host.create.answerStyleOptions.${settings.answerStyle}`),
-      settings.answerPalette !== 'vivid' ? t(`host.create.answerPaletteOptions.${settings.answerPalette}`) : null,
+      settings.answerPalette !== 'vivid'
+        ? `${t('host.create.answerPalette')}: ${t(`host.create.answerPaletteOptions.${settings.answerPalette}`)}`
+        : null,
       settings.answerSymbols !== 'shapes' ? t(`host.create.answerSymbolsOptions.${settings.answerSymbols}`) : null,
     ],
     scoring: [
@@ -225,11 +231,14 @@ export function GameSettingsForm({
           choices={gameThemes.map((theme) => ({
             value: theme,
             label: t(`host.create.themeOptions.${theme}`),
-            adornment: <ThemeSwatch colours={themeSwatches(theme)} />,
+            adornment: <ThemeSwatch colours={themeSwatches(theme, value.customTheme)} />,
           }))}
           onChange={(theme) => set({ theme })}
           help={t('host.create.themeHelp')}
         />
+      )}
+      {show('look') && value.theme === 'custom' && (
+        <CustomThemePicker value={value.customTheme} onChange={(customTheme) => set({ customTheme })} />
       )}
       {show('flow') && (
         <>
@@ -265,11 +274,18 @@ export function GameSettingsForm({
             choices={answerPalettes.map((palette) => ({
               value: palette,
               label: t(`host.create.answerPaletteOptions.${palette}`),
-              adornment: <PaletteSwatch palette={palette} />,
+              adornment: <PaletteSwatch palette={palette} custom={value.customPalette} />,
             }))}
             onChange={(answerPalette) => set({ answerPalette })}
             help={t('host.create.answerPaletteHelp')}
           />
+          {value.answerPalette === 'custom' && (
+            <CustomPalettePicker
+              value={value.customPalette}
+              symbols={value.answerSymbols}
+              onChange={(customPalette) => set({ customPalette })}
+            />
+          )}
           <ChoiceCards
             legend={t('host.create.answerSymbols')}
             value={value.answerSymbols}
@@ -339,6 +355,76 @@ function choices<T extends string>(values: readonly T[], label: (value: T) => st
   return values.map((value) => ({ value, label: label(value) }))
 }
 
+/** The custom theme's colours: main and accent on a colour wheel, and how strong the colours are. */
+function CustomThemePicker({ value, onChange }: { value: CustomTheme; onChange: (value: CustomTheme) => void }) {
+  const { t } = useTranslation()
+  const strengthId = useId()
+  return (
+    <fieldset className="flex animate-fade-up flex-col gap-3 rounded-2xl border-2 border-dashed p-4">
+      <legend className="px-1 font-bold">{t('host.create.customTheme.title')}</legend>
+      <div className="flex flex-wrap items-center gap-6">
+        <ColourWheel
+          chroma={value.chroma}
+          handles={[
+            { key: 'hue', hue: value.hue, label: t('host.create.customTheme.main') },
+            { key: 'accent', hue: value.accent, label: t('host.create.customTheme.accent') },
+          ]}
+          onChange={(key, hue) => onChange({ ...value, [key]: hue })}
+        />
+        <div className="flex min-w-48 flex-1 flex-col gap-3">
+          <label htmlFor={strengthId} className="font-semibold">
+            {t('host.create.customTheme.strength')}
+          </label>
+          <input
+            id={strengthId}
+            type="range"
+            min={0}
+            max={1.2}
+            step={0.05}
+            value={value.chroma}
+            onChange={(e) => onChange({ ...value, chroma: Number(e.target.value) })}
+            className="h-2 w-full cursor-pointer accent-primary"
+          />
+          <div className="flex justify-between text-sm text-muted-foreground" aria-hidden="true">
+            <span>{t('host.create.customTheme.muted')}</span>
+            <span>{t('host.create.customTheme.vivid')}</span>
+          </div>
+          <p className="text-sm text-muted-foreground">{t('host.create.customTheme.help')}</p>
+        </div>
+      </div>
+      <CustomThemeSample value={value} />
+    </fieldset>
+  )
+}
+
+/**
+ * The lobby card a player waits on, in the custom colours: the main colour on the button, the accent
+ * on the avatar bubble and in the ring. The question preview shows little of the accent, so this
+ * makes the accent handle's effect visible while it is dragged.
+ */
+function CustomThemeSample({ value }: { value: CustomTheme }) {
+  const { t } = useTranslation()
+  return (
+    <figure className="flex flex-col gap-2">
+      <figcaption className="text-sm font-semibold text-muted-foreground">{t('host.create.customTheme.sample')}</figcaption>
+      <div
+        aria-hidden="true"
+        data-theme="custom"
+        style={themeVars({ theme: 'custom', customTheme: value })}
+        className="flex justify-center rounded-2xl bg-background px-4 py-6 text-foreground"
+      >
+        <div className="glow-border flex w-full max-w-64 flex-col items-center gap-3 rounded-3xl bg-card p-5 shadow-soft">
+          <PlayerAvatar avatar="🐮" size="lg" className="bg-accent" />
+          <p className="text-lg font-black">{t('host.create.customTheme.sampleName')}</p>
+          <span className="rounded-full bg-primary px-4 py-1.5 text-sm font-bold text-primary-foreground">
+            {t('host.create.customTheme.sampleButton')}
+          </span>
+        </div>
+      </div>
+    </figure>
+  )
+}
+
 function ThemeSwatch({ colours }: { colours: readonly string[] }) {
   return (
     <span aria-hidden="true" className="flex shrink-0 -space-x-1.5">
@@ -349,10 +435,62 @@ function ThemeSwatch({ colours }: { colours: readonly string[] }) {
   )
 }
 
-/** The six answer colours of a palette; the wrapper's data-palette selects them in styles.css. */
-function PaletteSwatch({ palette }: { palette: AnswerPalette }) {
+/**
+ * The custom answer colours: any colour per answer from the browser's colour picker. Each row shows
+ * the answer as it will look, with the text colour the app picks for it (white or dark).
+ */
+function CustomPalettePicker({
+  value,
+  symbols,
+  onChange,
+}: {
+  value: CustomPalette
+  symbols: AnswerSymbols
+  onChange: (value: CustomPalette) => void
+}) {
+  const { t } = useTranslation()
   return (
-    <span aria-hidden="true" data-palette={palette} className="flex shrink-0 -space-x-1">
+    <fieldset className="flex animate-fade-up flex-col gap-3 rounded-2xl border-2 border-dashed p-4">
+      <legend className="px-1 font-bold">{t('host.create.customPalette.title')}</legend>
+      <ul className="grid gap-2 sm:grid-cols-2">
+        {value.map((colour, i) => (
+          <li key={i}>
+            <label className="flex cursor-pointer items-center gap-3 rounded-xl p-1 focus-within:ring-[3px] focus-within:ring-ring">
+              <input
+                type="color"
+                value={colour}
+                onChange={(e) => onChange(value.map((c, j) => (j === i ? e.target.value.toLowerCase() : c)))}
+                aria-label={t('host.create.customPalette.answer', { n: i + 1 })}
+                className="size-11 shrink-0 cursor-pointer rounded-lg border-2 border-border bg-card p-0.5"
+              />
+              {/* The answer as it will look, with the text colour the app picks. */}
+              <span
+                aria-hidden="true"
+                // A faint edge, so a white or very light answer still shows its shape.
+                className="flex h-11 flex-1 items-center gap-2 rounded-xl px-3 font-bold ring-1 ring-foreground/15 ring-inset"
+                style={{ background: colour, color: textOn(colour) }}
+              >
+                <OptionSymbol symbols={symbols} index={i} className="size-4" />
+                {t('host.create.customPalette.answer', { n: i + 1 })}
+              </span>
+            </label>
+          </li>
+        ))}
+      </ul>
+      <p className="text-sm text-muted-foreground">{t('host.create.customPalette.help')}</p>
+    </fieldset>
+  )
+}
+
+/** The six answer colours of a palette; the wrapper's data-palette selects them in styles.css (the custom one's come inline). */
+function PaletteSwatch({ palette, custom }: { palette: AnswerPalette; custom: CustomPalette }) {
+  return (
+    <span
+      aria-hidden="true"
+      data-palette={palette}
+      style={paletteVars({ answerPalette: palette, customPalette: custom })}
+      className="flex shrink-0 -space-x-1"
+    >
       {Array.from({ length: OPTION_COLOURS }, (_, n) => (
         <span key={n} className="size-5 rounded-full border-2 border-card" style={{ background: `var(--option-${n + 1})` }} />
       ))}

@@ -1,4 +1,4 @@
-import { gameSettingsSchema, pinSchema, type GameHostInfo, type GamePublicInfo } from '@quizmoo/shared'
+import { gameSettingsSchema, pinSchema, scheduledAtSchema, type GameHostInfo, type GamePublicInfo } from '@quizmoo/shared'
 import { eq } from 'drizzle-orm'
 import type { FastifyInstance } from 'fastify'
 import { nanoid } from 'nanoid'
@@ -6,7 +6,7 @@ import { z } from 'zod'
 import { requireSession } from '../auth/require-session.js'
 import type { Db } from '../db/index.js'
 import { quizzes } from '../db/schema.js'
-import { setNextGame } from '../game/index.js'
+import { EngineError, setNextGame } from '../game/index.js'
 import type { GameManager } from '../realtime/game-manager.js'
 import { parseOr400 } from './http.js'
 
@@ -14,6 +14,8 @@ const createGameSchema = z.object({
   quizId: z.string().min(1),
   /** Overrides for this game; without them the quiz's own settings apply. */
   settings: gameSettingsSchema.optional(),
+  /** "Start later": the PIN is reserved now and joining opens at this time. */
+  scheduledAt: scheduledAtSchema.optional(),
 })
 
 export interface GameRouteOptions {
@@ -36,14 +38,21 @@ export async function gameRoutes(app: FastifyInstance, { db, manager, appOrigin 
     const settings = body.settings ?? (quizSettings.success ? quizSettings.data : null)
     if (!settings) return reply.code(400).send({ error: 'errors.invalidInput' })
 
-    const game = await manager.create({
-      id: nanoid(12),
-      // Frozen copy: later quiz edits do not affect a running game.
-      quiz: { id: quiz.id, title: quiz.title, description: quiz.description, questions: quiz.questions },
-      settings,
-      hostId: request.user!.id,
-      quizId: quiz.id,
-    })
+    let game
+    try {
+      game = await manager.create({
+        id: nanoid(12),
+        // Frozen copy: later quiz edits do not affect a running game.
+        quiz: { id: quiz.id, title: quiz.title, description: quiz.description, questions: quiz.questions },
+        settings,
+        hostId: request.user!.id,
+        quizId: quiz.id,
+        scheduledAt: body.scheduledAt,
+      })
+    } catch (error) {
+      if (error instanceof EngineError) return reply.code(400).send({ error: error.code })
+      throw error
+    }
     return reply.code(201).send({ pin: game.state.pin })
   })
 
@@ -97,6 +106,8 @@ export async function gameRoutes(app: FastifyInstance, { db, manager, appOrigin 
       phase: state.phase,
       teams: Object.values(state.teams).map((t) => ({ id: t.id, name: t.name })),
       joinUrl: `${appOrigin}/?pin=${state.pin}`,
+      scheduledAt: state.scheduledAt ?? null,
+      serverNow: Date.now(),
     }
     return info
   })

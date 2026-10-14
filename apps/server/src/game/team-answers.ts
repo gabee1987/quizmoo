@@ -16,6 +16,14 @@ export function answersAsOne(team: Team): boolean {
   return teamMode(team) !== 'average'
 }
 
+/**
+ * Captain decides with someone to decide with: members suggest and the captain confirms. A team
+ * of one in captain decides needs no confirmation; its member's answer is the team's answer.
+ */
+export function needsConfirmation(state: GameState, team: Team): boolean {
+  return teamMode(team) === 'captain' && membersOf(state, team.id).length > 1
+}
+
 /** Members in join order (games saved before `joinOrder` existed fall back to the id). */
 export function membersOf(state: GameState, teamId: string): Player[] {
   return Object.values(state.players)
@@ -114,7 +122,7 @@ export function teamAnswerNow(state: GameState, team: Team, questionId: string):
   const stored = team.answers?.[questionId]
   if (stored) return stored
   const majority = majorityAnswer(votesOf(state, team.id, questionId))
-  return majority && { ...majority, byPlayerId: null, fallback: teamMode(team) === 'captain', points: 0, correct: null }
+  return majority && { ...majority, byPlayerId: null, fallback: needsConfirmation(state, team), points: 0, correct: null }
 }
 
 /**
@@ -122,7 +130,7 @@ export function teamAnswerNow(state: GameState, team: Team, questionId: string):
  * someone answered and every connected member has.
  */
 export function teamAnswered(state: GameState, team: Team, questionId: string): boolean {
-  if (teamMode(team) === 'captain') return Boolean(team.answers?.[questionId])
+  if (needsConfirmation(state, team)) return Boolean(team.answers?.[questionId])
   const members = membersOf(state, team.id)
   return members.some((m) => m.answers[questionId]) && members.every((m) => !m.connected || m.answers[questionId])
 }

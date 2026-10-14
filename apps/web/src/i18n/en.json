@@ -41,7 +41,11 @@
       "food": "Food",
       "fantasy": "Fantasy",
       "fun": "Fun and games"
-    }
+    },
+    "scheduled": "Starts {{date}}",
+    "scheduledHelp": "Fill in your details meanwhile. Keep this page open: you can join here when it starts.",
+    "leave": "Leave",
+    "opensAtStart": "Joining opens at the start"
   },
   "home": {
     "tagline": "Think. Quiz. Outsmart the herd!",
@@ -58,6 +62,7 @@
     "loading": "Loading…",
     "next": "Next",
     "cancel": "Cancel",
+    "save": "Save",
     "add": "Add",
     "delete": "Delete",
     "removeItem": "Remove {{name}}",
@@ -175,7 +180,9 @@
       "teamModesHelp": "Changes apply from the next question.",
       "teamConfirmed": "Confirmed",
       "teamSuggesting": "Suggesting ({{picked}} of {{count}})",
-      "teamFallback": "Majority, not confirmed"
+      "teamFallback": "Majority, not confirmed",
+      "copyLink": "Copy link",
+      "linkCopied": "Link copied."
     },
     "shown": {
       "onScreen": {
@@ -247,8 +254,6 @@
       "shuffle": "Shuffle answer options",
       "submit": "Create game",
       "groupsHelp": "The game starts with the quiz's settings. Change any group for this game only.",
-      "change": "Change",
-      "done": "Done",
       "reset": "Reset",
       "changedForGame": "Changed for this game",
       "noBonuses": "No bonuses, fixed order",
@@ -289,7 +294,8 @@
         "navy": "Navy",
         "petrol": "Petrol",
         "stone": "Stone",
-        "bordeaux": "Bordeaux"
+        "bordeaux": "Bordeaux",
+        "custom": "Custom"
       },
       "answerPalette": "Answer colours",
       "answerPaletteHelp": "The answer buttons and the result bars on the phones and the projector, independent of the theme. Muted and Corporate are the calmer sets.",
@@ -299,7 +305,8 @@
         "neon": "Neon",
         "earth": "Earth",
         "muted": "Muted",
-        "corporate": "Corporate"
+        "corporate": "Corporate",
+        "custom": "Custom"
       },
       "answerSymbols": "Answer symbols",
       "answerSymbolsOptions": {
@@ -324,7 +331,32 @@
         "sameHelp": "You pick the mode; teams can't change it."
       },
       "teamAnswerMode": "Mode for every team",
-      "teamAnswerSame": "Same for all teams: {{mode}}"
+      "teamAnswerSame": "Same for all teams: {{mode}}",
+      "customTheme": {
+        "title": "Your colours",
+        "main": "Main colour",
+        "accent": "Accent colour",
+        "strength": "Colour strength",
+        "muted": "Black and white",
+        "vivid": "Vivid",
+        "help": "Drag the handles on the wheel, or use the arrow keys. The main colour shows on buttons and the countdown; the accent on the lobby card's ring, the avatar bubble and the winner's card. Strength at zero is black and white. Text stays readable in light and dark mode whatever you pick.",
+        "sample": "What players see in the lobby",
+        "sampleName": "You're in, Anna!",
+        "sampleButton": "Main colour"
+      },
+      "customPalette": {
+        "title": "Your answer colours",
+        "answer": "Answer {{n}}",
+        "help": "Pick any colour, black and white too. The app picks the text colour (white or dark) so it stays readable. The symbols still tell answers apart when two colours are close."
+      },
+      "when": "When does it start?",
+      "whenOptions": {
+        "now": "Now",
+        "later": "Later"
+      },
+      "startsAt": "Start time",
+      "laterHelp": "The PIN and the link are yours now, ready to share. Players can join from that time on; you start the game.",
+      "scheduleSubmit": "Schedule"
     },
     "newQuiz": "New quiz",
     "edit": "Edit",
@@ -371,7 +403,16 @@
       "updated": "Last edited",
       "title": "Title"
     },
-    "noMatches": "No quiz matches “{{query}}”."
+    "noMatches": "No quiz matches “{{query}}”.",
+    "scheduled": {
+      "title": "Scheduled game",
+      "opensAt": "Players can join from {{date}}",
+      "help": "Share the link or the QR code now. Anyone who opens it early sees when it starts.",
+      "openNow": "Open now",
+      "changeTime": "Change time",
+      "cancel": "Call off game",
+      "confirmCancel": "Call off this scheduled game? The PIN and the link stop working."
+    }
   },
   "play": {
     "youAreIn": "You're in, {{name}}!",
@@ -466,7 +507,8 @@
       "you": "You",
       "useAnswer": "Use",
       "useAnswerFor": "Confirm {{name}}'s pick for the team",
-      "fallback": "Your captain did not confirm, so the team's majority counted."
+      "fallback": "Your captain did not confirm, so the team's majority counted.",
+      "teamAnswerLabel": "Your team's answer"
     }
   },
   "screen": {
@@ -698,7 +740,9 @@
     "samePassword": "The new password must differ from the current one.",
     "gameNotFinished": "End the game first.",
     "answerNotSent": "Your answer was not sent. Tap again.",
-    "notCaptain": "Only your team's captain can do that."
+    "notCaptain": "Only your team's captain can do that.",
+    "gameNotOpenYet": "This game has not opened yet. Come back at the start time.",
+    "invalidSchedule": "Pick a time in the future, at most 30 days ahead."
   },
   "nav": {
     "label": "Host menu",
@@ -720,7 +764,11 @@
     "date": "Date",
     "mode": "Mode",
     "playerCount": "Players",
-    "status": "Status"
+    "status": "Status",
+    "scheduled": "Scheduled",
+    "cancel": "Call off",
+    "cancelTitle": "Call off game?",
+    "cancelBody": "The scheduled game \"{{title}}\" ({{date}}) will be deleted and its PIN and link stop working."
   },
   "results": {
     "title": "Results",
@@ -761,5 +809,19 @@
     "screenHint": "Space or → next, ← back, P pause",
     "teamAnswers": "Team answers",
     "noTeamAnswer": "No answer"
+  },
+  "datePicker": {
+    "title": "Pick a date and time",
+    "previousMonth": "Previous month",
+    "nextMonth": "Next month",
+    "time": "Time",
+    "hour": "Hour",
+    "minute": "Minute",
+    "done": "Done"
+  },
+  "calendar": {
+    "add": "Add to calendar",
+    "summary": "Quizmoo: {{title}}",
+    "description": "PIN: {{pin}}\nJoin at: {{url}}"
   }
 }

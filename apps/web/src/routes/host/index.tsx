@@ -84,8 +84,8 @@ function HostHome() {
     })
 
   const play = useMutation({
-    mutationFn: ({ quizId, settings }: { quizId: string; settings: GameSettings }) =>
-      apiFetch<{ pin: string }>('/api/games', { method: 'POST', body: JSON.stringify({ quizId, settings }) }),
+    mutationFn: ({ quizId, settings, scheduledAt }: { quizId: string; settings: GameSettings; scheduledAt?: number | undefined }) =>
+      apiFetch<{ pin: string }>('/api/games', { method: 'POST', body: JSON.stringify({ quizId, settings, scheduledAt }) }),
     onSuccess: ({ pin }) => void navigate({ to: '/host/games/$pin', params: { pin } }),
     onError: toastError,
   })
@@ -318,7 +318,7 @@ function HostHome() {
               <Badge variant="secondary">{t('host.questionCount', { count: quiz.questionCount })}</Badge>
               <Badge variant="outline">{t(`host.create.modes.${quiz.settings.mode}`)}</Badge>
               <Badge variant="outline">
-                <span className="size-2.5 rounded-full" style={{ background: themeSwatches(quiz.settings.theme)[0] }} />
+                <span className="size-2.5 rounded-full" style={{ background: themeSwatches(quiz.settings.theme, quiz.settings.customTheme)[0] }} />
                 {t(`host.create.themeOptions.${quiz.settings.theme}`)}
               </Badge>
             </div>
@@ -345,7 +345,7 @@ function HostHome() {
           quizTitle={creating.title}
           quizSettings={creating.settings}
           pending={play.isPending}
-          onCreate={(settings) => play.mutate({ quizId: creating.id, settings })}
+          onCreate={(settings, scheduledAt) => play.mutate({ quizId: creating.id, settings, scheduledAt })}
           onCancel={() => {
             setCreating(null)
             play.reset()

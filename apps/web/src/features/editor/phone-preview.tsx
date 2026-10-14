@@ -1,6 +1,7 @@
 import type { GameSettings, Question } from '@quizmoo/shared'
 import type { TFunction } from 'i18next'
 import { useTranslation } from 'react-i18next'
+import { gameVars } from '@/lib/themes'
 import { QuestionInput } from '../questions/question-input'
 
 /** A question to show when none is selected, so the theme, palette and symbols can be previewed on an answer screen. */
@@ -36,12 +37,13 @@ export function PhonePreview({
   return (
     <div
       data-theme={settings.theme}
+      style={gameVars(settings)}
       data-palette={settings.answerPalette}
       className="mx-auto w-[375px] max-w-full rounded-[2.5rem] border-8 border-foreground/85 bg-background p-4 text-foreground shadow-soft"
     >
       {/* Inert: a preview, not a playable question. Re-keyed so the entrance animations replay on changes. */}
       <div
-        key={`${shown.id}-${settings.answerStyle}-${settings.answerSymbols}-${settings.answerPalette}-${settings.theme}`}
+        key={`${shown.id}-${settings.answerStyle}-${settings.answerSymbols}-${settings.answerPalette}-${settings.theme}-${JSON.stringify(settings.customTheme)}-${settings.customPalette.join()}`}
         className="pointer-events-none flex min-h-[600px] flex-col gap-4"
         inert
       >

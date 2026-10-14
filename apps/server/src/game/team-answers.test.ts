@@ -19,7 +19,7 @@ import {
   submitAnswer,
 } from './engine.js'
 import { fixtureQuiz, fixtureSettings } from './fixtures.js'
-import { captainOf, majorityAnswer, teamMode, voteKey, type Vote } from './team-answers.js'
+import { captainOf, majorityAnswer, teamAnswered, teamMode, voteKey, type Vote } from './team-answers.js'
 import { EngineError, type GameQuiz, type GameState } from './types.js'
 
 const T0 = 1_000_000
@@ -278,6 +278,24 @@ describe('captain decides', () => {
   it('discards the confirmation when the question is skipped', () => {
     const state = skipQuestion(confirm(captainGame(), 'p1', A, T0 + 2000), T0 + 3000)
     expect(state.teams['team-1']!.answers!['q-single']).toBeUndefined()
+  })
+
+  it('takes a team of one’s answer as its team answer, without a confirmation or a fallback mark', () => {
+    let state = startGame(kickPlayer(teamGame({ teamAnswer: 'captain' }), 'p5'), T0)
+    state = answer(state, 'p4', A, T0 + 5000)
+    expect(teamAnswered(state, state.teams['team-2']!, 'q-single')).toBe(true)
+    // Its answer is final, like a classic answer.
+    expectCode(() => answer(state, 'p4', B, T0 + 6000), 'errors.alreadyAnswered')
+    state = endQuestion(state)
+    expect(state.teams['team-2']!.answers!['q-single']).toMatchObject({ answer: A, fallback: false, points: 875 })
+    expect(state.teams['team-2']!.score).toBe(875)
+  })
+
+  it('closes early once a team of one has answered and the other team has confirmed', () => {
+    let state = startGame(kickPlayer(teamGame({ teamAnswer: 'captain' }), 'p5'), T0)
+    state = confirm(state, 'p1', A, T0 + 1000)
+    expect(allAnswered(state)).toBe(false)
+    expect(allAnswered(answer(state, 'p4', B, T0 + 2000))).toBe(true)
   })
 
   it('plays a team saved in the removed shared mode as captain decides, its answer counting as confirmed', () => {

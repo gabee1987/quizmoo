@@ -5,6 +5,7 @@ import {
   endQuestion,
   expireAnnouncement,
   resultsPending,
+  schedule,
   type GameQuiz,
   type GameState,
 } from '../game/index.js'
@@ -82,9 +83,19 @@ export class GameManager {
     return () => this.listeners.delete(listener)
   }
 
-  async create(input: { id: string; quiz: GameQuiz; settings: GameSettings; hostId: string; quizId: string | null }) {
+  /** With `scheduledAt` joining opens then (may throw EngineError `errors.invalidSchedule`). */
+  async create(input: {
+    id: string
+    quiz: GameQuiz
+    settings: GameSettings
+    hostId: string
+    quizId: string | null
+    scheduledAt?: number | undefined
+  }) {
+    const now = this.now()
     const pin = generatePin((candidate) => this.games.has(candidate))
-    const state = createGame(input.quiz, input.settings, pin, input.id, this.now())
+    const created = createGame(input.quiz, input.settings, pin, input.id, now)
+    const state = input.scheduledAt === undefined ? created : schedule(created, input.scheduledAt, now)
     const entry: Entry = {
       game: { state, hostId: input.hostId, quizId: input.quizId },
       timer: null,

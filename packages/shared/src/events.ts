@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { MAX_PLAYERS, announcementDurationSchema, announcementTextSchema, answerSchema, avatarSchema } from './game.js'
+import { MAX_PLAYERS, announcementDurationSchema, announcementTextSchema, answerSchema, avatarSchema, scheduledAtSchema } from './game.js'
 import type { HostSnapshot, PlayerSnapshot } from './game.js'
 import { teamAnswerModes } from './quiz.js'
 
@@ -71,6 +71,10 @@ export const hostCommandSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('showQuestion'), index: z.number().int().min(0) }),
   /** Back from a question shown again to where the game was. */
   z.object({ type: z.literal('closeQuestion') }),
+  /** A scheduled game whose joining has not opened yet: a new opening time. */
+  z.object({ type: z.literal('schedule'), at: scheduledAtSchema }),
+  /** A scheduled game: open joining now instead of at the scheduled time. */
+  z.object({ type: z.literal('openJoining') }),
 ])
 export type HostCommand = z.infer<typeof hostCommandSchema>
 

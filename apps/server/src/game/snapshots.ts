@@ -24,6 +24,7 @@ import {
   captainOf,
   countedAnswers,
   membersOf,
+  needsConfirmation,
   teamAnswerNow,
   teamAnswered,
   teamGain,
@@ -115,9 +116,8 @@ function teamLive(state: GameState, player: Player): TeamLive | null {
   if (state.phase !== 'question' || !team || !question) return null
   const tally = voteTally(votesOf(state, team.id, question.id))
   const picked = new Set(tally.flatMap((g) => g.votes.map((v) => v.playerId)))
-  const mode = teamMode(team)
-  const record =
-    mode === 'captain' ? (team.answers?.[question.id] ?? null) : mode === 'majority' ? teamAnswerNow(state, team, question.id) : null
+  // Captain decides shows only a confirmed answer; a team of one's own answer is its answer.
+  const record = needsConfirmation(state, team) ? (team.answers?.[question.id] ?? null) : teamAnswerNow(state, team, question.id)
   return {
     answer: record?.answer ?? null,
     setBy: record?.byPlayerId ?? null,
@@ -171,9 +171,19 @@ function conceal(state: GameState, base: GameSnapshotBase): GameSnapshotBase {
 
 /** Questions actually asked (a game ended early stops at the current one). */
 function playerResults(state: GameState, player: Player): PlayerQuestionResult[] {
+  const team = player.teamId ? state.teams[player.teamId] : undefined
+  const inTeam = team !== undefined && membersOf(state, team.id).length > 1
   return state.quiz.questions.slice(0, state.questionIndex + 1).map((question) => {
     const record = player.answers[question.id]
-    return { question, answer: record?.answer ?? null, correct: record?.correct ?? null, points: record?.points ?? 0 }
+    const teamRecord = inTeam ? team.answers?.[question.id] : undefined
+    return {
+      question,
+      answer: record?.answer ?? null,
+      correct: record?.correct ?? null,
+      points: record?.points ?? 0,
+      teamAnswer: Boolean(teamRecord),
+      fallback: teamRecord?.fallback ?? false,
+    }
   })
 }
 
@@ -276,6 +286,7 @@ function baseSnapshot(state: GameState, now: number, audience: ResultsAudience, 
     resultsPending: resultsPendingFor(state, audience),
     announcement: state.announcement ?? null,
     nextPin: state.nextPin ?? null,
+    scheduledAt: state.scheduledAt ?? null,
   }
 }
 

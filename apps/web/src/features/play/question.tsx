@@ -11,7 +11,7 @@ import { stagger } from '../../lib/motion'
 import { emitAck, sendAnswer } from '../../lib/socket'
 import { QuestionInput } from '../questions/question-input'
 import { Answered } from './answered'
-import { changeWindow, confirmsForTeam, myTeamMode } from './change-window'
+import { captainDecides, changeWindow, confirmsForTeam, myTeamSize } from './change-window'
 import { TeamPicksPanel } from './team-picks-panel'
 import { picksByOption } from './team-picks'
 
@@ -28,12 +28,13 @@ export function Question({ snapshot, clockOffset }: { snapshot: PlayerSnapshot; 
   const now = useNow(changing) + clockOffset
   const question = snapshot.question
   const paused = snapshot.pausedAt !== null
-  const teamMode = myTeamMode(snapshot)
-  const live = snapshot.teamLive
+  const decides = captainDecides(snapshot)
+  // A team of one has nobody to show picks to.
+  const live = myTeamSize(snapshot) > 1 ? snapshot.teamLive : null
   const captain = confirmsForTeam(snapshot)
   // Captain decides: the team is done once the captain confirms; members' picks are suggestions until then.
-  const confirmed = teamMode === 'captain' && Boolean(live?.answer)
-  const done = teamMode === 'captain' ? confirmed : snapshot.myAnswer !== null
+  const confirmed = decides && Boolean(live?.answer)
+  const done = decides ? confirmed : snapshot.myAnswer !== null
 
   if (!question) return null
   if (done && !(changing && changeWindow(snapshot, now))) {
@@ -85,7 +86,7 @@ export function Question({ snapshot, clockOffset }: { snapshot: PlayerSnapshot; 
     })
   const picks = live ? Object.fromEntries(Object.entries(picksByOption(live, snapshot.me.id)).map(([key, ids]) => [key, players(ids)])) : undefined
   const teamNote =
-    teamMode !== 'captain' ? null : captain ? t('play.team.youDecide') : snapshot.myAnswer ? t('play.team.waitingCaptain') : t('play.team.suggest')
+    !decides ? null : captain ? t('play.team.youDecide') : snapshot.myAnswer ? t('play.team.waitingCaptain') : t('play.team.suggest')
   const disabled = pending || closed || paused
 
   return (

@@ -24,6 +24,10 @@ Topic skills: `game-screens` (phone, projector, host control and results layouts
 
 `/host/*` routes have a layout route that loads `/api/auth/me` and redirects to `/login` on 401. `/play/$pin` and `/screen/$pin` need no login.
 
+## Installable app
+
+`public/manifest.webmanifest`, the icons in `public/icons/` (rendered from `logo.svg`) and `public/sw.js`, registered in `main.tsx` in production builds only. The worker caches hashed `/assets/*` as they load and other app files network-first; it must never answer `/api/*` or `/socket.io/*`. Bump its `CACHE` name when its caching rules change.
+
 ## Data
 
 - REST data (quizzes, results, me) goes through TanStack Query with `queryKey` arrays like `['quizzes']`, `['quiz', id]`. Mutations invalidate the keys they affect. The API client is one `apiFetch<T>(path, init)` helper in `src/lib/api.ts` that throws `ApiError { status, code }` where `code` is the i18n key from the server.
@@ -37,7 +41,7 @@ Topic skills: `game-screens` (phone, projector, host control and results layouts
 
 ## Components and code style
 
-- **App components** live in `src/components/`: `TextField` (label + input + error), `ChoiceCards` (single choice as cards; two columns when the card group itself is at least 28rem wide, a container query), `SelectField` (labelled Radix select in the app's style; use it instead of a native `<select>`), `ConfirmDialog`, `FormAlert` (inline error tied to a form), `Timer`, `OptionButton`, `DistributionBars`, `CountUp`, `RankArrow`, `WaitingDots`, `PinInput`, `QrScanner` (lazy), `QrCode`, `Backdrop`, `Spinner`, `AppHeader`, `GameMenu`, `HostNav`, `ModeToggle`. Primitives (`src/components/ui/`) are in `design-system`.
+- **App components** live in `src/components/`: `TextField` (label + input + error), `ChoiceCards` (single choice as cards; two columns when the card group itself is at least 28rem wide, a container query), `SelectField` (labelled Radix select in the app's style; use it instead of a native `<select>`), `ConfirmDialog`, `FormAlert` (inline error tied to a form), `Timer`, `OptionButton`, `DistributionBars`, `CountUp`, `RankArrow`, `WaitingDots`, `PinInput`, `QrScanner` (lazy), `QrCode`, `DateTimePicker` (calendar and 24-hour time in a popover; use it instead of a native date input), `AddToCalendarButton` (.ics from `lib/ics.ts`), `Backdrop`, `Spinner`, `AppHeader`, `GameMenu`, `HostNav`, `ModeToggle`. Primitives (`src/components/ui/`) are in `design-system`.
 - **Imports**: `@/` points to `src/` (shadcn requires it). New code imports primitives and app components with `@/components/...`; existing relative imports may stay.
 - **Errors**: a failed request where no field is at fault calls `toastError(error)` from `lib/toast.ts` (e.g. `useMutation({ onError: toastError })`); errors tied to a form use `FormAlert` or the field's own error.
 - Tailwind utility classes only. No CSS modules.
@@ -49,4 +53,4 @@ Topic skills: `game-screens` (phone, projector, host control and results layouts
 
 ## Tests
 
-Vitest with `@testing-library/react` and `happy-dom` for logic-bearing components and pure modules: the timer hook, the socket store, the editor's draft and validation, the results summary. Playwright end-to-end lives in `apps/web/e2e`; screenshots and e2e runs are in `browser-checks`.
+Vitest with `@testing-library/react` and `happy-dom` for logic-bearing components and pure modules: the timer hook, the socket store, the editor's draft and validation, the results summary. A component test that checks translated or `Intl`-formatted text imports `../i18n` and sets the language in `beforeAll` (`i18n.changeLanguage('hu')`). Without it, labels follow the machine's locale: they pass on the Hungarian dev laptop and fail in CI, which is English. Playwright end-to-end lives in `apps/web/e2e`; screenshots and e2e runs are in `browser-checks`.

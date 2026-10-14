@@ -84,7 +84,7 @@ function MyResults({ results, symbols }: { results: PlayerQuestionResult[]; symb
       <h2 className="text-center text-xl font-extrabold">{t('play.yourAnswers')}</h2>
       <ol className="flex flex-col gap-4">
         {results.map((result, index) => {
-          const { question, answer, points } = result
+          const { question, answer, points, teamAnswer, fallback } = result
           const outcome = outcomeOf(result)
           const look = outcomeLook[outcome]
           return (
@@ -122,10 +122,13 @@ function MyResults({ results, symbols }: { results: PlayerQuestionResult[]; symb
                 </summary>
                 <div className="flex flex-col gap-3 border-t border-[color-mix(in_srgb,var(--tone)_35%,var(--border))] px-4 py-3">
                   <div className="flex flex-col gap-1">
-                    <p className="text-sm font-semibold text-muted-foreground">{t('play.yourAnswer')}</p>
+                    <p className="text-sm font-semibold text-muted-foreground">
+                      {teamAnswer ? t('play.team.teamAnswerLabel') : t('play.yourAnswer')}
+                    </p>
                     <p className="text-lg font-bold wrap-break-word">
                       {answer ? formatAnswer(answer, question, t, i18n.language) : t('play.noAnswer')}
                     </p>
+                    {fallback && <p className="text-sm font-semibold text-muted-foreground">{t('play.team.fallback')}</p>}
                   </div>
                   {/* Left-aligned here; the reveal centres it. */}
                   <div className="[&>div]:items-start [&>div]:text-left [&_ul]:justify-start">

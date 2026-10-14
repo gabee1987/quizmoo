@@ -21,7 +21,7 @@ Order inside `apply`: run engine command (may throw `EngineError`), replace in m
 
 Timers: one `setTimeout` per game for `questionEndsAt - now`. On fire, call `endQuestion`. Clear on phase change, `extendTime`, `skip`, `end`. A paused question (`pausedAt`) gets no deadline timer; `resume` re-arms it. A second timer per game clears a host message with `expiresAt` through `expireAnnouncement(id)`. Both are re-armed on every transition. Timers are not persisted; `restoreGames()` on boot recomputes them from `questionEndsAt`, firing immediately for games whose deadline passed while the server was down.
 
-Restore on boot: load games where `phase != 'finished'` (plus finished ones whose results still wait for release) and `created_at` is within 12 hours, mark every player `connected: false` with `disconnectedAt` set, re-arm timers. Older unfinished games are marked finished.
+Restore on boot: load games where `phase != 'finished'` (plus finished ones whose results still wait for release) and the later of `created_at` and the state's `scheduledAt` is within 12 hours (a scheduled game waits up to 30 days in memory), mark every player `connected: false` with `disconnectedAt` set, re-arm timers. Older unfinished games are marked finished.
 
 Game lifetime: a finished game stays in memory for 1 hour so late reconnects still see the podium (12 hours while results wait for release), then is dropped from the map (the DB row stays).
 

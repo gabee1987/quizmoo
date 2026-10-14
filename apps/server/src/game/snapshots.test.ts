@@ -516,6 +516,13 @@ describe('team answers in snapshots', () => {
     })
   })
 
+  it('marks team answers and fallbacks in the end-of-game review', () => {
+    const state = endGame(endQuestion(send(send(teams(), 'p5', A, T0 + 1000), 'p6', B, T0 + 1000)), T0 + 2000)
+    expect(toPlayerSnapshot(state, 'p4', T0).myResults![0]).toMatchObject({ answer: A, teamAnswer: true, fallback: true })
+    // Everyone counts: the player's own answer.
+    expect(toPlayerSnapshot(state, 'p6', T0).myResults![0]).toMatchObject({ answer: B, teamAnswer: false, fallback: false })
+  })
+
   it('tells the team on its phones when the captain did not confirm and the majority counted', () => {
     const state = endQuestion(send(teams(), 'p5', A, T0 + 1000))
     expect(toPlayerSnapshot(state, 'p4', T0).teamFallback).toBe(true)

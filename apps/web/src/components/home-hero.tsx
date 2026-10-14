@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type Ref } from 'react'
 import { useTranslation } from 'react-i18next'
 import { stagger } from '@/lib/motion'
 import { CowLogo } from './cow-logo'
@@ -16,7 +16,7 @@ export function mooKey(taps: number) {
  * makes it jump and say something. All motion is CSS (styles.css, "Home hero") and ends at once
  * under reduced motion.
  */
-export function HomeHero({ tagline }: { tagline: string }) {
+export function HomeHero({ tagline, titleRef }: { tagline: string; titleRef?: Ref<HTMLHeadingElement> | undefined }) {
   const { t } = useTranslation()
   const [taps, setTaps] = useState(0)
   const name = t('app.name')
@@ -64,7 +64,7 @@ export function HomeHero({ tagline }: { tagline: string }) {
           )}
         </p>
       </div>
-      <h1 className="text-5xl font-black tracking-tight lg:text-7xl">
+      <h1 ref={titleRef} className="scroll-mt-4 text-5xl font-black tracking-tight lg:text-7xl">
         <span className="sr-only">{name}</span>
         {/* Letters drop in one by one; "moo" (from the fifth letter) is in the theme colour. */}
         <span aria-hidden="true">

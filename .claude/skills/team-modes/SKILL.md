@@ -11,7 +11,7 @@ Team mode (`settings.mode === 'team'`) gives every team an answer mode (`Team.an
 
 | Mode | During the question | At `endQuestion` |
 |---|---|---|
-| `captain` | members' answers are suggestions (`player.answers`), changeable until the captain confirms, also without `answerChanges`; `confirmTeamAnswer` (captain only, `errors.notCaptain`) writes `team.answers[q]` with `byPlayerId`, timed at the confirmation, final unless `answerChanges` (then until the lock-in) | the confirmed answer; without one the majority of the suggestions with `fallback: true` |
+| `captain` | (a team of more than one member, `needsConfirmation`; a team of one answers like `average` with its own answer as the team answer) members' answers are suggestions (`player.answers`), changeable until the captain confirms, also without `answerChanges`; `confirmTeamAnswer` (captain only, `errors.notCaptain`) writes `team.answers[q]` with `byPlayerId`, timed at the confirmation, final unless `answerChanges` (then until the lock-in) | the confirmed answer; without one the majority of the suggestions with `fallback: true` |
 | `majority` | members' answers are votes (`answerChanges` applies) | `majorityAnswer`: most votes wins (`voteKey`: text normalised, multiple as a set, order as the whole order), a tie goes to the first given, numbers take the lower median; time = lower median of the winning votes |
 | `average` | every member answers | each scored alone; team gains the rounded mean |
 

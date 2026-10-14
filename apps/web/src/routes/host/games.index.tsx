@@ -16,7 +16,14 @@ export const Route = createFileRoute('/host/games/')({
   component: GameHistory,
 })
 
-/** The host's games, newest first: open the results, or delete a finished game. A table on laptops, cards on phones. */
+/** Joining has not opened yet: the game is waiting for its time. */
+const isScheduled = (game: GameHistoryItem, now: number) =>
+  game.phase === 'lobby' && game.scheduledAt !== null && Date.parse(game.scheduledAt) > now
+
+/**
+ * The host's games: scheduled ones first (soonest first), then the rest newest first. Open the
+ * results, delete a finished game or call off a scheduled one. A table on laptops, cards on phones.
+ */
 function GameHistory() {
   const { t, i18n } = useTranslation()
   const queryClient = useQueryClient()
@@ -35,6 +42,12 @@ function GameHistory() {
     onError: toastError,
   })
   const dateFormat = new Intl.DateTimeFormat(i18n.language, { dateStyle: 'medium', timeStyle: 'short' })
+  const now = Date.now()
+  const scheduled = (games.data ?? []).filter((game) => isScheduled(game, now))
+  scheduled.sort((a, b) => Date.parse(a.scheduledAt!) - Date.parse(b.scheduledAt!))
+  const rows = [...scheduled, ...(games.data ?? []).filter((game) => !isScheduled(game, now))]
+  /** A scheduled game shows when it starts; the others when they were created. */
+  const date = (game: GameHistoryItem) => dateFormat.format(new Date(isScheduled(game, now) ? game.scheduledAt! : game.createdAt))
 
   const actions = (game: GameHistoryItem) => (
     <>
@@ -46,17 +59,19 @@ function GameHistory() {
           </Link>
         </Button>
       )}
-      <Button asChild variant="outline" size="sm">
-        <Link to="/host/results/$gameId" params={{ gameId: game.gameId }}>
-          <BarChart3Icon aria-hidden="true" />
-          {t('history.results')}
-        </Link>
-      </Button>
-      {game.phase === 'finished' && (
+      {!isScheduled(game, now) && (
+        <Button asChild variant="outline" size="sm">
+          <Link to="/host/results/$gameId" params={{ gameId: game.gameId }}>
+            <BarChart3Icon aria-hidden="true" />
+            {t('history.results')}
+          </Link>
+        </Button>
+      )}
+      {(game.phase === 'finished' || isScheduled(game, now)) && (
         <Button
           variant="ghost"
           size="icon-sm"
-          aria-label={`${t('common.delete')}: ${game.quizTitle}`}
+          aria-label={`${isScheduled(game, now) ? t('history.cancel') : t('common.delete')}: ${game.quizTitle}`}
           onClick={() => setDeleting(game)}
         >
           <Trash2Icon aria-hidden="true" />
@@ -64,9 +79,12 @@ function GameHistory() {
       )}
     </>
   )
-  const status = (game: GameHistoryItem) => (
-    <Badge variant={game.phase === 'finished' ? 'secondary' : 'default'}>{t(`host.game.phase.${game.phase}`)}</Badge>
-  )
+  const status = (game: GameHistoryItem) =>
+    isScheduled(game, now) ? (
+      <Badge variant="outline">{t('history.scheduled')}</Badge>
+    ) : (
+      <Badge variant={game.phase === 'finished' ? 'secondary' : 'default'}>{t(`host.game.phase.${game.phase}`)}</Badge>
+    )
 
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-5">
@@ -104,11 +122,11 @@ function GameHistory() {
                 </tr>
               </thead>
               <tbody>
-                {games.data.map((game) => (
+                {rows.map((game) => (
                   <tr key={game.gameId} className="border-t">
                     <td className="max-w-64 px-4 py-3 font-bold wrap-break-word">{game.quizTitle}</td>
                     <td className="px-4 py-3 text-sm whitespace-nowrap text-muted-foreground">
-                      {dateFormat.format(new Date(game.createdAt))}
+                      {date(game)}
                     </td>
                     <td className="px-4 py-3 text-sm">{t(`host.create.modes.${game.mode}`)}</td>
                     <td className="px-4 py-3 text-right tabular-nums">{game.playerCount}</td>
@@ -124,14 +142,14 @@ function GameHistory() {
 
           {/* Phone */}
           <ul className="flex flex-col gap-3 md:hidden">
-            {games.data.map((game) => (
+            {rows.map((game) => (
               <li key={game.gameId} className="flex flex-col gap-3 rounded-2xl border bg-card p-4 shadow-soft">
                 <div className="flex items-start justify-between gap-2">
                   <p className="min-w-0 text-lg leading-snug font-extrabold wrap-break-word">{game.quizTitle}</p>
                   {status(game)}
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  {dateFormat.format(new Date(game.createdAt))}
+                  {date(game)}
                   {' · '}
                   {t(`host.create.modes.${game.mode}`)}
                   {' · '}
@@ -146,8 +164,8 @@ function GameHistory() {
 
       {deleting && (
         <ConfirmDialog
-          title={t('history.deleteTitle')}
-          confirmLabel={t('common.delete')}
+          title={isScheduled(deleting, now) ? t('history.cancelTitle') : t('history.deleteTitle')}
+          confirmLabel={isScheduled(deleting, now) ? t('history.cancel') : t('common.delete')}
           danger
           pending={remove.isPending}
           onConfirm={() => remove.mutate(deleting)}
@@ -156,7 +174,7 @@ function GameHistory() {
             remove.reset()
           }}
         >
-          {t('history.deleteBody', { title: deleting.quizTitle, date: dateFormat.format(new Date(deleting.createdAt)) })}
+          {t(isScheduled(deleting, now) ? 'history.cancelBody' : 'history.deleteBody', { title: deleting.quizTitle, date: date(deleting) })}
         </ConfirmDialog>
       )}
     </div>

@@ -97,10 +97,28 @@ describeDb('game routes (database)', () => {
         { id: 'team-2', name: 'Blue' },
       ],
       joinUrl: `http://localhost:3000/?pin=${pin}`,
+      scheduledAt: null,
+      serverNow: expect.any(Number),
     })
     const missing = await built.app.inject({ method: 'GET', url: '/api/games/999999/public' })
     expect(missing.statusCode).toBe(404)
     expect(missing.json()).toEqual({ error: 'errors.gameNotFound' })
+  })
+
+  it('start later: reserves the PIN, tells the join page when joining opens, refuses an invalid time', async () => {
+    const scheduledAt = Date.now() + 24 * 60 * 60 * 1000
+    const res = await create(alice, { quizId: 'quiz-test_alice', scheduledAt })
+    expect(res.statusCode).toBe(201)
+    const { pin } = res.json()
+    expect(built.manager.get(pin)!.state).toMatchObject({ phase: 'lobby', scheduledAt })
+    const info = await built.app.inject({ method: 'GET', url: `/api/games/${pin}/public` })
+    expect(info.json()).toMatchObject({ phase: 'lobby', scheduledAt, serverNow: expect.any(Number) })
+
+    for (const at of [Date.now() - 1000, Date.now() + 31 * 24 * 60 * 60 * 1000]) {
+      const refused = await create(alice, { quizId: 'quiz-test_alice', scheduledAt: at })
+      expect([refused.statusCode, refused.json()]).toEqual([400, { error: 'errors.invalidSchedule' }])
+    }
+    expect((await create(alice, { quizId: 'quiz-test_alice', scheduledAt: 'tomorrow' })).statusCode).toBe(400)
   })
 
   it('play again: a new lobby with the same quiz and settings, pointed to by the finished game, owner only', async () => {

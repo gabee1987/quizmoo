@@ -53,9 +53,10 @@ export function OptionButton({
         '[--option-edge:color-mix(in_oklch,var(--option),black_25%)] shadow-[0_5px_0_0_var(--option-edge)]',
         'enabled:hover:-translate-y-0.5 enabled:hover:shadow-[0_7px_0_0_var(--option-edge)] enabled:hover:brightness-105',
         'enabled:active:translate-y-1 enabled:active:shadow-none',
-        // Selected: pressed down, with a ring in the option's own text colour drawn inside its edge,
-        // so it stays within the option instead of reaching into the neighbours.
-        selected && 'translate-y-1 shadow-[0_1px_0_0_var(--option-edge)] ring-4 ring-(--option-fg) ring-inset',
+        // Selected: pressed down, with a ring in the theme's primary colour outside the option and a
+        // gap in the page colour, so it reads against every option colour. 3 + 2 px per side stays
+        // within the 12 px grid gap, also when two neighbours are selected.
+        selected && 'translate-y-1 shadow-[0_1px_0_0_var(--option-edge)] ring-3 ring-primary ring-offset-2 ring-offset-background',
       )
     : cn(
         'border-2 shadow-[0_4px_0_0_var(--secondary-edge)] enabled:hover:-translate-y-0.5 enabled:active:translate-y-1 enabled:active:shadow-none',
@@ -91,7 +92,17 @@ export function OptionButton({
       {pending ? (
         <Loader2Icon className="size-6 shrink-0 animate-spin" aria-hidden="true" />
       ) : (
-        selected && <CheckIcon className="size-6 shrink-0" />
+        selected && (
+          // A badge with an edge in the page colour: visible on any option colour, in the theme's colour.
+          <span
+            className={cn(
+              'grid size-8 shrink-0 place-items-center rounded-full ring-2',
+              colourful ? 'bg-primary text-primary-foreground ring-background' : 'bg-primary-foreground text-primary ring-primary-foreground/40',
+            )}
+          >
+            <CheckIcon className="size-5" />
+          </span>
+        )
       )}
     </button>
   )

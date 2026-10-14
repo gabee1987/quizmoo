@@ -30,9 +30,11 @@ import {
   joinPlayer,
   kickPlayer,
   next,
+  openJoining,
   pause,
   releaseResults,
   resume,
+  schedule,
   setCaptain,
   setTeamMode,
   showQuestion,
@@ -150,7 +152,7 @@ export function registerSocketHandlers(io: AppSocketServer, { manager, db, parse
         const existing = token ? Object.values(game.state.players).find((p) => p.token === token) : undefined
         const playerId = existing?.id ?? nanoid(10)
         const playerToken = existing?.token ?? randomBytes(24).toString('base64url')
-        manager.apply(pin, (s) => joinPlayer(s, { id: playerId, name, teamId, token: playerToken, avatar }))
+        manager.apply(pin, (s, now) => joinPlayer(s, { id: playerId, name, teamId, token: playerToken, avatar }, now))
 
         leaveGameRooms(socket)
         socket.data = { pin, playerId, role: 'player' }
@@ -319,5 +321,9 @@ function runHostCommand(state: GameState, command: HostCommand, now: number): Ga
       return showQuestion(state, command.index)
     case 'closeQuestion':
       return closeQuestion(state)
+    case 'schedule':
+      return schedule(state, command.at, now)
+    case 'openJoining':
+      return openJoining(state, now)
   }
 }

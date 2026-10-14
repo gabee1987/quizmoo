@@ -173,14 +173,23 @@
   --tint: 0.006;
   --chroma: 0.5;
 }
+/* The host's own colours: themeVars() (lib/themes.ts) sets them inline; these are only the fallback. */
+[data-theme='custom'] {
+  --hue: 277;
+  --hue-accent: 330;
+  --tint: 0.012;
+  --chroma: 1;
+}
 
 /*
  * Answer palettes: six fixed colours by option index (red, blue, yellow, green, orange, purple
  * families), each with its own readable text colour, the same in both modes and every theme, so
  * answers never blend into the background. Option buttons and result bars read --option-N.
  */
+/* custom: Vivid until the host's colours arrive as inline variables (lib/themes.ts paletteVars). */
 :root,
-[data-palette='vivid'] {
+[data-palette='vivid'],
+[data-palette='custom'] {
   --option-1: oklch(0.57 0.22 25);
   --option-1-fg: oklch(0.99 0 0);
   --option-2: oklch(0.5 0.2 262);
@@ -341,6 +350,7 @@
   --animate-menu-pop: menu-pop 0.32s cubic-bezier(0.34, 1.56, 0.64, 1) both;
   --animate-panel-in: panel-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
   --animate-dialog-pop: dialog-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  --animate-bubble-pop: bubble-pop 0.6s ease-out both;
 
   /* Menus and select lists spring open from their trigger (transform-origin is set by Radix). */
   @keyframes menu-pop {
@@ -349,6 +359,35 @@
       opacity: 0;
     }
     to {
+      transform: none;
+      opacity: 1;
+    }
+  }
+  /*
+   * A popover that bubbles open (the date picker) like bubble gum pulled out of its corner: it grows
+   * from the corner at its trigger (Radix's transform origin), so its far corner shoots out along the
+   * opening direction, overshoots, snaps back a little and settles. Uniform scale only: a stretch along
+   * the diagonal reads as a skew on a rectangle.
+   */
+  @keyframes bubble-pop {
+    0% {
+      transform: scale(0.45);
+      opacity: 0;
+    }
+    26% {
+      transform: scale(1.045);
+      opacity: 1;
+    }
+    46% {
+      transform: scale(0.982);
+    }
+    66% {
+      transform: scale(1.008);
+    }
+    84% {
+      transform: scale(0.997);
+    }
+    100% {
       transform: none;
       opacity: 1;
     }

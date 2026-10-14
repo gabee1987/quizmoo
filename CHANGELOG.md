@@ -95,6 +95,23 @@
 - Teams that answer as one score their answer once; the projector and host count teams, the host sees each team's answer and whether it is confirmed, and the results page and CSV list the team answers.
 - Games and quizzes saved with the earlier "One shared answer" mode play as "Captain decides".
 
+### Small improvements
+- The selected answer stands out on every answer colour, palette and theme: a ring in the theme's colour around the option and a round check badge, in light and dark mode.
+- A team of one in "Captain decides" just answers: no confirmation, no captain note.
+- The end-of-game review on the phones says "Your team's answer" for team answers, and when the captain did not confirm.
+- Quizmoo can be installed as an app (home screen icon, opens like an app). The service worker keeps only the app's own files; games, the API and images always come from the server. A page a phone has opened still loads without the network and shows "Connection lost".
+- The admin's names page no longer nests a list inside a paragraph.
+- The new game dialog is much bigger: the setting groups are tabs on the left with their summaries, the whole group's settings on the right, and Create game always in view; on a phone it fills the screen.
+- A "Custom" theme with the host's own colours: a colour wheel for the main and the accent colour and a colour strength from muted to vivid. Text stays readable in light and dark mode whatever is picked.
+- The custom theme shows a small lobby card in its colours, so the accent colour's effect is visible while picking, and the colour strength goes down to black and white.
+- "Custom" answer colours: any colour per answer, black and white included; the text on each answer is white or dark, whichever reads better.
+- The quiz editor's settings panel takes the whole width beside the phone preview (the question form folds away while it is open) and shows the settings in two columns.
+- Games can be scheduled up to 30 days ahead ("Later" in the new game dialog): the PIN and the join link are reserved at once to share, the join page shows when the game starts, and joining opens at that time. The host can open it early, move the time or call it off; scheduled games come first in the games list. The host still presses Start.
+- "Copy link" in the host lobby.
+- While waiting for a scheduled game, players can fill in their name, avatar and team ahead; a reload keeps the PIN and their details, "Leave" goes back to an empty join page, and "Add to calendar" saves the game as a calendar event (an .ics file made in the browser, with the PIN, the join link and a reminder 10 minutes before). The host's scheduled card has the same button.
+- Join page scrolling on phones: tapping the PIN boxes brings the join card to the top of the screen, and once the game is found the page settles with the Quizmoo name at the top.
+- The start time is picked on the app's own calendar: a month grid that bubbles open with the same wobble as the buttons, hours and minutes in 24-hour style, all usable with the keyboard.
+
 ### Development
 - The web dev server runs on port 15173, away from the 5173+ ports other local Vite projects take.
 - CI runs typecheck, tests and build only; the end-to-end suite runs locally before each pull request.
