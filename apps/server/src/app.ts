@@ -15,6 +15,7 @@ import { registerSocketHandlers, type AppSocketServer } from './realtime/handler
 import { authRoutes } from './routes/auth.js'
 import { gameRoutes } from './routes/games.js'
 import { imageRoutes } from './routes/images.js'
+import { meRoutes } from './routes/me.js'
 import { quizRoutes } from './routes/quizzes.js'
 import { nicknameRoutes } from './routes/nicknames.js'
 import { resultRoutes } from './routes/results.js'
@@ -100,6 +101,7 @@ export async function buildApp(config: Config, { db, manager, webDist: webDistOv
   await app.register(quizRoutes, { db })
   await app.register(imageRoutes, { db })
   await app.register(userRoutes, { db })
+  await app.register(meRoutes, { db })
   await app.register(gameRoutes, { db, manager, appOrigin: config.APP_ORIGIN })
   await app.register(resultRoutes, { db, manager })
   await app.register(nicknameRoutes, { db, manager })

@@ -36,11 +36,14 @@ Error shape everywhere: `{ error: '<i18n key>' }`. Status codes: 400 invalid inp
 | `POST /api/auth/logout` | session | clears cookie |
 | `GET /api/auth/me` | session | `{ user }` or 401 |
 | `GET /api/quizzes` | session | list own quizzes (id, title, questionCount, updatedAt) |
-| `POST /api/quizzes` | session | create from `quizInputSchema` |
+| `POST /api/quizzes` | session | create from `quizInputSchema`; a body without `settings` gets the host's game defaults |
 | `GET /api/quizzes/:id` | owner | full quiz |
 | `PUT /api/quizzes/:id` | owner | replace from `quizInputSchema` |
 | `DELETE /api/quizzes/:id` | owner | |
 | `POST /api/quizzes/batch-delete` | owner of all | `{ ids }` -> `{ deleted }`; 404 and nothing deleted if any id is missing or not owned |
+| `GET /api/me/settings` | session | the host's own settings (`hostSettingsSchema`, defaults when never saved): `{ settings }` |
+| `PUT /api/me/settings` | session | replace them; no user id in any `/api/me` URL, so a host only reaches their own row |
+| `POST /api/me/quick-messages` | session | `{ text, durationSec }` -> `{ message }` with its id, appended ("Save to my messages"); 409 `errors.quickMessagesFull` at 20 |
 | `GET /api/nicknames` | admin | "Surprise me" lists per language: `{ lists: { hu: { names, custom }, en: … } }`, built-in until saved |
 | `PUT /api/nicknames/:language` | admin | `{ names }` (1–500 player names, each passing the name filter) -> saved without duplicates |
 | `DELETE /api/nicknames/:language` | admin | back to the built-in list |

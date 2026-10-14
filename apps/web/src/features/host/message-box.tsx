@@ -1,41 +1,86 @@
-import type { Announcement, HostCommand } from '@quizmoo/shared'
-import { MegaphoneIcon, SendIcon, XIcon } from 'lucide-react'
+import { MAX_QUICK_MESSAGES, builtInMessages, type Announcement, type GameQuickMessages, type HostCommand } from '@quizmoo/shared'
+import { useQueryClient } from '@tanstack/react-query'
+import { BookmarkPlusIcon, CheckIcon, MegaphoneIcon, PencilIcon, SendIcon, XIcon } from 'lucide-react'
 import { useId, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { toast } from 'sonner'
 import { AnnouncementBanner } from '@/components/announcement-banner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/cn'
 import { remainingMs, useNow } from '@/lib/clock'
+import { toastError } from '@/lib/toast'
+import { addToMyMessages, hostSettingsQueryOptions, MESSAGE_DURATIONS } from '../settings/host-settings'
 
-const presets = ['getReady', 'shortBreak', 'lastQuestion'] as const
 const MAX_LENGTH = 200
-/** How long a message stays: until cleared (null), or seconds. */
-const durations = [null, 10, 30, 60] as const
+/** How long a message stays: each quick message's own time ('own'), until cleared (null), or seconds. */
+const durations = ['own', ...MESSAGE_DURATIONS] as const
 type Duration = (typeof durations)[number]
 
-/** Host message to every phone and the projector: one-tap presets, free text, how long it stays, and Clear. */
+/** One button of the message box: a built-in message (translated) or one of the host's own. */
+interface Quick {
+  /** A built-in message's name, or an own message's id: what `removeQuickMessage` takes. */
+  id: string
+  text: string
+  durationSec: number | null
+}
+
+/**
+ * Host message to every phone and the projector: one-tap quick messages (the built-in ones and the
+ * host's own from My settings), free text, how long it stays, and Clear. Typed text can be saved
+ * to the host's messages, and a quick message can be taken out of this game.
+ */
 export function MessageBox({
   announcement,
+  quickMessages,
   clockOffset,
   onCommand,
 }: {
   announcement: Announcement | null
+  quickMessages: GameQuickMessages | null
   clockOffset: number
   onCommand: (command: HostCommand) => Promise<boolean>
 }) {
   const { t } = useTranslation()
+  const queryClient = useQueryClient()
   const [text, setText] = useState('')
   const [sending, setSending] = useState(false)
-  const [duration, setDuration] = useState<Duration>(null)
+  const [duration, setDuration] = useState<Duration>('own')
+  const [editing, setEditing] = useState(false)
   const inputId = useId()
   const helpId = useId()
   const durationId = useId()
 
-  async function announce(message: string) {
+  const hidden = quickMessages?.hidden ?? []
+  const own = quickMessages?.own ?? []
+  const quick: Quick[] = [
+    ...builtInMessages
+      .filter((name) => !hidden.includes(name))
+      .map((name) => ({ id: name, text: t(`host.game.message.presets.${name}`), durationSec: null })),
+    ...own,
+  ]
+  const ownFull = own.length >= MAX_QUICK_MESSAGES
+
+  async function announce(message: string, ownDuration: number | null) {
     setSending(true)
-    const command: HostCommand = duration === null ? { type: 'announce', text: message } : { type: 'announce', text: message, durationSec: duration }
+    const seconds = duration === 'own' ? ownDuration : duration
+    const command: HostCommand = seconds === null ? { type: 'announce', text: message } : { type: 'announce', text: message, durationSec: seconds }
     if (await onCommand(command)) setText('')
+    setSending(false)
+  }
+
+  async function saveToMine() {
+    setSending(true)
+    try {
+      const message = await addToMyMessages({ text: text.trim(), durationSec: duration === 'own' ? null : duration })
+      await queryClient.invalidateQueries({ queryKey: hostSettingsQueryOptions.queryKey })
+      if (await onCommand({ type: 'addQuickMessage', message })) {
+        setText('')
+        toast.success(t('host.game.message.savedToMine'))
+      }
+    } catch (error) {
+      toastError(error)
+    }
     setSending(false)
   }
 
@@ -74,7 +119,7 @@ export function MessageBox({
         <span id={durationId} className="text-sm font-semibold text-muted-foreground">
           {t('host.game.message.duration')}
         </span>
-        <div role="group" aria-labelledby={durationId} className="flex rounded-lg bg-muted p-0.5">
+        <div role="group" aria-labelledby={durationId} className="flex flex-wrap rounded-lg bg-muted p-0.5">
           {durations.map((value) => (
             <button
               key={value ?? 'stays'}
@@ -82,33 +127,59 @@ export function MessageBox({
               aria-pressed={duration === value}
               onClick={() => setDuration(value)}
               className={cn(
-                'h-9 min-w-12 rounded-md px-2.5 text-sm font-bold outline-none focus-visible:ring-[3px] focus-visible:ring-ring',
+                'h-9 min-w-10 rounded-md px-2 text-sm font-bold sm:min-w-12 sm:px-2.5 outline-none focus-visible:ring-[3px] focus-visible:ring-ring',
                 duration === value ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground',
               )}
             >
-              {value === null ? t('host.game.message.stays') : t('host.game.message.seconds', { count: value })}
+              {value === 'own'
+                ? t('host.game.message.ownTime')
+                : value === null
+                  ? t('host.game.message.stays')
+                  : t('host.game.message.seconds', { count: value })}
             </button>
           ))}
         </div>
       </div>
-      <div className="flex flex-wrap gap-2">
-        {presets.map((preset) => (
-          <Button
-            key={preset}
-            variant="secondary"
-            size="sm"
-            disabled={sending}
-            onClick={() => void announce(t(`host.game.message.presets.${preset}`))}
-          >
-            {t(`host.game.message.presets.${preset}`)}
+      {quick.length > 0 && (
+        <div className="flex flex-wrap items-center gap-2">
+          {quick.map((message) =>
+            editing ? (
+              <Button
+                key={message.id}
+                variant="outline"
+                size="sm"
+                aria-label={t('host.game.message.removeFromGame', { text: message.text })}
+                onClick={() => void onCommand({ type: 'removeQuickMessage', id: message.id })}
+              >
+                <XIcon aria-hidden="true" />
+                {message.text}
+              </Button>
+            ) : (
+              <Button
+                key={message.id}
+                variant="secondary"
+                size="sm"
+                disabled={sending}
+                onClick={() => void announce(message.text, message.durationSec)}
+              >
+                {message.text}
+                {message.durationSec !== null && (
+                  <span className="font-semibold opacity-75">{t('host.game.message.seconds', { count: message.durationSec })}</span>
+                )}
+              </Button>
+            ),
+          )}
+          <Button variant="ghost" size="sm" aria-pressed={editing} onClick={() => setEditing((on) => !on)}>
+            {editing ? <CheckIcon aria-hidden="true" /> : <PencilIcon aria-hidden="true" />}
+            {editing ? t('host.game.message.doneEditing') : t('host.game.message.edit')}
           </Button>
-        ))}
-      </div>
+        </div>
+      )}
       <form
-        className="flex gap-2"
+        className="flex flex-wrap gap-2"
         onSubmit={(e) => {
           e.preventDefault()
-          if (text.trim()) void announce(text)
+          if (text.trim()) void announce(text, null)
         }}
       >
         <label htmlFor={inputId} className="sr-only">
@@ -116,16 +187,29 @@ export function MessageBox({
         </label>
         <Input
           id={inputId}
+          className="min-w-48 flex-1"
           value={text}
           maxLength={MAX_LENGTH}
           aria-describedby={helpId}
           placeholder={t('host.game.message.label')}
           onChange={(e) => setText(e.target.value)}
         />
-        <Button type="submit" disabled={sending || !text.trim()}>
-          <SendIcon aria-hidden="true" />
-          {t('host.game.message.send')}
-        </Button>
+        <div className="flex gap-2">
+          <Button type="submit" disabled={sending || !text.trim()}>
+            <SendIcon aria-hidden="true" />
+            {t('host.game.message.send')}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            disabled={sending || !text.trim() || ownFull}
+            title={ownFull ? t('settings.messages.full') : undefined}
+            onClick={() => void saveToMine()}
+          >
+            <BookmarkPlusIcon aria-hidden="true" />
+            {t('host.game.message.saveToMine')}
+          </Button>
+        </div>
       </form>
     </section>
   )

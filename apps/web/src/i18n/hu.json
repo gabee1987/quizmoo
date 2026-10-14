@@ -77,7 +77,6 @@
     "logout": "Kilépés",
     "required": "Ezt ki kell tölteni.",
     "passwordChange": {
-      "link": "Jelszó módosítása",
       "title": "Jelszó módosítása",
       "mustChange": "Mielőtt továbbmész, cseréld le a kezdeti jelszót.",
       "current": "Jelenlegi jelszó",
@@ -163,6 +162,12 @@
         "seconds_other": "{{count}} mp",
         "disappearsIn_one": "{{count}} mp múlva eltűnik",
         "disappearsIn_other": "{{count}} mp múlva eltűnik",
+        "ownTime": "saját idő",
+        "edit": "Szerkesztés",
+        "doneEditing": "Kész",
+        "removeFromGame": "Vedd ki ebből a játékból: {{text}}",
+        "saveToMine": "Mentés",
+        "savedToMine": "Elmentettük az üzeneteid közé",
         "presets": {
           "getReady": "Készüljetek!",
           "shortBreak": "Egy kis szünet",
@@ -742,14 +747,53 @@
     "answerNotSent": "A válaszod nem ment el. Koppints újra.",
     "notCaptain": "Ezt csak a csapatkapitány teheti meg.",
     "gameNotOpenYet": "Ez a játék még nem kezdődött el. Nézz vissza a megadott időpontban.",
-    "invalidSchedule": "Válassz egy jövőbeli időpontot, legfeljebb 30 napon belül."
+    "invalidSchedule": "Válassz egy jövőbeli időpontot, legfeljebb 30 napon belül.",
+    "quickMessagesFull": "Már 20 üzeneted van. Előbb törölj egyet a Beállításaimban."
   },
   "nav": {
     "label": "Játékvezetői menü",
     "quizzes": "Kvízek",
     "signedInAs": "Belépve mint",
     "games": "Játékok",
-    "account": "Fiók"
+    "account": "Fiók",
+    "settings": "Beállításaim"
+  },
+  "settings": {
+    "title": "Beállításaim",
+    "help": "Minden kvízedhez és játékodhoz ezek járnak.",
+    "unsaved": "Nem mentett változások",
+    "discard": "Elvetés",
+    "saved": "Elmentettük",
+    "passwordSaved": "Elmentettük az új jelszót",
+    "leaveTitle": "Kilépsz mentés nélkül?",
+    "leaveBody": "A Beállításaimban tett változásokat még nem mentetted.",
+    "messages": {
+      "title": "Gyors üzenetek",
+      "help": "Játék közben egy koppintással elküldheted őket az üzenetdobozból. Egy játék azokkal az üzenetekkel megy végig, amelyekkel elindult.",
+      "builtIn": "Beépített",
+      "shown": "Látszik",
+      "hidden": "Rejtve",
+      "own": "Saját üzeneteid",
+      "empty": "Még nincs egy sem. Adj hozzá egyet lent, vagy ments el egyet játék közben az üzenetdobozból.",
+      "new": "Új üzenet",
+      "add": "Hozzáadás",
+      "full": "Legfeljebb 20 üzeneted lehet",
+      "messageN": "{{n}}. üzenet",
+      "drag": "{{n}}. üzenet áthelyezése",
+      "moveUp": "{{n}}. üzenet feljebb",
+      "moveDown": "{{n}}. üzenet lejjebb",
+      "remove": "{{n}}. üzenet törlése",
+      "textRequired": "Írj valamit az üzenetbe.",
+      "custom": "Más…",
+      "customSeconds": "Másodperc"
+    },
+    "defaults": {
+      "title": "Alap játékbeállítások",
+      "help": "Az új kvízeid ezekkel indulnak. Kvízenként még átállíthatod őket.",
+      "app": "Az app alapbeállításait használod.",
+      "own": "A saját alapbeállításaidat használod.",
+      "reset": "Vissza az app alapjaira"
+    }
   },
   "history": {
     "title": "Játékok",

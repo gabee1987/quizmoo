@@ -7,6 +7,7 @@ import { requireSession } from '../auth/require-session.js'
 import type { Db } from '../db/index.js'
 import { quizzes } from '../db/schema.js'
 import { parseOr400 } from './http.js'
+import { readHostSettings } from './me.js'
 
 /** Gives every question and option without an id a fresh `nanoid(8)`, so the editor can send new items without ids. */
 export function assignIds(body: unknown): unknown {
@@ -119,7 +120,13 @@ export async function quizRoutes(app: FastifyInstance, { db }: { db: Db }) {
   })
 
   app.post('/api/quizzes', auth, async (request, reply) => {
-    const input = parseQuiz(request.body, reply)
+    // A new quiz without settings of its own starts with the host's game defaults.
+    let body = request.body
+    if (typeof body === 'object' && body !== null && !('settings' in body)) {
+      const { gameDefaults } = await readHostSettings(db, request.user!.id)
+      if (gameDefaults) body = { ...body, settings: gameDefaults }
+    }
+    const input = parseQuiz(body, reply)
     if (!input) return reply
     const [row] = await db
       .insert(quizzes)

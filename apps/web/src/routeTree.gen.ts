@@ -15,6 +15,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as HostIndexRouteImport } from './routes/host/index'
 import { Route as HostNicknamesRouteImport } from './routes/host/nicknames'
 import { Route as HostPasswordRouteImport } from './routes/host/password'
+import { Route as HostSettingsRouteImport } from './routes/host/settings'
 import { Route as HostUsersRouteImport } from './routes/host/users'
 import { Route as PlayPinRouteImport } from './routes/play.$pin'
 import { Route as ScreenPinRouteImport } from './routes/screen.$pin'
@@ -52,6 +53,11 @@ const HostNicknamesRoute = HostNicknamesRouteImport.update({
 const HostPasswordRoute = HostPasswordRouteImport.update({
   id: '/password',
   path: '/password',
+  getParentRoute: () => HostRouteRoute,
+} as any)
+const HostSettingsRoute = HostSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => HostRouteRoute,
 } as any)
 const HostUsersRoute = HostUsersRouteImport.update({
@@ -101,6 +107,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/host/nicknames': typeof HostNicknamesRoute
   '/host/password': typeof HostPasswordRoute
+  '/host/settings': typeof HostSettingsRoute
   '/host/users': typeof HostUsersRoute
   '/play/$pin': typeof PlayPinRoute
   '/screen/$pin': typeof ScreenPinRoute
@@ -116,6 +123,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/host/nicknames': typeof HostNicknamesRoute
   '/host/password': typeof HostPasswordRoute
+  '/host/settings': typeof HostSettingsRoute
   '/host/users': typeof HostUsersRoute
   '/play/$pin': typeof PlayPinRoute
   '/screen/$pin': typeof ScreenPinRoute
@@ -133,6 +141,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/host/nicknames': typeof HostNicknamesRoute
   '/host/password': typeof HostPasswordRoute
+  '/host/settings': typeof HostSettingsRoute
   '/host/users': typeof HostUsersRoute
   '/play/$pin': typeof PlayPinRoute
   '/screen/$pin': typeof ScreenPinRoute
@@ -151,6 +160,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/host/nicknames'
     | '/host/password'
+    | '/host/settings'
     | '/host/users'
     | '/play/$pin'
     | '/screen/$pin'
@@ -166,6 +176,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/host/nicknames'
     | '/host/password'
+    | '/host/settings'
     | '/host/users'
     | '/play/$pin'
     | '/screen/$pin'
@@ -182,6 +193,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/host/nicknames'
     | '/host/password'
+    | '/host/settings'
     | '/host/users'
     | '/play/$pin'
     | '/screen/$pin'
@@ -246,6 +258,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HostPasswordRouteImport
       parentRoute: typeof HostRouteRoute
     }
+    '/host/settings': {
+      id: '/host/settings'
+      path: '/settings'
+      fullPath: '/host/settings'
+      preLoaderRoute: typeof HostSettingsRouteImport
+      parentRoute: typeof HostRouteRoute
+    }
     '/host/users': {
       id: '/host/users'
       path: '/users'
@@ -308,6 +327,7 @@ declare module '@tanstack/react-router' {
 interface HostRouteRouteChildren {
   HostNicknamesRoute: typeof HostNicknamesRoute
   HostPasswordRoute: typeof HostPasswordRoute
+  HostSettingsRoute: typeof HostSettingsRoute
   HostUsersRoute: typeof HostUsersRoute
   HostIndexRoute: typeof HostIndexRoute
   HostGamesPinRoute: typeof HostGamesPinRoute
@@ -319,6 +339,7 @@ interface HostRouteRouteChildren {
 const HostRouteRouteChildren: HostRouteRouteChildren = {
   HostNicknamesRoute: HostNicknamesRoute,
   HostPasswordRoute: HostPasswordRoute,
+  HostSettingsRoute: HostSettingsRoute,
   HostUsersRoute: HostUsersRoute,
   HostIndexRoute: HostIndexRoute,
   HostGamesPinRoute: HostGamesPinRoute,

@@ -9,6 +9,7 @@ import { quizzes } from '../db/schema.js'
 import { EngineError, setNextGame } from '../game/index.js'
 import type { GameManager } from '../realtime/game-manager.js'
 import { parseOr400 } from './http.js'
+import { readHostSettings } from './me.js'
 
 const createGameSchema = z.object({
   quizId: z.string().min(1),
@@ -38,6 +39,7 @@ export async function gameRoutes(app: FastifyInstance, { db, manager, appOrigin 
     const settings = body.settings ?? (quizSettings.success ? quizSettings.data : null)
     if (!settings) return reply.code(400).send({ error: 'errors.invalidInput' })
 
+    const host = await readHostSettings(db, request.user!.id)
     let game
     try {
       game = await manager.create({
@@ -48,6 +50,7 @@ export async function gameRoutes(app: FastifyInstance, { db, manager, appOrigin 
         hostId: request.user!.id,
         quizId: quiz.id,
         scheduledAt: body.scheduledAt,
+        quickMessages: { hidden: host.hiddenBuiltIns, own: host.quickMessages },
       })
     } catch (error) {
       if (error instanceof EngineError) return reply.code(400).send({ error: error.code })
@@ -74,6 +77,7 @@ export async function gameRoutes(app: FastifyInstance, { db, manager, appOrigin 
       settings: old.state.settings,
       hostId: old.hostId,
       quizId: old.quizId,
+      quickMessages: old.state.quickMessages,
     })
     manager.apply(old.state.pin, (state) => setNextGame(state, game.state.pin))
     return reply.code(201).send({ pin: game.state.pin })

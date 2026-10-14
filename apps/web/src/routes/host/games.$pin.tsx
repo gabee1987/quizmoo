@@ -93,7 +93,7 @@ function HostGamePage() {
       <div className="flex min-w-0 flex-col gap-5">
         <Header host={host} connected={status === 'connected'} />
         <Controls host={host} onCommand={(c) => void send(c)} />
-        <MessageBox announcement={host.announcement} clockOffset={clockOffset} onCommand={send} />
+        <MessageBox announcement={host.announcement} quickMessages={host.quickMessages} clockOffset={clockOffset} onCommand={send} />
         <PhaseDetail
           host={host}
           clockOffset={clockOffset}

@@ -455,6 +455,31 @@ describeDb('sockets (database)', () => {
     expect(await command(hostSocket, { type: 'schedule', at: later })).toEqual({ error: 'errors.gameAlreadyStarted' })
   })
 
+  it("copies the host's quick messages into a new game, which keeps its own copy through a restart", async () => {
+    const save = (payload: object) =>
+      built.app.inject({ method: 'PUT', url: '/api/me/settings', headers: { cookie: hostCookie }, payload })
+    await save({ quickMessages: [{ id: 'm1', text: 'Pizza is here!', durationSec: 30 }], hiddenBuiltIns: ['lastQuestion'] })
+    const pin = await newGame()
+    // Later edits to the library leave the game alone.
+    await save({ quickMessages: [] })
+    const hostSocket = await host(pin)
+    const added = nextSnapshot<HostSnapshot>(hostSocket, 'game:host', (s) => s.quickMessages!.own.length === 2)
+    const back = { id: 'm2', text: 'Back in 5', durationSec: null }
+    expect(await command(hostSocket, { type: 'addQuickMessage', message: back })).toEqual({ ok: true })
+    expect((await added).quickMessages).toEqual({
+      hidden: ['lastQuestion'],
+      own: [{ id: 'm1', text: 'Pizza is here!', durationSec: 30 }, back],
+    })
+    expect(await command(hostSocket, { type: 'addQuickMessage', message: { id: 'm3', text: '' } })).toEqual({ error: 'errors.invalidInput' })
+
+    await built.manager.flush()
+    const restored = new GameManager(createGameStore(db), quietLog)
+    await restored.restore()
+    expect(restored.get(pin)!.state.quickMessages!.own.map((m) => m.id)).toEqual(['m1', 'm2'])
+    restored.close()
+    await save({})
+  })
+
   it('rejects host commands from a socket without a session or attach', async () => {
     const pin = await newGame()
     const anonymous = await connect()

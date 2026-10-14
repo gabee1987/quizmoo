@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Link, useNavigate } from '@tanstack/react-router'
-import { DicesIcon, HistoryIcon, KeyRoundIcon, LayoutGridIcon, LogOutIcon, UserRoundIcon, UsersIcon } from 'lucide-react'
+import { DicesIcon, HistoryIcon, LayoutGridIcon, LogOutIcon, SettingsIcon, UserRoundIcon, UsersIcon } from 'lucide-react'
 import type { ComponentType, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
@@ -71,11 +71,11 @@ export function HostNav({ user }: { user: User }) {
             <span className="truncate">{user.username}</span>
           </p>
           <Link
-            to="/host/password"
+            to="/host/settings"
             className="flex min-h-11 items-center gap-3 rounded-xl px-3 font-semibold text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring data-[status=active]:bg-secondary data-[status=active]:text-secondary-foreground"
           >
-            <KeyRoundIcon className="size-5" />
-            {t('auth.passwordChange.link')}
+            <SettingsIcon className="size-5" />
+            {t('nav.settings')}
           </Link>
           <button
             type="button"
@@ -115,9 +115,9 @@ export function HostNav({ user }: { user: User }) {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <MenuLink>
-                  <Link to="/host/password">
-                    <KeyRoundIcon />
-                    {t('auth.passwordChange.link')}
+                  <Link to="/host/settings">
+                    <SettingsIcon />
+                    {t('nav.settings')}
                   </Link>
                 </MenuLink>
                 <DropdownMenuItem className="min-h-11" disabled={logout.isPending} onSelect={() => logout.mutate()}>

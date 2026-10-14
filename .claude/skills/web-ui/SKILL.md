@@ -16,6 +16,8 @@ Topic skills: `game-screens` (phone, projector, host control and results layouts
 | `/login` | hosts | username + password |
 | `/host` | hosts | quiz list with Play, Edit, New, Results |
 | `/host/quizzes/$quizId` | hosts | editor |
+| `/host/settings` | hosts | My settings: quick messages, game defaults, password (`#account`); one draft with a sticky Save bar, keyed by the stored settings |
+| `/host/password` | hosts | the forced first password change only, without navigation; otherwise redirects to `/host/settings#account` |
 | `/host/games/$pin` | hosts | control view (phone or laptop) |
 | `/host/games` | hosts | game history |
 | `/host/results/$gameId` | hosts | results summary and export |

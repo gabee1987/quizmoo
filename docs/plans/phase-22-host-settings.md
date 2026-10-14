@@ -16,8 +16,9 @@ From the user:
 - Host ownership is per logged-in host account, not only game settings: "a more robust host ownership".
 - Quick messages can be saved before the game (on the page) and during it (from the host control).
 - This is its own branch.
+- Confirmed on 14 October 2026: two commits on the branch, first the page with quick messages, game defaults and the password, then branding. A game copies the quick messages at creation. Game defaults apply to new quizzes only. Branding on the phones' lobby has its own switch in the new game dialog, so it can be turned off there while the projector keeps it.
 
-Proposed (confirm or change before implementation):
+The rest, as proposed and confirmed:
 - **Where:** `/host/settings`, "My settings" in the host navigation (sidebar and bottom bar) next to "Change password", which moves onto this page as its last section. Sections: Quick messages, Branding, Game defaults, Account.
 - **Storage:** one row per host in a new table `host_settings` (`user_id` primary key and foreign key with `on delete cascade`, `settings jsonb`, `updated_at`). The jsonb is validated by a shared Zod schema `hostSettingsSchema` with defaults, so fields added later read from old rows like game settings do. No player data, ever.
 - **Ownership and access:** a host reads and writes only their own row (`GET` / `PUT /api/me/settings`); no host id in the URL, so one host can never reach another's. Admins get no view of other hosts' settings (not needed).
@@ -36,7 +37,7 @@ Proposed (confirm or change before implementation):
 
 - **Logo:** one image per host, uploaded through the existing image upload (owned by the host, same size and type limits). Shown on the projector lobby (next to the QR code) and podium, and small on the phones' lobby.
 - **Event name:** per game, in the new game dialog, prefilled with the last one the host used (stored in the host settings). Shown on the projector lobby and podium under the logo; empty means none.
-- **Per game switch:** "Show my branding" in the new game dialog, on by default once a logo or event name exists.
+- **Per game switch:** "Show my branding" in the new game dialog, on by default once a logo or event name exists, and "Also on the phones" under it (on by default).
 - The projector shows only what the game has (copied at creation), so the public screen never reads host settings.
 
 ### Game defaults
@@ -134,3 +135,11 @@ $env:E2E_BASE_URL="http://localhost:3999"; $env:E2E_USERNAME="admin"; $env:E2E_P
 7. Set Graphite and Muted as game defaults, create a quiz. Expected: it starts with them.
 8. Log in as a second host. Expected: none of the first host's messages, logo or defaults.
 9. Restart the server mid-game. Expected: the game's quick messages and branding stay.
+
+## Deviations
+
+First commit (quick messages, game defaults, password):
+- `/host/password` stays as the forced first-login page without navigation (new accounts need it); otherwise it redirects to `/host/settings#account`.
+- "Save to my messages" uses its own `POST /api/me/quick-messages`, which appends one message, so saving from a game never overwrites edits made on the page.
+- The message box's time row starts on "own time": each quick message uses its own time unless the host picks one.
+- The reserved `teamLists` field is not added yet: the schema's defaults let phase 23 add it without a migration.

@@ -1,6 +1,7 @@
 import type { Answer, GameSettings, Question } from '@quizmoo/shared'
 import { describe, expect, it } from 'vitest'
 import {
+  addQuickMessage,
   announce,
   closeQuestion,
   createGame,
@@ -12,6 +13,7 @@ import {
   joinPlayer,
   next,
   pause,
+  removeQuickMessage,
   resume,
   showQuestion,
   showScoreboard,
@@ -190,5 +192,49 @@ describe('showing a question again', () => {
     expect(grading.awaitingGrading).toBe(true)
     expect(code(() => showQuestion(grading, 0))).toBe('errors.invalidTransition')
     expect(showQuestion(gradeText(grading, []), 0).reviewIndex).toBe(0)
+  })
+})
+
+describe("a game's quick messages", () => {
+  const pizza = { id: 'm1', text: 'Pizza is here!', durationSec: 30 }
+  const back = { id: 'm2', text: 'Back in 5', durationSec: null }
+
+  it('lists none hidden and no own ones in a game saved before they existed', () => {
+    const state = game([tf('q1')])
+    expect(toHostSnapshot(state, T0, { includeAnswers: true }).quickMessages).toEqual({ hidden: [], own: [] })
+  })
+
+  it('adds an own message once, in any phase, and keeps it through a save', () => {
+    let state = addQuickMessage(game([tf('q1')]), pizza)
+    state = addQuickMessage(state, back)
+    expect(addQuickMessage(state, back)).toBe(state)
+    state = endGame(state, T0 + 1000)
+    state = addQuickMessage(state, { id: 'm3', text: 'Thanks!', durationSec: null })
+    expect(state.quickMessages!.own.map((m) => m.id)).toEqual(['m1', 'm2', 'm3'])
+    roundTrip(state)
+  })
+
+  it('refuses a message beyond the limit', () => {
+    let state = game([tf('q1')])
+    for (let i = 0; i < 20; i++) state = addQuickMessage(state, { id: `m${i}`, text: `Message ${i}`, durationSec: null })
+    expect(() => addQuickMessage(state, { id: 'm20', text: 'One more', durationSec: null })).toThrow(
+      new EngineError('errors.quickMessagesFull'),
+    )
+  })
+
+  it('removes an own message by id and hides a built-in one by name, in this game only', () => {
+    let state = addQuickMessage(addQuickMessage(game([tf('q1')]), pizza), back)
+    state = removeQuickMessage(state, 'm1')
+    state = removeQuickMessage(state, 'shortBreak')
+    expect(state.quickMessages).toEqual({ hidden: ['shortBreak'], own: [back] })
+    expect(removeQuickMessage(state, 'shortBreak')).toBe(state)
+    expect(removeQuickMessage(state, 'unknown')).toBe(state)
+  })
+
+  it('goes to the host room only, never to the public screen', () => {
+    const state = addQuickMessage(game([tf('q1')]), pizza)
+    expect(toHostSnapshot(state, T0, { includeAnswers: true }).quickMessages!.own).toEqual([pizza])
+    expect(toHostSnapshot(state, T0).quickMessages).toBeNull()
+    expect(toPlayerSnapshot(state, 'p1', T0)).not.toHaveProperty('quickMessages')
   })
 })

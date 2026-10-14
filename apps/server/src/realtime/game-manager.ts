@@ -1,4 +1,4 @@
-import { gameSettingsSchema, type GameSettings } from '@quizmoo/shared'
+import { gameSettingsSchema, type GameQuickMessages, type GameSettings } from '@quizmoo/shared'
 import {
   EngineError,
   createGame,
@@ -91,11 +91,14 @@ export class GameManager {
     hostId: string
     quizId: string | null
     scheduledAt?: number | undefined
+    /** The host's quick messages, copied in: later edits to the library leave this game alone. */
+    quickMessages?: GameQuickMessages | undefined
   }) {
     const now = this.now()
     const pin = generatePin((candidate) => this.games.has(candidate))
     const created = createGame(input.quiz, input.settings, pin, input.id, now)
-    const state = input.scheduledAt === undefined ? created : schedule(created, input.scheduledAt, now)
+    const withMessages = input.quickMessages ? { ...created, quickMessages: input.quickMessages } : created
+    const state = input.scheduledAt === undefined ? withMessages : schedule(withMessages, input.scheduledAt, now)
     const entry: Entry = {
       game: { state, hostId: input.hostId, quizId: input.quizId },
       timer: null,

@@ -65,7 +65,7 @@ export function HostLobby({
           onTeamMode={(mode, teamId) => void send({ type: 'teamMode', mode, ...(teamId && { teamId }) })}
           onCaptain={(playerId) => void send({ type: 'captain', playerId })}
         />
-        <MessageBox announcement={host.announcement} clockOffset={clockOffset} onCommand={send} />
+        <MessageBox announcement={host.announcement} quickMessages={host.quickMessages} clockOffset={clockOffset} onCommand={send} />
         <Button variant="outline" className="self-start" onClick={endGame}>
           {t('host.game.end')}
         </Button>

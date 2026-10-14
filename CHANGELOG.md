@@ -112,6 +112,13 @@
 - Join page scrolling on phones: tapping the PIN boxes brings the join card to the top of the screen, and once the game is found the page settles with the Quizmoo name at the top.
 - The start time is picked on the app's own calendar: a month grid that bubbles open with the same wobble as the buttons, hours and minutes in 24-hour style, all usable with the keyboard.
 
+### My settings
+- Every host account has a My settings page (in the navigation, where "Change password" was): quick messages, game defaults and the password change.
+- Quick messages: up to 20 of the host's own, each with its own time (until cleared, 10, 30 or 60 s, or any 5 to 600 s), reordered by dragging, with the keyboard or with the arrows; any built-in message can be hidden. In a game they follow the built-in ones in the message box and one click sends them with their own time, unless a time is picked first.
+- A game keeps the quick messages it was created with, also through a restart. "Save" next to Send adds the typed message to the host's messages and to the running game at once; "Edit" takes a quick message out of this game only.
+- Game defaults: new quizzes start with the host's usual game settings instead of the app's.
+- The settings are stored per host account, reachable only by that host, and deleted with the account.
+
 ### Development
 - The web dev server runs on port 15173, away from the 5173+ ports other local Vite projects take.
 - CI runs typecheck, tests and build only; the end-to-end suite runs locally before each pull request.

@@ -17,7 +17,7 @@ import {
 } from '@quizmoo/shared'
 import { normalise } from './normalise.js'
 import { displayOrder } from './order.js'
-import { answersHidden, resultsPendingFor } from './engine.js'
+import { answersHidden, quickMessagesOf, resultsPendingFor } from './engine.js'
 import { denseRank } from './scoring.js'
 import {
   answersAsOne,
@@ -82,6 +82,7 @@ export function toHostSnapshot(state: GameState, now: number, { includeAnswers =
     live: includeAnswers && state.phase === 'question' && question ? revealInfo(state, question) : null,
     playersWaiting: includeAnswers && resultsPendingFor(state, 'players'),
     teamAnswers: includeAnswers ? teamAnswers(state, base.questionIndex) : null,
+    quickMessages: includeAnswers ? quickMessagesOf(state) : null,
   }
 }
 
