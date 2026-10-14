@@ -53,4 +53,4 @@ Topic skills: `game-screens` (phone, projector, host control and results layouts
 
 ## Tests
 
-Vitest with `@testing-library/react` and `happy-dom` for logic-bearing components and pure modules: the timer hook, the socket store, the editor's draft and validation, the results summary. Playwright end-to-end lives in `apps/web/e2e`; screenshots and e2e runs are in `browser-checks`.
+Vitest with `@testing-library/react` and `happy-dom` for logic-bearing components and pure modules: the timer hook, the socket store, the editor's draft and validation, the results summary. A component test that checks translated or `Intl`-formatted text imports `../i18n` and sets the language in `beforeAll` (`i18n.changeLanguage('hu')`). Without it, labels follow the machine's locale: they pass on the Hungarian dev laptop and fail in CI, which is English. Playwright end-to-end lives in `apps/web/e2e`; screenshots and e2e runs are in `browser-checks`.

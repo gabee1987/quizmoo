@@ -1,9 +1,12 @@
 // @vitest-environment happy-dom
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
 import { useState } from 'react'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeAll, describe, expect, it } from 'vitest'
+import i18n from '../i18n'
 import { DateTimePicker } from './date-time-picker'
 
+// Hungarian on every machine: without it the labels follow the system's locale (CI is English).
+beforeAll(() => i18n.changeLanguage('hu'))
 afterEach(cleanup)
 
 const at = (d: number, h = 19, m = 0) => new Date(2026, 9, d, h, m).getTime()
