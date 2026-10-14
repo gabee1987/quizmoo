@@ -20,7 +20,8 @@ export function PinInput({
 }) {
   const { t } = useTranslation()
   const boxes = useRef<(HTMLInputElement | null)[]>([])
-  const focus = (index: number) => boxes.current[Math.max(0, Math.min(PIN_LENGTH - 1, index))]?.focus()
+  // No scroll: the join page keeps the card at the top while the PIN is typed.
+  const focus = (index: number) => boxes.current[Math.max(0, Math.min(PIN_LENGTH - 1, index))]?.focus({ preventScroll: true })
 
   /** Writes `digits` from box `index` on, moving the focus past them. */
   function write(index: number, digits: string) {

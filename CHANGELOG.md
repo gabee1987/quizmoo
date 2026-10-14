@@ -108,6 +108,8 @@
 - The quiz editor's settings panel takes the whole width beside the phone preview (the question form folds away while it is open) and shows the settings in two columns.
 - Games can be scheduled up to 30 days ahead ("Later" in the new game dialog): the PIN and the join link are reserved at once to share, the join page shows when the game starts, and joining opens at that time. The host can open it early, move the time or call it off; scheduled games come first in the games list. The host still presses Start.
 - "Copy link" in the host lobby.
+- While waiting for a scheduled game, players can fill in their name, avatar and team ahead; a reload keeps the PIN and their details, "Leave" goes back to an empty join page, and "Add to calendar" saves the game as a calendar event (an .ics file made in the browser, with the PIN, the join link and a reminder 10 minutes before). The host's scheduled card has the same button.
+- Join page scrolling on phones: tapping the PIN boxes brings the join card to the top of the screen, and once the game is found the page settles with the Quizmoo name at the top.
 - The start time is picked on the app's own calendar: a month grid that bubbles open with the same wobble as the buttons, hours and minutes in 24-hour style, all usable with the keyboard.
 
 ### Development

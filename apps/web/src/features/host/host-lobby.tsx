@@ -41,7 +41,16 @@ export function HostLobby({
     <div className="mx-auto grid w-full max-w-6xl gap-6 lg:grid-cols-2 lg:items-start">
       <JoinStage host={host} joinUrl={joinUrl} connected={connected} />
       <div className="flex min-w-0 flex-col gap-6">
-        {!open && host.scheduledAt !== null && <ScheduledCard scheduledAt={host.scheduledAt} gameId={gameId} send={send} />}
+        {!open && host.scheduledAt !== null && (
+          <ScheduledCard
+            scheduledAt={host.scheduledAt}
+            gameId={gameId}
+            pin={host.pin}
+            quizTitle={host.quizTitle}
+            joinUrl={joinUrl}
+            send={send}
+          />
+        )}
         {/* Start appears with the first player; ending the game is the rare action, so it waits at the bottom. */}
         {host.players.length > 0 && (
           <Button size="xl" className="w-full animate-pop" onClick={() => void send({ type: 'start' })}>

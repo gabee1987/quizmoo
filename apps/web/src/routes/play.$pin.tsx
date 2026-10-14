@@ -30,7 +30,7 @@ function PlayPage() {
   useEffect(() => {
     const stored = getStoredPlayer(pin)
     if (!stored) {
-      void navigate({ to: '/', search: { pin } })
+      void navigate({ to: '/', search: { pin: Number(pin) } })
       return
     }
     // Runs on every (re)connect: the token reclaims the same player and the ack path sends the snapshot.

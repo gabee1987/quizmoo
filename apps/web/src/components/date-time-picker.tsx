@@ -148,7 +148,7 @@ export function DateTimePicker({
       </PopoverAnchor>
       <PopoverContent
         // Wobbles from the middle of the edge that faces the field, not from its corner.
-        className="w-[min(22rem,calc(100vw-2rem))] data-[side=bottom]:origin-top data-[side=top]:origin-bottom"
+        className="w-[min(22rem,calc(100vw-2rem))]"
         aria-label={t('datePicker.title')}
         // The chosen day takes the focus, so the arrow keys work at once.
         onOpenAutoFocus={(e) => {

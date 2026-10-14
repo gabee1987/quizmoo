@@ -4,6 +4,7 @@ import { useNavigate } from '@tanstack/react-router'
 import { CalendarClockIcon, DoorOpenIcon } from 'lucide-react'
 import { useId, useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
+import { AddToCalendarButton } from '@/components/add-to-calendar-button'
 import { DateTimePicker } from '@/components/date-time-picker'
 import { Button } from '@/components/ui/button'
 import { ConfirmDialog } from '@/components/dialog'
@@ -13,15 +14,21 @@ import { toastError } from '@/lib/toast'
 
 /**
  * The host lobby of a scheduled game before joining opens: when it opens, "Open now",
- * moving the time and calling the game off (which deletes it; nobody can be in it yet).
+ * moving the time, adding it to the calendar and calling the game off (which deletes it; nobody can be in it yet).
  */
 export function ScheduledCard({
   scheduledAt,
   gameId,
+  pin,
+  quizTitle,
+  joinUrl,
   send,
 }: {
   scheduledAt: number
   gameId: string | null
+  pin: string
+  quizTitle: string
+  joinUrl: string | null
   send: (command: HostCommand) => Promise<boolean>
 }) {
   const { t, i18n } = useTranslation()
@@ -97,6 +104,7 @@ export function ScheduledCard({
           >
             {t('host.scheduled.changeTime')}
           </Button>
+          {joinUrl && <AddToCalendarButton pin={pin} scheduledAt={scheduledAt} quizTitle={quizTitle} joinUrl={joinUrl} />}
           <Button variant="ghost" disabled={!gameId} onClick={() => setConfirming(true)}>
             {t('host.scheduled.cancel')}
           </Button>

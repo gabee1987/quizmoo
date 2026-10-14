@@ -43,7 +43,9 @@
       "fun": "Játék és móka"
     },
     "scheduled": "Ekkor kezdünk: {{date}}",
-    "scheduledHelp": "Addig nem lehet csatlakozni. Hagyd nyitva ezt az oldalt: amikor kezdünk, itt tudsz beszállni."
+    "scheduledHelp": "Addig is töltsd ki az adataidat. Hagyd nyitva ezt az oldalt: amikor kezdünk, itt tudsz beszállni.",
+    "leave": "Kilépés",
+    "opensAtStart": "Kezdéskor tudsz beszállni"
   },
   "home": {
     "tagline": "Gondolkodj. Válaszolj. Győzd le a csordát!",
@@ -816,5 +818,10 @@
     "hour": "Óra",
     "minute": "Perc",
     "done": "Kész"
+  },
+  "calendar": {
+    "add": "Naptárba",
+    "summary": "Quizmoo: {{title}}",
+    "description": "PIN-kód: {{pin}}\nCsatlakozz itt: {{url}}"
   }
 }

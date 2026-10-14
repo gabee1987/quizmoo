@@ -43,7 +43,9 @@
       "fun": "Fun and games"
     },
     "scheduled": "Starts {{date}}",
-    "scheduledHelp": "Joining opens then. Keep this page open: you can join here when it starts."
+    "scheduledHelp": "Fill in your details meanwhile. Keep this page open: you can join here when it starts.",
+    "leave": "Leave",
+    "opensAtStart": "Joining opens at the start"
   },
   "home": {
     "tagline": "Think. Quiz. Outsmart the herd!",
@@ -816,5 +818,10 @@
     "hour": "Hour",
     "minute": "Minute",
     "done": "Done"
+  },
+  "calendar": {
+    "add": "Add to calendar",
+    "summary": "Quizmoo: {{title}}",
+    "description": "PIN: {{pin}}\nJoin at: {{url}}"
   }
 }
