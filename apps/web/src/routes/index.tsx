@@ -117,7 +117,22 @@ function JoinPage() {
     if (pinBox.current?.contains(document.activeElement) && document.activeElement instanceof HTMLElement) {
       document.activeElement.blur()
     }
-    title.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    // After the blur the spacer goes and the keyboard closes; either cancels a smooth scroll already
+    // under way, so scroll once the spacer is gone and again when the keyboard has finished closing.
+    const toTitle = () => title.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    let timer = window.setTimeout(toTitle, 50)
+    const onResize = () => {
+      window.clearTimeout(timer)
+      timer = window.setTimeout(toTitle, 120)
+    }
+    const viewport = window.visualViewport
+    viewport?.addEventListener('resize', onResize)
+    const stop = window.setTimeout(() => viewport?.removeEventListener('resize', onResize), 1500)
+    return () => {
+      window.clearTimeout(timer)
+      window.clearTimeout(stop)
+      viewport?.removeEventListener('resize', onResize)
+    }
   }, [quizTitle])
 
   const infoError = info.error && 'code' in info.error ? (info.error as { code: string }).code : null
