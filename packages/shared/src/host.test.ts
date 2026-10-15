@@ -10,7 +10,14 @@ describe('hostSettingsSchema', () => {
         { id: 'lastQuestion', builtIn: 'lastQuestion', durationSec: null },
       ],
       gameDefaults: null,
+      logoImageId: null,
+      eventName: '',
     })
+  })
+
+  it('trims the event name and keeps it to 60 characters', () => {
+    expect(hostSettingsSchema.parse({ eventName: '  Christmas party ' }).eventName).toBe('Christmas party')
+    expect(hostSettingsSchema.safeParse({ eventName: 'x'.repeat(61) }).success).toBe(false)
   })
 
   it('fills fields added later, and new game settings fields, from an old row', () => {

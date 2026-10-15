@@ -126,6 +126,7 @@
 - Game settings that come and go (team settings, the custom colours, the answer lock, help lines, the "Changed for this game" bar, the start time for Later) open and close smoothly, and what is below slides along instead of jumping.
 - Phones and tablets keep their own scrollbars (thin, hidden while not scrolling, taking no space); the styled scrollbar is for mouse devices.
 - Hosts land on a home page after logging in: a greeting, their figures (quizzes, games played, players), running games with "Back to the game", scheduled games, the recently edited quizzes with Play and the latest results. The quiz list moved to `/host/quizzes`; "Home" is the first item in the navigation, and on phones the admin pages (Users, Names) are in the Account menu.
+- Branding: a host uploads a logo and sets an event name on My settings. The new game dialog (Look) starts with the last event name used and has "Show my branding" and "Also on the phones"; the projector's lobby and podium then show the logo and the name, and the phones' lobby too when chosen. A game keeps its branding through a restart and in "Play again"; a logo can only be the host's own image and is deleted with the account.
 
 ### Development
 - The web dev server runs on port 15173, away from the 5173+ ports other local Vite projects take.

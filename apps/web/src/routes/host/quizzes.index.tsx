@@ -318,7 +318,7 @@ function QuizList() {
           quizTitle={creating.title}
           quizSettings={creating.settings}
           pending={play.isPending}
-          onCreate={(settings, scheduledAt) => play.mutate({ quizId: creating.id, settings, scheduledAt })}
+          onCreate={(settings, scheduledAt, branding) => play.mutate({ quizId: creating.id, settings, scheduledAt, branding })}
           onCancel={() => {
             setCreating(null)
             play.reset()

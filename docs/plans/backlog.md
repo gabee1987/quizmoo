@@ -20,7 +20,6 @@ Candidate features after the design phases (9 to 12). None is planned in detail 
 | Import questions from CSV or Excel | Build quizzes outside the app | M | Column format documented; validation report |
 | Quiz sharing between hosts | Team of organisers | M | Owner plus editors per quiz; permission checks on every route |
 | PDF results report | Hand-out after the event | M | Server-side rendering; no third-party service |
-| Projector branding | Company logo and event name on the lobby and podium | S | Upload once per host; shown by theme |
 
 ## Platform
 
@@ -55,6 +54,7 @@ Collected while testing phases 9 to 12. Effort as above.
 - Teams can answer as one: majority vote or a shared answer, with captains, chosen by the host or by each team (phase 19).
 - Teams choose their mode by default; captain decides with live team picks and a majority fallback; the shared answer mode removed (phase 20).
 - Clearly visible answer selection, a team of one answers without confirming, team answers labelled in the review, installable app, bigger new game dialog, custom theme and answer colours, bigger editor settings panel, scheduled games with a shareable link, names page markup (phase 21).
+- My settings per host account: quick messages, game defaults, branding (logo and event name on the projector and phones), and a host home page (phase 22).
 
 ### Open
 
@@ -64,4 +64,5 @@ Collected while testing phases 9 to 12. Effort as above.
 | Rooms with their own admin | Feature | L | Each room (workspace) has an admin; only its members see and edit its quizzes and games. Today every quiz and game belongs to one host account. Needs a rooms table, membership and roles, permission checks on every route and socket attach, migration of existing quizzes. |
 | Play-through preview in the editor | Feature | M | The host plays the quiz on a phone-like frame (question, answer, reveal) without starting a game. Reuses the phone screens with a local fake snapshot; no server state. |
 | Host live dashboard and hints | Feature | L | One coherent view of the running game: answers in, who is stuck or offline, per-question stats, standings. Hints or messages to selected players (host-to-player messages were out of scope in phase 12). |
+| Registration for new hosts | Feature | L | People who want to use the app create their own host account instead of asking the admin (today accounts come from the seed or the admin's Users page, and phase 26 keeps it that way for the beta). Decisions to make before the plan: open sign-up, an invite link from the admin, or sign-up waiting for the admin's approval; whether an e-mail address is needed (personal data under GDPR, with a privacy notice, consent and erasure; sending mail is a third-party service needing a compliance review, see "Password reset"); bot protection without a third-party CAPTCHA (rate limits per IP that are not stored, a proof-of-work or a honeypot field); terms of use and age limit; limits per new account (quizzes, games, image storage). Builds on the forced first password change and My settings (phase 22). From the 15 October 2026 request. |
 | Sounds for key moments | Feature | M | Short playful sounds for important events and messages, switched on per quiz. Generated in the browser (Web Audio) to avoid licensed audio files; projector only, phones silent by default. Same as the "Sounds and music" item above. |

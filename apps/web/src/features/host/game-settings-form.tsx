@@ -549,7 +549,7 @@ function SymbolsSwatch({ symbols }: { symbols: AnswerSymbols }) {
   )
 }
 
-function SwitchRow({
+export function SwitchRow({
   label,
   description,
   checked,

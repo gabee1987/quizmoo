@@ -26,7 +26,7 @@ Both start with `HomeHero` (the animated `CowLogo` on a primary tile, the wordma
 
 ## Projector (`/screen/$pin`)
 
-Targets 1080p at 2 to 4 m viewing distance: question text at 40 px or more, options at 32 px or more, the QR code at least 300 px in the lobby, the join URL spelled out next to it. Shows answer count live, the distribution bar chart in reveal (`RevealLayout`, shared with the results summary: question and image left, bars right, figures below), top 10 in scoreboard, top 3 podium at the end (`PodiumStage`, also used on phones in its compact form). If the screen is also the host (same browser session), Space or Right arrow triggers "next" and the same action floats as a button bottom right; otherwise the screen is passive. The projector keeps its header.
+Targets 1080p at 2 to 4 m viewing distance: question text at 40 px or more, options at 32 px or more, the QR code at least 300 px in the lobby, the join URL spelled out next to it. Shows answer count live, the distribution bar chart in reveal (`RevealLayout`, shared with the results summary: question and image left, bars right, figures below), top 10 in scoreboard, top 3 podium at the end (`PodiumStage`, also used on phones in its compact form). If the screen is also the host (same browser session), Space or Right arrow triggers "next" and the same action floats as a button bottom right; otherwise the screen is passive. The projector keeps its header. A game with branding (`snapshot.branding`, copied at creation) shows `BrandingMark` above the quiz title in the lobby and above "Game over" on the podium; phone snapshots carry it only when the host chose "Also on the phones", and the phone lobby shows it above the player's card.
 
 ## Host control (`/host/games/$pin`)
 

@@ -1,6 +1,7 @@
 import {
   fallbackAvatar,
   type Answer,
+  type BrandingPublic,
   type CurrentAnswer,
   type GameSnapshotBase,
   type HostSnapshot,
@@ -288,7 +289,15 @@ function baseSnapshot(state: GameState, now: number, audience: ResultsAudience, 
     announcement: state.announcement ?? null,
     nextPin: state.nextPin ?? null,
     scheduledAt: state.scheduledAt ?? null,
+    branding: brandingFor(state, audience),
   }
+}
+
+/** The game's branding for the projector, and for the phones only when the host chose to show it there. */
+function brandingFor(state: GameState, audience: ResultsAudience): BrandingPublic | null {
+  const branding = state.branding
+  if (!branding || (audience === 'players' && !branding.onPhones)) return null
+  return { logoImageId: branding.logoImageId, eventName: branding.eventName }
 }
 
 function rankLookup(items: { id: string; name: string; score: number }[]): Map<string, number> {

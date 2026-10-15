@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { announcementDurationSchema, announcementTextSchema } from './game.js'
+import { announcementDurationSchema, announcementTextSchema, eventNameSchema } from './game.js'
 import { gameSettingsSchema } from './quiz.js'
 
 /** The app's own quick messages, translated on the host's screen. Every host list starts with them. */
@@ -57,8 +57,22 @@ export const hostSettingsSchema = z.object({
   quickMessages: quickMessagesSchema.default(defaultQuickMessages),
   /** New quizzes start with these game settings; null means the app's defaults. */
   gameDefaults: gameSettingsSchema.nullable().default(null),
+  /** The host's logo (an uploaded image of their own) for the projector and the phones' lobby. */
+  logoImageId: z.string().min(1).max(32).nullable().default(null),
+  /** The event name the new game dialog starts with: the last one the host used. */
+  eventName: eventNameSchema.default(''),
 })
 export type HostSettings = z.infer<typeof hostSettingsSchema>
+
+/** The new game dialog's branding choice: the event name for this game, and where the branding shows. */
+export const brandingChoiceSchema = z.object({
+  eventName: eventNameSchema,
+  /** "Show my branding": the logo and event name on the projector. */
+  show: z.boolean(),
+  /** "Also on the phones": on the phones' lobby too. */
+  onPhones: z.boolean(),
+})
+export type BrandingChoice = z.infer<typeof brandingChoiceSchema>
 
 /** "Save to my messages": one own message added to the list (and to the running game). */
 export const newQuickMessageSchema = ownQuickMessageSchema.omit({ id: true })

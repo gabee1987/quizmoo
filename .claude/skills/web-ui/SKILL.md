@@ -17,7 +17,7 @@ Topic skills: `game-screens` (phone, projector, host control and results layouts
 | `/host` | hosts | home: greeting, figures, running and scheduled games, recently edited quizzes, latest results (from `/api/quizzes` and `/api/games`; sorting in `features/host/dashboard.ts`) |
 | `/host/quizzes` | hosts | quiz list with search, Play, Edit, New, batch edit and delete |
 | `/host/quizzes/$quizId` | hosts | editor |
-| `/host/settings` | hosts | My settings: quick messages, game defaults, password (`#account`); one draft with a sticky Save bar, keyed by the stored settings |
+| `/host/settings` | hosts | My settings: quick messages, branding (logo, event name), game defaults, password (`#account`); one draft with a sticky Save bar, keyed by the stored settings |
 | `/host/password` | hosts | the forced first password change only, without navigation; otherwise redirects to `/host/settings#account` |
 | `/host/games/$pin` | hosts | control view (phone or laptop) |
 | `/host/games` | hosts | game history |
@@ -44,7 +44,7 @@ Topic skills: `game-screens` (phone, projector, host control and results layouts
 
 ## Components and code style
 
-- **App components** live in `src/components/`: `TextField` (label + input + error; `type="password"` adds the show-password eye button), `ChoiceCards` (single choice as cards; two columns when the card group itself is at least 28rem wide, a container query), `SelectField` (labelled Radix select in the app's style; use it instead of a native `<select>`), `ConfirmDialog`, `Collapse` (smooth open and close, see `motion`), `FormAlert` (inline error tied to a form), `Timer`, `OptionButton`, `DistributionBars`, `CountUp`, `RankArrow`, `WaitingDots`, `PinInput`, `QrScanner` (lazy), `QrCode`, `SmoothHeight` (springs to its content's new height), `DateTimePicker` (calendar and 24-hour time in a popover; use it instead of a native date input), `AddToCalendarButton` (.ics from `lib/ics.ts`), `Backdrop`, `Spinner`, `AppHeader`, `GameMenu`, `HostNav`, `ModeToggle`. Primitives (`src/components/ui/`) are in `design-system`.
+- **App components** live in `src/components/`: `TextField` (label + input + error; `type="password"` adds the show-password eye button), `ChoiceCards` (single choice as cards; two columns when the card group itself is at least 28rem wide, a container query), `SelectField` (labelled Radix select in the app's style; use it instead of a native `<select>`), `ConfirmDialog`, `Collapse` (smooth open and close, see `motion`), `FormAlert` (inline error tied to a form), `Timer`, `OptionButton`, `DistributionBars`, `CountUp`, `RankArrow`, `WaitingDots`, `PinInput`, `QrScanner` (lazy), `QrCode`, `SmoothHeight` (springs to its content's new height), `DateTimePicker` (calendar and 24-hour time in a popover; use it instead of a native date input), `AddToCalendarButton` (.ics from `lib/ics.ts`), `BrandingMark` (a host's logo and event name, sizes `phone`, `lobby`, `podium`), `Backdrop`, `Spinner`, `AppHeader`, `GameMenu`, `HostNav`, `ModeToggle`. Primitives (`src/components/ui/`) are in `design-system`.
 - **Imports**: `@/` points to `src/` (shadcn requires it). New code imports primitives and app components with `@/components/...`; existing relative imports may stay.
 - **Errors**: a failed request where no field is at fault calls `toastError(error)` from `lib/toast.ts` (e.g. `useMutation({ onError: toastError })`); errors tied to a form use `FormAlert` or the field's own error.
 - Tailwind utility classes only. No CSS modules.

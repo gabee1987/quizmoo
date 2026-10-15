@@ -2,6 +2,7 @@ import type {
   Announcement,
   Answer,
   Avatar,
+  GameBranding,
   GamePhase,
   GameSettings,
   OwnQuickMessage,
@@ -113,6 +114,8 @@ export interface GameState {
    * Read through `quickMessagesOf`.
    */
   quickMessages?: QuickMessage[] | { hidden: string[]; own: OwnQuickMessage[] }
+  /** The host's logo and event name, copied at creation when the host chose to show them. Missing in games saved before it existed. */
+  branding?: GameBranding | null
 }
 
 /** Who sees the final results: the projector (podium) or the players' phones. */

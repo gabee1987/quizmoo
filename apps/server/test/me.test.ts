@@ -3,7 +3,7 @@ import { eq } from 'drizzle-orm'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { createUser } from '../src/auth/users.js'
 import type { Db } from '../src/db/index.js'
-import { hostSettings, users } from '../src/db/schema.js'
+import { hostSettings, images, users } from '../src/db/schema.js'
 import { parseHostSettings } from '../src/routes/me.js'
 import { buildTestApp, sessionCookie } from './helpers/app.js'
 import { describeDb, withTestDb } from './helpers/test-db.js'
@@ -29,12 +29,13 @@ describeDb('host settings (database)', () => {
   let first: string
   let second: string
   let firstId: string
+  let secondId: string
 
   beforeAll(async () => {
     ;({ db, cleanup } = await withTestDb())
     built = await buildTestApp(db)
     firstId = (await createUser(db, 'test_first', 'test-password-123', 'editor')).id
-    await createUser(db, 'test_second', 'test-password-123', 'editor')
+    secondId = (await createUser(db, 'test_second', 'test-password-123', 'editor')).id
     const login = async (username: string) =>
       sessionCookie(
         await built.app.inject({ method: 'POST', url: '/api/auth/login', payload: { username, password: 'test-password-123' } }),
@@ -67,6 +68,8 @@ describeDb('host settings (database)', () => {
     expect(await settingsOf(first)).toEqual({
       quickMessages: [{ id: 'm1', text: 'Pizza is here!', durationSec: 30 }, builtIns[0]],
       gameDefaults: null,
+      logoImageId: null,
+      eventName: '',
     })
     // Another host never sees them.
     expect((await settingsOf(second)).quickMessages).toEqual(builtIns)
@@ -108,9 +111,24 @@ describeDb('host settings (database)', () => {
     expect(other.settings).toMatchObject({ theme: 'classic' })
   })
 
-  it('deletes the settings with the host account', async () => {
+  it("takes the host's own image as the logo, never another host's", async () => {
+    const image = (id: string, ownerId: string) => ({ id, ownerId, mime: 'image/webp', width: 1, height: 1, data: Buffer.from('x') })
+    await db.insert(images).values([image('logo-first', firstId), image('logo-second', secondId)])
+    const own = await req(first, 'PUT', '/api/me/settings', { logoImageId: 'logo-first', eventName: ' Christmas party ' })
+    expect(own.statusCode).toBe(200)
+    expect(await settingsOf(first)).toMatchObject({ logoImageId: 'logo-first', eventName: 'Christmas party' })
+    for (const logoImageId of ['logo-second', 'missing']) {
+      const refused = await req(first, 'PUT', '/api/me/settings', { logoImageId })
+      expect(refused.statusCode).toBe(400)
+      expect(refused.json().error).toBe('errors.invalidInput')
+    }
+    expect((await settingsOf(first)).logoImageId).toBe('logo-first')
+  })
+
+  it('deletes the settings and the logo with the host account', async () => {
     expect(await db.select().from(hostSettings).where(eq(hostSettings.userId, firstId))).toHaveLength(1)
     await db.delete(users).where(eq(users.id, firstId))
     expect(await db.select().from(hostSettings).where(eq(hostSettings.userId, firstId))).toHaveLength(0)
+    expect(await db.select().from(images).where(eq(images.id, 'logo-first'))).toHaveLength(0)
   })
 })

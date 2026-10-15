@@ -153,3 +153,10 @@ Second commit (fixes after testing):
 Third commit (host home):
 - `/host` is a home page built from the existing `/api/quizzes` and `/api/games` only; the quiz list is `/host/quizzes`, and every "Back to quizzes" link goes there.
 - The phone tab bar keeps four tabs (Home, Quizzes, Games, Account): for admins, Users and Names moved into the Account menu, since six tabs do not fit a 390 px phone. The laptop sidebar lists them all.
+
+Fourth commit (branding):
+- No migration and no `kind` column: the logo and the last event name are two more fields in the host settings, and `PUT /api/me/settings` refuses a logo that is not an image the host uploaded (`errors.invalidInput`).
+- The event name is also on My settings (it is what the next new game dialog starts with); creating a game merges the name used into the stored settings (jsonb `||`), so it never overwrites a save from the page.
+- The branding choice sits at the top of the dialog's Look tab. Without a choice in the request (API calls, older clients) a game has no branding.
+- The logo shows on a white tile in both colour modes, like the QR code.
+- The e2e test checks the event name on the projector and the phones; the logo upload is covered by route tests and screenshots only, since uploaded images cannot be deleted through the API and the e2e run must leave the dev database clean.

@@ -1,4 +1,4 @@
-import type { GameSettings, Quiz } from '@quizmoo/shared'
+import type { BrandingChoice, GameSettings, Quiz } from '@quizmoo/shared'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
@@ -28,8 +28,8 @@ export function useNewQuiz() {
 export function useStartGame() {
   const navigate = useNavigate()
   return useMutation({
-    mutationFn: ({ quizId, settings, scheduledAt }: { quizId: string; settings: GameSettings; scheduledAt?: number | undefined }) =>
-      apiFetch<{ pin: string }>('/api/games', { method: 'POST', body: JSON.stringify({ quizId, settings, scheduledAt }) }),
+    mutationFn: (game: { quizId: string; settings: GameSettings; scheduledAt: number | undefined; branding: BrandingChoice | undefined }) =>
+      apiFetch<{ pin: string }>('/api/games', { method: 'POST', body: JSON.stringify(game) }),
     onSuccess: ({ pin }) => void navigate({ to: '/host/games/$pin', params: { pin } }),
     onError: toastError,
   })

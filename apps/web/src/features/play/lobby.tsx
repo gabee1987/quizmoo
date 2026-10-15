@@ -1,5 +1,6 @@
 import type { PlayerSnapshot } from '@quizmoo/shared'
 import { useTranslation } from 'react-i18next'
+import { BrandingMark } from '@/components/branding-mark'
 import { PlayerAvatar } from '../../components/player-avatar'
 import { WaitingDots } from '../../components/waiting-dots'
 import { TeamCard } from './team-card'
@@ -9,6 +10,7 @@ export function Lobby({ snapshot }: { snapshot: PlayerSnapshot }) {
   const team = snapshot.teams.find((x) => x.id === snapshot.me.teamId)
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-6 text-center">
+      {snapshot.branding && <BrandingMark branding={snapshot.branding} size="phone" />}
       <div className="glow-border flex w-full max-w-sm animate-pop flex-col items-center gap-3 rounded-3xl bg-card p-6 shadow-soft">
         <PlayerAvatar avatar={snapshot.me.avatar} size="xl" className="animate-float bg-accent" />
         <p className="text-sm font-semibold text-muted-foreground wrap-break-word">{snapshot.quizTitle}</p>

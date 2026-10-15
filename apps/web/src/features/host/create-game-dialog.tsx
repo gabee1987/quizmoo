@@ -1,4 +1,5 @@
-import type { GameSettings } from '@quizmoo/shared'
+import type { BrandingChoice, GameSettings } from '@quizmoo/shared'
+import { useQuery } from '@tanstack/react-query'
 import { CalendarClockIcon, PlayIcon, RotateCcwIcon } from 'lucide-react'
 import { useId, useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -9,6 +10,8 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { cn } from '@/lib/cn'
 import { defaultStart, latestStart, scheduleError } from '@/lib/schedule'
+import { hostSettingsQueryOptions } from '../settings/host-settings'
+import { BrandingFields } from './branding-fields'
 import {
   GameSettingsForm,
   allSections,
@@ -37,8 +40,8 @@ export function CreateGameDialog({
   quizTitle: string
   quizSettings: GameSettings
   pending: boolean
-  /** `scheduledAt` (unix ms) when the host picked "Later". */
-  onCreate: (settings: GameSettings, scheduledAt?: number) => void
+  /** `scheduledAt` (unix ms) when the host picked "Later"; `branding` once the host's settings loaded. */
+  onCreate: (settings: GameSettings, scheduledAt: number | undefined, branding: BrandingChoice | undefined) => void
   onCancel: () => void
 }) {
   const { t } = useTranslation()
@@ -52,12 +55,18 @@ export function CreateGameDialog({
   // The last problem stays as text while its line closes, so it does not blank out first.
   const [shownError, setShownError] = useState(error)
   if (error && error !== shownError) setShownError(error)
+  // Branding starts from My settings: the last event name, shown once there is a logo or a name.
+  const host = useQuery(hostSettingsQueryOptions)
+  const [branding, setBranding] = useState<BrandingChoice | null>(null)
+  if (host.data && !branding) {
+    const { logoImageId, eventName } = host.data
+    setBranding({ eventName, show: Boolean(logoImageId || eventName), onPhones: true })
+  }
 
   function submit(e: FormEvent) {
     e.preventDefault()
     if (error) return
-    if (later) onCreate(settings, scheduledAt)
-    else onCreate(settings)
+    onCreate(settings, later ? scheduledAt : undefined, branding ?? undefined)
   }
 
   return (
@@ -155,6 +164,11 @@ export function CreateGameDialog({
                     </Button>
                   </div>
                 </Collapse>
+                {section === 'look' && branding && (
+                  <div className="pb-8">
+                    <BrandingFields value={branding} logoImageId={host.data?.logoImageId ?? null} onChange={setBranding} />
+                  </div>
+                )}
                 <GameSettingsForm value={settings} onChange={setSettings} sections={[section]} />
               </TabsContent>
             ))}

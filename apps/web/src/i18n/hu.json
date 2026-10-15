@@ -264,6 +264,16 @@
       "answerChangesLocked_other": "Válaszváltoztatás {{count}} mp-cel a vége előttig",
       "shuffle": "Keverd össze a válaszokat",
       "submit": "Játék létrehozása",
+      "branding": {
+        "title": "Arculat",
+        "show": "Mutasd az arculatomat",
+        "showHelp": "A logód és az esemény neve a kivetítő váróján és dobogóján.",
+        "nothing": "Írd be az esemény nevét, vagy adj meg logót a Beállításaimban.",
+        "onPhones": "A telefonokon is",
+        "onPhonesHelp": "A játékosok telefonján, a váróban.",
+        "addLogo": "Logó hozzáadása",
+        "eventName": "Esemény neve"
+      },
       "groupsHelp": "A játék a kvíz beállításaival indul. Bármelyik csoportot átállíthatod csak erre a játékra.",
       "reset": "Visszaállítás",
       "changedForGame": "Erre a játékra átállítva",
@@ -801,7 +811,19 @@
       "app": "Az app alapbeállításait használod.",
       "own": "A saját alapbeállításaidat használod.",
       "reset": "Vissza az app alapjaira"
+    },
+    "branding": {
+      "title": "Arculat",
+      "help": "A logód és az esemény neve a kivetítő váróján és dobogóján, és ha szeretnéd, a telefonokon is. Játékonként az új játék ablakában választhatsz.",
+      "logo": "Logó",
+      "logoHelp": "Átlátszó vagy fehér hátterű, széles logó mutat a legjobban: fehér lapon jelenik meg.",
+      "eventName": "Esemény neve",
+      "eventNameHelp": "Az új játék ablaka ezzel indul, és játékonként átírhatod.",
+      "eventNamePlaceholder": "pl. Karácsonyi buli"
     }
+  },
+  "branding": {
+    "logo": "A szervező logója"
   },
   "dashboard": {
     "greeting": "Szia, {{name}}!",

@@ -1,11 +1,12 @@
 import { gameSettingsSchema, type HostSettings } from '@quizmoo/shared'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute, useBlocker } from '@tanstack/react-router'
-import { CircleAlertIcon, KeyRoundIcon, MegaphoneIcon, RotateCcwIcon, SaveIcon, SlidersHorizontalIcon } from 'lucide-react'
+import { CircleAlertIcon, ImageIcon, KeyRoundIcon, MegaphoneIcon, RotateCcwIcon, SaveIcon, SlidersHorizontalIcon } from 'lucide-react'
 import { useState, type ComponentType, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { SmoothHeight } from '@/components/smooth-height'
+import { TextField } from '@/components/text-field'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -13,6 +14,7 @@ import { cn } from '@/lib/cn'
 import { usePresence } from '@/lib/presence'
 import { toastError } from '@/lib/toast'
 import { ConfirmDialog } from '../../components/dialog'
+import { ImageField } from '../../features/editor/image-field'
 import { GameSettingsForm, allSections, sectionIcons, settingsError } from '../../features/host/game-settings-form'
 import { hostSettingsQueryOptions, saveHostSettings } from '../../features/settings/host-settings'
 import { PasswordForm } from '../../features/settings/password-form'
@@ -84,6 +86,32 @@ function SettingsForm({ saved }: { saved: HostSettings }) {
             onMessages={(quickMessages) => setDraft((d) => ({ ...d, quickMessages }))}
           />
         </SmoothHeight>
+      </Section>
+
+      <Section icon={ImageIcon} title={t('settings.branding.title')} help={t('settings.branding.help')}>
+        <div className="flex flex-col gap-2">
+          <p className="font-semibold">{t('settings.branding.logo')}</p>
+          <ImageField
+            imageId={draft.logoImageId ?? undefined}
+            label={t('settings.branding.logo')}
+            onChange={(logoImageId) => setDraft((d) => ({ ...d, logoImageId: logoImageId ?? null }))}
+          />
+          <p className="text-sm text-muted-foreground">{t('settings.branding.logoHelp')}</p>
+        </div>
+        <div className="flex flex-col gap-1">
+          <TextField
+            label={t('settings.branding.eventName')}
+            value={draft.eventName}
+            maxLength={60}
+            placeholder={t('settings.branding.eventNamePlaceholder')}
+            autoComplete="off"
+            onChange={(e) => {
+              const eventName = e.target.value
+              setDraft((d) => ({ ...d, eventName }))
+            }}
+          />
+          <p className="text-sm text-muted-foreground">{t('settings.branding.eventNameHelp')}</p>
+        </div>
       </Section>
 
       <Section icon={SlidersHorizontalIcon} title={t('settings.defaults.title')} help={t('settings.defaults.help')}>

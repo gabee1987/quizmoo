@@ -6,12 +6,12 @@ import {
   type HostSettings,
   type OwnQuickMessage,
 } from '@quizmoo/shared'
-import { eq } from 'drizzle-orm'
+import { eq, sql } from 'drizzle-orm'
 import type { FastifyInstance } from 'fastify'
 import { nanoid } from 'nanoid'
 import { requireSession } from '../auth/require-session.js'
 import type { Db } from '../db/index.js'
-import { hostSettings } from '../db/schema.js'
+import { hostSettings, images } from '../db/schema.js'
 import { parseOr400 } from './http.js'
 
 /**
@@ -46,6 +46,24 @@ async function saveHostSettings(db: Db, userId: string, settings: HostSettings) 
     .onConflictDoUpdate({ target: hostSettings.userId, set: { settings, updatedAt } })
 }
 
+/** Keeps the event name a game was created with for the next one; merged in, so the other settings stay as stored. */
+export async function rememberEventName(db: Db, userId: string, eventName: string) {
+  const updatedAt = new Date()
+  await db
+    .insert(hostSettings)
+    .values({ userId, settings: { eventName }, updatedAt })
+    .onConflictDoUpdate({
+      target: hostSettings.userId,
+      set: { settings: sql`${hostSettings.settings} || ${JSON.stringify({ eventName })}::jsonb`, updatedAt },
+    })
+}
+
+/** A logo must be an image the host uploaded themselves. */
+async function ownsImage(db: Db, userId: string, imageId: string) {
+  const row = (await db.select({ ownerId: images.ownerId }).from(images).where(eq(images.id, imageId)))[0]
+  return row?.ownerId === userId
+}
+
 /**
  * The logged-in host's own settings. No user id in the URL: a host can only ever reach their own row.
  */
@@ -57,6 +75,9 @@ export async function meRoutes(app: FastifyInstance, { db }: { db: Db }) {
   app.put('/api/me/settings', auth, async (request, reply) => {
     const settings = parseOr400(hostSettingsSchema, request.body, reply)
     if (!settings) return reply
+    if (settings.logoImageId && !(await ownsImage(db, request.user!.id, settings.logoImageId))) {
+      return reply.code(400).send({ error: 'errors.invalidInput' })
+    }
     await saveHostSettings(db, request.user!.id, settings)
     return { settings }
   })

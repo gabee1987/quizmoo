@@ -28,7 +28,7 @@ Finished plans are deleted once their branch is merged: `CHANGELOG.md` records w
 | 19 | [Team answers: captains, majority vote, shared answer](phase-19-team-answers.md) | `feature/team-answers` | done |
 | 20 | [Teams choose, captain decides](phase-20-team-captain.md) | `feature/team-captain` | done |
 | 21 | [Small improvements: selection, team of one, review label, names markup, PWA, new game dialog, custom theme and answer colours, editor settings panel, scheduled games](phase-21-small-improvements.md) | `feature/small-improvements` | done |
-| 22 | [My settings, per host account](phase-22-host-settings.md) | `feature/host-settings` | in progress |
+| 22 | [My settings, per host account](phase-22-host-settings.md) | `feature/host-settings` | done |
 | 23 | [Flexible teams and mixed play, set up per game](phase-23-flexible-teams.md) | `feature/flexible-teams` | planned |
 | 24 | [Player and host polish from testing](phase-24-player-host-polish.md) | `feature/player-host-polish` | planned |
 | 25 | [Game history at scale](phase-25-game-history.md) | `feature/game-history` | planned |

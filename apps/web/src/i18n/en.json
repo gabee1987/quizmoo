@@ -264,6 +264,16 @@
       "answerChangesLocked_other": "Answer changes until {{count}} s before the end",
       "shuffle": "Shuffle answer options",
       "submit": "Create game",
+      "branding": {
+        "title": "Branding",
+        "show": "Show my branding",
+        "showHelp": "Your logo and the event name on the projector's lobby and podium.",
+        "nothing": "Type an event name, or add a logo in My settings.",
+        "onPhones": "Also on the phones",
+        "onPhonesHelp": "In the lobby on the players' phones.",
+        "addLogo": "Add a logo",
+        "eventName": "Event name"
+      },
       "groupsHelp": "The game starts with the quiz's settings. Change any group for this game only.",
       "reset": "Reset",
       "changedForGame": "Changed for this game",
@@ -801,7 +811,19 @@
       "app": "Using the app's defaults.",
       "own": "Using your own defaults.",
       "reset": "Use the app's defaults"
+    },
+    "branding": {
+      "title": "Branding",
+      "help": "Your logo and the event name on the projector's lobby and podium, and on the phones if you like. You choose per game in the new game dialog.",
+      "logo": "Logo",
+      "logoHelp": "A wide logo on a transparent or white background works best: it is shown on a white tile.",
+      "eventName": "Event name",
+      "eventNameHelp": "The new game dialog starts with it, and each game can change it.",
+      "eventNamePlaceholder": "e.g. Christmas party"
     }
+  },
+  "branding": {
+    "logo": "Organiser's logo"
   },
   "dashboard": {
     "greeting": "Hi, {{name}}!",

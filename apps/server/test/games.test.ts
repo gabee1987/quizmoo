@@ -1,9 +1,9 @@
 import { afterAll, beforeAll, expect, it } from 'vitest'
 import { createUser } from '../src/auth/users.js'
 import type { Db } from '../src/db/index.js'
-import { quizzes } from '../src/db/schema.js'
+import { images, quizzes } from '../src/db/schema.js'
 import { fixtureQuiz } from '../src/game/fixtures.js'
-import { endGame } from '../src/game/index.js'
+import { endGame, joinPlayer, toHostSnapshot, toPlayerSnapshot } from '../src/game/index.js'
 import { buildTestApp, sessionCookie } from './helpers/app.js'
 import { describeDb, withTestDb } from './helpers/test-db.js'
 
@@ -13,12 +13,14 @@ describeDb('game routes (database)', () => {
   let built: Awaited<ReturnType<typeof buildTestApp>>
   let alice: string
   let bob: string
+  let aliceId: string
 
   beforeAll(async () => {
     ;({ db, cleanup } = await withTestDb())
     built = await buildTestApp(db)
     for (const name of ['test_alice', 'test_bob']) {
       const user = await createUser(db, name, 'test-password-123')
+      if (name === 'test_alice') aliceId = user.id
       await db.insert(quizzes).values({ id: `quiz-${name}`, ownerId: user.id, title: `Quiz ${name}`, questions: fixtureQuiz().questions })
     }
     const login = async (username: string) =>
@@ -121,8 +123,44 @@ describeDb('game routes (database)', () => {
     expect((await create(alice, { quizId: 'quiz-test_alice', scheduledAt: 'tomorrow' })).statusCode).toBe(400)
   })
 
+  it("copies the host's logo and the event name into a game that shows branding, and remembers the name", async () => {
+    await db.insert(images).values({ id: 'logo-alice', ownerId: aliceId, mime: 'image/webp', width: 1, height: 1, data: Buffer.from('x') })
+    const settings = (cookie: string, payload?: object) =>
+      built.app.inject({ method: payload ? 'PUT' : 'GET', url: '/api/me/settings', headers: { cookie }, ...(payload ? { payload } : {}) })
+    await settings(alice, { logoImageId: 'logo-alice' })
+    const branded = (branding: object) => create(alice, { quizId: 'quiz-test_alice', branding })
+
+    const shown = built.manager.get((await branded({ eventName: ' Christmas party ', show: true, onPhones: false })).json().pin)!
+    expect(shown.state.branding).toEqual({ logoImageId: 'logo-alice', eventName: 'Christmas party', onPhones: false })
+    expect((await settings(alice)).json().settings).toMatchObject({ logoImageId: 'logo-alice', eventName: 'Christmas party' })
+    // The projector gets it; phones only when the host chose to show it there too.
+    const withPlayer = joinPlayer(shown.state, { id: 'p1', name: 'Ann', teamId: null, token: 't1' }, 0)
+    expect(toHostSnapshot(withPlayer, 0).branding).toEqual({ logoImageId: 'logo-alice', eventName: 'Christmas party' })
+    expect(toPlayerSnapshot(withPlayer, 'p1', 0).branding).toBeNull()
+    const onPhones = built.manager.get((await branded({ eventName: '', show: true, onPhones: true })).json().pin)!
+    expect(toPlayerSnapshot(joinPlayer(onPhones.state, { id: 'p1', name: 'Ann', teamId: null, token: 't1' }, 0), 'p1', 0).branding).toEqual({
+      logoImageId: 'logo-alice',
+      eventName: null,
+    })
+
+    // Switched off, or no choice sent at all: no branding.
+    expect(built.manager.get((await branded({ eventName: 'Party', show: false, onPhones: true })).json().pin)!.state.branding).toBeNull()
+    expect(built.manager.get((await create(alice, { quizId: 'quiz-test_alice' })).json().pin)!.state.branding).toBeNull()
+    expect((await settings(alice)).json().settings.eventName).toBe('Party')
+    // Bob has neither a logo nor a name: showing branding gives nothing to show.
+    const bobs = await create(bob, { quizId: 'quiz-test_bob', branding: { eventName: '', show: true, onPhones: true } })
+    expect(built.manager.get(bobs.json().pin)!.state.branding).toBeNull()
+    expect((await branded({ eventName: 'x'.repeat(61), show: true, onPhones: true })).statusCode).toBe(400)
+  })
+
   it('play again: a new lobby with the same quiz and settings, pointed to by the finished game, owner only', async () => {
-    const { pin } = (await create(alice, { quizId: 'quiz-test_alice', settings: { streakBonus: true, theme: 'navy' } })).json()
+    const { pin } = (
+      await create(alice, {
+        quizId: 'quiz-test_alice',
+        settings: { streakBonus: true, theme: 'navy' },
+        branding: { eventName: 'Party', show: true, onPhones: true },
+      })
+    ).json()
     const old = built.manager.get(pin)!
     const again = (cookie: string) =>
       built.app.inject({ method: 'POST', url: `/api/games/${old.state.id}/again`, headers: { cookie } })
@@ -136,6 +174,7 @@ describeDb('game routes (database)', () => {
     const next = built.manager.get(res.json().pin)!
     expect(next.state).toMatchObject({ phase: 'lobby', quiz: { id: 'quiz-test_alice' }, settings: { streakBonus: true, theme: 'navy' } })
     expect(next.state.id).not.toBe(old.state.id)
+    expect(next.state.branding).toEqual(old.state.branding)
     expect(built.manager.get(pin)!.state.nextPin).toBe(next.state.pin)
 
     // A second press (double click, second tab) gets the same round.

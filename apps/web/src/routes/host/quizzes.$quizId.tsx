@@ -49,6 +49,7 @@ import { useAutosave, type SaveStatus } from '../../features/editor/use-autosave
 import { errorsUnder, validateQuiz } from '../../features/editor/validate'
 import { CreateGameDialog } from '../../features/host/create-game-dialog'
 import { GameSettingsForm, settingsSummary, type SettingsSection } from '../../features/host/game-settings-form'
+import { useStartGame } from '../../features/host/quiz-actions'
 import { ApiError, apiFetch, errorCode } from '../../lib/api'
 import { paletteVars } from '../../lib/themes'
 
@@ -293,12 +294,7 @@ function Editor({ quiz }: { quiz: Quiz }) {
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [])
 
-  const play = useMutation({
-    mutationFn: ({ settings, scheduledAt }: { settings: GameSettings; scheduledAt?: number | undefined }) =>
-      apiFetch<{ pin: string }>('/api/games', { method: 'POST', body: JSON.stringify({ quizId: quiz.id, settings, scheduledAt }) }),
-    onSuccess: ({ pin }) => void navigate({ to: '/host/games/$pin', params: { pin } }),
-    onError: toastError,
-  })
+  const play = useStartGame()
   const remove = useMutation({
     mutationFn: () => apiFetch(`/api/quizzes/${quiz.id}`, { method: 'DELETE' }),
     onMutate: () => {
@@ -627,7 +623,7 @@ function Editor({ quiz }: { quiz: Quiz }) {
             quizTitle={draft.title}
             quizSettings={draft.settings}
             pending={play.isPending}
-            onCreate={(settings, scheduledAt) => play.mutate({ settings, scheduledAt })}
+            onCreate={(settings, scheduledAt, branding) => play.mutate({ quizId: quiz.id, settings, scheduledAt, branding })}
             onCancel={() => {
               setStarting(false)
               play.reset()

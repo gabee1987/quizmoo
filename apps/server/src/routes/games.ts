@@ -1,4 +1,12 @@
-import { gameSettingsSchema, pinSchema, scheduledAtSchema, type GameHostInfo, type GamePublicInfo } from '@quizmoo/shared'
+import {
+  brandingChoiceSchema,
+  gameSettingsSchema,
+  pinSchema,
+  scheduledAtSchema,
+  type GameBranding,
+  type GameHostInfo,
+  type GamePublicInfo,
+} from '@quizmoo/shared'
 import { eq } from 'drizzle-orm'
 import type { FastifyInstance } from 'fastify'
 import { nanoid } from 'nanoid'
@@ -9,7 +17,7 @@ import { quizzes } from '../db/schema.js'
 import { EngineError, quickMessagesOf, setNextGame } from '../game/index.js'
 import type { GameManager } from '../realtime/game-manager.js'
 import { parseOr400 } from './http.js'
-import { readHostSettings } from './me.js'
+import { readHostSettings, rememberEventName } from './me.js'
 
 const createGameSchema = z.object({
   quizId: z.string().min(1),
@@ -17,6 +25,8 @@ const createGameSchema = z.object({
   settings: gameSettingsSchema.optional(),
   /** "Start later": the PIN is reserved now and joining opens at this time. */
   scheduledAt: scheduledAtSchema.optional(),
+  /** The new game dialog's branding choice; without it the game has no branding. */
+  branding: brandingChoiceSchema.optional(),
 })
 
 export interface GameRouteOptions {
@@ -40,6 +50,11 @@ export async function gameRoutes(app: FastifyInstance, { db, manager, appOrigin 
     if (!settings) return reply.code(400).send({ error: 'errors.invalidInput' })
 
     const host = await readHostSettings(db, request.user!.id)
+    const choice = body.branding
+    const eventName = choice?.eventName || null
+    // Copied in, so later changes to the logo or the name leave this game (and its projector) alone.
+    const branding: GameBranding | null =
+      choice?.show && (host.logoImageId || eventName) ? { logoImageId: host.logoImageId, eventName, onPhones: choice.onPhones } : null
     let game
     try {
       game = await manager.create({
@@ -51,11 +66,14 @@ export async function gameRoutes(app: FastifyInstance, { db, manager, appOrigin 
         quizId: quiz.id,
         scheduledAt: body.scheduledAt,
         quickMessages: host.quickMessages,
+        branding,
       })
     } catch (error) {
       if (error instanceof EngineError) return reply.code(400).send({ error: error.code })
       throw error
     }
+    // The next game's dialog starts with the event name used now.
+    if (choice && choice.eventName !== host.eventName) await rememberEventName(db, request.user!.id, choice.eventName)
     return reply.code(201).send({ pin: game.state.pin })
   })
 
@@ -78,6 +96,7 @@ export async function gameRoutes(app: FastifyInstance, { db, manager, appOrigin 
       hostId: old.hostId,
       quizId: old.quizId,
       quickMessages: quickMessagesOf(old.state),
+      branding: old.state.branding ?? null,
     })
     manager.apply(old.state.pin, (state) => setNextGame(state, game.state.pin))
     return reply.code(201).send({ pin: game.state.pin })
