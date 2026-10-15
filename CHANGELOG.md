@@ -128,6 +128,7 @@
 - Hosts land on a home page after logging in: a greeting, their figures (quizzes, games played, players), running games with "Back to the game", scheduled games, the recently edited quizzes with Play and the latest results. The quiz list moved to `/host/quizzes`; "Home" is the first item in the navigation, and on phones the admin pages (Users, Names) are in the Account menu.
 - Branding: a host uploads a logo and sets an event name on My settings. The new game dialog (Look) starts with the last event name used and has "Show my branding" and "Also on the phones"; the projector's lobby and podium then show the logo and the name, and the phones' lobby too when chosen. A game keeps its branding through a restart and in "Play again"; a logo can only be the host's own image and is deleted with the account.
 - Each quiz can have its own branding in its settings: a logo and an event name that replace the ones from My settings (left empty, My settings is used), or branding turned off, so its games show no logo or event name on the projector or the phones unless the host turns it on in the new game dialog.
+- The editor's quiz settings are split into tabs (General, Game flow, Look, Scoring, Branding), so only one group shows at a time.
 
 ### Development
 - The web dev server runs on port 15173, away from the 5173+ ports other local Vite projects take.

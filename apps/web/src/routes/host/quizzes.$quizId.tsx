@@ -1,11 +1,13 @@
 import type { GameSettings, Question, QuestionType, Quiz, QuizInput } from '@quizmoo/shared'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link, createFileRoute, useBlocker, useNavigate } from '@tanstack/react-router'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   ArrowLeftIcon,
   EyeIcon,
+  FileTextIcon,
+  ImageIcon,
   KeyboardIcon,
   ListOrderedIcon,
   PlayIcon,
@@ -21,6 +23,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/lib/cn'
@@ -48,7 +51,7 @@ import { TypePicker } from '../../features/editor/type-picker'
 import { useAutosave, type SaveStatus } from '../../features/editor/use-autosave'
 import { errorsUnder, validateQuiz } from '../../features/editor/validate'
 import { CreateGameDialog } from '../../features/host/create-game-dialog'
-import { GameSettingsForm, settingsSummary, type SettingsSection } from '../../features/host/game-settings-form'
+import { GameSettingsForm, allSections, sectionIcons, settingsSummary } from '../../features/host/game-settings-form'
 import { useStartGame } from '../../features/host/quiz-actions'
 import { QuizBrandingFields } from '../../features/editor/quiz-branding-fields'
 import { ApiError, apiFetch, errorCode } from '../../lib/api'
@@ -57,6 +60,15 @@ import { paletteVars } from '../../lib/themes'
 export const Route = createFileRoute('/host/quizzes/$quizId')({
   component: QuizEditorPage,
 })
+
+/** The quiz settings' tabs: the quiz itself, the game settings groups, then its branding. */
+const settingsTabs = ['general', ...allSections, 'branding'] as const
+type SettingsTab = (typeof settingsTabs)[number]
+const tabIcons: Record<SettingsTab, ComponentType<{ className?: string }>> = {
+  general: FileTextIcon,
+  ...sectionIcons,
+  branding: ImageIcon,
+}
 
 const MAX_QUESTIONS = 100
 const UNDO_MS = 10_000
@@ -107,6 +119,7 @@ function Editor({ quiz }: { quiz: Quiz }) {
   const [picking, setPicking] = useState(false)
   const [listOpen, setListOpen] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [settingsTab, setSettingsTab] = useState<SettingsTab>('general')
   // From 1280 px the settings dock beside the form and the phone preview, so theme and colour
   // choices show in the preview as they are made; below that they slide over in a sheet.
   const wide = useMediaQuery('(min-width: 80rem)')
@@ -342,45 +355,43 @@ function Editor({ quiz }: { quiz: Quiz }) {
       )}
     </div>
   )
-  const settingsGroup = (section: SettingsSection) => (
-    // A card from sm up; on phones a plain section under a line, so the options get the whole width.
-    <section
-      className="flex flex-col gap-4 border-t pt-5 sm:rounded-2xl sm:border sm:p-4"
-      aria-labelledby={`settings-group-${section}`}
-    >
-      <h3 id={`settings-group-${section}`} className="text-lg font-extrabold">
-        {t(`host.batch.groups.${section}`)}
-      </h3>
-      <GameSettingsForm value={draft.settings} onChange={(settings) => setDraft((d) => ({ ...d, settings }))} sections={[section]} />
-    </section>
-  )
-  // Two columns where the panel is wide enough (the docked panel on laptops, a wide sheet):
-  // game flow and scoring beside the look, the longest group, so there is less to scroll.
+  // One tab per group, as on My settings, so only one group's options show at a time.
   const settingsBody = (
-    <div className="@container">
-      <div className="grid items-start gap-5 @3xl:grid-cols-2">
-        <div className="flex flex-col gap-5">
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="quiz-description" className="font-semibold">
-              {t('editor.description')}
-            </Label>
-            <Textarea
-              id="quiz-description"
-              value={draft.description}
-              maxLength={500}
-              rows={3}
-              onChange={(e) => setDraft((d) => ({ ...d, description: e.target.value }))}
-            />
-            <p className="text-sm text-muted-foreground">{t('editor.gameSettingsHelp')}</p>
-          </div>
-          {settingsGroup('flow')}
-          {settingsGroup('scoring')}
+    <Tabs value={settingsTab} onValueChange={(value) => setSettingsTab(value as SettingsTab)} className="@container gap-5">
+      <TabsList aria-label={t('editor.settings')} className="h-auto! w-full gap-1 rounded-2xl p-1.5 max-@xl:grid! max-@xl:grid-cols-3">
+        {settingsTabs.map((tab) => {
+          const Icon = tabIcons[tab]
+          return (
+            <TabsTrigger
+              key={tab}
+              value={tab}
+              className={cn(
+                'group/tab min-h-12 gap-2 rounded-xl px-2 text-sm font-extrabold @xl:px-3 @3xl:text-base',
+                'transition-[color,background-color,box-shadow,transform] duration-300 ease-spring hover:bg-card/60',
+                'data-[state=active]:border-transparent! data-[state=active]:bg-primary! data-[state=active]:text-primary-foreground!',
+                'data-[state=active]:shadow-[0_3px_0_0_var(--primary-edge)]! data-[state=active]:-translate-y-px',
+              )}
+            >
+              <Icon className="size-5! shrink-0 transition-transform duration-500 ease-spring group-data-[state=active]/tab:animate-wiggle" />
+              <span className="truncate">{tab === 'general' ? t('editor.generalTab') : tab === 'branding' ? t('editor.branding.title') : t(`host.batch.groups.${tab}`)}</span>
+            </TabsTrigger>
+          )
+        })}
+      </TabsList>
+      <TabsContent value="general" className="flex flex-col gap-6">
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="quiz-description" className="font-semibold">
+            {t('editor.description')}
+          </Label>
+          <Textarea
+            id="quiz-description"
+            value={draft.description}
+            maxLength={500}
+            rows={3}
+            onChange={(e) => setDraft((d) => ({ ...d, description: e.target.value }))}
+          />
         </div>
-        <div className="flex flex-col gap-5">
-          {settingsGroup('look')}
-          <QuizBrandingFields value={draft.branding} onChange={(branding) => setDraft((d) => ({ ...d, branding }))} />
-        </div>
-        <div className="flex flex-col gap-2 border-t pt-5 @3xl:col-span-2">
+        <div className="flex flex-col gap-2 border-t pt-5">
           <h3 className="font-extrabold">{t('editor.deleteQuiz')}</h3>
           <p className="text-sm text-muted-foreground">{t('editor.deleteQuizHelp')}</p>
           <Button variant="destructive" className="self-start" onClick={() => setDeleting(true)}>
@@ -388,8 +399,17 @@ function Editor({ quiz }: { quiz: Quiz }) {
             {t('editor.deleteQuiz')}
           </Button>
         </div>
-      </div>
-    </div>
+      </TabsContent>
+      {allSections.map((section) => (
+        <TabsContent key={section} value={section} className="flex flex-col gap-4">
+          <p className="text-sm text-muted-foreground">{t('editor.gameSettingsHelp')}</p>
+          <GameSettingsForm value={draft.settings} onChange={(settings) => setDraft((d) => ({ ...d, settings }))} sections={[section]} />
+        </TabsContent>
+      ))}
+      <TabsContent value="branding">
+        <QuizBrandingFields value={draft.branding} onChange={(branding) => setDraft((d) => ({ ...d, branding }))} />
+      </TabsContent>
+    </Tabs>
   )
   const preview = <PhonePreview question={selected} index={selectedIndex} count={questions.length} settings={draft.settings} />
 

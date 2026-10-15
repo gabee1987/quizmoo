@@ -579,6 +579,7 @@
     "untitledQuiz": "New quiz",
     "gameSettings": "Game settings",
     "gameSettingsHelp": "Every game of this quiz starts with these settings. You can still change them when starting a game.",
+    "generalTab": "General",
     "branding": {
       "title": "Branding",
       "show": "Show branding",

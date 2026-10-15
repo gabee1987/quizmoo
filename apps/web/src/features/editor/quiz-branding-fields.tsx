@@ -13,11 +13,8 @@ export function QuizBrandingFields({ value, onChange }: { value: QuizBranding; o
   const { t } = useTranslation()
   const set = (patch: Partial<QuizBranding>) => onChange({ ...value, ...patch })
   return (
-    // Styled like the game settings groups beside it: a card from sm up, a plain section on phones.
-    <section className="flex flex-col gap-2 border-t pt-5 sm:rounded-2xl sm:border sm:p-4" aria-labelledby="settings-group-branding">
-      <h3 id="settings-group-branding" className="text-lg font-extrabold">
-        {t('editor.branding.title')}
-      </h3>
+    // The settings tab it sits in names it.
+    <div className="flex flex-col gap-2">
       <SwitchRow
         label={t('editor.branding.show')}
         description={value.show ? t('editor.branding.showHelp') : t('editor.branding.offHelp')}
@@ -46,6 +43,6 @@ export function QuizBrandingFields({ value, onChange }: { value: QuizBranding; o
           <p className="text-sm text-muted-foreground">{t('editor.branding.eventNameHelp')}</p>
         </div>
       </Collapse>
-    </section>
+    </div>
   )
 }

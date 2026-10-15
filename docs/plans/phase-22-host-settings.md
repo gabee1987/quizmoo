@@ -166,3 +166,5 @@ Fifth commit (quiz branding, asked for after testing):
 - `show: false` turns branding off for the quiz's games: the new game dialog starts with "Show my branding" off and says why, and can still turn it on for one game, like other quiz settings.
 - A quiz's own event name is not remembered in My settings (only names typed for quizzes without one are).
 - Quiz logos pass the same ownership check as the account logo; duplicate copies the branding, batch edit keeps it.
+
+Sixth commit (asked for after testing): the editor's quiz settings had grown too long for one page, so they are split into tabs like My settings: General (description, delete quiz), Game flow, Look, Scoring and Branding. A blank panel after closing the logo's file dialog was reported on the old single page; it could not be reproduced (real Windows file dialog, cancelled, on the production build and the dev server) and does not happen with the tabs.
