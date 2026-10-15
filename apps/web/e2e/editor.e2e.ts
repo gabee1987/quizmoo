@@ -106,7 +106,7 @@ test('host reorders, duplicates, deletes and restores questions, and duplicates 
 
     await test.step('duplicate the quiz from the list', async () => {
       await page.getByRole('link', { name: 'Back to quizzes' }).click()
-      await expect(page).toHaveURL(/\/host$/)
+      await expect(page).toHaveURL(/\/host\/quizzes$/)
       await page.getByRole('button', { name: `More actions for ${title}` }).click()
       await page.getByRole('menuitem', { name: 'Duplicate' }).click()
       // Ids are nanoids: letters, digits, "_" and "-".

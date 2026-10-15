@@ -15,11 +15,13 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as HostIndexRouteImport } from './routes/host/index'
 import { Route as HostNicknamesRouteImport } from './routes/host/nicknames'
 import { Route as HostPasswordRouteImport } from './routes/host/password'
+import { Route as HostSettingsRouteImport } from './routes/host/settings'
 import { Route as HostUsersRouteImport } from './routes/host/users'
 import { Route as PlayPinRouteImport } from './routes/play.$pin'
 import { Route as ScreenPinRouteImport } from './routes/screen.$pin'
 import { Route as HostGamesIndexRouteImport } from './routes/host/games.index'
 import { Route as HostGamesPinRouteImport } from './routes/host/games.$pin'
+import { Route as HostQuizzesIndexRouteImport } from './routes/host/quizzes.index'
 import { Route as HostQuizzesQuizIdRouteImport } from './routes/host/quizzes.$quizId'
 import { Route as HostResultsGameIdRouteImport } from './routes/host/results.$gameId'
 import { Route as ScreenResultsGameIdRouteImport } from './routes/screen.results.$gameId'
@@ -54,6 +56,11 @@ const HostPasswordRoute = HostPasswordRouteImport.update({
   path: '/password',
   getParentRoute: () => HostRouteRoute,
 } as any)
+const HostSettingsRoute = HostSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => HostRouteRoute,
+} as any)
 const HostUsersRoute = HostUsersRouteImport.update({
   id: '/users',
   path: '/users',
@@ -79,6 +86,11 @@ const HostGamesPinRoute = HostGamesPinRouteImport.update({
   path: '/games/$pin',
   getParentRoute: () => HostRouteRoute,
 } as any)
+const HostQuizzesIndexRoute = HostQuizzesIndexRouteImport.update({
+  id: '/quizzes/',
+  path: '/quizzes/',
+  getParentRoute: () => HostRouteRoute,
+} as any)
 const HostQuizzesQuizIdRoute = HostQuizzesQuizIdRouteImport.update({
   id: '/quizzes/$quizId',
   path: '/quizzes/$quizId',
@@ -101,6 +113,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/host/nicknames': typeof HostNicknamesRoute
   '/host/password': typeof HostPasswordRoute
+  '/host/settings': typeof HostSettingsRoute
   '/host/users': typeof HostUsersRoute
   '/play/$pin': typeof PlayPinRoute
   '/screen/$pin': typeof ScreenPinRoute
@@ -110,12 +123,14 @@ export interface FileRoutesByFullPath {
   '/host/results/$gameId': typeof HostResultsGameIdRoute
   '/screen/results/$gameId': typeof ScreenResultsGameIdRoute
   '/host/games/': typeof HostGamesIndexRoute
+  '/host/quizzes/': typeof HostQuizzesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/host/nicknames': typeof HostNicknamesRoute
   '/host/password': typeof HostPasswordRoute
+  '/host/settings': typeof HostSettingsRoute
   '/host/users': typeof HostUsersRoute
   '/play/$pin': typeof PlayPinRoute
   '/screen/$pin': typeof ScreenPinRoute
@@ -125,6 +140,7 @@ export interface FileRoutesByTo {
   '/host/results/$gameId': typeof HostResultsGameIdRoute
   '/screen/results/$gameId': typeof ScreenResultsGameIdRoute
   '/host/games': typeof HostGamesIndexRoute
+  '/host/quizzes': typeof HostQuizzesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -133,6 +149,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/host/nicknames': typeof HostNicknamesRoute
   '/host/password': typeof HostPasswordRoute
+  '/host/settings': typeof HostSettingsRoute
   '/host/users': typeof HostUsersRoute
   '/play/$pin': typeof PlayPinRoute
   '/screen/$pin': typeof ScreenPinRoute
@@ -142,6 +159,7 @@ export interface FileRoutesById {
   '/host/results/$gameId': typeof HostResultsGameIdRoute
   '/screen/results/$gameId': typeof ScreenResultsGameIdRoute
   '/host/games/': typeof HostGamesIndexRoute
+  '/host/quizzes/': typeof HostQuizzesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -151,6 +169,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/host/nicknames'
     | '/host/password'
+    | '/host/settings'
     | '/host/users'
     | '/play/$pin'
     | '/screen/$pin'
@@ -160,12 +179,14 @@ export interface FileRouteTypes {
     | '/host/results/$gameId'
     | '/screen/results/$gameId'
     | '/host/games/'
+    | '/host/quizzes/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/login'
     | '/host/nicknames'
     | '/host/password'
+    | '/host/settings'
     | '/host/users'
     | '/play/$pin'
     | '/screen/$pin'
@@ -175,6 +196,7 @@ export interface FileRouteTypes {
     | '/host/results/$gameId'
     | '/screen/results/$gameId'
     | '/host/games'
+    | '/host/quizzes'
   id:
     | '__root__'
     | '/'
@@ -182,6 +204,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/host/nicknames'
     | '/host/password'
+    | '/host/settings'
     | '/host/users'
     | '/play/$pin'
     | '/screen/$pin'
@@ -191,6 +214,7 @@ export interface FileRouteTypes {
     | '/host/results/$gameId'
     | '/screen/results/$gameId'
     | '/host/games/'
+    | '/host/quizzes/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -246,6 +270,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HostPasswordRouteImport
       parentRoute: typeof HostRouteRoute
     }
+    '/host/settings': {
+      id: '/host/settings'
+      path: '/settings'
+      fullPath: '/host/settings'
+      preLoaderRoute: typeof HostSettingsRouteImport
+      parentRoute: typeof HostRouteRoute
+    }
     '/host/users': {
       id: '/host/users'
       path: '/users'
@@ -281,6 +312,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HostGamesPinRouteImport
       parentRoute: typeof HostRouteRoute
     }
+    '/host/quizzes/': {
+      id: '/host/quizzes/'
+      path: '/quizzes'
+      fullPath: '/host/quizzes/'
+      preLoaderRoute: typeof HostQuizzesIndexRouteImport
+      parentRoute: typeof HostRouteRoute
+    }
     '/host/quizzes/$quizId': {
       id: '/host/quizzes/$quizId'
       path: '/quizzes/$quizId'
@@ -308,23 +346,27 @@ declare module '@tanstack/react-router' {
 interface HostRouteRouteChildren {
   HostNicknamesRoute: typeof HostNicknamesRoute
   HostPasswordRoute: typeof HostPasswordRoute
+  HostSettingsRoute: typeof HostSettingsRoute
   HostUsersRoute: typeof HostUsersRoute
   HostIndexRoute: typeof HostIndexRoute
   HostGamesPinRoute: typeof HostGamesPinRoute
   HostQuizzesQuizIdRoute: typeof HostQuizzesQuizIdRoute
   HostResultsGameIdRoute: typeof HostResultsGameIdRoute
   HostGamesIndexRoute: typeof HostGamesIndexRoute
+  HostQuizzesIndexRoute: typeof HostQuizzesIndexRoute
 }
 
 const HostRouteRouteChildren: HostRouteRouteChildren = {
   HostNicknamesRoute: HostNicknamesRoute,
   HostPasswordRoute: HostPasswordRoute,
+  HostSettingsRoute: HostSettingsRoute,
   HostUsersRoute: HostUsersRoute,
   HostIndexRoute: HostIndexRoute,
   HostGamesPinRoute: HostGamesPinRoute,
   HostQuizzesQuizIdRoute: HostQuizzesQuizIdRoute,
   HostResultsGameIdRoute: HostResultsGameIdRoute,
   HostGamesIndexRoute: HostGamesIndexRoute,
+  HostQuizzesIndexRoute: HostQuizzesIndexRoute,
 }
 
 const HostRouteRouteWithChildren = HostRouteRoute._addFileChildren(

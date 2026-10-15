@@ -16,8 +16,10 @@ From the user:
 - Host ownership is per logged-in host account, not only game settings: "a more robust host ownership".
 - Quick messages can be saved before the game (on the page) and during it (from the host control).
 - This is its own branch.
+- After testing the first commit (14 October 2026): built-in and own quick messages become one list, still translated until edited, with a way to bring removed built-ins back; a message's time can be changed in a game for that game only, and the message box gets a custom time; a host home dashboard replaces the quiz list as `/host` (the list moves to `/host/quizzes`), as its own commit before branding; plus motion and layout fixes (sidebar, toasts, tabs, save bar, panel changes, password width, the editor's settings on phones).
+- Confirmed on 14 October 2026: two commits on the branch, first the page with quick messages, game defaults and the password, then branding. A game copies the quick messages at creation. Game defaults apply to new quizzes only. Branding on the phones' lobby has its own switch in the new game dialog, so it can be turned off there while the projector keeps it.
 
-Proposed (confirm or change before implementation):
+The rest, as proposed and confirmed:
 - **Where:** `/host/settings`, "My settings" in the host navigation (sidebar and bottom bar) next to "Change password", which moves onto this page as its last section. Sections: Quick messages, Branding, Game defaults, Account.
 - **Storage:** one row per host in a new table `host_settings` (`user_id` primary key and foreign key with `on delete cascade`, `settings jsonb`, `updated_at`). The jsonb is validated by a shared Zod schema `hostSettingsSchema` with defaults, so fields added later read from old rows like game settings do. No player data, ever.
 - **Ownership and access:** a host reads and writes only their own row (`GET` / `PUT /api/me/settings`); no host id in the URL, so one host can never reach another's. Admins get no view of other hosts' settings (not needed).
@@ -36,7 +38,7 @@ Proposed (confirm or change before implementation):
 
 - **Logo:** one image per host, uploaded through the existing image upload (owned by the host, same size and type limits). Shown on the projector lobby (next to the QR code) and podium, and small on the phones' lobby.
 - **Event name:** per game, in the new game dialog, prefilled with the last one the host used (stored in the host settings). Shown on the projector lobby and podium under the logo; empty means none.
-- **Per game switch:** "Show my branding" in the new game dialog, on by default once a logo or event name exists.
+- **Per game switch:** "Show my branding" in the new game dialog, on by default once a logo or event name exists, and "Also on the phones" under it (on by default).
 - The projector shows only what the game has (copied at creation), so the public screen never reads host settings.
 
 ### Game defaults
@@ -134,3 +136,35 @@ $env:E2E_BASE_URL="http://localhost:3999"; $env:E2E_USERNAME="admin"; $env:E2E_P
 7. Set Graphite and Muted as game defaults, create a quiz. Expected: it starts with them.
 8. Log in as a second host. Expected: none of the first host's messages, logo or defaults.
 9. Restart the server mid-game. Expected: the game's quick messages and branding stay.
+
+## Deviations
+
+First commit (quick messages, game defaults, password):
+- `/host/password` stays as the forced first-login page without navigation (new accounts need it); otherwise it redirects to `/host/settings#account`.
+- "Save to my messages" uses its own `POST /api/me/quick-messages`, which appends one message, so saving from a game never overwrites edits made on the page.
+- The message box's time row starts on "own time": each quick message uses its own time unless the host picks one.
+- The reserved `teamLists` field is not added yet: the schema's defaults let phase 23 add it without a migration.
+
+Second commit (fixes after testing):
+- One quick message list instead of built-ins kept apart: `hiddenBuiltIns` is gone, built-in rows are `{ id, builtIn }`. Old rows and games are merged on read (`mergeLegacyQuickMessages`), no migration. The limit is 25 in all, so a host with 20 own messages and the three built-ins keeps them all.
+- New host command `setQuickMessageTime` (this game only).
+- Planned next on this branch: the host dashboard (its own commit), then branding.
+
+Third commit (host home):
+- `/host` is a home page built from the existing `/api/quizzes` and `/api/games` only; the quiz list is `/host/quizzes`, and every "Back to quizzes" link goes there.
+- The phone tab bar keeps four tabs (Home, Quizzes, Games, Account): for admins, Users and Names moved into the Account menu, since six tabs do not fit a 390 px phone. The laptop sidebar lists them all.
+
+Fourth commit (branding):
+- No migration and no `kind` column: the logo and the last event name are two more fields in the host settings, and `PUT /api/me/settings` refuses a logo that is not an image the host uploaded (`errors.invalidInput`).
+- The event name is also on My settings (it is what the next new game dialog starts with); creating a game merges the name used into the stored settings (jsonb `||`), so it never overwrites a save from the page.
+- The branding choice sits at the top of the dialog's Look tab. Without a choice in the request (API calls, older clients) a game has no branding.
+- The logo shows on a white tile in both colour modes, like the QR code.
+- The e2e test checks the event name on the projector and the phones; the logo upload is covered by route tests and screenshots only, since uploaded images cannot be deleted through the API and the e2e run must leave the dev database clean.
+
+Fifth commit (quiz branding, asked for after testing):
+- A quiz has its own `branding` (`show`, `logoImageId`, `eventName`) in a new jsonb column (migration `0005`); My settings is the default for what it leaves empty. The game uses the quiz's logo, else the account's.
+- `show: false` turns branding off for the quiz's games: the new game dialog starts with "Show my branding" off and says why, and can still turn it on for one game, like other quiz settings.
+- A quiz's own event name is not remembered in My settings (only names typed for quizzes without one are).
+- Quiz logos pass the same ownership check as the account logo; duplicate copies the branding, batch edit keeps it.
+
+Sixth commit (asked for after testing): the editor's quiz settings had grown too long for one page, so they are split into tabs like My settings: General (description, delete quiz), Game flow, Look, Scoring and Branding. A blank panel after closing the logo's file dialog was reported on the old single page; it could not be reproduced (real Windows file dialog, cancelled, on the production build and the dev server) and does not happen with the tabs.

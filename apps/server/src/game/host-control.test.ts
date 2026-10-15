@@ -1,6 +1,7 @@
-import type { Answer, GameSettings, Question } from '@quizmoo/shared'
+import { MAX_QUICK_MESSAGES, type Answer, type GameSettings, type Question } from '@quizmoo/shared'
 import { describe, expect, it } from 'vitest'
 import {
+  addQuickMessage,
   announce,
   closeQuestion,
   createGame,
@@ -12,7 +13,10 @@ import {
   joinPlayer,
   next,
   pause,
+  quickMessagesOf,
+  removeQuickMessage,
   resume,
+  setQuickMessageTime,
   showQuestion,
   showScoreboard,
   skipQuestion,
@@ -190,5 +194,69 @@ describe('showing a question again', () => {
     expect(grading.awaitingGrading).toBe(true)
     expect(code(() => showQuestion(grading, 0))).toBe('errors.invalidTransition')
     expect(showQuestion(gradeText(grading, []), 0).reviewIndex).toBe(0)
+  })
+})
+
+describe("a game's quick messages", () => {
+  const pizza = { id: 'm1', text: 'Pizza is here!', durationSec: 30 }
+  const back = { id: 'm2', text: 'Back in 5', durationSec: null }
+  const builtIns = ['getReady', 'shortBreak', 'lastQuestion']
+  const ids = (state: ReturnType<typeof game>) => quickMessagesOf(state).map((m) => m.id)
+
+  it('lists the built-in messages in a game saved before they existed', () => {
+    const state = game([tf('q1')])
+    expect(ids(state)).toEqual(builtIns)
+    expect(toHostSnapshot(state, T0, { includeAnswers: true }).quickMessages).toEqual(quickMessagesOf(state))
+  })
+
+  it('reads a game saved with the old separate lists as one list', () => {
+    const state = { ...game([tf('q1')]), quickMessages: { hidden: ['shortBreak'], own: [pizza] } }
+    expect(ids(state)).toEqual(['getReady', 'lastQuestion', 'm1'])
+    expect(ids(removeQuickMessage(state, 'getReady'))).toEqual(['lastQuestion', 'm1'])
+  })
+
+  it('adds an own message once, in any phase, and keeps it through a save', () => {
+    let state = addQuickMessage(game([tf('q1')]), pizza)
+    state = addQuickMessage(state, back)
+    expect(addQuickMessage(state, back)).toBe(state)
+    state = endGame(state, T0 + 1000)
+    state = addQuickMessage(state, { id: 'm3', text: 'Thanks!', durationSec: null })
+    expect(ids(state)).toEqual([...builtIns, 'm1', 'm2', 'm3'])
+    roundTrip(state)
+  })
+
+  it('refuses a message beyond the limit', () => {
+    let state: GameState = { ...game([tf('q1')]), quickMessages: [] }
+    for (let i = 0; i < MAX_QUICK_MESSAGES; i++) state = addQuickMessage(state, { id: `m${i}`, text: `Message ${i}`, durationSec: null })
+    expect(() => addQuickMessage(state, { id: 'mx', text: 'One more', durationSec: null })).toThrow(
+      new EngineError('errors.quickMessagesFull'),
+    )
+  })
+
+  it('removes any message, built-in or own, by id, in this game only', () => {
+    let state = addQuickMessage(addQuickMessage(game([tf('q1')]), pizza), back)
+    state = removeQuickMessage(state, 'm1')
+    state = removeQuickMessage(state, 'shortBreak')
+    expect(ids(state)).toEqual(['getReady', 'lastQuestion', 'm2'])
+    expect(removeQuickMessage(state, 'shortBreak')).toBe(state)
+    expect(removeQuickMessage(state, 'unknown')).toBe(state)
+  })
+
+  it("changes a message's own time, built-in or own, in this game only", () => {
+    let state = addQuickMessage(game([tf('q1')]), pizza)
+    state = setQuickMessageTime(state, 'getReady', 45)
+    state = setQuickMessageTime(state, 'm1', null)
+    expect(quickMessagesOf(state)[0]).toEqual({ id: 'getReady', builtIn: 'getReady', durationSec: 45 })
+    expect(quickMessagesOf(state).at(-1)).toEqual({ ...pizza, durationSec: null })
+    expect(setQuickMessageTime(state, 'm1', null)).toBe(state)
+    expect(setQuickMessageTime(state, 'unknown', 10)).toBe(state)
+    roundTrip(state)
+  })
+
+  it('goes to the host room only, never to the public screen', () => {
+    const state = addQuickMessage(game([tf('q1')]), pizza)
+    expect(toHostSnapshot(state, T0, { includeAnswers: true }).quickMessages!.at(-1)).toEqual(pizza)
+    expect(toHostSnapshot(state, T0).quickMessages).toBeNull()
+    expect(toPlayerSnapshot(state, 'p1', T0)).not.toHaveProperty('quickMessages')
   })
 })

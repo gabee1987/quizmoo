@@ -34,7 +34,7 @@ test('pause and resume, a message that clears itself, showing a question again',
     { type: 'truefalse', text: 'Cows say moo.', correct: true, timeLimitSec: 60 },
     { type: 'truefalse', text: 'Cows can fly.', correct: false, timeLimitSec: 60 },
   ]
-  const created = await page.request.post('/api/quizzes', { data: { title: `E2E host control ${Date.now()}`, questions } })
+  const created = await page.request.post('/api/quizzes', { data: { title: `E2E host control ${Date.now()}`, questions, settings: {} } })
   const { quiz } = (await created.json()) as { quiz: { id: string } }
   const { pin } = (await (await page.request.post('/api/games', { data: { quizId: quiz.id } })).json()) as { pin: string }
   const { gameId } = (await (await page.request.get(`/api/games/${pin}`)).json()) as { gameId: string }

@@ -12,6 +12,12 @@ const ALLOWED_MIME = new Set(['image/jpeg', 'image/png', 'image/webp'])
 /** The decoded content must match too: the declared mime type alone is client-controlled. */
 const ALLOWED_FORMATS = new Set(['jpeg', 'png', 'webp'])
 
+/** A logo must be an image the host uploaded themselves. */
+export async function ownsImage(db: Db, userId: string, imageId: string) {
+  const row = (await db.select({ ownerId: images.ownerId }).from(images).where(eq(images.id, imageId)))[0]
+  return row?.ownerId === userId
+}
+
 export async function imageRoutes(app: FastifyInstance, { db }: { db: Db }) {
   app.post('/api/images', { preHandler: requireSession(db) }, async (request, reply) => {
     const file = await request.file({ limits: { fileSize: MAX_IMAGE_BYTES, files: 1 } })

@@ -1,11 +1,16 @@
 import {
+  MAX_QUICK_MESSAGES,
   MAX_SCHEDULE_DAYS,
+  defaultQuickMessages,
   fallbackAvatar,
+  mergeLegacyQuickMessages,
   streakBonusFor,
   type Answer,
   type Avatar,
   type GameSettings,
+  type OwnQuickMessage,
   type Question,
+  type QuickMessage,
   type TeamAnswerMode,
 } from '@quizmoo/shared'
 import { isNameAllowed } from './names.js'
@@ -479,6 +484,38 @@ export function expireAnnouncement(state: GameState, id: string, now: number): G
 export function clearAnnouncement(state: GameState): GameState {
   if (!state.announcement) return state
   return { ...state, announcement: null }
+}
+
+/**
+ * This game's quick messages, in order. Games saved before they existed get the built-in ones;
+ * games saved while built-in and own messages were kept apart are read as one list.
+ */
+export function quickMessagesOf(state: GameState): QuickMessage[] {
+  const stored = state.quickMessages
+  if (!stored) return defaultQuickMessages()
+  return Array.isArray(stored) ? stored : mergeLegacyQuickMessages(stored.hidden, stored.own)
+}
+
+/** "Save to my messages": adds an own message to this game's quick messages. Adding the same id again changes nothing. */
+export function addQuickMessage(state: GameState, message: OwnQuickMessage): GameState {
+  const current = quickMessagesOf(state)
+  if (current.some((m) => m.id === message.id)) return state
+  if (current.length >= MAX_QUICK_MESSAGES) throw new EngineError('errors.quickMessagesFull')
+  return { ...state, quickMessages: [...current, message] }
+}
+
+/** Takes a quick message, built-in or own, out of this game only. */
+export function removeQuickMessage(state: GameState, id: string): GameState {
+  const current = quickMessagesOf(state)
+  if (!current.some((m) => m.id === id)) return state
+  return { ...state, quickMessages: current.filter((m) => m.id !== id) }
+}
+
+/** How long a quick message stays when sent with its own time (null: until cleared), in this game only. */
+export function setQuickMessageTime(state: GameState, id: string, durationSec: number | null): GameState {
+  const current = quickMessagesOf(state)
+  if (!current.some((m) => m.id === id && m.durationSec !== durationSec)) return state
+  return { ...state, quickMessages: current.map((m) => (m.id === id ? { ...m, durationSec } : m)) }
 }
 
 /**

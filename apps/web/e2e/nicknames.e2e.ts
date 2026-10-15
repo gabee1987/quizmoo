@@ -31,7 +31,7 @@ test('admin edits the Surprise me names and a phone gets one of them', async ({ 
   const original = ((await (await page.request.get('/api/nicknames')).json()) as { lists: { en: List } }).lists.en
   const { quiz } = (await (
     await page.request.post('/api/quizzes', {
-      data: { title: `E2E names ${Date.now()}`, questions: [{ type: 'truefalse', text: 'True?', correct: true }] },
+      data: { title: `E2E names ${Date.now()}`, questions: [{ type: 'truefalse', text: 'True?', correct: true }], settings: {} },
     })
   ).json()) as { quiz: { id: string } }
   const { pin } = (await (await page.request.post('/api/games', { data: { quizId: quiz.id } })).json()) as { pin: string }

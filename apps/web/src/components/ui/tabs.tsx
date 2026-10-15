@@ -69,7 +69,8 @@ function TabsContent({ className, ...props }: React.ComponentProps<typeof TabsPr
   return (
     <TabsPrimitive.Content
       data-slot="tabs-content"
-      className={cn('flex-1 outline-none', className)}
+      // A tab's content comes in with a soft wobble instead of blinking in.
+      className={cn('flex-1 outline-none data-[state=active]:animate-panel-swap', className)}
       {...props}
     />
   )

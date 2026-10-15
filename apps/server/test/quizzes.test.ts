@@ -1,6 +1,8 @@
 import { afterAll, beforeAll, expect, it } from 'vitest'
 import { createUser } from '../src/auth/users.js'
+import { eq } from 'drizzle-orm'
 import type { Db } from '../src/db/index.js'
+import { images, users } from '../src/db/schema.js'
 import { assignIds } from '../src/routes/quizzes.js'
 import { buildTestApp, sessionCookie } from './helpers/app.js'
 import { describeDb, withTestDb } from './helpers/test-db.js'
@@ -75,7 +77,7 @@ describeDb('quiz routes (database)', () => {
 
     const aliceList = (await req(alice, 'GET', '/api/quizzes')).json().quizzes
     expect(aliceList).toEqual([
-      { id: quiz.id, title: 'Test quiz', questionCount: 2, updatedAt: expect.any(String), settings: quiz.settings },
+      { id: quiz.id, title: 'Test quiz', questionCount: 2, updatedAt: expect.any(String), settings: quiz.settings, branding: quiz.branding },
     ])
     expect((await req(bob, 'GET', '/api/quizzes')).json().quizzes).toEqual([])
   })
@@ -237,5 +239,30 @@ describeDb('quiz routes (database)', () => {
     const body = res.json()
     expect(body.error).toBe('errors.invalidInput')
     expect(body.issues.length).toBeGreaterThan(0)
+  })
+
+  it("stores a quiz's branding with defaults, takes only an own image as its logo, and copies it on duplicate", async () => {
+    const userId = async (username: string) => (await db.select().from(users).where(eq(users.username, username)))[0]!.id
+    const image = (id: string, ownerId: string) => ({ id, ownerId, mime: 'image/webp', width: 1, height: 1, data: Buffer.from('x') })
+    await db.insert(images).values([image('quiz-logo-alice', await userId('test_alice')), image('quiz-logo-bob', await userId('test_bob'))])
+
+    const plain = (await req(alice, 'POST', '/api/quizzes', quizBody)).json().quiz
+    expect(plain.branding).toEqual({ show: true, logoImageId: null, eventName: '' })
+
+    const branding = { show: false, logoImageId: 'quiz-logo-alice', eventName: ' Quiz night ' }
+    const created = await req(alice, 'POST', '/api/quizzes', { ...quizBody, branding })
+    expect(created.statusCode).toBe(201)
+    const quiz = created.json().quiz
+    expect(quiz.branding).toEqual({ show: false, logoImageId: 'quiz-logo-alice', eventName: 'Quiz night' })
+    const listed = (await req(alice, 'GET', '/api/quizzes')).json().quizzes.find((q: { id: string }) => q.id === quiz.id)
+    expect(listed.branding).toEqual(quiz.branding)
+
+    for (const method of ['POST', 'PUT'] as const) {
+      const url = method === 'POST' ? '/api/quizzes' : `/api/quizzes/${quiz.id}`
+      const refused = await req(alice, method, url, { ...quizBody, branding: { logoImageId: 'quiz-logo-bob' } })
+      expect([refused.statusCode, refused.json().error]).toEqual([400, 'errors.invalidInput'])
+    }
+    const copy = (await req(alice, 'POST', `/api/quizzes/${quiz.id}/duplicate`, { title: 'Copy' })).json().quiz
+    expect(copy.branding).toEqual(quiz.branding)
   })
 })

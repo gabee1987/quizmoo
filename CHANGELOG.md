@@ -112,6 +112,24 @@
 - Join page scrolling on phones: tapping the PIN boxes brings the join card to the top of the screen, and once the game is found the page settles with the Quizmoo name at the top.
 - The start time is picked on the app's own calendar: a month grid that bubbles open with the same wobble as the buttons, hours and minutes in 24-hour style, all usable with the keyboard.
 
+### My settings
+- Every host account has a My settings page (in the navigation, where "Change password" was): quick messages, game defaults and the password change.
+- Quick messages are one list of up to 25: the built-in ones (in the app's language until their text is edited) and the host's own. Any of them can be edited, removed, timed (until cleared, 10, 30 or 60 s, or any 5 to 600 s) and reordered by dragging, with the keyboard or with the arrows; removed built-in ones can be brought back. One click in the message box sends a message with its own time, unless a time (now also a custom number of seconds) is picked first.
+- A game keeps the quick messages it was created with, also through a restart. "Save" next to Send adds the typed message to the host's messages and to the running game at once; "Edit" changes a quick message's time or takes it out of this game only.
+- Game defaults: new quizzes start with the host's usual game settings instead of the app's.
+- The settings are stored per host account, reachable only by that host, and deleted with the account.
+- Motion: the sidebar's highlight springs to the chosen page, toasts are as wide as the page's panels and bubble in and out, rows moved with the arrows or shortcuts slide past each other (quick messages, the editor's question list, the ordering question), tab panels, rows and the unsaved changes bar animate in and out instead of blinking, and panels spring to their new height. The settings tabs are bigger and coloured, and the unsaved changes bar stands apart from the page under it.
+- The quiz editor's settings on a phone use the full width, with a one-line summary in the header and the same space on both sides when a scrollbar shows.
+- Password fields (login, password change, new users) have an eye button on the right that shows the characters.
+- The new game dialog on a phone gives the settings about a third more height: a one-row header, and Now / Later next to Create game in one row (the X closes it). Its groups are pill tabs with icons like on My settings (the open one filled, on laptops too), a group changed for this game gets a dot, Now / Later is one sliding pill, and the custom colours' explanations open from an info button.
+- Joyful controls everywhere: dialog and sheet close buttons are round chunky buttons whose X turns on hover; switches sit on the primary edge with a springing thumb and a check; a radio's dot springs in when chosen and shrinks away quietly; pressing something that turns a choice off gets a soft dip instead of the wobble.
+- Game settings that come and go (team settings, the custom colours, the answer lock, help lines, the "Changed for this game" bar, the start time for Later) open and close smoothly, and what is below slides along instead of jumping.
+- Phones and tablets keep their own scrollbars (thin, hidden while not scrolling, taking no space); the styled scrollbar is for mouse devices.
+- Hosts land on a home page after logging in: a greeting, their figures (quizzes, games played, players), running games with "Back to the game", scheduled games, the recently edited quizzes with Play and the latest results. The quiz list moved to `/host/quizzes`; "Home" is the first item in the navigation, and on phones the admin pages (Users, Names) are in the Account menu.
+- Branding: a host uploads a logo and sets an event name on My settings. The new game dialog (Look) starts with the last event name used and has "Show my branding" and "Also on the phones"; the projector's lobby and podium then show the logo and the name, and the phones' lobby too when chosen. A game keeps its branding through a restart and in "Play again"; a logo can only be the host's own image and is deleted with the account.
+- Each quiz can have its own branding in its settings: a logo and an event name that replace the ones from My settings (left empty, My settings is used), or branding turned off, so its games show no logo or event name on the projector or the phones unless the host turns it on in the new game dialog.
+- The editor's quiz settings are split into tabs (General, Game flow, Look, Scoring, Branding), so only one group shows at a time.
+
 ### Development
 - The web dev server runs on port 15173, away from the 5173+ ports other local Vite projects take.
 - CI runs typecheck, tests and build only; the end-to-end suite runs locally before each pull request.

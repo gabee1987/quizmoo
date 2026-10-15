@@ -1,5 +1,6 @@
 import type { HostSnapshot, PlayerPublic } from '@quizmoo/shared'
 import { useTranslation } from 'react-i18next'
+import { BrandingMark } from '@/components/branding-mark'
 import { PlayerAvatar } from '../../components/player-avatar'
 import { QrCode } from '../../components/qr-code'
 
@@ -10,6 +11,7 @@ export function ScreenLobby({ host, joinUrl }: { host: HostSnapshot; joinUrl: st
     <div className="grid flex-1 items-center gap-10 lg:grid-cols-[auto_1fr]">
       {joinUrl && <QrCode value={joinUrl} className="mx-auto w-[min(60vh,80vw)] animate-pop" />}
       <div className="flex flex-col gap-6">
+        {host.branding && <BrandingMark branding={host.branding} size="lobby" />}
         <p className="text-3xl font-semibold text-muted-foreground wrap-break-word">{host.quizTitle}</p>
         <div className="animate-fade-up">
           <p className="text-3xl">{t('screen.joinAt')}</p>

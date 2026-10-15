@@ -351,6 +351,8 @@
   --animate-panel-in: panel-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
   --animate-dialog-pop: dialog-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
   --animate-bubble-pop: bubble-pop 0.6s ease-out both;
+  --animate-pop-out: pop-out 0.32s ease-in both;
+  --animate-panel-swap: panel-swap 0.5s var(--ease-spring) both;
 
   /* Menus and select lists spring open from their trigger (transform-origin is set by Radix). */
   @keyframes menu-pop {
@@ -429,6 +431,36 @@
       opacity: 0;
     }
     to {
+      transform: none;
+      opacity: 1;
+    }
+  }
+  /* The way out of `pop`: a little swell, then it shrinks away. */
+  @keyframes pop-out {
+    0% {
+      transform: none;
+      opacity: 1;
+    }
+    30% {
+      transform: scale(1.04, 0.94);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(0.6);
+      opacity: 0;
+    }
+  }
+  /* New content in a panel (a tab, a section that changed): rises in with a soft wobble. */
+  @keyframes panel-swap {
+    0% {
+      transform: translateY(10px) scale(0.985, 0.97);
+      opacity: 0;
+    }
+    55% {
+      transform: translateY(-2px) scale(1.005, 1.01);
+      opacity: 1;
+    }
+    100% {
       transform: none;
       opacity: 1;
     }
@@ -592,35 +624,39 @@
  * fully coloured while dragged. WebKit/Blink get the full shape; Firefox, which has no scrollbar
  * pseudo-elements, the thin coloured variant. (Chrome ignores the ::-webkit rules on any element
  * with scrollbar-color set, hence the @supports split.)
+ * Mouse devices only: styling ::-webkit-scrollbar turns a phone's overlay scrollbar (thin, hidden
+ * while not scrolling, no space taken) into a classic one that eats 14 px on the right.
  */
-@supports not selector(::-webkit-scrollbar) {
-  * {
-    scrollbar-width: thin;
-    scrollbar-color: color-mix(in oklch, var(--primary) 45%, transparent) transparent;
+@media (hover: hover) and (pointer: fine) {
+  @supports not selector(::-webkit-scrollbar) {
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: color-mix(in oklch, var(--primary) 45%, transparent) transparent;
+    }
   }
-}
-::-webkit-scrollbar {
-  width: 14px;
-  height: 14px;
-}
-::-webkit-scrollbar-track,
-::-webkit-scrollbar-corner {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  min-height: 48px;
-  border: 4px solid transparent;
-  border-radius: 999px;
-  background-color: color-mix(in oklch, var(--primary) 38%, transparent);
-  background-clip: padding-box;
-}
-::-webkit-scrollbar-thumb:hover {
-  border-width: 3px;
-  background-color: color-mix(in oklch, var(--primary) 62%, transparent);
-}
-::-webkit-scrollbar-thumb:active {
-  border-width: 2px;
-  background-color: var(--primary);
+  ::-webkit-scrollbar {
+    width: 14px;
+    height: 14px;
+  }
+  ::-webkit-scrollbar-track,
+  ::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    min-height: 48px;
+    border: 4px solid transparent;
+    border-radius: 999px;
+    background-color: color-mix(in oklch, var(--primary) 38%, transparent);
+    background-clip: padding-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    border-width: 3px;
+    background-color: color-mix(in oklch, var(--primary) 62%, transparent);
+  }
+  ::-webkit-scrollbar-thumb:active {
+    border-width: 2px;
+    background-color: var(--primary);
+  }
 }
 
 /*
@@ -641,6 +677,50 @@
     opacity 300ms,
     height 400ms,
     box-shadow 200ms;
+}
+/*
+ * From sm up, as wide as the page's panels (max-w-3xl, Sonner sets its 356 px inline); still the
+ * full width on phones. Beside the host sidebar (w-60 plus a gap-8) the page's column is centred
+ * 136 px right of the window's centre, and so are the toasts.
+ */
+@media (min-width: 640px) {
+  .toaster {
+    --width: min(48rem, calc(100vw - 2rem)) !important;
+  }
+}
+@media (min-width: 1024px) {
+  body:has([data-host-sidebar]) .toaster[data-x-position='center'] {
+    --width: min(48rem, calc(100vw - 2rem - 272px)) !important;
+    left: calc(50% + 136px) !important;
+  }
+}
+/*
+ * Toasts fall in like the host's messages and wobble back up when they go. `backwards`, not
+ * `both`: once it lands, Sonner's own transform stacks the toasts again. Sonner keeps a closing
+ * toast for 200 ms, which is all the way out gets.
+ */
+.toaster [data-sonner-toast][data-mounted='true']:not([data-removed='true']) {
+  --note-fly: -120px;
+  transform-origin: 50% 0;
+  animation: note-in 0.7s ease-out backwards;
+}
+.toaster [data-sonner-toast][data-removed='true'][data-swipe-out='false'] {
+  transform-origin: 50% 0;
+  animation: toast-out 0.2s ease-in both;
+}
+@keyframes toast-out {
+  0% {
+    transform: none;
+    opacity: 1;
+  }
+  40% {
+    transform: translateY(3px) scale(1, 0.84);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-48px) scale(0.84, 1.16);
+    opacity: 0;
+  }
 }
 .note-success,
 .toaster [data-sonner-toast][data-type='success'] {

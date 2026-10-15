@@ -4,7 +4,13 @@ import i18next from 'i18next'
 import { XIcon } from 'lucide-react'
 import { Dialog as DialogPrimitive } from 'radix-ui'
 
-import { Button } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
+
+/** The X of dialogs and sheets: a round chunky button like the others, the cross turns on hover. */
+export const closeButtonClass = cn(
+  buttonVariants({ variant: 'secondary', size: 'icon-sm' }),
+  'absolute top-3 right-3 rounded-full [&_svg]:size-5! hover:[&_svg]:scale-110 hover:[&_svg]:rotate-90 [&_svg]:duration-300 [&_svg]:ease-spring',
+)
 
 function Dialog({ ...props }: React.ComponentProps<typeof DialogPrimitive.Root>) {
   return <DialogPrimitive.Root data-slot="dialog" {...props} />
@@ -59,10 +65,7 @@ function DialogContent({
       >
         {children}
         {showCloseButton && (
-          <DialogPrimitive.Close
-            data-slot="dialog-close"
-            className="absolute top-3 right-3 flex size-10 items-center justify-center rounded-lg opacity-70 ring-offset-background transition-opacity hover:bg-muted hover:opacity-100 focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:outline-hidden disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
-          >
+          <DialogPrimitive.Close data-slot="dialog-close" className={closeButtonClass}>
             <XIcon />
             <span className="sr-only">{i18next.t('common.close')}</span>
           </DialogPrimitive.Close>

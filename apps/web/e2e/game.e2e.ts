@@ -28,6 +28,14 @@ async function phone(browser: Browser, who: string) {
   return page
 }
 
+// The quiz is built in the editor, so it would start with the host's own game defaults (My
+// settings): they are switched off for the run and put back afterwards, also after a failure.
+let hostSettings: object | null = null
+test.afterEach(async ({ page }) => {
+  if (hostSettings) await page.request.put('/api/me/settings', { data: hostSettings })
+  hostSettings = null
+})
+
 test('host builds a quiz, three phones play it with a reload mid-question, results add up', async ({ browser, page }) => {
   test.skip(!username || !password, 'Set E2E_USERNAME and E2E_PASSWORD to a host account')
   watch(page, 'host')
@@ -40,6 +48,8 @@ test('host builds a quiz, three phones play it with a reload mid-question, resul
     await page.getByLabel('Password', { exact: true }).fill(password!)
     await page.getByRole('button', { name: 'Log in' }).click()
     await expect(page).toHaveURL(/\/host$/)
+    hostSettings = (await (await page.request.get('/api/me/settings')).json()).settings as object
+    await page.request.put('/api/me/settings', { data: { ...hostSettings, gameDefaults: null } })
   })
 
   await test.step('host builds a quiz with three questions', async () => {
@@ -71,11 +81,17 @@ test('host builds a quiz, three phones play it with a reload mid-question, resul
   })
 
   const pin = await test.step('host starts a game', async () => {
-    await page.goto('/host')
+    await page.goto('/host/quizzes')
     await page.locator('li').filter({ hasText: title }).getByRole('button', { name: 'Play' }).click()
     await page.getByRole('dialog').getByRole('button', { name: 'Create game' }).click()
     await expect(page).toHaveURL(/\/host\/games\/\d{6}$/)
-    return page.url().split('/').pop()!
+    const pin = page.url().split('/').pop()!
+    // The home page leads back to the running game.
+    await page.goto('/host')
+    const running = page.locator('section').filter({ hasText: 'Running now' }).getByRole('listitem').filter({ hasText: title })
+    await running.getByRole('link', { name: 'Back to the game' }).click()
+    await expect(page).toHaveURL(new RegExp(`/host/games/${pin}$`))
+    return pin
   })
 
   const projector = await browser.newPage({ viewport: { width: 1920, height: 1080 }, locale: 'en-US' })

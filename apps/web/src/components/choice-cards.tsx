@@ -1,5 +1,6 @@
-import { useId, type ReactNode } from 'react'
+import { useId, useRef, type ReactNode } from 'react'
 import { cn } from '@/lib/cn'
+import { Collapse } from '@/components/collapse'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 
 export interface Choice<T extends string> {
@@ -29,6 +30,8 @@ export function ChoiceCards<T extends string>({
   columns?: 1 | 2
 }) {
   const id = useId()
+  const lastHelp = useRef(help)
+  if (help) lastHelp.current = help
   return (
     // Two columns when the fieldset itself is wide enough (a container query), so the cards also fit narrow panels.
     <fieldset className="@container flex flex-col gap-2" disabled={disabled}>
@@ -63,7 +66,10 @@ export function ChoiceCards<T extends string>({
           </label>
         ))}
       </RadioGroup>
-      {help && <p className="text-sm text-muted-foreground">{help}</p>}
+      {/* Help that comes and goes with the choice opens smoothly and keeps its text while closing. */}
+      <Collapse open={!!help} className="-mt-2" innerClassName="pt-2">
+        <p className="text-sm text-muted-foreground">{lastHelp.current}</p>
+      </Collapse>
     </fieldset>
   )
 }

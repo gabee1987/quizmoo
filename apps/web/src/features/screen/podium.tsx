@@ -2,6 +2,7 @@ import type { HostSnapshot } from '@quizmoo/shared'
 import { CrownIcon } from 'lucide-react'
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import { BrandingMark } from '@/components/branding-mark'
 import { cn } from '@/lib/cn'
 import { CountUp } from '../../components/count-up'
 import { PlayerAvatar } from '../../components/player-avatar'
@@ -43,6 +44,7 @@ export function ScreenPodium({ host }: { host: HostSnapshot }) {
   const runnersUp = places.filter((p) => p.rank > 3).slice(0, 7)
   return (
     <div className="flex flex-1 flex-col gap-8">
+      {host.branding && <BrandingMark branding={host.branding} size="podium" />}
       <h1 className="animate-pop text-center text-6xl font-black">{t('play.gameOver')}</h1>
       <PodiumStage places={places} />
       {runnersUp.length > 0 && (

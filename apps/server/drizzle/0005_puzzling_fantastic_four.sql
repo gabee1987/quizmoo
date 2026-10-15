@@ -1,0 +1,1 @@
+ALTER TABLE "quizzes" ADD COLUMN "branding" jsonb DEFAULT '{}'::jsonb NOT NULL;

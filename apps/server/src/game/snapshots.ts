@@ -1,6 +1,7 @@
 import {
   fallbackAvatar,
   type Answer,
+  type BrandingPublic,
   type CurrentAnswer,
   type GameSnapshotBase,
   type HostSnapshot,
@@ -17,7 +18,7 @@ import {
 } from '@quizmoo/shared'
 import { normalise } from './normalise.js'
 import { displayOrder } from './order.js'
-import { answersHidden, resultsPendingFor } from './engine.js'
+import { answersHidden, quickMessagesOf, resultsPendingFor } from './engine.js'
 import { denseRank } from './scoring.js'
 import {
   answersAsOne,
@@ -82,6 +83,7 @@ export function toHostSnapshot(state: GameState, now: number, { includeAnswers =
     live: includeAnswers && state.phase === 'question' && question ? revealInfo(state, question) : null,
     playersWaiting: includeAnswers && resultsPendingFor(state, 'players'),
     teamAnswers: includeAnswers ? teamAnswers(state, base.questionIndex) : null,
+    quickMessages: includeAnswers ? quickMessagesOf(state) : null,
   }
 }
 
@@ -287,7 +289,15 @@ function baseSnapshot(state: GameState, now: number, audience: ResultsAudience, 
     announcement: state.announcement ?? null,
     nextPin: state.nextPin ?? null,
     scheduledAt: state.scheduledAt ?? null,
+    branding: brandingFor(state, audience),
   }
+}
+
+/** The game's branding for the projector, and for the phones only when the host chose to show it there. */
+function brandingFor(state: GameState, audience: ResultsAudience): BrandingPublic | null {
+  const branding = state.branding
+  if (!branding || (audience === 'players' && !branding.onPhones)) return null
+  return { logoImageId: branding.logoImageId, eventName: branding.eventName }
 }
 
 function rankLookup(items: { id: string; name: string; score: number }[]): Map<string, number> {

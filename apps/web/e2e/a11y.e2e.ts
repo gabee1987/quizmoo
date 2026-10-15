@@ -39,6 +39,7 @@ async function expectAccessible(page: Page, name: string) {
 
 const quizBody = (title: string) => ({
   title,
+  settings: {},
   questions: [
     {
       id: 'q1',
@@ -54,7 +55,7 @@ const quizBody = (title: string) => ({
 })
 
 for (const mode of modes) {
-  test(`login, join, quiz list, phone lobby and projector lobby are accessible in ${mode} mode`, async ({ browser }) => {
+  test(`login, join, host home, quiz list, phone lobby and projector lobby are accessible in ${mode} mode`, async ({ browser }) => {
     test.skip(!username || !password, 'Set E2E_USERNAME and E2E_PASSWORD to a host account')
 
     const host = await newPage(browser, mode, { width: 1280, height: 800 })
@@ -74,6 +75,9 @@ for (const mode of modes) {
     let pin: string | null = null
     try {
       await host.reload()
+      await expect(host.getByText(title)).toBeVisible()
+      await expectAccessible(host, 'host home')
+      await host.goto('/host/quizzes')
       await expect(host.getByText(title)).toBeVisible()
       await expectAccessible(host, 'quiz list')
 

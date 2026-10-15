@@ -17,6 +17,7 @@ import { SESSION_COOKIE, verifySession } from '../auth/session.js'
 import type { Db } from '../db/index.js'
 import {
   EngineError,
+  addQuickMessage,
   allAnswered,
   announce,
   clearAnnouncement,
@@ -33,6 +34,8 @@ import {
   openJoining,
   pause,
   releaseResults,
+  removeQuickMessage,
+  setQuickMessageTime,
   resume,
   schedule,
   setCaptain,
@@ -313,6 +316,12 @@ function runHostCommand(state: GameState, command: HostCommand, now: number): Ga
       return announce(state, { id: nanoid(8), text: command.text, durationSec: command.durationSec }, now)
     case 'clearAnnouncement':
       return clearAnnouncement(state)
+    case 'addQuickMessage':
+      return addQuickMessage(state, command.message)
+    case 'removeQuickMessage':
+      return removeQuickMessage(state, command.id)
+    case 'setQuickMessageTime':
+      return setQuickMessageTime(state, command.id, command.durationSec)
     case 'pause':
       return pause(state, now)
     case 'resume':

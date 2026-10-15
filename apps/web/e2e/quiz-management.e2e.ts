@@ -40,7 +40,7 @@ test('host batch edits and batch deletes quizzes, and deletes one from the edito
         })
         ids.push(((await res.json()) as { quiz: { id: string } }).quiz.id)
       }
-      await page.reload()
+      await page.goto('/host/quizzes')
       await page.getByLabel('Search quizzes').fill(prefix)
       await expect(page.getByRole('listitem')).toHaveCount(3)
     })
@@ -101,7 +101,7 @@ test('host batch edits and batch deletes quizzes, and deletes one from the edito
       await page.getByRole('button', { name: 'Settings' }).click()
       await page.getByRole('button', { name: 'Delete quiz' }).click()
       await page.getByRole('dialog', { name: 'Delete this quiz?' }).getByRole('button', { name: 'Delete' }).click()
-      await expect(page).toHaveURL(/\/host$/)
+      await expect(page).toHaveURL(/\/host\/quizzes$/)
       expect(await status(ids[2]!)).toBe(404)
     })
 
