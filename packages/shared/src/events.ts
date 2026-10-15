@@ -2,7 +2,7 @@ import { z } from 'zod'
 import { MAX_PLAYERS, announcementDurationSchema, announcementTextSchema, answerSchema, avatarSchema, scheduledAtSchema } from './game.js'
 import type { HostSnapshot, PlayerSnapshot } from './game.js'
 import { ownQuickMessageSchema } from './host.js'
-import { teamAnswerModes } from './quiz.js'
+import { teamAnswerModes, teamNameSchema } from './quiz.js'
 
 // ---- Client -> server payloads (validated with zod on the server) --------
 
@@ -19,6 +19,8 @@ export const playerJoinSchema = z.object({
   pin: pinSchema,
   name: playerNameSchema,
   teamId: z.string().min(1).optional(),
+  /** Team mode, when players may create teams: a new team with this name instead of `teamId`; the player becomes its captain. */
+  newTeamName: teamNameSchema.optional(),
   /** Chosen on the join page; a rejoin with a token keeps the stored one. */
   avatar: avatarSchema.optional(),
   /** Token from a previous join, used to reclaim the same player after a reconnect. */
@@ -36,9 +38,16 @@ export type PlayerAnswer = z.infer<typeof playerAnswerSchema>
 export const playerTeamModeSchema = z.object({ mode: z.enum(teamAnswerModes) })
 export type PlayerTeamMode = z.infer<typeof playerTeamModeSchema>
 
-/** A captain passes the captaincy to a teammate in the lobby. */
+/** A captain passes the captaincy to a teammate, at any point of the game. */
 export const playerCaptainSchema = z.object({ playerId: z.string().min(1) })
 export type PlayerCaptain = z.infer<typeof playerCaptainSchema>
+
+/** A player without a team (the host removed theirs) picks one in the lobby, or creates one when players may. */
+export const playerTeamSchema = z.union([
+  z.object({ teamId: z.string().min(1) }),
+  z.object({ newTeamName: teamNameSchema }),
+])
+export type PlayerTeam = z.infer<typeof playerTeamSchema>
 
 export const hostCommandSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('start') }),
@@ -54,8 +63,15 @@ export const hostCommandSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('kick'), playerId: z.string().min(1) }),
   /** Team mode, in the lobby or between questions: a team's answer mode, or every team's without `teamId`. */
   z.object({ type: z.literal('teamMode'), mode: z.enum(teamAnswerModes), teamId: z.string().min(1).optional() }),
-  /** Lobby, team mode: makes the player their team's captain. */
+  /** Team mode, any time before the end: makes the player their team's captain. */
   z.object({ type: z.literal('captain'), playerId: z.string().min(1) }),
+  /** Team mode, in the lobby or between questions: a new, empty team. */
+  z.object({ type: z.literal('createTeam'), name: teamNameSchema }),
+  z.object({ type: z.literal('renameTeam'), teamId: z.string().min(1), name: teamNameSchema }),
+  /** Lobby only: its players pick another team on their phones. */
+  z.object({ type: z.literal('removeTeam'), teamId: z.string().min(1) }),
+  /** Team mode, in the lobby or between questions: the player plays for `teamId` from the next question. */
+  z.object({ type: z.literal('movePlayer'), playerId: z.string().min(1), teamId: z.string().min(1) }),
   /** Host grading of a text question without accepted answers: listed players are correct. */
   z.object({ type: z.literal('gradeText'), correctPlayerIds: z.array(z.string().min(1)).max(MAX_PLAYERS) }),
   z.object({ type: z.literal('end') }),
@@ -103,6 +119,7 @@ export interface ClientToServerEvents {
   'player:confirmTeamAnswer': (data: PlayerAnswer, ack: (res: { ok: true } | ErrorPayload) => void) => void
   'player:teamMode': (data: PlayerTeamMode, ack: (res: { ok: true } | ErrorPayload) => void) => void
   'player:captain': (data: PlayerCaptain, ack: (res: { ok: true } | ErrorPayload) => void) => void
+  'player:team': (data: PlayerTeam, ack: (res: { ok: true } | ErrorPayload) => void) => void
   'host:attach': (data: { pin: string }, ack: (res: { ok: true } | ErrorPayload) => void) => void
   'host:command': (data: HostCommand, ack: (res: { ok: true } | ErrorPayload) => void) => void
   'screen:attach': (data: { pin: string }, ack: (res: { ok: true } | ErrorPayload) => void) => void

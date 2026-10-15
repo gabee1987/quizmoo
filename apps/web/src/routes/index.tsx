@@ -7,13 +7,13 @@ import { useTranslation } from 'react-i18next'
 import { z } from 'zod'
 import { AddToCalendarButton } from '@/components/add-to-calendar-button'
 import { AvatarPicker } from '@/components/avatar-picker'
-import { ChoiceCards } from '@/components/choice-cards'
 import { FloatingShapes } from '@/components/floating-shapes'
 import { FormAlert } from '@/components/form-alert'
 import { HomeHero } from '@/components/home-hero'
 import { PinInput } from '@/components/pin-input'
 import { Button } from '@/components/ui/button'
 import { TextField } from '../components/text-field'
+import { TeamPicker, teamChoice } from '../features/join/team-picker'
 import { useTimeReached } from '@/lib/clock'
 import { formatStart } from '@/lib/schedule'
 import { apiFetch, errorCode } from '../lib/api'
@@ -44,6 +44,7 @@ function JoinPage() {
   const [name, setName] = useState('')
   const [avatar, setAvatar] = useState<Avatar>(() => randomAvatar())
   const [teamId, setTeamId] = useState<string | null>(null)
+  const [newTeamName, setNewTeamName] = useState('')
   const [submitted, setSubmitted] = useState(false)
   const [pending, setPending] = useState(false)
   const [scanning, setScanning] = useState(false)
@@ -57,9 +58,11 @@ function JoinPage() {
     enabled: pinValid,
     retry: false,
     // Waiting for a scheduled game: notice when the host opens it early or moves the time.
+    // A team game: teams other players create (and their member counts) show up while choosing.
     refetchInterval: (query) => {
       const data = query.state.data
-      return data?.scheduledAt && data.scheduledAt > data.serverNow ? 30_000 : false
+      if (data?.scheduledAt && data.scheduledAt > data.serverNow) return 30_000
+      return data?.mode === 'team' ? 5_000 : false
     },
   })
   const game = info.data
@@ -154,7 +157,8 @@ function JoinPage() {
     if (document.activeElement instanceof HTMLElement) document.activeElement.blur()
   }
   const nameError = submitted && !name.trim() ? t('join.nameRequired') : undefined
-  const teamError = submitted && teamMode && !teamId ? t('errors.unknownTeam') : undefined
+  const team = teamChoice(teamId ?? '', newTeamName)
+  const teamError = submitted && teamMode && !team ? t(teamId ? 'join.newTeamNameRequired' : 'errors.unknownTeam') : undefined
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault()
@@ -163,7 +167,7 @@ function JoinPage() {
     if (waiting) return
     setSubmitted(true)
     setError(null)
-    if (!pinValid || !name.trim() || (teamMode && !teamId)) return
+    if (!pinValid || !name.trim() || (teamMode && !team)) return
     setPending(true)
     try {
       await ensureConnected()
@@ -173,7 +177,7 @@ function JoinPage() {
         pin,
         name: name.trim(),
         avatar,
-        ...(teamMode && teamId ? { teamId } : {}),
+        ...(teamMode && team ? team : {}),
         ...(stored ? { token: stored.token } : {}),
       })
       if ('error' in res) {
@@ -293,13 +297,14 @@ function JoinPage() {
               </Button>
               <AvatarPicker value={avatar} onChange={setAvatar} />
               {teamMode && (
-                <ChoiceCards
-                  legend={t('join.team')}
-                  value={teamId ?? ''}
-                  columns={1}
-                  choices={game.teams.map((team) => ({ value: team.id, label: team.name }))}
-                  onChange={setTeamId}
-                  help={teamError && <span className="font-semibold text-destructive">{teamError}</span>}
+                <TeamPicker
+                  teams={game.teams}
+                  newTeams={game.newTeams}
+                  selected={teamId ?? ''}
+                  newName={newTeamName}
+                  onSelect={setTeamId}
+                  onNewName={setNewTeamName}
+                  error={teamError && <span className="font-semibold text-destructive">{teamError}</span>}
                 />
               )}
               {error && <FormAlert>{t(error)}</FormAlert>}

@@ -1,7 +1,9 @@
 import {
+  MAX_TEAMS,
   brandingChoiceSchema,
-  gameSettingsSchema,
+  newGameSettingsSchema,
   pinSchema,
+  playersCreateTeams,
   scheduledAtSchema,
   type GameBranding,
   type GameHostInfo,
@@ -23,7 +25,7 @@ import { parseQuizBranding } from './quizzes.js'
 const createGameSchema = z.object({
   quizId: z.string().min(1),
   /** Overrides for this game; without them the quiz's own settings apply. */
-  settings: gameSettingsSchema.optional(),
+  settings: newGameSettingsSchema.optional(),
   /** "Start later": the PIN is reserved now and joining opens at this time. */
   scheduledAt: scheduledAtSchema.optional(),
   /** The new game dialog's branding choice; without it the game has no branding. */
@@ -45,8 +47,8 @@ export async function gameRoutes(app: FastifyInstance, { db, manager, appOrigin 
     const quiz = (await db.select().from(quizzes).where(eq(quizzes.id, body.quizId)))[0]
     if (!quiz) return reply.code(404).send({ error: 'errors.notFound' })
     if (quiz.ownerId !== request.user!.id) return reply.code(403).send({ error: 'errors.forbidden' })
-    // Quiz settings are validated on save, but parse again so fields added later get defaults.
-    const quizSettings = gameSettingsSchema.safeParse(quiz.settings)
+    // Parsed again so fields added later get defaults; a team quiz still needs its teams for a game.
+    const quizSettings = newGameSettingsSchema.safeParse(quiz.settings)
     const settings = body.settings ?? (quizSettings.success ? quizSettings.data : null)
     if (!settings) return reply.code(400).send({ error: 'errors.invalidInput' })
 
@@ -100,6 +102,8 @@ export async function gameRoutes(app: FastifyInstance, { db, manager, appOrigin 
       quizId: old.quizId,
       quickMessages: quickMessagesOf(old.state),
       branding: old.state.branding ?? null,
+      // The same teams, so players rejoin theirs (the phones keep the team id).
+      teams: Object.values(old.state.teams).map((t) => ({ id: t.id, name: t.name, byPlayer: t.byPlayer })),
     })
     manager.apply(old.state.pin, (state) => setNextGame(state, game.state.pin))
     return reply.code(201).send({ pin: game.state.pin })
@@ -126,11 +130,17 @@ export async function gameRoutes(app: FastifyInstance, { db, manager, appOrigin 
     const game = pinSchema.safeParse(request.params.pin).success ? manager.get(request.params.pin) : undefined
     if (!game) return reply.code(404).send({ error: 'errors.gameNotFound' })
     const { state } = game
+    const teams = Object.values(state.teams)
     const info: GamePublicInfo = {
       quizTitle: state.quiz.title,
       mode: state.settings.mode,
       phase: state.phase,
-      teams: Object.values(state.teams).map((t) => ({ id: t.id, name: t.name })),
+      teams: teams.map((t) => ({
+        id: t.id,
+        name: t.name,
+        memberCount: Object.values(state.players).filter((p) => p.teamId === t.id).length,
+      })),
+      newTeams: state.settings.mode === 'team' && playersCreateTeams(state.settings.teamSetup) && teams.length < MAX_TEAMS,
       joinUrl: `${appOrigin}/?pin=${state.pin}`,
       scheduledAt: state.scheduledAt ?? null,
       serverNow: Date.now(),

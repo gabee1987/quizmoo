@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { BrandingMark } from '@/components/branding-mark'
 import { PlayerAvatar } from '../../components/player-avatar'
 import { WaitingDots } from '../../components/waiting-dots'
+import { PickTeam } from './pick-team'
 import { TeamCard } from './team-card'
 
 export function Lobby({ snapshot }: { snapshot: PlayerSnapshot }) {
@@ -20,6 +21,7 @@ export function Lobby({ snapshot }: { snapshot: PlayerSnapshot }) {
         )}
       </div>
       {team && <TeamCard snapshot={snapshot} team={team} />}
+      {snapshot.mode === 'team' && !snapshot.me.teamId && <PickTeam snapshot={snapshot} />}
       <p className="flex items-center gap-2 font-semibold text-muted-foreground">
         {t('play.waitingForHost')}
         <WaitingDots />

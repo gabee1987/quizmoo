@@ -581,6 +581,64 @@ describeDb('sockets (database)', () => {
     expect(reveal.reveal!.answeredCount).toBe(4)
   })
 
+  it('flexible teams: players create and join teams, the host moves and removes, a latecomer joins the running game', async () => {
+    const pin = await newGame({ mode: 'team', teamSetup: 'both', teamNames: ['Red'], lateJoin: true, teamAnswer: 'captain' })
+    const hostSocket = await host(pin)
+    async function join(name: string, team: object) {
+      const socket = await connect()
+      const snapshot = nextSnapshot<PlayerSnapshot>(socket, 'game:player')
+      const ack = await socket.emitWithAck('player:join', { pin, name, ...team })
+      const joined = 'token' in ack ? await snapshot : null
+      return { socket, ack, joined, me: joined?.me ?? null }
+    }
+    const anna = await join('Anna', { newTeamName: 'Kockák' })
+    expect(anna.ack).toEqual({ token: expect.any(String) })
+    const kockak = anna.me!.teamId!
+    expect((await join('Ugyanaz', { newTeamName: ' kockák ' })).ack).toEqual({ error: 'errors.teamNameTaken' })
+    expect((await join('Csúnya', { newTeamName: 'Kurva' })).ack).toEqual({ error: 'errors.teamNameNotAllowed' })
+    expect((await join('Üres', { newTeamName: '  ' })).ack).toEqual({ error: 'errors.invalidInput' })
+    const bence = await join('Bence', { teamId: kockak })
+    const cecil = await join('Cecil', { teamId: 'team-1' })
+    expect(bence.me!.teamId).toBe(kockak)
+
+    // The host removes Red: Cecil picks again, the game waits for him.
+    const removed = nextSnapshot<PlayerSnapshot>(cecil.socket, 'game:player', (s) => s.me.teamId === null)
+    expect(await command(hostSocket, { type: 'removeTeam', teamId: 'team-1' })).toEqual({ ok: true })
+    await removed
+    expect(await command(hostSocket, { type: 'start' })).toEqual({ error: 'errors.playersWithoutTeam' })
+    expect(await bence.socket.emitWithAck('player:team', { teamId: kockak })).toEqual({ error: 'errors.invalidTransition' })
+    const picked = nextSnapshot<PlayerSnapshot>(cecil.socket, 'game:player', (s) => s.me.teamId !== null)
+    expect(await cecil.socket.emitWithAck('player:team', { newTeamName: 'Solo' })).toEqual({ ok: true })
+    const solo = (await picked).me.teamId!
+
+    expect(await command(hostSocket, { type: 'renameTeam', teamId: solo, name: 'Magányos farkas' })).toEqual({ ok: true })
+    expect(await command(hostSocket, { type: 'createTeam', name: 'kockák' })).toEqual({ error: 'errors.teamNameTaken' })
+    const moved = nextSnapshot<PlayerSnapshot>(bence.socket, 'game:player', (s) => s.me.teamId === solo)
+    expect(await command(hostSocket, { type: 'movePlayer', playerId: bence.me!.id, teamId: solo })).toEqual({ ok: true })
+    const after = await moved
+    expect(after.teams.find((t) => t.id === solo)).toMatchObject({ name: 'Magányos farkas', memberCount: 2 })
+
+    const question = nextSnapshot<PlayerSnapshot>(anna.socket, 'game:player', (s) => s.phase === 'question')
+    expect(await command(hostSocket, { type: 'start' })).toEqual({ ok: true })
+    await question
+    expect(await command(hostSocket, { type: 'movePlayer', playerId: bence.me!.id, teamId: kockak })).toEqual({
+      error: 'errors.invalidTransition',
+    })
+    // Cecil passes the crown during the question; Bence confirms at once.
+    expect(await cecil.socket.emitWithAck('player:captain', { playerId: bence.me!.id })).toEqual({ ok: true })
+
+    const dora = await join('Dóra', { teamId: kockak })
+    expect(dora.ack).toEqual({ token: expect.any(String) })
+    const live = dora.joined!
+    expect([live.phase, live.me.teamId]).toEqual(['question', kockak])
+    expect(await dora.socket.emitWithAck('player:answer', { questionId: live.question!.id, answer: { type: 'single', optionId: 'a' } })).toEqual({
+      ok: true,
+    })
+    expect(await bence.socket.emitWithAck('player:confirmTeamAnswer', { questionId: live.question!.id, answer: { type: 'single', optionId: 'a' } })).toEqual({
+      ok: true,
+    })
+  })
+
   it('a token reclaims the same player with its score after a disconnect', async () => {
     const pin = await newGame()
     const hostSocket = await host(pin)

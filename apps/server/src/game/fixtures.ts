@@ -59,6 +59,8 @@ export function fixtureSettings(overrides: Partial<GameSettings> = {}): GameSett
     answerLockSec: 0,
     shuffleOptions: false,
     teamNames: [],
+    teamSetup: 'host',
+    lateJoin: false,
     teamAnswer: 'average',
     teamsChoose: false,
     revealAnswers: 'afterQuestion',

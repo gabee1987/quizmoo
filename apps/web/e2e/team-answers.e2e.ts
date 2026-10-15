@@ -83,7 +83,8 @@ test('teams choose: the captain decides, a majority vote, and the fallback', asy
       const p = await phone(browser, name)
       await p.goto(`/?pin=${pin}`)
       await p.getByLabel('Your name').fill(name)
-      await p.getByRole('radio', { name: team, exact: true }).click()
+      // The card also says how many have joined ("Red, 2 players").
+      await p.getByRole('radio', { name: new RegExp(`^${team}\\b`) }).click()
       await p.getByRole('button', { name: 'Join' }).click()
       await expect(p.getByText(/You.re in/)).toBeVisible()
       players[name] = p

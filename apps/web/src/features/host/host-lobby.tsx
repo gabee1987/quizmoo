@@ -6,7 +6,7 @@ import { QrCode } from '@/components/qr-code'
 import { Button } from '@/components/ui/button'
 import { useTimeReached } from '@/lib/clock'
 import { openProjector } from '@/lib/projector'
-import { LobbyPlayers } from './lobby-players'
+import { LobbyPlayers, teamActions } from './lobby-players'
 import { MessageBox } from './message-box'
 import { RoundTripBadge } from './round-trip-badge'
 import { ScheduledCard } from './scheduled-card'
@@ -64,6 +64,7 @@ export function HostLobby({
           onKick={(playerId) => void send({ type: 'kick', playerId })}
           onTeamMode={(mode, teamId) => void send({ type: 'teamMode', mode, ...(teamId && { teamId }) })}
           onCaptain={(playerId) => void send({ type: 'captain', playerId })}
+          teamActions={teamActions(send)}
         />
         <MessageBox announcement={host.announcement} quickMessages={host.quickMessages} clockOffset={clockOffset} onCommand={send} />
         <Button variant="outline" className="self-start" onClick={endGame}>

@@ -39,6 +39,14 @@ describe('lobbyGroups', () => {
     expect(groups[1]).toEqual({ team: team('green'), players: [] })
   })
 
+  it('puts players whose team was removed first, in a group without a team', () => {
+    const groups = lobbyGroups([player('a', 'red'), player('b')], [team('red')], 'team')
+    expect(groups.map((g) => [g.team?.id ?? null, g.players.map((p) => p.id)])).toEqual([
+      [null, ['b']],
+      ['red', ['a']],
+    ])
+  })
+
   it('returns an empty group when nobody has joined in classic mode', () => {
     expect(lobbyGroups([], [], 'classic')).toEqual([{ team: null, players: [] }])
   })

@@ -7,7 +7,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { SelectField } from '../../components/select-field'
 import { POINTS, TIME_LIMITS } from '../editor/question-form'
-import { GameSettingsForm, settingsError, settingsSections, type SettingsSection } from './game-settings-form'
+import { GameSettingsForm, gameOnlySettings, settingsError, settingsSections, type SettingsSection } from './game-settings-form'
 
 export interface BatchPatch {
   settings: Partial<GameSettings>
@@ -55,7 +55,11 @@ export function BatchEditDialog({
     const patch: BatchPatch = { settings: {}, questions: {} }
     for (const group of enabled) {
       if (group === 'questions') patch.questions = { timeLimitSec, points }
-      else for (const key of settingsSections[group]) Object.assign(patch.settings, { [key]: settings[key] })
+      else {
+        // A quiz's saved team names (from before teams were set per game) stay as they are.
+        const keys = settingsSections[group].filter((key) => !(gameOnlySettings as readonly string[]).includes(key))
+        for (const key of keys) Object.assign(patch.settings, { [key]: settings[key] })
+      }
     }
     onSave(patch)
   }

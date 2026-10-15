@@ -14,7 +14,7 @@ Both start with `HomeHero` (the animated `CowLogo` on a primary tile, the wordma
 ## Phone (`/play/$pin`, join page)
 
 - Phone layout is the default; the screen view is the exception. Touch targets at least 48 px high. Answer buttons fill the width and the lower half of the viewport.
-- `/play/*` has no `AppHeader`: the root layout shows `GameMenu` instead (a fixed round button top right with the language and colour mode). Keep the top right corner of phone game screens free, or give the element `pr-12` / `mr-12`.
+- `/play/*` has no `AppHeader`: the root layout shows `GameMenu` instead (a fixed round button top right with the language and colour mode). Keep the top right corner of phone game screens free, or give the element `pr-12` / `mr-12`. The host's message (`AnnouncementBanner`) is `sticky` at the top of `/play/$pin`, so it stays in view however far the player scrolls.
 - A question image on the phone sits in a `flex-3` box (absolutely positioned `img`, `max-h-full`, `object-contain`, `min-h-28`) next to the answers' `flex-2` box, so image and answers fit the screen together (a 390 × 844 phone with four options shows everything without scrolling).
 - Use `100dvh` based layouts, `viewport-fit=cover` safe-area padding, no horizontal scroll, no hover-only affordances.
 - Forms: `inputMode="numeric"` for the PIN, `autoComplete="off"`, `enterKeyHint`.

@@ -55,6 +55,30 @@ describeDb('game routes (database)', () => {
     expect(noTeams.json()).toMatchObject({ error: 'errors.invalidInput', issues: [{ path: 'settings.teamNames' }] })
   })
 
+  it('needs no team names when players make the teams, and tells the join page they may', async () => {
+    const res = await create(alice, { quizId: 'quiz-test_alice', settings: { mode: 'team', teamSetup: 'players' } })
+    expect(res.statusCode).toBe(201)
+    const info = (await built.app.inject({ method: 'GET', url: `/api/games/${res.json().pin}/public` })).json()
+    expect(info).toMatchObject({ teams: [], newTeams: true })
+  })
+
+  it("prefills a game from a quiz's saved team names, and refuses a team quiz without them", async () => {
+    const save = (settings: object) =>
+      built.app.inject({
+        method: 'PUT',
+        url: '/api/quizzes/quiz-test_alice',
+        headers: { cookie: alice },
+        payload: { title: 'Quiz test_alice', questions: fixtureQuiz().questions, settings },
+      })
+    expect((await save({ mode: 'team', teamNames: ['Red', 'Blue'] })).statusCode).toBe(200)
+    const { pin } = (await create(alice, { quizId: 'quiz-test_alice' })).json()
+    expect(Object.values(built.manager.get(pin)!.state.teams).map((t) => t.name)).toEqual(['Red', 'Blue'])
+
+    expect((await save({ mode: 'team' })).statusCode).toBe(200)
+    expect((await create(alice, { quizId: 'quiz-test_alice' })).statusCode).toBe(400)
+    await save({})
+  })
+
   it("uses the quiz's settings unless the request overrides them", async () => {
     const quizSettings = { revealAnswers: 'atEnd', answerStyle: 'colourful' }
     await built.app.inject({
@@ -95,13 +119,17 @@ describeDb('game routes (database)', () => {
       mode: 'team',
       phase: 'lobby',
       teams: [
-        { id: 'team-1', name: 'Red' },
-        { id: 'team-2', name: 'Blue' },
+        { id: 'team-1', name: 'Red', memberCount: 0 },
+        { id: 'team-2', name: 'Blue', memberCount: 0 },
       ],
+      newTeams: false,
       joinUrl: `http://localhost:3000/?pin=${pin}`,
       scheduledAt: null,
       serverNow: expect.any(Number),
     })
+    built.manager.apply(pin, (state) => joinPlayer(state, { id: 'p1', name: 'Anna', teamId: 'team-2', token: 'tok-1' }))
+    const counted = (await built.app.inject({ method: 'GET', url: `/api/games/${pin}/public` })).json()
+    expect(counted.teams[1]).toEqual({ id: 'team-2', name: 'Blue', memberCount: 1 })
     const missing = await built.app.inject({ method: 'GET', url: '/api/games/999999/public' })
     expect(missing.statusCode).toBe(404)
     expect(missing.json()).toEqual({ error: 'errors.gameNotFound' })
@@ -178,10 +206,13 @@ describeDb('game routes (database)', () => {
     const { pin } = (
       await create(alice, {
         quizId: 'quiz-test_alice',
-        settings: { streakBonus: true, theme: 'navy' },
+        settings: { streakBonus: true, theme: 'navy', mode: 'team', teamSetup: 'both', teamNames: ['Red'] },
         branding: { eventName: 'Party', show: true, onPhones: true },
       })
     ).json()
+    built.manager.apply(pin, (state) =>
+      joinPlayer(state, { id: 'p1', name: 'Anna', newTeam: { id: 'kock', name: 'Kockák' }, token: 'tok-1' }),
+    )
     const old = built.manager.get(pin)!
     const again = (cookie: string) =>
       built.app.inject({ method: 'POST', url: `/api/games/${old.state.id}/again`, headers: { cookie } })
@@ -196,6 +227,11 @@ describeDb('game routes (database)', () => {
     expect(next.state).toMatchObject({ phase: 'lobby', quiz: { id: 'quiz-test_alice' }, settings: { streakBonus: true, theme: 'navy' } })
     expect(next.state.id).not.toBe(old.state.id)
     expect(next.state.branding).toEqual(old.state.branding)
+    // The same teams (a player's own one too), so phones rejoin theirs.
+    expect(Object.values(next.state.teams)).toMatchObject([
+      { id: 'team-1', name: 'Red', score: 0 },
+      { id: 'kock', name: 'Kockák', byPlayer: true, score: 0 },
+    ])
     expect(built.manager.get(pin)!.state.nextPin).toBe(next.state.pin)
 
     // A second press (double click, second tab) gets the same round.

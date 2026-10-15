@@ -33,11 +33,9 @@ describe('validateQuiz', () => {
     expect(validateQuiz({ ...quiz([]), title: '  ' })).toEqual({ title: 'editor.errors.required' })
   })
 
-  it('reports team settings without two distinct names, so such a quiz is never saved', () => {
+  it('saves a team quiz without team names: teams are set up per game', () => {
     const team = (teamNames: string[]) => ({ ...quiz([]), settings: { ...quiz([]).settings, mode: 'team' as const, teamNames } })
-    expect(validateQuiz(team(['Red']))).toEqual({ 'settings.teamNames': 'host.create.needTwoTeams' })
-    expect(validateQuiz(team(['Red', 'RED']))).toEqual({ 'settings.teamNames': 'host.create.duplicateTeams' })
-    expect(validateQuiz(team(['Red', 'Blue']))).toEqual({})
+    expect(validateQuiz(team([]))).toEqual({})
   })
 
   it('reports a correct answer pointing to a removed option', () => {

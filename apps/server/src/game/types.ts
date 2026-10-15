@@ -69,6 +69,13 @@ export interface Team {
   captainId?: string | null
   /** The team's answers by question id (captain decides and majority vote). Missing in games saved before it existed. */
   answers?: Record<string, TeamAnswerRecord>
+  /** A player created it when joining: it goes when its last member leaves the lobby. The host's teams stay. */
+  byPlayer?: boolean
+  /**
+   * Points gained per question id, as added to `score`. Kept so a player moved between questions
+   * does not change what the team gained. Missing in games saved before it existed.
+   */
+  gains?: Record<string, number>
 }
 
 /** The quiz frozen into a game. Its default settings are not part of it: the game has its own. */

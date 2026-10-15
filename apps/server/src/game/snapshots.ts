@@ -233,8 +233,10 @@ function baseSnapshot(state: GameState, now: number, audience: ResultsAudience, 
   const previousTeamRank = rankLookup(
     Object.values(state.teams).map((team) => {
       const members = players.filter((p) => p.teamId === team.id)
-      // Mirrors addTeamGains.
-      return { id: team.id, name: team.name, score: team.score - teamGain(team, question?.id ?? '', members.map(roundPoints)) }
+      // The stored gain (members may have moved since); games saved before it existed mirror addTeamGains.
+      const stored = question && revealed && !reviewing ? team.gains?.[question.id] : undefined
+      const gain = stored ?? teamGain(team, question?.id ?? '', members.map(roundPoints))
+      return { id: team.id, name: team.name, score: team.score - gain }
     }),
   )
 

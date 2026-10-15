@@ -330,7 +330,9 @@ export const gamePublicInfoSchema = z.object({
   quizTitle: z.string(),
   mode: z.enum(gameModes),
   phase: z.enum(gamePhases),
-  teams: z.array(z.object({ id: z.string(), name: z.string() })),
+  teams: z.array(z.object({ id: z.string(), name: z.string(), memberCount: z.number() })),
+  /** Team mode: a joining player may create a new team (players make teams and the limit is not reached). */
+  newTeams: z.boolean(),
   /** Link players open, also encoded in the QR code. */
   joinUrl: z.string(),
   /** A scheduled game's opening time (unix ms); null when it was never scheduled. */

@@ -210,6 +210,7 @@ When the user corrects your approach, append a one-line rule here before ending 
 - The user runs PowerShell on Windows: write commands in delivery reports and manual tests as `$env:VAR="value"; command`, never `VAR=value command`.
 - While the user's dev server runs, edit source files under `apps/*/src` and `packages/*/src` with the Edit/Write tools only, never `cat > file`, `sed -i` or a Python/Node script that rewrites the file (scripts are fine for tests, e2e specs, docs and skills): Vite can read a truncated empty file, and `sed -i` replaces the file so `tsx watch` stops seeing later changes to it (the API keeps running stale code).
 - After a burst of server edits while the user's `dev:lan` runs, check that the API on port 3000 restarted after the last edit (process start time vs file times) before browser-testing or handing over; `tsx watch` can miss changes made seconds apart. If it did not, tell the user to restart `dev:lan`.
+- Python scripts that rewrite repo files must open them with `newline=''` (or use the Edit tool): on Windows text mode turns LF into CRLF, and a CRLF `SKILL.md` loses its frontmatter description.
 - After editing `styles.css` while `dev:lan` runs, check that Vite serves the change (`curl -s localhost:<vite port>/src/styles.css | grep <new class>`); a long-running Vite can keep serving a stale compiled stylesheet. If it does, tell the user to restart `dev:lan` in the handover.
 
 ---

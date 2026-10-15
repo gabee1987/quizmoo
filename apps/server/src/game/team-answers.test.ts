@@ -5,6 +5,7 @@ import {
   confirmTeamAnswer,
   createGame,
   disconnectPlayer,
+  endGame,
   endQuestion,
   gradeText,
   joinPlayer,
@@ -121,11 +122,16 @@ describe('captains', () => {
     expect(state.teams['team-2']!.captainId).toBe('p5')
   })
 
-  it('changes captains by hand only in the lobby', () => {
-    const started = startGame(teamGame(), T0)
-    expectCode(() => setCaptain(started, { playerId: 'p2' }), 'errors.gameAlreadyStarted')
-    // A drop during a question still hands it on.
-    expect(disconnectPlayer(started, 'p1', T0).teams['team-1']!.captainId).toBe('p2')
+  it('passes the captaincy during a question, and the new captain confirms at once', () => {
+    let state = startGame(teamGame({ teamAnswer: 'captain' }), T0)
+    state = setCaptain(state, { playerId: 'p2', byPlayerId: 'p1' })
+    expectCode(() => confirm(state, 'p1', A, T0 + 1000), 'errors.notCaptain')
+    state = confirm(state, 'p2', A, T0 + 1000)
+    expect(state.teams['team-1']!.answers!['q-single']).toMatchObject({ answer: A, byPlayerId: 'p2' })
+    // The host may hand it on between questions too, but not once the game is over.
+    state = setCaptain(endQuestion(state), { playerId: 'p3' })
+    expect(state.teams['team-1']!.captainId).toBe('p3')
+    expectCode(() => setCaptain(endGame(state, T0), { playerId: 'p1' }), 'errors.invalidTransition')
   })
 
   it('restores a game saved before team modes as average with the first member as captain', () => {

@@ -105,7 +105,13 @@ function HostGamePage() {
       </div>
       <div className="flex min-w-0 flex-col gap-6">
         <TeamModesPanel host={host} onTeamMode={(mode, teamId) => void send({ type: 'teamMode', mode, teamId })} />
-        <PlayerPanel host={host} clockOffset={clockOffset} onKick={(playerId) => void send({ type: 'kick', playerId })} />
+        <PlayerPanel
+          host={host}
+          clockOffset={clockOffset}
+          onKick={(playerId) => void send({ type: 'kick', playerId })}
+          onCaptain={(playerId) => void send({ type: 'captain', playerId })}
+          onMove={(playerId, teamId) => void send({ type: 'movePlayer', playerId, teamId })}
+        />
         <ReviewPanel host={host} onShowQuestion={(index) => void send({ type: 'showQuestion', index })} />
       </div>
     </div>

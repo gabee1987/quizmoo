@@ -1,19 +1,33 @@
 import type { HostSnapshot, PlayerPublic } from '@quizmoo/shared'
+import { CrownIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { PlayerAvatar } from '../../components/player-avatar'
 import { useNow } from '../../lib/clock'
+import { MovePlayerMenu } from './move-player-menu'
 
+/**
+ * Everyone in a running game with their score; the host removes players here. In team mode the
+ * crown makes a player their team's captain at any time, and "Move" puts them in another team
+ * between questions.
+ */
 export function PlayerPanel({
   host,
   clockOffset,
   onKick,
+  onCaptain,
+  onMove,
 }: {
   host: HostSnapshot
   clockOffset: number
   onKick: (playerId: string) => void
+  onCaptain: (playerId: string) => void
+  onMove: (playerId: string, teamId: string) => void
 }) {
   const { t } = useTranslation()
   const teamName = (teamId: string | null) => host.teams.find((team) => team.id === teamId)?.name
+  const captainOf = (teamId: string | null) => host.teams.find((team) => team.id === teamId)?.captainId
+  const teams = host.mode === 'team' && host.phase !== 'finished'
+  const betweenQuestions = (host.phase === 'reveal' && !host.awaitingGrading) || host.phase === 'scoreboard'
   const online = host.players.filter((p) => p.connected).length
   // Ticks only while someone is offline. Server time, so the phone's clock does not matter.
   const now = useNow(online < host.players.length) + clockOffset
@@ -49,6 +63,23 @@ export function PlayerPanel({
                 {offline && <span className="block truncate text-xs font-semibold text-muted-foreground tabular-nums">{offline}</span>}
               </span>
               <span className="font-bold tabular-nums">{player.score}</span>
+              {teams &&
+                player.teamId &&
+                (captainOf(player.teamId) === player.id ? (
+                  <span className="grid size-10 place-items-center text-warning">
+                    <CrownIcon className="size-4" aria-label={t('play.team.captain')} />
+                  </span>
+                ) : (
+                  <button
+                    type="button"
+                    aria-label={t('host.game.makeCaptain', { name: player.name })}
+                    className="grid size-10 place-items-center rounded-full text-muted-foreground/60 outline-none hover:bg-warning/15 hover:text-warning focus-visible:ring-[3px] focus-visible:ring-ring"
+                    onClick={() => onCaptain(player.id)}
+                  >
+                    <CrownIcon className="size-4" aria-hidden="true" />
+                  </button>
+                ))}
+              {teams && betweenQuestions && <MovePlayerMenu player={player} teams={host.teams} onMove={onMove} />}
               {host.phase !== 'finished' && (
                 <button
                   type="button"

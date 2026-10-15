@@ -1,9 +1,11 @@
 import {
   MAX_QUICK_MESSAGES,
   MAX_SCHEDULE_DAYS,
+  MAX_TEAMS,
   defaultQuickMessages,
   fallbackAvatar,
   mergeLegacyQuickMessages,
+  playersCreateTeams,
   streakBonusFor,
   type Answer,
   type Avatar,
@@ -30,8 +32,16 @@ import {
 
 const DAY_MS = 24 * 60 * 60 * 1000
 
+/** A team carried into a new game ("Play again" keeps the last round's teams, ids and all). */
+export interface TeamSeed {
+  id: string
+  name: string
+  byPlayer?: boolean | undefined
+}
+
 /**
- * New lobby. With `settings.shuffleOptions` the option order of choice questions is
+ * New lobby. In team mode its teams are `teams` when given, else the host's `teamNames` (none when
+ * only players make teams). With `settings.shuffleOptions` the option order of choice questions is
  * shuffled once here and frozen into the game's quiz copy; correctness is id-based,
  * so nothing else changes. `random` is injectable for tests.
  */
@@ -42,13 +52,14 @@ export function createGame(
   id: string,
   now: number,
   random: () => number = Math.random,
+  seeds?: readonly TeamSeed[],
 ): GameState {
   const teams: Record<string, Team> = {}
   if (settings.mode === 'team') {
-    settings.teamNames.forEach((name, i) => {
-      const teamId = `team-${i + 1}`
-      teams[teamId] = { id: teamId, name, score: 0, answerMode: settings.teamAnswer, captainId: null, answers: {} }
-    })
+    const hostTeams = settings.teamSetup === 'players' ? [] : settings.teamNames
+    for (const seed of seeds ?? hostTeams.map((name, i): TeamSeed => ({ id: `team-${i + 1}`, name }))) {
+      teams[seed.id] = { ...newTeam(seed.id, seed.name, settings), ...(seed.byPlayer && { byPlayer: true }) }
+    }
   }
   return {
     id,
@@ -76,20 +87,25 @@ export interface JoinInput {
   id: string
   name: string
   teamId?: string | null | undefined
+  /** Team mode, when players make teams: creates this team for the player instead of `teamId`. */
+  newTeam?: { id: string; name: string } | undefined
   token: string
   /** Picked on the join page; without one the player gets a stable one from their id. */
   avatar?: Avatar | undefined
 }
 
 /**
- * Adds a player in the lobby. A known token reclaims that player in any phase instead.
- * A scheduled game takes new players from its opening time on (`now` is needed then; without it joining stays closed).
+ * Adds a player in the lobby, or later with `lateJoin` (until the game is finished). A known token
+ * reclaims that player in any phase instead. A scheduled game takes new players from its opening
+ * time on (`now` is needed then; without it joining stays closed).
  */
 export function joinPlayer(state: GameState, input: JoinInput, now?: number): GameState {
   const existing = findByToken(state, input.token)
   if (existing) return withCaptains(withPlayer(state, { ...existing, connected: true, disconnectedAt: null }))
 
-  if (state.phase !== 'lobby') throw new EngineError('errors.gameAlreadyStarted')
+  if (state.phase !== 'lobby' && (!state.settings.lateJoin || state.phase === 'finished')) {
+    throw new EngineError('errors.gameAlreadyStarted')
+  }
   if (!joiningOpen(state, now)) throw new EngineError('errors.gameNotOpenYet')
   const name = input.name.trim()
   if (!isNameAllowed(name)) throw new EngineError('errors.nameNotAllowed')
@@ -98,13 +114,19 @@ export function joinPlayer(state: GameState, input: JoinInput, now?: number): Ga
   if (Object.keys(state.players).length >= MAX_PLAYERS) throw new EngineError('errors.gameFull')
 
   let teamId: string | null = null
+  let joined = state
   if (state.settings.mode === 'team') {
-    if (!input.teamId || !state.teams[input.teamId]) throw new EngineError('errors.unknownTeam')
-    teamId = input.teamId
+    if (input.newTeam) {
+      joined = withNewTeam(state, input.newTeam, true)
+      teamId = input.newTeam.id
+    } else {
+      if (!input.teamId || !state.teams[input.teamId]) throw new EngineError('errors.unknownTeam')
+      teamId = input.teamId
+    }
   }
   const joinOrder = Math.max(0, ...Object.values(state.players).map((p) => p.joinOrder ?? 0)) + 1
   return withCaptains(
-    withPlayer(state, {
+    withPlayer(joined, {
       id: input.id,
       name,
       teamId,
@@ -138,7 +160,7 @@ export function kickPlayer(state: GameState, playerId: string): GameState {
   if (state.phase === 'finished') throw new EngineError('errors.invalidTransition')
   if (!state.players[playerId]) throw new EngineError('errors.playerNotFound')
   const { [playerId]: _removed, ...players } = state.players
-  return withCaptains({ ...state, players })
+  return withoutEmptyPlayerTeams(withCaptains({ ...state, players }))
 }
 
 /**
@@ -152,8 +174,7 @@ export function setTeamMode(
 ): GameState {
   if (state.settings.mode !== 'team') throw new EngineError('errors.invalidTransition')
   if (input.byPlayerId !== undefined && state.phase !== 'lobby') throw new EngineError('errors.gameAlreadyStarted')
-  const betweenQuestions = (state.phase === 'reveal' && !state.awaitingGrading) || state.phase === 'scoreboard'
-  if (state.phase !== 'lobby' && !betweenQuestions) throw new EngineError('errors.invalidTransition')
+  if (state.phase !== 'lobby' && !betweenQuestions(state)) throw new EngineError('errors.invalidTransition')
   let teamIds = input.teamId === undefined ? Object.keys(state.teams) : [input.teamId]
   if (input.byPlayerId !== undefined) {
     const player = state.players[input.byPlayerId]
@@ -172,13 +193,12 @@ export function setTeamMode(
 }
 
 /**
- * Makes `playerId` the captain of their team in the lobby: by the host, or with `byPlayerId`
- * by the team's current captain passing it on. An offline player keeps it only while no
- * teammate is online.
+ * Makes `playerId` the captain of their team, at any point before the end (also during a question:
+ * the new captain may confirm at once): by the host, or with `byPlayerId` by the team's current
+ * captain passing it on. An offline player keeps it only while no teammate is online.
  */
 export function setCaptain(state: GameState, input: { playerId: string; byPlayerId?: string | undefined }): GameState {
-  if (state.settings.mode !== 'team') throw new EngineError('errors.invalidTransition')
-  if (state.phase !== 'lobby') throw new EngineError('errors.gameAlreadyStarted')
+  if (state.settings.mode !== 'team' || state.phase === 'finished') throw new EngineError('errors.invalidTransition')
   const player = state.players[input.playerId]
   const team = player?.teamId ? state.teams[player.teamId] : undefined
   if (!player || !team) throw new EngineError('errors.playerNotFound')
@@ -186,6 +206,71 @@ export function setCaptain(state: GameState, input: { playerId: string; byPlayer
     throw new EngineError('errors.notCaptain')
   }
   return withCaptains({ ...state, teams: { ...state.teams, [team.id]: { ...team, captainId: player.id } } })
+}
+
+/** The host adds an empty team, in the lobby or between questions. */
+export function createTeam(state: GameState, team: { id: string; name: string }): GameState {
+  if (state.settings.mode !== 'team' || !(state.phase === 'lobby' || betweenQuestions(state))) {
+    throw new EngineError('errors.invalidTransition')
+  }
+  return withNewTeam(state, team, false)
+}
+
+/** The host renames a team, at any point before the end. */
+export function renameTeam(state: GameState, input: { teamId: string; name: string }): GameState {
+  if (state.settings.mode !== 'team' || state.phase === 'finished') throw new EngineError('errors.invalidTransition')
+  const team = state.teams[input.teamId]
+  if (!team) throw new EngineError('errors.unknownTeam')
+  const name = checkTeamName(state, input.name, team.id)
+  if (name === team.name) return state
+  return { ...state, teams: { ...state.teams, [team.id]: { ...team, name } } }
+}
+
+/** The host removes a team in the lobby. Its players are left without a team and pick another one (`pickTeam`). */
+export function removeTeam(state: GameState, teamId: string): GameState {
+  if (state.settings.mode !== 'team') throw new EngineError('errors.invalidTransition')
+  if (state.phase !== 'lobby') throw new EngineError('errors.gameAlreadyStarted')
+  if (!state.teams[teamId]) throw new EngineError('errors.unknownTeam')
+  const { [teamId]: _removed, ...teams } = state.teams
+  const players = { ...state.players }
+  for (const member of membersOf(state, teamId)) players[member.id] = { ...member, teamId: null }
+  return { ...state, teams, players }
+}
+
+/**
+ * A player without a team (theirs was removed) picks one in the lobby, or creates one when
+ * players make teams.
+ */
+export function pickTeam(
+  state: GameState,
+  input: { playerId: string; teamId?: string | undefined; newTeam?: { id: string; name: string } | undefined },
+): GameState {
+  const player = state.players[input.playerId]
+  if (!player) throw new EngineError('errors.playerNotFound')
+  if (state.settings.mode !== 'team' || player.teamId !== null) throw new EngineError('errors.invalidTransition')
+  if (state.phase !== 'lobby') throw new EngineError('errors.gameAlreadyStarted')
+  if (input.newTeam) {
+    const created = withNewTeam(state, input.newTeam, true)
+    return withCaptains(withPlayer(created, { ...player, teamId: input.newTeam.id }))
+  }
+  if (!input.teamId || !state.teams[input.teamId]) throw new EngineError('errors.unknownTeam')
+  return withCaptains(withPlayer(state, { ...player, teamId: input.teamId }))
+}
+
+/**
+ * The host moves a player to another team, in the lobby or between questions (never while a
+ * question runs). Points the player earned stay with the old team; they count for the new one
+ * from the next question. A captain who moves hands the crown to the next member of the old team.
+ */
+export function movePlayer(state: GameState, input: { playerId: string; teamId: string }): GameState {
+  if (state.settings.mode !== 'team' || !(state.phase === 'lobby' || betweenQuestions(state))) {
+    throw new EngineError('errors.invalidTransition')
+  }
+  const player = state.players[input.playerId]
+  if (!player) throw new EngineError('errors.playerNotFound')
+  if (!state.teams[input.teamId]) throw new EngineError('errors.unknownTeam')
+  if (player.teamId === input.teamId) return state
+  return withoutEmptyPlayerTeams(withCaptains(withPlayer(state, { ...player, teamId: input.teamId })))
 }
 
 /** Whether new players may join a lobby: always, unless it is scheduled and its time has not come. */
@@ -216,6 +301,10 @@ export function startGame(state: GameState, now: number): GameState {
   if (state.phase !== 'lobby') throw new EngineError('errors.gameAlreadyStarted')
   if (Object.keys(state.players).length === 0 || state.quiz.questions.length === 0) {
     throw new EngineError('errors.invalidTransition')
+  }
+  // Someone whose team the host removed has not picked another one yet.
+  if (state.settings.mode === 'team' && Object.values(state.players).some((p) => p.teamId === null)) {
+    throw new EngineError('errors.playersWithoutTeam')
   }
   return openQuestion({ ...state, announcement: null }, 0, now)
 }
@@ -540,6 +629,50 @@ export function resultsPending(state: GameState): boolean {
 
 // ---- helpers ---------------------------------------------------------------
 
+/** Between questions: the reveal (not while grading) and the scoreboard. */
+function betweenQuestions(state: GameState): boolean {
+  return (state.phase === 'reveal' && !state.awaitingGrading) || state.phase === 'scoreboard'
+}
+
+function newTeam(id: string, name: string, settings: GameSettings): Team {
+  return { id, name, score: 0, answerMode: settings.teamAnswer, captainId: null, answers: {} }
+}
+
+/** A trimmed team name no other team (than `ownId`) has, ignoring case. */
+function checkTeamName(state: GameState, name: string, ownId?: string): string {
+  const trimmed = name.trim()
+  if (trimmed.length < 1 || trimmed.length > 40) throw new EngineError('errors.invalidInput')
+  const key = nameKey(trimmed)
+  if (Object.values(state.teams).some((t) => t.id !== ownId && nameKey(t.name) === key)) {
+    throw new EngineError('errors.teamNameTaken')
+  }
+  return trimmed
+}
+
+/**
+ * Adds a team: the host's, or one a player creates (only when players make teams, with a name
+ * the nickname filter allows). At most `MAX_TEAMS`.
+ */
+function withNewTeam(state: GameState, input: { id: string; name: string }, byPlayer: boolean): GameState {
+  if (byPlayer && !playersCreateTeams(state.settings.teamSetup)) throw new EngineError('errors.invalidTransition')
+  if (state.teams[input.id]) throw new EngineError('errors.invalidInput')
+  const name = checkTeamName(state, input.name)
+  if (byPlayer && !isNameAllowed(name)) throw new EngineError('errors.teamNameNotAllowed')
+  if (Object.keys(state.teams).length >= MAX_TEAMS) throw new EngineError('errors.teamLimit')
+  const team = { ...newTeam(input.id, name, state.settings), ...(byPlayer && { byPlayer: true }) }
+  return { ...state, teams: { ...state.teams, [team.id]: team } }
+}
+
+/** In the lobby a team a player created goes once nobody is left in it; the host's teams stay. After the start nothing goes. */
+function withoutEmptyPlayerTeams(state: GameState): GameState {
+  if (state.phase !== 'lobby') return state
+  const empty = Object.values(state.teams).filter((t) => t.byPlayer && membersOf(state, t.id).length === 0)
+  if (empty.length === 0) return state
+  const teams = { ...state.teams }
+  for (const team of empty) delete teams[team.id]
+  return { ...state, teams }
+}
+
 function scoreboardAfterEachQuestion(state: GameState): boolean {
   return state.settings.scoreboard === 'afterQuestion' && state.settings.revealAnswers === 'afterQuestion'
 }
@@ -711,7 +844,12 @@ function addTeamGains(
       record && scored
         ? { ...team.answers, [questionId]: { ...record, points: scored.points, bonus: scored.bonus ?? 0, correct: scored.correct } }
         : team.answers
-    result[team.id] = { ...team, score: team.score + gain, ...(answers && { answers }) }
+    result[team.id] = {
+      ...team,
+      score: team.score + gain,
+      gains: { ...team.gains, [questionId]: gain },
+      ...(answers && { answers }),
+    }
   }
   return result
 }
