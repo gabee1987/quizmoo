@@ -78,7 +78,7 @@ function QuizEditorPage() {
       <div className="flex flex-1 flex-col items-center justify-center gap-4">
         <FormAlert>{t(errorCode(quiz.error))}</FormAlert>
         <Button asChild variant="secondary">
-          <Link to="/host">{t('host.game.backToQuizzes')}</Link>
+          <Link to="/host/quizzes">{t('host.game.backToQuizzes')}</Link>
         </Button>
       </div>
     )
@@ -307,7 +307,7 @@ function Editor({ quiz }: { quiz: Quiz }) {
     onSuccess: () => {
       queryClient.removeQueries({ queryKey: ['quiz', quiz.id] })
       void queryClient.invalidateQueries({ queryKey: ['quizzes'] })
-      void navigate({ to: '/host' })
+      void navigate({ to: '/host/quizzes' })
     },
     onError: (error) => {
       deleted.current = false
@@ -401,7 +401,7 @@ function Editor({ quiz }: { quiz: Quiz }) {
         <div className="z-30 sm:sticky sm:top-2">
         <header className="flex flex-wrap items-center gap-2 rounded-2xl border bg-card/95 p-2 shadow-soft backdrop-blur">
           <Button asChild variant="ghost" size="icon" aria-label={t('host.game.backToQuizzes')} title={t('host.game.backToQuizzes')}>
-            <Link to="/host">
+            <Link to="/host/quizzes">
               <ArrowLeftIcon aria-hidden="true" />
             </Link>
           </Button>

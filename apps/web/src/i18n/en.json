@@ -759,6 +759,7 @@
   },
   "nav": {
     "label": "Host menu",
+    "home": "Home",
     "quizzes": "Quizzes",
     "signedInAs": "Signed in as",
     "games": "Games",
@@ -801,6 +802,27 @@
       "own": "Using your own defaults.",
       "reset": "Use the app's defaults"
     }
+  },
+  "dashboard": {
+    "greeting": "Hi, {{name}}!",
+    "subtitle": "What are we playing today?",
+    "figures": "At a glance",
+    "quizzes_one": "quiz",
+    "quizzes_other": "quizzes",
+    "played_one": "game played",
+    "played_other": "games played",
+    "players_one": "player",
+    "players_other": "players",
+    "live": "Running now",
+    "backToGame": "Back to the game",
+    "upcoming": "Coming up",
+    "recentQuizzes": "Recently edited",
+    "allQuizzes": "All quizzes",
+    "latestResults": "Latest results",
+    "allGames": "All games",
+    "noQuizzes": "No quizzes yet. Make your first one and play it in minutes.",
+    "firstQuiz": "Make your first quiz",
+    "noResults": "No finished games yet. Their results show up here."
   },
   "history": {
     "title": "Games",

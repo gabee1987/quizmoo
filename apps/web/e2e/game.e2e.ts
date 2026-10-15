@@ -81,11 +81,17 @@ test('host builds a quiz, three phones play it with a reload mid-question, resul
   })
 
   const pin = await test.step('host starts a game', async () => {
-    await page.goto('/host')
+    await page.goto('/host/quizzes')
     await page.locator('li').filter({ hasText: title }).getByRole('button', { name: 'Play' }).click()
     await page.getByRole('dialog').getByRole('button', { name: 'Create game' }).click()
     await expect(page).toHaveURL(/\/host\/games\/\d{6}$/)
-    return page.url().split('/').pop()!
+    const pin = page.url().split('/').pop()!
+    // The home page leads back to the running game.
+    await page.goto('/host')
+    const running = page.locator('section').filter({ hasText: 'Running now' }).getByRole('listitem').filter({ hasText: title })
+    await running.getByRole('link', { name: 'Back to the game' }).click()
+    await expect(page).toHaveURL(new RegExp(`/host/games/${pin}$`))
+    return pin
   })
 
   const projector = await browser.newPage({ viewport: { width: 1920, height: 1080 }, locale: 'en-US' })

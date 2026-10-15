@@ -149,3 +149,7 @@ Second commit (fixes after testing):
 - One quick message list instead of built-ins kept apart: `hiddenBuiltIns` is gone, built-in rows are `{ id, builtIn }`. Old rows and games are merged on read (`mergeLegacyQuickMessages`), no migration. The limit is 25 in all, so a host with 20 own messages and the three built-ins keeps them all.
 - New host command `setQuickMessageTime` (this game only).
 - Planned next on this branch: the host dashboard (its own commit), then branding.
+
+Third commit (host home):
+- `/host` is a home page built from the existing `/api/quizzes` and `/api/games` only; the quiz list is `/host/quizzes`, and every "Back to quizzes" link goes there.
+- The phone tab bar keeps four tabs (Home, Quizzes, Games, Account): for admins, Users and Names moved into the Account menu, since six tabs do not fit a 390 px phone. The laptop sidebar lists them all.

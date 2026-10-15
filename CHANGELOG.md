@@ -125,6 +125,7 @@
 - Joyful controls everywhere: dialog and sheet close buttons are round chunky buttons whose X turns on hover; switches sit on the primary edge with a springing thumb and a check; a radio's dot springs in when chosen and shrinks away quietly; pressing something that turns a choice off gets a soft dip instead of the wobble.
 - Game settings that come and go (team settings, the custom colours, the answer lock, help lines, the "Changed for this game" bar, the start time for Later) open and close smoothly, and what is below slides along instead of jumping.
 - Phones and tablets keep their own scrollbars (thin, hidden while not scrolling, taking no space); the styled scrollbar is for mouse devices.
+- Hosts land on a home page after logging in: a greeting, their figures (quizzes, games played, players), running games with "Back to the game", scheduled games, the recently edited quizzes with Play and the latest results. The quiz list moved to `/host/quizzes`; "Home" is the first item in the navigation, and on phones the admin pages (Users, Names) are in the Account menu.
 
 ### Development
 - The web dev server runs on port 15173, away from the 5173+ ports other local Vite projects take.

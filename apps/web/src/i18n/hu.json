@@ -759,6 +759,7 @@
   },
   "nav": {
     "label": "Játékvezetői menü",
+    "home": "Kezdőlap",
     "quizzes": "Kvízek",
     "signedInAs": "Belépve mint",
     "games": "Játékok",
@@ -801,6 +802,27 @@
       "own": "A saját alapbeállításaidat használod.",
       "reset": "Vissza az app alapjaira"
     }
+  },
+  "dashboard": {
+    "greeting": "Szia, {{name}}!",
+    "subtitle": "Mit játszunk ma?",
+    "figures": "Számokban",
+    "quizzes_one": "kvíz",
+    "quizzes_other": "kvíz",
+    "played_one": "lejátszott játék",
+    "played_other": "lejátszott játék",
+    "players_one": "játékos",
+    "players_other": "játékos",
+    "live": "Most fut",
+    "backToGame": "Vissza a játékhoz",
+    "upcoming": "Hamarosan",
+    "recentQuizzes": "Legutóbb szerkesztett",
+    "allQuizzes": "Összes kvíz",
+    "latestResults": "Legutóbbi eredmények",
+    "allGames": "Összes játék",
+    "noQuizzes": "Még nincs kvízed. Készítsd el az elsőt, és pár perc múlva már játszhatsz is.",
+    "firstQuiz": "Készítsd el az első kvízed",
+    "noResults": "Még nincs befejezett játékod. Az eredményei itt jelennek meg."
   },
   "history": {
     "title": "Játékok",

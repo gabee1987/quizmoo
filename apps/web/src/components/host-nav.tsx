@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Link, useNavigate, useRouterState } from '@tanstack/react-router'
-import { DicesIcon, HistoryIcon, LayoutGridIcon, LogOutIcon, SettingsIcon, UserRoundIcon, UsersIcon } from 'lucide-react'
+import { DicesIcon, HistoryIcon, HouseIcon, LayoutGridIcon, LogOutIcon, SettingsIcon, UserRoundIcon, UsersIcon } from 'lucide-react'
 import { useEffect, useLayoutEffect, useRef, useState, type ComponentType, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
@@ -15,7 +15,7 @@ import { apiFetch } from '@/lib/api'
 import type { User } from '@/lib/auth'
 import { cn } from '@/lib/cn'
 
-type To = '/host' | '/host/games' | '/host/users' | '/host/nicknames'
+type To = '/host' | '/host/quizzes' | '/host/games' | '/host/users' | '/host/nicknames'
 
 interface Item {
   to: To
@@ -24,7 +24,10 @@ interface Item {
   exact: boolean
 }
 
-/** Host navigation: a sidebar from `lg` up, a bottom tab bar below (Quizzes, Games, Users, Names, Account). */
+/**
+ * Host navigation: a sidebar from `lg` up, a bottom tab bar below (Home, Quizzes, Games, Account).
+ * On the tab bar the admin pages (Users, Names) sit in the Account menu: six tabs do not fit a phone.
+ */
 export function HostNav({ user }: { user: User }) {
   const { t } = useTranslation()
   const navigate = useNavigate()
@@ -36,16 +39,19 @@ export function HostNav({ user }: { user: User }) {
       void navigate({ to: '/login' })
     },
   })
-  const items: Item[] = [
-    { to: '/host', label: t('nav.quizzes'), icon: LayoutGridIcon, exact: true },
+  const main: Item[] = [
+    { to: '/host', label: t('nav.home'), icon: HouseIcon, exact: true },
+    { to: '/host/quizzes', label: t('nav.quizzes'), icon: LayoutGridIcon, exact: false },
     { to: '/host/games', label: t('nav.games'), icon: HistoryIcon, exact: true },
-    ...(user.role === 'admin'
-      ? [
-          { to: '/host/users' as const, label: t('users.title'), icon: UsersIcon, exact: false },
-          { to: '/host/nicknames' as const, label: t('nicknames.nav'), icon: DicesIcon, exact: false },
-        ]
-      : []),
   ]
+  const admin: Item[] =
+    user.role === 'admin'
+      ? [
+          { to: '/host/users', label: t('users.title'), icon: UsersIcon, exact: false },
+          { to: '/host/nicknames', label: t('nicknames.nav'), icon: DicesIcon, exact: false },
+        ]
+      : []
+  const items = [...main, ...admin]
 
   return (
     <>
@@ -99,7 +105,7 @@ export function HostNav({ user }: { user: User }) {
         className="fixed inset-x-0 bottom-0 z-40 border-t bg-card/95 pb-[env(safe-area-inset-bottom)] shadow-soft backdrop-blur lg:hidden"
       >
         <ul className="mx-auto flex max-w-lg">
-          {items.map((item) => (
+          {main.map((item) => (
             <li key={item.to} className="flex-1">
               <Link to={item.to} activeOptions={{ exact: item.exact }} className={tabClass}>
                 <TabIcon icon={item.icon} />
@@ -118,6 +124,14 @@ export function HostNav({ user }: { user: User }) {
                   {t('nav.signedInAs')}: {user.username}
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
+                {admin.map((item) => (
+                  <MenuLink key={item.to}>
+                    <Link to={item.to}>
+                      <item.icon />
+                      {item.label}
+                    </Link>
+                  </MenuLink>
+                ))}
                 <MenuLink>
                   <Link to="/host/settings">
                     <SettingsIcon />

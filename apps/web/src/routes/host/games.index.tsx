@@ -8,6 +8,8 @@ import { FormAlert } from '@/components/form-alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
+import { isScheduled } from '@/features/host/dashboard'
+import { gamesQueryOptions } from '@/features/host/queries'
 import { toastError } from '@/lib/toast'
 import { ConfirmDialog } from '../../components/dialog'
 import { apiFetch } from '../../lib/api'
@@ -16,10 +18,6 @@ export const Route = createFileRoute('/host/games/')({
   component: GameHistory,
 })
 
-/** Joining has not opened yet: the game is waiting for its time. */
-const isScheduled = (game: GameHistoryItem, now: number) =>
-  game.phase === 'lobby' && game.scheduledAt !== null && Date.parse(game.scheduledAt) > now
-
 /**
  * The host's games: scheduled ones first (soonest first), then the rest newest first. Open the
  * results, delete a finished game or call off a scheduled one. A table on laptops, cards on phones.
@@ -27,10 +25,7 @@ const isScheduled = (game: GameHistoryItem, now: number) =>
 function GameHistory() {
   const { t, i18n } = useTranslation()
   const queryClient = useQueryClient()
-  const games = useQuery({
-    queryKey: ['games'],
-    queryFn: async () => (await apiFetch<{ games: GameHistoryItem[] }>('/api/games')).games,
-  })
+  const games = useQuery(gamesQueryOptions)
   const [deleting, setDeleting] = useState<GameHistoryItem | null>(null)
   const remove = useMutation({
     mutationFn: (game: GameHistoryItem) => apiFetch(`/api/games/${game.gameId}`, { method: 'DELETE' }),

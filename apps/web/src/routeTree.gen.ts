@@ -21,6 +21,7 @@ import { Route as PlayPinRouteImport } from './routes/play.$pin'
 import { Route as ScreenPinRouteImport } from './routes/screen.$pin'
 import { Route as HostGamesIndexRouteImport } from './routes/host/games.index'
 import { Route as HostGamesPinRouteImport } from './routes/host/games.$pin'
+import { Route as HostQuizzesIndexRouteImport } from './routes/host/quizzes.index'
 import { Route as HostQuizzesQuizIdRouteImport } from './routes/host/quizzes.$quizId'
 import { Route as HostResultsGameIdRouteImport } from './routes/host/results.$gameId'
 import { Route as ScreenResultsGameIdRouteImport } from './routes/screen.results.$gameId'
@@ -85,6 +86,11 @@ const HostGamesPinRoute = HostGamesPinRouteImport.update({
   path: '/games/$pin',
   getParentRoute: () => HostRouteRoute,
 } as any)
+const HostQuizzesIndexRoute = HostQuizzesIndexRouteImport.update({
+  id: '/quizzes/',
+  path: '/quizzes/',
+  getParentRoute: () => HostRouteRoute,
+} as any)
 const HostQuizzesQuizIdRoute = HostQuizzesQuizIdRouteImport.update({
   id: '/quizzes/$quizId',
   path: '/quizzes/$quizId',
@@ -117,6 +123,7 @@ export interface FileRoutesByFullPath {
   '/host/results/$gameId': typeof HostResultsGameIdRoute
   '/screen/results/$gameId': typeof ScreenResultsGameIdRoute
   '/host/games/': typeof HostGamesIndexRoute
+  '/host/quizzes/': typeof HostQuizzesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -133,6 +140,7 @@ export interface FileRoutesByTo {
   '/host/results/$gameId': typeof HostResultsGameIdRoute
   '/screen/results/$gameId': typeof ScreenResultsGameIdRoute
   '/host/games': typeof HostGamesIndexRoute
+  '/host/quizzes': typeof HostQuizzesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -151,6 +159,7 @@ export interface FileRoutesById {
   '/host/results/$gameId': typeof HostResultsGameIdRoute
   '/screen/results/$gameId': typeof ScreenResultsGameIdRoute
   '/host/games/': typeof HostGamesIndexRoute
+  '/host/quizzes/': typeof HostQuizzesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -170,6 +179,7 @@ export interface FileRouteTypes {
     | '/host/results/$gameId'
     | '/screen/results/$gameId'
     | '/host/games/'
+    | '/host/quizzes/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -186,6 +196,7 @@ export interface FileRouteTypes {
     | '/host/results/$gameId'
     | '/screen/results/$gameId'
     | '/host/games'
+    | '/host/quizzes'
   id:
     | '__root__'
     | '/'
@@ -203,6 +214,7 @@ export interface FileRouteTypes {
     | '/host/results/$gameId'
     | '/screen/results/$gameId'
     | '/host/games/'
+    | '/host/quizzes/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -300,6 +312,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HostGamesPinRouteImport
       parentRoute: typeof HostRouteRoute
     }
+    '/host/quizzes/': {
+      id: '/host/quizzes/'
+      path: '/quizzes'
+      fullPath: '/host/quizzes/'
+      preLoaderRoute: typeof HostQuizzesIndexRouteImport
+      parentRoute: typeof HostRouteRoute
+    }
     '/host/quizzes/$quizId': {
       id: '/host/quizzes/$quizId'
       path: '/quizzes/$quizId'
@@ -334,6 +353,7 @@ interface HostRouteRouteChildren {
   HostQuizzesQuizIdRoute: typeof HostQuizzesQuizIdRoute
   HostResultsGameIdRoute: typeof HostResultsGameIdRoute
   HostGamesIndexRoute: typeof HostGamesIndexRoute
+  HostQuizzesIndexRoute: typeof HostQuizzesIndexRoute
 }
 
 const HostRouteRouteChildren: HostRouteRouteChildren = {
@@ -346,6 +366,7 @@ const HostRouteRouteChildren: HostRouteRouteChildren = {
   HostQuizzesQuizIdRoute: HostQuizzesQuizIdRoute,
   HostResultsGameIdRoute: HostResultsGameIdRoute,
   HostGamesIndexRoute: HostGamesIndexRoute,
+  HostQuizzesIndexRoute: HostQuizzesIndexRoute,
 }
 
 const HostRouteRouteWithChildren = HostRouteRoute._addFileChildren(

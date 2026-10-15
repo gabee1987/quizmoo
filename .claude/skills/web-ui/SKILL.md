@@ -14,7 +14,8 @@ Topic skills: `game-screens` (phone, projector, host control and results layouts
 | `/` | players | join form (PIN first, then name and avatar, team picker in team mode), `?pin=` prefill from QR |
 | `/play/$pin` | players | the whole game on a phone: lobby, question, answered, reveal, scoreboard, podium |
 | `/login` | hosts | username + password |
-| `/host` | hosts | quiz list with Play, Edit, New, Results |
+| `/host` | hosts | home: greeting, figures, running and scheduled games, recently edited quizzes, latest results (from `/api/quizzes` and `/api/games`; sorting in `features/host/dashboard.ts`) |
+| `/host/quizzes` | hosts | quiz list with search, Play, Edit, New, batch edit and delete |
 | `/host/quizzes/$quizId` | hosts | editor |
 | `/host/settings` | hosts | My settings: quick messages, game defaults, password (`#account`); one draft with a sticky Save bar, keyed by the stored settings |
 | `/host/password` | hosts | the forced first password change only, without navigation; otherwise redirects to `/host/settings#account` |
@@ -24,7 +25,7 @@ Topic skills: `game-screens` (phone, projector, host control and results layouts
 | `/screen/$pin` | projector | public read-only big-screen view |
 | `/screen/results/$gameId` | projector | results summary (host session required) |
 
-`/host/*` routes have a layout route that loads `/api/auth/me` and redirects to `/login` on 401. `/play/$pin` and `/screen/$pin` need no login.
+`/host/*` routes have a layout route that loads `/api/auth/me` and redirects to `/login` on 401. `HostNav`: Home, Quizzes, Games (plus Users and Names for admins) in the laptop sidebar; the phone tab bar keeps four tabs, so the admin pages sit in its Account menu. Shared host queries (`quizzesQueryOptions`, `gamesQueryOptions`) are in `features/host/queries.ts`, "New quiz" and "Play" in `features/host/quiz-actions.ts`. `/play/$pin` and `/screen/$pin` need no login.
 
 ## Installable app
 

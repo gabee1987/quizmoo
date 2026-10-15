@@ -64,7 +64,7 @@ function HostGamePage() {
       <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center">
         <p className="text-xl font-semibold">{t(closed)}</p>
         <Button asChild variant="secondary">
-          <Link to="/host">{t('host.game.backToQuizzes')}</Link>
+          <Link to="/host/quizzes">{t('host.game.backToQuizzes')}</Link>
         </Button>
       </div>
     )
@@ -216,7 +216,7 @@ function PhaseDetail({
           )}
           {gameId && <PlayAgainButton gameId={gameId} />}
           <Button asChild variant="ghost">
-            <Link to="/host">{t('host.game.backToQuizzes')}</Link>
+            <Link to="/host/quizzes">{t('host.game.backToQuizzes')}</Link>
           </Button>
         </section>
       )
