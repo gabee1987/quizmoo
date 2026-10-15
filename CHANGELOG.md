@@ -139,6 +139,7 @@
 - "Play again" keeps the teams, so phones rejoin theirs.
 - The host's message stays pinned to the top of the phone while the player scrolls (long questions, the end-of-game review), as wide as a toast.
 - Phones say what happened to their team: "The host moved you to …", "… joined your team", "You're the captain of … now", and to the old captain who the new one is.
+- Once a whole team has its answer, its phones show what the team sent instead of only "Answer sent": the team's answer (with who confirmed it, or how many votes it had) and every member's pick; in "Everyone counts", that everyone has answered, with the picks. The reveal shows the same (also when correct answers are held back until the end), since the question closes as soon as every team has answered.
 - Team-mode lobby tiles are rows with a small avatar and the whole name; make captain, move and remove are in one menu per player.
 
 ### Development

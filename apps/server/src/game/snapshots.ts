@@ -30,6 +30,7 @@ import {
   teamAnswered,
   teamGain,
   teamMode,
+  voteKey,
   voteTally,
   votesOf,
 } from './team-answers.js'
@@ -130,6 +131,37 @@ function teamLive(state: GameState, player: Player): TeamLive | null {
   }
 }
 
+/**
+ * The player's team on the question its reveal shows: the team's answer (captain decides and majority
+ * vote) and each member's own pick, kept on the team's answer when its members' records became copies.
+ * A team of one, other phases and other teams get nothing. Nothing about correctness.
+ */
+function teamResult(state: GameState, player: Player, phase: GameSnapshotBase['phase'], index: number): TeamLive | null {
+  const team = player.teamId ? state.teams[player.teamId] : undefined
+  const question = state.quiz.questions[index]
+  if (phase !== 'reveal' || !team || !question) return null
+  const members = membersOf(state, team.id)
+  if (members.length < 2) return null
+  const record = team.answers?.[question.id]
+  const picks =
+    record?.picks ??
+    members.flatMap((m) => (m.answers[question.id] ? [{ playerId: m.id, answer: m.answers[question.id]!.answer }] : []))
+  const groups = new Map<string, { answer: Answer; playerIds: string[] }>()
+  for (const pick of picks) {
+    const key = voteKey(pick.answer)
+    const group = groups.get(key)
+    if (group) group.playerIds.push(pick.playerId)
+    else groups.set(key, { answer: pick.answer, playerIds: [pick.playerId] })
+  }
+  const picked = new Set(picks.map((p) => p.playerId))
+  return {
+    answer: record?.answer ?? null,
+    setBy: record?.byPlayerId ?? null,
+    votes: [...groups.values()].sort((a, b) => b.playerIds.length - a.playerIds.length),
+    waiting: members.filter((m) => !picked.has(m.id)).map((m) => m.id),
+  }
+}
+
 export function toPlayerSnapshot(state: GameState, playerId: string, now: number, seq = 0): PlayerSnapshot {
   const base = conceal(state, baseSnapshot(state, now, 'players', seq))
   const me = base.players.find((p) => p.id === playerId)
@@ -145,6 +177,7 @@ export function toPlayerSnapshot(state: GameState, playerId: string, now: number
     me,
     myAnswer: record?.answer ?? null,
     teamLive: teamLive(state, player),
+    teamResult: teamResult(state, player, base.phase, base.questionIndex),
     teamFallback: base.phase === 'reveal' && Boolean(teamRecord?.fallback),
     lastPoints: base.reveal ? (record?.points ?? 0) : null,
     lastBonus: base.reveal ? (record?.bonus ?? 0) : null,

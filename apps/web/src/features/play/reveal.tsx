@@ -1,4 +1,5 @@
-import type { PlayerSnapshot } from '@quizmoo/shared'
+import type { PlayerSnapshot, TeamLive } from '@quizmoo/shared'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/cn'
 import { CheckIcon, CrossIcon } from '../../components/icons'
@@ -7,11 +8,13 @@ import { stagger, useCountUp } from '../../lib/motion'
 import { CorrectAnswer } from '../questions/correct-answer'
 import { formatAnswer } from '../questions/format-answer'
 import { myTeamMode } from './change-window'
+import { TeamPicksPanel } from './team-picks-panel'
+import { TeamSummary } from './team-summary'
 
 export function Reveal({ snapshot }: { snapshot: PlayerSnapshot }) {
   const { t, i18n } = useTranslation()
   const points = useCountUp(snapshot.lastPoints ?? 0, 900, 350)
-  if (snapshot.answersHidden) return <AnswerKept answered={snapshot.myAnswer !== null} />
+  if (snapshot.answersHidden) return <AnswerKept snapshot={snapshot} />
 
   const question = snapshot.reveal?.question
   const isPoll = question?.type === 'poll'
@@ -46,8 +49,8 @@ export function Reveal({ snapshot }: { snapshot: PlayerSnapshot }) {
           </span>
         )}
         <h1 className="text-3xl font-black">{title}</h1>
-        {/* One answer for the whole team: say which one counted. */}
-        {question && snapshot.myAnswer && (myTeamMode(snapshot) === 'majority' || myTeamMode(snapshot) === 'captain') && (
+        {/* One answer for the whole team: say which one counted (a team of more than one gets the summary below). */}
+        {question && snapshot.myAnswer && !snapshot.teamResult && (myTeamMode(snapshot) === 'majority' || myTeamMode(snapshot) === 'captain') && (
           <p className="font-bold wrap-break-word">
             {t('play.team.teamAnswered', { answer: formatAnswer(snapshot.myAnswer, question, t, i18n.language) })}
           </p>
@@ -73,6 +76,7 @@ export function Reveal({ snapshot }: { snapshot: PlayerSnapshot }) {
           <CorrectAnswer question={question} symbols={snapshot.settings.answerSymbols} />
         </div>
       )}
+      {snapshot.teamResult && <TeamResult snapshot={snapshot} team={snapshot.teamResult} />}
       {/* The running rank is a scoreboard of its own: only shown when the scoreboard follows every question. */}
       {snapshot.settings.scoreboard === 'afterQuestion' && (
         <p className="flex animate-fade-up items-center gap-2 font-semibold text-muted-foreground" style={stagger(1, 0, 450)}>
@@ -108,14 +112,27 @@ function Sparkles() {
   )
 }
 
-/** Results are held back until the end: confirm the answer was kept, reveal nothing. */
-function AnswerKept({ answered }: { answered: boolean }) {
+/** What the player's team sent and each member's pick (a team of more than one); nothing about right or wrong. */
+function TeamResult({ snapshot, team }: { snapshot: PlayerSnapshot; team: TeamLive }) {
+  const [open, setOpen] = useState(true)
+  return (
+    <div className="flex w-full animate-fade-up flex-col items-center gap-3" style={stagger(1, 0, 400)}>
+      <TeamSummary snapshot={snapshot} team={team} />
+      <TeamPicksPanel snapshot={snapshot} live={team} open={open} onOpenChange={setOpen} closed className="max-w-sm" />
+    </div>
+  )
+}
+
+/** Results are held back until the end: confirm the answer was kept and show the team's picks, reveal nothing else. */
+function AnswerKept({ snapshot }: { snapshot: PlayerSnapshot }) {
   const { t } = useTranslation()
+  const answered = snapshot.myAnswer !== null
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-5 text-center">
       <div className="flex w-full animate-pop flex-col items-center gap-2 rounded-3xl border bg-card px-4 py-8 shadow-soft">
         <h1 className="text-3xl font-black">{answered ? t('play.answerKept') : t('play.noAnswer')}</h1>
       </div>
+      {snapshot.teamResult && <TeamResult snapshot={snapshot} team={snapshot.teamResult} />}
       <p className="font-semibold text-muted-foreground">{t('play.resultsAtEnd')}</p>
     </div>
   )

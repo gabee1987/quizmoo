@@ -516,6 +516,37 @@ describe('team answers in snapshots', () => {
     })
   })
 
+  it("shows the team's answer and each member's own pick in the reveal, also while results are held back", () => {
+    // Blue (captain decides): p4 suggests B, p5 picks A, p4 confirms A. Red (majority): p1 and p2 vote B, p3 does not.
+    let state = send(send(teams(), 'p4', B, T0 + 1000), 'p5', A, T0 + 2000)
+    state = send(send(state, 'p1', B, T0 + 1000), 'p2', B, T0 + 1500)
+    state = endQuestion(confirm(state, 'p4', A, T0 + 3000))
+    const blue = toPlayerSnapshot(state, 'p5', T0).teamResult
+    expect(blue).toEqual({
+      answer: A,
+      setBy: 'p4',
+      votes: [
+        { answer: B, playerIds: ['p4'] },
+        { answer: A, playerIds: ['p5'] },
+      ],
+      waiting: [],
+    })
+    for (const other of ['p1', 'p2', 'p3', 'p6', 'p7']) expect(JSON.stringify(blue)).not.toContain(other)
+    expect(toPlayerSnapshot(state, 'p3', T0).teamResult).toEqual({
+      answer: B,
+      setBy: null,
+      votes: [{ answer: B, playerIds: ['p1', 'p2'] }],
+      waiting: ['p3'],
+    })
+    // Green (everyone counts) has no team answer; nobody answered.
+    expect(toPlayerSnapshot(state, 'p6', T0).teamResult).toEqual({ answer: null, setBy: null, votes: [], waiting: ['p6', 'p7'] })
+    // Held back until the end: the team's picks are still shown, correctness is not.
+    const hidden = { ...state, settings: { ...state.settings, revealAnswers: 'atEnd' as const } }
+    expect(toPlayerSnapshot(hidden, 'p5', T0)).toMatchObject({ teamResult: blue, reveal: null })
+    // Not while a question runs.
+    expect(toPlayerSnapshot(next(state, T0 + 9000), 'p5', T0).teamResult).toBeNull()
+  })
+
   it('marks team answers and fallbacks in the end-of-game review', () => {
     const state = endGame(endQuestion(send(send(teams(), 'p5', A, T0 + 1000), 'p6', B, T0 + 1000)), T0 + 2000)
     expect(toPlayerSnapshot(state, 'p4', T0).myResults![0]).toMatchObject({ answer: A, teamAnswer: true, fallback: true })

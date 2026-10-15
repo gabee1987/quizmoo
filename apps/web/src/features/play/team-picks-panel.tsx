@@ -20,6 +20,7 @@ export function TeamPicksPanel({
   onOpenChange,
   onUse,
   disabled,
+  closed = false,
   className,
   ref,
 }: {
@@ -29,11 +30,14 @@ export function TeamPicksPanel({
   onOpenChange: (open: boolean) => void
   onUse?: ((answer: Answer) => void) | undefined
   disabled?: boolean
+  /** The question has closed (the reveal): members without a pick gave no answer instead of still thinking. */
+  closed?: boolean
   className?: string
   ref?: Ref<HTMLDetailsElement>
 }) {
   const { t, i18n } = useTranslation()
   const members = memberPicks(live)
+  const question = snapshot.question ?? snapshot.reveal?.question ?? null
   const captainId = snapshot.teams.find((team) => team.id === snapshot.me.teamId)?.captainId
   const picked = members.filter((m) => m.answer).length
 
@@ -60,7 +64,7 @@ export function TeamPicksPanel({
                   {playerId === captainId && <CrownIcon className="size-3.5 shrink-0 text-warning" aria-label={t('play.team.captain')} />}
                 </span>
                 <span className={cn('font-bold wrap-break-word', !answer && 'font-semibold text-muted-foreground italic')}>
-                  {answer ? formatAnswer(answer, snapshot.question, t, i18n.language) : t('play.team.thinking')}
+                  {answer ? formatAnswer(answer, question, t, i18n.language) : t(closed ? 'play.noAnswer' : 'play.team.thinking')}
                 </span>
               </span>
               {onUse && answer && !isMe && (

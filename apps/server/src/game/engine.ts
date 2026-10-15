@@ -17,7 +17,17 @@ import {
 } from '@quizmoo/shared'
 import { isNameAllowed } from './names.js'
 import { isCorrect, pointsFor } from './scoring.js'
-import { answersAsOne, captainOf, membersOf, needsConfirmation, teamAnswerNow, teamAnswered, teamGain, teamMode } from './team-answers.js'
+import {
+  answersAsOne,
+  captainOf,
+  membersOf,
+  needsConfirmation,
+  teamAnswerNow,
+  teamAnswered,
+  teamGain,
+  teamMode,
+  votesOf,
+} from './team-answers.js'
 import {
   EngineError,
   MAX_PLAYERS,
@@ -743,7 +753,10 @@ function resolveTeamAnswers(state: GameState, questionId: string): GameState {
   const teams = { ...state.teams }
   for (const team of Object.values(state.teams)) {
     if (!answersAsOne(team)) continue
-    const record = teamAnswerNow(state, team, questionId)
+    const answer = teamAnswerNow(state, team, questionId)
+    // The members' own picks, before they are replaced by the team's answer below.
+    const picks = votesOf(state, team.id, questionId).map((vote) => ({ playerId: vote.playerId, answer: vote.record.answer }))
+    const record = answer && { ...answer, picks }
     if (record) teams[team.id] = { ...team, answers: { ...team.answers, [questionId]: record } }
     for (const member of membersOf(state, team.id)) {
       const { [questionId]: _vote, ...answers } = member.answers

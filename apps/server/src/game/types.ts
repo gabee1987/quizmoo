@@ -54,6 +54,11 @@ export interface TeamAnswerRecord {
   byPlayerId: string | null
   /** Captain decides without a confirmation: the majority counted. Missing in games saved before it existed. */
   fallback?: boolean
+  /**
+   * What each member picked (votes or suggestions), kept when the question closes and every member's
+   * record becomes a copy of this answer. Missing in games saved before it existed.
+   */
+  picks?: { playerId: string; answer: Answer }[]
   points: number
   bonus?: number
   correct: boolean | null

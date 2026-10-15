@@ -298,6 +298,12 @@ export interface PlayerSnapshot extends GameSnapshotBase {
   myAnswer: Answer | null
   /** The player's team's picks while a question runs, in team mode; otherwise null. */
   teamLive: TeamLive | null
+  /**
+   * The reveal (also while results are held back): the team's answer to the question on the screens
+   * and what each member picked, for a team of more than one; otherwise null. Only the player's own
+   * team, and nothing about correctness. `waiting`: members without a pick.
+   */
+  teamResult: TeamLive | null
   /** The revealed question's team answer was the majority because the captain did not confirm. */
   teamFallback: boolean
   /** Points earned on the last revealed question (streak bonus included). */
