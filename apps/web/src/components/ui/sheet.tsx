@@ -3,6 +3,7 @@ import { cn } from '@/lib/cn'
 import i18next from 'i18next'
 import { XIcon } from 'lucide-react'
 import { Dialog as SheetPrimitive } from 'radix-ui'
+import { closeButtonClass } from '@/components/ui/dialog'
 
 function Sheet({ ...props }: React.ComponentProps<typeof SheetPrimitive.Root>) {
   return <SheetPrimitive.Root data-slot="sheet" {...props} />
@@ -67,8 +68,8 @@ function SheetContent({
       >
         {children}
         {showCloseButton && (
-          <SheetPrimitive.Close className="absolute top-3 right-3 flex size-10 items-center justify-center rounded-lg opacity-70 ring-offset-background transition-opacity hover:bg-muted hover:opacity-100 focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:outline-hidden disabled:pointer-events-none data-[state=open]:bg-secondary">
-            <XIcon className="size-4" />
+          <SheetPrimitive.Close className={closeButtonClass}>
+            <XIcon />
             <span className="sr-only">{i18next.t('common.close')}</span>
           </SheetPrimitive.Close>
         )}

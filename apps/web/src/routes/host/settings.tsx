@@ -1,17 +1,7 @@
 import { gameSettingsSchema, type HostSettings } from '@quizmoo/shared'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute, useBlocker } from '@tanstack/react-router'
-import {
-  CircleAlertIcon,
-  KeyRoundIcon,
-  MegaphoneIcon,
-  PaletteIcon,
-  RotateCcwIcon,
-  RouteIcon,
-  SaveIcon,
-  SlidersHorizontalIcon,
-  TrophyIcon,
-} from 'lucide-react'
+import { CircleAlertIcon, KeyRoundIcon, MegaphoneIcon, RotateCcwIcon, SaveIcon, SlidersHorizontalIcon } from 'lucide-react'
 import { useState, type ComponentType, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
@@ -23,7 +13,7 @@ import { cn } from '@/lib/cn'
 import { usePresence } from '@/lib/presence'
 import { toastError } from '@/lib/toast'
 import { ConfirmDialog } from '../../components/dialog'
-import { GameSettingsForm, allSections, settingsError, type SettingsSection } from '../../features/host/game-settings-form'
+import { GameSettingsForm, allSections, sectionIcons, settingsError } from '../../features/host/game-settings-form'
 import { hostSettingsQueryOptions, saveHostSettings } from '../../features/settings/host-settings'
 import { PasswordForm } from '../../features/settings/password-form'
 import { QuickMessagesEditor } from '../../features/settings/quick-messages-editor'
@@ -31,12 +21,6 @@ import { QuickMessagesEditor } from '../../features/settings/quick-messages-edit
 export const Route = createFileRoute('/host/settings')({
   component: SettingsPage,
 })
-
-const sectionIcons: Record<SettingsSection, ComponentType<{ className?: string }>> = {
-  flow: RouteIcon,
-  look: PaletteIcon,
-  scoring: TrophyIcon,
-}
 
 /** My settings: what belongs to the host account and outlasts quizzes and games. */
 function SettingsPage() {

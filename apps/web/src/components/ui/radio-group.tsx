@@ -29,12 +29,14 @@ function RadioGroupItem({
       )}
       {...props}
     >
+      {/* Always mounted, so the dot springs in when chosen and shrinks away quietly when another option takes over. */}
       <RadioGroupPrimitive.Indicator
+        forceMount
         data-slot="radio-group-indicator"
-        className="relative flex items-center justify-center"
+        className="group/dot relative flex items-center justify-center"
       >
         <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-          <CircleIcon className="size-2.5 animate-pop fill-primary text-primary" />
+          <CircleIcon className="size-2.5 fill-primary text-primary transition-transform duration-400 ease-spring group-data-[state=unchecked]/dot:scale-0 group-data-[state=unchecked]/dot:duration-150 group-data-[state=unchecked]/dot:ease-in" />
         </span>
       </RadioGroupPrimitive.Indicator>
     </RadioGroupPrimitive.Item>

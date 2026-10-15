@@ -267,6 +267,7 @@
       "groupsHelp": "A játék a kvíz beállításaival indul. Bármelyik csoportot átállíthatod csak erre a játékra.",
       "reset": "Visszaállítás",
       "changedForGame": "Erre a játékra átállítva",
+      "aboutThis": "Bővebben: {{title}}",
       "noBonuses": "Nincs bónusz, kötött sorrend",
       "revealAnswers": "Helyes válaszok",
       "revealAnswersOptions": {

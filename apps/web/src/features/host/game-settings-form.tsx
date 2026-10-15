@@ -11,10 +11,11 @@ import {
   type GameSettings,
 } from '@quizmoo/shared'
 import type { TFunction } from 'i18next'
-import { XIcon } from 'lucide-react'
-import { useId, useState, type ReactNode } from 'react'
+import { InfoIcon, PaletteIcon, RouteIcon, TrophyIcon, XIcon } from 'lucide-react'
+import { useId, useState, type ComponentType, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ChoiceCards } from '@/components/choice-cards'
+import { Collapse } from '@/components/collapse'
 import { ColourWheel } from '@/components/colour-wheel'
 import { OptionSymbol } from '@/components/icons'
 import { OPTION_COLOURS } from '@/components/option-colours'
@@ -38,6 +39,12 @@ export const settingsSections = {
 } as const satisfies Record<string, readonly (keyof GameSettings)[]>
 export type SettingsSection = keyof typeof settingsSections
 export const allSections = Object.keys(settingsSections) as SettingsSection[]
+/** Each group's icon on its tab (My settings, the new game dialog). */
+export const sectionIcons: Record<SettingsSection, ComponentType<{ className?: string }>> = {
+  flow: RouteIcon,
+  look: PaletteIcon,
+  scoring: TrophyIcon,
+}
 
 /** Short descriptions of one group's settings, e.g. ["Classic", "Answers: after each question", ...]. */
 export function sectionSummary(settings: GameSettings, section: SettingsSection, t: TFunction): string[] {
@@ -119,6 +126,9 @@ export function GameSettingsForm({
   const set = (patch: Partial<GameSettings>) => onChange({ ...value, ...patch })
   const show = (section: SettingsSection) => sections.includes(section)
   const error = settingsError(value)
+  // The last problem stays as text while its line closes.
+  const [shownError, setShownError] = useState(error)
+  if (error && error !== shownError) setShownError(error)
 
   function addTeam() {
     const name = newTeam.trim()
@@ -148,7 +158,8 @@ export function GameSettingsForm({
             }
           />
 
-          {value.mode === 'team' && (
+          {/* Team settings open and close with the mode instead of jumping in (the parent's gap is taken inside). */}
+          <Collapse open={value.mode === 'team'} className="-mt-6" innerClassName="flex flex-col gap-6 pt-6">
             <fieldset className="flex flex-col gap-2">
               <legend className="mb-2 font-bold">{t('host.create.teams')}</legend>
               <ul className="flex flex-wrap gap-2">
@@ -190,11 +201,10 @@ export function GameSettingsForm({
                   {t('host.create.addTeam')}
                 </Button>
               </div>
-              {error && <p className="text-sm font-semibold text-destructive">{t(error)}</p>}
+              <Collapse open={!!error} className="-mt-2" innerClassName="pt-2">
+                <p className="text-sm font-semibold text-destructive">{shownError && t(shownError)}</p>
+              </Collapse>
             </fieldset>
-          )}
-          {value.mode === 'team' && (
-            <>
               <ChoiceCards
                 legend={t('host.create.teamAnswer')}
                 value={value.teamsChoose ? 'choose' : 'same'}
@@ -207,7 +217,7 @@ export function GameSettingsForm({
                 // Teams that choose all start on captain decides.
                 onChange={(option) => set(option === 'choose' ? { teamsChoose: true, teamAnswer: 'captain' } : { teamsChoose: false })}
               />
-              {!value.teamsChoose && (
+              <Collapse open={!value.teamsChoose} className="-mt-6" innerClassName="pt-6">
                 <ChoiceCards
                   legend={t('host.create.teamAnswerMode')}
                   value={value.teamAnswer}
@@ -219,9 +229,8 @@ export function GameSettingsForm({
                   }))}
                   onChange={(teamAnswer) => set({ teamAnswer })}
                 />
-              )}
-            </>
-          )}
+              </Collapse>
+          </Collapse>
         </>
       )}
       {show('look') && (
@@ -237,8 +246,10 @@ export function GameSettingsForm({
           help={t('host.create.themeHelp')}
         />
       )}
-      {show('look') && value.theme === 'custom' && (
-        <CustomThemePicker value={value.customTheme} onChange={(customTheme) => set({ customTheme })} />
+      {show('look') && (
+        <Collapse open={value.theme === 'custom'} className="-mt-6" innerClassName="pt-6">
+          <CustomThemePicker value={value.customTheme} onChange={(customTheme) => set({ customTheme })} />
+        </Collapse>
       )}
       {show('flow') && (
         <>
@@ -279,13 +290,13 @@ export function GameSettingsForm({
             onChange={(answerPalette) => set({ answerPalette })}
             help={t('host.create.answerPaletteHelp')}
           />
-          {value.answerPalette === 'custom' && (
+          <Collapse open={value.answerPalette === 'custom'} className="-mt-6" innerClassName="pt-6">
             <CustomPalettePicker
               value={value.customPalette}
               symbols={value.answerSymbols}
               onChange={(customPalette) => set({ customPalette })}
             />
-          )}
+          </Collapse>
           <ChoiceCards
             legend={t('host.create.answerSymbols')}
             value={value.answerSymbols}
@@ -325,8 +336,7 @@ export function GameSettingsForm({
             checked={value.answerChanges}
             onChange={(answerChanges) => set({ answerChanges })}
           />
-          {value.answerChanges && (
-            <div className="pb-2">
+          <Collapse open={value.answerChanges} innerClassName="pb-2">
               <ChoiceCards
                 legend={t('host.create.answerLock')}
                 value={String(value.answerLockSec)}
@@ -338,8 +348,7 @@ export function GameSettingsForm({
                   }))}
                 onChange={(sec) => set({ answerLockSec: Number(sec) })}
               />
-            </div>
-          )}
+          </Collapse>
           <SwitchRow
             label={t('host.create.shuffle')}
             checked={value.shuffleOptions}
@@ -360,8 +369,8 @@ function CustomThemePicker({ value, onChange }: { value: CustomTheme; onChange: 
   const { t } = useTranslation()
   const strengthId = useId()
   return (
-    <fieldset className="flex animate-fade-up flex-col gap-3 rounded-2xl border-2 border-dashed p-4">
-      <legend className="px-1 font-bold">{t('host.create.customTheme.title')}</legend>
+    <fieldset className="flex flex-col gap-3 rounded-2xl border-2 border-dashed p-4">
+      <LegendWithHelp title={t('host.create.customTheme.title')} help={t('host.create.customTheme.help')} />
       <div className="flex flex-wrap items-center gap-6">
         <ColourWheel
           chroma={value.chroma}
@@ -389,11 +398,42 @@ function CustomThemePicker({ value, onChange }: { value: CustomTheme; onChange: 
             <span>{t('host.create.customTheme.muted')}</span>
             <span>{t('host.create.customTheme.vivid')}</span>
           </div>
-          <p className="text-sm text-muted-foreground">{t('host.create.customTheme.help')}</p>
         </div>
       </div>
       <CustomThemeSample value={value} />
     </fieldset>
+  )
+}
+
+/** A fieldset's legend with an info button; the longer explanation shows only when asked for. */
+function LegendWithHelp({ title, help }: { title: string; help: string }) {
+  const { t } = useTranslation()
+  const helpId = useId()
+  const [open, setOpen] = useState(false)
+  return (
+    <>
+      <legend className="flex items-center gap-1 px-1 font-bold">
+        {title}
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-sm"
+          className="size-8 rounded-full text-muted-foreground hover:text-foreground aria-expanded:bg-secondary aria-expanded:text-secondary-foreground"
+          aria-label={t('host.create.aboutThis', { title })}
+          aria-expanded={open}
+          aria-controls={helpId}
+          onClick={() => setOpen((o) => !o)}
+        >
+          <InfoIcon aria-hidden="true" />
+        </Button>
+      </legend>
+      {/* The fieldset's gap is taken inside (below), so a closed one leaves none. */}
+      <Collapse open={open} className="-mb-3" innerClassName="pb-3">
+        <p id={helpId} className="rounded-xl bg-muted px-3 py-2 text-sm text-muted-foreground">
+          {help}
+        </p>
+      </Collapse>
+    </>
   )
 }
 
@@ -450,8 +490,8 @@ function CustomPalettePicker({
 }) {
   const { t } = useTranslation()
   return (
-    <fieldset className="flex animate-fade-up flex-col gap-3 rounded-2xl border-2 border-dashed p-4">
-      <legend className="px-1 font-bold">{t('host.create.customPalette.title')}</legend>
+    <fieldset className="flex flex-col gap-3 rounded-2xl border-2 border-dashed p-4">
+      <LegendWithHelp title={t('host.create.customPalette.title')} help={t('host.create.customPalette.help')} />
       <ul className="grid gap-2 sm:grid-cols-2">
         {value.map((colour, i) => (
           <li key={i}>
@@ -477,7 +517,6 @@ function CustomPalettePicker({
           </li>
         ))}
       </ul>
-      <p className="text-sm text-muted-foreground">{t('host.create.customPalette.help')}</p>
     </fieldset>
   )
 }

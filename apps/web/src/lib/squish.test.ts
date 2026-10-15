@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { installSquish, squishAmount } from './squish'
+import { installSquish, isUnselecting, squishAmount } from './squish'
 
 describe('squish', () => {
   let uninstall = () => {}
@@ -46,5 +46,38 @@ describe('squish', () => {
     radio.click()
     expect(card.animate).toHaveBeenCalledTimes(1)
     expect(radio.animate).not.toHaveBeenCalled()
+  })
+
+  it('gives a press that turns something off a soft dip instead of the wobble', () => {
+    document.body.innerHTML =
+      '<button id="on" role="switch" aria-checked="true"></button><button id="off" role="switch" aria-checked="false"></button>'
+    const on = document.querySelector<HTMLButtonElement>('#on')!
+    const off = document.querySelector<HTMLButtonElement>('#off')!
+    on.animate = vi.fn()
+    off.animate = vi.fn()
+    uninstall = installSquish()
+    on.click()
+    off.click()
+    const frames = (el: HTMLButtonElement) => vi.mocked(el.animate).mock.calls[0]![0] as Keyframe[]
+    expect(frames(on)).toHaveLength(3)
+    expect(frames(off)).toHaveLength(6)
+  })
+
+  it('ignores the plain click Radix fires on the hidden input of the option just unchosen', () => {
+    document.body.innerHTML = '<label data-squish><button role="radio" aria-checked="false"></button><input type="radio" aria-hidden="true"></label>'
+    const card = document.querySelector<HTMLElement>('label')!
+    card.animate = vi.fn()
+    uninstall = installSquish()
+    document.querySelector('input')!.dispatchEvent(new Event('click', { bubbles: true }))
+    expect(card.animate).not.toHaveBeenCalled()
+  })
+
+  it('knows when a press takes a choice away', () => {
+    document.body.innerHTML =
+      '<label data-squish><input type="checkbox" checked></label><label data-squish><button role="radio" aria-checked="false"></button></label><button>Go</button>'
+    const [checkbox, radio] = document.querySelectorAll('label')
+    expect(isUnselecting(checkbox!)).toBe(true)
+    expect(isUnselecting(radio!)).toBe(false)
+    expect(isUnselecting(document.querySelector('body > button')!)).toBe(false)
   })
 })

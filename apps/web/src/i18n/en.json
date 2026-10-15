@@ -267,6 +267,7 @@
       "groupsHelp": "The game starts with the quiz's settings. Change any group for this game only.",
       "reset": "Reset",
       "changedForGame": "Changed for this game",
+      "aboutThis": "About {{title}}",
       "noBonuses": "No bonuses, fixed order",
       "revealAnswers": "Correct answers",
       "revealAnswersOptions": {
