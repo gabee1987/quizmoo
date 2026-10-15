@@ -36,7 +36,7 @@ Error shape everywhere: `{ error: '<i18n key>' }`. Status codes: 400 invalid inp
 | `POST /api/auth/logout` | session | clears cookie |
 | `GET /api/auth/me` | session | `{ user }` or 401 |
 | `GET /api/quizzes` | session | list own quizzes (id, title, questionCount, updatedAt) |
-| `POST /api/quizzes` | session | create from `quizInputSchema`; a body without `settings` gets the host's game defaults |
+| `POST /api/quizzes` | session | create from `quizInputSchema`; a body without `settings` gets the host's game defaults. A `branding.logoImageId` that is not the host's own image: 400 `errors.invalidInput` (also on PUT) |
 | `GET /api/quizzes/:id` | owner | full quiz |
 | `PUT /api/quizzes/:id` | owner | replace from `quizInputSchema` |
 | `DELETE /api/quizzes/:id` | owner | |

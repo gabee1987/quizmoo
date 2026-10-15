@@ -272,6 +272,7 @@
         "onPhones": "A telefonokon is",
         "onPhonesHelp": "A játékosok telefonján, a váróban.",
         "addLogo": "Logó hozzáadása",
+        "offInQuiz": "A kvíz beállításaiban ki van kapcsolva. Itt csak erre a játékra kapcsolhatod be.",
         "eventName": "Esemény neve"
       },
       "groupsHelp": "A játék a kvíz beállításaival indul. Bármelyik csoportot átállíthatod csak erre a játékra.",
@@ -578,6 +579,16 @@
     "untitledQuiz": "Új kvíz",
     "gameSettings": "Játékbeállítások",
     "gameSettingsHelp": "Ennek a kvíznek minden játéka ezekkel a beállításokkal indul. Indításkor még átállíthatod őket.",
+    "branding": {
+      "title": "Arculat",
+      "show": "Arculat mutatása",
+      "showHelp": "Logó és eseménynév a kivetítőn, és ha indításkor kéred, a telefonokon is.",
+      "offHelp": "Ennek a kvíznek a játékaiban nincs logó és eseménynév, se a kivetítőn, se a telefonokon. Indításkor még bekapcsolhatod.",
+      "logo": "A kvíz logója",
+      "logoHelp": "Ha üresen hagyod, a Beállításaimban megadott logó jelenik meg.",
+      "eventName": "Esemény neve",
+      "eventNameHelp": "Ha üresen hagyod, a legutóbb használt eseménynevet kapod."
+    },
     "untitledQuestion": "Cím nélküli kérdés",
     "questionCount_one": "{{count}} kérdés",
     "questionCount_other": "{{count}} kérdés",

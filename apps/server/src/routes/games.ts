@@ -18,6 +18,7 @@ import { EngineError, quickMessagesOf, setNextGame } from '../game/index.js'
 import type { GameManager } from '../realtime/game-manager.js'
 import { parseOr400 } from './http.js'
 import { readHostSettings, rememberEventName } from './me.js'
+import { parseQuizBranding } from './quizzes.js'
 
 const createGameSchema = z.object({
   quizId: z.string().min(1),
@@ -50,11 +51,13 @@ export async function gameRoutes(app: FastifyInstance, { db, manager, appOrigin 
     if (!settings) return reply.code(400).send({ error: 'errors.invalidInput' })
 
     const host = await readHostSettings(db, request.user!.id)
+    const quizBranding = parseQuizBranding(quiz.branding)
     const choice = body.branding
     const eventName = choice?.eventName || null
-    // Copied in, so later changes to the logo or the name leave this game (and its projector) alone.
+    // The quiz's own logo, else the one from My settings. Copied in, so later changes leave this game (and its projector) alone.
+    const logoImageId = quizBranding.logoImageId ?? host.logoImageId
     const branding: GameBranding | null =
-      choice?.show && (host.logoImageId || eventName) ? { logoImageId: host.logoImageId, eventName, onPhones: choice.onPhones } : null
+      choice?.show && (logoImageId || eventName) ? { logoImageId, eventName, onPhones: choice.onPhones } : null
     let game
     try {
       game = await manager.create({
@@ -72,8 +75,8 @@ export async function gameRoutes(app: FastifyInstance, { db, manager, appOrigin 
       if (error instanceof EngineError) return reply.code(400).send({ error: error.code })
       throw error
     }
-    // The next game's dialog starts with the event name used now.
-    if (choice && choice.eventName !== host.eventName) await rememberEventName(db, request.user!.id, choice.eventName)
+    // The next game's dialog starts with the event name used now, unless it is this quiz's own.
+    if (choice && !quizBranding.eventName && choice.eventName !== host.eventName) await rememberEventName(db, request.user!.id, choice.eventName)
     return reply.code(201).send({ pin: game.state.pin })
   })
 

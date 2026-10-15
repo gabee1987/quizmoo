@@ -1,6 +1,6 @@
 import { z } from 'zod'
-import { announcementDurationSchema, announcementTextSchema, eventNameSchema } from './game.js'
-import { gameSettingsSchema } from './quiz.js'
+import { announcementDurationSchema, announcementTextSchema } from './game.js'
+import { eventNameSchema, gameSettingsSchema } from './quiz.js'
 
 /** The app's own quick messages, translated on the host's screen. Every host list starts with them. */
 export const builtInMessages = ['getReady', 'shortBreak', 'lastQuestion'] as const

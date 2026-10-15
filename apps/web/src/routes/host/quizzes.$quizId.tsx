@@ -50,6 +50,7 @@ import { errorsUnder, validateQuiz } from '../../features/editor/validate'
 import { CreateGameDialog } from '../../features/host/create-game-dialog'
 import { GameSettingsForm, settingsSummary, type SettingsSection } from '../../features/host/game-settings-form'
 import { useStartGame } from '../../features/host/quiz-actions'
+import { QuizBrandingFields } from '../../features/editor/quiz-branding-fields'
 import { ApiError, apiFetch, errorCode } from '../../lib/api'
 import { paletteVars } from '../../lib/themes'
 
@@ -100,6 +101,7 @@ function Editor({ quiz }: { quiz: Quiz }) {
     description: quiz.description,
     questions: quiz.questions,
     settings: quiz.settings,
+    branding: quiz.branding,
   })
   const [selectedId, setSelectedId] = useState<string | null>(quiz.questions[0]?.id ?? null)
   const [picking, setPicking] = useState(false)
@@ -374,7 +376,10 @@ function Editor({ quiz }: { quiz: Quiz }) {
           {settingsGroup('flow')}
           {settingsGroup('scoring')}
         </div>
-        <div className="flex flex-col gap-5">{settingsGroup('look')}</div>
+        <div className="flex flex-col gap-5">
+          {settingsGroup('look')}
+          <QuizBrandingFields value={draft.branding} onChange={(branding) => setDraft((d) => ({ ...d, branding }))} />
+        </div>
         <div className="flex flex-col gap-2 border-t pt-5 @3xl:col-span-2">
           <h3 className="font-extrabold">{t('editor.deleteQuiz')}</h3>
           <p className="text-sm text-muted-foreground">{t('editor.deleteQuizHelp')}</p>
@@ -622,6 +627,7 @@ function Editor({ quiz }: { quiz: Quiz }) {
           <CreateGameDialog
             quizTitle={draft.title}
             quizSettings={draft.settings}
+            quizBranding={draft.branding}
             pending={play.isPending}
             onCreate={(settings, scheduledAt, branding) => play.mutate({ quizId: quiz.id, settings, scheduledAt, branding })}
             onCancel={() => {

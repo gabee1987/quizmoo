@@ -317,6 +317,7 @@ function QuizList() {
         <CreateGameDialog
           quizTitle={creating.title}
           quizSettings={creating.settings}
+          quizBranding={creating.branding}
           pending={play.isPending}
           onCreate={(settings, scheduledAt, branding) => play.mutate({ quizId: creating.id, settings, scheduledAt, branding })}
           onCancel={() => {

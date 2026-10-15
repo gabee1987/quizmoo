@@ -1,4 +1,4 @@
-import type { GameHistoryItem, GameSettings } from '@quizmoo/shared'
+import type { GameHistoryItem, GameSettings, QuizBranding } from '@quizmoo/shared'
 import { queryOptions } from '@tanstack/react-query'
 import { apiFetch } from '@/lib/api'
 
@@ -8,6 +8,7 @@ export interface QuizSummary {
   questionCount: number
   updatedAt: string
   settings: GameSettings
+  branding: QuizBranding
 }
 
 /** The host's quizzes, most recently edited first. */

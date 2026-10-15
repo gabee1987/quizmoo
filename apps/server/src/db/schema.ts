@@ -1,5 +1,5 @@
 import { pgTable, text, timestamp, jsonb, integer, boolean, customType } from 'drizzle-orm/pg-core'
-import type { GameSettings, HostSettings, Question } from '@quizmoo/shared'
+import type { GameSettings, HostSettings, Question, QuizBranding } from '@quizmoo/shared'
 import type { GameState } from '../game/types.js'
 
 const bytea = customType<{ data: Buffer }>({ dataType: () => 'bytea' })
@@ -43,6 +43,8 @@ export const quizzes = pgTable('quizzes', {
   questions: jsonb('questions').$type<Question[]>().notNull(),
   /** Default game settings. Stored as sent; read through `gameSettingsSchema` so new fields get defaults. */
   settings: jsonb('settings').$type<Partial<GameSettings>>().notNull().default({}),
+  /** The quiz's own logo, event name and whether its games show branding; read through `quizBrandingSchema`. */
+  branding: jsonb('branding').$type<Partial<QuizBranding>>().notNull().default({}),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 })

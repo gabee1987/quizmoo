@@ -160,3 +160,9 @@ Fourth commit (branding):
 - The branding choice sits at the top of the dialog's Look tab. Without a choice in the request (API calls, older clients) a game has no branding.
 - The logo shows on a white tile in both colour modes, like the QR code.
 - The e2e test checks the event name on the projector and the phones; the logo upload is covered by route tests and screenshots only, since uploaded images cannot be deleted through the API and the e2e run must leave the dev database clean.
+
+Fifth commit (quiz branding, asked for after testing):
+- A quiz has its own `branding` (`show`, `logoImageId`, `eventName`) in a new jsonb column (migration `0005`); My settings is the default for what it leaves empty. The game uses the quiz's logo, else the account's.
+- `show: false` turns branding off for the quiz's games: the new game dialog starts with "Show my branding" off and says why, and can still turn it on for one game, like other quiz settings.
+- A quiz's own event name is not remembered in My settings (only names typed for quizzes without one are).
+- Quiz logos pass the same ownership check as the account logo; duplicate copies the branding, batch edit keeps it.

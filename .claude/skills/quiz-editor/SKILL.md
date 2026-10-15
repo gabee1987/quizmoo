@@ -14,6 +14,10 @@ General web rules are in `web-ui`; the settings column's animation is in `motion
 - **Saving**: `useAutosave` returns `{ status, retry }` with `saved | pending | saving | invalid | offline | error`; offline saves retry on the `online` event and every 10 s. `useBlocker` asks before leaving while the status is `invalid`, `offline` or `error`, and the browser's own prompt covers closing the tab while anything is unsaved.
 - **Shortcuts**: `matchShortcut` in `shortcuts.ts` (ignored while a field, dialog or menu has focus); list them in `shortcutKeys` so the "?" dialog stays complete.
 
+## Quiz branding
+
+`QuizBrandingFields` (`features/editor/quiz-branding-fields.tsx`) sits under the Look group: show on or off, a logo and an event name that override My settings when filled. It is quiz data (`draft.branding`), not a game setting, so batch edit, game defaults and the settings summary leave it out.
+
 ## Game settings groups
 
 `GameSettingsForm` is split into three groups (Game flow, Look, Scoring), labelled with the batch edit's keys (`host.batch.groups.*`) so every dialog names them the same way. `sectionSummary(group)` gives a group's chips; `settingsSummary` is built from it. The new game dialog shows one card per group, one open at a time, with "Changed for this game" and "Reset" when a group differs from the quiz's defaults.

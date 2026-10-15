@@ -153,6 +153,27 @@ describeDb('game routes (database)', () => {
     expect((await branded({ eventName: 'x'.repeat(61), show: true, onPhones: true })).statusCode).toBe(400)
   })
 
+  it("uses the quiz's own logo over the one from My settings, and keeps the quiz's event name out of My settings", async () => {
+    const image = (id: string) => ({ id, ownerId: aliceId, mime: 'image/webp', width: 1, height: 1, data: Buffer.from('x') })
+    await db.insert(images).values([image('logo-account'), image('logo-quiz')])
+    await built.app.inject({ method: 'PUT', url: '/api/me/settings', headers: { cookie: alice }, payload: { logoImageId: 'logo-account', eventName: 'Last' } })
+    await db.insert(quizzes).values({
+      id: 'quiz-branded',
+      ownerId: aliceId,
+      title: 'Branded',
+      questions: fixtureQuiz().questions,
+      branding: { logoImageId: 'logo-quiz', eventName: 'Quiz night' },
+    })
+    const res = await create(alice, { quizId: 'quiz-branded', branding: { eventName: 'Quiz night', show: true, onPhones: true } })
+    expect(built.manager.get(res.json().pin)!.state.branding).toEqual({ logoImageId: 'logo-quiz', eventName: 'Quiz night', onPhones: true })
+    const settings = await built.app.inject({ method: 'GET', url: '/api/me/settings', headers: { cookie: alice } })
+    expect(settings.json().settings.eventName).toBe('Last')
+
+    // A quiz without a logo of its own uses the account's.
+    const plain = await create(alice, { quizId: 'quiz-test_alice', branding: { eventName: '', show: true, onPhones: true } })
+    expect(built.manager.get(plain.json().pin)!.state.branding?.logoImageId).toBe('logo-account')
+  })
+
   it('play again: a new lobby with the same quiz and settings, pointed to by the finished game, owner only', async () => {
     const { pin } = (
       await create(alice, {

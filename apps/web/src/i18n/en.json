@@ -272,6 +272,7 @@
         "onPhones": "Also on the phones",
         "onPhonesHelp": "In the lobby on the players' phones.",
         "addLogo": "Add a logo",
+        "offInQuiz": "Turned off in this quiz's settings. Turn it on for this game only.",
         "eventName": "Event name"
       },
       "groupsHelp": "The game starts with the quiz's settings. Change any group for this game only.",
@@ -578,6 +579,16 @@
     "untitledQuiz": "New quiz",
     "gameSettings": "Game settings",
     "gameSettingsHelp": "Every game of this quiz starts with these settings. You can still change them when starting a game.",
+    "branding": {
+      "title": "Branding",
+      "show": "Show branding",
+      "showHelp": "A logo and event name on the projector, and on the phones if chosen when starting a game.",
+      "offHelp": "No logo or event name in this quiz's games, on the projector or on the phones. You can still turn it on when starting a game.",
+      "logo": "Quiz logo",
+      "logoHelp": "Leave it empty to use the logo from My settings.",
+      "eventName": "Event name",
+      "eventNameHelp": "Leave it empty to use the last event name you used."
+    },
     "untitledQuestion": "Untitled question",
     "questionCount_one": "{{count}} question",
     "questionCount_other": "{{count}} questions",

@@ -1,4 +1,4 @@
-import { gameSettingsSchema, quizInputSchema, type Question, type QuizInput } from '@quizmoo/shared'
+import { gameSettingsSchema, quizBrandingSchema, quizInputSchema, type Question, type QuizBranding, type QuizInput } from '@quizmoo/shared'
 import { and, desc, eq, inArray, sql } from 'drizzle-orm'
 import type { FastifyInstance, FastifyReply } from 'fastify'
 import { nanoid } from 'nanoid'
@@ -7,7 +7,14 @@ import { requireSession } from '../auth/require-session.js'
 import type { Db } from '../db/index.js'
 import { quizzes } from '../db/schema.js'
 import { parseOr400 } from './http.js'
+import { ownsImage } from './images.js'
 import { readHostSettings } from './me.js'
+
+/** A quiz's stored branding read through the schema; a value that no longer validates falls back to the defaults. */
+export function parseQuizBranding(raw: unknown): QuizBranding {
+  const parsed = quizBrandingSchema.safeParse(raw ?? {})
+  return parsed.success ? parsed.data : quizBrandingSchema.parse({})
+}
 
 /** Gives every question and option without an id a fresh `nanoid(8)`, so the editor can send new items without ids. */
 export function assignIds(body: unknown): unknown {
@@ -65,6 +72,7 @@ function toQuiz(row: QuizRow) {
     description: row.description,
     questions: row.questions,
     settings: gameSettingsSchema.parse(row.settings),
+    branding: parseQuizBranding(row.branding),
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   }
@@ -103,6 +111,14 @@ export async function quizRoutes(app: FastifyInstance, { db }: { db: Db }) {
     return parseOr400(quizInputSchema, assignIds(body), reply)
   }
 
+  /** A quiz's logo must be an image the host uploaded; answers 400 and returns false otherwise. */
+  async function logoAllowed(input: QuizInput, userId: string, reply: FastifyReply): Promise<boolean> {
+    const logo = input.branding.logoImageId
+    if (!logo || (await ownsImage(db, userId, logo))) return true
+    void reply.code(400).send({ error: 'errors.invalidInput' })
+    return false
+  }
+
   app.get('/api/quizzes', auth, async (request) => {
     const rows = await db
       .select({
@@ -111,12 +127,15 @@ export async function quizRoutes(app: FastifyInstance, { db }: { db: Db }) {
         questionCount: sql<number>`jsonb_array_length(${quizzes.questions})`.mapWith(Number),
         updatedAt: quizzes.updatedAt,
         settings: quizzes.settings,
+        branding: quizzes.branding,
       })
       .from(quizzes)
       .where(eq(quizzes.ownerId, request.user!.id))
       .orderBy(desc(quizzes.updatedAt))
-    // The list carries the settings so the new-game dialog can start from them.
-    return { quizzes: rows.map((row) => ({ ...row, settings: gameSettingsSchema.parse(row.settings) })) }
+    // The list carries the settings and branding so the new-game dialog can start from them.
+    return {
+      quizzes: rows.map((row) => ({ ...row, settings: gameSettingsSchema.parse(row.settings), branding: parseQuizBranding(row.branding) })),
+    }
   })
 
   app.post('/api/quizzes', auth, async (request, reply) => {
@@ -127,7 +146,7 @@ export async function quizRoutes(app: FastifyInstance, { db }: { db: Db }) {
       if (gameDefaults) body = { ...body, settings: gameDefaults }
     }
     const input = parseQuiz(body, reply)
-    if (!input) return reply
+    if (!input || !(await logoAllowed(input, request.user!.id, reply))) return reply
     const [row] = await db
       .insert(quizzes)
       .values({ id: nanoid(12), ownerId: request.user!.id, ...input })
@@ -160,6 +179,7 @@ export async function quizRoutes(app: FastifyInstance, { db }: { db: Db }) {
           description: row.description,
           questions: row.questions.map((question) => ({ ...question, ...body.questions })),
           settings: { ...row.settings, ...body.settings },
+          branding: parseQuizBranding(row.branding),
         },
         reply,
       )
@@ -188,7 +208,7 @@ export async function quizRoutes(app: FastifyInstance, { db }: { db: Db }) {
     const row = await ownQuiz(request.params.id, request.user!.id, reply)
     if (!row) return reply
     const input = parseQuiz(request.body, reply)
-    if (!input) return reply
+    if (!input || !(await logoAllowed(input, request.user!.id, reply))) return reply
     const [updated] = await db
       .update(quizzes)
       .set({ ...input, updatedAt: new Date() })
@@ -212,6 +232,7 @@ export async function quizRoutes(app: FastifyInstance, { db }: { db: Db }) {
         description: row.description,
         questions: row.questions.map(withFreshIds),
         settings: row.settings,
+        branding: row.branding,
       })
       .returning()
     return reply.code(201).send({ quiz: toQuiz(copy!) })

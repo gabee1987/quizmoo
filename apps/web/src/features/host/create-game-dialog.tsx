@@ -1,4 +1,4 @@
-import type { BrandingChoice, GameSettings } from '@quizmoo/shared'
+import type { BrandingChoice, GameSettings, QuizBranding } from '@quizmoo/shared'
 import { useQuery } from '@tanstack/react-query'
 import { CalendarClockIcon, PlayIcon, RotateCcwIcon } from 'lucide-react'
 import { useId, useState, type FormEvent } from 'react'
@@ -33,12 +33,14 @@ import {
 export function CreateGameDialog({
   quizTitle,
   quizSettings,
+  quizBranding,
   pending,
   onCreate,
   onCancel,
 }: {
   quizTitle: string
   quizSettings: GameSettings
+  quizBranding: QuizBranding
   pending: boolean
   /** `scheduledAt` (unix ms) when the host picked "Later"; `branding` once the host's settings loaded. */
   onCreate: (settings: GameSettings, scheduledAt: number | undefined, branding: BrandingChoice | undefined) => void
@@ -55,12 +57,14 @@ export function CreateGameDialog({
   // The last problem stays as text while its line closes, so it does not blank out first.
   const [shownError, setShownError] = useState(error)
   if (error && error !== shownError) setShownError(error)
-  // Branding starts from My settings: the last event name, shown once there is a logo or a name.
+  // Branding starts from the quiz, with My settings for what it leaves empty (the logo, the last event
+  // name); shown once there is a logo or a name, unless the quiz turned it off.
   const host = useQuery(hostSettingsQueryOptions)
+  const logoImageId = quizBranding.logoImageId ?? host.data?.logoImageId ?? null
   const [branding, setBranding] = useState<BrandingChoice | null>(null)
   if (host.data && !branding) {
-    const { logoImageId, eventName } = host.data
-    setBranding({ eventName, show: Boolean(logoImageId || eventName), onPhones: true })
+    const eventName = quizBranding.eventName || host.data.eventName
+    setBranding({ eventName, show: quizBranding.show && Boolean(logoImageId || eventName), onPhones: true })
   }
 
   function submit(e: FormEvent) {
@@ -166,7 +170,7 @@ export function CreateGameDialog({
                 </Collapse>
                 {section === 'look' && branding && (
                   <div className="pb-8">
-                    <BrandingFields value={branding} logoImageId={host.data?.logoImageId ?? null} onChange={setBranding} />
+                    <BrandingFields value={branding} logoImageId={logoImageId} offInQuiz={!quizBranding.show} onChange={setBranding} />
                   </div>
                 )}
                 <GameSettingsForm value={settings} onChange={setSettings} sections={[section]} />

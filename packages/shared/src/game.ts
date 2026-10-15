@@ -198,9 +198,6 @@ export const announcementTextSchema = z.string().trim().min(1).max(200)
 /** How long a host message stays before it clears itself: 5 s to 10 min. */
 export const announcementDurationSchema = z.number().int().min(5).max(600)
 
-/** The event's name on the projector and the phones' lobby, under the host's logo: up to 60 characters, may be empty. */
-export const eventNameSchema = z.string().trim().max(60)
-
 /** A game's branding: the host's logo and the event name, copied in when the game was created. */
 export interface GameBranding {
   logoImageId: string | null

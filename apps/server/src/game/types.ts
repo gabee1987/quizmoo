@@ -72,7 +72,7 @@ export interface Team {
 }
 
 /** The quiz frozen into a game. Its default settings are not part of it: the game has its own. */
-export type GameQuiz = Omit<Quiz, 'settings'>
+export type GameQuiz = Omit<Quiz, 'settings' | 'branding'>
 
 /** Plain JSON-serialisable value: persisted on every transition and restored on boot. */
 export interface GameState {

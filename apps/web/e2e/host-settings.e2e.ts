@@ -167,6 +167,19 @@ test('the event name from My settings on the projector, and on the phones only w
       await expect(on.projector.getByText('E2E party', { exact: true })).toBeVisible()
       await expect(on.phone.getByText('E2E party', { exact: true })).toBeVisible()
     })
+
+    await test.step("a quiz's own event name, and branding turned off in the quiz", async () => {
+      const quizNow = ((await (await page.request.get(`/api/quizzes/${quiz.id}`)).json()) as { quiz: object }).quiz
+      await page.request.put(`/api/quizzes/${quiz.id}`, { data: { ...quizNow, branding: { show: false, eventName: 'E2E quiz night' } } })
+      await page.goto('/host/quizzes')
+      await page.locator('li').filter({ hasText: title }).getByRole('button', { name: 'Play' }).click()
+      const dialog = page.getByRole('dialog')
+      await dialog.getByRole('tab', { name: /Look/ }).click()
+      await expect(dialog.getByRole('textbox', { name: 'Event name' })).toHaveValue('E2E quiz night')
+      await expect(dialog.getByRole('switch', { name: /Show my branding/ })).not.toBeChecked()
+      await expect(dialog.getByText("Turned off in this quiz's settings.", { exact: false })).toBeVisible()
+      await page.keyboard.press('Escape')
+    })
   } finally {
     await context.close()
     for (const gameId of gameIds) {

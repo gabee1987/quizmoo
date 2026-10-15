@@ -11,8 +11,9 @@ import type { FastifyInstance } from 'fastify'
 import { nanoid } from 'nanoid'
 import { requireSession } from '../auth/require-session.js'
 import type { Db } from '../db/index.js'
-import { hostSettings, images } from '../db/schema.js'
+import { hostSettings } from '../db/schema.js'
 import { parseOr400 } from './http.js'
+import { ownsImage } from './images.js'
 
 /**
  * A stored row read through the schema, so fields added later get their defaults. A field that no
@@ -56,12 +57,6 @@ export async function rememberEventName(db: Db, userId: string, eventName: strin
       target: hostSettings.userId,
       set: { settings: sql`${hostSettings.settings} || ${JSON.stringify({ eventName })}::jsonb`, updatedAt },
     })
-}
-
-/** A logo must be an image the host uploaded themselves. */
-async function ownsImage(db: Db, userId: string, imageId: string) {
-  const row = (await db.select({ ownerId: images.ownerId }).from(images).where(eq(images.id, imageId)))[0]
-  return row?.ownerId === userId
 }
 
 /**

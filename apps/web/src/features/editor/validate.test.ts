@@ -1,10 +1,10 @@
-import { gameSettingsSchema, type QuizInput } from '@quizmoo/shared'
+import { gameSettingsSchema, quizBrandingSchema, type QuizInput } from '@quizmoo/shared'
 import { describe, expect, it } from 'vitest'
 import { copyQuestion, move, newQuestion } from './draft'
 import { errorsUnder, locateProblem, validateQuiz } from './validate'
 
 function quiz(questions: QuizInput['questions']): QuizInput {
-  return { title: 'Quiz', description: '', questions, settings: gameSettingsSchema.parse({}) }
+  return { title: 'Quiz', description: '', questions, settings: gameSettingsSchema.parse({}), branding: quizBrandingSchema.parse({}) }
 }
 
 function filledSingle() {

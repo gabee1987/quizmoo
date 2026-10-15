@@ -7,21 +7,26 @@ import { TextField } from '@/components/text-field'
 import { SwitchRow } from './game-settings-form'
 
 /**
- * The new game dialog's branding: the event name for this game and where the host's logo and the
- * name show. The logo itself is set on My settings.
+ * The new game dialog's branding: the event name for this game and where the logo and the name
+ * show. The logo itself is set in the quiz's settings or on My settings.
  */
 export function BrandingFields({
   value,
   logoImageId,
+  offInQuiz,
   onChange,
 }: {
   value: BrandingChoice
+  /** The quiz's logo, else the one from My settings. */
   logoImageId: string | null
+  /** The quiz's settings turn branding off; it can still be turned on for this game. */
+  offInQuiz: boolean
   onChange: (value: BrandingChoice) => void
 }) {
   const { t } = useTranslation()
   const set = (patch: Partial<BrandingChoice>) => onChange({ ...value, ...patch })
   const nothing = !logoImageId && !value.eventName.trim()
+  const showHelp = nothing ? 'nothing' : offInQuiz && !value.show ? 'offInQuiz' : 'showHelp'
   return (
     <fieldset className="flex flex-col gap-3 rounded-2xl border p-4">
       <legend className="px-1 text-lg font-extrabold">{t('host.create.branding.title')}</legend>
@@ -52,7 +57,7 @@ export function BrandingFields({
       <div className="flex flex-col">
         <SwitchRow
           label={t('host.create.branding.show')}
-          description={nothing ? t('host.create.branding.nothing') : t('host.create.branding.showHelp')}
+          description={t(`host.create.branding.${showHelp}`)}
           checked={value.show}
           onChange={(show) => set({ show })}
         />

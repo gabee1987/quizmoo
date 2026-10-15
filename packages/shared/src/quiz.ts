@@ -218,6 +218,20 @@ function checkTeams(settings: { mode: GameMode; teamNames: string[] }, ctx: z.Re
   }
 }
 
+/** The event's name on the projector and the phones' lobby, under the host's logo: up to 60 characters, may be empty. */
+export const eventNameSchema = z.string().trim().max(60)
+
+/** A quiz's own branding; what it leaves empty comes from the host's My settings. */
+export const quizBrandingSchema = z.object({
+  /** False: this quiz's games start without branding (the new game dialog can still turn it on). */
+  show: z.boolean().default(true),
+  /** The quiz's logo, an image of the host's own; null uses the logo from My settings. */
+  logoImageId: z.string().min(1).max(32).nullable().default(null),
+  /** The event name its games start with; empty uses the last one the host used. */
+  eventName: eventNameSchema.default(''),
+})
+export type QuizBranding = z.infer<typeof quizBrandingSchema>
+
 export const quizSchema = z.object({
   id: z.string().min(1),
   title: z.string().trim().min(1).max(120),
@@ -225,6 +239,7 @@ export const quizSchema = z.object({
   questions: z.array(questionSchema).max(100).superRefine(checkQuestions),
   /** Default settings for games of this quiz; the host can change them when starting a game. */
   settings: gameSettingsSchema.prefault({}),
+  branding: quizBrandingSchema.prefault({}),
 })
 export type Quiz = z.infer<typeof quizSchema>
 
