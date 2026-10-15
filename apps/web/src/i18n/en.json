@@ -73,6 +73,7 @@
     "title": "Host login",
     "username": "Username",
     "password": "Password",
+    "showPassword": "Show password",
     "submit": "Log in",
     "logout": "Log out",
     "required": "Required.",

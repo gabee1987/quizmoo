@@ -73,6 +73,7 @@
     "title": "Lépj be!",
     "username": "Felhasználónév",
     "password": "Jelszó",
+    "showPassword": "Mutasd a jelszót",
     "submit": "Belépek",
     "logout": "Kilépés",
     "required": "Ezt ki kell tölteni.",

@@ -120,6 +120,7 @@
 - The settings are stored per host account, reachable only by that host, and deleted with the account.
 - Motion: the sidebar's highlight springs to the chosen page, toasts are as wide as the page's panels and bubble in and out, rows moved with the arrows or shortcuts slide past each other (quick messages, the editor's question list, the ordering question), tab panels, rows and the unsaved changes bar animate in and out instead of blinking, and panels spring to their new height. The settings tabs are bigger and coloured, and the unsaved changes bar stands apart from the page under it.
 - The quiz editor's settings on a phone use the full width, with a one-line summary in the header and the same space on both sides when a scrollbar shows.
+- Password fields (login, password change, new users) have an eye button on the right that shows the characters.
 
 ### Development
 - The web dev server runs on port 15173, away from the 5173+ ports other local Vite projects take.
