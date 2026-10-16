@@ -123,6 +123,7 @@ describeDb('game routes (database)', () => {
         { id: 'team-2', name: 'Blue', memberCount: 0 },
       ],
       newTeams: false,
+      solo: false,
       joinUrl: `http://localhost:3000/?pin=${pin}`,
       scheduledAt: null,
       serverNow: expect.any(Number),
@@ -130,6 +131,13 @@ describeDb('game routes (database)', () => {
     built.manager.apply(pin, (state) => joinPlayer(state, { id: 'p1', name: 'Anna', teamId: 'team-2', token: 'tok-1' }))
     const counted = (await built.app.inject({ method: 'GET', url: `/api/games/${pin}/public` })).json()
     expect(counted.teams[1]).toEqual({ id: 'team-2', name: 'Blue', memberCount: 1 })
+
+    // Playing alone: offered, and a solo player's own entry is no team to join.
+    const solo = (await create(alice, { quizId: 'quiz-test_alice', settings: { ...settings, soloPlayers: true } })).json()
+    built.manager.apply(solo.pin, (state) => joinPlayer(state, { id: 'p1', name: 'Anna', solo: true, token: 'tok-1' }))
+    const soloInfo = (await built.app.inject({ method: 'GET', url: `/api/games/${solo.pin}/public` })).json()
+    expect(soloInfo.solo).toBe(true)
+    expect(soloInfo.teams.map((t: { id: string }) => t.id)).toEqual(['team-1', 'team-2'])
     const missing = await built.app.inject({ method: 'GET', url: '/api/games/999999/public' })
     expect(missing.statusCode).toBe(404)
     expect(missing.json()).toEqual({ error: 'errors.gameNotFound' })

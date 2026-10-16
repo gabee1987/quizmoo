@@ -141,6 +141,9 @@
 - Phones say what happened to their team: "The host moved you to …", "… joined your team", "You're the captain of … now", and to the old captain who the new one is.
 - Once a whole team has its answer, its phones show what the team sent instead of only "Answer sent": the team's answer (with who confirmed it, or how many votes it had) and every member's pick; in "Everyone counts", that everyone has answered, with the picks. The reveal shows the same (also when correct answers are held back until the end), since the question closes as soon as every team has answered.
 - Team-mode lobby tiles are rows with a small avatar and the whole name; make captain, move and remove are in one menu per player.
+- The phone lobby shows the game PIN, and the phone's round menu keeps it (with the quiz title) at hand for the whole game, so players can tell others where to join.
+- A player answering alone (classic, a team of one, a solo player) sees what they sent instead of only a check: the answer in its button colours and symbols, how long it took and which question it was.
+- Mixed play: with "Players may play on their own" (new game dialog, off by default) the join page also offers "On my own". Solo players answer for themselves and are ranked with the teams by their own points on the scoreboard, the podium and the results ("Teams and solo players"), shown with their avatar; the results and the CSV mark them "On their own". The host lobby groups them under "On their own"; the host moves players between a team and playing alone (drag, the player's menu, or "Move" between questions), and their solo points wait for them when they come back.
 
 ### Development
 - The web dev server runs on port 15173, away from the 5173+ ports other local Vite projects take.

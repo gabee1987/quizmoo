@@ -9,8 +9,8 @@ import {
 } from '@quizmoo/shared'
 import { resultsPendingFor } from './engine.js'
 import { denseRank } from './scoring.js'
-import { isRevealed, revealInfo, teamAnswers } from './snapshots.js'
-import { captainOf, teamMode } from './team-answers.js'
+import { isRevealed, revealInfo, soloOf, teamAnswers } from './snapshots.js'
+import { captainOf, rankedTeams, teamMode } from './team-answers.js'
 import type { GameState } from './types.js'
 
 /**
@@ -42,9 +42,10 @@ export function toResults(state: GameState): GameResults {
     correctCount: asked.filter((q) => p.answers[q.id]?.correct === true).length,
     points: asked.map((q) => p.answers[q.id]?.points ?? null),
   }))
-  const teams = denseRank(Object.values(state.teams)).map((t) => ({
+  const teams = denseRank(rankedTeams(state)).map((t) => ({
     id: t.id,
     name: t.name,
+    ...soloOf(state, t),
     score: t.score,
     rank: t.rank,
     // Final standings: nothing is pending, so there is no earlier rank to compare with.
@@ -55,7 +56,7 @@ export function toResults(state: GameState): GameResults {
     answered: false,
   }))
   const podium: PodiumPlace[] = (
-    state.settings.mode === 'team' ? teams.map((t) => ({ ...t, avatar: null })) : rankedPlayers
+    state.settings.mode === 'team' ? teams : rankedPlayers
   )
     .filter((place) => place.rank <= 3)
     .map(({ id, name, avatar, score, rank }) => ({ id, name, avatar, score, rank }))
@@ -80,21 +81,22 @@ export type CsvLanguage = 'hu' | 'en'
 
 const csvHeaders: Record<
   CsvLanguage,
-  { rank: string; name: string; team: string; total: string; teamAnswer: string; true: string; false: string }
+  { rank: string; name: string; team: string; solo: string; total: string; teamAnswer: string; true: string; false: string }
 > = {
-  hu: { rank: 'Helyezés', name: 'Név', team: 'Csapat', total: 'Összesen', teamAnswer: 'Csapat válasza', true: 'Igaz', false: 'Hamis' },
-  en: { rank: 'Rank', name: 'Name', team: 'Team', total: 'Total', teamAnswer: 'Team answer', true: 'True', false: 'False' },
+  hu: { rank: 'Helyezés', name: 'Név', team: 'Csapat', solo: 'Egyéni', total: 'Összesen', teamAnswer: 'Csapat válasza', true: 'Igaz', false: 'Hamis' },
+  en: { rank: 'Rank', name: 'Name', team: 'Team', solo: 'On their own', total: 'Total', teamAnswer: 'Team answer', true: 'True', false: 'False' },
 }
 
 /**
  * Player table as CSV for Excel: UTF-8 with BOM (keeps accents), `;` separator
  * (the Hungarian Excel default), CRLF lines. One column per question with its points;
- * empty where the player did not answer. Teams that answered as one follow after an empty
- * line with their answer to each question.
+ * empty where the player did not answer; solo players are marked in the team column. Teams that
+ * answered as one follow after an empty line with their answer to each question.
  */
 export function toCsv(results: GameResults, language: CsvLanguage): string {
   const headers = csvHeaders[language]
-  const teamNames = new Map(results.teams.map((t) => [t.id, t.name]))
+  // A solo player's team column says so instead of repeating their name.
+  const teamNames = new Map(results.teams.map((t) => [t.id, t.solo ? headers.solo : t.name]))
   const rows: (string | number)[][] = [
     [headers.rank, headers.name, headers.team, headers.total, ...results.questions.map((q) => `${q.index + 1}. ${q.question.text}`)],
     ...results.players.map((p) => [

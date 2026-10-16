@@ -158,6 +158,12 @@ $env:E2E_BASE_URL="http://localhost:3999"; $env:E2E_USERNAME="admin"; $env:E2E_P
 - `pnpm e2e` on the production build (:3999): 14 of 14, with the new `flexible-teams.e2e.ts`; `team-answers.e2e.ts` picks its team by the start of the card's name (the card now also shows the member count).
 - Screenshots: new game dialog (setup, list, late join), join page with "New team" (light and dark), a taken name, 30 teams (list scrolls, no "New team"), host lobby on a laptop and a phone (drag, "Move" by keyboard, rename, remove, "Without a team"), the phone picking again, the captaincy in the phone menu mid-question, a latecomer's question, the control page's crown and "Move" in the reveal.
 
+## Results (second commit: mixed play)
+
+- `pnpm verify`: shared 12, web 177, server 383 tests (with the test database), builds.
+- `pnpm e2e` on the production build (:3999): 15 of 15, with the new `mixed-play.e2e.ts` (a solo player, the host moving a team player out to play alone, the mixed scoreboard, the results).
+- Screenshots: the new game dialog's switch, "On my own" on the join page (light and dark), the solo phone lobby, the host lobby's "On their own" group and the row menu, the phone's toast, the mixed scoreboard on phones and the projector, the control page's "Move", the podiums, the results page; the CSV marks solo players "On their own".
+
 ## Deviations
 
 - **Removing a team** leaves its players without a team (`teamId: null`); they pick another one with the new `player:team` event (lobby only), or the host moves them. Start is refused with `errors.playersWithoutTeam` until everyone has a team.
@@ -166,8 +172,13 @@ $env:E2E_BASE_URL="http://localhost:3999"; $env:E2E_USERNAME="admin"; $env:E2E_P
 - **"Play again"** keeps the last round's teams with their ids (`createGame` takes them as seeds), so phones rejoin their team.
 - **Team setup and names are game-only settings** (`gameOnlySettings` in the web form): shown only in the new game dialog, left out of batch edits. The two-team rule moved from `gameSettingsSchema` to `newGameSettingsSchema` (game creation). A team quiz without saved names opens the dialog on "Players create teams".
 - **Captaincy in the game:** the phone's game menu (top right) lists the connected teammates for the captain in every phase but finished; the host's crown is on the control page's player list.
+- **Solo players are entries of their own, not `teamId: null`.** A solo player gets a team-like entry (`Team.solo`, id `solo-<playerId>`, their name, "Everyone counts", nobody else can join, rename, remove or set its mode), so scoring, early close, ranks, the podium, results and the CSV work as for a team of one, with one ranking for teams and solo players. `teamId: null` stays "without a team" (a removed team). Snapshots and results mark the entries (`TeamPublic.solo`, `avatar`); the join page and pickers leave them out; they do not count towards the 30 teams or against team names.
+- **Moving a solo player into a team after the start** keeps their solo points on their entry, hidden from the standings while nobody plays in it; moved back, they continue from those points. In the lobby the empty entry goes. "Play again" does not carry solo entries over (players choose again).
+- **"Players may play on their own" is game-only** (`soloPlayers`, with the team setup in `gameOnlySettings`), shown in the new game dialog; the setting line on the host control lists it.
 
 ## Known gaps (first commit)
 
 - A latecomer who joins a captain-decides team of one while it is answering makes it a team of two: the answer already given becomes a suggestion, and without a confirmation the majority counts (marked "not confirmed").
 - Moving a player in the reveal can shift that question's distribution bars by one answer (the bars count a team's answer once, by the current teams).
+- In a game with solo players and one-answer teams, the "answered" counter counts solo players as teams ("3 of 4 teams answered").
+- On the phone's leaderboard, team names start where solo players' avatars are (teams have no avatar).

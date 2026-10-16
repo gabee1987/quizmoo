@@ -21,11 +21,16 @@ export function PlayerPanel({
   clockOffset: number
   onKick: (playerId: string) => void
   onCaptain: (playerId: string) => void
-  onMove: (playerId: string, teamId: string) => void
+  /** `teamId` null: the player plays on their own. */
+  onMove: (playerId: string, teamId: string | null) => void
 }) {
   const { t } = useTranslation()
-  const teamName = (teamId: string | null) => host.teams.find((team) => team.id === teamId)?.name
-  const captainOf = (teamId: string | null) => host.teams.find((team) => team.id === teamId)?.captainId
+  const teamOf = (teamId: string | null) => host.teams.find((team) => team.id === teamId)
+  const teamName = (teamId: string | null) => {
+    const team = teamOf(teamId)
+    return team?.solo ? t('play.soloGroup') : team?.name
+  }
+  const captainOf = (teamId: string | null) => teamOf(teamId)?.captainId
   const teams = host.mode === 'team' && host.phase !== 'finished'
   const betweenQuestions = (host.phase === 'reveal' && !host.awaitingGrading) || host.phase === 'scoreboard'
   const online = host.players.filter((p) => p.connected).length
@@ -65,6 +70,7 @@ export function PlayerPanel({
               <span className="font-bold tabular-nums">{player.score}</span>
               {teams &&
                 player.teamId &&
+                !teamOf(player.teamId)?.solo &&
                 (captainOf(player.teamId) === player.id ? (
                   <span className="grid size-10 place-items-center text-warning">
                     <CrownIcon className="size-4" aria-label={t('play.team.captain')} />
@@ -79,7 +85,14 @@ export function PlayerPanel({
                     <CrownIcon className="size-4" aria-hidden="true" />
                   </button>
                 ))}
-              {teams && betweenQuestions && <MovePlayerMenu player={player} teams={host.teams} onMove={onMove} />}
+              {teams && betweenQuestions && (
+                <MovePlayerMenu
+                  player={player}
+                  teams={host.teams}
+                  solo={host.settings.soloPlayers ? Boolean(teamOf(player.teamId)?.solo) : null}
+                  onMove={onMove}
+                />
+              )}
               {host.phase !== 'finished' && (
                 <button
                   type="button"

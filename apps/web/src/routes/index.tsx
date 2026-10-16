@@ -300,6 +300,7 @@ function JoinPage() {
                 <TeamPicker
                   teams={game.teams}
                   newTeams={game.newTeams}
+                  solo={game.solo}
                   selected={teamId ?? ''}
                   newName={newTeamName}
                   onSelect={setTeamId}

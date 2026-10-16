@@ -16,7 +16,19 @@ const player = (id: string, teamId: string | null = null): PlayerPublic => ({
   correctCount: 0,
   roundPoints: 0,
 })
-const team = (id: string): TeamPublic => ({ id, name: id, score: 0, rank: 1, previousRank: 1, memberCount: 0, answerMode: 'average', captainId: null, answered: false })
+const team = (id: string, solo = false): TeamPublic => ({
+  id,
+  name: id,
+  solo,
+  avatar: solo ? avatars[0] : null,
+  score: 0,
+  rank: 1,
+  previousRank: 1,
+  memberCount: 0,
+  answerMode: 'average',
+  captainId: null,
+  answered: false,
+})
 
 describe('lobbyGroups', () => {
   it('puts everyone in one group without a team in classic mode, in the given order', () => {
@@ -45,6 +57,16 @@ describe('lobbyGroups', () => {
       [null, ['b']],
       ['red', ['a']],
     ])
+  })
+
+  it('puts solo players together after the teams, and keeps that group while empty when players may play alone', () => {
+    const groups = lobbyGroups([player('a', 'solo-a'), player('b', 'red')], [team('solo-a', true), team('red')], 'team', true)
+    expect(groups.map((g) => [g.solo ? 'solo' : g.team?.id, g.players.map((p) => p.id)])).toEqual([
+      ['red', ['b']],
+      ['solo', ['a']],
+    ])
+    expect(lobbyGroups([], [team('red')], 'team', true).at(-1)).toEqual({ team: null, solo: true, players: [] })
+    expect(lobbyGroups([], [team('red')], 'team')).toHaveLength(1)
   })
 
   it('returns an empty group when nobody has joined in classic mode', () => {

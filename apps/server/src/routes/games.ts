@@ -103,7 +103,10 @@ export async function gameRoutes(app: FastifyInstance, { db, manager, appOrigin 
       quickMessages: quickMessagesOf(old.state),
       branding: old.state.branding ?? null,
       // The same teams, so players rejoin theirs (the phones keep the team id).
-      teams: Object.values(old.state.teams).map((t) => ({ id: t.id, name: t.name, byPlayer: t.byPlayer })),
+      // Not solo players' entries: they choose again when they join.
+      teams: Object.values(old.state.teams)
+        .filter((t) => !t.solo)
+        .map((t) => ({ id: t.id, name: t.name, byPlayer: t.byPlayer })),
     })
     manager.apply(old.state.pin, (state) => setNextGame(state, game.state.pin))
     return reply.code(201).send({ pin: game.state.pin })
@@ -130,7 +133,8 @@ export async function gameRoutes(app: FastifyInstance, { db, manager, appOrigin 
     const game = pinSchema.safeParse(request.params.pin).success ? manager.get(request.params.pin) : undefined
     if (!game) return reply.code(404).send({ error: 'errors.gameNotFound' })
     const { state } = game
-    const teams = Object.values(state.teams)
+    // Solo players' entries are no team to join.
+    const teams = Object.values(state.teams).filter((t) => !t.solo)
     const info: GamePublicInfo = {
       quizTitle: state.quiz.title,
       mode: state.settings.mode,
@@ -141,6 +145,7 @@ export async function gameRoutes(app: FastifyInstance, { db, manager, appOrigin 
         memberCount: Object.values(state.players).filter((p) => p.teamId === t.id).length,
       })),
       newTeams: state.settings.mode === 'team' && playersCreateTeams(state.settings.teamSetup) && teams.length < MAX_TEAMS,
+      solo: state.settings.mode === 'team' && state.settings.soloPlayers,
       joinUrl: `${appOrigin}/?pin=${state.pin}`,
       scheduledAt: state.scheduledAt ?? null,
       serverNow: Date.now(),

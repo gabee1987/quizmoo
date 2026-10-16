@@ -23,7 +23,14 @@ Team mode (`settings.mode === 'team'`) gives every team an answer mode (`Team.an
 - Players create a team on join (`newTeamName`, id from the handler) or with `player:team` after the host removed theirs (`pickTeam`, lobby, only while `teamId` is null). Names: 1 to 40 characters, unique ignoring case (`errors.teamNameTaken`), the nickname filter for player-made ones (`errors.teamNameNotAllowed`), at most `MAX_TEAMS` = 30 (`errors.teamLimit`). Player-made teams carry `byPlayer` and go when empty in the lobby (`withoutEmptyPlayerTeams` after kick and move); host teams stay; after the start nothing goes.
 - Host commands: `createTeam` and `movePlayer` in the lobby and between questions, `renameTeam` before the end, `removeTeam` in the lobby (members get `teamId: null`; `startGame` refuses with `errors.playersWithoutTeam`). A moved player's points stay with the old team (`Team.gains` per question keeps the rank arrows right).
 - `settings.lateJoin`: new players join until the game is finished (classic too); earlier questions are simply unanswered.
-- "Play again" passes the old teams as seeds to `createGame` (same ids and names).
+- "Play again" passes the old teams as seeds to `createGame` (same ids and names), not solo entries.
+
+## Mixed play (solo players)
+
+- `settings.soloPlayers` (game-only, off by default): a player may play on their own (`player:join` / `player:team` with `solo: true`, host `movePlayer` with `teamId: null`). The engine gives them an entry of their own, `Team.solo` with id `soloTeamId(playerId)` (`solo-<id>`), their name and `average` mode, so everything that works for a team of one (scoring, `allAnswered`, ranks, podium, results, CSV) works for them, and teams and solo players share one ranking.
+- `teamId: null` still means "without a team" (removed team), never solo. Nobody else joins a solo entry, and rename, remove and mode changes refuse it (`errors.unknownTeam`); every-team mode changes skip it. Solo entries do not count towards `MAX_TEAMS` or against team names.
+- In the lobby an empty solo entry goes; after the start it stays with its points but `rankedTeams` hides it from snapshots and results while empty, and moving back takes it up again.
+- Web: `TeamPublic.solo` and `avatar` (the player's). Filter `!team.solo` wherever real teams are meant (pickers, mode panels, the 30-team limit, move targets); the standings show solo entries with their avatar ("Teams and solo players"); the team column says "On their own" (`play.soloGroup`). Host lobby: one "On their own" group (`lobbyGroups(..., soloPlayers)`, a drop target), and "On their own" in the row menu and `MovePlayerMenu`.
 
 ## Captains and mode changes
 

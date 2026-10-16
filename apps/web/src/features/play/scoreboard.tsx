@@ -9,8 +9,8 @@ import { stagger } from '../../lib/motion'
 interface Row {
   id: string
   name: string
-  /** Players only; teams have none. */
-  avatar?: string
+  /** Players and solo players; teams have none. */
+  avatar?: string | null | undefined
   score: number
   rank: number
   previousRank: number
@@ -59,6 +59,12 @@ export function RankList({ players, meId, limit }: { players: PlayerPublic[]; me
   return <Rows rows={players.slice(0, limit)} mineId={meId} />
 }
 
+/** The team standings' heading: "Teams", or "Teams and solo players" once someone plays alone. */
+export function standingsHeading(teams: readonly TeamPublic[]): string {
+  return teams.some((team) => team.solo) ? 'play.mixedLeaderboard' : 'play.teamLeaderboard'
+}
+
+/** Teams and solo players ranked together; a solo player shows their avatar. */
 export function TeamRankList({ teams, myTeamId }: { teams: TeamPublic[]; myTeamId: string | null }) {
   return <Rows rows={teams} mineId={myTeamId} />
 }
@@ -75,11 +81,15 @@ export function Scoreboard({ snapshot }: { snapshot: PlayerSnapshot }) {
           <RankArrow previous={snapshot.me.previousRank} rank={snapshot.me.rank} className="text-3xl" />
         </p>
         <p className="text-lg font-semibold">{t('play.totalScore', { score: snapshot.me.score })}</p>
-        {myTeam && <p className="text-foreground">{t('play.teamRank', { team: myTeam.name, rank: myTeam.rank })}</p>}
+        {myTeam && (
+          <p className="text-foreground">
+            {myTeam.solo ? t('play.soloRank', { rank: myTeam.rank }) : t('play.teamRank', { team: myTeam.name, rank: myTeam.rank })}
+          </p>
+        )}
       </div>
       {snapshot.mode === 'team' && (
         <>
-          <h2 className="text-xl font-extrabold">{t('play.teamLeaderboard')}</h2>
+          <h2 className="text-xl font-extrabold">{t(standingsHeading(snapshot.teams))}</h2>
           <TeamRankList teams={snapshot.teams} myTeamId={snapshot.me.teamId} />
         </>
       )}

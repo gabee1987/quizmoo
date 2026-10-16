@@ -15,7 +15,7 @@ export function PickTeam({ snapshot }: { snapshot: PlayerSnapshot }) {
   const [pending, setPending] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const choice = teamChoice(selected, newName)
-  const newTeams = playersCreateTeams(snapshot.settings.teamSetup) && snapshot.teams.length < MAX_TEAMS
+  const newTeams = playersCreateTeams(snapshot.settings.teamSetup) && snapshot.teams.filter((x) => !x.solo).length < MAX_TEAMS
 
   async function submit(e: FormEvent) {
     e.preventDefault()
@@ -40,6 +40,7 @@ export function PickTeam({ snapshot }: { snapshot: PlayerSnapshot }) {
       <TeamPicker
         teams={snapshot.teams}
         newTeams={newTeams}
+        solo={snapshot.settings.soloPlayers}
         selected={selected}
         newName={newName}
         onSelect={setSelected}

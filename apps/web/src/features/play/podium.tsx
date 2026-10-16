@@ -38,7 +38,11 @@ export function Podium({ snapshot }: { snapshot: PlayerSnapshot }) {
         <p className="font-semibold text-muted-foreground">{onPodium ? t('play.finalRank') : t('play.wellPlayed')}</p>
         <p className="text-6xl font-black">{snapshot.me.rank}.</p>
         <p className="text-lg font-semibold">{t('play.totalScore', { score: snapshot.me.score })}</p>
-        {myTeam && <p className="text-foreground">{t('play.teamRank', { team: myTeam.name, rank: myTeam.rank })}</p>}
+        {myTeam && (
+          <p className="text-foreground">
+            {myTeam.solo ? t('play.soloRank', { rank: myTeam.rank }) : t('play.teamRank', { team: myTeam.name, rank: myTeam.rank })}
+          </p>
+        )}
       </div>
       <h2 className="text-xl font-extrabold">{t('play.podium')}</h2>
       <PodiumStage places={snapshot.mode === 'team' ? snapshot.teams : snapshot.players} compact celebrate={false} />

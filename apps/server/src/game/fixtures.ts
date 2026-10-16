@@ -60,6 +60,7 @@ export function fixtureSettings(overrides: Partial<GameSettings> = {}): GameSett
     shuffleOptions: false,
     teamNames: [],
     teamSetup: 'host',
+    soloPlayers: false,
     lateJoin: false,
     teamAnswer: 'average',
     teamsChoose: false,

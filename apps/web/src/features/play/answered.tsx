@@ -10,6 +10,7 @@ import { WaitingDots } from '../../components/waiting-dots'
 import { stagger } from '../../lib/motion'
 import { formatAnswer } from '../questions/format-answer'
 import { captainDecides, changeWindow, myTeamMode, myTeamSize } from './change-window'
+import { MyAnswer } from './my-answer'
 import { TeamPicksPanel } from './team-picks-panel'
 import { TeamSummary } from './team-summary'
 
@@ -44,6 +45,17 @@ export function Answered({
             <CheckIcon className="size-10" drawn />
           </span>
           <TeamSummary snapshot={snapshot} team={live} />
+        </>
+      ) : !live && snapshot.myAnswer ? (
+        // Answering alone (classic, a team of one, a solo player): what was sent, not only a check.
+        <>
+          <h1 className="flex animate-pop items-center gap-2 text-2xl font-black">
+            <span className="grid size-10 place-items-center rounded-full bg-success text-success-foreground shadow-soft">
+              <CheckIcon className="size-6" drawn />
+            </span>
+            {t('play.answerSent')}
+          </h1>
+          <MyAnswer snapshot={snapshot} answer={snapshot.myAnswer} />
         </>
       ) : (
         <>

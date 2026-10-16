@@ -153,7 +153,7 @@ export function registerSocketHandlers(io: AppSocketServer, { manager, db, parse
       respond(ack, async () => {
         const parsed = playerJoinSchema.safeParse(data)
         if (!parsed.success) return invalidInput
-        const { pin, name, teamId, newTeamName, token, avatar } = parsed.data
+        const { pin, name, teamId, newTeamName, solo, token, avatar } = parsed.data
         const game = manager.get(pin)
         if (!game) return { error: 'errors.gameNotFound' }
 
@@ -162,7 +162,9 @@ export function registerSocketHandlers(io: AppSocketServer, { manager, db, parse
         const playerId = existing?.id ?? nanoid(10)
         const playerToken = existing?.token ?? randomBytes(24).toString('base64url')
         const newTeam = newTeamName === undefined ? undefined : { id: nanoid(8), name: newTeamName }
-        manager.apply(pin, (s, now) => joinPlayer(s, { id: playerId, name, teamId, newTeam, token: playerToken, avatar }, now))
+        manager.apply(pin, (s, now) =>
+          joinPlayer(s, { id: playerId, name, teamId, newTeam, solo, token: playerToken, avatar }, now),
+        )
 
         leaveGameRooms(socket)
         socket.data = { pin, playerId, role: 'player' }
@@ -233,7 +235,9 @@ export function registerSocketHandlers(io: AppSocketServer, { manager, db, parse
         manager.apply(pin, (state) =>
           'teamId' in pick
             ? pickTeam(state, { playerId, teamId: pick.teamId })
-            : pickTeam(state, { playerId, newTeam: { id: nanoid(8), name: pick.newTeamName } }),
+            : 'solo' in pick
+              ? pickTeam(state, { playerId, solo: true })
+              : pickTeam(state, { playerId, newTeam: { id: nanoid(8), name: pick.newTeamName } }),
         )
         return { ok: true as const }
       }),

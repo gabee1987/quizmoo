@@ -5,6 +5,8 @@ import { answerProgress } from './answer-progress'
 const team = (id: string, answerMode: TeamPublic['answerMode'], memberCount: number, answered: boolean): TeamPublic => ({
   id,
   name: id,
+  solo: false,
+  avatar: null,
   score: 0,
   rank: 1,
   previousRank: 1,

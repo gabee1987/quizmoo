@@ -7,6 +7,7 @@ import { QrCode } from '../../components/qr-code'
 export function ScreenLobby({ host, joinUrl }: { host: HostSnapshot; joinUrl: string | null }) {
   const { t } = useTranslation()
   const teamMode = host.mode === 'team'
+  const soloIds = new Set(host.teams.filter((team) => team.solo).map((team) => team.id))
   return (
     <div className="grid flex-1 items-center gap-10 lg:grid-cols-[auto_1fr]">
       {joinUrl && <QrCode value={joinUrl} className="mx-auto w-[min(60vh,80vw)] animate-pop" />}
@@ -27,12 +28,21 @@ export function ScreenLobby({ host, joinUrl }: { host: HostSnapshot; joinUrl: st
         </p>
         {teamMode ? (
           <div className="grid gap-4 md:grid-cols-2">
-            {host.teams.map((team) => (
-              <div key={team.id} className="rounded-2xl border bg-card p-4 shadow-soft">
-                <p className="mb-2 text-3xl font-bold">{team.name}</p>
-                <Names players={host.players.filter((p) => p.teamId === team.id)} />
+            {host.teams
+              .filter((team) => !team.solo)
+              .map((team) => (
+                <div key={team.id} className="rounded-2xl border bg-card p-4 shadow-soft">
+                  <p className="mb-2 text-3xl font-bold">{team.name}</p>
+                  <Names players={host.players.filter((p) => p.teamId === team.id)} />
+                </div>
+              ))}
+            {/* Solo players together in one card. */}
+            {soloIds.size > 0 && (
+              <div className="rounded-2xl border bg-card p-4 shadow-soft">
+                <p className="mb-2 text-3xl font-bold">{t('play.soloGroup')}</p>
+                <Names players={host.players.filter((p) => p.teamId !== null && soloIds.has(p.teamId))} />
               </div>
-            ))}
+            )}
           </div>
         ) : (
           <Names players={host.players} />

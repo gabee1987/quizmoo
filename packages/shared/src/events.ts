@@ -21,6 +21,8 @@ export const playerJoinSchema = z.object({
   teamId: z.string().min(1).optional(),
   /** Team mode, when players may create teams: a new team with this name instead of `teamId`; the player becomes its captain. */
   newTeamName: teamNameSchema.optional(),
+  /** Team mode, when players may play on their own: no team, ranked with the teams. */
+  solo: z.literal(true).optional(),
   /** Chosen on the join page; a rejoin with a token keeps the stored one. */
   avatar: avatarSchema.optional(),
   /** Token from a previous join, used to reclaim the same player after a reconnect. */
@@ -46,6 +48,7 @@ export type PlayerCaptain = z.infer<typeof playerCaptainSchema>
 export const playerTeamSchema = z.union([
   z.object({ teamId: z.string().min(1) }),
   z.object({ newTeamName: teamNameSchema }),
+  z.object({ solo: z.literal(true) }),
 ])
 export type PlayerTeam = z.infer<typeof playerTeamSchema>
 
@@ -70,8 +73,11 @@ export const hostCommandSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('renameTeam'), teamId: z.string().min(1), name: teamNameSchema }),
   /** Lobby only: its players pick another team on their phones. */
   z.object({ type: z.literal('removeTeam'), teamId: z.string().min(1) }),
-  /** Team mode, in the lobby or between questions: the player plays for `teamId` from the next question. */
-  z.object({ type: z.literal('movePlayer'), playerId: z.string().min(1), teamId: z.string().min(1) }),
+  /**
+   * Team mode, in the lobby or between questions: the player plays for `teamId` from the next
+   * question, or on their own with null (when players may).
+   */
+  z.object({ type: z.literal('movePlayer'), playerId: z.string().min(1), teamId: z.string().min(1).nullable() }),
   /** Host grading of a text question without accepted answers: listed players are correct. */
   z.object({ type: z.literal('gradeText'), correctPlayerIds: z.array(z.string().min(1)).max(MAX_PLAYERS) }),
   z.object({ type: z.literal('end') }),

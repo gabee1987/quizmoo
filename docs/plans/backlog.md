@@ -55,6 +55,7 @@ Collected while testing phases 9 to 12. Effort as above.
 - Teams choose their mode by default; captain decides with live team picks and a majority fallback; the shared answer mode removed (phase 20).
 - Clearly visible answer selection, a team of one answers without confirming, team answers labelled in the review, installable app, bigger new game dialog, custom theme and answer colours, bigger editor settings panel, scheduled games with a shareable link, names page markup (phase 21).
 - My settings per host account: quick messages, game defaults, branding (logo and event name on the projector and phones), and a host home page (phase 22).
+- Teams set up per game (host teams, player-made teams or both), moving players, late joining, the captaincy at any time, team toasts, the team's answer and picks on the phones, and mixed play with solo players ranked with the teams (phase 23).
 
 ### Open
 

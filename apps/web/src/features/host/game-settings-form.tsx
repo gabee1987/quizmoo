@@ -38,7 +38,7 @@ export function settingsError(settings: GameSettings, { newGame = false } = {}):
 }
 
 /** Settings only a game has (its teams): quizzes, My settings and batch edits leave them alone. */
-export const gameOnlySettings = ['teamSetup', 'teamNames'] as const satisfies readonly (keyof GameSettings)[]
+export const gameOnlySettings = ['teamSetup', 'teamNames', 'soloPlayers'] as const satisfies readonly (keyof GameSettings)[]
 
 /**
  * A new game's starting settings from a quiz's: a team quiz without saved team names lets the
@@ -51,7 +51,7 @@ export function newGameSettings(quizSettings: GameSettings): GameSettings {
 
 /** The settings in each group of the form; a batch edit changes a group as a whole. */
 export const settingsSections = {
-  flow: ['mode', 'teamSetup', 'teamNames', 'teamAnswer', 'teamsChoose', 'lateJoin', 'revealAnswers', 'scoreboard', 'finalResults'],
+  flow: ['mode', 'teamSetup', 'teamNames', 'soloPlayers', 'teamAnswer', 'teamsChoose', 'lateJoin', 'revealAnswers', 'scoreboard', 'finalResults'],
   look: ['theme', 'customTheme', 'answerPalette', 'customPalette', 'answerSymbols', 'answerStyle'],
   scoring: ['speedBonus', 'streakBonus', 'answerChanges', 'answerLockSec', 'shuffleOptions'],
 } as const satisfies Record<string, readonly (keyof GameSettings)[]>
@@ -70,6 +70,7 @@ export function sectionSummary(settings: GameSettings, section: SettingsSection,
     flow: [
       t(`host.create.modes.${settings.mode}`),
       settings.mode === 'team' ? teamAnswerLabel(settings, t) : null,
+      settings.mode === 'team' && settings.soloPlayers ? t('host.create.soloPlayers') : null,
       settings.lateJoin ? t('host.create.lateJoin') : null,
       `${t('host.create.revealAnswers')}: ${t(`host.create.revealAnswersOptions.${settings.revealAnswers}`)}`,
       settings.revealAnswers === 'afterQuestion'
@@ -185,6 +186,12 @@ export function GameSettingsForm({
                 <Collapse open={value.teamSetup !== 'players'} className="-mt-6" innerClassName="pt-6">
                   <TeamNamesField value={value} onChange={(teamNames) => set({ teamNames })} />
                 </Collapse>
+                <SwitchRow
+                  label={t('host.create.soloPlayers')}
+                  description={t('host.create.soloPlayersHelp')}
+                  checked={value.soloPlayers}
+                  onChange={(soloPlayers) => set({ soloPlayers })}
+                />
               </>
             )}
               <ChoiceCards

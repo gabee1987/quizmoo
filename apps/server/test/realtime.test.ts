@@ -639,6 +639,40 @@ describeDb('sockets (database)', () => {
     })
   })
 
+  it('mixed play: a solo player joins, answers on their own, ranks with the teams and is moved into a team and back', async () => {
+    const pin = await newGame({ mode: 'team', teamNames: ['Red', 'Blue'], soloPlayers: true, teamAnswer: 'captain' })
+    const hostSocket = await host(pin)
+    async function join(name: string, team: object) {
+      const socket = await connect()
+      const snapshot = nextSnapshot<PlayerSnapshot>(socket, 'game:player')
+      const ack = await socket.emitWithAck('player:join', { pin, name, ...team })
+      return { socket, ack, me: 'token' in ack ? (await snapshot).me : null }
+    }
+    const anna = await join('Anna', { teamId: 'team-1' })
+    const bence = await join('Bence', { solo: true })
+    expect(bence.me!.teamId).toBe(`solo-${bence.me!.id}`)
+    expect((await join('Cecil', { teamId: bence.me!.teamId })).ack).toEqual({ error: 'errors.unknownTeam' })
+
+    const question = nextSnapshot<PlayerSnapshot>(bence.socket, 'game:player', (s) => s.phase === 'question')
+    expect(await command(hostSocket, { type: 'start' })).toEqual({ ok: true })
+    const q = (await question).question!
+    const right = { questionId: q.id, answer: { type: 'single', optionId: 'a' } }
+    // Bence answers alone, Anna is a team of one: both count at once and the question closes.
+    const revealed = nextSnapshot<HostSnapshot>(hostSocket, 'game:host', (s) => s.phase === 'reveal')
+    expect(await bence.socket.emitWithAck('player:answer', right)).toEqual({ ok: true })
+    expect(await anna.socket.emitWithAck('player:answer', { ...right, answer: { type: 'single', optionId: 'b' } })).toEqual({ ok: true })
+    const reveal = await revealed
+    expect(reveal.teams[0]).toMatchObject({ id: bence.me!.teamId, name: 'Bence', solo: true, avatar: bence.me!.avatar, rank: 1 })
+    expect(reveal.teams.filter((t) => !t.solo).map((t) => t.name)).toEqual(['Blue', 'Red'])
+
+    const moved = nextSnapshot<PlayerSnapshot>(bence.socket, 'game:player', (s) => s.me.teamId === 'team-2')
+    expect(await command(hostSocket, { type: 'movePlayer', playerId: bence.me!.id, teamId: 'team-2' })).toEqual({ ok: true })
+    expect((await moved).teams.some((t) => t.solo)).toBe(false)
+    const back = nextSnapshot<PlayerSnapshot>(bence.socket, 'game:player', (s) => s.me.teamId === bence.me!.teamId)
+    expect(await command(hostSocket, { type: 'movePlayer', playerId: bence.me!.id, teamId: null })).toEqual({ ok: true })
+    expect((await back).teams.find((t) => t.solo)).toMatchObject({ rank: 1, score: reveal.teams[0]!.score })
+  })
+
   it('a token reclaims the same player with its score after a disconnect', async () => {
     const pin = await newGame()
     const hostSocket = await host(pin)

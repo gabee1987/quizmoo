@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { useGameTheme } from '@/lib/themes'
 import { ConnectionBar } from '../../components/connection-bar'
+import { PlayerAvatar } from '../../components/player-avatar'
 import { Spinner } from '../../components/spinner'
 import { Controls } from '../../features/host/controls'
 import { GradingPanel } from '../../features/host/grading-panel'
@@ -204,6 +205,7 @@ function PhaseDetail({
                 .map((team) => (
                   <li key={team.id} className="flex gap-3 rounded-xl border bg-card px-4 py-2">
                     <span className="w-8 font-bold">{team.rank}.</span>
+                    <PlayerAvatar avatar={team.avatar} />
                     <span className="flex-1">{team.name}</span>
                     <span className="font-semibold tabular-nums">{team.score}</span>
                   </li>

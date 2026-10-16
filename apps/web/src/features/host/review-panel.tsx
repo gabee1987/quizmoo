@@ -12,7 +12,10 @@ export function ReviewPanel({ host, onShowQuestion }: { host: HostSnapshot; onSh
   // Between questions (the engine's showQuestion rules): put a played question back on the screens.
   const canShowAgain =
     (host.phase === 'reveal' || host.phase === 'scoreboard') && !host.awaitingGrading && !host.answersHidden
-  const teamName = (teamId: string | null) => host.teams.find((team) => team.id === teamId)?.name ?? ''
+  const teamName = (teamId: string | null) => {
+    const team = host.teams.find((x) => x.id === teamId)
+    return team?.solo ? t('play.soloGroup') : (team?.name ?? '')
+  }
   const seconds = new Intl.NumberFormat(i18n.language, { maximumFractionDigits: 1 })
   const percent = new Intl.NumberFormat(i18n.language, { style: 'percent' })
   const question = host.reveal?.question ?? host.question

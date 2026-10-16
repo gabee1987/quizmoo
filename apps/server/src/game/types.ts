@@ -77,6 +77,12 @@ export interface Team {
   /** A player created it when joining: it goes when its last member leaves the lobby. The host's teams stay. */
   byPlayer?: boolean
   /**
+   * A player on their own (`soloPlayers`): a team of exactly that player, id `solo-<playerId>`,
+   * named after them, everyone counts. Kept when they move to a team after the start (their points
+   * stay there) and taken up again when they go back to playing alone.
+   */
+  solo?: boolean
+  /**
    * Points gained per question id, as added to `score`. Kept so a player moved between questions
    * does not change what the team gained. Missing in games saved before it existed.
    */

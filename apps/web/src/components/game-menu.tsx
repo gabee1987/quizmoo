@@ -50,6 +50,17 @@ export function GameMenu() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="min-w-48">
+        {snapshot && (
+          <>
+            {/* The room code at any point of the game, for someone who wants to join. */}
+            <div className="flex flex-col px-2 py-1.5">
+              <span className="text-xs font-semibold text-muted-foreground">{t('join.pin')}</span>
+              <span className="text-2xl font-black tracking-widest tabular-nums">{snapshot.pin}</span>
+              <span className="max-w-56 truncate text-xs text-muted-foreground">{snapshot.quizTitle}</span>
+            </div>
+            <DropdownMenuSeparator />
+          </>
+        )}
         {teammates.length > 0 && (
           <>
             <DropdownMenuLabel className="flex items-center gap-1.5">

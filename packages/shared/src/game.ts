@@ -93,7 +93,15 @@ export interface PlayerPublic {
 
 export interface TeamPublic {
   id: string
+  /** A solo player's entry: the player's name. */
   name: string
+  /**
+   * A player on their own (team mode with `soloPlayers`): ranked with the teams, shown with the
+   * player's name and avatar, never joined by anyone else.
+   */
+  solo: boolean
+  /** The solo player's avatar; null for a team. */
+  avatar: Avatar | null
   score: number
   rank: number
   /** Rank before the current question's points were added; equals `rank` outside a reveal. */
@@ -296,6 +304,8 @@ export interface PlayerSnapshot extends GameSnapshotBase {
   me: PlayerPublic
   /** Answer the player submitted for the current question, if any (a team suggestion or vote while it runs). */
   myAnswer: Answer | null
+  /** How long that answer took, in ms from the question's start; null without one. */
+  myAnswerTimeMs: number | null
   /** The player's team's picks while a question runs, in team mode; otherwise null. */
   teamLive: TeamLive | null
   /**
@@ -339,6 +349,8 @@ export const gamePublicInfoSchema = z.object({
   teams: z.array(z.object({ id: z.string(), name: z.string(), memberCount: z.number() })),
   /** Team mode: a joining player may create a new team (players make teams and the limit is not reached). */
   newTeams: z.boolean(),
+  /** Team mode: a joining player may play on their own. */
+  solo: z.boolean(),
   /** Link players open, also encoded in the QR code. */
   joinUrl: z.string(),
   /** A scheduled game's opening time (unix ms); null when it was never scheduled. */

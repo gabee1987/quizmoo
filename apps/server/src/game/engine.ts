@@ -22,6 +22,7 @@ import {
   captainOf,
   membersOf,
   needsConfirmation,
+  soloTeamId,
   teamAnswerNow,
   teamAnswered,
   teamGain,
@@ -99,6 +100,8 @@ export interface JoinInput {
   teamId?: string | null | undefined
   /** Team mode, when players make teams: creates this team for the player instead of `teamId`. */
   newTeam?: { id: string; name: string } | undefined
+  /** Team mode, when players may play on their own: no team, ranked with the teams. */
+  solo?: boolean | undefined
   token: string
   /** Picked on the join page; without one the player gets a stable one from their id. */
   avatar?: Avatar | undefined
@@ -126,11 +129,14 @@ export function joinPlayer(state: GameState, input: JoinInput, now?: number): Ga
   let teamId: string | null = null
   let joined = state
   if (state.settings.mode === 'team') {
-    if (input.newTeam) {
+    if (input.solo) {
+      joined = withSoloTeam(state, input.id, name)
+      teamId = soloTeamId(input.id)
+    } else if (input.newTeam) {
       joined = withNewTeam(state, input.newTeam, true)
       teamId = input.newTeam.id
     } else {
-      if (!input.teamId || !state.teams[input.teamId]) throw new EngineError('errors.unknownTeam')
+      if (!joinable(state, input.teamId)) throw new EngineError('errors.unknownTeam')
       teamId = input.teamId
     }
   }
@@ -185,18 +191,19 @@ export function setTeamMode(
   if (state.settings.mode !== 'team') throw new EngineError('errors.invalidTransition')
   if (input.byPlayerId !== undefined && state.phase !== 'lobby') throw new EngineError('errors.gameAlreadyStarted')
   if (state.phase !== 'lobby' && !betweenQuestions(state)) throw new EngineError('errors.invalidTransition')
-  let teamIds = input.teamId === undefined ? Object.keys(state.teams) : [input.teamId]
+  // Solo players always count on their own.
+  let teamIds = input.teamId === undefined ? Object.values(state.teams).filter((t) => !t.solo).map((t) => t.id) : [input.teamId]
   if (input.byPlayerId !== undefined) {
     const player = state.players[input.byPlayerId]
     if (!player?.teamId) throw new EngineError('errors.playerNotFound')
-    if (!state.settings.teamsChoose) throw new EngineError('errors.invalidTransition')
+    if (!state.settings.teamsChoose || state.teams[player.teamId]?.solo) throw new EngineError('errors.invalidTransition')
     if (captainOf(state, state.teams[player.teamId]!) !== player.id) throw new EngineError('errors.notCaptain')
     teamIds = [player.teamId]
   }
   const teams = { ...state.teams }
   for (const teamId of teamIds) {
     const team = teams[teamId]
-    if (!team) throw new EngineError('errors.unknownTeam')
+    if (!team || team.solo) throw new EngineError('errors.unknownTeam')
     teams[teamId] = { ...team, answerMode: input.mode }
   }
   return { ...state, teams }
@@ -230,7 +237,7 @@ export function createTeam(state: GameState, team: { id: string; name: string })
 export function renameTeam(state: GameState, input: { teamId: string; name: string }): GameState {
   if (state.settings.mode !== 'team' || state.phase === 'finished') throw new EngineError('errors.invalidTransition')
   const team = state.teams[input.teamId]
-  if (!team) throw new EngineError('errors.unknownTeam')
+  if (!team || team.solo) throw new EngineError('errors.unknownTeam')
   const name = checkTeamName(state, input.name, team.id)
   if (name === team.name) return state
   return { ...state, teams: { ...state.teams, [team.id]: { ...team, name } } }
@@ -240,7 +247,7 @@ export function renameTeam(state: GameState, input: { teamId: string; name: stri
 export function removeTeam(state: GameState, teamId: string): GameState {
   if (state.settings.mode !== 'team') throw new EngineError('errors.invalidTransition')
   if (state.phase !== 'lobby') throw new EngineError('errors.gameAlreadyStarted')
-  if (!state.teams[teamId]) throw new EngineError('errors.unknownTeam')
+  if (!state.teams[teamId] || state.teams[teamId].solo) throw new EngineError('errors.unknownTeam')
   const { [teamId]: _removed, ...teams } = state.teams
   const players = { ...state.players }
   for (const member of membersOf(state, teamId)) players[member.id] = { ...member, teamId: null }
@@ -248,39 +255,52 @@ export function removeTeam(state: GameState, teamId: string): GameState {
 }
 
 /**
- * A player without a team (theirs was removed) picks one in the lobby, or creates one when
- * players make teams.
+ * A player without a team (theirs was removed) picks one in the lobby, creates one when players
+ * make teams, or plays on their own when players may.
  */
 export function pickTeam(
   state: GameState,
-  input: { playerId: string; teamId?: string | undefined; newTeam?: { id: string; name: string } | undefined },
+  input: {
+    playerId: string
+    teamId?: string | undefined
+    newTeam?: { id: string; name: string } | undefined
+    solo?: boolean | undefined
+  },
 ): GameState {
   const player = state.players[input.playerId]
   if (!player) throw new EngineError('errors.playerNotFound')
   if (state.settings.mode !== 'team' || player.teamId !== null) throw new EngineError('errors.invalidTransition')
   if (state.phase !== 'lobby') throw new EngineError('errors.gameAlreadyStarted')
+  if (input.solo) {
+    const created = withSoloTeam(state, player.id, player.name)
+    return withCaptains(withPlayer(created, { ...player, teamId: soloTeamId(player.id) }))
+  }
   if (input.newTeam) {
     const created = withNewTeam(state, input.newTeam, true)
     return withCaptains(withPlayer(created, { ...player, teamId: input.newTeam.id }))
   }
-  if (!input.teamId || !state.teams[input.teamId]) throw new EngineError('errors.unknownTeam')
+  if (!joinable(state, input.teamId)) throw new EngineError('errors.unknownTeam')
   return withCaptains(withPlayer(state, { ...player, teamId: input.teamId }))
 }
 
 /**
- * The host moves a player to another team, in the lobby or between questions (never while a
- * question runs). Points the player earned stay with the old team; they count for the new one
- * from the next question. A captain who moves hands the crown to the next member of the old team.
+ * The host moves a player to another team, or with `teamId` null to play on their own (when players
+ * may), in the lobby or between questions (never while a question runs). Points the player earned
+ * stay with the old team; they count for the new one from the next question. A captain who moves
+ * hands the crown to the next member of the old team.
  */
-export function movePlayer(state: GameState, input: { playerId: string; teamId: string }): GameState {
+export function movePlayer(state: GameState, input: { playerId: string; teamId: string | null }): GameState {
   if (state.settings.mode !== 'team' || !(state.phase === 'lobby' || betweenQuestions(state))) {
     throw new EngineError('errors.invalidTransition')
   }
   const player = state.players[input.playerId]
   if (!player) throw new EngineError('errors.playerNotFound')
-  if (!state.teams[input.teamId]) throw new EngineError('errors.unknownTeam')
-  if (player.teamId === input.teamId) return state
-  return withoutEmptyPlayerTeams(withCaptains(withPlayer(state, { ...player, teamId: input.teamId })))
+  const teamId = input.teamId ?? soloTeamId(player.id)
+  if (player.teamId === teamId) return state
+  let moved = state
+  if (input.teamId === null) moved = withSoloTeam(state, player.id, player.name)
+  else if (!joinable(state, input.teamId)) throw new EngineError('errors.unknownTeam')
+  return withoutEmptyPlayerTeams(withCaptains(withPlayer(moved, { ...player, teamId })))
 }
 
 /** Whether new players may join a lobby: always, unless it is scheduled and its time has not come. */
@@ -648,12 +668,12 @@ function newTeam(id: string, name: string, settings: GameSettings): Team {
   return { id, name, score: 0, answerMode: settings.teamAnswer, captainId: null, answers: {} }
 }
 
-/** A trimmed team name no other team (than `ownId`) has, ignoring case. */
+/** A trimmed team name no other team (than `ownId`) has, ignoring case. Solo players' names are not team names. */
 function checkTeamName(state: GameState, name: string, ownId?: string): string {
   const trimmed = name.trim()
   if (trimmed.length < 1 || trimmed.length > 40) throw new EngineError('errors.invalidInput')
   const key = nameKey(trimmed)
-  if (Object.values(state.teams).some((t) => t.id !== ownId && nameKey(t.name) === key)) {
+  if (Object.values(state.teams).some((t) => !t.solo && t.id !== ownId && nameKey(t.name) === key)) {
     throw new EngineError('errors.teamNameTaken')
   }
   return trimmed
@@ -668,15 +688,35 @@ function withNewTeam(state: GameState, input: { id: string; name: string }, byPl
   if (state.teams[input.id]) throw new EngineError('errors.invalidInput')
   const name = checkTeamName(state, input.name)
   if (byPlayer && !isNameAllowed(name)) throw new EngineError('errors.teamNameNotAllowed')
-  if (Object.keys(state.teams).length >= MAX_TEAMS) throw new EngineError('errors.teamLimit')
+  if (Object.values(state.teams).filter((t) => !t.solo).length >= MAX_TEAMS) throw new EngineError('errors.teamLimit')
   const team = { ...newTeam(input.id, name, state.settings), ...(byPlayer && { byPlayer: true }) }
   return { ...state, teams: { ...state.teams, [team.id]: team } }
 }
 
-/** In the lobby a team a player created goes once nobody is left in it; the host's teams stay. After the start nothing goes. */
+/**
+ * The entry of a player who plays on their own (only when players may): created on the first
+ * time, taken up again with its points when they come back to it.
+ */
+function withSoloTeam(state: GameState, playerId: string, name: string): GameState {
+  if (!state.settings.soloPlayers) throw new EngineError('errors.invalidTransition')
+  const id = soloTeamId(playerId)
+  if (state.teams[id]) return state
+  const team: Team = { id, name, score: 0, answerMode: 'average', captainId: null, answers: {}, solo: true }
+  return { ...state, teams: { ...state.teams, [id]: team } }
+}
+
+/** A team others can join: it exists and is not a solo player's. */
+function joinable(state: GameState, teamId: string | null | undefined): teamId is string {
+  return Boolean(teamId && state.teams[teamId] && !state.teams[teamId].solo)
+}
+
+/**
+ * In the lobby a team a player created, or a solo player's entry, goes once nobody is left in it;
+ * the host's teams stay. After the start nothing goes.
+ */
 function withoutEmptyPlayerTeams(state: GameState): GameState {
   if (state.phase !== 'lobby') return state
-  const empty = Object.values(state.teams).filter((t) => t.byPlayer && membersOf(state, t.id).length === 0)
+  const empty = Object.values(state.teams).filter((t) => (t.byPlayer || t.solo) && membersOf(state, t.id).length === 0)
   if (empty.length === 0) return state
   const teams = { ...state.teams }
   for (const team of empty) delete teams[team.id]

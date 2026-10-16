@@ -95,7 +95,9 @@ function useTeamToasts(player: PlayerSnapshot | null) {
     const before = previous.current
     previous.current = teamSeat(player)
     const moved = movedTo(before?.teamId, player)
-    if (moved) return void toast.info(t('play.team.moved', { team: moved.name }), { id: 'team-moved' })
+    if (moved) {
+      return void toast.info(moved.solo ? t('play.team.movedSolo') : t('play.team.moved', { team: moved.name }), { id: 'team-moved' })
+    }
     for (const name of newTeammates(before, player)) toast.info(t('play.team.joined', { name }), { id: `team-joined-${name}` })
     const led = newCaptaincy(before, player)
     if (led) return void toast.info(t('play.team.nowCaptain', { team: led.name }), { id: 'team-captain' })

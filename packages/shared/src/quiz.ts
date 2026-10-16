@@ -205,6 +205,8 @@ export const gameSettingsSchema = z
     teamNames: z.array(teamNameSchema).max(MAX_TEAMS).default([]),
     /** Team mode: who makes the teams. */
     teamSetup: z.enum(teamSetups).default('host'),
+    /** Team mode: a player may also play on their own, ranked with the teams. */
+    soloPlayers: z.boolean().default(false),
     /** New players may join a game that has started (classic and team mode). */
     lateJoin: z.boolean().default(false),
     /** Team mode: every team's starting mode when teams choose, otherwise the mode of every team. */

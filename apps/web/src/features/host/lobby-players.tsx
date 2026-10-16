@@ -18,6 +18,7 @@ import {
   PencilIcon,
   PlusIcon,
   Trash2Icon,
+  UserIcon,
   XIcon,
 } from 'lucide-react'
 import { useState, type FormEvent, type ReactNode } from 'react'
@@ -39,8 +40,12 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 
+/** The solo group's drop target id (team ids never look like this). */
+const SOLO_DROP = '+solo'
+
 export interface TeamActions {
-  onMove: (playerId: string, teamId: string) => void
+  /** `teamId` null: the player plays on their own. */
+  onMove: (playerId: string, teamId: string | null) => void
   onCreateTeam: (name: string) => void
   onRenameTeam: (teamId: string, name: string) => void
   onRemoveTeam: (teamId: string) => void
@@ -82,7 +87,10 @@ export function LobbyPlayers({
   // Ticks only while someone is offline. Server time, so the host's clock does not matter.
   const now = useNow(online < host.players.length) + clockOffset
   const modeOptions = teamAnswerModes.map((mode) => ({ value: mode, label: t(`host.create.teamAnswerOptions.${mode}`) }))
-  const allModes = new Set(host.teams.map((team) => team.answerMode))
+  // Solo players' entries are no teams: no mode, not counted towards the limit.
+  const teams = host.teams.filter((team) => !team.solo)
+  const soloPlayers = host.settings.soloPlayers
+  const allModes = new Set(teams.map((team) => team.answerMode))
   const teamMode = host.mode === 'team'
   // The keyboard moves players with "Move", so dragging is for mouse and touch only.
   const sensors = useSensors(
@@ -92,10 +100,21 @@ export function LobbyPlayers({
 
   function onDragEnd({ active, over }: DragEndEvent) {
     const player = host.players.find((p) => p.id === active.id)
-    if (player && over && over.id !== player.teamId) teamActions.onMove(player.id, String(over.id))
+    if (!player || !over || over.id === player.teamId) return
+    if (over.id !== SOLO_DROP) teamActions.onMove(player.id, String(over.id))
+    else if (!isSolo(player)) teamActions.onMove(player.id, null)
   }
 
-  const groups = lobbyGroups(host.players, host.teams, host.mode)
+  const soloIds = new Set(host.teams.filter((team) => team.solo).map((team) => team.id))
+  const isSolo = (player: PlayerPublic) => player.teamId !== null && soloIds.has(player.teamId)
+  const rowTeam = (player: PlayerPublic, captain: boolean | null) => ({
+    captain,
+    onCaptain,
+    teams,
+    solo: soloPlayers ? isSolo(player) : null,
+    onMove: teamActions.onMove,
+  })
+  const groups = lobbyGroups(host.players, host.teams, host.mode, soloPlayers)
   return (
     <section className="flex flex-col gap-3" aria-labelledby="lobby-players">
       <h2 id="lobby-players" className="text-xl font-extrabold">
@@ -104,7 +123,7 @@ export function LobbyPlayers({
           {t('play.playerCount', { count: host.players.length })}
         </span>
       </h2>
-      {teamMode && host.teams.length > 0 && (
+      {teamMode && teams.length > 0 && (
         <div className="flex flex-wrap items-center gap-2" role="group" aria-label={t('host.game.allTeamsMode')}>
           <span className="text-sm font-semibold text-muted-foreground">{t('host.game.allTeamsMode')}</span>
           {modeOptions.map((option) => (
@@ -135,8 +154,18 @@ export function LobbyPlayers({
       )}
       {teamMode && (
         <DndContext sensors={sensors} onDragEnd={onDragEnd}>
-          {groups.map(({ team, players }) =>
-            team ? (
+          {groups.map(({ team, solo, players }) =>
+            solo ? (
+              <SoloGroup key="solo" count={players.length}>
+                {players.length > 0 && (
+                  <TileGrid rows>
+                    {players.map((player) => (
+                      <PlayerTile key={player.id} player={player} now={now} onKick={onKick} team={rowTeam(player, null)} />
+                    ))}
+                  </TileGrid>
+                )}
+              </SoloGroup>
+            ) : team ? (
               <TeamGroup key={team.id} team={team} count={players.length} modeOptions={modeOptions} onTeamMode={onTeamMode} teamActions={teamActions}>
                 {players.length === 0 ? (
                   <p className="text-sm text-muted-foreground">{t('host.game.teamEmpty')}</p>
@@ -148,7 +177,7 @@ export function LobbyPlayers({
                         player={player}
                         now={now}
                         onKick={onKick}
-                        team={{ captain: team.captainId === player.id, onCaptain, teams: host.teams, onMove: teamActions.onMove }}
+                        team={rowTeam(player, team.captainId === player.id)}
                       />
                     ))}
                   </TileGrid>
@@ -166,7 +195,7 @@ export function LobbyPlayers({
                       player={player}
                       now={now}
                       onKick={onKick}
-                      team={{ captain: null, onCaptain, teams: host.teams, onMove: teamActions.onMove }}
+                      team={rowTeam(player, null)}
                     />
                   ))}
                 </TileGrid>
@@ -175,7 +204,7 @@ export function LobbyPlayers({
           )}
         </DndContext>
       )}
-      {teamMode && host.teams.length < MAX_TEAMS && <AddTeamForm onCreate={teamActions.onCreateTeam} />}
+      {teamMode && teams.length < MAX_TEAMS && <AddTeamForm onCreate={teamActions.onCreateTeam} />}
     </section>
   )
 }
@@ -265,6 +294,26 @@ function TeamGroup({
   )
 }
 
+/** The players who play on their own, under one heading; dropping a player here makes them play alone. */
+function SoloGroup({ count, children }: { count: number; children: ReactNode }) {
+  const { t } = useTranslation()
+  const { setNodeRef, isOver } = useDroppable({ id: SOLO_DROP })
+  return (
+    <div
+      ref={setNodeRef}
+      className={cn('-m-2 flex flex-col gap-2 rounded-2xl p-2 transition-colors', isOver && 'bg-secondary ring-[3px] ring-ring')}
+    >
+      <h3 className="flex min-h-10 items-center gap-1.5 font-bold">
+        <UserIcon className="size-4 text-muted-foreground" aria-hidden="true" />
+        {t('play.soloGroup')}
+        <span className="text-sm font-semibold text-muted-foreground tabular-nums">{count}</span>
+      </h3>
+      {count === 0 && <p className="text-sm text-muted-foreground">{t('host.game.soloEmpty')}</p>}
+      {children}
+    </div>
+  )
+}
+
 /** A team name field: Enter or the check saves, Escape or the cross leaves it as it was. */
 function RenameForm({ name, label, onDone }: { name: string; label: string; onDone: (name: string | null) => void }) {
   const { t } = useTranslation()
@@ -343,8 +392,11 @@ function PlayerTile({
   team?: {
     captain: boolean | null
     onCaptain: (playerId: string) => void
+    /** The teams to move to (not solo players' entries). */
     teams: readonly TeamPublic[]
-    onMove: (playerId: string, teamId: string) => void
+    /** Whether the player plays on their own; null when players may not. */
+    solo: boolean | null
+    onMove: (playerId: string, teamId: string | null) => void
   }
 }) {
   const { t } = useTranslation()
@@ -449,7 +501,7 @@ function PlayerActions({
             {t('host.game.makeCaptainShort')}
           </DropdownMenuItem>
         )}
-        {others.length > 0 && (
+        {(others.length > 0 || team.solo === false) && (
           <>
             <DropdownMenuLabel>{t('host.game.moveTo')}</DropdownMenuLabel>
             {others.map((other) => (
@@ -458,6 +510,12 @@ function PlayerActions({
                 <span className="truncate">{other.name}</span>
               </DropdownMenuItem>
             ))}
+            {team.solo === false && (
+              <DropdownMenuItem onSelect={() => team.onMove(player.id, null)}>
+                <UserIcon aria-hidden="true" />
+                {t('play.soloGroup')}
+              </DropdownMenuItem>
+            )}
           </>
         )}
         <DropdownMenuSeparator />

@@ -15,12 +15,19 @@ export function Lobby({ snapshot }: { snapshot: PlayerSnapshot }) {
       <div className="glow-border flex w-full max-w-sm animate-pop flex-col items-center gap-3 rounded-3xl bg-card p-6 shadow-soft">
         <PlayerAvatar avatar={snapshot.me.avatar} size="xl" className="animate-float bg-accent" />
         <p className="text-sm font-semibold text-muted-foreground wrap-break-word">{snapshot.quizTitle}</p>
+        {/* The room code, so the player can tell others where to join (also in the game menu later). */}
+        <p className="flex items-baseline gap-2 rounded-xl bg-muted px-3 py-1">
+          <span className="text-sm font-semibold text-muted-foreground">{t('join.pin')}</span>
+          <span className="text-xl font-black tracking-widest tabular-nums">{snapshot.pin}</span>
+        </p>
         <h1 className="text-3xl font-black wrap-break-word">{t('play.youAreIn', { name: snapshot.me.name })}</h1>
         {team && (
-          <p className="rounded-full bg-secondary px-3 py-1 font-bold text-secondary-foreground">{t('play.yourTeam', { team: team.name })}</p>
+          <p className="rounded-full bg-secondary px-3 py-1 font-bold text-secondary-foreground">
+            {team.solo ? t('play.solo') : t('play.yourTeam', { team: team.name })}
+          </p>
         )}
       </div>
-      {team && <TeamCard snapshot={snapshot} team={team} />}
+      {team && !team.solo && <TeamCard snapshot={snapshot} team={team} />}
       {snapshot.mode === 'team' && !snapshot.me.teamId && <PickTeam snapshot={snapshot} />}
       <p className="flex items-center gap-2 font-semibold text-muted-foreground">
         {t('play.waitingForHost')}

@@ -1,5 +1,5 @@
 import type { PlayerPublic, TeamPublic } from '@quizmoo/shared'
-import { ArrowRightLeftIcon } from 'lucide-react'
+import { ArrowRightLeftIcon, UserIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import {
@@ -11,21 +11,28 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/cn'
 
-/** "Move to": the other teams for a player, on the control page between questions (the lobby has its own menu and drag). */
+/**
+ * "Move to": the other teams for a player, and playing on their own when players may, on the
+ * control page between questions (the lobby has its own menu and drag).
+ */
 export function MovePlayerMenu({
   player,
   teams,
+  solo,
   onMove,
   className,
 }: {
   player: PlayerPublic
   teams: readonly TeamPublic[]
-  onMove: (playerId: string, teamId: string) => void
+  /** Whether the player plays on their own; null when players may not. */
+  solo: boolean | null
+  /** `teamId` null: on their own. */
+  onMove: (playerId: string, teamId: string | null) => void
   className?: string
 }) {
   const { t } = useTranslation()
-  const others = teams.filter((team) => team.id !== player.teamId)
-  if (others.length === 0) return null
+  const others = teams.filter((team) => !team.solo && team.id !== player.teamId)
+  if (others.length === 0 && solo !== false) return null
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -46,6 +53,12 @@ export function MovePlayerMenu({
             <span className="truncate">{team.name}</span>
           </DropdownMenuItem>
         ))}
+        {solo === false && (
+          <DropdownMenuItem onSelect={() => onMove(player.id, null)}>
+            <UserIcon aria-hidden="true" />
+            {t('play.soloGroup')}
+          </DropdownMenuItem>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   )

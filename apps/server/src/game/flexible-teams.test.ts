@@ -1,6 +1,8 @@
 import { MAX_TEAMS, type Answer, type GameSettings } from '@quizmoo/shared'
 import { describe, expect, it } from 'vitest'
 import {
+  allAnswered,
+  confirmTeamAnswer,
   createGame,
   createTeam,
   endGame,
@@ -12,11 +14,13 @@ import {
   pickTeam,
   removeTeam,
   renameTeam,
+  setTeamMode,
   showScoreboard,
   startGame,
   submitAnswer,
 } from './engine.js'
 import { fixtureQuiz, fixtureSettings } from './fixtures.js'
+import { toCsv, toResults } from './results.js'
 import { toHostSnapshot } from './snapshots.js'
 import { EngineError, type GameState } from './types.js'
 
@@ -27,7 +31,7 @@ function game(settings: Partial<GameSettings> = {}): GameState {
   return createGame(fixtureQuiz(), fixtureSettings({ mode: 'team', ...settings }), '123456', 'g', T0)
 }
 
-function join(state: GameState, n: number, team: { teamId?: string; newTeam?: { id: string; name: string } }): GameState {
+function join(state: GameState, n: number, team: { teamId?: string; newTeam?: { id: string; name: string }; solo?: boolean }): GameState {
   return joinPlayer(state, { id: `p${n}`, name: `Player ${n}`, token: `tok-${n}`, ...team })
 }
 
@@ -196,6 +200,82 @@ describe('late joining', () => {
     let classic = createGame(fixtureQuiz(), fixtureSettings({ lateJoin: true }), '123456', 'g', T0)
     classic = startGame(joinPlayer(classic, { id: 'p1', name: 'Anna', token: 't1' }), T0)
     expect(joinPlayer(classic, { id: 'p2', name: 'Béla', token: 't2' }).players.p2).toBeDefined()
+  })
+})
+
+describe('solo players', () => {
+  const B: Answer = { type: 'single', optionId: 'b' }
+  function lobby(): GameState {
+    let state = game({ teamSetup: 'both', teamNames: ['Red'], soloPlayers: true, teamAnswer: 'captain' })
+    state = join(state, 1, { teamId: 'team-1' })
+    state = join(state, 2, { teamId: 'team-1' })
+    return join(state, 3, { solo: true })
+  }
+
+  it('refuses playing alone unless the game allows it', () => {
+    expectCode(() => join(game({ teamNames: ['Red', 'Blue'] }), 1, { solo: true }), 'errors.invalidTransition')
+    expectCode(() => movePlayer(join(game({ teamNames: ['Red', 'Blue'] }), 1, { teamId: 'team-1' }), { playerId: 'p1', teamId: null }), 'errors.invalidTransition')
+  })
+
+  it('gives a solo player an entry of their own that nobody else joins or changes', () => {
+    const state = lobby()
+    expect(state.players.p3!.teamId).toBe('solo-p3')
+    expect(state.teams['solo-p3']).toMatchObject({ name: 'Player 3', solo: true, answerMode: 'average', captainId: 'p3' })
+    expectCode(() => join(state, 4, { teamId: 'solo-p3' }), 'errors.unknownTeam')
+    expectCode(() => movePlayer(state, { playerId: 'p1', teamId: 'solo-p3' }), 'errors.unknownTeam')
+    expectCode(() => renameTeam(state, { teamId: 'solo-p3', name: 'Mine' }), 'errors.unknownTeam')
+    expectCode(() => removeTeam(state, 'solo-p3'), 'errors.unknownTeam')
+    expectCode(() => setTeamMode(state, { teamId: 'solo-p3', mode: 'captain' }), 'errors.unknownTeam')
+    expectCode(() => setTeamMode({ ...state, settings: { ...state.settings, teamsChoose: true } }, { mode: 'majority', byPlayerId: 'p3' }), 'errors.invalidTransition')
+    // Every team's mode leaves solo players counting on their own.
+    expect(setTeamMode(state, { mode: 'majority' }).teams['solo-p3']!.answerMode).toBe('average')
+    // Not a team name, and not one of the 30 teams.
+    expect(createTeam(state, { id: 'x', name: 'Player 3' }).teams.x!.name).toBe('Player 3')
+  })
+
+  it('ranks solo players with the teams by their own points, and closes when everyone has answered', () => {
+    let state = startGame(lobby(), T0)
+    state = answer(state, 'p1', B, T0)
+    state = answer(state, 'p2', B, T0)
+    state = answer(state, 'p3', A, T0)
+    expect(allAnswered(state)).toBe(false)
+    state = confirmTeamAnswer(state, { playerId: 'p1', questionId: 'q-single', answer: A }, T0 + 4_000)
+    expect(allAnswered(state)).toBe(true)
+    state = endQuestion(state)
+    expect(state.teams['solo-p3']!.score).toBe(1000)
+    expect(state.teams['team-1']!.score).toBe(900)
+    expect(toHostSnapshot(state, T0).teams).toMatchObject([
+      { id: 'solo-p3', name: 'Player 3', solo: true, avatar: state.players.p3!.avatar, rank: 1, memberCount: 1 },
+      { id: 'team-1', name: 'Red', solo: false, avatar: null, rank: 2 },
+    ])
+    const results = toResults(endGame(state, T0))
+    expect(results.podium.map((p) => [p.id, p.avatar])).toEqual([
+      ['solo-p3', state.players.p3!.avatar],
+      ['team-1', null],
+    ])
+    expect(toCsv(results, 'en')).toContain('Player 3;On their own;1000')
+  })
+
+  it('moves a player between a team and playing alone; after the start the solo points wait for them', () => {
+    let state = movePlayer(lobby(), { playerId: 'p3', teamId: 'team-1' })
+    expect(state.teams['solo-p3']).toBeUndefined()
+    state = movePlayer(state, { playerId: 'p3', teamId: null })
+    expect(state.players.p3!.teamId).toBe('solo-p3')
+
+    state = endQuestion(answer(startGame(state, T0), 'p3', A, T0))
+    state = movePlayer(state, { playerId: 'p3', teamId: 'team-1' })
+    expect(state.teams['solo-p3']!.score).toBe(1000)
+    expect(toHostSnapshot(state, T0).teams.map((t) => t.id)).toEqual(['team-1'])
+    state = movePlayer(state, { playerId: 'p3', teamId: null })
+    expect(toHostSnapshot(state, T0).teams.find((t) => t.id === 'solo-p3')).toMatchObject({ score: 1000, rank: 1 })
+  })
+
+  it('lets a player whose team was removed play alone, and drops the entry when they are removed', () => {
+    let state = removeTeam(lobby(), 'team-1')
+    state = pickTeam(state, { playerId: 'p1', solo: true })
+    expect(state.teams['solo-p1']).toMatchObject({ solo: true, captainId: 'p1' })
+    state = kickPlayer(state, 'p1')
+    expect(state.teams['solo-p1']).toBeUndefined()
   })
 })
 

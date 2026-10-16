@@ -211,10 +211,13 @@ describe('toPlayerSnapshot', () => {
     const before = toPlayerSnapshot(state, 'p1', T0)
     expect(before.me).toMatchObject({ id: 'p1', name: 'Anna', score: 0 })
     expect(before.myAnswer).toBeNull()
+    expect(before.myAnswerTimeMs).toBeNull()
     expect(before.lastPoints).toBeNull()
 
     state = submitAnswer(state, { playerId: 'p1', questionId: 'q-single', answer: { type: 'single', optionId: 'a' } }, T0)
     expect(toPlayerSnapshot(state, 'p1', T0).myAnswer).toEqual({ type: 'single', optionId: 'a' })
+    expect(toPlayerSnapshot(state, 'p2', T0).myAnswerTimeMs).toBeNull()
+    expect(toPlayerSnapshot(submitAnswer(state, { playerId: 'p2', questionId: 'q-single', answer: { type: 'single', optionId: 'b' } }, T0 + 3400), 'p2', T0).myAnswerTimeMs).toBe(3400)
     expect(toPlayerSnapshot(state, 'p1', T0).question).not.toHaveProperty('correctOptionId')
 
     state = endQuestion(state)
