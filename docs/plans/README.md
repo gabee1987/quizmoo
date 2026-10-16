@@ -30,7 +30,7 @@ Finished plans are deleted once their branch is merged: `CHANGELOG.md` records w
 | 21 | Small improvements: selection, team of one, review label, names markup, PWA, new game dialog, custom theme and answer colours, editor settings panel, scheduled games | `feature/small-improvements` | done |
 | 22 | My settings, per host account | `feature/host-settings` | done |
 | 23 | Flexible teams and mixed play, set up per game | `feature/flexible-teams` | done |
-| 24 | [Player and host polish from testing](phase-24-player-host-polish.md) | `feature/player-host-polish` | done |
+| 24 | Player and host polish from testing | `feature/player-host-polish` | done |
 | 25 | [Game history at scale](phase-25-game-history.md) | `feature/game-history` | planned |
 | 26 | [Friends and family beta on a hosting provider](phase-26-beta-deploy.md) | `chore/beta-deploy` | planned |
 
