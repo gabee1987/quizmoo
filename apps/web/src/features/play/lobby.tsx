@@ -1,5 +1,5 @@
 import type { GameSettings, PlayerSnapshot } from '@quizmoo/shared'
-import { CheckIcon, CopyIcon, EyeOffIcon, FlameIcon, ListOrderedIcon, PencilIcon, UserPlusIcon, UsersIcon, ZapIcon } from 'lucide-react'
+import { CheckIcon, CopyIcon, EyeOffIcon, FlameIcon, ListOrderedIcon, PencilIcon, UserIcon, UserPlusIcon, UsersIcon, ZapIcon } from 'lucide-react'
 import { useState, type ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
@@ -12,34 +12,57 @@ import { stagger } from '../../lib/motion'
 import { PickTeam } from './pick-team'
 import { TeamCard } from './team-card'
 
+/**
+ * Waiting for the start: who the player is and which team they play for (big, in the theme colour),
+ * that the game is about to start and how many have joined, then the PIN to pass on, the team and
+ * what the game is like.
+ */
 export function Lobby({ snapshot }: { snapshot: PlayerSnapshot }) {
   const { t } = useTranslation()
   const team = snapshot.teams.find((x) => x.id === snapshot.me.teamId)
   return (
-    // Top padding keeps the game menu's button clear of the card once the page is taller than the screen.
-    <div className="flex flex-1 flex-col items-center justify-center gap-6 pt-12 text-center">
+    <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center">
       {snapshot.branding && <BrandingMark branding={snapshot.branding} size="phone" />}
-      <div className="glow-border flex w-full max-w-sm animate-pop flex-col items-center gap-3 rounded-3xl bg-card p-6 shadow-soft">
+      <div className="glow-border flex w-full max-w-sm animate-pop flex-col items-center gap-4 rounded-3xl bg-card p-6 shadow-soft">
         <PlayerAvatar avatar={snapshot.me.avatar} size="xl" className="animate-float bg-accent" />
         <h1 className="text-3xl font-black wrap-break-word">{t('play.youAreIn', { name: snapshot.me.name })}</h1>
-        {team && (
-          <p className="rounded-full bg-secondary px-3 py-1 font-bold text-secondary-foreground">
-            {team.solo ? t('play.solo') : t('play.yourTeam', { team: team.name })}
-          </p>
-        )}
-        <PinBox pin={snapshot.pin} />
+        {team && <TeamBanner name={team.solo ? null : team.name} />}
+        <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2 font-semibold text-muted-foreground">
+          <span className="flex items-center gap-2">
+            {t('play.waitingForHost')}
+            <WaitingDots />
+          </span>
+          {/* Keyed by the count so the badge pops each time someone joins. */}
+          <span key={snapshot.players.length} className="animate-pop rounded-full bg-muted px-3 py-1 text-sm font-bold text-foreground">
+            {t('play.playerCount', { count: snapshot.players.length })}
+          </span>
+        </div>
       </div>
-      {team && !team.solo && <TeamCard snapshot={snapshot} team={team} />}
       {snapshot.mode === 'team' && !snapshot.me.teamId && <PickTeam snapshot={snapshot} />}
+      <PinBox pin={snapshot.pin} />
+      {team && !team.solo && <TeamCard snapshot={snapshot} team={team} />}
       <GameInfo snapshot={snapshot} />
-      <p className="flex items-center gap-2 font-semibold text-muted-foreground">
-        {t('play.waitingForHost')}
-        <WaitingDots />
-      </p>
-      {/* Keyed by the count so the badge pops each time someone joins. */}
-      <p key={snapshot.players.length} className="animate-pop rounded-full bg-muted px-4 py-1.5 text-sm font-bold">
-        {t('play.playerCount', { count: snapshot.players.length })}
-      </p>
+    </div>
+  )
+}
+
+/** The player's team, the first thing after their name: a solid banner in the theme colour. `name` null: on their own. */
+function TeamBanner({ name }: { name: string | null }) {
+  const { t } = useTranslation()
+  const Icon = name === null ? UserIcon : UsersIcon
+  return (
+    <div className="flex w-full animate-pop items-center gap-3 rounded-2xl bg-primary px-4 py-3 text-left text-primary-foreground shadow-soft" style={stagger(1, 0, 150)}>
+      <span className="grid size-12 shrink-0 place-items-center rounded-xl bg-primary-foreground/15">
+        <Icon className="size-7" aria-hidden="true" />
+      </span>
+      {name === null ? (
+        <p className="text-xl font-black">{t('play.solo')}</p>
+      ) : (
+        <p className="flex min-w-0 flex-col">
+          <span className="text-sm font-bold tracking-wide uppercase">{t('play.yourTeamLabel')}</span>
+          <span className="text-2xl leading-tight font-black wrap-break-word">{name}</span>
+        </p>
+      )}
     </div>
   )
 }
@@ -55,14 +78,18 @@ function PinBox({ pin }: { pin: string }) {
     setTimeout(() => setCopied(false), 2000)
   }
   return (
-    <div className="flex w-full flex-col items-center gap-2 rounded-2xl bg-muted px-4 py-3">
-      <span className="text-sm font-semibold text-muted-foreground">{t('join.pin')}</span>
+    <section
+      aria-label={t('join.pin')}
+      className="flex w-full max-w-sm animate-fade-up flex-col items-center gap-2 rounded-3xl border bg-card px-5 py-4 shadow-soft"
+      style={stagger(1, 0, 120)}
+    >
+      <span className="text-sm font-bold tracking-wide text-muted-foreground uppercase">{t('join.pin')}</span>
       <span className="text-5xl font-black tracking-[0.15em] tabular-nums">{pin}</span>
       <Button variant="outline" size="sm" onClick={() => void copy()} aria-label={t('play.copyPinLabel', { pin })}>
         {copied ? <CheckIcon aria-hidden="true" /> : <CopyIcon aria-hidden="true" />}
         {copied ? t('play.copied') : t('play.copyPin')}
       </Button>
-    </div>
+    </section>
   )
 }
 
@@ -74,7 +101,7 @@ function GameInfo({ snapshot }: { snapshot: PlayerSnapshot }) {
     <section
       aria-labelledby="game-info"
       className="flex w-full max-w-sm animate-fade-up flex-col gap-3 rounded-3xl border bg-card p-5 text-left shadow-soft"
-      style={stagger(1, 0, 200)}
+      style={stagger(1, 0, 280)}
     >
       <div className="min-w-0">
         <h2 id="game-info" className="text-sm font-bold tracking-wide text-muted-foreground uppercase">

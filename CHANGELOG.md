@@ -152,6 +152,11 @@
 - "Team picks" stays open on the next questions once opened (remembered per game in that tab).
 - The player's own answer stays in view until the next question instead of a bare "Answer sent!": a team member's pick or vote before the team is done (with the teammates' picks below), the kept answer when results are held back until the end, and in the reveal when the answer was not the correct one (or a poll vote, or waiting for grading).
 - Confirmation dialogs on phones have full-size buttons (they were squashed to half height).
+- Players can swipe a host message away (left or right) or close it with ×, on their own phone only; it stays hidden after a reload. A swiped message just flies off; one closed with × wobbles out as before. The host can send a message as "Important" (a switch in the message box, off by default; a quick message can be set to always go out as important in My settings), and important messages cannot be hidden.
+- Every toast can be swiped away sideways too.
+- The phone's round menu button moved to the bottom left corner, in reach of a thumb, and opens upwards; messages and toasts at the top are full width again and never under it.
+- A message or toast wobbling out is no longer cut off at the bottom.
+- The phone lobby puts the team first: a big banner in the game's colour with the team's name (or "You're playing on your own"), then that the game is about to start and how many have joined, then the PIN, the team members with their count, and what the game is like.
 
 ### Development
 - The web dev server runs on port 15173, away from the 5173+ ports other local Vite projects take.

@@ -768,8 +768,7 @@
 .toaster [data-sonner-toast][data-styled='true'] [data-title] {
   font-weight: 800;
   line-height: 1.3;
-}
-.note-icon,
+}.note-icon,
 .toaster [data-sonner-toast][data-styled='true'] [data-icon] {
   display: flex;
   flex-shrink: 0;

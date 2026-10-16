@@ -457,6 +457,12 @@ describe('host messages', () => {
     expectSerialisable(finished)
   })
 
+  it('announce marks an important message, and only then', () => {
+    const state = withPlayers(1)
+    expect(announce(state, { id: 'm', text: 'Hi', important: true }, T0).announcement).toMatchObject({ important: true })
+    expect(announce(state, { id: 'm', text: 'Hi', important: false }, T0).announcement).not.toHaveProperty('important')
+  })
+
   it('announce rejects an empty or too long text', () => {
     const state = withPlayers(1)
     expectCode(() => announce(state, { id: 'm', text: '   ' }, T0), 'errors.invalidInput')

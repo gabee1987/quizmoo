@@ -2,7 +2,7 @@ import type { QueryClient } from '@tanstack/react-query'
 import { Outlet, createRootRouteWithContext, useRouterState } from '@tanstack/react-router'
 import { AppHeader } from '@/components/app-header'
 import { Backdrop } from '@/components/backdrop'
-import { GameMenu } from '@/components/game-menu'
+import { GAME_MENU_SPACE, GameMenu } from '@/components/game-menu'
 import { Toaster } from '@/components/ui/sonner'
 import { cn } from '@/lib/cn'
 import { installSocketToasts } from '@/lib/socket-toasts'
@@ -26,7 +26,7 @@ function RootLayout() {
       <Backdrop />
       <div className="flex min-h-full flex-col">
         {inGame ? <GameMenu /> : <AppHeader brand={!home} />}
-        <main className={cn('flex flex-1 flex-col px-4 pb-6', inGame && 'pt-[max(0.75rem,env(safe-area-inset-top))]')}>
+        <main className={cn('flex flex-1 flex-col px-4', inGame ? cn('pt-[max(0.75rem,env(safe-area-inset-top))]', GAME_MENU_SPACE) : 'pb-6')}>
           <Outlet />
         </main>
       </div>

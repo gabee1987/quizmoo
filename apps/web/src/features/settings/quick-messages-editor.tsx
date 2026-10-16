@@ -7,6 +7,7 @@ import { useCallback, useId, useMemo, useRef, useState, type FormEvent } from 'r
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Switch } from '@/components/ui/switch'
 import { cn } from '@/lib/cn'
 import { useFlip } from '@/lib/flip'
 import { useMotionOk } from '@/lib/motion'
@@ -190,7 +191,9 @@ function MessageRow({
           aria-invalid={empty || undefined}
           aria-describedby={empty ? errorId : undefined}
           // Editing a built-in message makes it the host's own text, no longer translated.
-          onChange={(e) => onChange({ id: message.id, text: e.target.value, durationSec: message.durationSec })}
+          onChange={(e) =>
+            onChange({ id: message.id, text: e.target.value, durationSec: message.durationSec, ...(message.important && { important: true }) })
+          }
         />
         <Button type="button" variant="ghost" size="icon-sm" aria-label={t('settings.messages.remove', { n })} onClick={remove}>
           <XIcon aria-hidden="true" />
@@ -203,6 +206,11 @@ function MessageRow({
       )}
       <div className="flex flex-wrap items-end gap-2 pl-7">
         <DurationField value={message.durationSec} onChange={(durationSec) => onChange({ ...message, durationSec })} />
+        {/* Sent as important: players cannot swipe it away. */}
+        <label className="mb-2 flex items-center gap-2 text-sm font-semibold">
+          <Switch checked={message.important === true} onCheckedChange={(important) => onChange({ ...message, important })} />
+          {t('settings.messages.important')}
+        </label>
         {builtIn && (
           <span className="mb-2.5 flex items-center gap-1 text-xs font-bold text-muted-foreground">
             <LanguagesIcon className="size-3.5" aria-hidden="true" />

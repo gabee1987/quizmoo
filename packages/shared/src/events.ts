@@ -85,7 +85,13 @@ export const hostCommandSchema = z.discriminatedUnion('type', [
    * A message on every phone and the projector until cleared (or the next question starts);
    * with `durationSec` it clears itself after that long.
    */
-  z.object({ type: z.literal('announce'), text: announcementTextSchema, durationSec: announcementDurationSchema.optional() }),
+  z.object({
+    type: z.literal('announce'),
+    text: announcementTextSchema,
+    durationSec: announcementDurationSchema.optional(),
+    /** Players cannot swipe it away. */
+    important: z.boolean().optional(),
+  }),
   z.object({ type: z.literal('clearAnnouncement') }),
   /** "Save to my messages": the message, already saved to the host's library, joins this game's quick messages. */
   z.object({ type: z.literal('addQuickMessage'), message: ownQuickMessageSchema }),

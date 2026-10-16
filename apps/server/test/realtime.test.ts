@@ -741,6 +741,9 @@ describeDb('sockets (database)', () => {
     await cleared
     expect(await command(hostSocket, { type: 'announce', text: '' })).toEqual({ error: 'errors.invalidInput' })
     expect(await command(screen, { type: 'announce', text: 'Hi' })).toEqual({ error: 'errors.unauthorized' })
+    const important = nextSnapshot<PlayerSnapshot>(again.socket, 'game:player', (s) => s.announcement?.important === true)
+    expect(await command(hostSocket, { type: 'announce', text: 'Fire drill', important: true })).toEqual({ ok: true })
+    expect((await important).announcement).toMatchObject({ text: 'Fire drill', important: true })
   })
 
   it('pause and resume: phones see the pause, answers wait for the resume; a question shown again reaches the phone', async () => {

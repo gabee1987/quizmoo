@@ -23,10 +23,15 @@ import { emitAck, useGameStore } from '@/lib/socket'
 
 /**
  * Phones in a game have no header: the screen belongs to the game. Language and colour mode sit
- * behind this small round button in the top right corner instead, with the game and who the player
+ * behind this round button in the bottom left corner instead (in reach of a thumb, and away from
+ * the host's messages and the toasts at the top; game pages keep a strip free for it at the
+ * bottom, `GAME_MENU_SPACE`), with the game and who the player
  * joined as, and "Leave game". A team's captain can pass the captaincy from here at any point of
  * the game (in the lobby the team card offers it too).
  */
+/** Room left free at the bottom of a game page for the button (its 3rem, its offset and a gap), so it never covers content. */
+export const GAME_MENU_SPACE = 'pb-[calc(max(0.75rem,env(safe-area-inset-bottom))+3.75rem)]'
+
 /** Touch-sized rows: the menu is used on phones, often in a hurry mid-game. */
 const touchItem = 'min-h-12 text-base'
 const touchRadio = 'min-h-12 rounded-xl pl-9 text-base font-semibold'
@@ -70,12 +75,12 @@ export function GameMenu() {
             size="icon-sm"
             aria-label={t('app.settings')}
             title={t('app.settings')}
-            className="fixed top-[max(0.75rem,env(safe-area-inset-top))] right-3 z-40 size-10 rounded-full bg-card/90 shadow-soft backdrop-blur"
+            className="fixed bottom-[max(0.75rem,env(safe-area-inset-bottom))] left-3 z-40 size-12 rounded-full bg-card/90 shadow-soft backdrop-blur"
           >
             <Settings2Icon aria-hidden="true" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="min-w-64">
+        <DropdownMenuContent side="top" align="start" className="min-w-64">
           {snapshot && (
             <>
               {/* The room code at any point of the game, for someone who wants to join. */}

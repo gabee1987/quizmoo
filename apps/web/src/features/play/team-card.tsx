@@ -6,6 +6,7 @@ import { toast } from 'sonner'
 import { ChoiceCards } from '@/components/choice-cards'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/cn'
+import { stagger } from '@/lib/motion'
 import { PlayerAvatar } from '../../components/player-avatar'
 import { emitAck } from '../../lib/socket'
 
@@ -28,14 +29,22 @@ export function TeamCard({ snapshot, team }: { snapshot: PlayerSnapshot; team: T
   }
 
   return (
-    <section className="flex w-full max-w-sm animate-fade-up flex-col gap-4 rounded-3xl border bg-card p-5 text-left shadow-soft">
+    <section
+      aria-labelledby="team-members"
+      className="flex w-full max-w-sm animate-fade-up flex-col gap-4 rounded-3xl border bg-card p-5 text-left shadow-soft"
+      style={stagger(1, 0, 200)}
+    >
+      {/* The team's name is on the banner above: here who is in it and how it answers. */}
       <div className="flex flex-col gap-1">
-        <h2 className="text-lg font-extrabold wrap-break-word">{team.name}</h2>
+        <h2 id="team-members" className="flex items-center gap-2 text-sm font-bold tracking-wide text-muted-foreground uppercase">
+          {t('play.team.members')}
+          <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-foreground tabular-nums">{members.length}</span>
+        </h2>
         <p className="text-sm font-semibold text-muted-foreground">
           {t('play.team.answers', { mode: t(`host.create.teamAnswerOptions.${team.answerMode}`) })}
         </p>
       </div>
-      <ul className="flex flex-wrap gap-2" aria-label={t('play.team.members')}>
+      <ul className="flex flex-wrap gap-2" aria-labelledby="team-members">
         {members.map((p) => (
           <li
             key={p.id}

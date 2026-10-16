@@ -596,7 +596,7 @@ export function setNextGame(state: GameState, pin: string): GameState {
 /** Shows a message on every phone and the projector, replacing the current one. Allowed in any phase. */
 export function announce(
   state: GameState,
-  input: { id: string; text: string; durationSec?: number | undefined },
+  input: { id: string; text: string; durationSec?: number | undefined; important?: boolean | undefined },
   now: number,
 ): GameState {
   const text = input.text.trim()
@@ -606,7 +606,8 @@ export function announce(
     throw new EngineError('errors.invalidInput')
   }
   const expiresAt = durationSec === undefined ? null : now + durationSec * 1000
-  return { ...state, announcement: { id: input.id, text, at: now, expiresAt } }
+  // Important: players cannot swipe it away on their phones.
+  return { ...state, announcement: { id: input.id, text, at: now, expiresAt, ...(input.important && { important: true }) } }
 }
 
 /** Clears the message `id` once its time is up; a newer message, or one that stays, is left alone. */

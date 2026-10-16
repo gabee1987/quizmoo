@@ -65,6 +65,10 @@ Assumed (change if wrong): admin-edited name lists keep plain names; their avata
 
 - **Follow-ups to A (user requests, 16 October 2026):** the game menu is touch-sized (48 px rows); the player's own answer stays visible until the next question (team member before the team is done, held-back reveal, a reveal that was not correct).
 
+- **B (messages on phones), done 16 October 2026.** `Announcement.important` and the `announce` command's `important`; quick messages carry an optional `important` preset (My settings switch per message; a preset chip goes out important even with the box's switch off). Phones: × and swipe to hide (session storage per game), never for important ones. The banner and the game phones' toasts end before the menu button. Tests: 1 engine, 1 realtime assertion, 1 shared schema case, 3 web units (`useDismissable`), `connection.e2e.ts` extended.
+
+- **Follow-ups to B (user requests, 16 October 2026):** a swiped message no longer reappears to wobble out; nothing clips a leaving message; every toast swipes away (`swipeDirections` on the shared Toaster) and the message's swipe is a shared `SwipeAway`; the game menu button moved to the bottom left (game pages keep a strip free for it), so messages and toasts are full width at the top (this replaces B7's narrowing); the phone lobby leads with a team banner.
+
 ## Deviations
 
 - A2: the "Back to home" link already existed on the podium, and the closed screen has "Join a game", so nothing was added there.

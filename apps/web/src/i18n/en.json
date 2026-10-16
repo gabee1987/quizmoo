@@ -186,6 +186,10 @@
         "customSeconds": "How many seconds is it shown?",
         "timeOf": "How long \"{{text}}\" is shown",
         "editHelp": "Changes here apply to this game only. Edit your list in My settings.",
+        "important": "Important",
+        "importantHelp": "Players can't swipe it away",
+        "importantShown": "important",
+        "importantPreset": "Always sent as important",
         "presets": {
           "getReady": "Get ready!",
           "shortBreak": "Short break",
@@ -476,6 +480,7 @@
   "play": {
     "youAreIn": "You're in, {{name}}!",
     "yourTeam": "Team: {{team}}",
+    "yourTeamLabel": "Your team",
     "solo": "You're playing on your own",
     "soloGroup": "On their own",
     "soloRank": "Among the teams: rank {{rank}}.",
@@ -641,7 +646,8 @@
     "reconnecting": "Reconnecting… {{seconds}} s",
     "offline": "No network… {{seconds}} s",
     "reconnected": "Reconnected",
-    "announcement": "Message from the host"
+    "announcement": "Message from the host",
+    "dismissAnnouncement": "Hide this message"
   },
   "questionTypes": {
     "single": "Single choice",
@@ -905,6 +911,7 @@
       "moveDown": "Move message {{n}} down",
       "remove": "Remove message {{n}}",
       "textRequired": "A message needs some text.",
+      "important": "Important",
       "custom": "Other…",
       "customSeconds": "Seconds"
     },

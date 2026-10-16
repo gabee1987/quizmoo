@@ -367,7 +367,7 @@ function runHostCommand(state: GameState, command: HostCommand, now: number): Ga
     case 'releaseResults':
       return releaseResults(state, command.audience)
     case 'announce':
-      return announce(state, { id: nanoid(8), text: command.text, durationSec: command.durationSec }, now)
+      return announce(state, { id: nanoid(8), text: command.text, durationSec: command.durationSec, important: command.important }, now)
     case 'clearAnnouncement':
       return clearAnnouncement(state)
     case 'addQuickMessage':

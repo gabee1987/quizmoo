@@ -186,6 +186,10 @@
         "customSeconds": "Hány másodpercig látszik?",
         "timeOf": "Meddig látszik: „{{text}}”",
         "editHelp": "Az itteni változások csak erre a játékra szólnak. A listádat a Beállításaimban szerkesztheted.",
+        "important": "Fontos",
+        "importantHelp": "A játékosok nem húzhatják el",
+        "importantShown": "fontos",
+        "importantPreset": "Mindig fontosként megy ki",
         "presets": {
           "getReady": "Készüljetek!",
           "shortBreak": "Egy kis szünet",
@@ -476,6 +480,7 @@
   "play": {
     "youAreIn": "Bent vagy, {{name}}!",
     "yourTeam": "Csapat: {{team}}",
+    "yourTeamLabel": "A csapatod",
     "solo": "Egyedül játszol",
     "soloGroup": "Egyéni játékosok",
     "soloRank": "A csapatok között: {{rank}}. hely",
@@ -641,7 +646,8 @@
     "reconnecting": "Újracsatlakozás… {{seconds}} mp",
     "offline": "Nincs hálózat… {{seconds}} mp",
     "reconnected": "Újra online",
-    "announcement": "Üzenet a játékvezetőtől"
+    "announcement": "Üzenet a játékvezetőtől",
+    "dismissAnnouncement": "Elrejtem az üzenetet"
   },
   "questionTypes": {
     "single": "Egy helyes válasz",
@@ -905,6 +911,7 @@
       "moveDown": "{{n}}. üzenet lejjebb",
       "remove": "{{n}}. üzenet törlése",
       "textRequired": "Írj valamit az üzenetbe.",
+      "important": "Fontos",
       "custom": "Más…",
       "customSeconds": "Másodperc"
     },

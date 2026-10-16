@@ -4,7 +4,8 @@ import { expect, test, type Page } from '@playwright/test'
  * Connection resilience and host messages: a phone loses its network mid-question, sees the
  * bar with the elapsed time, comes back with a "Reconnected" toast and still answers; the host
  * sends a message to every phone and the projector, a reloaded phone still shows it, and Clear
- * removes it everywhere. Finally the player leaves from the game menu.
+ * removes it everywhere. The phone hides a message for itself, but not an important one. Finally
+ * the player leaves from the game menu.
  */
 
 const username = process.env.E2E_USERNAME
@@ -87,6 +88,23 @@ test('a phone survives going offline; host messages reach phones and the project
       await page.getByRole('button', { name: 'Clear', exact: true }).click()
       await expect(banner(phone)).toHaveCount(0)
       await expect(banner(projector)).toHaveCount(0)
+    })
+
+    await test.step('the player hides a message on their phone, but not an important one', async () => {
+      await page.getByLabel('Message', { exact: true }).fill('Drinks at the bar')
+      await page.getByRole('button', { name: 'Send', exact: true }).click()
+      await expect(banner(phone)).toHaveText('Drinks at the bar')
+      await phone.getByRole('button', { name: 'Hide this message' }).click()
+      await expect(banner(phone)).toHaveCount(0)
+      await expect(banner(projector)).toHaveText('Drinks at the bar')
+
+      await page.getByRole('switch', { name: 'Important' }).click()
+      await page.getByLabel('Message', { exact: true }).fill('Fire drill at 3 pm')
+      await page.getByRole('button', { name: 'Send', exact: true }).click()
+      await expect(banner(phone)).toHaveText('Fire drill at 3 pm')
+      await expect(phone.getByRole('button', { name: 'Hide this message' })).toHaveCount(0)
+      await page.getByRole('button', { name: 'Clear', exact: true }).click()
+      await expect(banner(phone)).toHaveCount(0)
     })
 
     await test.step('the player leaves from the game menu and keeps their points', async () => {

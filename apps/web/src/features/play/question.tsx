@@ -92,8 +92,7 @@ export function Question({ snapshot, clockOffset }: { snapshot: PlayerSnapshot; 
 
   return (
     <div className="flex flex-1 flex-col gap-4">
-      {/* Tall enough to keep the timer below the floating settings button. */}
-      <p className="flex min-h-10 animate-fade-up items-center pr-12 text-sm font-semibold text-muted-foreground">
+      <p className="flex animate-fade-up items-center text-sm font-semibold text-muted-foreground">
         {t('play.questionOf', { index: snapshot.questionIndex + 1, count: snapshot.questionCount })}
       </p>
       {snapshot.questionEndsAt !== null && (

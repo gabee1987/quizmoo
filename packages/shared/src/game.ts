@@ -201,6 +201,8 @@ export interface Announcement {
   at: number
   /** Unix ms when it disappears by itself; null (or missing in games saved before it existed) while it stays. */
   expiresAt?: number | null
+  /** Players cannot swipe it away on their phones. Missing (false) in games saved before it existed. */
+  important?: boolean
 }
 
 /** Host messages: 1 to 200 characters. */

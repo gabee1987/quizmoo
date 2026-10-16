@@ -11,18 +11,22 @@ export const MAX_QUICK_MESSAGES = 25
 
 const idSchema = z.string().min(1).max(16)
 const durationSchema = announcementDurationSchema.nullable().default(null)
+/** Sent as important: players cannot swipe it away. Missing: not important. */
+const importantSchema = z.boolean().optional()
 
 /** A built-in message: shown in the host's language. Its id is its name. Editing its text turns it into an own message. */
 export const builtInQuickMessageSchema = z.object({
   id: idSchema,
   builtIn: z.enum(builtInMessages),
   durationSec: durationSchema,
+  important: importantSchema,
 })
 /** A host's own message, sent as typed. Without `durationSec` it stays until cleared. */
 export const ownQuickMessageSchema = z.object({
   id: idSchema,
   text: announcementTextSchema,
   durationSec: durationSchema,
+  important: importantSchema,
 })
 export const quickMessageSchema = z.union([builtInQuickMessageSchema, ownQuickMessageSchema])
 export type QuickMessage = z.infer<typeof quickMessageSchema>
