@@ -156,6 +156,7 @@
 - Every toast can be swiped away sideways too.
 - The phone's round menu button moved to the bottom left corner, in reach of a thumb, and opens upwards; messages and toasts at the top are full width again and never under it.
 - A message or toast wobbling out is no longer cut off at the bottom.
+- On a laptop or desktop the waiting screen has its own two-column layout: who the player is and the PIN on the left, the team and what the game is like on the right (its rules side by side), instead of the phone's narrow column.
 - The phone lobby puts the team first: a big banner in the game's colour with the team's name (or "You're playing on your own"), then that the game is about to start and how many have joined, then the PIN, the team members with their count, and what the game is like.
 
 ### Development

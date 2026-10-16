@@ -31,7 +31,7 @@ export function TeamCard({ snapshot, team }: { snapshot: PlayerSnapshot; team: T
   return (
     <section
       aria-labelledby="team-members"
-      className="flex w-full max-w-sm animate-fade-up flex-col gap-4 rounded-3xl border bg-card p-5 text-left shadow-soft"
+      className="flex animate-fade-up flex-col gap-4 rounded-3xl border bg-card p-5 text-left shadow-soft"
       style={stagger(1, 0, 200)}
     >
       {/* The team's name is on the banner above: here who is in it and how it answers. */}
