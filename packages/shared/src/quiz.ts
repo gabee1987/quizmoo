@@ -110,6 +110,24 @@ export type TeamAnswerMode = (typeof teamAnswerModes)[number]
 /** A team answer mode; quizzes and games saved with the removed "one shared answer" play it as captain decides. */
 export const teamAnswerModeSchema = z.preprocess((value) => (value === 'shared' ? 'captain' : value), z.enum(teamAnswerModes))
 
+/** At most this many teams in a game, the host's and the players' together. */
+export const MAX_TEAMS = 30
+
+/** A team's name, from the host or from the player who created it. */
+export const teamNameSchema = z.string().trim().min(1).max(40)
+
+/**
+ * Who makes a team game's teams: the host's list (players pick one), the players (each may create
+ * one when joining), or both (the host's list plus "New team").
+ */
+export const teamSetups = ['host', 'players', 'both'] as const
+export type TeamSetup = (typeof teamSetups)[number]
+
+/** Players may create teams in this setup. */
+export function playersCreateTeams(setup: TeamSetup): boolean {
+  return setup !== 'host'
+}
+
 /**
  * Visual themes for the phones, projector and host control. Hues only; light and dark mode stay the device's choice.
  * The first seven are playful, the next five (graphite to bordeaux) are subdued for formal company events,
@@ -180,8 +198,17 @@ export const gameSettingsSchema = z
     answerLockSec: z.number().int().min(0).max(60).default(0),
     /** Shuffle answer options per game. */
     shuffleOptions: z.boolean().default(false),
-    /** Team names prepared by the host (team mode only). Players pick one when joining. */
-    teamNames: z.array(z.string().trim().min(1).max(40)).max(20).default([]),
+    /**
+     * The host's teams for a game (team mode; ignored when only players create teams). Set in the new
+     * game dialog; a quiz's saved names (from before teams were set per game) prefill it.
+     */
+    teamNames: z.array(teamNameSchema).max(MAX_TEAMS).default([]),
+    /** Team mode: who makes the teams. */
+    teamSetup: z.enum(teamSetups).default('host'),
+    /** Team mode: a player may also play on their own, ranked with the teams. */
+    soloPlayers: z.boolean().default(false),
+    /** New players may join a game that has started (classic and team mode). */
+    lateJoin: z.boolean().default(false),
     /** Team mode: every team's starting mode when teams choose, otherwise the mode of every team. */
     teamAnswer: teamAnswerModeSchema.default('captain'),
     /** Each team's captain may pick the team's answer mode in the lobby. */
@@ -205,15 +232,21 @@ export const gameSettingsSchema = z
     /** The colours of the custom theme; kept when another theme is picked, so switching back restores them. */
     customTheme: customThemeSchema.default({ hue: 277, accent: 330, chroma: 1 }),
   })
-  .superRefine(checkTeams)
 export type GameSettings = z.infer<typeof gameSettingsSchema>
 
-/** Team mode needs at least two distinct team names. Messages are i18n keys. */
-function checkTeams(settings: { mode: GameMode; teamNames: string[] }, ctx: z.RefinementCtx) {
+/**
+ * A new game's settings: in team mode the host's team names must differ, and a game whose teams
+ * only the host makes needs at least two. Quizzes and My settings hold no teams, so they skip this.
+ */
+export const newGameSettingsSchema = gameSettingsSchema.superRefine(checkTeams)
+
+/** Messages are i18n keys. */
+function checkTeams(settings: { mode: GameMode; teamNames: string[]; teamSetup: TeamSetup }, ctx: z.RefinementCtx) {
   if (settings.mode !== 'team') return
   const names = settings.teamNames.map((n) => n.toLowerCase())
-  if (names.length < 2) ctx.addIssue({ code: 'custom', path: ['teamNames'], message: 'host.create.needTwoTeams' })
-  else if (new Set(names).size !== names.length) {
+  if (settings.teamSetup === 'host' && names.length < 2) {
+    ctx.addIssue({ code: 'custom', path: ['teamNames'], message: 'host.create.needTwoTeams' })
+  } else if (new Set(names).size !== names.length) {
     ctx.addIssue({ code: 'custom', path: ['teamNames'], message: 'host.create.duplicateTeams' })
   }
 }

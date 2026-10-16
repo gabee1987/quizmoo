@@ -10,7 +10,8 @@ const cell = 'px-3 py-2'
 export function PlayerTable({ players, teams }: { players: ResultPlayer[]; teams: TeamPublic[] }) {
   const { t, i18n } = useTranslation()
   const [sort, setSort] = useState<Sort>({ key: 'score', direction: 'desc' })
-  const teamNames = new Map(teams.map((team) => [team.id, team.name]))
+  // A solo player's team column says so instead of repeating their name.
+  const teamNames = new Map(teams.map((team) => [team.id, team.solo ? t('play.soloGroup') : team.name]))
   const sorted = sortPlayers(players, sort, i18n.language)
 
   const sortHeader = (column: SortKey, label: string, className = '') => {
@@ -83,7 +84,7 @@ export function TeamTable({ teams }: { teams: TeamPublic[] }) {
   const { t } = useTranslation()
   return (
     <section className="flex flex-col gap-2">
-      <h2 className="text-xl font-extrabold">{t('results.teams')}</h2>
+      <h2 className="text-xl font-extrabold">{t(teams.some((team) => team.solo) ? 'play.mixedLeaderboard' : 'results.teams')}</h2>
       <div className="overflow-x-auto rounded-2xl border bg-card shadow-soft">
         <table className="w-full text-left tabular-nums">
           <thead className="bg-muted text-sm text-muted-foreground">
@@ -106,7 +107,13 @@ export function TeamTable({ teams }: { teams: TeamPublic[] }) {
             {teams.map((team) => (
               <tr key={team.id} className="border-t">
                 <td className={cell}>{team.rank}.</td>
-                <td className={`${cell} wrap-break-word`}>{team.name}</td>
+                <td className={`${cell} wrap-break-word`}>
+                  {/* Solo players rank with the teams, marked by their avatar. */}
+                  <span className="flex items-center gap-2">
+                    <PlayerAvatar avatar={team.avatar} />
+                    {team.name}
+                  </span>
+                </td>
                 <td className={`${cell} text-right`}>{team.memberCount}</td>
                 <td className={`${cell} text-right font-semibold`}>{team.score}</td>
               </tr>

@@ -6,6 +6,7 @@ import {
   playerCaptainSchema,
   playerJoinSchema,
   playerTeamModeSchema,
+  playerTeamSchema,
   type ClientToServerEvents,
   type ErrorPayload,
   type HostCommand,
@@ -23,6 +24,7 @@ import {
   clearAnnouncement,
   closeQuestion,
   confirmTeamAnswer,
+  createTeam,
   disconnectPlayer,
   endGame,
   endQuestion,
@@ -30,11 +32,15 @@ import {
   gradeText,
   joinPlayer,
   kickPlayer,
+  movePlayer,
   next,
   openJoining,
   pause,
+  pickTeam,
   releaseResults,
   removeQuickMessage,
+  removeTeam,
+  renameTeam,
   setQuickMessageTime,
   resume,
   schedule,
@@ -147,7 +153,7 @@ export function registerSocketHandlers(io: AppSocketServer, { manager, db, parse
       respond(ack, async () => {
         const parsed = playerJoinSchema.safeParse(data)
         if (!parsed.success) return invalidInput
-        const { pin, name, teamId, token, avatar } = parsed.data
+        const { pin, name, teamId, newTeamName, solo, token, avatar } = parsed.data
         const game = manager.get(pin)
         if (!game) return { error: 'errors.gameNotFound' }
 
@@ -155,7 +161,10 @@ export function registerSocketHandlers(io: AppSocketServer, { manager, db, parse
         const existing = token ? Object.values(game.state.players).find((p) => p.token === token) : undefined
         const playerId = existing?.id ?? nanoid(10)
         const playerToken = existing?.token ?? randomBytes(24).toString('base64url')
-        manager.apply(pin, (s, now) => joinPlayer(s, { id: playerId, name, teamId, token: playerToken, avatar }, now))
+        const newTeam = newTeamName === undefined ? undefined : { id: nanoid(8), name: newTeamName }
+        manager.apply(pin, (s, now) =>
+          joinPlayer(s, { id: playerId, name, teamId, newTeam, solo, token: playerToken, avatar }, now),
+        )
 
         leaveGameRooms(socket)
         socket.data = { pin, playerId, role: 'player' }
@@ -212,6 +221,24 @@ export function registerSocketHandlers(io: AppSocketServer, { manager, db, parse
         const parsed = playerCaptainSchema.safeParse(data)
         if (!parsed.success) return invalidInput
         manager.apply(pin, (state) => setCaptain(state, { playerId: parsed.data.playerId, byPlayerId: playerId }))
+        return { ok: true as const }
+      }),
+    )
+
+    socket.on('player:team', (data, ack) =>
+      respond(ack, () => {
+        const { pin, playerId, role } = socket.data
+        if (role !== 'player' || !pin || !playerId) return { error: 'errors.playerNotFound' }
+        const parsed = playerTeamSchema.safeParse(data)
+        if (!parsed.success) return invalidInput
+        const pick = parsed.data
+        manager.apply(pin, (state) =>
+          'teamId' in pick
+            ? pickTeam(state, { playerId, teamId: pick.teamId })
+            : 'solo' in pick
+              ? pickTeam(state, { playerId, solo: true })
+              : pickTeam(state, { playerId, newTeam: { id: nanoid(8), name: pick.newTeamName } }),
+        )
         return { ok: true as const }
       }),
     )
@@ -306,6 +333,14 @@ function runHostCommand(state: GameState, command: HostCommand, now: number): Ga
       return setTeamMode(state, { mode: command.mode, teamId: command.teamId })
     case 'captain':
       return setCaptain(state, { playerId: command.playerId })
+    case 'createTeam':
+      return createTeam(state, { id: nanoid(8), name: command.name })
+    case 'renameTeam':
+      return renameTeam(state, { teamId: command.teamId, name: command.name })
+    case 'removeTeam':
+      return removeTeam(state, command.teamId)
+    case 'movePlayer':
+      return movePlayer(state, { playerId: command.playerId, teamId: command.teamId })
     case 'gradeText':
       return gradeText(state, command.correctPlayerIds)
     case 'end':

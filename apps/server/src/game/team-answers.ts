@@ -24,6 +24,16 @@ export function needsConfirmation(state: GameState, team: Team): boolean {
   return teamMode(team) === 'captain' && membersOf(state, team.id).length > 1
 }
 
+/** The id of a player's own entry when they play on their own. */
+export function soloTeamId(playerId: string): string {
+  return `solo-${playerId}`
+}
+
+/** The teams in the standings: every team except a solo player's entry nobody plays in any more. */
+export function rankedTeams(state: GameState): Team[] {
+  return Object.values(state.teams).filter((team) => !team.solo || membersOf(state, team.id).length > 0)
+}
+
 /** Members in join order (games saved before `joinOrder` existed fall back to the id). */
 export function membersOf(state: GameState, teamId: string): Player[] {
   return Object.values(state.players)

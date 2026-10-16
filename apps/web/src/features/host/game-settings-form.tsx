@@ -1,9 +1,12 @@
 import {
+  MAX_TEAMS,
   answerPalettes,
   answerSymbols,
   gameSettingsSchema,
   gameThemes,
+  newGameSettingsSchema,
   teamAnswerModes,
+  teamSetups,
   type AnswerPalette,
   type AnswerSymbols,
   type CustomPalette,
@@ -25,15 +28,30 @@ import { Switch } from '@/components/ui/switch'
 import { PlayerAvatar } from '@/components/player-avatar'
 import { paletteVars, textOn, themeSwatches, themeVars } from '@/lib/themes'
 
-/** i18n key of the first settings problem (team names), or null when the settings are valid. */
-export function settingsError(settings: GameSettings): string | null {
-  const result = gameSettingsSchema.safeParse(settings)
+/**
+ * i18n key of the first settings problem, or null when the settings are valid. A new game
+ * (`newGame`) also checks its teams.
+ */
+export function settingsError(settings: GameSettings, { newGame = false } = {}): string | null {
+  const result = (newGame ? newGameSettingsSchema : gameSettingsSchema).safeParse(settings)
   return result.success ? null : (result.error.issues[0]?.message ?? 'errors.invalidInput')
+}
+
+/** Settings only a game has (its teams): quizzes, My settings and batch edits leave them alone. */
+export const gameOnlySettings = ['teamSetup', 'teamNames', 'soloPlayers'] as const satisfies readonly (keyof GameSettings)[]
+
+/**
+ * A new game's starting settings from a quiz's: a team quiz without saved team names lets the
+ * players make the teams (saved names, from before teams were set per game, stay the host's list).
+ */
+export function newGameSettings(quizSettings: GameSettings): GameSettings {
+  if (quizSettings.mode !== 'team' || quizSettings.teamNames.length > 0) return quizSettings
+  return { ...quizSettings, teamSetup: 'players' }
 }
 
 /** The settings in each group of the form; a batch edit changes a group as a whole. */
 export const settingsSections = {
-  flow: ['mode', 'teamNames', 'teamAnswer', 'teamsChoose', 'revealAnswers', 'scoreboard', 'finalResults'],
+  flow: ['mode', 'teamSetup', 'teamNames', 'soloPlayers', 'teamAnswer', 'teamsChoose', 'lateJoin', 'revealAnswers', 'scoreboard', 'finalResults'],
   look: ['theme', 'customTheme', 'answerPalette', 'customPalette', 'answerSymbols', 'answerStyle'],
   scoring: ['speedBonus', 'streakBonus', 'answerChanges', 'answerLockSec', 'shuffleOptions'],
 } as const satisfies Record<string, readonly (keyof GameSettings)[]>
@@ -51,8 +69,9 @@ export function sectionSummary(settings: GameSettings, section: SettingsSection,
   const items = {
     flow: [
       t(`host.create.modes.${settings.mode}`),
-      settings.mode === 'team' ? settings.teamNames.join(', ') : null,
       settings.mode === 'team' ? teamAnswerLabel(settings, t) : null,
+      settings.mode === 'team' && settings.soloPlayers ? t('host.create.soloPlayers') : null,
+      settings.lateJoin ? t('host.create.lateJoin') : null,
       `${t('host.create.revealAnswers')}: ${t(`host.create.revealAnswersOptions.${settings.revealAnswers}`)}`,
       settings.revealAnswers === 'afterQuestion'
         ? `${t('host.create.scoreboard')}: ${t(`host.create.scoreboardOptions.${settings.scoreboard}`)}`
@@ -109,32 +128,29 @@ export function withSection(settings: GameSettings, from: GameSettings, section:
 }
 
 /**
- * Game settings. Used in the quiz editor (the quiz's defaults), when starting a game (overrides)
- * and, one group at a time (`sections`), in the batch edit of several quizzes.
+ * Game settings. Used in the quiz editor (the quiz's defaults), My settings, when starting a game
+ * (`newGame`: also who makes the teams and the host's team list) and, one group at a time
+ * (`sections`), in the batch edit of several quizzes.
  */
 export function GameSettingsForm({
   value,
   onChange,
   sections = allSections,
+  newGame = false,
 }: {
   value: GameSettings
   onChange: (settings: GameSettings) => void
   sections?: readonly SettingsSection[]
+  newGame?: boolean
 }) {
   const { t } = useTranslation()
-  const [newTeam, setNewTeam] = useState('')
   const set = (patch: Partial<GameSettings>) => onChange({ ...value, ...patch })
   const show = (section: SettingsSection) => sections.includes(section)
-  const error = settingsError(value)
-  // The last problem stays as text while its line closes.
-  const [shownError, setShownError] = useState(error)
-  if (error && error !== shownError) setShownError(error)
 
-  function addTeam() {
-    const name = newTeam.trim()
-    if (!name || value.teamNames.length >= 20) return
-    set({ teamNames: [...value.teamNames, name] })
-    setNewTeam('')
+  function setTeamSetup(teamSetup: GameSettings['teamSetup']) {
+    // The host's list starts with two teams to rename; players' teams need none.
+    const seeded = teamSetup === 'host' && value.teamNames.length === 0
+    set(seeded ? { teamSetup, teamNames: [t('host.create.defaultTeam', { n: 1 }), t('host.create.defaultTeam', { n: 2 })] } : { teamSetup })
   }
 
   return (
@@ -149,62 +165,35 @@ export function GameSettingsForm({
               label: t(`host.create.modes.${mode}`),
               description: t(`host.create.modes.${mode}Help`),
             }))}
-            onChange={(mode) =>
-              set(
-                mode === 'team' && value.teamNames.length === 0
-                  ? { mode, teamNames: [t('host.create.defaultTeam', { n: 1 }), t('host.create.defaultTeam', { n: 2 })] }
-                  : { mode },
-              )
-            }
+            onChange={(mode) => set({ mode })}
           />
 
           {/* Team settings open and close with the mode instead of jumping in (the parent's gap is taken inside). */}
           <Collapse open={value.mode === 'team'} className="-mt-6" innerClassName="flex flex-col gap-6 pt-6">
-            <fieldset className="flex flex-col gap-2">
-              <legend className="mb-2 font-bold">{t('host.create.teams')}</legend>
-              <ul className="flex flex-wrap gap-2">
-                {value.teamNames.map((name, i) => (
-                  <li
-                    key={`${name}-${i}`}
-                    className="flex items-center gap-1 rounded-full bg-secondary py-1 pr-1 pl-3 font-semibold text-secondary-foreground"
-                  >
-                    <span>{name}</span>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon-sm"
-                      className="size-8 rounded-full"
-                      aria-label={t('host.create.removeTeam', { name })}
-                      onClick={() => set({ teamNames: value.teamNames.filter((_, j) => j !== i) })}
-                    >
-                      <XIcon className="size-4" />
-                    </Button>
-                  </li>
-                ))}
-              </ul>
-              <div className="flex gap-2">
-                <Input
-                  value={newTeam}
-                  onChange={(e) => setNewTeam(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault()
-                      addTeam()
-                    }
-                  }}
-                  maxLength={40}
-                  aria-label={t('host.create.teamName')}
-                  placeholder={t('host.create.teamName')}
-                  className="flex-1"
+            {newGame && (
+              <>
+                <ChoiceCards
+                  legend={t('host.create.teamSetup')}
+                  value={value.teamSetup}
+                  columns={1}
+                  choices={teamSetups.map((setup) => ({
+                    value: setup,
+                    label: t(`host.create.teamSetupOptions.${setup}`),
+                    description: t(`host.create.teamSetupOptions.${setup}Help`),
+                  }))}
+                  onChange={setTeamSetup}
                 />
-                <Button type="button" variant="secondary" onClick={addTeam}>
-                  {t('host.create.addTeam')}
-                </Button>
-              </div>
-              <Collapse open={!!error} className="-mt-2" innerClassName="pt-2">
-                <p className="text-sm font-semibold text-destructive">{shownError && t(shownError)}</p>
-              </Collapse>
-            </fieldset>
+                <Collapse open={value.teamSetup !== 'players'} className="-mt-6" innerClassName="pt-6">
+                  <TeamNamesField value={value} onChange={(teamNames) => set({ teamNames })} />
+                </Collapse>
+                <SwitchRow
+                  label={t('host.create.soloPlayers')}
+                  description={t('host.create.soloPlayersHelp')}
+                  checked={value.soloPlayers}
+                  onChange={(soloPlayers) => set({ soloPlayers })}
+                />
+              </>
+            )}
               <ChoiceCards
                 legend={t('host.create.teamAnswer')}
                 value={value.teamsChoose ? 'choose' : 'same'}
@@ -274,6 +263,12 @@ export function GameSettingsForm({
             choices={choices(['immediately', 'onRelease'] as const, (v) => t(`host.create.finalResultsOptions.${v}`))}
             onChange={(finalResults) => set({ finalResults })}
             help={value.finalResults === 'onRelease' ? t('host.create.finalResultsHelp') : undefined}
+          />
+          <SwitchRow
+            label={t('host.create.lateJoin')}
+            description={t('host.create.lateJoinHelp')}
+            checked={value.lateJoin}
+            onChange={(lateJoin) => set({ lateJoin })}
           />
         </>
       )}
@@ -362,6 +357,73 @@ export function GameSettingsForm({
 
 function choices<T extends string>(values: readonly T[], label: (value: T) => string) {
   return values.map((value) => ({ value, label: label(value) }))
+}
+
+/** The host's teams for a new game: chips with remove, a name field and "Add team", and the list's problem. */
+function TeamNamesField({ value, onChange }: { value: GameSettings; onChange: (teamNames: string[]) => void }) {
+  const { t } = useTranslation()
+  const [newTeam, setNewTeam] = useState('')
+  const error = settingsError(value, { newGame: true })
+  // The last problem stays as text while its line closes.
+  const [shownError, setShownError] = useState(error)
+  if (error && error !== shownError) setShownError(error)
+  const full = value.teamNames.length >= MAX_TEAMS
+
+  function addTeam() {
+    const name = newTeam.trim()
+    if (!name || full) return
+    onChange([...value.teamNames, name])
+    setNewTeam('')
+  }
+
+  return (
+    <fieldset className="flex flex-col gap-2">
+      <legend className="mb-2 font-bold">{t('host.create.teams')}</legend>
+      <ul className="flex flex-wrap gap-2">
+        {value.teamNames.map((name, i) => (
+          <li
+            key={`${name}-${i}`}
+            className="flex items-center gap-1 rounded-full bg-secondary py-1 pr-1 pl-3 font-semibold text-secondary-foreground"
+          >
+            <span>{name}</span>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-sm"
+              className="size-8 rounded-full"
+              aria-label={t('host.create.removeTeam', { name })}
+              onClick={() => onChange(value.teamNames.filter((_, j) => j !== i))}
+            >
+              <XIcon className="size-4" />
+            </Button>
+          </li>
+        ))}
+      </ul>
+      <div className="flex gap-2">
+        <Input
+          value={newTeam}
+          onChange={(e) => setNewTeam(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault()
+              addTeam()
+            }
+          }}
+          maxLength={40}
+          disabled={full}
+          aria-label={t('host.create.teamName')}
+          placeholder={t('host.create.teamName')}
+          className="flex-1"
+        />
+        <Button type="button" variant="secondary" onClick={addTeam} disabled={full}>
+          {t('host.create.addTeam')}
+        </Button>
+      </div>
+      <Collapse open={!!error} className="-mt-2" innerClassName="pt-2">
+        <p className="text-sm font-semibold text-destructive">{shownError && t(shownError)}</p>
+      </Collapse>
+    </fieldset>
+  )
 }
 
 /** The custom theme's colours: main and accent on a colour wheel, and how strong the colours are. */

@@ -152,12 +152,10 @@ describeDb('quiz routes (database)', () => {
     expect(copy.settings).toMatchObject(settings)
   })
 
-  it('rejects team mode without two distinct team names', async () => {
-    for (const teamNames of [['Red'], ['Red', 'red']]) {
-      const res = await req(alice, 'POST', '/api/quizzes', { ...quizBody, settings: { mode: 'team', teamNames } })
-      expect(res.statusCode).toBe(400)
-      expect(res.json().issues).toContainEqual({ path: 'settings.teamNames', code: 'custom' })
-    }
+  it('saves team mode without team names: teams are set up per game', async () => {
+    const res = await req(alice, 'POST', '/api/quizzes', { ...quizBody, settings: { mode: 'team' } })
+    expect(res.statusCode).toBe(201)
+    expect(res.json().quiz.settings).toMatchObject({ mode: 'team', teamNames: [], teamSetup: 'host' })
   })
 
   it('batch deletes own quizzes, and none when one of them is missing or someone else’s', async () => {
@@ -215,7 +213,7 @@ describeDb('quiz routes (database)', () => {
     const quiz = (await req(alice, 'POST', '/api/quizzes', quizBody)).json().quiz
     const bobs = (await req(bob, 'POST', '/api/quizzes', quizBody)).json().quiz
     const cases = [
-      { body: { ids: [quiz.id], settings: { mode: 'team' } }, status: 400 },
+      { body: { ids: [quiz.id], settings: { answerLockSec: 999 } }, status: 400 },
       { body: { ids: [quiz.id], questions: { points: 99_999 } }, status: 400 },
       { body: { ids: [quiz.id], settings: { theme: 'nope' } }, status: 400 },
       { body: { ids: [quiz.id, bobs.id], settings: { theme: 'navy' } }, status: 404 },
@@ -226,10 +224,8 @@ describeDb('quiz routes (database)', () => {
     expect(after.questions).toEqual(quiz.questions)
     expect(after.updatedAt).toBe(quiz.updatedAt)
 
-    const team = await req(alice, 'PATCH', '/api/quizzes/batch', {
-      ids: [quiz.id],
-      settings: { mode: 'team', teamNames: ['Red', 'Blue'] },
-    })
+    // Teams are set up per game: a quiz switches to team mode without team names.
+    const team = await req(alice, 'PATCH', '/api/quizzes/batch', { ids: [quiz.id], settings: { mode: 'team' } })
     expect(team.statusCode).toBe(200)
   })
 

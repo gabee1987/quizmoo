@@ -7,6 +7,7 @@ export function settingsLine(host: HostSnapshot, t: TFunction): string[] {
   return [
     t(`host.create.modes.${host.settings.mode}`),
     host.settings.mode === 'team' ? teamAnswerLabel(host.settings, t) : null,
+    host.settings.mode === 'team' && host.settings.soloPlayers ? t('host.create.soloPlayers') : null,
     host.settings.speedBonus ? t('host.create.speedBonus') : null,
     host.settings.streakBonus ? t('host.create.streakBonus') : null,
     answerChangesLabel(host.settings, t),

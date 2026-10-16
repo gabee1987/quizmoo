@@ -130,6 +130,22 @@
 - Each quiz can have its own branding in its settings: a logo and an event name that replace the ones from My settings (left empty, My settings is used), or branding turned off, so its games show no logo or event name on the projector or the phones unless the host turns it on in the new game dialog.
 - The editor's quiz settings are split into tabs (General, Game flow, Look, Scoring, Branding), so only one group shows at a time.
 
+### Flexible teams
+- Teams are set up for each game in the new game dialog, not in the quiz: "Who makes the teams" is the host ("I set the teams", as before), the players, or both. The quiz editor, My settings and the batch edit no longer have team names; a quiz's saved names prefill the dialog.
+- Players can create a team on the join page ("New team" with a name; the creator is its captain), or join one from the list, which shows how many have joined. Team names are required, unique and pass the name filter; a game has at most 30 teams. A player alone plays as a team of one.
+- The host adds, renames and removes teams in the lobby, and moves players between teams by dragging a tile (mouse, or a long press on touch) or with "Move" (touch and keyboard), in the lobby and between questions. Points earned stay with the old team. Players of a removed team pick another one on their phones; the game starts once everyone has a team. A team a player created goes when its last member leaves the lobby.
+- "Players can join late" (off by default): latecomers join a running game and answer from the current question on.
+- The captaincy can be passed at any point of the game: by the captain from the phone's menu, or by the host with the crown, also during a question (the new captain confirms at once).
+- "Play again" keeps the teams, so phones rejoin theirs.
+- The host's message stays pinned to the top of the phone while the player scrolls (long questions, the end-of-game review), as wide as a toast.
+- Phones say what happened to their team: "The host moved you to …", "… joined your team", "You're the captain of … now", and to the old captain who the new one is.
+- Once a whole team has its answer, its phones show what the team sent instead of only "Answer sent": the team's answer (with who confirmed it, or how many votes it had) and every member's pick; in "Everyone counts", that everyone has answered, with the picks. The reveal shows the same (also when correct answers are held back until the end), since the question closes as soon as every team has answered.
+- Team-mode lobby tiles are rows with a small avatar and the whole name; make captain, move and remove are in one menu per player.
+- The phone lobby shows the game PIN in big digits with "Copy PIN" (also over plain http on the venue wifi), and the phone's round menu keeps it (with the quiz title) at hand for the whole game, so players can tell others where to join.
+- The phone lobby says what the game is like: the quiz, how many questions, how players score (on their own, in teams, teams and solo players), and the rules that are on (speed bonus, streak bonus, answer changes, answers revealed at the end, late joining).
+- A player answering alone (classic, a team of one, a solo player) sees what they sent instead of only a check: the answer in its button colours and symbols, how long it took and which question it was.
+- Mixed play: with "Players may play on their own" (new game dialog, off by default) the join page also offers "On my own". Solo players answer for themselves and are ranked with the teams by their own points on the scoreboard, the podium and the results ("Teams and solo players"), shown with their avatar; the results and the CSV mark them "On their own". The host lobby groups them under "On their own"; the host moves players between a team and playing alone (drag, the player's menu, or "Move" between questions), and their solo points wait for them when they come back.
+
 ### Development
 - The web dev server runs on port 15173, away from the 5173+ ports other local Vite projects take.
 - CI runs typecheck, tests and build only; the end-to-end suite runs locally before each pull request.

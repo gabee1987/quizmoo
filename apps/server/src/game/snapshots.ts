@@ -26,14 +26,16 @@ import {
   countedAnswers,
   membersOf,
   needsConfirmation,
+  rankedTeams,
   teamAnswerNow,
   teamAnswered,
   teamGain,
   teamMode,
+  voteKey,
   voteTally,
   votesOf,
 } from './team-answers.js'
-import { EngineError, type GameState, type Player, type ResultsAudience } from './types.js'
+import { EngineError, type GameState, type Player, type ResultsAudience, type Team } from './types.js'
 
 /** Strips every correct-answer field. Built per type so a new field is never leaked by accident. */
 export function toPublicQuestion(question: Question): PublicQuestion {
@@ -130,6 +132,37 @@ function teamLive(state: GameState, player: Player): TeamLive | null {
   }
 }
 
+/**
+ * The player's team on the question its reveal shows: the team's answer (captain decides and majority
+ * vote) and each member's own pick, kept on the team's answer when its members' records became copies.
+ * A team of one, other phases and other teams get nothing. Nothing about correctness.
+ */
+function teamResult(state: GameState, player: Player, phase: GameSnapshotBase['phase'], index: number): TeamLive | null {
+  const team = player.teamId ? state.teams[player.teamId] : undefined
+  const question = state.quiz.questions[index]
+  if (phase !== 'reveal' || !team || !question) return null
+  const members = membersOf(state, team.id)
+  if (members.length < 2) return null
+  const record = team.answers?.[question.id]
+  const picks =
+    record?.picks ??
+    members.flatMap((m) => (m.answers[question.id] ? [{ playerId: m.id, answer: m.answers[question.id]!.answer }] : []))
+  const groups = new Map<string, { answer: Answer; playerIds: string[] }>()
+  for (const pick of picks) {
+    const key = voteKey(pick.answer)
+    const group = groups.get(key)
+    if (group) group.playerIds.push(pick.playerId)
+    else groups.set(key, { answer: pick.answer, playerIds: [pick.playerId] })
+  }
+  const picked = new Set(picks.map((p) => p.playerId))
+  return {
+    answer: record?.answer ?? null,
+    setBy: record?.byPlayerId ?? null,
+    votes: [...groups.values()].sort((a, b) => b.playerIds.length - a.playerIds.length),
+    waiting: members.filter((m) => !picked.has(m.id)).map((m) => m.id),
+  }
+}
+
 export function toPlayerSnapshot(state: GameState, playerId: string, now: number, seq = 0): PlayerSnapshot {
   const base = conceal(state, baseSnapshot(state, now, 'players', seq))
   const me = base.players.find((p) => p.id === playerId)
@@ -144,7 +177,9 @@ export function toPlayerSnapshot(state: GameState, playerId: string, now: number
     ...base,
     me,
     myAnswer: record?.answer ?? null,
+    myAnswerTimeMs: record?.timeMs ?? null,
     teamLive: teamLive(state, player),
+    teamResult: teamResult(state, player, base.phase, base.questionIndex),
     teamFallback: base.phase === 'reveal' && Boolean(teamRecord?.fallback),
     lastPoints: base.reveal ? (record?.points ?? 0) : null,
     lastBonus: base.reveal ? (record?.bonus ?? 0) : null,
@@ -230,11 +265,14 @@ function baseSnapshot(state: GameState, now: number, audience: ResultsAudience, 
   const roundPoints = (p: Player) => (revealed && question && !reviewing ? (p.answers[question.id]?.points ?? 0) : 0)
   // Ranks before this question's points: what the scoreboard shows as "moved up" or "moved down".
   const previousPlayerRank = rankLookup(players.map((p) => ({ id: p.id, name: p.name, score: p.score - roundPoints(p) })))
+  const teams = rankedTeams(state)
   const previousTeamRank = rankLookup(
-    Object.values(state.teams).map((team) => {
+    teams.map((team) => {
       const members = players.filter((p) => p.teamId === team.id)
-      // Mirrors addTeamGains.
-      return { id: team.id, name: team.name, score: team.score - teamGain(team, question?.id ?? '', members.map(roundPoints)) }
+      // The stored gain (members may have moved since); games saved before it existed mirror addTeamGains.
+      const stored = question && revealed && !reviewing ? team.gains?.[question.id] : undefined
+      const gain = stored ?? teamGain(team, question?.id ?? '', members.map(roundPoints))
+      return { id: team.id, name: team.name, score: team.score - gain }
     }),
   )
 
@@ -252,9 +290,10 @@ function baseSnapshot(state: GameState, now: number, audience: ResultsAudience, 
     correctCount: Object.values(p.answers).filter((a) => a.correct === true).length,
     roundPoints: roundPoints(p),
   }))
-  const rankedTeams: TeamPublic[] = denseRank(Object.values(state.teams)).map((t) => ({
+  const teamsPublic: TeamPublic[] = denseRank(teams).map((t) => ({
     id: t.id,
     name: t.name,
+    ...soloOf(state, t),
     score: t.score,
     rank: t.rank,
     previousRank: previousTeamRank.get(t.id) ?? t.rank,
@@ -279,7 +318,7 @@ function baseSnapshot(state: GameState, now: number, audience: ResultsAudience, 
     serverNow: now,
     answeredCount: question ? players.filter((p) => p.answers[question.id]).length : 0,
     players: rankedPlayers,
-    teams: rankedTeams,
+    teams: teamsPublic,
     reveal: revealed ? revealInfo(state, question) : null,
     awaitingGrading: reviewing ? false : state.awaitingGrading,
     questionStats: questionStats(state),
@@ -298,6 +337,13 @@ function brandingFor(state: GameState, audience: ResultsAudience): BrandingPubli
   const branding = state.branding
   if (!branding || (audience === 'players' && !branding.onPhones)) return null
   return { logoImageId: branding.logoImageId, eventName: branding.eventName }
+}
+
+/** A solo player's entry carries their avatar, so the standings show them as a player. */
+export function soloOf(state: GameState, team: Team): Pick<TeamPublic, 'solo' | 'avatar'> {
+  if (!team.solo) return { solo: false, avatar: null }
+  const player = membersOf(state, team.id)[0]
+  return { solo: true, avatar: player ? (player.avatar ?? fallbackAvatar(player.id)) : null }
 }
 
 function rankLookup(items: { id: string; name: string; score: number }[]): Map<string, number> {

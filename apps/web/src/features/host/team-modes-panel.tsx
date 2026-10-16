@@ -18,7 +18,7 @@ export function TeamModesPanel({ host, onTeamMode }: { host: HostSnapshot; onTea
       </h2>
       <p className="text-sm text-muted-foreground">{t('host.game.teamModesHelp')}</p>
       <ul className="flex flex-col gap-1">
-        {host.teams.map((team) => (
+        {host.teams.filter((team) => !team.solo).map((team) => (
           <li key={team.id} className="flex flex-wrap items-center justify-between gap-2 rounded-xl border bg-card px-3 py-2">
             <span className="min-w-0 font-semibold wrap-break-word">{team.name}</span>
             <SelectField

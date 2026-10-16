@@ -15,6 +15,7 @@ import { BrandingFields } from './branding-fields'
 import {
   GameSettingsForm,
   allSections,
+  newGameSettings,
   sectionChanged,
   sectionIcons,
   sectionSummary,
@@ -48,12 +49,14 @@ export function CreateGameDialog({
 }) {
   const { t } = useTranslation()
   const startsAtId = useId()
-  const [settings, setSettings] = useState(quizSettings)
+  // What "Changed for this game" and "Reset" compare with: the quiz's settings, set up for a game.
+  const [defaults] = useState(() => newGameSettings(quizSettings))
+  const [settings, setSettings] = useState(defaults)
   const [active, setActive] = useState<SettingsSection>('flow')
   const [later, setLater] = useState(false)
   const [scheduledAt, setScheduledAt] = useState(() => defaultStart(Date.now()))
   const timeError = later ? scheduleError(scheduledAt, Date.now()) : null
-  const error = settingsError(settings) ?? timeError
+  const error = settingsError(settings, { newGame: true }) ?? timeError
   // The last problem stays as text while its line closes, so it does not blank out first.
   const [shownError, setShownError] = useState(error)
   if (error && error !== shownError) setShownError(error)
@@ -112,7 +115,7 @@ export function CreateGameDialog({
               )}
             >
               {allSections.map((section) => {
-                const changed = sectionChanged(settings, quizSettings, section)
+                const changed = sectionChanged(settings, defaults, section)
                 const summary = sectionSummary(settings, section, t)
                 const Icon = sectionIcons[section]
                 return (
@@ -154,14 +157,14 @@ export function CreateGameDialog({
 
             {allSections.map((section) => (
               <TabsContent key={section} value={section} className="min-h-0 overflow-y-auto p-4 md:px-8 md:py-6">
-                <Collapse open={sectionChanged(settings, quizSettings, section)} innerClassName="pb-4">
+                <Collapse open={sectionChanged(settings, defaults, section)} innerClassName="pb-4">
                   <div className="flex flex-wrap items-center gap-2 rounded-xl bg-secondary px-3 py-2 text-sm font-semibold text-secondary-foreground">
                     <span className="flex-1">{t('host.create.changedForGame')}</span>
                     <Button
                       type="button"
                       variant="ghost"
                       size="sm"
-                      onClick={() => setSettings((current) => withSection(current, quizSettings, section))}
+                      onClick={() => setSettings((current) => withSection(current, defaults, section))}
                     >
                       <RotateCcwIcon aria-hidden="true" />
                       {t('host.create.reset')}
@@ -173,7 +176,7 @@ export function CreateGameDialog({
                     <BrandingFields value={branding} logoImageId={logoImageId} offInQuiz={!quizBranding.show} onChange={setBranding} />
                   </div>
                 )}
-                <GameSettingsForm value={settings} onChange={setSettings} sections={[section]} />
+                <GameSettingsForm value={settings} onChange={setSettings} sections={[section]} newGame />
               </TabsContent>
             ))}
           </Tabs>

@@ -54,6 +54,11 @@ export interface TeamAnswerRecord {
   byPlayerId: string | null
   /** Captain decides without a confirmation: the majority counted. Missing in games saved before it existed. */
   fallback?: boolean
+  /**
+   * What each member picked (votes or suggestions), kept when the question closes and every member's
+   * record becomes a copy of this answer. Missing in games saved before it existed.
+   */
+  picks?: { playerId: string; answer: Answer }[]
   points: number
   bonus?: number
   correct: boolean | null
@@ -69,6 +74,19 @@ export interface Team {
   captainId?: string | null
   /** The team's answers by question id (captain decides and majority vote). Missing in games saved before it existed. */
   answers?: Record<string, TeamAnswerRecord>
+  /** A player created it when joining: it goes when its last member leaves the lobby. The host's teams stay. */
+  byPlayer?: boolean
+  /**
+   * A player on their own (`soloPlayers`): a team of exactly that player, id `solo-<playerId>`,
+   * named after them, everyone counts. Kept when they move to a team after the start (their points
+   * stay there) and taken up again when they go back to playing alone.
+   */
+  solo?: boolean
+  /**
+   * Points gained per question id, as added to `score`. Kept so a player moved between questions
+   * does not change what the team gained. Missing in games saved before it existed.
+   */
+  gains?: Record<string, number>
 }
 
 /** The quiz frozen into a game. Its default settings are not part of it: the game has its own. */

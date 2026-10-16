@@ -8,6 +8,7 @@ import {
   schedule,
   type GameQuiz,
   type GameState,
+  type TeamSeed,
 } from '../game/index.js'
 import { generatePin } from './pin.js'
 
@@ -95,10 +96,13 @@ export class GameManager {
     quickMessages?: QuickMessage[] | undefined
     /** The host's logo and event name, when the host chose to show them in this game. */
     branding?: GameBranding | null | undefined
+    /** "Play again": the last round's teams instead of the settings' team names. */
+    teams?: readonly TeamSeed[] | undefined
   }) {
     const now = this.now()
     const pin = generatePin((candidate) => this.games.has(candidate))
-    const created = { ...createGame(input.quiz, input.settings, pin, input.id, now), branding: input.branding ?? null }
+    const game = createGame(input.quiz, input.settings, pin, input.id, now, Math.random, input.teams)
+    const created = { ...game, branding: input.branding ?? null }
     const withMessages = input.quickMessages ? { ...created, quickMessages: input.quickMessages } : created
     const state = input.scheduledAt === undefined ? withMessages : schedule(withMessages, input.scheduledAt, now)
     const entry: Entry = {

@@ -17,6 +17,7 @@ export function AnnouncementBanner({
   announcement,
   size = 'phone',
   flush = false,
+  clearCorner = false,
   clockOffset = 0,
   className,
 }: {
@@ -24,6 +25,8 @@ export function AnnouncementBanner({
   size?: 'phone' | 'screen'
   /** No space below (when it sits in a row instead of above content). */
   flush?: boolean
+  /** Full width like a toast, with the text kept clear of the phone's round menu button in the top right corner. */
+  clearCorner?: boolean
   /** Server minus local clock, for the time bar of a message that clears itself. */
   clockOffset?: number
   className?: string
@@ -113,6 +116,7 @@ export function AnnouncementBanner({
               size === 'screen' ? 'note-lg' : 'text-lg',
               shown.expiresAt && 'note-timed',
               leaving && 'note-leaving',
+              clearCorner && 'pr-12!',
             )}
           >
             <span className="note-icon" aria-hidden="true">

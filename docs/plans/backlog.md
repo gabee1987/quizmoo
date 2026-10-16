@@ -55,12 +55,14 @@ Collected while testing phases 9 to 12. Effort as above.
 - Teams choose their mode by default; captain decides with live team picks and a majority fallback; the shared answer mode removed (phase 20).
 - Clearly visible answer selection, a team of one answers without confirming, team answers labelled in the review, installable app, bigger new game dialog, custom theme and answer colours, bigger editor settings panel, scheduled games with a shareable link, names page markup (phase 21).
 - My settings per host account: quick messages, game defaults, branding (logo and event name on the projector and phones), and a host home page (phase 22).
+- Teams set up per game (host teams, player-made teams or both), moving players, late joining, the captaincy at any time, team toasts, the team's answer and picks on the phones, and mixed play with solo players ranked with the teams (phase 23).
 
 ### Open
 
 | Task | Kind | Effort | Notes |
 |---|---|---|---|
 | Every member's own answer in team results (after the MVP) | Feature | M | Teams that answer as one keep only the team's answer today: members' votes and suggestions are replaced at the reveal. Keep them (`votes` per team answer), and show on the results page and the phones' review what each member would have answered ("so they can blame each other"). From the 13 October test notes. |
+| Estimated game length | Feature | S | How long a quiz will take, from its questions: the sum of the time limits plus a grace time per question for the reveal, the scoreboard, pauses and the host talking (a fixed number of seconds per question, or a share of the total; to decide in the plan). Shown as "about 25 min" in the quiz list, the editor, the new game dialog and the phone lobby's "About the game" (the phones know only the question count today, so the snapshot needs the estimate). Settings that add steps (scoreboard after every question, host-graded text) could raise it. From the 16 October 2026 request. |
 | Rooms with their own admin | Feature | L | Each room (workspace) has an admin; only its members see and edit its quizzes and games. Today every quiz and game belongs to one host account. Needs a rooms table, membership and roles, permission checks on every route and socket attach, migration of existing quizzes. |
 | Play-through preview in the editor | Feature | M | The host plays the quiz on a phone-like frame (question, answer, reveal) without starting a game. Reuses the phone screens with a local fake snapshot; no server state. |
 | Host live dashboard and hints | Feature | L | One coherent view of the running game: answers in, who is stuck or offline, per-question stats, standings. Hints or messages to selected players (host-to-player messages were out of scope in phase 12). |

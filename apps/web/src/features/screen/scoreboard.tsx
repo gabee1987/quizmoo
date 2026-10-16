@@ -54,10 +54,11 @@ function PlayerRows({ players, compact = false }: { players: PlayerPublic[]; com
   )
 }
 
-/** Team ranking with each team's members underneath. */
+/** Team ranking with each team's members underneath; a solo player stands alone with their avatar. */
 function TeamBoard({ host }: { host: HostSnapshot }) {
   return (
-    <ol className="grid gap-4 xl:grid-cols-2">
+    // Cards keep their own height: a solo player's card is a single line next to a team's list.
+    <ol className="grid items-start gap-4 xl:grid-cols-2">
       {host.teams.map((team, i) => (
         <li key={team.id} className="flex animate-slide-in flex-col gap-2 rounded-2xl border bg-card p-4 shadow-soft" style={stagger(i, 120)}>
           <div className="flex items-center gap-4 text-4xl font-black">
@@ -69,11 +70,12 @@ function TeamBoard({ host }: { host: HostSnapshot }) {
             >
               {team.rank}
             </span>
+            <PlayerAvatar avatar={team.avatar} size="lg" />
             <span className="flex-1 truncate">{team.name}</span>
             <RankArrow previous={team.previousRank} rank={team.rank} className="text-3xl" />
             <CountUp value={team.score} />
           </div>
-          <PlayerRows players={host.players.filter((p) => p.teamId === team.id).slice(0, 5)} compact />
+          {!team.solo && <PlayerRows players={host.players.filter((p) => p.teamId === team.id).slice(0, 5)} compact />}
         </li>
       ))}
     </ol>

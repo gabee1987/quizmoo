@@ -1,7 +1,8 @@
 import type { PlayerSnapshot } from '@quizmoo/shared'
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
+import { toast } from 'sonner'
 import { AnnouncementBanner } from '../components/announcement-banner'
 import { ConnectionBar } from '../components/connection-bar'
 import { Button } from '../components/ui/button'
@@ -12,6 +13,7 @@ import { Podium } from '../features/play/podium'
 import { Question } from '../features/play/question'
 import { Reveal } from '../features/play/reveal'
 import { Scoreboard } from '../features/play/scoreboard'
+import { lostCaptaincy, movedTo, newCaptaincy, newTeammates, teamSeat, type TeamSeat } from '../features/play/team-moved'
 import { forgetPlayer, getStoredPlayer } from '../lib/player-storage'
 import { useGameTheme } from '../lib/themes'
 import { closeSession, emitAck, startSession, useGameStore } from '../lib/socket'
@@ -26,6 +28,7 @@ function PlayPage() {
   const navigate = useNavigate()
   const { status, since, player, clockOffset, closed } = useGameStore()
   useGameTheme(player?.settings)
+  useTeamToasts(player)
 
   useEffect(() => {
     const stored = getStoredPlayer(pin)
@@ -65,9 +68,14 @@ function PlayPage() {
         <Spinner />
       ) : (
         <>
-          {/* Clear of the floating settings button in the top right corner. */}
+          {/*
+            The host's message sticks to the top while the player scrolls (long questions, the
+            end-of-game review). As wide as a toast; the round menu button stays on top of its corner.
+          */}
+          <div className="sticky top-[max(0.75rem,env(safe-area-inset-top))] z-30">
+            <AnnouncementBanner announcement={player.announcement} clockOffset={clockOffset} clearCorner />
+          </div>
           <div className="mr-12">
-            <AnnouncementBanner announcement={player.announcement} clockOffset={clockOffset} />
             <NextRound snapshot={player} pin={pin} />
           </div>
           <PhaseView snapshot={player} clockOffset={clockOffset} />
@@ -75,6 +83,28 @@ function PlayPage() {
       )}
     </>
   )
+}
+
+/** Tells the player when the host moved them to another team, someone joined their team, or the captaincy changed hands. */
+function useTeamToasts(player: PlayerSnapshot | null) {
+  const { t } = useTranslation()
+  const previous = useRef<TeamSeat | undefined>(undefined)
+  const seat = player ? teamSeat(player) : null
+  useEffect(() => {
+    if (!player) return
+    const before = previous.current
+    previous.current = teamSeat(player)
+    const moved = movedTo(before?.teamId, player)
+    if (moved) {
+      return void toast.info(moved.solo ? t('play.team.movedSolo') : t('play.team.moved', { team: moved.name }), { id: 'team-moved' })
+    }
+    for (const name of newTeammates(before, player)) toast.info(t('play.team.joined', { name }), { id: `team-joined-${name}` })
+    const led = newCaptaincy(before, player)
+    if (led) return void toast.info(t('play.team.nowCaptain', { team: led.name }), { id: 'team-captain' })
+    const successor = lostCaptaincy(before, player)
+    if (successor) toast.info(t('play.team.noLongerCaptain', { name: successor }), { id: 'team-captain' })
+    // Only a change of team, captain or teammates matters, not every snapshot.
+  }, [seat?.teamId, seat?.captainId, seat?.mates.join(',')])
 }
 
 function PhaseView({ snapshot, clockOffset }: { snapshot: PlayerSnapshot; clockOffset: number }) {

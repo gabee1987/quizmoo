@@ -12,7 +12,7 @@ import { stagger } from '../../lib/motion'
 interface Place {
   id: string
   name: string
-  /** Players only; teams have none. */
+  /** Players and solo players; teams have none. */
   avatar?: string | null
   score: number
   rank: number
