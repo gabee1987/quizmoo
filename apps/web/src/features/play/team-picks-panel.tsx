@@ -55,16 +55,25 @@ export function TeamPicksPanel({
         {members.map(({ playerId, answer }) => {
           const player = snapshot.players.find((p) => p.id === playerId)
           const isMe = playerId === snapshot.me.id
+          const offline = player ? !player.connected : false
           return (
             <li key={playerId} className="flex min-h-12 items-center gap-3 rounded-xl px-2 py-1">
-              <PlayerAvatar avatar={player?.avatar} size="md" />
+              <PlayerAvatar avatar={player?.avatar} size="md" className={cn(offline && 'opacity-40 grayscale')} />
               <span className="flex min-w-0 flex-1 flex-col">
                 <span className="flex items-center gap-1.5 text-sm font-semibold text-muted-foreground">
                   <span className="truncate">{isMe ? t('play.team.you') : player?.name}</span>
                   {playerId === captainId && <CrownIcon className="size-3.5 shrink-0 text-warning" aria-label={t('play.team.captain')} />}
+                  {offline && (
+                    <span className="shrink-0 rounded-full border border-dashed px-1.5 text-xs">
+                      {t(player?.left ? 'play.teammateLeft' : 'play.teammateOffline')}
+                    </span>
+                  )}
                 </span>
                 <span className={cn('font-bold wrap-break-word', !answer && 'font-semibold text-muted-foreground italic')}>
-                  {answer ? formatAnswer(answer, question, t, i18n.language) : t(closed ? 'play.noAnswer' : 'play.team.thinking')}
+                  {/* Someone offline is not thinking about it. */}
+                  {answer
+                    ? formatAnswer(answer, question, t, i18n.language)
+                    : t(closed || offline ? 'play.noAnswer' : 'play.team.thinking')}
                 </span>
               </span>
               {onUse && answer && !isMe && (

@@ -4,7 +4,7 @@ import { expect, test, type Page } from '@playwright/test'
  * Connection resilience and host messages: a phone loses its network mid-question, sees the
  * bar with the elapsed time, comes back with a "Reconnected" toast and still answers; the host
  * sends a message to every phone and the projector, a reloaded phone still shows it, and Clear
- * removes it everywhere.
+ * removes it everywhere. Finally the player leaves from the game menu.
  */
 
 const username = process.env.E2E_USERNAME
@@ -87,6 +87,18 @@ test('a phone survives going offline; host messages reach phones and the project
       await page.getByRole('button', { name: 'Clear', exact: true }).click()
       await expect(banner(phone)).toHaveCount(0)
       await expect(banner(projector)).toHaveCount(0)
+    })
+
+    await test.step('the player leaves from the game menu and keeps their points', async () => {
+      await phone.getByRole('button', { name: 'Settings' }).click()
+      await phone.getByRole('menuitem', { name: 'Leave game' }).click()
+      await phone.getByRole('dialog').getByRole('button', { name: 'Leave', exact: true }).click()
+      await expect(phone).toHaveURL((url) => url.pathname === '/')
+      await expect(phone.getByText('You left the game.')).toBeVisible()
+      await expect(page.getByText('Left the game')).toBeVisible()
+      // Opening the game again asks to join instead of rejoining as the same player.
+      await phone.goto(`/play/${pin}`)
+      await expect(phone).toHaveURL((url) => url.pathname === '/')
     })
 
     await page.getByRole('button', { name: 'End game', exact: true }).click()

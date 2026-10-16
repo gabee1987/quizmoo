@@ -12,6 +12,7 @@ import { emitAck, sendAnswer } from '../../lib/socket'
 import { QuestionInput } from '../questions/question-input'
 import { Answered } from './answered'
 import { captainDecides, changeWindow, confirmsForTeam, myTeamSize } from './change-window'
+import { usePicksOpen } from './picks-open'
 import { TeamPicksPanel } from './team-picks-panel'
 import { picksByOption } from './team-picks'
 
@@ -23,7 +24,7 @@ export function Question({ snapshot, clockOffset }: { snapshot: PlayerSnapshot; 
   const [error, setError] = useState<string | null>(null)
   // Showing the question again to change the answer; falls back to the answered view when the lock-in starts.
   const [changing, setChanging] = useState(false)
-  const [picksOpen, setPicksOpen] = useState(false)
+  const [picksOpen, setPicksOpen] = usePicksOpen(snapshot.pin, false)
   const picksRef = useRef<HTMLDetailsElement>(null)
   const now = useNow(changing) + clockOffset
   const question = snapshot.question

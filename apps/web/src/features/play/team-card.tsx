@@ -40,13 +40,15 @@ export function TeamCard({ snapshot, team }: { snapshot: PlayerSnapshot; team: T
           <li
             key={p.id}
             className={cn(
-              'flex items-center gap-1.5 rounded-full bg-secondary py-1 pr-3 pl-1 text-sm font-bold text-secondary-foreground',
-              !p.connected && 'opacity-50',
+              'flex items-center gap-1.5 rounded-full border-2 border-transparent bg-secondary py-0.5 pr-3 pl-0.5 text-sm font-bold text-secondary-foreground',
+              // Offline: dashed border and a faded avatar, as on the host's tiles; the text keeps its contrast.
+              !p.connected && 'border-dashed border-border bg-card text-foreground',
             )}
           >
-            <PlayerAvatar avatar={p.avatar} className="bg-card" />
+            <PlayerAvatar avatar={p.avatar} className={cn('bg-card', !p.connected && 'opacity-40 grayscale')} />
             <span className="max-w-32 truncate">{p.name}</span>
             {p.id === team.captainId && <CrownIcon className="size-4 text-warning" aria-label={t('play.team.captain')} />}
+            {!p.connected && <span className="text-xs font-semibold text-muted-foreground">{t('play.teammateOffline')}</span>}
           </li>
         ))}
       </ul>

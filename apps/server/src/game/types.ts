@@ -41,6 +41,8 @@ export interface Player {
   joinOrder?: number
   /** Unix ms when the last connection dropped; null while connected. Missing in games saved before it existed. */
   disconnectedAt?: number | null
+  /** Left the running game from their phone: offline for good, points kept, the token no longer rejoins. */
+  left?: boolean
   score: number
   answers: Record<string, PlayerAnswerRecord>
 }

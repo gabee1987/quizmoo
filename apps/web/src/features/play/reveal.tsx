@@ -1,5 +1,4 @@
 import type { PlayerSnapshot, TeamLive } from '@quizmoo/shared'
-import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/cn'
 import { CheckIcon, CrossIcon } from '../../components/icons'
@@ -8,6 +7,7 @@ import { stagger, useCountUp } from '../../lib/motion'
 import { CorrectAnswer } from '../questions/correct-answer'
 import { formatAnswer } from '../questions/format-answer'
 import { myTeamMode } from './change-window'
+import { usePicksOpen } from './picks-open'
 import { TeamPicksPanel } from './team-picks-panel'
 import { TeamSummary } from './team-summary'
 
@@ -114,7 +114,7 @@ function Sparkles() {
 
 /** What the player's team sent and each member's pick (a team of more than one); nothing about right or wrong. */
 function TeamResult({ snapshot, team }: { snapshot: PlayerSnapshot; team: TeamLive }) {
-  const [open, setOpen] = useState(true)
+  const [open, setOpen] = usePicksOpen(snapshot.pin, true)
   return (
     <div className="flex w-full animate-fade-up flex-col items-center gap-3" style={stagger(1, 0, 400)}>
       <TeamSummary snapshot={snapshot} team={team} />

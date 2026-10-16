@@ -146,6 +146,12 @@
 - A player answering alone (classic, a team of one, a solo player) sees what they sent instead of only a check: the answer in its button colours and symbols, how long it took and which question it was.
 - Mixed play: with "Players may play on their own" (new game dialog, off by default) the join page also offers "On my own". Solo players answer for themselves and are ranked with the teams by their own points on the scoreboard, the podium and the results ("Teams and solo players"), shown with their avatar; the results and the CSV mark them "On their own". The host lobby groups them under "On their own"; the host moves players between a team and playing alone (drag, the player's menu, or "Move" between questions), and their solo points wait for them when they come back.
 
+### Player and host polish
+- The phone's round menu is touch-sized (every row at least 48 px, larger text, wider), shows who the player joined as (avatar, name, team) and has "Leave game" with a confirmation. In the lobby the player is removed; once the game runs they stay in the standings and results with their points, the host sees "Left the game", the question no longer waits for them, and the phone cannot rejoin as the same player.
+- Teammates who are offline show as "offline" on the team card and in "Team picks" (a dashed chip and a faded avatar), and a teammate who left as "left"; neither is "thinking…" any more.
+- "Team picks" stays open on the next questions once opened (remembered per game in that tab).
+- Confirmation dialogs on phones have full-size buttons (they were squashed to half height).
+
 ### Development
 - The web dev server runs on port 15173, away from the 5173+ ports other local Vite projects take.
 - CI runs typecheck, tests and build only; the end-to-end suite runs locally before each pull request.

@@ -32,6 +32,7 @@ import {
   gradeText,
   joinPlayer,
   kickPlayer,
+  leavePlayer,
   movePlayer,
   next,
   openJoining,
@@ -239,6 +240,24 @@ export function registerSocketHandlers(io: AppSocketServer, { manager, db, parse
               ? pickTeam(state, { playerId, solo: true })
               : pickTeam(state, { playerId, newTeam: { id: nanoid(8), name: pick.newTeamName } }),
         )
+        return { ok: true as const }
+      }),
+    )
+
+    socket.on('player:leave', (_data, ack) =>
+      respond(ack, () => {
+        const { pin, playerId, role } = socket.data
+        if (role !== 'player' || !pin || !playerId) return { error: 'errors.playerNotFound' }
+        manager.apply(pin, (state, now) => {
+          const left = leavePlayer(state, playerId, now)
+          // A running question need not wait for someone who left.
+          return !left.pausedAt && allAnswered(left) ? endQuestion(left) : left
+        })
+        // The player's other tabs or devices end their session too.
+        const room = rooms.player(pin, playerId)
+        socket.to(room).emit('game:closed', { error: 'errors.leftGame' })
+        io.in(room).socketsLeave(room)
+        socket.data = {}
         return { ok: true as const }
       }),
     )

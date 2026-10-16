@@ -42,15 +42,31 @@ Change requests from the user's testing on 13 October 2026, the ones not covered
     - Admin-edited lists (the names page) need a way to set the avatar per name, or a fallback (a keyword match, else random). To be decided when planned.
     - Every name still passes the name filter; the e2e `nicknames.e2e.ts` covers the avatar match.
 
+## Already covered before this phase
+
+- A1 in part: the game menu shows the PIN and the quiz title (phase 23). Still missing: the player's name, avatar and team.
+- C8 in part: team-mode lobby players are rows with the full name (phase 23). Classic mode still has narrow tiles.
+- C10 in part: the host home page lists running games with "Back to game" (phase 22). Still missing: the 12-hour rule and the reported logout case.
+- D11 done: `squish.ts` gives a soft dip instead of the wobble when a press turns a choice off, and ignores Radix's click on the radio that loses its selection (phase 11 follow-up). Only re-checked in the browser.
+
 ## Decisions
 
-From the user: the items as listed in the test notes.
-
-Proposed (confirm or change before implementation):
+From the user: the items as listed in the test notes. Confirmed on 16 October 2026:
 - Leaving during a game keeps the player in the results (points so far), shown as "left"; they cannot come back with the same token.
 - "Important" is per message, off by default; the host's own quick messages (phase 22) can have it preset.
-- Host toasts are on by default, with a mute switch in the host control; the projector never shows them.
+- Host toasts are on by default, with a mute switch in the host control (remembered per browser); the projector never shows them.
 - The running games list shows games of the last 12 hours that are not finished (as the restore rule).
+
+Assumed (change if wrong): admin-edited name lists keep plain names; their avatar comes from a keyword match on the name (e.g. "pingvin" or "penguin" gives the penguin), else a random one. No schema change for the names page.
+
+## Results
+
+- **A (players), done 16 October 2026.** Engine `leavePlayer` (lobby: as a kick; later `left: true`, points kept, the token refused with `errors.leftGame`), the `player:leave` event (other devices of the player get `game:closed`; the question closes if the rest have answered), `PlayerPublic.left`. The game menu shows the player's avatar, name and team, and "Leave game". Offline teammates are marked on the team card and in "Team picks" ("left" for those who left); the picks panel remembers its open state per game (`usePicksOpen`). The host's player list says "Left the game", and the reconnecting hint leaves them out. Tests: 2 engine, 2 realtime, 2 web units (panel memory), 1 web unit (reconnecting hint), `connection.e2e.ts` extended with leaving.
+
+## Deviations
+
+- A2: the "Back to home" link already existed on the podium, and the closed screen has "Join a game", so nothing was added there.
+- `ConfirmDialog` (shared) fixed in passing: its buttons were half height on phones, which the leave dialog showed.
 
 ## Files (expected)
 

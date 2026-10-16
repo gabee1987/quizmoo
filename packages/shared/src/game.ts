@@ -81,6 +81,8 @@ export interface PlayerPublic {
   connected: boolean
   /** Unix ms when the player's last connection dropped; null while connected. */
   disconnectedAt: number | null
+  /** Left the running game from their phone: offline for good, their points stay. */
+  left: boolean
   score: number
   rank: number
   /** Rank before the current question's points were added; equals `rank` outside a reveal. */

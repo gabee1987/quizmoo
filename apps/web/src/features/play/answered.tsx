@@ -1,6 +1,5 @@
 import type { PlayerSnapshot } from '@quizmoo/shared'
 import { PencilIcon } from 'lucide-react'
-import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { answerProgress } from '@/lib/answer-progress'
@@ -11,6 +10,7 @@ import { stagger } from '../../lib/motion'
 import { formatAnswer } from '../questions/format-answer'
 import { captainDecides, changeWindow, myTeamMode, myTeamSize } from './change-window'
 import { MyAnswer } from './my-answer'
+import { usePicksOpen } from './picks-open'
 import { TeamPicksPanel } from './team-picks-panel'
 import { TeamSummary } from './team-summary'
 
@@ -24,7 +24,7 @@ export function Answered({
   onChange: () => void
 }) {
   const { t, i18n } = useTranslation()
-  const [picksOpen, setPicksOpen] = useState(true)
+  const [picksOpen, setPicksOpen] = usePicksOpen(snapshot.pin, true)
   const teamMode = myTeamMode(snapshot)
   const decides = captainDecides(snapshot)
   // A team of one has nobody to show picks to.

@@ -126,6 +126,8 @@ export interface ClientToServerEvents {
   'player:teamMode': (data: PlayerTeamMode, ack: (res: { ok: true } | ErrorPayload) => void) => void
   'player:captain': (data: PlayerCaptain, ack: (res: { ok: true } | ErrorPayload) => void) => void
   'player:team': (data: PlayerTeam, ack: (res: { ok: true } | ErrorPayload) => void) => void
+  /** The player leaves: removed in the lobby, marked as left (points kept) once the game runs. */
+  'player:leave': (data: Record<string, never>, ack: (res: { ok: true } | ErrorPayload) => void) => void
   'host:attach': (data: { pin: string }, ack: (res: { ok: true } | ErrorPayload) => void) => void
   'host:command': (data: HostCommand, ack: (res: { ok: true } | ErrorPayload) => void) => void
   'screen:attach': (data: { pin: string }, ack: (res: { ok: true } | ErrorPayload) => void) => void
