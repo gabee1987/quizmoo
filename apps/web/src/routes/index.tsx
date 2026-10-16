@@ -141,12 +141,14 @@ function JoinPage() {
   const infoError = info.error && 'code' in info.error ? (info.error as { code: string }).code : null
   const pinError = (submitted || pinChecked) && !pinValid ? t('join.pinInvalid') : infoError ? t(infoError) : undefined
 
-  // "Surprise me": a name from the admins' list that nobody in this game has yet, and a random avatar.
+  // "Surprise me": a name from the admins' list that nobody in this game has yet, with the avatar
+  // that fits it, or a random one.
   const surprise = useMutation({
-    mutationFn: () => apiFetch<{ name: string | null }>(`/api/games/${pin}/nickname?lang=${i18n.language.startsWith('en') ? 'en' : 'hu'}`),
-    onSuccess: ({ name: picked }) => {
+    mutationFn: () =>
+      apiFetch<{ name: string | null; avatar: Avatar | null }>(`/api/games/${pin}/nickname?lang=${i18n.language.startsWith('en') ? 'en' : 'hu'}`),
+    onSuccess: ({ name: picked, avatar: fitting }) => {
       if (picked) setName(picked)
-      setAvatar(randomAvatar())
+      setAvatar(fitting ?? randomAvatar())
     },
     onError: (err) => setError(errorCode(err)),
   })

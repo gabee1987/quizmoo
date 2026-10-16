@@ -2,7 +2,8 @@ import { expect, test } from '@playwright/test'
 
 /**
  * The admins' "Surprise me" names: an admin replaces the English list on the Names page (a rude
- * name is refused first), and a phone joining in English gets a name from it. The list the
+ * name is refused first), and a phone joining in English gets a name from it with the avatar
+ * that fits. The list the
  * database had before is put back at the end.
  */
 
@@ -65,6 +66,10 @@ test('admin edits the Surprise me names and a phone gets one of them', async ({ 
       await phone.goto(`/?pin=${pin}`)
       await phone.getByRole('button', { name: 'Surprise me' }).click()
       await expect(phone.getByLabel('Your name')).toHaveValue(/^(Disco Potato|Turbo Snail)$/)
+      // The avatar fits the name: both are built-in names with their own avatar.
+      await phone.getByRole('button', { name: 'Change', exact: true }).click()
+      const fitting = (await phone.getByLabel('Your name').inputValue()) === 'Disco Potato' ? '😎' : '🚀'
+      await expect(phone.locator('input[name="avatar"]:checked')).toHaveValue(fitting)
     })
   } finally {
     if (original.custom) await page.request.put('/api/nicknames/en', { data: { names: original.names } })

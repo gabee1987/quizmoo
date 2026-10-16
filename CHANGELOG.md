@@ -161,6 +161,7 @@
 - The host's lobby in a classic game lists players as rows with the whole name (on up to two lines), two to a column on a laptop, instead of narrow tiles that cut names off.
 - The host gets a short note when players join, go offline, come back, leave or are removed. Many at once become one note ("12 players joined"), and a player who drops and is back within a second or two shows nothing. A bell next to the connection badge turns these notes off on that browser.
 - "Running now" on the host's home lists unfinished games of the last 12 hours, the same games the server keeps running after a restart.
+- "Surprise me" has about 180 built-in names per language, written separately for Hungarian and English players instead of translated (wordplay, films, cartoons, history and memes each audience knows), and gives the avatar that fits the name ("Pattogó Pingvin" gets the penguin). Names an admin adds on the Names page get their avatar from a word in the name (penguin, pingvin…), else a random one.
 
 ### Development
 - The web dev server runs on port 15173, away from the 5173+ ports other local Vite projects take.

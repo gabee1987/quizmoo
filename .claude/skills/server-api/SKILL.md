@@ -47,7 +47,7 @@ Error shape everywhere: `{ error: '<i18n key>' }`. Status codes: 400 invalid inp
 | `GET /api/nicknames` | admin | "Surprise me" lists per language: `{ lists: { hu: { names, custom }, en: … } }`, built-in until saved |
 | `PUT /api/nicknames/:language` | admin | `{ names }` (1–500 player names, each passing the name filter) -> saved without duplicates |
 | `DELETE /api/nicknames/:language` | admin | back to the built-in list |
-| `GET /api/games/:pin/nickname?lang=` | - | `{ name }`: a name from the list nobody in that game has yet |
+| `GET /api/games/:pin/nickname?lang=` | - | `{ name, avatar }`: a name from the list nobody in that game has yet, with `avatarForNickname` (built-in avatar, else a keyword, else null) |
 | `PATCH /api/quizzes/batch` | owner of all | `{ ids, settings?, questions?: { timeLimitSec?, points? } }` -> `{ updated }`; merged per quiz and fully validated, all or nothing |
 | `POST /api/images` | session | multipart, returns `{ id }` |
 | `GET /api/images/:id` | - | image bytes, long cache headers |
