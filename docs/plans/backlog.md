@@ -56,6 +56,7 @@ Collected while testing phases 9 to 12. Effort as above.
 - Clearly visible answer selection, a team of one answers without confirming, team answers labelled in the review, installable app, bigger new game dialog, custom theme and answer colours, bigger editor settings panel, scheduled games with a shareable link, names page markup (phase 21).
 - My settings per host account: quick messages, game defaults, branding (logo and event name on the projector and phones), and a host home page (phase 22).
 - Teams set up per game (host teams, player-made teams or both), moving players, late joining, the captaincy at any time, team toasts, the team's answer and picks on the phones, and mixed play with solo players ranked with the teams (phase 23).
+- Player and host polish from testing: player details and "Leave game" in the phone menu, offline and left teammates, the player's own answer kept in view, swipeable host messages with "Important", the menu button bottom left, a desktop waiting screen, readable lobby rows and join/drop notes for the host, "Running now" for 12 hours, about 180 funny names per language with fitting avatars (phase 24).
 
 ### Open
 

@@ -30,6 +30,7 @@ It uses the dev database, which is the user's data (see `database`).
 - Wait 1.5–2 s after a phase change before a screenshot: entrance animations and count-ups are otherwise caught half-way (faded cards, "+0 points"); a `fullPage` shot right after a change is the worst case.
 - Selectors: `getByRole(..., { name, exact: true })`. Loose names match more than meant ("Pear" also matched "Appearance"). A `ChoiceCards` card with a description has both in its name ("Red Nobody yet"): match its start, `new RegExp(`^${name}\b`)`.
 - Toasts: Sonner pauses a toast while the mouse rests on it, so after a click near the top of a phone a toast can stay for good; wait for `[data-sonner-toast]` to detach before swiping or clicking what it covers, and check overlaps only after its 0.4 s slide-in.
+- To assert which element a press animation runs on (the squish wobble or dip), wrap `Element.prototype.animate` in `context.addInitScript` and record each call's target and keyframes; `getAnimations()` after the fact misses short ones.
 - Write scripts with the Write tool, not shell heredocs: backticks in a quoted `node -e` string get eaten, `cat > file` can hang the shell, and `\r\n` inside a heredoc'd Python string lands in the file as a real line break. Python on Windows writes `\r\n` in text mode: open files with `newline=''` when a script must touch them.
 
 ## Performance measurement

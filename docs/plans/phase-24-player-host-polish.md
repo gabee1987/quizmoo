@@ -71,9 +71,15 @@ Assumed (change if wrong): admin-edited name lists keep plain names; their avata
 
 - **C (host), done 16 October 2026.** Classic lobby players are rows (avatar, the name on up to two lines with the full name as a tooltip, offline time, remove), `minmax(13rem)` so two fit a laptop column; three columns cut 24-character names mid-word, so two it is (60 players: 30 rows, checked at 1440 × 900 with long names, nothing clipped). Host toasts: `playerEvents` / `playerToasts` (`features/host/player-events.ts`, pure, 6 tests) diff the host snapshots and batch for 1.5 s into one toast per kind (one id each, so a new batch replaces it); `useHostToasts` and the bell `HostToastsToggle` (`host-toasts.tsx`, muted per browser in `quizmoo.hostToasts`) on the host control only. Checked with 60 socket joins: at most one join toast visible, "39 players joined", drops counted, a return named, removal, muted, remembered after reload. Running games: `dashboardGames` keeps unfinished games started (creation or scheduled time) in the last 12 hours (1 test case added). The reported logout case did not reproduce: a script started a game, logged out from the game page, logged in, and got back both through "Running now" and the game's address. `connection.e2e.ts` checks the join and left toasts.
 
+- **D (radio wobble), checked 16 October 2026, no change needed.** On the production build, a script recorded every press animation on the new game dialog's choice cards (phone, touch and mouse): selecting a card wobbles that card only, pressing the selected card again gives the soft dip, the card losing its selection gets nothing, and arrow keys animate nothing.
+
 - **E (names), done 16 October 2026.** `nicknames.ts` holds 184 Hungarian and 178 English built-in names (wordplay, plus films, cartoons, history and memes each audience knows), each with its avatar (written per language; puns on fictional or historical figures only, none on living people). `avatarForNickname`: a built-in name's own avatar, else a keyword from the end of the name (Hungarian and English words, `*` for word starts as in the name filter), else null and the phone picks one at random. `GET /api/games/:pin/nickname` returns `{ name, avatar }`. Tests: 2 unit cases (every built-in name valid, filtered, unique, no name in both lists, a valid avatar each; keyword matches), the database route test checks the avatar, `nicknames.e2e.ts` checks the avatar after "Surprise me".
 
+- **Final pass, 16 October 2026.** `pnpm verify` (shared 12, server 299 plus 91 skipped without a database, web 192; all 390 server tests with `TEST_DATABASE_URL`), `pnpm e2e` 15/15 against the production build on :3999.
+
 ## Deviations
+
+- D11: no commit, the phase 11 follow-up already did it (see "Already covered").
 
 - E12: more than the planned 100 names per language (about 180), so 60 players rarely see a repeat. The avatars are the existing 60; no new ones were added.
 
