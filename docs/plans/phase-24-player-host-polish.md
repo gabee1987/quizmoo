@@ -69,7 +69,12 @@ Assumed (change if wrong): admin-edited name lists keep plain names; their avata
 
 - **Follow-ups to B (user requests, 16 October 2026):** a swiped message no longer reappears to wobble out; nothing clips a leaving message; every toast swipes away (`swipeDirections` on the shared Toaster) and the message's swipe is a shared `SwipeAway`; the game menu button moved to the bottom left (game pages keep a strip free for it), so messages and toasts are full width at the top (this replaces B7's narrowing); the phone lobby leads with a team banner; the waiting screen has its own desktop layout (parts in `lobby-parts.tsx`, phone and desktop layouts in `lobby.tsx`, info lines tested in `lobby-info.test.ts`).
 
+- **C (host), done 16 October 2026.** Classic lobby players are rows (avatar, the name on up to two lines with the full name as a tooltip, offline time, remove), `minmax(13rem)` so two fit a laptop column; three columns cut 24-character names mid-word, so two it is (60 players: 30 rows, checked at 1440 × 900 with long names, nothing clipped). Host toasts: `playerEvents` / `playerToasts` (`features/host/player-events.ts`, pure, 6 tests) diff the host snapshots and batch for 1.5 s into one toast per kind (one id each, so a new batch replaces it); `useHostToasts` and the bell `HostToastsToggle` (`host-toasts.tsx`, muted per browser in `quizmoo.hostToasts`) on the host control only. Checked with 60 socket joins: at most one join toast visible, "39 players joined", drops counted, a return named, removal, muted, remembered after reload. Running games: `dashboardGames` keeps unfinished games started (creation or scheduled time) in the last 12 hours (1 test case added). The reported logout case did not reproduce: a script started a game, logged out from the game page, logged in, and got back both through "Running now" and the game's address. `connection.e2e.ts` checks the join and left toasts.
+
 ## Deviations
+
+- C9: the host's own connection has no new toast. Its drop is the connection bar (already there and more visible), its return the existing "Reconnected" toast.
+- C10: no server fix, since the logout case did not reproduce (see Results); "Running now" is on the host's home page (phase 22), not the quiz list.
 
 - A2: the "Back to home" link already existed on the podium, and the closed screen has "Join a game", so nothing was added there.
 - `ConfirmDialog` (shared) fixed in passing: its buttons were half height on phones, which the leave dialog showed.

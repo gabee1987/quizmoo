@@ -158,6 +158,9 @@
 - A message or toast wobbling out is no longer cut off at the bottom.
 - On a laptop or desktop the waiting screen has its own two-column layout: who the player is and the PIN on the left, the team and what the game is like on the right (its rules side by side), instead of the phone's narrow column.
 - The phone lobby puts the team first: a big banner in the game's colour with the team's name (or "You're playing on your own"), then that the game is about to start and how many have joined, then the PIN, the team members with their count, and what the game is like.
+- The host's lobby in a classic game lists players as rows with the whole name (on up to two lines), two to a column on a laptop, instead of narrow tiles that cut names off.
+- The host gets a short note when players join, go offline, come back, leave or are removed. Many at once become one note ("12 players joined"), and a player who drops and is back within a second or two shows nothing. A bell next to the connection badge turns these notes off on that browser.
+- "Running now" on the host's home lists unfinished games of the last 12 hours, the same games the server keeps running after a restart.
 
 ### Development
 - The web dev server runs on port 15173, away from the 5173+ ports other local Vite projects take.

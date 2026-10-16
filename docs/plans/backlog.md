@@ -17,7 +17,7 @@ Candidate features after the design phases (9 to 12). None is planned in detail 
 | Feature | Why | Effort | Notes |
 |---|---|---|---|
 | Question bank | Reuse questions across quizzes | L | New table, picker in the editor, tags |
-| Import questions from CSV or Excel | Build quizzes outside the app | M | Column format documented; validation report |
+| Quiz export, import and sharing as files | Write and edit a quiz outside the app (e.g. before the app is deployed), then import it; share quizzes between installs and people | L | Requested 16 October 2026; replaces the earlier "Import questions from CSV or Excel" item. Two formats to decide in the plan: a lossless, versioned JSON file validated by the shared `quizInputSchema` (every question type and setting; images packed with it, e.g. a `.zip` with `quiz.json` and the image files, or embedded), and a spreadsheet template (`.xlsx` / CSV: one row per question, columns for type, text, options, correct answer, time, points) for editing by hand in Excel, LibreOffice or Google Sheets. Export from the quiz list and the editor, import as a new quiz with a validation report naming the row and field of each problem, nothing saved until it is valid. A documented format and a sample file. No third-party service; a spreadsheet library needs the compliance review like any new dependency. |
 | Quiz sharing between hosts | Team of organisers | M | Owner plus editors per quiz; permission checks on every route |
 | PDF results report | Hand-out after the event | M | Server-side rendering; no third-party service |
 

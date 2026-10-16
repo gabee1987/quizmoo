@@ -54,6 +54,8 @@ test('a phone survives going offline; host messages reach phones and the project
     await phone.getByRole('button', { name: 'Join' }).click()
     await expect(phone.getByText(/You.re in/)).toBeVisible()
     await expect(page.getByText('1 / 1 connected')).toBeVisible()
+    // The host's player alert for the join.
+    await expect(page.getByText('Player Offline joined', { exact: true })).toBeVisible()
 
     await test.step('the phone goes offline mid-question and comes back', async () => {
       await page.getByRole('button', { name: 'Start', exact: true }).click()
@@ -114,6 +116,7 @@ test('a phone survives going offline; host messages reach phones and the project
       await expect(phone).toHaveURL((url) => url.pathname === '/')
       await expect(phone.getByText('You left the game.')).toBeVisible()
       await expect(page.getByText('Left the game')).toBeVisible()
+      await expect(page.getByText('Player Offline left the game', { exact: true })).toBeVisible()
       // Opening the game again asks to join instead of rejoining as the same player.
       await phone.goto(`/play/${pin}`)
       await expect(phone).toHaveURL((url) => url.pathname === '/')
