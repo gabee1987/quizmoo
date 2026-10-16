@@ -91,12 +91,12 @@ test('flexible teams: players create teams, the host moves, a latecomer joins, t
     const anna = await join('Anna', { create: 'Kockák' })
     await expect(anna.getByText(/You.re in/)).toBeVisible()
     const bence = await join('Bence', { pick: 'Kockák' })
-    await expect(bence.getByText('Team: Kockák')).toBeVisible()
+    await expect(bence.getByText('Kockák', { exact: true })).toBeVisible()
     await expect(anna.getByText('Bence joined your team.')).toBeVisible()
     const cecil = await join('Cecil', { pick: 'Red' })
     await expect(cecil.getByText(/You.re in/)).toBeVisible()
     const dora = await join('Dóra', { create: 'Solo' })
-    await expect(dora.getByText('Team: Solo')).toBeVisible()
+    await expect(dora.getByText('Solo', { exact: true })).toBeVisible()
 
     await test.step('a taken team name is refused', async () => {
       const dup = await join('Dupla', { create: 'kockák' })
@@ -107,7 +107,7 @@ test('flexible teams: players create teams, the host moves, a latecomer joins, t
     await test.step("the host moves Cecil to Kockák from his tile's menu", async () => {
       await page.getByRole('button', { name: 'Actions for Cecil' }).click()
       await page.getByRole('menuitem', { name: 'Kockák' }).click()
-      await expect(cecil.getByText('Team: Kockák')).toBeVisible()
+      await expect(cecil.getByText('Kockák', { exact: true })).toBeVisible()
       await expect(cecil.getByText('The host moved you to Kockák.')).toBeVisible()
     })
 

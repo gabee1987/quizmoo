@@ -156,6 +156,22 @@
       "playAgain": "Play again",
       "connectedOfTotal": "{{connected}} / {{count}} connected",
       "offlineForSeconds": "Offline for {{count}} s",
+      "leftGame": "Left the game",
+      "toasts": {
+        "label": "Player alerts",
+        "on": "Player alerts are on: joins, drops and returns",
+        "off": "Player alerts are off",
+        "joined_one": "{{name}} joined",
+        "joined_other": "{{count}} players joined",
+        "offline_one": "{{name}} went offline",
+        "offline_other": "{{count}} players went offline",
+        "back_one": "{{name}} is back",
+        "back_other": "{{count}} players are back",
+        "left_one": "{{name}} left the game",
+        "left_other": "{{count}} players left the game",
+        "gone_one": "{{name}} is out of the game",
+        "gone_other": "{{count}} players are out of the game"
+      },
       "offlineForMinutes": "Offline for {{count}} min",
       "reconnectingHint_one": "{{count}} player is reconnecting",
       "reconnectingHint_other": "{{count}} players are reconnecting",
@@ -185,6 +201,10 @@
         "customSeconds": "How many seconds is it shown?",
         "timeOf": "How long \"{{text}}\" is shown",
         "editHelp": "Changes here apply to this game only. Edit your list in My settings.",
+        "important": "Important",
+        "importantHelp": "Players can't swipe it away",
+        "importantShown": "important",
+        "importantPreset": "Always sent as important",
         "presets": {
           "getReady": "Get ready!",
           "shortBreak": "Short break",
@@ -475,10 +495,21 @@
   "play": {
     "youAreIn": "You're in, {{name}}!",
     "yourTeam": "Team: {{team}}",
+    "yourTeamLabel": "Your team",
     "solo": "You're playing on your own",
     "soloGroup": "On their own",
     "soloRank": "Among the teams: rank {{rank}}.",
     "mixedLeaderboard": "Teams and solo players",
+    "leave": {
+      "action": "Leave game",
+      "title": "Leave this game?",
+      "lobby": "You can join again with the PIN while the game has not started.",
+      "running": "Your points so far stay in the results, but you can't come back to this game.",
+      "confirm": "Leave",
+      "done": "You left the game."
+    },
+    "teammateOffline": "offline",
+    "teammateLeft": "left",
     "waitingForHost": "Waiting for the host to start…",
     "playerCount_one": "{{count}} player",
     "playerCount_other": "{{count}} players",
@@ -630,7 +661,8 @@
     "reconnecting": "Reconnecting… {{seconds}} s",
     "offline": "No network… {{seconds}} s",
     "reconnected": "Reconnected",
-    "announcement": "Message from the host"
+    "announcement": "Message from the host",
+    "dismissAnnouncement": "Hide this message"
   },
   "questionTypes": {
     "single": "Single choice",
@@ -845,6 +877,7 @@
     "rateLimited": "Too many attempts. Wait a minute and try again.",
     "internal": "Something went wrong. Try again.",
     "kicked": "The host removed you from the game.",
+    "leftGame": "You left this game.",
     "unsupportedImage": "Use a JPG, PNG or WebP image.",
     "fileTooLarge": "The file is larger than 5 MB.",
     "passwordChangeRequired": "Change your initial password first.",
@@ -893,6 +926,7 @@
       "moveDown": "Move message {{n}} down",
       "remove": "Remove message {{n}}",
       "textRequired": "A message needs some text.",
+      "important": "Important",
       "custom": "Other…",
       "customSeconds": "Seconds"
     },

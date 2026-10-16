@@ -32,6 +32,7 @@ import {
   gradeText,
   joinPlayer,
   kickPlayer,
+  leavePlayer,
   movePlayer,
   next,
   openJoining,
@@ -243,6 +244,24 @@ export function registerSocketHandlers(io: AppSocketServer, { manager, db, parse
       }),
     )
 
+    socket.on('player:leave', (_data, ack) =>
+      respond(ack, () => {
+        const { pin, playerId, role } = socket.data
+        if (role !== 'player' || !pin || !playerId) return { error: 'errors.playerNotFound' }
+        manager.apply(pin, (state, now) => {
+          const left = leavePlayer(state, playerId, now)
+          // A running question need not wait for someone who left.
+          return !left.pausedAt && allAnswered(left) ? endQuestion(left) : left
+        })
+        // The player's other tabs or devices end their session too.
+        const room = rooms.player(pin, playerId)
+        socket.to(room).emit('game:closed', { error: 'errors.leftGame' })
+        io.in(room).socketsLeave(room)
+        socket.data = {}
+        return { ok: true as const }
+      }),
+    )
+
     socket.on('host:attach', (data, ack) =>
       respond(ack, async () => {
         const pin = pinSchema.safeParse(data?.pin)
@@ -348,7 +367,7 @@ function runHostCommand(state: GameState, command: HostCommand, now: number): Ga
     case 'releaseResults':
       return releaseResults(state, command.audience)
     case 'announce':
-      return announce(state, { id: nanoid(8), text: command.text, durationSec: command.durationSec }, now)
+      return announce(state, { id: nanoid(8), text: command.text, durationSec: command.durationSec, important: command.important }, now)
     case 'clearAnnouncement':
       return clearAnnouncement(state)
     case 'addQuickMessage':

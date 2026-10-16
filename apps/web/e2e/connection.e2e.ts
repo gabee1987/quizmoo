@@ -4,7 +4,8 @@ import { expect, test, type Page } from '@playwright/test'
  * Connection resilience and host messages: a phone loses its network mid-question, sees the
  * bar with the elapsed time, comes back with a "Reconnected" toast and still answers; the host
  * sends a message to every phone and the projector, a reloaded phone still shows it, and Clear
- * removes it everywhere.
+ * removes it everywhere. The phone hides a message for itself, but not an important one. Finally
+ * the player leaves from the game menu.
  */
 
 const username = process.env.E2E_USERNAME
@@ -53,6 +54,8 @@ test('a phone survives going offline; host messages reach phones and the project
     await phone.getByRole('button', { name: 'Join' }).click()
     await expect(phone.getByText(/You.re in/)).toBeVisible()
     await expect(page.getByText('1 / 1 connected')).toBeVisible()
+    // The host's player alert for the join.
+    await expect(page.getByText('Player Offline joined', { exact: true })).toBeVisible()
 
     await test.step('the phone goes offline mid-question and comes back', async () => {
       await page.getByRole('button', { name: 'Start', exact: true }).click()
@@ -87,6 +90,36 @@ test('a phone survives going offline; host messages reach phones and the project
       await page.getByRole('button', { name: 'Clear', exact: true }).click()
       await expect(banner(phone)).toHaveCount(0)
       await expect(banner(projector)).toHaveCount(0)
+    })
+
+    await test.step('the player hides a message on their phone, but not an important one', async () => {
+      await page.getByLabel('Message', { exact: true }).fill('Drinks at the bar')
+      await page.getByRole('button', { name: 'Send', exact: true }).click()
+      await expect(banner(phone)).toHaveText('Drinks at the bar')
+      await phone.getByRole('button', { name: 'Hide this message' }).click()
+      await expect(banner(phone)).toHaveCount(0)
+      await expect(banner(projector)).toHaveText('Drinks at the bar')
+
+      await page.getByRole('switch', { name: 'Important' }).click()
+      await page.getByLabel('Message', { exact: true }).fill('Fire drill at 3 pm')
+      await page.getByRole('button', { name: 'Send', exact: true }).click()
+      await expect(banner(phone)).toHaveText('Fire drill at 3 pm')
+      await expect(phone.getByRole('button', { name: 'Hide this message' })).toHaveCount(0)
+      await page.getByRole('button', { name: 'Clear', exact: true }).click()
+      await expect(banner(phone)).toHaveCount(0)
+    })
+
+    await test.step('the player leaves from the game menu and keeps their points', async () => {
+      await phone.getByRole('button', { name: 'Settings' }).click()
+      await phone.getByRole('menuitem', { name: 'Leave game' }).click()
+      await phone.getByRole('dialog').getByRole('button', { name: 'Leave', exact: true }).click()
+      await expect(phone).toHaveURL((url) => url.pathname === '/')
+      await expect(phone.getByText('You left the game.')).toBeVisible()
+      await expect(page.getByText('Left the game')).toBeVisible()
+      await expect(page.getByText('Player Offline left the game', { exact: true })).toBeVisible()
+      // Opening the game again asks to join instead of rejoining as the same player.
+      await phone.goto(`/play/${pin}`)
+      await expect(phone).toHaveURL((url) => url.pathname === '/')
     })
 
     await page.getByRole('button', { name: 'End game', exact: true }).click()

@@ -97,6 +97,13 @@ describe('reconnecting hint before a question', () => {
     expect(reconnectingCount(withPlayers(lobby, 1, 1))).toBe(1)
   })
 
+  it('leaves out players who left the game', () => {
+    const scoreboard = { ...reveal({}), phase: 'scoreboard' } as HostSnapshot
+    const host = withPlayers(scoreboard, 7, 3)
+    const left = { ...host, players: host.players.map((p, i) => ({ ...p, left: i >= 8 })) }
+    expect(reconnectingCount(left)).toBeNull()
+  })
+
   it('stays quiet when the next step opens no question', () => {
     // Reveal with the scoreboard next, and the scoreboard after the last question.
     expect(reconnectingCount(withPlayers(reveal({}), 1, 9))).toBeNull()

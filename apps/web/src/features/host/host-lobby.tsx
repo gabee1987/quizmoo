@@ -6,6 +6,7 @@ import { QrCode } from '@/components/qr-code'
 import { Button } from '@/components/ui/button'
 import { useTimeReached } from '@/lib/clock'
 import { openProjector } from '@/lib/projector'
+import { HostToastsToggle } from './host-toasts'
 import { LobbyPlayers, teamActions } from './lobby-players'
 import { MessageBox } from './message-box'
 import { RoundTripBadge } from './round-trip-badge'
@@ -91,6 +92,7 @@ function JoinStage({ host, joinUrl, connected }: { host: HostSnapshot; joinUrl: 
             </span>
           )}
           <RoundTripBadge connected={connected} />
+          <HostToastsToggle />
         </div>
       </div>
       <div className="flex flex-col items-center gap-5 @lg:flex-row @lg:items-center">

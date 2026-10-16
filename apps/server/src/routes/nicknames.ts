@@ -6,7 +6,7 @@ import { requireSession } from '../auth/require-session.js'
 import type { Db } from '../db/index.js'
 import { nicknameLists } from '../db/schema.js'
 import { isNameAllowed } from '../game/names.js'
-import { defaultNicknames, pickNickname } from '../game/nicknames.js'
+import { avatarForNickname, defaultNicknames, pickNickname } from '../game/nicknames.js'
 import type { GameManager } from '../realtime/game-manager.js'
 import { parseOr400 } from './http.js'
 
@@ -67,12 +67,14 @@ export async function nicknameRoutes(app: FastifyInstance, { db, manager }: { db
     return { names: defaultNicknames[language], custom: false }
   })
 
-  // Public, for "Surprise me": a name nobody in this game has yet. Only the name leaves the server.
+  // Public, for "Surprise me": a name nobody in this game has yet, with the avatar that fits it
+  // (null: none fits, the phone picks one). Only the name and the avatar leave the server.
   app.get<{ Params: { pin: string }; Querystring: { lang?: string } }>('/api/games/:pin/nickname', async (request, reply) => {
     const game = pinSchema.safeParse(request.params.pin).success ? manager.get(request.params.pin) : undefined
     if (!game) return reply.code(404).send({ error: 'errors.gameNotFound' })
     const language = languageSchema.catch('hu').parse(request.query.lang)
     const taken = Object.values(game.state.players).map((p) => p.name)
-    return { name: pickNickname(await nicknamesFor(db, language), taken) }
+    const name = pickNickname(await nicknamesFor(db, language), taken)
+    return { name, avatar: name ? avatarForNickname(name) : null }
   })
 }

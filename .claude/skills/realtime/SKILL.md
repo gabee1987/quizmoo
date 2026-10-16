@@ -34,6 +34,7 @@ Keepalive: `pingInterval: 10000`, `pingTimeout: 20000` in `app.ts`. A phone that
 - A player is identified by their token, never by socket id. `player:join` with a valid token reclaims the existing player even if the name differs; the stored name wins. Without a token it is a fresh join, which the engine allows only in the lobby.
 - Two sockets with the same token (phone and tablet) are allowed; both receive snapshots. `connected` is true while at least one is open.
 - `host:attach` requires a valid session cookie whose user is the game's host (parse the cookie from `socket.handshake.headers.cookie`). `screen:attach` is public read-only by pin: the projector laptop is not logged in.
+- `player:leave` runs `leavePlayer` (and `endQuestion` when everyone left has answered and the question is not paused), sends `game:closed { error: 'errors.leftGame' }` to the player's other sockets and empties their room; the phone forgets the token and goes home.
 - On `disconnect`: `disconnectPlayer` (stamps `disconnectedAt`, shown to the host as "offline for 12 s") only if no other socket of that player remains in the room.
 - `host:ping` acks `{ ok: true }` to an attached host (round-trip badge), with no state.
 - Host messages are game state (`announcement`), set by the `announce` / `clearAnnouncement` host commands and cleared by `start` and `next`; a reconnecting phone and a restarted server keep them. With `durationSec` the manager's message timer clears them.

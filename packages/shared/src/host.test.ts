@@ -31,7 +31,7 @@ describe('hostSettingsSchema', () => {
 
   it('keeps built-in and own messages in one list, in the given order, each with its own time', () => {
     const quickMessages = [
-      { id: 'm1', text: 'Pizza is here!', durationSec: 30 },
+      { id: 'm1', text: 'Pizza is here!', durationSec: 30, important: true },
       { id: 'lastQuestion', builtIn: 'lastQuestion', durationSec: 10 },
     ]
     expect(hostSettingsSchema.parse({ quickMessages }).quickMessages).toEqual(quickMessages)

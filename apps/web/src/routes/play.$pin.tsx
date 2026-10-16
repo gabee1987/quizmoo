@@ -1,4 +1,4 @@
-import type { PlayerSnapshot } from '@quizmoo/shared'
+import type { Announcement, PlayerSnapshot } from '@quizmoo/shared'
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -7,6 +7,7 @@ import { AnnouncementBanner } from '../components/announcement-banner'
 import { ConnectionBar } from '../components/connection-bar'
 import { Button } from '../components/ui/button'
 import { Spinner } from '../components/spinner'
+import { useDismissable } from '../features/play/dismissed-message'
 import { Lobby } from '../features/play/lobby'
 import { NextRound } from '../features/play/next-round'
 import { Podium } from '../features/play/podium'
@@ -70,19 +71,23 @@ function PlayPage() {
         <>
           {/*
             The host's message sticks to the top while the player scrolls (long questions, the
-            end-of-game review). As wide as a toast; the round menu button stays on top of its corner.
+            end-of-game review). Full width like a toast.
           */}
           <div className="sticky top-[max(0.75rem,env(safe-area-inset-top))] z-30">
-            <AnnouncementBanner announcement={player.announcement} clockOffset={clockOffset} clearCorner />
+            <PlayerMessage pin={pin} announcement={player.announcement} clockOffset={clockOffset} />
           </div>
-          <div className="mr-12">
-            <NextRound snapshot={player} pin={pin} />
-          </div>
+          <NextRound snapshot={player} pin={pin} />
           <PhaseView snapshot={player} clockOffset={clockOffset} />
         </>
       )}
     </>
   )
+}
+
+/** The host's message on the phone: the player may swipe it away, unless the host marked it important. */
+function PlayerMessage({ pin, announcement, clockOffset }: { pin: string; announcement: Announcement | null; clockOffset: number }) {
+  const { shown, dismiss } = useDismissable(pin, announcement)
+  return <AnnouncementBanner announcement={shown} clockOffset={clockOffset} onDismiss={dismiss} />
 }
 
 /** Tells the player when the host moved them to another team, someone joined their team, or the captaincy changed hands. */

@@ -62,7 +62,7 @@ export function teamActions(send: (command: HostCommand) => Promise<boolean>): T
 }
 
 /**
- * The players in the lobby as avatar tiles, grouped by team in team mode; a friendly wait while
+ * The players in the lobby as rows, grouped by team in team mode; a friendly wait while
  * nobody is here. In team mode the host sets each team's answer mode (or all at once) and its
  * captain, adds, renames and removes teams, and moves players: by dragging a tile onto another
  * team (mouse, or a long press on touch) or with "Move" (touch and keyboard).
@@ -209,10 +209,13 @@ export function LobbyPlayers({
   )
 }
 
-/** Classic mode: big avatar tiles. Team mode (`rows`): draggable rows wide enough for the full name. */
+/**
+ * Classic mode: rows two to a laptop column, wide enough for a 24-character name on one or two
+ * lines. Team mode (`rows`): draggable rows with room for the name next to the grip and the menu.
+ */
 function TileGrid({ children, rows = false }: { children: ReactNode; rows?: boolean }) {
   return (
-    <ul className={cn('grid gap-2', rows ? 'grid-cols-[repeat(auto-fill,minmax(14rem,1fr))]' : 'grid-cols-[repeat(auto-fill,minmax(6.5rem,1fr))]')}>
+    <ul className={cn('grid gap-2', rows ? 'grid-cols-[repeat(auto-fill,minmax(14rem,1fr))]' : 'grid-cols-[repeat(auto-fill,minmax(13rem,1fr))]')}>
       {children}
     </ul>
   )
@@ -376,7 +379,7 @@ function AddTeamForm({ onCreate }: { onCreate: (name: string) => void }) {
 }
 
 /**
- * A player's tile. Classic mode: a big avatar with the name under it. Team mode (`team`): a
+ * A player's tile. Classic mode: a row with the avatar, the name on up to two lines and remove. Team mode (`team`): a
  * draggable row with a grip, a small avatar and the whole name; a crown marks the captain and makes
  * anyone else captain (`captain` null: the player has no team), and "Move" lists the other teams.
  */
@@ -410,23 +413,8 @@ function PlayerTile({
         : t('host.game.offlineForMinutes', { count: Math.floor(offlineSeconds / 60) })}
     </span>
   )
-  const avatar = (size: 'md' | 'lg') => (
-    <PlayerAvatar avatar={player.avatar} size={size} className={cn(offlineSeconds !== null && 'opacity-40 grayscale')} />
-  )
-  const kick = (className: string) => (
-    <button
-      type="button"
-      aria-label={t('host.game.kickPlayer', { name: player.name })}
-      className={cn(
-        'grid size-8 shrink-0 place-items-center rounded-full text-muted-foreground outline-none hover:bg-destructive/10 hover:text-destructive focus-visible:ring-[3px] focus-visible:ring-ring',
-        className,
-      )}
-      onClick={() => {
-        if (window.confirm(t('host.game.confirmKick', { name: player.name }))) onKick(player.id)
-      }}
-    >
-      <XIcon className="size-4" aria-hidden="true" />
-    </button>
+  const avatar = (
+    <PlayerAvatar avatar={player.avatar} size="md" className={cn(offlineSeconds !== null && 'opacity-40 grayscale')} />
   )
   const card = cn(
     'rounded-2xl border bg-card shadow-soft',
@@ -438,11 +426,25 @@ function PlayerTile({
 
   if (!team) {
     return (
-      <li className={cn(card, 'relative flex flex-col items-center gap-1.5 px-2 pt-3 pb-2 text-center')}>
-        {avatar('lg')}
-        <span className="w-full truncate font-bold">{player.name}</span>
-        {offline}
-        {kick('absolute top-1 right-1')}
+      <li className={cn(card, 'flex items-center gap-2 py-1.5 pr-1 pl-2')}>
+        {avatar}
+        {/* Two lines of the name before it is cut; the whole name as a tooltip. */}
+        <span className="min-w-0 flex-1">
+          <span className="line-clamp-2 font-bold leading-tight wrap-break-word" title={player.name}>
+            {player.name}
+          </span>
+          {offline}
+        </span>
+        <button
+          type="button"
+          aria-label={t('host.game.kickPlayer', { name: player.name })}
+          className="grid size-8 shrink-0 place-items-center rounded-full text-muted-foreground outline-none hover:bg-destructive/10 hover:text-destructive focus-visible:ring-[3px] focus-visible:ring-ring"
+          onClick={() => {
+            if (window.confirm(t('host.game.confirmKick', { name: player.name }))) onKick(player.id)
+          }}
+        >
+          <XIcon className="size-4" aria-hidden="true" />
+        </button>
       </li>
     )
   }
@@ -454,7 +456,7 @@ function PlayerTile({
       className={cn(card, 'flex cursor-grab items-center gap-2 py-1.5 pr-1 pl-1', isDragging && 'cursor-grabbing')}
     >
       <GripVerticalIcon className="size-4 shrink-0 text-muted-foreground/60" aria-hidden="true" />
-      {avatar('md')}
+      {avatar}
       {/* The whole name, wrapping if it must: the actions share one button so it gets the room. */}
       <span className="min-w-0 flex-1">
         <span className="font-bold leading-tight wrap-break-word">

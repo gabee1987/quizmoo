@@ -114,6 +114,7 @@ export interface JoinInput {
  */
 export function joinPlayer(state: GameState, input: JoinInput, now?: number): GameState {
   const existing = findByToken(state, input.token)
+  if (existing?.left) throw new EngineError('errors.leftGame')
   if (existing) return withCaptains(withPlayer(state, { ...existing, connected: true, disconnectedAt: null }))
 
   if (state.phase !== 'lobby' && (!state.settings.lateJoin || state.phase === 'finished')) {
@@ -161,13 +162,28 @@ export function joinPlayer(state: GameState, input: JoinInput, now?: number): Ga
 export function reconnectPlayer(state: GameState, token: string): GameState {
   const player = findByToken(state, token)
   if (!player) throw new EngineError('errors.playerNotFound')
+  if (player.left) throw new EngineError('errors.leftGame')
   return withCaptains(withPlayer(state, { ...player, connected: true, disconnectedAt: null }))
+}
+
+/**
+ * The player leaves from their phone. In the lobby they are removed, as a host kick would. Once the
+ * game runs they stay in the standings and results with their points, offline for good, and their
+ * token no longer rejoins.
+ */
+export function leavePlayer(state: GameState, playerId: string, now: number): GameState {
+  const player = state.players[playerId]
+  if (!player) throw new EngineError('errors.playerNotFound')
+  if (state.phase === 'finished') throw new EngineError('errors.invalidTransition')
+  if (state.phase === 'lobby') return kickPlayer(state, playerId)
+  return withCaptains(withPlayer(state, { ...player, connected: false, disconnectedAt: now, left: true }))
 }
 
 /** Unknown ids are ignored: a kicked player's socket may still disconnect afterwards. */
 export function disconnectPlayer(state: GameState, playerId: string, now: number): GameState {
   const player = state.players[playerId]
-  if (!player) return state
+  // A player who left is already offline since they left.
+  if (!player || player.left) return state
   return withCaptains(withPlayer(state, { ...player, connected: false, disconnectedAt: now }))
 }
 
@@ -580,7 +596,7 @@ export function setNextGame(state: GameState, pin: string): GameState {
 /** Shows a message on every phone and the projector, replacing the current one. Allowed in any phase. */
 export function announce(
   state: GameState,
-  input: { id: string; text: string; durationSec?: number | undefined },
+  input: { id: string; text: string; durationSec?: number | undefined; important?: boolean | undefined },
   now: number,
 ): GameState {
   const text = input.text.trim()
@@ -590,7 +606,8 @@ export function announce(
     throw new EngineError('errors.invalidInput')
   }
   const expiresAt = durationSec === undefined ? null : now + durationSec * 1000
-  return { ...state, announcement: { id: input.id, text, at: now, expiresAt } }
+  // Important: players cannot swipe it away on their phones.
+  return { ...state, announcement: { id: input.id, text, at: now, expiresAt, ...(input.important && { important: true }) } }
 }
 
 /** Clears the message `id` once its time is up; a newer message, or one that stays, is left alone. */

@@ -34,9 +34,10 @@ export function PlayerPanel({
   const teams = host.mode === 'team' && host.phase !== 'finished'
   const betweenQuestions = (host.phase === 'reveal' && !host.awaitingGrading) || host.phase === 'scoreboard'
   const online = host.players.filter((p) => p.connected).length
-  // Ticks only while someone is offline. Server time, so the phone's clock does not matter.
-  const now = useNow(online < host.players.length) + clockOffset
+  // Ticks only while someone is offline (and not for good). Server time, so the phone's clock does not matter.
+  const now = useNow(host.players.some((p) => !p.connected && !p.left)) + clockOffset
   const offlineFor = (player: PlayerPublic) => {
+    if (player.left) return t('host.game.leftGame')
     if (player.connected || player.disconnectedAt === null) return null
     const seconds = Math.max(0, Math.floor((now - player.disconnectedAt) / 1000))
     return seconds < 60

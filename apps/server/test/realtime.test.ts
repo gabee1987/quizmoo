@@ -741,6 +741,9 @@ describeDb('sockets (database)', () => {
     await cleared
     expect(await command(hostSocket, { type: 'announce', text: '' })).toEqual({ error: 'errors.invalidInput' })
     expect(await command(screen, { type: 'announce', text: 'Hi' })).toEqual({ error: 'errors.unauthorized' })
+    const important = nextSnapshot<PlayerSnapshot>(again.socket, 'game:player', (s) => s.announcement?.important === true)
+    expect(await command(hostSocket, { type: 'announce', text: 'Fire drill', important: true })).toEqual({ ok: true })
+    expect((await important).announcement).toMatchObject({ text: 'Fire drill', important: true })
   })
 
   it('pause and resume: phones see the pause, answers wait for the resume; a question shown again reaches the phone', async () => {
@@ -805,6 +808,41 @@ describeDb('sockets (database)', () => {
     const closed = new Promise((resolve) => a.socket.once('game:closed', resolve))
     expect(await command(hostSocket, { type: 'kick', playerId: a.snapshot.me.id })).toEqual({ ok: true })
     expect(await closed).toEqual({ error: 'errors.kicked' })
+  })
+
+  it('player:leave removes the player in the lobby', async () => {
+    const pin = await newGame()
+    const hostSocket = await host(pin)
+    const a = await player(pin, 'Anna')
+    const gone = nextSnapshot<HostSnapshot>(hostSocket, 'game:host', (s) => s.players.length === 0)
+    expect(await a.socket.emitWithAck('player:leave', {})).toEqual({ ok: true })
+    expect((await gone).players).toEqual([])
+    expect(await a.socket.emitWithAck('player:leave', {})).toEqual({ error: 'errors.playerNotFound' })
+  })
+
+  it('player:leave in a running game marks them left, closes their other devices and refuses the token', async () => {
+    const pin = await newGame()
+    const hostSocket = await host(pin)
+    const a = await player(pin, 'Anna')
+    const tablet = await player(pin, 'Anna', a.ack.token)
+    const b = await player(pin, 'Bence')
+    const question = nextSnapshot<PlayerSnapshot>(b.socket, 'game:player', (s) => s.phase === 'question')
+    await command(hostSocket, { type: 'start' })
+    const q = (await question).question!
+
+    const closed = new Promise((resolve) => tablet.socket.once('game:closed', resolve))
+    const left = nextSnapshot<HostSnapshot>(hostSocket, 'game:host', (s) => s.players.some((p) => p.left))
+    expect(await a.socket.emitWithAck('player:leave', {})).toEqual({ ok: true })
+    expect(await closed).toEqual({ error: 'errors.leftGame' })
+    expect((await left).players.find((p) => p.name === 'Anna')).toMatchObject({ connected: false, left: true })
+
+    // The question no longer waits for Anna.
+    const revealed = nextSnapshot<HostSnapshot>(hostSocket, 'game:host', (s) => s.phase === 'reveal')
+    await b.socket.emitWithAck('player:answer', { questionId: q.id, answer: { type: 'single', optionId: 'a' } })
+    await revealed
+
+    const again = await connect()
+    expect(await again.emitWithAck('player:join', { pin, name: 'Anna', token: a.ack.token })).toEqual({ error: 'errors.leftGame' })
   })
 
   it('gradeText: the host grades a text question and phones see the result', async () => {

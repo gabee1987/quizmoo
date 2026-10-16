@@ -16,6 +16,8 @@ const Toaster = ({ ...props }: ToasterProps) => {
     <Sonner
       theme={resolved}
       className="toaster group"
+      // Every toast can be swiped away sideways, like the host's messages on the phones.
+      swipeDirections={['left', 'right']}
       icons={{
         success: <CircleCheckIcon className="size-4" />,
         info: <InfoIcon className="size-4" />,

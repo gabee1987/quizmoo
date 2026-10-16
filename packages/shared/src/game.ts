@@ -81,6 +81,8 @@ export interface PlayerPublic {
   connected: boolean
   /** Unix ms when the player's last connection dropped; null while connected. */
   disconnectedAt: number | null
+  /** Left the running game from their phone: offline for good, their points stay. */
+  left: boolean
   score: number
   rank: number
   /** Rank before the current question's points were added; equals `rank` outside a reveal. */
@@ -199,6 +201,8 @@ export interface Announcement {
   at: number
   /** Unix ms when it disappears by itself; null (or missing in games saved before it existed) while it stays. */
   expiresAt?: number | null
+  /** Players cannot swipe it away on their phones. Missing (false) in games saved before it existed. */
+  important?: boolean
 }
 
 /** Host messages: 1 to 200 characters. */

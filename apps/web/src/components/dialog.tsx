@@ -37,13 +37,14 @@ export function ConfirmDialog({
           {children && <DialogDescription asChild><div>{children}</div></DialogDescription>}
         </DialogHeader>
         <DialogFooter className="gap-2 sm:gap-2">
-          <Button type="button" variant="secondary" className="flex-1" onClick={onCancel}>
+          {/* sm:flex-1: in the phone's column layout flex-1 would squash the buttons' height. */}
+          <Button type="button" variant="secondary" className="sm:flex-1" onClick={onCancel}>
             {t('common.cancel')}
           </Button>
           <Button
             type="button"
             variant={danger ? 'destructive' : 'default'}
-            className="flex-1"
+            className="sm:flex-1"
             disabled={pending}
             onClick={onConfirm}
             autoFocus

@@ -146,6 +146,23 @@
 - A player answering alone (classic, a team of one, a solo player) sees what they sent instead of only a check: the answer in its button colours and symbols, how long it took and which question it was.
 - Mixed play: with "Players may play on their own" (new game dialog, off by default) the join page also offers "On my own". Solo players answer for themselves and are ranked with the teams by their own points on the scoreboard, the podium and the results ("Teams and solo players"), shown with their avatar; the results and the CSV mark them "On their own". The host lobby groups them under "On their own"; the host moves players between a team and playing alone (drag, the player's menu, or "Move" between questions), and their solo points wait for them when they come back.
 
+### Player and host polish
+- The phone's round menu is touch-sized (every row at least 48 px, larger text, wider), shows who the player joined as (avatar, name, team) and has "Leave game" with a confirmation. In the lobby the player is removed; once the game runs they stay in the standings and results with their points, the host sees "Left the game", the question no longer waits for them, and the phone cannot rejoin as the same player.
+- Teammates who are offline show as "offline" on the team card and in "Team picks" (a dashed chip and a faded avatar), and a teammate who left as "left"; neither is "thinking…" any more.
+- "Team picks" stays open on the next questions once opened (remembered per game in that tab).
+- The player's own answer stays in view until the next question instead of a bare "Answer sent!": a team member's pick or vote before the team is done (with the teammates' picks below), the kept answer when results are held back until the end, and in the reveal when the answer was not the correct one (or a poll vote, or waiting for grading).
+- Confirmation dialogs on phones have full-size buttons (they were squashed to half height).
+- Players can swipe a host message away (left or right) or close it with ×, on their own phone only; it stays hidden after a reload. A swiped message just flies off; one closed with × wobbles out as before. The host can send a message as "Important" (a switch in the message box, off by default; a quick message can be set to always go out as important in My settings), and important messages cannot be hidden.
+- Every toast can be swiped away sideways too.
+- The phone's round menu button moved to the bottom left corner, in reach of a thumb, and opens upwards; messages and toasts at the top are full width again and never under it.
+- A message or toast wobbling out is no longer cut off at the bottom.
+- On a laptop or desktop the waiting screen has its own two-column layout: who the player is and the PIN on the left, the team and what the game is like on the right (its rules side by side), instead of the phone's narrow column.
+- The phone lobby puts the team first: a big banner in the game's colour with the team's name (or "You're playing on your own"), then that the game is about to start and how many have joined, then the PIN, the team members with their count, and what the game is like.
+- The host's lobby in a classic game lists players as rows with the whole name (on up to two lines), two to a column on a laptop, instead of narrow tiles that cut names off.
+- The host gets a short note when players join, go offline, come back, leave or are removed. Many at once become one note ("12 players joined"), and a player who drops and is back within a second or two shows nothing. A bell next to the connection badge turns these notes off on that browser.
+- "Running now" on the host's home lists unfinished games of the last 12 hours, the same games the server keeps running after a restart.
+- "Surprise me" has about 180 built-in names per language, written separately for Hungarian and English players instead of translated (wordplay, films, cartoons, history and memes each audience knows), and gives the avatar that fits the name ("Pattogó Pingvin" gets the penguin). Names an admin adds on the Names page get their avatar from a word in the name (penguin, pingvin…), else a random one.
+
 ### Development
 - The web dev server runs on port 15173, away from the 5173+ ports other local Vite projects take.
 - CI runs typecheck, tests and build only; the end-to-end suite runs locally before each pull request.

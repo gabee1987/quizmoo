@@ -3,7 +3,7 @@ import { createUser } from '../src/auth/users.js'
 import type { Db } from '../src/db/index.js'
 import { quizzes } from '../src/db/schema.js'
 import { fixtureQuiz } from '../src/game/fixtures.js'
-import { defaultNicknames } from '../src/game/nicknames.js'
+import { avatarForNickname, defaultNicknames } from '../src/game/nicknames.js'
 import { buildTestApp, sessionCookie } from './helpers/app.js'
 import { describeDb, withTestDb } from './helpers/test-db.js'
 
@@ -67,13 +67,19 @@ describeDb('nickname lists (database)', () => {
   })
 
   it('offers a game a name from the list of the requested language, without a login', async () => {
-    await req(admin, 'PUT', '/api/nicknames/en', { names: ['Disco Potato'] })
+    // An admin's name gets its avatar from a keyword, or none.
+    await req(admin, 'PUT', '/api/nicknames/en', { names: ['Penguin Pete'] })
     const pin = (await built.app.inject({ method: 'POST', url: '/api/games', headers: { cookie: admin }, payload: { quizId: 'quiz-1' } })).json()
       .pin as string
     const en = await built.app.inject({ method: 'GET', url: `/api/games/${pin}/nickname?lang=en` })
-    expect(en.json()).toEqual({ name: 'Disco Potato' })
-    const hu = await built.app.inject({ method: 'GET', url: `/api/games/${pin}/nickname?lang=hu` })
-    expect(defaultNicknames.hu).toContain(hu.json().name)
+    expect(en.json()).toEqual({ name: 'Penguin Pete', avatar: '🐧' })
+    await req(admin, 'PUT', '/api/nicknames/en', { names: ['Anna'] })
+    expect((await built.app.inject({ method: 'GET', url: `/api/games/${pin}/nickname?lang=en` })).json()).toEqual({ name: 'Anna', avatar: null })
+    // A built-in name comes with its own avatar.
+    const hu = (await built.app.inject({ method: 'GET', url: `/api/games/${pin}/nickname?lang=hu` })).json()
+    expect(defaultNicknames.hu).toContain(hu.name)
+    expect(hu.avatar).toBe(avatarForNickname(hu.name))
+    expect(hu.avatar).not.toBeNull()
     expect((await built.app.inject({ method: 'GET', url: '/api/games/999999/nickname' })).statusCode).toBe(404)
   })
 })

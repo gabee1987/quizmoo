@@ -19,7 +19,7 @@ const blocked = [
 
 const lookAlikes: Record<string, string> = { '0': 'o', '1': 'i', '3': 'e', '4': 'a', '5': 's', '7': 't', '@': 'a', $: 's', '!': 'i' }
 
-function simplify(text: string): string {
+export function simplify(text: string): string {
   return text
     .toLowerCase()
     .normalize('NFD')

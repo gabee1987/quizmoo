@@ -7,13 +7,13 @@ import { optionFill, optionVars } from '../../components/option-colours'
 import { stagger } from '../../lib/motion'
 
 /**
- * What a player answering alone (classic, a team of one, a solo player) has just sent: the answer
- * in its option colours and symbols as on the buttons, how long it took and which question it was.
- * Nothing about whether it is right.
+ * What the player sent: the answer in its option colours and symbols as on the buttons, how long
+ * it took and which question it was. Shown from the answer until the next question (also in the
+ * reveal). Says nothing about whether it is right.
  */
 export function MyAnswer({ snapshot, answer }: { snapshot: PlayerSnapshot; answer: Answer }) {
   const { t, i18n } = useTranslation()
-  const question = snapshot.question
+  const question = snapshot.question ?? snapshot.reveal?.question ?? null
   const options = question && 'options' in question ? question.options : []
   const symbols = snapshot.settings.answerSymbols
   const option = (id: string) => {

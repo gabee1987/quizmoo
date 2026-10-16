@@ -1,7 +1,8 @@
 import type { Announcement } from '@quizmoo/shared'
-import { MegaphoneIcon } from 'lucide-react'
+import { MegaphoneIcon, XIcon } from 'lucide-react'
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
+import { SwipeAway } from '@/components/swipe-away'
 import { cn } from '@/lib/cn'
 
 /** Longest open or close movement; the last message stays mounted this long while it leaves. */
@@ -17,16 +18,16 @@ export function AnnouncementBanner({
   announcement,
   size = 'phone',
   flush = false,
-  clearCorner = false,
   clockOffset = 0,
+  onDismiss,
   className,
 }: {
   announcement: Announcement | null
   size?: 'phone' | 'screen'
   /** No space below (when it sits in a row instead of above content). */
   flush?: boolean
-  /** Full width like a toast, with the text kept clear of the phone's round menu button in the top right corner. */
-  clearCorner?: boolean
+  /** The player may hide it: a swipe left or right, or the close button. Then it leaves like a cleared one. */
+  onDismiss?: (() => void) | undefined
   /** Server minus local clock, for the time bar of a message that clears itself. */
   clockOffset?: number
   className?: string
@@ -39,6 +40,11 @@ export function AnnouncementBanner({
   const [leaving, setLeaving] = useState(false)
   // Clips while the space opens or closes; afterwards the bubble's shadow may spill out.
   const [moving, setMoving] = useState(false)
+  // Swiped off by the player: already gone, so it leaves without the wobble out.
+  const [swiped, setSwiped] = useState(false)
+  // Whether the message on show has its close button; kept while it leaves, so nothing jumps.
+  const closable = useRef(false)
+  if (!leaving) closable.current = Boolean(onDismiss)
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined)
   const latest = useRef(announcement)
   latest.current = announcement
@@ -52,6 +58,7 @@ export function AnnouncementBanner({
     setMoving(true)
     if (id !== null) {
       setLeaving(false)
+      setSwiped(false)
       setShown(latest.current)
       timer.current = setTimeout(() => setMoving(false), MOVE_MS)
       return
@@ -82,49 +89,80 @@ export function AnnouncementBanner({
         'grid transition-[grid-template-rows]',
         open
           ? 'grid-rows-[1fr] duration-550 ease-spring-soft'
-          : // Closes once the bubble has wobbled, so the content follows it up instead of cutting it off.
-            'grid-rows-[0fr] delay-250 duration-400 ease-[cubic-bezier(0.22,1,0.36,1)]',
+          : // Closes once the bubble has wobbled, so the content follows it up instead of cutting it off;
+            // a swiped one is gone already, so its space closes at once.
+            cn('grid-rows-[0fr] duration-400 ease-[cubic-bezier(0.22,1,0.36,1)]', swiped ? 'delay-0' : 'delay-250'),
         className,
       )}
     >
       {/*
         While moving, the bubble flies in from above the screen and back out over the header, so
-        nothing is clipped above; below and at the sides there is room for its shadow (about 34 px
-        down, 60 px on the projector). Inside the host's message box (flush) it drops in through
-        its own top edge instead of flying across the host page.
+        nothing is clipped above; at the sides there is room for its shadow (60 px on the projector).
+        Opening, it is clipped about 34 px below, so it does not show over the content it pushes
+        down; leaving, not at all below, since the row shrinks under the bubble while it still
+        wobbles. Inside the host's message box (flush) it drops in through its own top edge instead
+        of flying across the host page.
       */}
       <div
         className={cn(
           'min-h-0',
           moving &&
             (flush
-              ? '[clip-path:inset(0_-3rem_-3rem_-3rem)]'
+              ? leaving
+                ? '[clip-path:inset(0_-3rem_-100vh_-3rem)]'
+                : '[clip-path:inset(0_-3rem_-3rem_-3rem)]'
               : size === 'screen'
-                ? '[clip-path:inset(-100vh_-5rem_-5rem_-5rem)]'
-                : '[clip-path:inset(-100vh_-3rem_-3rem_-3rem)]'),
+                ? leaving
+                  ? '[clip-path:inset(-100vh_-5rem_-100vh_-5rem)]'
+                  : '[clip-path:inset(-100vh_-5rem_-5rem_-5rem)]'
+                : leaving
+                  ? '[clip-path:inset(-100vh_-3rem_-100vh_-3rem)]'
+                  : '[clip-path:inset(-100vh_-3rem_-3rem_-3rem)]'),
         )}
       >
         {/* The space below lives inside the collapsing row, so it closes along with the bubble. */}
         <div className={cn(!flush && (size === 'screen' ? 'pb-6' : 'pb-4'))}>
-          <div
-            role="status"
-            aria-label={t('connection.announcement')}
-            // Keyed by id so a new message springs in again.
+          {/* Keyed by id so a new message springs in again (and a swiped one starts in place). */}
+          <SwipeAway
             key={shown.id}
-            className={cn(
-              'note note-announce',
-              size === 'screen' ? 'note-lg' : 'text-lg',
-              shown.expiresAt && 'note-timed',
-              leaving && 'note-leaving',
-              clearCorner && 'pr-12!',
-            )}
+            onSwipe={
+              onDismiss && !leaving
+                ? () => {
+                    setSwiped(true)
+                    onDismiss()
+                  }
+                : undefined
+            }
           >
-            <span className="note-icon" aria-hidden="true">
-              <MegaphoneIcon />
-            </span>
-            <p className="min-w-0 wrap-break-word">{shown.text}</p>
-            {shown.expiresAt && <TimeBar announcement={shown} expiresAt={shown.expiresAt} clockOffset={clockOffset} />}
-          </div>
+            <div
+              role="status"
+              aria-label={t('connection.announcement')}
+              className={cn(
+                'note note-announce',
+                size === 'screen' ? 'note-lg' : 'text-lg',
+                shown.expiresAt && 'note-timed',
+                // Closed with × or by the host: the wobble out. Swiped: already off the screen.
+                leaving && !swiped && 'note-leaving',
+              )}
+            >
+              <span className="note-icon" aria-hidden="true">
+                <MegaphoneIcon />
+              </span>
+              <p className="min-w-0 flex-1 wrap-break-word">{shown.text}</p>
+              {closable.current && (
+                <button
+                  type="button"
+                  aria-label={t('connection.dismissAnnouncement')}
+                  disabled={leaving || !onDismiss}
+                  onClick={onDismiss}
+                  className="-my-2 -mr-2 grid size-11 shrink-0 place-items-center rounded-full outline-none hover:bg-foreground/10 focus-visible:ring-[3px] focus-visible:ring-ring"
+                >
+                  <XIcon className="size-5" aria-hidden="true" />
+                </button>
+              )}
+              {shown.expiresAt && <TimeBar announcement={shown} expiresAt={shown.expiresAt} clockOffset={clockOffset} />}
+            </div>
+          </SwipeAway>
         </div>
       </div>
     </div>

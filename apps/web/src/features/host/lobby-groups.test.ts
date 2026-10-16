@@ -10,6 +10,7 @@ const player = (id: string, teamId: string | null = null): PlayerPublic => ({
   streak: 0,
   connected: true,
   disconnectedAt: null,
+  left: false,
   score: 0,
   rank: 1,
   previousRank: 1,

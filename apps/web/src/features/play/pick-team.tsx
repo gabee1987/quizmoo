@@ -29,7 +29,7 @@ export function PickTeam({ snapshot }: { snapshot: PlayerSnapshot }) {
 
   return (
     <form
-      className="flex w-full max-w-sm animate-fade-up flex-col gap-4 rounded-3xl border bg-card p-5 text-left shadow-soft"
+      className="flex animate-fade-up flex-col gap-4 rounded-3xl border bg-card p-5 text-left shadow-soft"
       onSubmit={(e) => void submit(e)}
       noValidate
     >

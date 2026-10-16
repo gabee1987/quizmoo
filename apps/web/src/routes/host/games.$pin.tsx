@@ -11,6 +11,7 @@ import { PlayerAvatar } from '../../components/player-avatar'
 import { Spinner } from '../../components/spinner'
 import { Controls } from '../../features/host/controls'
 import { GradingPanel } from '../../features/host/grading-panel'
+import { HostToastsToggle, useHostToasts } from '../../features/host/host-toasts'
 import { HostLobby } from '../../features/host/host-lobby'
 import { LiveQuestion } from '../../features/host/live-question'
 import { MessageBox } from '../../features/host/message-box'
@@ -37,6 +38,7 @@ function HostGamePage() {
   const { pin } = Route.useParams()
   const { status, since, host, clockOffset, closed } = useGameStore()
   useGameTheme(host?.settings)
+  useHostToasts(host)
   const info = useQuery({
     queryKey: ['game', pin],
     queryFn: () => apiFetch<GameHostInfo>(`/api/games/${pin}`),
@@ -142,6 +144,7 @@ function Header({ host, connected }: { host: HostSnapshot; connected: boolean })
             </span>
           )}
           <RoundTripBadge connected={connected} />
+          <HostToastsToggle />
         </div>
       </div>
       <Button asChild variant="secondary">

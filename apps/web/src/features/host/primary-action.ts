@@ -60,9 +60,11 @@ export function reconnectingCount(host: HostSnapshot): number | null {
   const command = primaryAction(host)?.command.type
   const startsQuestion =
     command === 'start' || (command === 'next' && host.questionIndex + 1 < host.questionCount)
-  if (!startsQuestion || host.players.length === 0) return null
-  const offline = host.players.filter((p) => !p.connected).length
-  return offline / host.players.length > RECONNECTING_SHARE ? offline : null
+  // Players who left are not coming back.
+  const players = host.players.filter((p) => !p.left)
+  if (!startsQuestion || players.length === 0) return null
+  const offline = players.filter((p) => !p.connected).length
+  return offline / players.length > RECONNECTING_SHARE ? offline : null
 }
 
 /**

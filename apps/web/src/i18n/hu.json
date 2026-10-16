@@ -156,6 +156,22 @@
       "playAgain": "Új kör",
       "connectedOfTotal": "{{connected}} / {{count}} online",
       "offlineForSeconds": "{{count}} mp óta offline",
+      "leftGame": "Kilépett a játékból",
+      "toasts": {
+        "label": "Értesítések a játékosokról",
+        "on": "Értesítések bekapcsolva: ki jött, ki esett ki, ki jött vissza",
+        "off": "Értesítések kikapcsolva",
+        "joined_one": "{{name}} csatlakozott",
+        "joined_other": "{{count}} játékos csatlakozott",
+        "offline_one": "{{name}} offline lett",
+        "offline_other": "{{count}} játékos offline lett",
+        "back_one": "{{name}} visszajött",
+        "back_other": "{{count}} játékos visszajött",
+        "left_one": "{{name}} kilépett a játékból",
+        "left_other": "{{count}} játékos kilépett a játékból",
+        "gone_one": "{{name}} már nincs a játékban",
+        "gone_other": "{{count}} játékos már nincs a játékban"
+      },
       "offlineForMinutes": "{{count}} perce offline",
       "reconnectingHint_one": "{{count}} játékos épp visszacsatlakozik",
       "reconnectingHint_other": "{{count}} játékos épp visszacsatlakozik",
@@ -185,6 +201,10 @@
         "customSeconds": "Hány másodpercig látszik?",
         "timeOf": "Meddig látszik: „{{text}}”",
         "editHelp": "Az itteni változások csak erre a játékra szólnak. A listádat a Beállításaimban szerkesztheted.",
+        "important": "Fontos",
+        "importantHelp": "A játékosok nem húzhatják el",
+        "importantShown": "fontos",
+        "importantPreset": "Mindig fontosként megy ki",
         "presets": {
           "getReady": "Készüljetek!",
           "shortBreak": "Egy kis szünet",
@@ -475,10 +495,21 @@
   "play": {
     "youAreIn": "Bent vagy, {{name}}!",
     "yourTeam": "Csapat: {{team}}",
+    "yourTeamLabel": "A csapatod",
     "solo": "Egyedül játszol",
     "soloGroup": "Egyéni játékosok",
     "soloRank": "A csapatok között: {{rank}}. hely",
     "mixedLeaderboard": "Csapatok és egyéni játékosok",
+    "leave": {
+      "action": "Kilépek a játékból",
+      "title": "Kilépsz a játékból?",
+      "lobby": "Amíg nem indul a játék, a PIN-nel újra beléphetsz.",
+      "running": "Az eddigi pontjaid megmaradnak az eredményekben, de ebbe a játékba már nem jöhetsz vissza.",
+      "confirm": "Kilépek",
+      "done": "Kiléptél a játékból."
+    },
+    "teammateOffline": "offline",
+    "teammateLeft": "kilépett",
     "waitingForHost": "Várjuk, hogy a játékvezető elindítsa…",
     "playerCount_one": "{{count}} játékos",
     "playerCount_other": "{{count}} játékos",
@@ -630,7 +661,8 @@
     "reconnecting": "Újracsatlakozás… {{seconds}} mp",
     "offline": "Nincs hálózat… {{seconds}} mp",
     "reconnected": "Újra online",
-    "announcement": "Üzenet a játékvezetőtől"
+    "announcement": "Üzenet a játékvezetőtől",
+    "dismissAnnouncement": "Elrejtem az üzenetet"
   },
   "questionTypes": {
     "single": "Egy helyes válasz",
@@ -845,6 +877,7 @@
     "rateLimited": "Túl sok próbálkozás. Várj egy percet, aztán próbáld újra.",
     "internal": "Valami elromlott. Próbáld újra.",
     "kicked": "A játékvezető eltávolított a játékból.",
+    "leftGame": "Kiléptél ebből a játékból.",
     "unsupportedImage": "JPG, PNG vagy WebP képet használj.",
     "fileTooLarge": "A fájl nagyobb 5 MB-nál.",
     "passwordChangeRequired": "Előbb cseréld le a kezdeti jelszót.",
@@ -893,6 +926,7 @@
       "moveDown": "{{n}}. üzenet lejjebb",
       "remove": "{{n}}. üzenet törlése",
       "textRequired": "Írj valamit az üzenetbe.",
+      "important": "Fontos",
       "custom": "Más…",
       "customSeconds": "Másodperc"
     },

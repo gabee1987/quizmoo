@@ -1,6 +1,6 @@
 import { MAX_QUICK_MESSAGES, type Announcement, type HostCommand, type QuickMessage } from '@quizmoo/shared'
 import { useQueryClient } from '@tanstack/react-query'
-import { BookmarkPlusIcon, CheckIcon, MegaphoneIcon, PencilIcon, SendIcon, XIcon } from 'lucide-react'
+import { BookmarkPlusIcon, CheckIcon, MegaphoneIcon, PencilIcon, SendIcon, TriangleAlertIcon, XIcon } from 'lucide-react'
 import { useId, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
@@ -8,6 +8,7 @@ import { AnnouncementBanner } from '@/components/announcement-banner'
 import { SmoothHeight } from '@/components/smooth-height'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Switch } from '@/components/ui/switch'
 import { cn } from '@/lib/cn'
 import { remainingMs, useNow } from '@/lib/clock'
 import { useMotionOk } from '@/lib/motion'
@@ -47,7 +48,9 @@ export function MessageBox({
   const [duration, setDuration] = useState<Duration>('own')
   const [customSeconds, setCustomSeconds] = useState('45')
   const [editing, setEditing] = useState(false)
+  const [important, setImportant] = useState(false)
   const inputId = useId()
+  const importantId = useId()
   const helpId = useId()
   const durationId = useId()
   const customId = useId()
@@ -62,11 +65,17 @@ export function MessageBox({
   /** The seconds the time row asks for, or 'own' to use each quick message's own time. */
   const chosen = (): number | null | 'own' => (duration === 'custom' ? clampSeconds(customSeconds) : duration)
 
-  async function announce(message: string, ownDuration: number | null) {
+  /** `preset`: a quick message saved as important goes out as important even with the switch off. */
+  async function announce(message: string, ownDuration: number | null, preset = false) {
     setSending(true)
     const picked = chosen()
     const seconds = picked === 'own' ? ownDuration : picked
-    const command: HostCommand = seconds === null ? { type: 'announce', text: message } : { type: 'announce', text: message, durationSec: seconds }
+    const command: HostCommand = {
+      type: 'announce',
+      text: message,
+      ...(seconds !== null && { durationSec: seconds }),
+      ...((important || preset) && { important: true }),
+    }
     if (await onCommand(command)) setText('')
     setSending(false)
   }
@@ -75,7 +84,11 @@ export function MessageBox({
     setSending(true)
     try {
       const picked = chosen()
-      const message = await addToMyMessages({ text: text.trim(), durationSec: picked === 'own' ? null : picked })
+      const message = await addToMyMessages({
+        text: text.trim(),
+        durationSec: picked === 'own' ? null : picked,
+        ...(important && { important: true }),
+      })
       await queryClient.invalidateQueries({ queryKey: hostSettingsQueryOptions.queryKey })
       if (await onCommand({ type: 'addQuickMessage', message })) {
         setText('')
@@ -107,6 +120,7 @@ export function MessageBox({
             >
               <span className="text-xs font-bold text-muted-foreground">
                 {t('host.game.message.showing')}
+                {shown.important && <> · {t('host.game.message.importantShown')}</>}
                 {shown.expiresAt && <TimeLeft expiresAt={shown.expiresAt} clockOffset={clockOffset} />}
               </span>
               {/* What the phones and the projector show, with the way to take it down. */}
@@ -172,6 +186,15 @@ export function MessageBox({
               </div>
             )}
           </div>
+          <div className="flex items-center gap-2">
+            <Switch id={importantId} checked={important} onCheckedChange={setImportant} aria-describedby={`${importantId}-help`} />
+            <label htmlFor={importantId} className="text-sm font-semibold">
+              {t('host.game.message.important')}
+            </label>
+            <span id={`${importantId}-help`} className="text-sm text-muted-foreground">
+              {t('host.game.message.importantHelp')}
+            </span>
+          </div>
           {editing ? (
             <div key="editing" className="flex animate-panel-swap flex-col gap-2">
               <p className="text-sm text-muted-foreground">{t('host.game.message.editHelp')}</p>
@@ -191,8 +214,10 @@ export function MessageBox({
                   variant="secondary"
                   size="sm"
                   disabled={sending}
-                  onClick={() => void announce(messageText(message, t), message.durationSec)}
+                  onClick={() => void announce(messageText(message, t), message.durationSec, message.important === true)}
+                  title={message.important ? t('host.game.message.importantPreset') : undefined}
                 >
+                  {message.important && <TriangleAlertIcon aria-label={t('host.game.message.importantPreset')} />}
                   {messageText(message, t)}
                   {message.durationSec !== null && (
                     <span className="font-semibold opacity-75">{t('host.game.message.seconds', { count: message.durationSec })}</span>

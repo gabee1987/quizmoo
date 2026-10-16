@@ -12,6 +12,7 @@ import {
   gradeText,
   joinPlayer,
   kickPlayer,
+  leavePlayer,
   next,
   reconnectPlayer,
   releaseResults,
@@ -177,6 +178,27 @@ describe('lobby commands', () => {
     expect(Object.keys(kickPlayer(state, 'p1').players)).toEqual(['p2'])
     expectCode(() => kickPlayer(state, 'nope'), 'errors.playerNotFound')
     expectCode(() => kickPlayer(endGame(state, T0), 'p1'), 'errors.invalidTransition')
+  })
+
+  it('leavePlayer removes the player in the lobby', () => {
+    const state = leavePlayer(withPlayers(2), 'p1', T0)
+    expect(Object.keys(state.players)).toEqual(['p2'])
+    expectCode(() => leavePlayer(state, 'p1', T0), 'errors.playerNotFound')
+  })
+
+  it('leavePlayer in a running game keeps the points and refuses the token afterwards', () => {
+    let state = startGame(withPlayers(2), T0)
+    state = endQuestion(answer(state, 'p1', correctAnswers[0]!, T0 + 1000))
+    const score = state.players.p1!.score
+    state = leavePlayer(state, 'p1', T0 + 2000)
+    expect(state.players.p1).toMatchObject({ connected: false, disconnectedAt: T0 + 2000, left: true, score })
+    expect(score).toBeGreaterThan(0)
+    expectCode(() => reconnectPlayer(state, 'tok-1'), 'errors.leftGame')
+    expectCode(() => joinPlayer(state, { id: 'x', name: 'Player 1', token: 'tok-1' }), 'errors.leftGame')
+    // A later dropped socket keeps the time they left.
+    expect(disconnectPlayer(state, 'p1', T0 + 9000)).toBe(state)
+    expectCode(() => leavePlayer(endGame(state, T0), 'p2', T0), 'errors.invalidTransition')
+    expectSerialisable(state)
   })
 
   it('startGame needs at least one player and one question', () => {
@@ -433,6 +455,12 @@ describe('host messages', () => {
     const finished = announce(endGame(lobby, T0 + 2), { id: 'm2', text: 'Thanks' }, T0 + 3)
     expect(finished.announcement).toEqual({ id: 'm2', text: 'Thanks', at: T0 + 3, expiresAt: null })
     expectSerialisable(finished)
+  })
+
+  it('announce marks an important message, and only then', () => {
+    const state = withPlayers(1)
+    expect(announce(state, { id: 'm', text: 'Hi', important: true }, T0).announcement).toMatchObject({ important: true })
+    expect(announce(state, { id: 'm', text: 'Hi', important: false }, T0).announcement).not.toHaveProperty('important')
   })
 
   it('announce rejects an empty or too long text', () => {
