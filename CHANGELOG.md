@@ -150,6 +150,7 @@
 - The phone's round menu is touch-sized (every row at least 48 px, larger text, wider), shows who the player joined as (avatar, name, team) and has "Leave game" with a confirmation. In the lobby the player is removed; once the game runs they stay in the standings and results with their points, the host sees "Left the game", the question no longer waits for them, and the phone cannot rejoin as the same player.
 - Teammates who are offline show as "offline" on the team card and in "Team picks" (a dashed chip and a faded avatar), and a teammate who left as "left"; neither is "thinking…" any more.
 - "Team picks" stays open on the next questions once opened (remembered per game in that tab).
+- The player's own answer stays in view until the next question instead of a bare "Answer sent!": a team member's pick or vote before the team is done (with the teammates' picks below), the kept answer when results are held back until the end, and in the reveal when the answer was not the correct one (or a poll vote, or waiting for grading).
 - Confirmation dialogs on phones have full-size buttons (they were squashed to half height).
 
 ### Development

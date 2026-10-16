@@ -46,14 +46,14 @@ export function Answered({
           </span>
           <TeamSummary snapshot={snapshot} team={live} />
         </>
-      ) : !live && snapshot.myAnswer ? (
-        // Answering alone (classic, a team of one, a solo player): what was sent, not only a check.
+      ) : snapshot.myAnswer && !decides ? (
+        // What was sent, not only a check: answering alone, or a teammate's own pick or vote until the team is done.
         <>
           <h1 className="flex animate-pop items-center gap-2 text-2xl font-black">
             <span className="grid size-10 place-items-center rounded-full bg-success text-success-foreground shadow-soft">
               <CheckIcon className="size-6" drawn />
             </span>
-            {t('play.answerSent')}
+            {teamMode === 'majority' && live ? t('play.team.voteSent') : t('play.answerSent')}
           </h1>
           <MyAnswer snapshot={snapshot} answer={snapshot.myAnswer} />
         </>

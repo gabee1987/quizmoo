@@ -63,6 +63,8 @@ Assumed (change if wrong): admin-edited name lists keep plain names; their avata
 
 - **A (players), done 16 October 2026.** Engine `leavePlayer` (lobby: as a kick; later `left: true`, points kept, the token refused with `errors.leftGame`), the `player:leave` event (other devices of the player get `game:closed`; the question closes if the rest have answered), `PlayerPublic.left`. The game menu shows the player's avatar, name and team, and "Leave game". Offline teammates are marked on the team card and in "Team picks" ("left" for those who left); the picks panel remembers its open state per game (`usePicksOpen`). The host's player list says "Left the game", and the reconnecting hint leaves them out. Tests: 2 engine, 2 realtime, 2 web units (panel memory), 1 web unit (reconnecting hint), `connection.e2e.ts` extended with leaving.
 
+- **Follow-ups to A (user requests, 16 October 2026):** the game menu is touch-sized (48 px rows); the player's own answer stays visible until the next question (team member before the team is done, held-back reveal, a reveal that was not correct).
+
 ## Deviations
 
 - A2: the "Back to home" link already existed on the podium, and the closed screen has "Join a game", so nothing was added there.
