@@ -163,6 +163,15 @@
 - "Running now" on the host's home lists unfinished games of the last 12 hours, the same games the server keeps running after a restart.
 - "Surprise me" has about 180 built-in names per language, written separately for Hungarian and English players instead of translated (wordplay, films, cartoons, history and memes each audience knows), and gives the avatar that fits the name ("Pattogó Pingvin" gets the penguin). Names an admin adds on the Names page get their avatar from a word in the name (penguin, pingvin…), else a random one.
 
+### Game history
+- The game history loads 30 games at a time, more as you scroll down (or with "Load more"), so it stays quick with hundreds of games.
+- Search by quiz title or a player's name, without minding capitals or accents ("karacsony" finds "Karácsony kvíz"), or by PIN; a game found by a player says who. The search starts from the third character. Filter running or finished games and the last day, 7 or 30 days. The search stays in the address, so a reload or a shared link keeps it.
+- New results page: the game's PIN, date and length, the figures and the actions in one header card, Delete included; the winner large (the best player too in team mode) with second and third; the easiest and hardest question; players, teams and questions in large tabs, medals for the top three. Laid out for laptops and phones.
+- The sidebar keeps the current page highlighted when the game history has a search.
+- Games are listed by when they start, so scheduled games are at the top.
+- Each host keeps at most 200 finished games (`MAX_GAMES_PER_HOST`); finishing one more deletes the oldest. Running and scheduled games never count. The 90-day limit stays, and the page says both.
+- After updating, run `pnpm --filter @quizmoo/server db:migrate` (production deploys migrate on start).
+
 ### Development
 - The web dev server runs on port 15173, away from the 5173+ ports other local Vite projects take.
 - CI runs typecheck, tests and build only; the end-to-end suite runs locally before each pull request.

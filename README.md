@@ -75,4 +75,4 @@ Working agreements for contributors (and coding agents) are in [AGENTS.md](AGENT
 
 ## Data protection
 
-Players enter a nickname only; no e-mail, device identifier or IP address is stored. Hosts have a username and password, nothing else. Finished games, with the nicknames and answers in them, are deleted automatically after `RESULTS_RETENTION_DAYS` (default 90). No third-party services are used beyond the hosting provider and PostgreSQL (see [docs/deploy.md](docs/deploy.md)).
+Players enter a nickname only; no e-mail, device identifier or IP address is stored. Hosts have a username and password, nothing else. Finished games, with the nicknames and answers in them, are deleted automatically after `RESULTS_RETENTION_DAYS` (default 90), and a host keeps at most `MAX_GAMES_PER_HOST` finished games (default 200). No third-party services are used beyond the hosting provider and PostgreSQL (see [docs/deploy.md](docs/deploy.md)).

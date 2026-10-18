@@ -67,7 +67,8 @@ export function HostNav({ user }: { user: User }) {
             <Link
               key={item.to}
               to={item.to}
-              activeOptions={{ exact: item.exact }}
+              // A page's filters in the address (the game history's search) keep its link active.
+              activeOptions={{ exact: item.exact, includeSearch: false }}
               className="group relative z-10 flex min-h-12 items-center gap-3 rounded-xl px-3 font-semibold text-muted-foreground transition-colors duration-300 outline-none hover:bg-muted hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring data-[status=active]:text-primary-foreground data-[status=active]:hover:bg-transparent"
             >
               <item.icon className="size-5 transition-transform duration-300 ease-spring group-hover:scale-115 group-hover:-rotate-8 group-data-[status=active]:animate-wiggle" />
@@ -107,7 +108,7 @@ export function HostNav({ user }: { user: User }) {
         <ul className="mx-auto flex max-w-lg">
           {main.map((item) => (
             <li key={item.to} className="flex-1">
-              <Link to={item.to} activeOptions={{ exact: item.exact }} className={tabClass}>
+              <Link to={item.to} activeOptions={{ exact: item.exact, includeSearch: false }} className={tabClass}>
                 <TabIcon icon={item.icon} />
                 {item.label}
               </Link>

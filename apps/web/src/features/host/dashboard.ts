@@ -1,4 +1,4 @@
-import type { GameHistoryItem } from '@quizmoo/shared'
+import type { GameHistoryItem, GameSummary } from '@quizmoo/shared'
 
 /** Joining has not opened yet: the game is waiting for its time. */
 export const isScheduled = (game: GameHistoryItem, now: number) =>
@@ -22,19 +22,15 @@ export interface DashboardGames {
   players: number
 }
 
-/** Sorts the host's games into what the home page shows. */
-export function dashboardGames(games: GameHistoryItem[], now: number, recentCount = 3): DashboardGames {
-  const finished = games.filter((game) => game.phase === 'finished')
-  const upcoming = games.filter((game) => isScheduled(game, now))
-  const live = games.filter(
-    (game) => game.phase !== 'finished' && !isScheduled(game, now) && now - startedAt(game) < LIVE_WINDOW_MS,
-  )
-  const ended = (game: GameHistoryItem) => Date.parse(game.finishedAt ?? game.createdAt)
+/** Sorts the server's summary (`GET /api/games/summary`) into what the home page shows. */
+export function dashboardGames(summary: GameSummary, now: number): DashboardGames {
+  const upcoming = summary.active.filter((game) => isScheduled(game, now))
+  const live = summary.active.filter((game) => !isScheduled(game, now) && now - startedAt(game) < LIVE_WINDOW_MS)
   return {
     live: live.sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt)),
     upcoming: upcoming.sort((a, b) => Date.parse(a.scheduledAt!) - Date.parse(b.scheduledAt!)),
-    recent: [...finished].sort((a, b) => ended(b) - ended(a)).slice(0, recentCount),
-    played: finished.length,
-    players: finished.reduce((sum, game) => sum + game.playerCount, 0),
+    recent: summary.recent,
+    played: summary.played,
+    players: summary.players,
   }
 }

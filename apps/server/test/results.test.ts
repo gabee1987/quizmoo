@@ -1,12 +1,13 @@
-import type { GameHistoryItem } from '@quizmoo/shared'
-import { eq } from 'drizzle-orm'
+import type { GameHistoryItem, GameHistoryPage, GameSummary } from '@quizmoo/shared'
+import { eq, or } from 'drizzle-orm'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { createUser } from '../src/auth/users.js'
 import type { Db } from '../src/db/index.js'
 import { games, quizzes } from '../src/db/schema.js'
-import { endGame, endQuestion, joinPlayer, openJoining, startGame, submitAnswer } from '../src/game/index.js'
+import { endGame, endQuestion, joinPlayer, openJoining, startGame, submitAnswer, type GameState } from '../src/game/index.js'
 import { fixtureQuiz } from '../src/game/fixtures.js'
-import { DAY_MS, deleteExpiredGames } from '../src/retention.js'
+import { createGameStore } from '../src/realtime/persist.js'
+import { DAY_MS, deleteExpiredGames, deleteGamesOverCap } from '../src/retention.js'
 import { buildTestApp, sessionCookie } from './helpers/app.js'
 import { describeDb, withTestDb } from './helpers/test-db.js'
 
@@ -169,6 +170,169 @@ describeDb('results routes and retention (database)', () => {
     expect((await del(cancelled.id)).statusCode).toBe(204)
     expect(built.manager.get(cancelled.pin)).toBeUndefined()
     expect(await listed(cancelled.id)).toBeUndefined()
+  })
+
+  describe('history pages, search, summary and the cap', () => {
+    let carol: { id: string; cookie: string }
+    let dave: { id: string; cookie: string }
+    const base = Date.parse('2026-03-01T12:00:00Z')
+
+    beforeAll(async () => {
+      const make = async (name: string) => {
+        const user = await createUser(db, name, 'test-password-123')
+        const res = await built.app.inject({ method: 'POST', url: '/api/auth/login', payload: { username: name, password: 'test-password-123' } })
+        return { id: user.id, cookie: sessionCookie(res) }
+      }
+      carol = await make('test_carol')
+      dave = await make('test_dave')
+    })
+
+    /** A saved game row; only the fields the history reads are filled in. */
+    async function insertGame(
+      hostId: string,
+      id: string,
+      {
+        title = 'Quiz',
+        at = base,
+        finished = true,
+        pin = '100000',
+        scheduledAt,
+        players = ['Anna', 'Bence'],
+      }: { title?: string; at?: number; finished?: boolean; pin?: string; scheduledAt?: number; players?: string[] } = {},
+    ) {
+      const state = {
+        id,
+        pin,
+        quiz: { title },
+        settings: { mode: 'classic' },
+        players: Object.fromEntries(players.map((name, i) => [`p${i}`, { id: `p${i}`, name }])),
+        createdAt: at,
+        finishedAt: finished ? at + 60_000 : null,
+        ...(scheduledAt ? { scheduledAt } : {}),
+      } as unknown as GameState
+      await db.insert(games).values({
+        id,
+        pin,
+        hostId,
+        settings: { mode: 'classic' } as GameState['settings'],
+        state,
+        phase: finished ? 'finished' : 'lobby',
+        createdAt: new Date(at),
+        finishedAt: finished ? new Date(at + 60_000) : null,
+      })
+    }
+    const page = (cookie: string, query: string) => built.app.inject({ method: 'GET', url: `/api/games?${query}`, headers: { cookie } })
+    const ids = (body: { games: GameHistoryItem[] }) => body.games.map((g) => g.gameId)
+
+    it('pages through the history without gaps or repeats, also across equal start times', async () => {
+      // Three games share one start time; the id breaks the tie.
+      const expected: string[] = []
+      for (let i = 0; i < 7; i++) {
+        const id = `c-page-${i}`
+        await insertGame(carol.id, id, { at: i < 3 ? base : base + i * 1000 })
+        expected.push(id)
+      }
+      await insertGame(dave.id, 'd-page-0', { at: base + 99_000 })
+      expected.sort((a, b) => {
+        const at = (id: string) => (Number(id.at(-1)) < 3 ? base : base + Number(id.at(-1)) * 1000)
+        return at(b) - at(a) || (a < b ? 1 : -1)
+      })
+
+      const seen: string[] = []
+      let cursor: string | null = null
+      do {
+        const res = await page(carol.cookie, `limit=3${cursor ? `&cursor=${cursor}` : ''}`)
+        expect(res.statusCode).toBe(200)
+        const body = res.json() as GameHistoryPage
+        expect(body.games.length).toBeLessThanOrEqual(3)
+        seen.push(...ids(body))
+        cursor = body.nextCursor
+      } while (cursor)
+      expect(seen).toEqual(expected)
+      expect((await page(carol.cookie, 'cursor=nonsense')).json()).toEqual({ error: 'errors.invalidInput' })
+      expect((await page(carol.cookie, 'limit=500')).statusCode).toBe(400)
+      await db.delete(games).where(or(eq(games.hostId, carol.id), eq(games.hostId, dave.id)))
+    })
+
+    it('searches titles and player names ignoring case and accents, PINs from the start, and filters by state and date', async () => {
+      await insertGame(carol.id, 'c-xmas', { title: 'Karácsony Kvíz', pin: '482913', at: base })
+      await insertGame(carol.id, 'c-summer', {
+        title: 'Nyári buli',
+        pin: '771122',
+        at: base + DAY_MS,
+        finished: false,
+        players: ['Szabó Zsófi', 'Zsófia Kiss', 'Péter'],
+      })
+      await insertGame(carol.id, 'c-odd', { title: '100% fun_night', pin: '123456', at: base + 2 * DAY_MS })
+      await insertGame(dave.id, 'd-xmas', { title: 'Karácsony kvíz', pin: '482914' })
+      const search = async (query: string) => ids((await page(carol.cookie, query)).json())
+
+      expect(await search('q=karacsony')).toEqual(['c-xmas'])
+      expect(await search(`q=${encodeURIComponent('KARÁCSONY kv')}`)).toEqual(['c-xmas'])
+      expect(await search('q=nyari')).toEqual(['c-summer'])
+      expect(await search(`q=${encodeURIComponent('00%')}`)).toEqual(['c-odd'])
+      expect(await search('q=n_ni')).toEqual(['c-odd'])
+      expect((await page(carol.cookie, 'q=ka')).statusCode).toBe(400)
+
+      // Players by name, with the names that matched (title matches carry none).
+      const byPlayer = (await page(carol.cookie, `q=${encodeURIComponent('ZSOFI')}`)).json() as GameHistoryPage
+      expect(byPlayer.games.map((g) => [g.gameId, g.matchedPlayers])).toEqual([['c-summer', ['Szabó Zsófi', 'Zsófia Kiss']]])
+      expect((await page(carol.cookie, 'q=karacsony')).json().games[0].matchedPlayers).toBeUndefined()
+      expect(await search('q=4829')).toEqual(['c-xmas'])
+      expect(await search('q=100')).toEqual(['c-odd'])
+      expect(await search('state=running')).toEqual(['c-summer'])
+      expect(await search('state=finished')).toEqual(['c-odd', 'c-xmas'])
+      const day = (offset: number) => encodeURIComponent(new Date(base - 12 * 3600_000 + offset * DAY_MS).toISOString())
+      expect(await search(`from=${day(1)}&to=${day(2)}`)).toEqual(['c-summer'])
+      expect(await search(`from=${day(1)}`)).toEqual(['c-odd', 'c-summer'])
+      expect((await page(carol.cookie, 'state=done')).statusCode).toBe(400)
+      await db.delete(games).where(or(eq(games.hostId, carol.id), eq(games.hostId, dave.id)))
+    })
+
+    it('puts a scheduled game at its start time', async () => {
+      await insertGame(carol.id, 'c-early', { at: base, finished: false, scheduledAt: base + 10 * DAY_MS })
+      await insertGame(carol.id, 'c-later', { at: base + DAY_MS })
+      expect(ids((await page(carol.cookie, '')).json())).toEqual(['c-early', 'c-later'])
+      await db.delete(games).where(eq(games.hostId, carol.id))
+    })
+
+    it('sums up the home page: unfinished games, the latest three finished, totals and how games are kept', async () => {
+      for (let i = 0; i < 5; i++) await insertGame(carol.id, `c-done-${i}`, { at: base + i * 1000 })
+      await insertGame(carol.id, 'c-open', { finished: false })
+      await insertGame(dave.id, 'd-done', { at: base + 99_000 })
+      const summary = (await built.app.inject({ method: 'GET', url: '/api/games/summary', headers: { cookie: carol.cookie } })).json() as GameSummary
+      expect(summary.active.map((g) => g.gameId)).toEqual(['c-open'])
+      expect(summary.recent.map((g) => g.gameId)).toEqual(['c-done-4', 'c-done-3', 'c-done-2'])
+      expect(summary).toMatchObject({ played: 5, players: 10, keep: { max: 200, days: 90 } })
+      expect((await built.app.inject({ method: 'GET', url: '/api/games/summary' })).statusCode).toBe(401)
+      await db.delete(games).where(or(eq(games.hostId, carol.id), eq(games.hostId, dave.id)))
+    })
+
+    it('keeps the newest finished games per host and never touches running games or other hosts', async () => {
+      for (let i = 0; i < 4; i++) await insertGame(carol.id, `c-cap-${i}`, { at: base + i * 1000 })
+      await insertGame(carol.id, 'c-cap-running', { at: base - DAY_MS, finished: false })
+      for (let i = 0; i < 3; i++) await insertGame(dave.id, `d-cap-${i}`, { at: base + i * 1000 })
+      const left = async (hostId: string) =>
+        (await db.select({ id: games.id }).from(games).where(eq(games.hostId, hostId))).map((r) => r.id).sort()
+
+      expect((await deleteGamesOverCap(db, 3, carol.id)).sort()).toEqual(['c-cap-0'])
+      expect(await left(carol.id)).toEqual(['c-cap-1', 'c-cap-2', 'c-cap-3', 'c-cap-running'])
+      expect(await left(dave.id)).toEqual(['d-cap-0', 'd-cap-1', 'd-cap-2'])
+
+      // Finishing one more through the store removes the oldest again and reports it.
+      const capped: string[][] = []
+      const store = createGameStore(db, { maxGamesPerHost: 3, onCapped: (removed) => capped.push(removed) })
+      const running = (await db.select().from(games).where(eq(games.id, 'c-cap-running')))[0]!
+      await store.save({ hostId: carol.id, quizId: null, state: { ...running.state, phase: 'finished', finishedAt: base + DAY_MS } })
+      expect(capped).toEqual([['c-cap-1']])
+      expect(await left(carol.id)).toEqual(['c-cap-2', 'c-cap-3', 'c-cap-running'])
+
+      // Every host at once, as the daily run does.
+      expect(await deleteGamesOverCap(db, 1)).toEqual(expect.arrayContaining(['c-cap-2', 'c-cap-3', 'd-cap-0', 'd-cap-1']))
+      expect(await left(carol.id)).toEqual(['c-cap-running'])
+      expect(await left(dave.id)).toEqual(['d-cap-2'])
+      await db.delete(games).where(or(eq(games.hostId, carol.id), eq(games.hostId, dave.id)))
+    })
   })
 
   describe('deleteExpiredGames', () => {

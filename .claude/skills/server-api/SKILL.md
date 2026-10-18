@@ -53,7 +53,8 @@ Error shape everywhere: `{ error: '<i18n key>' }`. Status codes: 400 invalid inp
 | `GET /api/images/:id` | - | image bytes, long cache headers |
 | `POST /api/games` | session | `{ quizId, settings, scheduledAt?, branding? }` -> creates lobby (scheduled: joining opens then; `400 errors.invalidSchedule`), returns `{ pin }`. The host's quick messages and, with `branding.show` and a logo or event name, the branding are copied into the game; the event name used is merged into the host settings |
 | `GET /api/games/:pin/public` | - | join page info: title, mode, phase, teams, join URL, `scheduledAt`, `serverNow` |
-| `GET /api/games` | session | own games (gameId, pin, quiz title, mode, phase, player count, dates) |
+| `GET /api/games?cursor=&limit=&q=&state=&from=&to=` | session | one page of own games (`gameHistoryQuerySchema`): `{ games, nextCursor }`, newest `started_at` first, 30 by default; `q` (3+ characters) matches the folded title and player names (`matchedPlayers` lists the names that matched) or, for digits, the start of the PIN; a malformed cursor is 400 |
+| `GET /api/games/summary` | session | the home page: `{ active, recent (3), played, players, keep: { max, days } }` |
 | `GET /api/games/:gameId/results` | owner | full results JSON |
 | `GET /api/games/:gameId/results.csv?lang=hu\|en` | owner | CSV export |
 | `DELETE /api/games/:gameId` | owner | delete a finished game and its results, or call off a scheduled game before joining opens |

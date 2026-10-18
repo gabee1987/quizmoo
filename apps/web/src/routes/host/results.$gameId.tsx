@@ -1,16 +1,20 @@
 import type { GameResults } from '@quizmoo/shared'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Link, createFileRoute } from '@tanstack/react-router'
+import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { DownloadIcon, MonitorIcon } from 'lucide-react'
+import { ArrowLeftIcon, DownloadIcon, ListChecksIcon, MonitorIcon, ShieldIcon, Trash2Icon, UsersIcon } from 'lucide-react'
 import { FormAlert } from '@/components/form-alert'
 import { Button } from '@/components/ui/button'
 import { toastError } from '@/lib/toast'
+import { ConfirmDialog } from '../../components/dialog'
 import { Spinner } from '../../components/spinner'
 import { PlayerTable, TeamTable } from '../../features/results/player-table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { QuestionStats } from '../../features/results/question-stats'
-import { ResultsSummary } from '../../features/results/results-summary'
+import { ResultsHero } from '../../features/results/results-hero'
+import { QuestionHighlights } from '../../features/results/results-summary'
+import { WinnerCard } from '../../features/results/winner-card'
 import { apiFetch, errorCode } from '../../lib/api'
 
 export const Route = createFileRoute('/host/results/$gameId')({
@@ -55,13 +59,30 @@ function ReleaseButtons({ gameId, pending }: { gameId: string; pending: GameResu
   )
 }
 
+/**
+ * A game's results: the header card (quiz, PIN, figures, actions), who won and the easiest and hardest
+ * question, then the players, the teams and the questions in tabs.
+ */
 function ResultsPage() {
   const { t, i18n } = useTranslation()
   const { gameId } = Route.useParams()
+  const navigate = useNavigate()
+  const queryClient = useQueryClient()
+  const [confirming, setConfirming] = useState(false)
   const results = useQuery({
     queryKey: ['results', gameId],
     queryFn: () => apiFetch<GameResults>(`/api/games/${gameId}/results`),
     retry: false,
+  })
+  const remove = useMutation({
+    mutationFn: () => apiFetch(`/api/games/${gameId}`, { method: 'DELETE' }),
+    // Leave the page before dropping its data: a mounted results query would fetch the deleted game again.
+    onSuccess: async () => {
+      await navigate({ to: '/host/games' })
+      queryClient.removeQueries({ queryKey: ['results', gameId] })
+      void queryClient.invalidateQueries({ queryKey: ['games'] })
+    },
+    onError: toastError,
   })
 
   if (results.isPending) return <Spinner />
@@ -77,60 +98,86 @@ function ResultsPage() {
   }
 
   const data = results.data
-  const date = new Intl.DateTimeFormat(i18n.language, { dateStyle: 'medium', timeStyle: 'short' }).format(data.createdAt)
   const lang = i18n.language.startsWith('en') ? 'en' : 'hu'
+  const teamMode = data.mode === 'team'
+  const date = new Intl.DateTimeFormat(i18n.language, { dateStyle: 'medium', timeStyle: 'short' }).format(data.startedAt ?? data.createdAt)
+  // Counts only from `sm`: on phones the tabs hold the icon and the label.
+  const count = (n: number) => <span className="rounded-full bg-current/15 px-2 py-0.5 text-xs tabular-nums max-sm:hidden">{n}</span>
 
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
-      <header className="flex flex-col gap-3">
-        <Link
-          to="/host/games"
-          className="self-start rounded-md text-sm font-semibold text-muted-foreground underline underline-offset-4 outline-none hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring"
-        >
+    <div className="mx-auto flex w-full max-w-5xl flex-col gap-5">
+      <Button asChild variant="ghost" size="sm" className="-ml-2 self-start">
+        <Link to="/host/games">
+          <ArrowLeftIcon aria-hidden="true" />
           {t('results.backToGames')}
         </Link>
-        <div>
-          <h1 className="text-3xl font-black tracking-tight wrap-break-word">{data.quizTitle}</h1>
-          <p className="text-sm text-muted-foreground">
-            {t('results.title')} · {date} · {t('screen.pin')} {data.pin} · {t(`host.create.modes.${data.mode}`)}
-          </p>
-        </div>
-        {data.phase !== 'finished' && (
-          <p className="rounded-2xl bg-warning px-4 py-3 font-semibold text-warning-foreground">{t('results.running')}</p>
-        )}
-        <ReleaseButtons gameId={gameId} pending={data.pendingRelease} />
-        <div className="flex flex-wrap gap-2">
-          <Button asChild>
-            <a href={`/api/games/${gameId}/results.csv?lang=${lang}`} download>
-              <DownloadIcon aria-hidden="true" />
-              {t('results.exportCsv')}
-            </a>
-          </Button>
-          <Button asChild variant="secondary">
-            <a href={`/screen/results/${gameId}`} target="_blank" rel="noreferrer">
-              <MonitorIcon aria-hidden="true" />
-              {t('results.showOnScreen')}
-            </a>
-          </Button>
-        </div>
-      </header>
+      </Button>
 
-      {/* What matters first; the details below in tabs. */}
-      <ResultsSummary results={data} />
+      <ResultsHero
+        results={data}
+        actions={
+          <>
+            <Button asChild>
+              <a href={`/api/games/${gameId}/results.csv?lang=${lang}`} download>
+                <DownloadIcon aria-hidden="true" />
+                {t('results.exportCsv')}
+              </a>
+            </Button>
+            <Button asChild variant="secondary">
+              <a href={`/screen/results/${gameId}`} target="_blank" rel="noreferrer">
+                <MonitorIcon aria-hidden="true" />
+                {t('results.showOnScreen')}
+              </a>
+            </Button>
+            {data.phase === 'finished' && (
+              <Button variant="outline" className="text-destructive sm:ml-auto" onClick={() => setConfirming(true)}>
+                <Trash2Icon aria-hidden="true" />
+                {t('results.delete')}
+              </Button>
+            )}
+          </>
+        }
+      />
+
+      {data.phase !== 'finished' && (
+        <p className="rounded-2xl bg-warning px-4 py-3 font-semibold text-warning-foreground">{t('results.running')}</p>
+      )}
+      <ReleaseButtons gameId={gameId} pending={data.pendingRelease} />
+
+      {/* Who won and what was easy or hard first; the full tables below. */}
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+        <WinnerCard results={data} />
+        <QuestionHighlights results={data} />
+      </div>
 
       <Tabs defaultValue="players" className="gap-4">
-        <TabsList>
+        <TabsList variant="bold" aria-label={t('results.details')}>
           <TabsTrigger value="players">
-            {t('results.players')} ({data.players.length})
+            <UsersIcon aria-hidden="true" />
+            {t('results.players')}
+            {count(data.players.length)}
           </TabsTrigger>
+          {teamMode && (
+            <TabsTrigger value="teams">
+              <ShieldIcon aria-hidden="true" />
+              {t('results.teams')}
+              {count(data.teams.length)}
+            </TabsTrigger>
+          )}
           <TabsTrigger value="questions">
-            {t('results.questions')} ({data.questions.length})
+            <ListChecksIcon aria-hidden="true" />
+            {t('results.questions')}
+            {count(data.questions.length)}
           </TabsTrigger>
         </TabsList>
-        <TabsContent value="players" className="flex flex-col gap-6">
-          {data.mode === 'team' && <TeamTable teams={data.teams} />}
-          <PlayerTable players={data.players} teams={data.mode === 'team' ? data.teams : []} />
+        <TabsContent value="players">
+          <PlayerTable players={data.players} teams={teamMode ? data.teams : []} hideHeading />
         </TabsContent>
+        {teamMode && (
+          <TabsContent value="teams">
+            <TeamTable teams={data.teams} hideHeading />
+          </TabsContent>
+        )}
         <TabsContent value="questions">
           {data.questions.length === 0 ? (
             <p className="text-muted-foreground">{t('results.noQuestions')}</p>
@@ -143,6 +190,22 @@ function ResultsPage() {
           )}
         </TabsContent>
       </Tabs>
+
+      {confirming && (
+        <ConfirmDialog
+          title={t('history.deleteTitle')}
+          confirmLabel={t('common.delete')}
+          danger
+          pending={remove.isPending}
+          onConfirm={() => remove.mutate()}
+          onCancel={() => {
+            setConfirming(false)
+            remove.reset()
+          }}
+        >
+          {t('history.deleteBody', { title: data.quizTitle, date })}
+        </ConfirmDialog>
+      )}
     </div>
   )
 }

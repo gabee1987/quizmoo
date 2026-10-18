@@ -44,4 +44,4 @@ During a running question `LiveQuestion` shows the answers coming in. In reveal,
 
 ## Results page (`/host/results/$gameId`)
 
-Summary first (`results-summary.tsx`: figures, podium, easiest and hardest question from the pure, tested `features/results/summary.ts`), then tabs: Players (with the team table in team mode) and Questions.
+`ResultsHero` (state, mode, date, length, the PIN, figures, and the actions: CSV, projector, Delete), then `WinnerCard` (winners on a tie, the team's best player, second and third) beside `QuestionHighlights` (easiest and hardest), all from the pure, tested `features/results/summary.ts`; then bold tabs: Players, Teams (team mode) and Questions. Delete navigates away before dropping the results query, or the still-mounted query fetches the deleted game (a 404 the e2e specs fail on).

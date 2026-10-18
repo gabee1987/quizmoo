@@ -11,7 +11,22 @@ import { resultsPendingFor } from './engine.js'
 import { denseRank } from './scoring.js'
 import { isRevealed, revealInfo, soloOf, teamAnswers } from './snapshots.js'
 import { captainOf, rankedTeams, teamMode } from './team-answers.js'
-import type { GameState } from './types.js'
+import type { GameState, Player } from './types.js'
+
+/**
+ * When the first question started: the earliest answer minus its answer time. The state keeps no
+ * start time of its own, and the creation time can be long before (a lobby, a scheduled game).
+ */
+function firstQuestionStart(players: readonly Player[]): number | null {
+  let first: number | null = null
+  for (const player of players) {
+    for (const record of Object.values(player.answers)) {
+      const start = record.at - record.timeMs
+      if (first === null || start < first) first = start
+    }
+  }
+  return first
+}
 
 /**
  * Results of a game, derived from its state. Covers the questions revealed so far,
@@ -68,6 +83,7 @@ export function toResults(state: GameState): GameResults {
     mode: state.settings.mode,
     phase: state.phase,
     createdAt: state.createdAt,
+    startedAt: firstQuestionStart(players),
     finishedAt: state.finishedAt,
     podium,
     players: rankedPlayers,

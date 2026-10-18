@@ -18,7 +18,11 @@ description: Drizzle and PostgreSQL conventions for apps/server: schema, migrati
 
 ## Results and retention
 
-Results are derived from the persisted `games.state` (player answers and scores), never stored twice. A daily job deletes finished games older than `RESULTS_RETENTION_DAYS` (default 90) in line with data minimisation.
+Results are derived from the persisted `games.state` (player answers and scores), never stored twice. A daily job (also run once at start) deletes finished games older than `RESULTS_RETENTION_DAYS` (default 90) in line with data minimisation, then each host's finished games beyond the newest `MAX_GAMES_PER_HOST` (default 200, `deleteGamesOverCap` in `retention.ts`); saving a finished game applies the cap to its host at once (`createGameStore` options). Running and scheduled games never count.
+
+## Game history columns
+
+`games.search_text` (quiz title and player names folded with `foldSql` from `db/search.ts`: lower case, accents translated, no extension), `quiz_title`, `player_count`, `scheduled_at` and `started_at` (scheduled time if later than creation) are stored generated columns: Postgres fills them from `state` on every save, inserts never set them, and old rows were filled by their migration. Lists and totals read these, never `state` (a large JSON per game). The history pages on `(host_id, started_at desc, id desc)`; a search folds the typed text with the same `foldSql`, so both sides always match. A generated expression may only use immutable functions (`jsonb_path_query_array` is fine, subqueries are not). Replacing a column makes `drizzle-kit generate` ask "rename or new?", which fails outside a terminal: add the new column in one migration and drop the old one in the next.
 
 ## Personal data
 

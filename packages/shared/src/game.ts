@@ -418,6 +418,8 @@ export interface GameResults {
   phase: GamePhase
   /** Unix ms. */
   createdAt: number
+  /** When the first question started, as far as the answers tell (unix ms); null when nobody answered. */
+  startedAt: number | null
   finishedAt: number | null
   /** Top three ranks (ties can add places). */
   podium: PodiumPlace[]
@@ -445,4 +447,46 @@ export interface GameHistoryItem {
   finishedAt: string | null
   /** When joining opens or opened, for a scheduled game; otherwise null. */
   scheduledAt: string | null
+  /** With a search: the players in this game whose name matches it. */
+  matchedPlayers?: string[]
+}
+
+export const gameHistoryStates = ['running', 'finished'] as const
+export const GAME_HISTORY_PAGE = 30
+/** Shorter searches would match almost everything; the page waits for this many characters. */
+export const GAME_SEARCH_MIN = 3
+
+/**
+ * `GET /api/games` query: one page of the history, newest start first. `q` (at least
+ * `GAME_SEARCH_MIN` characters) matches the quiz title or a player's name (case and accents ignored),
+ * or for digits the start of the PIN; `from` and `to` (ISO times, `to` exclusive)
+ * bound the start time; `cursor` is the previous page's `nextCursor`.
+ */
+export const gameHistoryQuerySchema = z.object({
+  cursor: z.string().max(100).optional(),
+  limit: z.coerce.number().int().min(1).max(100).default(GAME_HISTORY_PAGE),
+  q: z.string().trim().min(GAME_SEARCH_MIN).max(100).optional(),
+  state: z.enum(gameHistoryStates).optional(),
+  from: z.iso.datetime({ offset: true }).optional(),
+  to: z.iso.datetime({ offset: true }).optional(),
+})
+export type GameHistoryQuery = z.input<typeof gameHistoryQuerySchema>
+
+export interface GameHistoryPage {
+  games: GameHistoryItem[]
+  /** Pass as `cursor` for the next page; null on the last one. */
+  nextCursor: string | null
+}
+
+/** `GET /api/games/summary`: what the host's home page shows, without loading the whole history. */
+export interface GameSummary {
+  /** Every unfinished game (lobbies, running and scheduled ones). */
+  active: GameHistoryItem[]
+  /** The latest finished games, newest first. */
+  recent: GameHistoryItem[]
+  played: number
+  /** Players across all finished games (a player in two games counts twice). */
+  players: number
+  /** How finished games are kept: at most `max` per host, each for `days` days after it finished. */
+  keep: { max: number; days: number }
 }

@@ -35,7 +35,9 @@ Topic skills: `game-screens` (phone, projector, host control and results layouts
 
 - REST data (quizzes, results, me) goes through TanStack Query with `queryKey` arrays like `['quizzes']`, `['quiz', id]`. Mutations invalidate the keys they affect. The API client is one `apiFetch<T>(path, init)` helper in `src/lib/api.ts` that throws `ApiError { status, code }` where `code` is the i18n key from the server.
 - Live game state comes only from the socket store (see `socket-client`). Game screens are pure functions of the latest snapshot plus local UI state (selected option, text input). Never keep a second copy of game state.
-- Route search params are validated with Zod in `validateSearch`.
+- Route search params are validated with Zod in `validateSearch`, with `.catch(undefined)` so a bad value is dropped rather than failing the page. The router JSON-parses values: a bare `?q=123456` arrives as a number (preprocess it to a string), and a digit-only string is written back quoted (`?q=%22123456%22`).
+- Nav links that should stay active on a page with search params take `activeOptions={{ includeSearch: false }}` (the router compares the search too by default).
+- Long lists load with `useInfiniteQuery` and a cursor from the server (the game history: `features/host/history.ts`, `LoadMore` in `routes/host/games.index.tsx`).
 - Pure logic behind a screen (summaries, figures, draft edits) goes in a `.ts` module next to the feature with its own `*.test.ts`, e.g. `features/results/summary.ts`.
 
 ## Screens are phase switches

@@ -13,12 +13,18 @@ const { db, close } = createDb(config.DATABASE_URL)
 if (config.NODE_ENV === 'production') await runMigrations(db)
 
 // Structured logs through the app's logger (called only once the app exists).
-const manager = new GameManager(createGameStore(db), { error: (obj, msg) => app.log.error(obj, msg) })
+// The cap's deleted games leave memory too, without waiting (the save that capped them is still running).
+const store = createGameStore(db, {
+  maxGamesPerHost: config.MAX_GAMES_PER_HOST,
+  onCapped: (ids) => void Promise.all(ids.map((id) => manager.discard(id))),
+})
+const manager = new GameManager(store, { error: (obj, msg) => app.log.error(obj, msg) })
 const { app } = await buildApp(config, { db, manager })
 const restored = await manager.restore()
 if (restored > 0) app.log.info({ restored }, 'restored running games')
 const stopRetention = scheduleRetention(db, {
   days: config.RESULTS_RETENTION_DAYS,
+  maxPerHost: config.MAX_GAMES_PER_HOST,
   onDeleted: async (ids) => {
     for (const id of ids) await manager.discard(id)
   },

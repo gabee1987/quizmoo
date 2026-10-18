@@ -14,6 +14,8 @@ const envSchema = z.object({
   SEED_ADMIN_PASSWORD: emptyAsUnset(z.string().min(10).optional()),
   /** Finished games older than this are deleted (data minimisation). */
   RESULTS_RETENTION_DAYS: z.coerce.number().int().min(0).default(90),
+  /** Finished games kept per host account; finishing one more deletes the oldest. */
+  MAX_GAMES_PER_HOST: z.coerce.number().int().min(1).default(200),
 })
 
 export type Config = z.infer<typeof envSchema>

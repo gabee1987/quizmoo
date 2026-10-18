@@ -988,7 +988,32 @@
     "scheduled": "Scheduled",
     "cancel": "Call off",
     "cancelTitle": "Call off game?",
-    "cancelBody": "The scheduled game \"{{title}}\" ({{date}}) will be deleted and its PIN and link stop working."
+    "cancelBody": "The scheduled game \"{{title}}\" ({{date}}) will be deleted and its PIN and link stop working.",
+    "search": "Search",
+    "searchPlaceholder": "Quiz, player or PIN",
+    "searchHint": "A quiz title, a player's name or a PIN.",
+    "searchMin_one": "Type at least {{count}} character.",
+    "searchMin_other": "Type at least {{count}} characters.",
+    "matchedPlayers_one": "Player: {{names}}",
+    "matchedPlayers_other": "Players: {{names}}",
+    "state": "Status",
+    "states": {
+      "all": "All",
+      "running": "Running",
+      "finished": "Finished"
+    },
+    "period": "Period",
+    "periods": {
+      "any": "Any time",
+      "today": "Today",
+      "week": "Last 7 days",
+      "month": "Last 30 days"
+    },
+    "noMatches": "No games match. Try another search or filter.",
+    "clearFilters": "Clear filters",
+    "loadMore": "Load more",
+    "keep_one": "Finished games are kept for {{days}} day, your newest {{max}} at most.",
+    "keep_other": "Finished games are kept for {{days}} days, your newest {{max}} at most."
   },
   "results": {
     "title": "Results",
@@ -1028,7 +1053,15 @@
     "sortedDescending": "sorted descending",
     "screenHint": "Space or → next, ← back, P pause",
     "teamAnswers": "Team answers",
-    "noTeamAnswer": "No answer"
+    "noTeamAnswer": "No answer",
+    "length": "Played for {{length}}",
+    "winner_one": "Winner",
+    "winner_other": "Winners (tie)",
+    "points_one": "{{points}} point",
+    "points_other": "{{points}} points",
+    "bestPlayer": "Best player:",
+    "delete": "Delete game",
+    "details": "Details"
   },
   "datePicker": {
     "title": "Pick a date and time",

@@ -1,0 +1,3 @@
+ALTER TABLE "games" ADD COLUMN "title_search" text GENERATED ALWAYS AS (translate(lower("state"->'quiz'->>'title'), 'áàâäãåāăąçćčďéèêëēęěíìîïłńňñóòôöõøōőřśšşťúùûüūůűýÿźżž', 'aaaaaaaaacccdeeeeeeeiiiilnnnoooooooorssstuuuuuuuyyzzz')) STORED NOT NULL;--> statement-breakpoint
+ALTER TABLE "games" ADD COLUMN "started_at" timestamp with time zone GENERATED ALWAYS AS (greatest("created_at", coalesce(to_timestamp(("state"->>'scheduledAt')::double precision / 1000), "created_at"))) STORED NOT NULL;--> statement-breakpoint
+CREATE INDEX "games_host_started_idx" ON "games" USING btree ("host_id","started_at" DESC NULLS LAST,"id" DESC NULLS LAST);
