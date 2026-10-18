@@ -1,6 +1,7 @@
 import { and, gt, lte, ne, or, sql } from 'drizzle-orm'
 import type { Db } from '../db/index.js'
 import { games } from '../db/schema.js'
+import { deleteGamesOverCap } from '../retention.js'
 import type { GameStore, ManagedGame } from './game-manager.js'
 
 /** Unfinished games older than this are not restored on boot but closed. A scheduled game counts from its time. */
@@ -9,7 +10,14 @@ export const RESTORE_WINDOW_MS = 12 * 60 * 60 * 1000
 /** When a game began for the restore window: its scheduled time if later than its creation. */
 const startedAt = sql`greatest(${games.createdAt}, coalesce(to_timestamp((${games.state}->>'scheduledAt')::double precision / 1000), ${games.createdAt}))`
 
-export function createGameStore(db: Db): GameStore {
+export interface GameStoreOptions {
+  /** Finished games kept per host: saving a finished game deletes that host's oldest beyond it. */
+  maxGamesPerHost?: number | undefined
+  /** Called with the ids the cap deleted, to drop them from memory. */
+  onCapped?: ((ids: string[]) => void) | undefined
+}
+
+export function createGameStore(db: Db, { maxGamesPerHost, onCapped }: GameStoreOptions = {}): GameStore {
   return {
     async save({ state, hostId, quizId }: ManagedGame) {
       const finishedAt = state.finishedAt === null ? null : new Date(state.finishedAt)
@@ -27,6 +35,10 @@ export function createGameStore(db: Db): GameStore {
           finishedAt,
         })
         .onConflictDoUpdate({ target: games.id, set: { state, phase: state.phase, finishedAt } })
+      if (state.phase === 'finished' && maxGamesPerHost !== undefined) {
+        const ids = await deleteGamesOverCap(db, maxGamesPerHost, hostId)
+        if (ids.length > 0) onCapped?.(ids)
+      }
     },
 
     async loadActive(now: number) {

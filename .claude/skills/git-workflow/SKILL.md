@@ -50,7 +50,8 @@ Write this as the final message, in this order, nothing else after it:
 ## Delivery: <phase or task name>
 
 **Branch:** feature/<slug> (from develop)
-**Commit:** One-line message
+**Commit** (in its own fenced code block, so it can be copied):
+    One-line message
 **Branch status:** done, open a PR into develop and start the next phase on a new branch / keep working on this branch
 
 **Verification command**

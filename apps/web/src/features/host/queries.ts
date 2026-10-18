@@ -1,4 +1,4 @@
-import type { GameHistoryItem, GameSettings, QuizBranding } from '@quizmoo/shared'
+import type { GameSettings, GameSummary, QuizBranding } from '@quizmoo/shared'
 import { queryOptions } from '@tanstack/react-query'
 import { apiFetch } from '@/lib/api'
 
@@ -17,8 +17,8 @@ export const quizzesQueryOptions = queryOptions({
   queryFn: async () => (await apiFetch<{ quizzes: QuizSummary[] }>('/api/quizzes')).quizzes,
 })
 
-/** The host's games, newest first. */
-export const gamesQueryOptions = queryOptions({
-  queryKey: ['games'],
-  queryFn: async () => (await apiFetch<{ games: GameHistoryItem[] }>('/api/games')).games,
+/** What the host's home page shows: unfinished games, the latest finished ones and the totals. */
+export const gameSummaryQueryOptions = queryOptions({
+  queryKey: ['games', 'summary'],
+  queryFn: () => apiFetch<GameSummary>('/api/games/summary'),
 })

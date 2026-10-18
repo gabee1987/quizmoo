@@ -147,7 +147,9 @@ test('host builds a quiz, three phones play it with a reload mid-question, resul
 
   await test.step('results page adds up', async () => {
     await page.getByRole('link', { name: 'Results', exact: true }).click()
-    await expect(page.getByRole('heading', { name: 'Podium' })).toBeVisible()
+    // The winner first, and the game's PIN in the header card.
+    await expect(page.getByRole('region', { name: 'Winner' })).toContainText('Player Red')
+    await expect(page.getByRole('region', { name: title })).toContainText(`${pin.slice(0, 3)} ${pin.slice(3)}`)
     // Red: 3 of 3, green: 2 of 3 (wrong on question 3), blue: 1 of 3.
     const rows = page.locator('table').last().locator('tbody tr')
     await expect(rows).toHaveCount(3)
@@ -160,9 +162,19 @@ test('host builds a quiz, three phones play it with a reload mid-question, resul
     await expect(page.getByRole('tabpanel').locator('ol > li').filter({ hasText: 'Capital of Hungary?' })).toContainText('67% correct')
   })
 
-  await test.step('clean up the game and the quiz', async () => {
-    const gameId = page.url().split('/').pop()!
-    expect((await page.request.delete(`/api/games/${gameId}`)).status()).toBe(204)
+  await test.step('the history finds the game by a player, and the results page deletes it', async () => {
+    const resultsUrl = page.url()
+    await page.goto('/host/games')
+    await page.getByLabel('Search', { exact: true }).fill('player gre')
+    await expect(page.getByText('Player: Player Green').first()).toBeVisible()
+    await page.goto(resultsUrl)
+    await page.getByRole('button', { name: 'Delete game', exact: true }).click()
+    await page.getByRole('dialog').getByRole('button', { name: 'Delete', exact: true }).click()
+    await page.waitForURL(/\/host\/games$/)
+    expect((await page.request.get(`/api/games/${resultsUrl.split('/').pop()!}/results`)).status()).toBe(404)
+  })
+
+  await test.step('clean up the quiz', async () => {
     const quizzes = (await (await page.request.get('/api/quizzes')).json()) as { quizzes: { id: string; title: string }[] }
     const quiz = quizzes.quizzes.find((q) => q.title === title)!
     expect((await page.request.delete(`/api/quizzes/${quiz.id}`)).status()).toBe(204)

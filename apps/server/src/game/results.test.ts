@@ -62,6 +62,14 @@ describe('toResults', () => {
     expect(results).toMatchObject({ gameId: 'game-1', pin: '123456', phase: 'finished', finishedAt: T0 + 60_000 })
   })
 
+  it('tells when the first question started from the answers, and null before any answer', () => {
+    // The game was created at T0 and its first question opened at T0 too.
+    expect(toResults(finishedGame()).startedAt).toBe(T0)
+    let state = createGame(fixtureQuiz(), fixtureSettings(), '123456', 'game-1', T0)
+    state = joinPlayer(state, { id: 'p1', name: 'Anna', token: 't' })
+    expect(toResults(state).startedAt).toBeNull()
+  })
+
   it('puts teams on the podium in team mode', () => {
     const results = toResults(finishedGame({ mode: 'team', teamNames: ['Red', 'Blue'] }))
     // Red: Anna and Csilla, Blue: Bence. Team gain is the members' mean, so Red gets 500 per question.

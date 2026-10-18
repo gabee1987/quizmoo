@@ -115,8 +115,10 @@ test('mixed play: solo players join, rank with the teams and are moved in and ou
 
     await test.step('the results mark the solo players', async () => {
       await page.goto(`/host/results/${gameId}`)
-      await expect(page.getByRole('heading', { name: 'Teams and solo players' })).toBeVisible()
       await expect(page.getByRole('row', { name: /Bence.*On their own/ })).toBeVisible()
+      await page.getByRole('tab', { name: /Teams/ }).click()
+      await expect(page.getByRole('heading', { name: 'Teams and solo players' })).toBeAttached()
+      await expect(page.getByRole('tabpanel').getByRole('row', { name: /Bence/ })).toBeVisible()
     })
   } finally {
     if (gameId) await page.request.delete(`/api/games/${gameId}`)

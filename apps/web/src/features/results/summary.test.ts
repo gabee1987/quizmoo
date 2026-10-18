@@ -1,6 +1,6 @@
 import type { GameResults, Question, ResultPlayer, ResultQuestion } from '@quizmoo/shared'
 import { describe, expect, it } from 'vitest'
-import { summariseResults } from './summary'
+import { gameLengthMs, splitPodium, summariseResults } from './summary'
 
 const base = { timeLimitSec: 20, points: 1000, text: 'Q' }
 const tf = (id: string): Question => ({ ...base, id, type: 'truefalse', correct: true })
@@ -37,6 +37,7 @@ function results(questions: ResultQuestion[], players = 4): GameResults {
     mode: 'classic',
     phase: 'finished',
     createdAt: 0,
+    startedAt: null,
     finishedAt: 1,
     podium: [],
     players: list,
@@ -82,5 +83,22 @@ describe('summariseResults', () => {
   it('has no averages without answers or questions', () => {
     expect(summariseResults(results([question(tf('q1'), 0, 0, 0, null)]))).toMatchObject({ averageTimeMs: null, averageCorrect: 0 })
     expect(summariseResults(results([], 0))).toMatchObject({ averageTimeMs: null, averageCorrect: null, questionCount: 0 })
+  })
+})
+
+describe('gameLengthMs', () => {
+  it('counts from the first question to the end, and is unknown while running or without answers', () => {
+    expect(gameLengthMs({ startedAt: 1_000, finishedAt: 601_000 })).toBe(600_000)
+    expect(gameLengthMs({ startedAt: 1_000, finishedAt: null })).toBeNull()
+    expect(gameLengthMs({ startedAt: null, finishedAt: 5_000 })).toBeNull()
+  })
+})
+
+describe('splitPodium', () => {
+  const place = (id: string, rank: number) => ({ id, name: id, avatar: null, score: 0, rank })
+  it('puts every rank 1 among the winners, so a tie has two', () => {
+    const { winners, others } = splitPodium([place('a', 1), place('b', 1), place('c', 3)])
+    expect(winners.map((p) => p.id)).toEqual(['a', 'b'])
+    expect(others.map((p) => p.id)).toEqual(['c'])
   })
 })

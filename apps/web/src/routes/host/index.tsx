@@ -23,7 +23,7 @@ import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { CreateGameDialog } from '@/features/host/create-game-dialog'
 import { dashboardGames } from '@/features/host/dashboard'
-import { gamesQueryOptions, quizzesQueryOptions, type QuizSummary } from '@/features/host/queries'
+import { gameSummaryQueryOptions, quizzesQueryOptions, type QuizSummary } from '@/features/host/queries'
 import { useNewQuiz, useStartGame } from '@/features/host/quiz-actions'
 import { cn } from '@/lib/cn'
 import { stagger } from '@/lib/motion'
@@ -34,13 +34,13 @@ export const Route = createFileRoute('/host/')({
 
 /**
  * The host's home: a greeting, figures, games to go back to, and shortcuts to the latest quizzes
- * and results. Built from the quiz and game lists the other pages use; the full lists are a link away.
+ * and results. Built from the quiz list and the games summary; the full lists are a link away.
  */
 function HostHome() {
   const { t, i18n } = useTranslation()
   const { user } = Route.useRouteContext()
   const quizzes = useQuery(quizzesQueryOptions)
-  const games = useQuery(gamesQueryOptions)
+  const games = useQuery(gameSummaryQueryOptions)
   const create = useNewQuiz()
   const play = useStartGame()
   const [creating, setCreating] = useState<QuizSummary | null>(null)

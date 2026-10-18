@@ -13,6 +13,7 @@ Quizmoo runs as one Node process (API, Socket.IO and the web app on the same ori
 | `APP_ORIGIN` | yes | Public URL players open, no trailing slash. Used in QR codes and join links. `https://...` also turns on `Secure` session cookies |
 | `PORT` | no | Defaults to `3000`; Railway and Render set it automatically |
 | `RESULTS_RETENTION_DAYS` | no | Finished games older than this are deleted, default `90` |
+| `MAX_GAMES_PER_HOST` | no | Finished games kept per host account; finishing one more deletes that host's oldest, default `200` |
 | `SEED_ADMIN_USERNAME`, `SEED_ADMIN_PASSWORD` | only for seeding | First admin account, password at least 10 characters. Remove them after seeding |
 
 ## Creating the first admin

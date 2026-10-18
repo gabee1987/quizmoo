@@ -119,6 +119,7 @@ describe('app', () => {
     expect(parsed.SEED_ADMIN_USERNAME).toBeUndefined()
     expect(parsed.SEED_ADMIN_PASSWORD).toBeUndefined()
     expect(parsed.RESULTS_RETENTION_DAYS).toBe(90)
+    expect(parsed.MAX_GAMES_PER_HOST).toBe(200)
   })
 
   it('rejects an invalid environment', () => {

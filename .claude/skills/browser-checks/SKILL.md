@@ -16,7 +16,7 @@ The user's `dev:lan` usually holds :3000 and a Vite port, so checks run on a sep
 3. After every new web build, restart the :3999 process (it serves the built files it found at start).
 4. Stop it when done: `Get-NetTCPConnection -LocalPort 3999 -State Listen | % { Stop-Process -Id $_.OwningProcess -Force }`.
 
-It uses the dev database, which is the user's data (see `database`).
+It uses the dev database, which is the user's data (see `database`). A phase with a migration, or one that needs many seeded rows, runs :3999 against a throwaway copy instead (`docker exec quizmoo-db-1 sh -c "createdb -U quizmoo quizmoo_pNN && pg_dump -U quizmoo quizmoo | psql -q -U quizmoo quizmoo_pNN"`, `DATABASE_URL` pointing at it; production mode migrates it on start), dropped afterwards. Seeded `games` rows must be finished or older than 12 hours: the server restores recent unfinished games at start and crashes on a fake state.
 
 ## Screenshot scripts
 

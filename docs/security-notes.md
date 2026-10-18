@@ -39,7 +39,7 @@ The shadcn/ui component code is copied into `apps/web/src/components/ui` rather 
 - **Input**: every HTTP body and socket message is validated with the shared Zod schemas. JSON bodies are limited to 1 MB, socket messages to 64 KB, image uploads to 5 MB (re-encoded server-side).
 - **Errors**: clients receive i18n keys only, never internal details; errors are logged server-side with request ids.
 - **CSV export**: values that Excel would run as formulas are neutralised.
-- **Data minimisation (GDPR)**: players give a nickname only. Finished games are deleted after `RESULTS_RETENTION_DAYS` (default 90).
+- **Data minimisation (GDPR)**: players give a nickname only. Finished games are deleted after `RESULTS_RETENTION_DAYS` (default 90), and beyond the newest `MAX_GAMES_PER_HOST` (default 200) per host account.
 - **Camera**: the join page can read the projector's QR code with the phone's camera. Frames are decoded in the browser (`jsqr`) and are never sent anywhere; the camera stream stops when the dialog closes. Browsers allow camera access only in a secure context (HTTPS, or localhost), so the button is not offered on a plain-HTTP venue LAN deployment; players scan with the camera app there, as before.
 - **Results** are visible only to the game's host; the public projector screen never receives answers held back by the host.
 

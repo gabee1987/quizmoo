@@ -1,4 +1,4 @@
-import type { GameResults, ResultQuestion } from '@quizmoo/shared'
+import type { GameResults, PodiumPlace, ResultQuestion } from '@quizmoo/shared'
 import { hasCorrectAnswer } from './question-stats'
 
 /** The headline figures of a game's results, shown before the tables. */
@@ -13,6 +13,17 @@ export interface ResultsSummary {
   easiest: ResultQuestion | null
   /** Fewest players right (the earlier one on a tie); null with fewer than two questions with a right answer. */
   hardest: ResultQuestion | null
+}
+
+/** How long the game was played: first question to the end; null while it runs or when nobody answered. */
+export function gameLengthMs(results: Pick<GameResults, 'startedAt' | 'finishedAt'>): number | null {
+  if (results.startedAt === null || results.finishedAt === null) return null
+  return Math.max(0, results.finishedAt - results.startedAt)
+}
+
+/** The podium split into the winners (rank 1, more than one on a tie) and the places after them. */
+export function splitPodium(podium: readonly PodiumPlace[]): { winners: PodiumPlace[]; others: PodiumPlace[] } {
+  return { winners: podium.filter((p) => p.rank === 1), others: podium.filter((p) => p.rank > 1) }
 }
 
 /** Share of all players who got `question` right. */

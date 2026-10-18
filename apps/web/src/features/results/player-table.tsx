@@ -5,9 +5,28 @@ import { PlayerAvatar } from '../../components/player-avatar'
 import { sortPlayers, toggleSort, type Sort, type SortKey } from './sort'
 
 const cell = 'px-3 py-2'
+const medal = ['bg-yellow-400 text-black', 'bg-slate-300 text-black', 'bg-orange-400 text-black']
 
-/** Every player with rank, team, total and correct answers; sortable by score and name. */
-export function PlayerTable({ players, teams }: { players: ResultPlayer[]; teams: TeamPublic[] }) {
+/** The rank, as a medal for the top three. */
+function Rank({ rank }: { rank: number }) {
+  return rank <= 3 ? (
+    <span className={`inline-grid size-7 place-items-center rounded-full text-sm font-black ${medal[rank - 1]}`}>{rank}</span>
+  ) : (
+    <span className="inline-grid size-7 place-items-center font-semibold">{rank}.</span>
+  )
+}
+
+/** Every player with rank, team, total and correct answers; sortable by score and name. On phones the team goes under the name. */
+export function PlayerTable({
+  players,
+  teams,
+  hideHeading = false,
+}: {
+  players: ResultPlayer[]
+  teams: TeamPublic[]
+  /** In a tab that already names it. */
+  hideHeading?: boolean
+}) {
   const { t, i18n } = useTranslation()
   const [sort, setSort] = useState<Sort>({ key: 'score', direction: 'desc' })
   // A solo player's team column says so instead of repeating their name.
@@ -38,7 +57,7 @@ export function PlayerTable({ players, teams }: { players: ResultPlayer[]; teams
 
   return (
     <section className="flex flex-col gap-2">
-      <h2 className="text-xl font-extrabold">{t('results.players')}</h2>
+      <h2 className={hideHeading ? 'sr-only' : 'text-xl font-extrabold'}>{t('results.players')}</h2>
       <div className="overflow-x-auto rounded-2xl border bg-card shadow-soft">
         <table className="w-full text-left tabular-nums">
           <thead className="bg-muted text-sm text-muted-foreground">
@@ -48,7 +67,7 @@ export function PlayerTable({ players, teams }: { players: ResultPlayer[]; teams
               </th>
               {sortHeader('name', t('results.name'))}
               {teams.length > 0 && (
-                <th scope="col" className={cell}>
+                <th scope="col" className={`${cell} max-sm:hidden`}>
                   {t('results.team')}
                 </th>
               )}
@@ -59,20 +78,28 @@ export function PlayerTable({ players, teams }: { players: ResultPlayer[]; teams
             </tr>
           </thead>
           <tbody>
-            {sorted.map((player) => (
+            {sorted.map((player) => {
+              const team = player.teamId ? teamNames.get(player.teamId) : undefined
+              return (
               <tr key={player.id} className="border-t">
-                <td className={cell}>{player.rank}.</td>
+                <td className={cell}>
+                  <Rank rank={player.rank} />
+                </td>
                 <td className={`${cell} wrap-break-word`}>
                   <span className="flex items-center gap-2">
                     <PlayerAvatar avatar={player.avatar} />
-                    {player.name}
+                    <span className="min-w-0">
+                      <span className="block font-semibold">{player.name}</span>
+                      {team && <span className="block text-sm text-muted-foreground sm:hidden">{team}</span>}
+                    </span>
                   </span>
                 </td>
-                {teams.length > 0 && <td className={cell}>{player.teamId ? teamNames.get(player.teamId) : ''}</td>}
+                {teams.length > 0 && <td className={`${cell} max-sm:hidden`}>{team ?? ''}</td>}
                 <td className={`${cell} text-right`}>{player.correctCount}</td>
                 <td className={`${cell} text-right font-semibold`}>{player.score}</td>
               </tr>
-            ))}
+              )
+            })}
           </tbody>
         </table>
       </div>
@@ -80,11 +107,13 @@ export function PlayerTable({ players, teams }: { players: ResultPlayer[]; teams
   )
 }
 
-export function TeamTable({ teams }: { teams: TeamPublic[] }) {
+export function TeamTable({ teams, hideHeading = false }: { teams: TeamPublic[]; hideHeading?: boolean }) {
   const { t } = useTranslation()
   return (
     <section className="flex flex-col gap-2">
-      <h2 className="text-xl font-extrabold">{t(teams.some((team) => team.solo) ? 'play.mixedLeaderboard' : 'results.teams')}</h2>
+      <h2 className={hideHeading ? 'sr-only' : 'text-xl font-extrabold'}>
+        {t(teams.some((team) => team.solo) ? 'play.mixedLeaderboard' : 'results.teams')}
+      </h2>
       <div className="overflow-x-auto rounded-2xl border bg-card shadow-soft">
         <table className="w-full text-left tabular-nums">
           <thead className="bg-muted text-sm text-muted-foreground">
@@ -106,7 +135,9 @@ export function TeamTable({ teams }: { teams: TeamPublic[] }) {
           <tbody>
             {teams.map((team) => (
               <tr key={team.id} className="border-t">
-                <td className={cell}>{team.rank}.</td>
+                <td className={cell}>
+                  <Rank rank={team.rank} />
+                </td>
                 <td className={`${cell} wrap-break-word`}>
                   {/* Solo players rank with the teams, marked by their avatar. */}
                   <span className="flex items-center gap-2">

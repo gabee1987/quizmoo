@@ -103,7 +103,11 @@ export async function buildApp(config: Config, { db, manager, webDist: webDistOv
   await app.register(userRoutes, { db })
   await app.register(meRoutes, { db })
   await app.register(gameRoutes, { db, manager, appOrigin: config.APP_ORIGIN })
-  await app.register(resultRoutes, { db, manager })
+  await app.register(resultRoutes, {
+    db,
+    manager,
+    keep: { max: config.MAX_GAMES_PER_HOST, days: config.RESULTS_RETENTION_DAYS },
+  })
   await app.register(nicknameRoutes, { db, manager })
 
   const webDist =

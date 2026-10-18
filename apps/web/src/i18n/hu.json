@@ -988,7 +988,32 @@
     "scheduled": "Időzítve",
     "cancel": "Lefújás",
     "cancelTitle": "Lefújod a játékot?",
-    "cancelBody": "A(z) „{{title}}” ({{date}}) időzített játék törlődik, a PIN-kód és a link megszűnik."
+    "cancelBody": "A(z) „{{title}}” ({{date}}) időzített játék törlődik, a PIN-kód és a link megszűnik.",
+    "search": "Keresés",
+    "searchPlaceholder": "Kvíz, játékos vagy PIN",
+    "searchHint": "Kvíz címe, játékos neve vagy PIN-kód.",
+    "searchMin_one": "Írj legalább {{count}} karaktert.",
+    "searchMin_other": "Írj legalább {{count}} karaktert.",
+    "matchedPlayers_one": "Játékos: {{names}}",
+    "matchedPlayers_other": "Játékosok: {{names}}",
+    "state": "Állapot",
+    "states": {
+      "all": "Mind",
+      "running": "Folyamatban",
+      "finished": "Befejezett"
+    },
+    "period": "Időszak",
+    "periods": {
+      "any": "Bármikor",
+      "today": "Ma",
+      "week": "Elmúlt 7 nap",
+      "month": "Elmúlt 30 nap"
+    },
+    "noMatches": "Nincs ilyen játék. Próbálj más keresést vagy szűrőt.",
+    "clearFilters": "Szűrők törlése",
+    "loadMore": "Továbbiak",
+    "keep_one": "A befejezett játékokat {{days}} napig őrizzük meg, fiókonként legfeljebb {{max}} darabot.",
+    "keep_other": "A befejezett játékokat {{days}} napig őrizzük meg, fiókonként legfeljebb {{max}} darabot."
   },
   "results": {
     "title": "Eredmények",
@@ -1028,7 +1053,15 @@
     "sortedDescending": "csökkenő sorrend",
     "screenHint": "Szóköz vagy → tovább, ← vissza, P szünet",
     "teamAnswers": "A csapatok válaszai",
-    "noTeamAnswer": "Nem válaszolt"
+    "noTeamAnswer": "Nem válaszolt",
+    "length": "Játékidő: {{length}}",
+    "winner_one": "Győztes",
+    "winner_other": "Győztesek (holtverseny)",
+    "points_one": "{{points}} pont",
+    "points_other": "{{points}} pont",
+    "bestPlayer": "Legjobb játékos:",
+    "delete": "Játék törlése",
+    "details": "Részletek"
   },
   "datePicker": {
     "title": "Válassz dátumot és időt",
