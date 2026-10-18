@@ -18,6 +18,10 @@ General web rules are in `web-ui`; the settings column's animation is in `motion
 
 `QuizBrandingFields` (`features/editor/quiz-branding-fields.tsx`) sits under the Look group: show on or off, a logo and an event name that override My settings when filled. It is quiz data (`draft.branding`), not a game setting, so batch edit, game defaults and the settings summary leave it out.
 
+## Quiz files
+
+Formats in `docs/quiz-files.md`. The spreadsheet reader and writer (`packages/shared/src/quiz-csv.ts`) and the Quizmoo file schema (`quiz-file.ts`) are shared and pure; the browser part is `features/host/quiz-files.ts` (`exportQuiz`, `templateCsv`, `readQuizFile`) and `import-quiz-dialog.tsx`. Columns are by position and the type words are format tokens in `csvTypeWords`, not translations; the guide rows, headers and template examples are i18n (`quizFile.*`, arrays read with `returnObjects`). A new question field needs a column (or a note that spreadsheets leave it out) and a round-trip case in `quiz-csv.test.ts`.
+
 ## Game settings groups
 
 `GameSettingsForm` is split into three groups (Game flow, Look, Scoring), labelled with the batch edit's keys (`host.batch.groups.*`) so every dialog names them the same way. `sectionSummary(group)` gives a group's chips; `settingsSummary` is built from it. The new game dialog shows one card per group, one open at a time, with "Changed for this game" and "Reset" when a group differs from the quiz's defaults.

@@ -172,6 +172,12 @@
 - Each host keeps at most 200 finished games (`MAX_GAMES_PER_HOST`); finishing one more deletes the oldest. Running and scheduled games never count. The 90-day limit stays, and the page says both.
 - After updating, run `pnpm --filter @quizmoo/server db:migrate` (production deploys migrate on start).
 
+### Quiz files
+- Write questions without the app, in Excel, LibreOffice, Google Sheets or a notes app on the phone, and import them: Quizzes > Import takes a spreadsheet (CSV) with one question per row, every question type included.
+- "Download template" gives a spreadsheet that explains every column in its first rows and has an example of each question type, in the app's language (Hungarian files use `;` and decimal commas, as Hungarian Excel expects). Type words work in either language, with or without accents.
+- A broken spreadsheet is not imported: the dialog lists each problem with its row and column and what to write there.
+- Any quiz can be downloaded as a spreadsheet (questions only) or as a Quizmoo file (`.quizmoo.json`) with every setting and picture, from the quiz list's menu and from the editor; a Quizmoo file imports as a full copy, on another install too. The format is described in `docs/quiz-files.md`.
+
 ### Development
 - The web dev server runs on port 15173, away from the 5173+ ports other local Vite projects take.
 - CI runs typecheck, tests and build only; the end-to-end suite runs locally before each pull request.

@@ -17,7 +17,6 @@ Candidate features after the design phases (9 to 12). None is planned in detail 
 | Feature | Why | Effort | Notes |
 |---|---|---|---|
 | Question bank | Reuse questions across quizzes | L | New table, picker in the editor, tags |
-| Quiz export, import and sharing as files | Write and edit a quiz outside the app (e.g. before the app is deployed), then import it; share quizzes between installs and people | L | Requested 16 October 2026; replaces the earlier "Import questions from CSV or Excel" item. Two formats to decide in the plan: a lossless, versioned JSON file validated by the shared `quizInputSchema` (every question type and setting; images packed with it, e.g. a `.zip` with `quiz.json` and the image files, or embedded), and a spreadsheet template (`.xlsx` / CSV: one row per question, columns for type, text, options, correct answer, time, points) for editing by hand in Excel, LibreOffice or Google Sheets. Export from the quiz list and the editor, import as a new quiz with a validation report naming the row and field of each problem, nothing saved until it is valid. A documented format and a sample file. No third-party service; a spreadsheet library needs the compliance review like any new dependency. |
 | Quiz sharing between hosts | Team of organisers | M | Owner plus editors per quiz; permission checks on every route |
 | PDF results report | Hand-out after the event | M | Server-side rendering; no third-party service |
 
@@ -58,6 +57,7 @@ Collected while testing phases 9 to 12. Effort as above.
 - Teams set up per game (host teams, player-made teams or both), moving players, late joining, the captaincy at any time, team toasts, the team's answer and picks on the phones, and mixed play with solo players ranked with the teams (phase 23).
 - Player and host polish from testing: player details and "Leave game" in the phone menu, offline and left teammates, the player's own answer kept in view, swipeable host messages with "Important", the menu button bottom left, a desktop waiting screen, readable lobby rows and join/drop notes for the host, "Running now" for 12 hours, about 180 funny names per language with fitting avatars (phase 24).
 - Game history in pages while scrolling, search by title or PIN, state and period filters, and at most 200 finished games kept per host (phase 25).
+- Quiz files: questions written in a spreadsheet anywhere (template with a guide and examples) imported with a row-by-row problem report, and quizzes downloaded as a spreadsheet or a full Quizmoo file with settings and pictures (phase 27).
 
 ### Open
 

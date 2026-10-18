@@ -1,8 +1,9 @@
-import { afterAll, beforeAll, expect, it } from 'vitest'
+import sharp from 'sharp'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { createUser } from '../src/auth/users.js'
 import { eq } from 'drizzle-orm'
 import type { Db } from '../src/db/index.js'
-import { images, users } from '../src/db/schema.js'
+import { images, quizzes, users } from '../src/db/schema.js'
 import { assignIds } from '../src/routes/quizzes.js'
 import { buildTestApp, sessionCookie } from './helpers/app.js'
 import { describeDb, withTestDb } from './helpers/test-db.js'
@@ -260,5 +261,65 @@ describeDb('quiz routes (database)', () => {
     }
     const copy = (await req(alice, 'POST', `/api/quizzes/${quiz.id}/duplicate`, { title: 'Copy' })).json().quiz
     expect(copy.branding).toEqual(quiz.branding)
+  })
+
+  describe('import from a quiz file', () => {
+    const file = (quiz: object, images: Record<string, string> = {}) => ({ format: 'quizmoo-quiz', version: 1, guide: ['ignored'], quiz, images })
+    const count = async () => ({
+      quizzes: (await db.select({ id: quizzes.id }).from(quizzes)).length,
+      images: (await db.select({ id: images.id }).from(images)).length,
+    })
+
+    it('requires a session', async () => {
+      const res = await built.app.inject({ method: 'POST', url: '/api/quizzes/import', payload: file(quizBody) })
+      expect(res.statusCode).toBe(401)
+    })
+
+    it('creates a new quiz with its images re-encoded under new ids of the importing host', async () => {
+      const png = (await sharp({ create: { width: 1600, height: 400, channels: 3, background: 'teal' } }).png().toBuffer()).toString('base64')
+      const quiz = {
+        title: 'Imported',
+        questions: [
+          { ...quizBody.questions[0], imageId: 'old-1', options: [{ id: 'a', text: 'A', imageId: 'old-2' }, { id: 'b', text: 'B', imageId: 'old-1' }] },
+          quizBody.questions[1],
+        ],
+        settings: { theme: 'mint' },
+        branding: { logoImageId: 'old-2' },
+      }
+      const res = await req(bob, 'POST', '/api/quizzes/import', file(quiz, { 'old-1': png, 'old-2': png, unused: 'eA==' }))
+      expect(res.statusCode).toBe(201)
+      const created = res.json().quiz
+      expect(created).toMatchObject({ title: 'Imported', settings: { theme: 'mint' } })
+      const [first, second] = [created.questions[0].imageId, created.questions[0].options[0].imageId]
+      expect(first).not.toBe('old-1')
+      expect(created.questions[0].options[1].imageId).toBe(first)
+      expect(created.branding.logoImageId).toBe(second)
+
+      const stored = await db.select().from(images).where(eq(images.id, first))
+      const bobId = (await db.select().from(users).where(eq(users.username, 'test_bob')))[0]!.id
+      expect(stored[0]).toMatchObject({ ownerId: bobId, mime: 'image/webp', width: 1280, height: 320 })
+      expect((await req(bob, 'GET', `/api/quizzes/${created.id}`)).statusCode).toBe(200)
+    })
+
+    it('stores nothing when the file, the quiz or an image is not valid', async () => {
+      const before = await count()
+      const refused = [
+        await req(alice, 'POST', '/api/quizzes/import', { ...file(quizBody), format: 'kahoot' }),
+        await req(alice, 'POST', '/api/quizzes/import', { ...file(quizBody), version: 2 }),
+        await req(alice, 'POST', '/api/quizzes/import', file({ title: 'Bad', questions: [{ type: 'single', text: '' }] })),
+        await req(alice, 'POST', '/api/quizzes/import', file({ ...quizBody, branding: { logoImageId: 'missing' } })),
+        await req(alice, 'POST', '/api/quizzes/import', file({ ...quizBody, branding: { logoImageId: 'evil' } }, { evil: Buffer.from('<svg/>').toString('base64') })),
+      ]
+      expect(refused.map((r) => [r.statusCode, r.json().error])).toEqual([
+        [400, 'errors.invalidInput'],
+        [400, 'errors.invalidInput'],
+        [400, 'errors.invalidInput'],
+        [400, 'errors.invalidInput'],
+        [400, 'errors.unsupportedImage'],
+      ])
+      expect(refused[2]!.json().issues.map((i: { path: string }) => i.path)).toContain('questions.0.text')
+      expect(refused[3]!.json().issues).toEqual([{ path: 'images.missing', code: 'missing' }])
+      expect(await count()).toEqual(before)
+    })
   })
 })

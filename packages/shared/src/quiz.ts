@@ -265,11 +265,13 @@ export const quizBrandingSchema = z.object({
 })
 export type QuizBranding = z.infer<typeof quizBrandingSchema>
 
+export const MAX_QUESTIONS = 100
+
 export const quizSchema = z.object({
   id: z.string().min(1),
   title: z.string().trim().min(1).max(120),
   description: z.string().trim().max(500).default(''),
-  questions: z.array(questionSchema).max(100).superRefine(checkQuestions),
+  questions: z.array(questionSchema).max(MAX_QUESTIONS).superRefine(checkQuestions),
   /** Default settings for games of this quiz; the host can change them when starting a game. */
   settings: gameSettingsSchema.prefault({}),
   branding: quizBrandingSchema.prefault({}),
