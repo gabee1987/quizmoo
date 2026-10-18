@@ -1,3 +1,5 @@
+import { downloadBlob } from './download'
+
 /**
  * An iCalendar (.ics, RFC 5545) file for a scheduled game, built in the browser: every calendar app
  * imports it and no outside service is involved. A game has no set length, so the event lasts an hour.
@@ -73,14 +75,5 @@ export function toIcs(event: CalendarEvent, now: number): string {
 
 /** Saves the event as `<fileName>.ics`; phones offer to add it to their calendar. */
 export function downloadIcs(event: CalendarEvent, fileName: string): void {
-  const blob = new Blob([toIcs(event, Date.now())], { type: 'text/calendar;charset=utf-8' })
-  const href = URL.createObjectURL(blob)
-  const link = document.createElement('a')
-  link.href = href
-  link.download = `${fileName}.ics`
-  document.body.append(link)
-  link.click()
-  link.remove()
-  // Some browsers read the blob after the click returns.
-  setTimeout(() => URL.revokeObjectURL(href), 10_000)
+  downloadBlob(new Blob([toIcs(event, Date.now())], { type: 'text/calendar;charset=utf-8' }), `${fileName}.ics`)
 }

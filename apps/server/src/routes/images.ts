@@ -18,6 +18,30 @@ export async function ownsImage(db: Db, userId: string, imageId: string) {
   return row?.ownerId === userId
 }
 
+/**
+ * Re-encodes untrusted image bytes as WebP of at most 1280 px, or null when they are not a JPEG,
+ * PNG or WebP. Uploads and quiz file imports both go through it.
+ */
+export async function toWebp(input: Buffer): Promise<{ data: Buffer; info: OutputInfo } | null> {
+  try {
+    const metadata = await sharp(input).metadata()
+    if (!metadata.format || !ALLOWED_FORMATS.has(metadata.format)) return null
+    // rotate() applies EXIF orientation; metadata (EXIF, GPS) is not copied to the output.
+    return await sharp(input)
+      .rotate()
+      .resize(MAX_EDGE, MAX_EDGE, { fit: 'inside', withoutEnlargement: true })
+      .webp({ quality: 80 })
+      .toBuffer({ resolveWithObject: true })
+  } catch {
+    return null
+  }
+}
+
+/** A new `images` row for a re-encoded image. */
+export function imageRow(ownerId: string, output: { data: Buffer; info: OutputInfo }) {
+  return { id: nanoid(16), ownerId, mime: 'image/webp', width: output.info.width, height: output.info.height, data: output.data }
+}
+
 export async function imageRoutes(app: FastifyInstance, { db }: { db: Db }) {
   app.post('/api/images', { preHandler: requireSession(db) }, async (request, reply) => {
     const file = await request.file({ limits: { fileSize: MAX_IMAGE_BYTES, files: 1 } })
@@ -29,32 +53,12 @@ export async function imageRoutes(app: FastifyInstance, { db }: { db: Db }) {
     // Throws a 413 error (mapped to errors.fileTooLarge) when the limit is hit.
     const input = await file.toBuffer()
 
-    let output: { data: Buffer; info: OutputInfo }
-    try {
-      const metadata = await sharp(input).metadata()
-      if (!metadata.format || !ALLOWED_FORMATS.has(metadata.format)) {
-        return reply.code(400).send({ error: 'errors.unsupportedImage' })
-      }
-      // rotate() applies EXIF orientation; metadata (EXIF, GPS) is not copied to the output.
-      output = await sharp(input)
-        .rotate()
-        .resize(MAX_EDGE, MAX_EDGE, { fit: 'inside', withoutEnlargement: true })
-        .webp({ quality: 80 })
-        .toBuffer({ resolveWithObject: true })
-    } catch {
-      return reply.code(400).send({ error: 'errors.unsupportedImage' })
-    }
+    const output = await toWebp(input)
+    if (!output) return reply.code(400).send({ error: 'errors.unsupportedImage' })
 
-    const id = nanoid(16)
-    await db.insert(images).values({
-      id,
-      ownerId: request.user!.id,
-      mime: 'image/webp',
-      width: output.info.width,
-      height: output.info.height,
-      data: output.data,
-    })
-    return reply.code(201).send({ id, width: output.info.width, height: output.info.height })
+    const row = imageRow(request.user!.id, output)
+    await db.insert(images).values(row)
+    return reply.code(201).send({ id: row.id, width: row.width, height: row.height })
   })
 
   // Public: players and the projector load question images without logging in.

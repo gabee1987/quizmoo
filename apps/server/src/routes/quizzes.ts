@@ -1,13 +1,24 @@
-import { gameSettingsSchema, quizBrandingSchema, quizInputSchema, type Question, type QuizBranding, type QuizInput } from '@quizmoo/shared'
+import {
+  MAX_QUIZ_FILE_BYTES,
+  gameSettingsSchema,
+  mapQuizImages,
+  quizBrandingSchema,
+  quizFileSchema,
+  quizImageIds,
+  quizInputSchema,
+  type Question,
+  type QuizBranding,
+  type QuizInput,
+} from '@quizmoo/shared'
 import { and, desc, eq, inArray, sql } from 'drizzle-orm'
 import type { FastifyInstance, FastifyReply } from 'fastify'
 import { nanoid } from 'nanoid'
 import { z } from 'zod'
 import { requireSession } from '../auth/require-session.js'
 import type { Db } from '../db/index.js'
-import { quizzes } from '../db/schema.js'
+import { images, quizzes } from '../db/schema.js'
 import { parseOr400 } from './http.js'
-import { ownsImage } from './images.js'
+import { MAX_IMAGE_BYTES, imageRow, ownsImage, toWebp } from './images.js'
 import { readHostSettings } from './me.js'
 
 /** A quiz's stored branding read through the schema; a value that no longer validates falls back to the defaults. */
@@ -138,20 +149,52 @@ export async function quizRoutes(app: FastifyInstance, { db }: { db: Db }) {
     }
   })
 
+  /** A new quiz without settings of its own starts with the host's game defaults. */
+  async function withHostDefaults(body: unknown, userId: string): Promise<unknown> {
+    if (typeof body !== 'object' || body === null || 'settings' in body) return body
+    const { gameDefaults } = await readHostSettings(db, userId)
+    return gameDefaults ? { ...body, settings: gameDefaults } : body
+  }
+
   app.post('/api/quizzes', auth, async (request, reply) => {
-    // A new quiz without settings of its own starts with the host's game defaults.
-    let body = request.body
-    if (typeof body === 'object' && body !== null && !('settings' in body)) {
-      const { gameDefaults } = await readHostSettings(db, request.user!.id)
-      if (gameDefaults) body = { ...body, settings: gameDefaults }
-    }
-    const input = parseQuiz(body, reply)
+    const input = parseQuiz(await withHostDefaults(request.body, request.user!.id), reply)
     if (!input || !(await logoAllowed(input, request.user!.id, reply))) return reply
     const [row] = await db
       .insert(quizzes)
       .values({ id: nanoid(12), ownerId: request.user!.id, ...input })
       .returning()
     return reply.code(201).send({ quiz: toQuiz(row!) })
+  })
+
+  // A quiz file (a full copy or the questions read from a spreadsheet) becomes a new quiz. Nothing
+  // is stored unless the quiz and every image it refers to are valid; images are re-encoded like uploads.
+  app.post('/api/quizzes/import', { ...auth, bodyLimit: MAX_QUIZ_FILE_BYTES }, async (request, reply) => {
+    const file = parseOr400(quizFileSchema, request.body, reply)
+    if (!file) return reply
+    const userId = request.user!.id
+    const input = parseQuiz(await withHostDefaults(file.quiz, userId), reply)
+    if (!input) return reply
+
+    const rows: ReturnType<typeof imageRow>[] = []
+    const newIds = new Map<string, string>()
+    for (const id of quizImageIds(input)) {
+      const data = file.images[id]
+      if (!data) return reply.code(400).send({ error: 'errors.invalidInput', issues: [{ path: `images.${id}`, code: 'missing' }] })
+      const bytes = Buffer.from(data, 'base64')
+      if (bytes.length > MAX_IMAGE_BYTES) return reply.code(400).send({ error: 'errors.fileTooLarge' })
+      const output = await toWebp(bytes)
+      if (!output) return reply.code(400).send({ error: 'errors.unsupportedImage' })
+      const row = imageRow(userId, output)
+      rows.push(row)
+      newIds.set(id, row.id)
+    }
+
+    const quiz = mapQuizImages(input, newIds)
+    const row = await db.transaction(async (tx) => {
+      if (rows.length > 0) await tx.insert(images).values(rows)
+      return (await tx.insert(quizzes).values({ id: nanoid(12), ownerId: userId, ...quiz }).returning())[0]!
+    })
+    return reply.code(201).send({ quiz: toQuiz(row) })
   })
 
   // All or nothing: one quiz that is missing or not the user's, and none is deleted.

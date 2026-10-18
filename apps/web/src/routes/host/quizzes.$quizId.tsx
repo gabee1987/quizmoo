@@ -5,7 +5,10 @@ import { useCallback, useEffect, useMemo, useRef, useState, type ComponentType }
 import { useTranslation } from 'react-i18next'
 import {
   ArrowLeftIcon,
+  DownloadIcon,
   EyeIcon,
+  FileDownIcon,
+  FileSpreadsheetIcon,
   FileTextIcon,
   ImageIcon,
   KeyboardIcon,
@@ -20,6 +23,7 @@ import { toast } from 'sonner'
 import { FormAlert } from '@/components/form-alert'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet'
@@ -53,6 +57,7 @@ import { errorsUnder, validateQuiz } from '../../features/editor/validate'
 import { CreateGameDialog } from '../../features/host/create-game-dialog'
 import { GameSettingsForm, allSections, sectionIcons, settingsSummary } from '../../features/host/game-settings-form'
 import { useStartGame } from '../../features/host/quiz-actions'
+import { exportQuiz } from '../../features/host/quiz-files'
 import { QuizBrandingFields } from '../../features/editor/quiz-branding-fields'
 import { ApiError, apiFetch, errorCode } from '../../lib/api'
 import { paletteVars } from '../../lib/themes'
@@ -105,7 +110,7 @@ function QuizEditorPage() {
  * Smaller: the form full width, the list in a bottom sheet and the preview behind a toggle.
  */
 function Editor({ quiz }: { quiz: Quiz }) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const queryClient = useQueryClient()
   const navigate = useNavigate()
   const [draft, setDraft] = useState<QuizInput>({
@@ -451,6 +456,25 @@ function Editor({ quiz }: { quiz: Quiz }) {
           <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
             <SaveIndicator status={status} onRetry={retry} />
             {problems.length > 0 && <ProblemsMenu problems={problems} onGo={goToProblem} />}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" aria-label={t('quizFile.exportMenu')} title={t('quizFile.exportMenu')}>
+                  <DownloadIcon aria-hidden="true" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="min-w-44">
+                {(['csv', 'file'] as const).map((kind) => (
+                  <DropdownMenuItem
+                    key={kind}
+                    className="min-h-11"
+                    onSelect={() => exportQuiz(draft, kind, t, i18n.language).catch(toastError)}
+                  >
+                    {kind === 'csv' ? <FileSpreadsheetIcon aria-hidden="true" /> : <FileDownIcon aria-hidden="true" />}
+                    {t(kind === 'csv' ? 'quizFile.exportCsv' : 'quizFile.exportFile')}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Button variant="ghost" size="icon" className="hidden lg:inline-flex" aria-label={t('editor.shortcuts.title')} title={t('editor.shortcuts.title')} onClick={() => setHelpOpen(true)}>
               <KeyboardIcon aria-hidden="true" />
             </Button>

@@ -7,6 +7,8 @@ import {
   ArrowUpDownIcon,
   CopyIcon,
   EllipsisVerticalIcon,
+  FileDownIcon,
+  FileSpreadsheetIcon,
   ListChecksIcon,
   PencilIcon,
   PlayIcon,
@@ -15,6 +17,7 @@ import {
   Settings2Icon,
   SparklesIcon,
   Trash2Icon,
+  UploadIcon,
   XIcon,
 } from 'lucide-react'
 import { toast } from 'sonner'
@@ -40,6 +43,8 @@ import { cn } from '@/lib/cn'
 import { ConfirmDialog } from '../../components/dialog'
 import { BatchEditDialog, type BatchPatch } from '../../features/host/batch-edit-dialog'
 import { CreateGameDialog } from '../../features/host/create-game-dialog'
+import { ImportQuizDialog } from '../../features/host/import-quiz-dialog'
+import { exportQuiz } from '../../features/host/quiz-files'
 import { apiFetch } from '../../lib/api'
 
 export const Route = createFileRoute('/host/quizzes/')({
@@ -60,6 +65,7 @@ function QuizList() {
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [batchDeleting, setBatchDeleting] = useState(false)
   const [batchEditing, setBatchEditing] = useState(false)
+  const [importing, setImporting] = useState(false)
   const refresh = () => void queryClient.invalidateQueries({ queryKey: ['quizzes'] })
   const stopSelecting = () => {
     setSelecting(false)
@@ -84,6 +90,13 @@ function QuizList() {
     onSuccess: ({ quiz }) => {
       refresh()
       void navigate({ to: '/host/quizzes/$quizId', params: { quizId: quiz.id } })
+    },
+    onError: toastError,
+  })
+  const download = useMutation({
+    mutationFn: async ({ quiz, kind }: { quiz: QuizSummary; kind: 'csv' | 'file' }) => {
+      const full = await apiFetch<{ quiz: Quiz }>(`/api/quizzes/${quiz.id}`)
+      await exportQuiz(full.quiz, kind, t, i18n.language)
     },
     onError: toastError,
   })
@@ -140,10 +153,16 @@ function QuizList() {
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-3xl font-black tracking-tight">{t('host.title')}</h1>
-        <Button onClick={() => create.mutate()} disabled={create.isPending}>
-          <PlusIcon aria-hidden="true" />
-          {t('host.newQuiz')}
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setImporting(true)}>
+            <UploadIcon aria-hidden="true" />
+            {t('quizFile.import')}
+          </Button>
+          <Button onClick={() => create.mutate()} disabled={create.isPending}>
+            <PlusIcon aria-hidden="true" />
+            {t('host.newQuiz')}
+          </Button>
+        </div>
       </div>
 
       {quizzes.isPending && (
@@ -279,6 +298,14 @@ function QuizList() {
                       <CopyIcon aria-hidden="true" />
                       {t('host.duplicate')}
                     </DropdownMenuItem>
+                    <DropdownMenuItem className="min-h-11" disabled={download.isPending} onSelect={() => download.mutate({ quiz, kind: 'csv' })}>
+                      <FileSpreadsheetIcon aria-hidden="true" />
+                      {t('quizFile.exportCsv')}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="min-h-11" disabled={download.isPending} onSelect={() => download.mutate({ quiz, kind: 'file' })}>
+                      <FileDownIcon aria-hidden="true" />
+                      {t('quizFile.exportFile')}
+                    </DropdownMenuItem>
                     <DropdownMenuItem className="min-h-11" variant="destructive" onSelect={() => setDeleting(quiz)}>
                       <Trash2Icon aria-hidden="true" />
                       {t('common.delete')}
@@ -326,6 +353,7 @@ function QuizList() {
           }}
         />
       )}
+      {importing && <ImportQuizDialog onClose={() => setImporting(false)} />}
       {deleting && (
         <ConfirmDialog
           title={t('host.deleteTitle')}

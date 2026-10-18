@@ -15,7 +15,7 @@ Topic skills: `game-screens` (phone, projector, host control and results layouts
 | `/play/$pin` | players | the whole game on a phone: lobby, question, answered, reveal, scoreboard, podium |
 | `/login` | hosts | username + password |
 | `/host` | hosts | home: greeting, figures, running and scheduled games, recently edited quizzes, latest results (from `/api/quizzes` and `/api/games`; sorting in `features/host/dashboard.ts`) |
-| `/host/quizzes` | hosts | quiz list with search, Play, Edit, New, batch edit and delete |
+| `/host/quizzes` | hosts | quiz list with search, Play, Edit, New, Import (spreadsheet or Quizmoo file), downloads, batch edit and delete |
 | `/host/quizzes/$quizId` | hosts | editor |
 | `/host/settings` | hosts | My settings: quick messages, branding (logo, event name), game defaults, password (`#account`); one draft with a sticky Save bar, keyed by the stored settings |
 | `/host/password` | hosts | the forced first password change only, without navigation; otherwise redirects to `/host/settings#account` |

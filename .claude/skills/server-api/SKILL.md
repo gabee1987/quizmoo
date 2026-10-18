@@ -44,6 +44,7 @@ Error shape everywhere: `{ error: '<i18n key>' }`. Status codes: 400 invalid inp
 | `GET /api/me/settings` | session | the host's own settings (`hostSettingsSchema`, defaults when never saved): `{ settings }` |
 | `PUT /api/me/settings` | session | replace them; no user id in any `/api/me` URL, so a host only reaches their own row. `logoImageId` must be an image the host uploaded (else 400 `errors.invalidInput`) |
 | `POST /api/me/quick-messages` | session | `{ text, durationSec }` -> `{ message }` with its id, appended ("Save to my messages"); 409 `errors.quickMessagesFull` at 20 |
+| `POST /api/quizzes/import` | session | a quiz file `{ format: 'quizmoo-quiz', version: 1, quiz, images }` (25 MB route limit) -> new quiz, 201; all or nothing; referenced images re-encoded with `toWebp` under new ids; spreadsheets arrive here already parsed by the browser |
 | `GET /api/nicknames` | admin | "Surprise me" lists per language: `{ lists: { hu: { names, custom }, en: … } }`, built-in until saved |
 | `PUT /api/nicknames/:language` | admin | `{ names }` (1–500 player names, each passing the name filter) -> saved without duplicates |
 | `DELETE /api/nicknames/:language` | admin | back to the built-in list |
