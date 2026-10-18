@@ -121,13 +121,13 @@ describe('app', () => {
   })
 
   it('tells the privacy page and the host navigation who runs the install', async () => {
-    expect((await built.app.inject({ method: 'GET', url: '/api/site' })).json()).toEqual({ operator: null, contact: null, feedbackUrl: null, retentionDays: 90 })
+    expect((await built.app.inject({ method: 'GET', url: '/api/site' })).json()).toEqual({ operator: null, contact: null, feedbackUrl: null, retentionDays: 90, registrationOpen: false })
     const site = await buildApp(
       { ...config, OPERATOR_NAME: 'Test Operator', OPERATOR_EMAIL: 'privacy@example.test', FEEDBACK_URL: 'https://example.test/feedback' },
       { db: { execute: async () => [] } as unknown as Db, manager: newManager() },
     )
     const res = await site.app.inject({ method: 'GET', url: '/api/site' })
-    expect(res.json()).toEqual({ operator: 'Test Operator', contact: 'privacy@example.test', feedbackUrl: 'https://example.test/feedback', retentionDays: 90 })
+    expect(res.json()).toEqual({ operator: 'Test Operator', contact: 'privacy@example.test', feedbackUrl: 'https://example.test/feedback', retentionDays: 90, registrationOpen: false })
     await site.app.close()
   })
 
@@ -153,6 +153,15 @@ describe('app', () => {
     expect(parsed.RESULTS_RETENTION_DAYS).toBe(90)
     expect(parsed.MAX_GAMES_PER_HOST).toBe(200)
     expect(parsed.TRUST_PROXY).toBe(0)
+    expect(parsed.REGISTRATION_OPEN).toBe(false)
+  })
+
+  it('opens registration only for the exact value true', () => {
+    const env = { DATABASE_URL: 'postgres://test:test@localhost:5432/test', SESSION_SECRET: 'x'.repeat(32) }
+    expect(loadConfig({ ...env, REGISTRATION_OPEN: 'true' }).REGISTRATION_OPEN).toBe(true)
+    expect(loadConfig({ ...env, REGISTRATION_OPEN: 'false' }).REGISTRATION_OPEN).toBe(false)
+    expect(loadConfig({ ...env, REGISTRATION_OPEN: '' }).REGISTRATION_OPEN).toBe(false)
+    expect(() => loadConfig({ ...env, REGISTRATION_OPEN: 'yes' })).toThrow(/REGISTRATION_OPEN/)
   })
 
   it('accepts only an https feedback link and a valid operator e-mail', () => {

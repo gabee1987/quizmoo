@@ -106,8 +106,9 @@ export async function buildApp(config: Config, { db, manager, webDist: webDistOv
     contact: config.OPERATOR_EMAIL ?? null,
     feedbackUrl: config.FEEDBACK_URL ?? null,
     retentionDays: config.RESULTS_RETENTION_DAYS,
+    registrationOpen: config.REGISTRATION_OPEN,
   }))
-  await app.register(authRoutes, { db, secureCookies })
+  await app.register(authRoutes, { db, secureCookies, registrationOpen: config.REGISTRATION_OPEN })
   await app.register(multipart)
   await app.register(quizRoutes, { db })
   await app.register(imageRoutes, { db })

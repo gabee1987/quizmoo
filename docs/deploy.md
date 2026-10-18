@@ -16,6 +16,7 @@ Quizmoo runs as one Node process (API, Socket.IO and the web app on the same ori
 | `RESULTS_RETENTION_DAYS` | no | Finished games older than this are deleted, default `90`. Shown on the privacy page |
 | `MAX_GAMES_PER_HOST` | no | Finished games kept per host account; finishing one more deletes that host's oldest, default `200` |
 | `OPERATOR_NAME`, `OPERATOR_EMAIL` | for a public site | Who runs this install and where to send privacy questions and deletion requests, shown on `/privacy` |
+| `REGISTRATION_OPEN` | no | `true` lets anyone sign up as a host on `/register`; the account cannot log in until an admin approves it on the Users page. Off (`false`) by default: leave it off on the venue LAN |
 | `FEEDBACK_URL` | no | An `https://` link for the Feedback item in the host navigation, e.g. the repository's issue form `https://github.com/<owner>/quizmoo/issues/new?template=feedback.yml`. No item without it |
 | `SEED_ADMIN_USERNAME`, `SEED_ADMIN_PASSWORD` | only for seeding | First admin account, password at least 10 characters. Remove them after seeding |
 
@@ -41,12 +42,13 @@ The seed script is idempotent: it creates the admin if missing and a sample quiz
    - `APP_ORIGIN` = the generated `https://` address
    - `TRUST_PROXY` = `1`
    - `OPERATOR_NAME`, `OPERATOR_EMAIL`, `FEEDBACK_URL` as above
+   - `REGISTRATION_OPEN` = `true` if friends should sign up themselves
 5. Deploy. The log shows the migrations and `Server listening`.
 6. Seed once: add `SEED_ADMIN_USERNAME` and `SEED_ADMIN_PASSWORD`, run `node apps/server/dist/seed.js` in the service (`railway ssh`), then **remove both variables**. Log in and change the password if asked.
 7. Run the smoke test (below) against the address.
 8. On GitHub, protect `main`: Settings, Branches, require the `verify` check to pass before merging.
 
-Friends who want to host get an account from the admin's Users page; there is no self sign-up.
+Friends who want to host either get an account from the admin's Users page, or, with `REGISTRATION_OPEN=true`, sign up on `/register` ("Create a host account" on the login page). A sign-up waits under "Waiting for approval" on the Users page: approve only usernames you recognise (ask friends to tell you theirs). Rejected sign-ups are deleted at once, unapproved ones after 7 days. There is no e-mail: a friend who forgets the password gets a new account or a reset from the admin.
 
 ### Releasing
 

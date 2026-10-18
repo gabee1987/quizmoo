@@ -14,7 +14,7 @@ Run Quizmoo on a public HTTPS address so friends and family can play it from the
 
 1. **Provider: Railway** (Docker from GitHub, managed Postgres in the same project, an EU region, always on, WebSockets without extra setup, about 5 USD a month on the Hobby plan). Render, Fly.io and an EU VPS were the alternatives.
 2. **Address: Railway's free subdomain** (`quizmoo-xyz.up.railway.app`) first; an own domain can be pointed at it later.
-3. **Who can host:** the user's admin account, plus a host account per friend, created by the admin. No self sign-up in the beta.
+3. **Who can host:** the user's admin account, accounts the admin creates, and **self sign-up with admin approval** (changed on 18 October 2026, before the first deploy). Anyone can register with a username and password on `/register`; the account stays pending and cannot log in until the admin approves it on the Users page. No e-mail address: a forgotten password is reset by the admin. Sign-up is off unless `REGISTRATION_OPEN=true`, so a venue laptop never offers it. Spam protection without a third-party CAPTCHA: a per-IP limit, a honeypot field and a cap on pending accounts; rejected sign-ups are deleted at once, unapproved ones after 7 days.
 4. **Release rhythm:** `main` is what runs; merging `develop` into `main` deploys automatically. Releases are tagged with the changelog's "Unreleased" moved under the version. Version 1.0.0 already exists (7 October 2026), so the first hosted release is the next version after it, not `v0.1.0`.
 5. **Feedback:** a GitHub issue form in the repository (the repository is public; friends need a GitHub account). The link's address is a setting (`FEEDBACK_URL`), so other installs point elsewhere or show none.
 6. **Privacy page operator:** the name and contact e-mail of whoever runs the install, from settings (`OPERATOR_NAME`, `OPERATOR_EMAIL`), not from the repository.
@@ -53,7 +53,9 @@ In:
 - **Load sanity check:** the phase 8 load test (60 players, 20% reconnecting) against the live address once, outside an event.
 - **Beta feedback:** a "Feedback" link in the host navigation to a place the user chooses (an e-mail address or a GitHub issue form; no third-party widget).
 
-Out: autoscaling, several regions, self sign-up for hosts, paid plans for hosts, analytics.
+- **Host sign-up with approval** (decision 3): `POST /api/auth/register`, `/register` page, pending accounts on the admin's Users page with Approve and Reject, expired sign-ups deleted by the daily retention job.
+
+Out: autoscaling, several regions, e-mail (verification, notifications, password reset), paid plans for hosts, analytics.
 
 ## Files (expected)
 
@@ -129,3 +131,4 @@ $env:SMOKE_USERNAME="..."; $env:SMOKE_PASSWORD="..."; node scripts/smoke.mjs htt
 - `railway.json` added for the build, health check and restart policy.
 - The first hosted version follows 1.0.0 instead of `v0.1.0` (see Decisions).
 - Deploys must wait until no game runs (`activeGames: 0`): Railway runs the old and new process side by side for a moment, and the game registry lives in one process. Documented in `docs/deploy.md` rather than changed.
+- Host sign-up with admin approval was added before the first deploy (decision 3 changed, 18 October 2026): `users.status` (migration 0009, additive), `POST /api/auth/register`, `POST /api/users/:id/approve` and `/reject`, `/register`, a "Waiting for approval" section on the Users page, and expired sign-ups in the daily retention job. Tested in `apps/server/test/signup.test.ts` and `apps/web/e2e/signup.e2e.ts`; the a11y spec checks `/register` when sign-up is open.

@@ -97,6 +97,19 @@
       "tooShort_other": "Legalább {{count}} karakter legyen.",
       "mismatch": "A két jelszó nem egyezik.",
       "submit": "Jelszó mentése"
+    },
+    "register": {
+      "link": "Kérj játékvezetői fiókot",
+      "title": "Regisztrálj!",
+      "intro": "Válassz felhasználónevet és jelszót. Az új fiókokat az adminisztrátor hagyja jóvá, utána be tudsz lépni.",
+      "repeat": "Jelszó még egyszer",
+      "website": "Ezt hagyd üresen",
+      "submit": "Regisztrálok",
+      "doneTitle": "Köszi!",
+      "done": "A fiókod ({{name}}) az adminisztrátor jóváhagyására vár. Ha jóváhagyta, lépj be a jelszavaddal.",
+      "closed": "Ezen az oldalon nem lehet regisztrálni. Kérj fiókot az adminisztrátortól.",
+      "toLogin": "Tovább a belépéshez",
+      "haveAccount": "Van már fiókod? Lépj be"
     }
   },
   "host": {
@@ -848,7 +861,17 @@
     "initialPasswordHint": "A kezdeti jelszót négyszemközt add át. Első belépéskor le kell cserélni.",
     "usernameRules": "3–40 karakter: betű, szám, pont, kötőjel, aláhúzás. E-mail-cím nem lehet.",
     "pendingPassword": "Még nem cserélte le a jelszavát",
-    "created": "{{name}} felhasználó létrehozva."
+    "created": "{{name}} felhasználó létrehozva.",
+    "pending": {
+      "title": "Jóváhagyásra várnak",
+      "hint": "Akik a regisztrációs oldalon jelentkeztek. Csak azt hagyd jóvá, akit felismersz; a jóvá nem hagyott regisztrációkat 7 nap után töröljük.",
+      "approve": "Jóváhagyás",
+      "reject": "Elutasítás",
+      "approved": "{{name}} már be tud lépni.",
+      "rejected": "{{name}} regisztrációja törölve.",
+      "rejectTitle": "Elutasítod: {{name}}?",
+      "rejectBody": "A regisztrációt töröljük. Később újra jelentkezhet."
+    }
   },
   "errors": {
     "gameNotFound": "Nincs ilyen játék. Ellenőrizd a PIN-t.",
@@ -882,6 +905,9 @@
     "fileTooLarge": "A fájl nagyobb 5 MB-nál.",
     "passwordChangeRequired": "Előbb cseréld le a kezdeti jelszót.",
     "usernameTaken": "Ez a felhasználónév már foglalt.",
+    "accountPending": "A fiókod az adminisztrátor jóváhagyására vár.",
+    "registrationClosed": "Nem lehet regisztrálni. Kérj fiókot az adminisztrátortól.",
+    "registrationsFull": "Túl sok regisztráció vár jóváhagyásra. Próbáld újra pár nap múlva.",
     "wrongCurrentPassword": "A jelenlegi jelszó hibás.",
     "samePassword": "Az új jelszónak különböznie kell a jelenlegitől.",
     "gameNotFinished": "Előbb fejezd be a játékot.",
@@ -1106,7 +1132,8 @@
         "heading": "Meddig",
         "items": [
           "A befejezett játékokat a játékosok becenevével és válaszaival együtt legkésőbb {{days}} nappal a játék után töröljük.",
-          "A játékvezetői fiókok és a kvízek addig maradnak, amíg valaki nem törli őket."
+          "A játékvezetői fiókok és a kvízek addig maradnak, amíg valaki nem törli őket.",
+          "Ha az adminisztrátor 7 napon belül nem hagy jóvá egy regisztrációt, töröljük."
         ]
       },
       {

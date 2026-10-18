@@ -13,9 +13,9 @@ export const testConfig = loadConfig({
 /** Silent logger for managers in tests. */
 export const quietLog = { error: () => {}, warn: () => {} }
 
-export async function buildTestApp(db: Db, store: GameStore = createGameStore(db)) {
+export async function buildTestApp(db: Db, store: GameStore = createGameStore(db), config = testConfig) {
   const manager = new GameManager(store, quietLog)
-  const built = await buildApp(testConfig, { db, manager })
+  const built = await buildApp(config, { db, manager })
   built.app.addHook('onClose', async () => {
     manager.close()
     await manager.flush()

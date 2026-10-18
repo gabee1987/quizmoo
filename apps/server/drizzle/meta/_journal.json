@@ -64,6 +64,13 @@
       "when": 1792314278668,
       "tag": "0008_flashy_luke_cage",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1792340777111,
+      "tag": "0009_public_lorna_dane",
+      "breakpoints": true
     }
   ]
 }

@@ -14,6 +14,8 @@ export const users = pgTable('users', {
   role: text('role', { enum: ['admin', 'editor'] }).notNull().default('editor'),
   /** Set for users created by an admin with an initial password; cleared on first password change. */
   mustChangePassword: boolean('must_change_password').notNull().default(false),
+  /** `pending` after self sign-up: cannot log in until an admin approves the account. */
+  status: text('status', { enum: ['active', 'pending'] }).notNull().default('active'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 })
 

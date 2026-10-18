@@ -35,7 +35,9 @@ Error shape everywhere: `{ error: '<i18n key>' }`. Status codes: 400 invalid inp
 | `POST /api/auth/login` | - | `{ username, password }` -> sets session cookie, returns `{ user }` |
 | `POST /api/auth/logout` | session | clears cookie |
 | `GET /api/auth/me` | session | `{ user }` or 401 |
-| `GET /api/site` | - | `{ operator, contact, feedbackUrl, retentionDays }` from the environment, for `/privacy` and the Feedback link |
+| `POST /api/auth/register` | - | `{ username, password, website? }` (honeypot) -> 201 `{ pending: true }`, no session; 403 `errors.registrationClosed` unless `REGISTRATION_OPEN`, 503 `errors.registrationsFull` at 20 pending, 5 per hour per IP |
+| `POST /api/users/:id/approve` / `reject` | admin | pending sign-ups only (404 otherwise); reject deletes the account |
+| `GET /api/site` | - | `{ operator, contact, feedbackUrl, retentionDays, registrationOpen }` from the environment, for `/privacy` and the Feedback link |
 | `GET /api/quizzes` | session | list own quizzes (id, title, questionCount, updatedAt) |
 | `POST /api/quizzes` | session | create from `quizInputSchema`; a body without `settings` gets the host's game defaults. A `branding.logoImageId` that is not the host's own image: 400 `errors.invalidInput` (also on PUT) |
 | `GET /api/quizzes/:id` | owner | full quiz |
@@ -69,6 +71,6 @@ Quiz question ids and option ids are generated server-side with `nanoid(8)` when
 - Session token: 32 random bytes, base64url, in an `httpOnly`, `sameSite=lax`, `secure` (production) cookie named `quizmoo_session`, 30 days. The DB stores the SHA-256 of the token.
 - `requireSession` preHandler loads the user onto `request.user`. Expired sessions are deleted on sight.
 - Login is rate limited to 10 attempts per minute per IP. The IP comes from `X-Forwarded-For` only for `TRUST_PROXY` hops, through a trust function (`hop < n`): Fastify 5 ignores a numeric `trustProxy` (fails closed), and `true` takes the first address, which the client writes itself. Request logs leave out the client address. Failed login returns `401 { error: 'errors.invalidCredentials' }` regardless of whether the user exists.
-- Users are created by the seed script or by an admin via `POST /api/users` (admin only, phase 6). No self-registration.
+- Users are created by the seed script, by an admin via `POST /api/users` (admin only, phase 6), or by self sign-up (`users.status = 'pending'`; login answers 403 `errors.accountPending` only after the password checks out). Pending sign-ups older than 7 days are deleted by the daily retention job (`deleteExpiredSignups`).
 - Keep `users` free of personal data: username only. Future SSO adds an `oidc_identities` table; do not add provider columns to `users`.
 

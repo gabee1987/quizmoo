@@ -10,6 +10,7 @@ import { toastError } from '@/lib/toast'
 import { TextField } from '../components/text-field'
 import { apiFetch } from '../lib/api'
 import { meQueryOptions, type User } from '../lib/auth'
+import { useSiteInfo } from '../lib/site'
 
 export const Route = createFileRoute('/login')({
   component: LoginPage,
@@ -19,6 +20,7 @@ function LoginPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const site = useSiteInfo()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [submitted, setSubmitted] = useState(false)
@@ -86,6 +88,11 @@ function LoginPage() {
           <Link to="/" className={footerLink}>
             {t('home.joinLink')}
           </Link>
+          {site.data?.registrationOpen && (
+            <Link to="/register" className={footerLink}>
+              {t('auth.register.link')}
+            </Link>
+          )}
           <Link to="/privacy" className={footerLink}>
             {t('privacy.link')}
           </Link>

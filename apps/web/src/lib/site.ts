@@ -7,6 +7,8 @@ export interface SiteInfo {
   contact: string | null
   feedbackUrl: string | null
   retentionDays: number
+  /** Whether hosts may sign up on /register (`REGISTRATION_OPEN`). */
+  registrationOpen: boolean
 }
 
 export function useSiteInfo() {

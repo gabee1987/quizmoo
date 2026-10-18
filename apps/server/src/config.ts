@@ -26,6 +26,13 @@ const envSchema = z.object({
   OPERATOR_EMAIL: emptyAsUnset(z.string().trim().email().max(200).optional()),
   /** Where the host navigation's Feedback link points; no link without it. */
   FEEDBACK_URL: emptyAsUnset(z.string().url().startsWith('https://').optional()),
+  /** `true` lets anyone sign up as a host on /register; the account waits for an admin's approval. */
+  REGISTRATION_OPEN: emptyAsUnset(
+    z
+      .enum(['true', 'false'])
+      .default('false')
+      .transform((v) => v === 'true'),
+  ),
 })
 
 export type Config = z.infer<typeof envSchema>

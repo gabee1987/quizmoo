@@ -97,6 +97,19 @@
       "tooShort_other": "At least {{count}} characters.",
       "mismatch": "The two passwords differ.",
       "submit": "Save password"
+    },
+    "register": {
+      "link": "Create a host account",
+      "title": "Sign up",
+      "intro": "Pick a username and a password. The admin approves new accounts, then you can log in.",
+      "repeat": "Password again",
+      "website": "Leave this empty",
+      "submit": "Sign up",
+      "doneTitle": "Thanks!",
+      "done": "Your account {{name}} is waiting for the admin's approval. Once it is approved, log in with your password.",
+      "closed": "Sign-up is closed on this site. Ask the admin for an account.",
+      "toLogin": "Go to login",
+      "haveAccount": "Already have an account? Log in"
     }
   },
   "host": {
@@ -848,7 +861,17 @@
     "initialPasswordHint": "Share the initial password privately. The user must change it at first login.",
     "usernameRules": "3–40 characters: letters, digits, dot, dash, underscore. No e-mail addresses.",
     "pendingPassword": "Password not changed yet",
-    "created": "User {{name}} created."
+    "created": "User {{name}} created.",
+    "pending": {
+      "title": "Waiting for approval",
+      "hint": "People who signed up on the sign-up page. Only approve names you recognise; unapproved sign-ups are deleted after 7 days.",
+      "approve": "Approve",
+      "reject": "Reject",
+      "approved": "{{name}} can log in now.",
+      "rejected": "Sign-up {{name}} deleted.",
+      "rejectTitle": "Reject {{name}}?",
+      "rejectBody": "The sign-up is deleted. They can sign up again."
+    }
   },
   "errors": {
     "gameNotFound": "No such game. Check the PIN.",
@@ -882,6 +905,9 @@
     "fileTooLarge": "The file is larger than 5 MB.",
     "passwordChangeRequired": "Change your initial password first.",
     "usernameTaken": "This username is already taken.",
+    "accountPending": "Your account is waiting for the admin's approval.",
+    "registrationClosed": "Sign-up is closed. Ask the admin for an account.",
+    "registrationsFull": "Too many sign-ups are waiting for approval. Try again in a few days.",
     "wrongCurrentPassword": "The current password is wrong.",
     "samePassword": "The new password must differ from the current one.",
     "gameNotFinished": "End the game first.",
@@ -1106,7 +1132,8 @@
         "heading": "How long",
         "items": [
           "Finished games, with the players' nicknames and answers, are deleted {{days}} days after the game at the latest.",
-          "Host accounts and quizzes stay until they are deleted."
+          "Host accounts and quizzes stay until they are deleted.",
+          "A sign-up the admin does not approve within 7 days is deleted."
         ]
       },
       {
