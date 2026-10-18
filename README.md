@@ -23,7 +23,7 @@ One Node.js process serves the API, the realtime connection (Socket.IO) and the 
 | Document | For |
 |---|---|
 | [docs/event-checklist.md](docs/event-checklist.md) | The host on the day of an event |
-| [docs/deploy.md](docs/deploy.md) | Running it on a laptop at the venue, on Railway or on Render, environment variables, first admin |
+| [docs/deploy.md](docs/deploy.md) | Running it on Railway (releases, rollback, backups, smoke test), on Render or on a laptop at the venue, environment variables, first admin |
 | [docs/security-notes.md](docs/security-notes.md) | Security controls, dependency audit and documented exceptions |
 | [CHANGELOG.md](CHANGELOG.md) | Release history |
 | [docs/plans](docs/plans) | The phase in progress, the phase list and the backlog |

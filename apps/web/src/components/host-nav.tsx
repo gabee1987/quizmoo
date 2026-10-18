@@ -1,6 +1,17 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Link, useNavigate, useRouterState } from '@tanstack/react-router'
-import { DicesIcon, HistoryIcon, HouseIcon, LayoutGridIcon, LogOutIcon, SettingsIcon, UserRoundIcon, UsersIcon } from 'lucide-react'
+import {
+  DicesIcon,
+  ExternalLinkIcon,
+  HistoryIcon,
+  HouseIcon,
+  LayoutGridIcon,
+  LogOutIcon,
+  MessageSquareHeartIcon,
+  SettingsIcon,
+  UserRoundIcon,
+  UsersIcon,
+} from 'lucide-react'
 import { useEffect, useLayoutEffect, useRef, useState, type ComponentType, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
@@ -14,6 +25,7 @@ import {
 import { apiFetch } from '@/lib/api'
 import type { User } from '@/lib/auth'
 import { cn } from '@/lib/cn'
+import { useSiteInfo } from '@/lib/site'
 
 type To = '/host' | '/host/quizzes' | '/host/games' | '/host/users' | '/host/nicknames'
 
@@ -52,6 +64,7 @@ export function HostNav({ user }: { user: User }) {
         ]
       : []
   const items = [...main, ...admin]
+  const feedbackUrl = useSiteInfo().data?.feedbackUrl
 
   return (
     <>
@@ -88,6 +101,17 @@ export function HostNav({ user }: { user: User }) {
             <SettingsIcon className="size-5 transition-transform duration-500 ease-spring group-hover:rotate-45 group-data-[status=active]:animate-wiggle" />
             {t('nav.settings')}
           </Link>
+          {feedbackUrl && (
+            <a
+              href={feedbackUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group flex min-h-11 items-center gap-3 rounded-xl px-3 font-semibold text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring"
+            >
+              <MessageSquareHeartIcon className="size-5 transition-transform duration-300 ease-spring group-hover:scale-115 group-hover:-rotate-8" />
+              <FeedbackLabel />
+            </a>
+          )}
           <button
             type="button"
             className="flex min-h-11 items-center gap-3 rounded-xl px-3 text-left font-semibold text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring"
@@ -139,6 +163,14 @@ export function HostNav({ user }: { user: User }) {
                     {t('nav.settings')}
                   </Link>
                 </MenuLink>
+                {feedbackUrl && (
+                  <MenuLink>
+                    <a href={feedbackUrl} target="_blank" rel="noopener noreferrer">
+                      <MessageSquareHeartIcon />
+                      <FeedbackLabel />
+                    </a>
+                  </MenuLink>
+                )}
                 <DropdownMenuItem className="min-h-11" disabled={logout.isPending} onSelect={() => logout.mutate()}>
                   <LogOutIcon />
                   {t('auth.logout')}
@@ -195,6 +227,17 @@ function SlidingItems({ children }: { children: ReactNode }) {
       />
       {children}
     </div>
+  )
+}
+
+function FeedbackLabel() {
+  const { t } = useTranslation()
+  return (
+    <>
+      {t('nav.feedback')}
+      <ExternalLinkIcon className="size-4 opacity-70" aria-hidden="true" />
+      <span className="sr-only">({t('nav.opensInNewTab')})</span>
+    </>
   )
 }
 

@@ -898,7 +898,9 @@
     "signedInAs": "Belépve mint",
     "games": "Játékok",
     "account": "Fiók",
-    "settings": "Beállításaim"
+    "settings": "Beállításaim",
+    "feedback": "Visszajelzés",
+    "opensInNewTab": "új lapon nyílik meg"
   },
   "settings": {
     "title": "Beállításaim",
@@ -1076,6 +1078,59 @@
     "add": "Naptárba",
     "summary": "Quizmoo: {{title}}",
     "description": "PIN-kód: {{pin}}\nCsatlakozz itt: {{url}}"
+  },
+  "privacy": {
+    "link": "Adatvédelem",
+    "title": "Adatvédelem",
+    "intro": "A Quizmoo egy kvízjáték. A lehető legkevesebbet tárolja rólad, és csak a játékhoz.",
+    "operator": "Ezt az oldalt {{name}} üzemelteti.",
+    "operatorUnknown": "Ezt az oldalt az üzemelteti, aki a játékaidat szervezi: a kérdéseiddel fordulj hozzá.",
+    "contact": "Kérdés, kérés:",
+    "sections": [
+      {
+        "heading": "Ha játszol",
+        "items": [
+          "A beírt beceneved, az avatarod és a csapatod.",
+          "A válaszaid és a pontjaid a játékban.",
+          "Semmi más: se e-mail-cím, se telefonszám, se fiók, se hely, se IP-cím."
+        ]
+      },
+      {
+        "heading": "Ha játékot vezetsz",
+        "items": [
+          "A felhasználóneved, a jelszavad pedig csak hash-ként, amiből senki nem tudja visszafejteni.",
+          "A kvízeid, képeid, beállításaid és a játékaid."
+        ]
+      },
+      {
+        "heading": "Meddig",
+        "items": [
+          "A befejezett játékokat a játékosok becenevével és válaszaival együtt legkésőbb {{days}} nappal a játék után töröljük.",
+          "A játékvezetői fiókok és a kvízek addig maradnak, amíg valaki nem törli őket."
+        ]
+      },
+      {
+        "heading": "Sütik és a készüléked",
+        "items": [
+          "A játékvezetők egy sütit kapnak, ami legfeljebb 30 napig bejelentkezve tartja őket. A játékosok egyet sem.",
+          "A böngésződ megjegyzi a nyelvet, a színmódot és a helyedet a játékban, hogy újratöltés után visszajuss. Ez a készülékeden marad.",
+          "Nincs követés, statisztika vagy reklám, és más oldalról semmi nem töltődik be."
+        ]
+      },
+      {
+        "heading": "Hol fut",
+        "items": [
+          "Az alkalmazás és az adatbázisa egy tárhelyszolgáltatónál fut, akit az oldal üzemeltetője választott. A szolgáltató az adatokat csak a működtetéshez kezeli."
+        ]
+      },
+      {
+        "heading": "A jogaid",
+        "items": [
+          "Megkérdezheted, mit tárolunk rólad, és kérheted, hogy javítsuk vagy töröljük. Írj a fenti címre a játék dátumával és a beceneveddel.",
+          "A játékvezetők a játékaikat és a kvízeiket bármikor maguk is törölhetik."
+        ]
+      }
+    ]
   },
   "quizFile": {
     "importTitle": "Importálj egy kvízt",

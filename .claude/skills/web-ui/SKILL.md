@@ -14,6 +14,7 @@ Topic skills: `game-screens` (phone, projector, host control and results layouts
 | `/` | players | join form (PIN first, then name and avatar, team picker in team mode), `?pin=` prefill from QR |
 | `/play/$pin` | players | the whole game on a phone: lobby, question, answered, reveal, scoreboard, podium |
 | `/login` | hosts | username + password |
+| `/privacy` | everyone | privacy notice; operator, contact and retention days from `GET /api/site` (`useSiteInfo`) |
 | `/host` | hosts | home: greeting, figures, running and scheduled games, recently edited quizzes, latest results (from `/api/quizzes` and `/api/games`; sorting in `features/host/dashboard.ts`) |
 | `/host/quizzes` | hosts | quiz list with search, Play, Edit, New, Import (spreadsheet or Quizmoo file), downloads, batch edit and delete |
 | `/host/quizzes/$quizId` | hosts | editor |

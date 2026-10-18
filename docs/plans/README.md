@@ -32,7 +32,7 @@ Finished plans are deleted once their branch is merged: `CHANGELOG.md` records w
 | 23 | Flexible teams and mixed play, set up per game | `feature/flexible-teams` | done |
 | 24 | Player and host polish from testing | `feature/player-host-polish` | done |
 | 25 | Game history at scale | `feature/game-history` | done |
-| 26 | [Friends and family beta on a hosting provider](phase-26-beta-deploy.md) | `chore/beta-deploy` | planned |
+| 26 | [Friends and family beta on a hosting provider](phase-26-beta-deploy.md) | `chore/beta-deploy` | in progress |
 | 27 | [Quiz files: spreadsheet and Quizmoo file import and export](phase-27-quiz-files.md) | `feature/quiz-files` | done |
 
 ## Conventions every plan follows

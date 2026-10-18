@@ -63,6 +63,11 @@ for (const mode of modes) {
     await host.goto('/login')
     await expect(host.locator('html')).toHaveAttribute('data-mode', mode)
     await expectAccessible(host, 'login')
+    await host.getByRole('link', { name: 'Privacy', exact: true }).click()
+    await expect(host.getByRole('heading', { name: 'If you play' })).toBeVisible()
+    await expect(host.getByText(/deleted \d+ days after the game/)).toBeVisible()
+    await expectAccessible(host, 'privacy')
+    await host.goto('/login')
 
     await host.getByLabel('Username').fill(username!)
     await host.getByLabel('Password', { exact: true }).fill(password!)

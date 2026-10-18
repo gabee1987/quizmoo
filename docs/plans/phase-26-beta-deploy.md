@@ -10,15 +10,14 @@ Run Quizmoo on a public HTTPS address so friends and family can play it from the
 
 > **Compliance note.** A hosting provider is a third-party service that stores the nicknames, answers and host accounts. For this personal project the user decides; for any client or government use the provider, its EU data location and its sub-processors need a compliance review first (GDPR, NIS2, ISO 27001 controls), as `docs/deploy.md` says.
 
-## Decisions to make before starting
+## Decisions (18 October 2026)
 
-1. **Provider.** Proposed: **Railway** (Docker from GitHub, managed Postgres in the same project, an EU region, always on, WebSockets without extra setup, about 5 USD a month on the Hobby plan). Alternatives:
-   - Render: similar, but the free tier sleeps and free Postgres expires; a paid Starter instance and Postgres are needed for a beta.
-   - Fly.io: more control, more setup.
-   - A small VPS (e.g. Hetzner, EU), with Docker Compose and Caddy for HTTPS: cheapest at scale, but the backups, updates and monitoring are ours.
-2. **Address.** The provider's free subdomain (`quizmoo-xyz.up.railway.app`), or an own domain (e.g. `quizmoo.hu`, about 10 EUR a year) pointed at it. An own domain is easier to type and survives a provider change.
-3. **Who can host.** Proposed: the user's admin account, plus a host account per friend who wants to run games, created by the admin. No self sign-up in the beta.
-4. **Release rhythm.** Proposed: `main` is what runs; merging `develop` into `main` deploys automatically. Releases are tagged (`v0.1.0`, `v0.2.0`, …) with the changelog's "Unreleased" moved under the version.
+1. **Provider: Railway** (Docker from GitHub, managed Postgres in the same project, an EU region, always on, WebSockets without extra setup, about 5 USD a month on the Hobby plan). Render, Fly.io and an EU VPS were the alternatives.
+2. **Address: Railway's free subdomain** (`quizmoo-xyz.up.railway.app`) first; an own domain can be pointed at it later.
+3. **Who can host:** the user's admin account, plus a host account per friend, created by the admin. No self sign-up in the beta.
+4. **Release rhythm:** `main` is what runs; merging `develop` into `main` deploys automatically. Releases are tagged with the changelog's "Unreleased" moved under the version. Version 1.0.0 already exists (7 October 2026), so the first hosted release is the next version after it, not `v0.1.0`.
+5. **Feedback:** a GitHub issue form in the repository (the repository is public; friends need a GitHub account). The link's address is a setting (`FEEDBACK_URL`), so other installs point elsewhere or show none.
+6. **Privacy page operator:** the name and contact e-mail of whoever runs the install, from settings (`OPERATOR_NAME`, `OPERATOR_EMAIL`), not from the repository.
 
 ## Scope
 
@@ -112,3 +111,21 @@ $env:SMOKE_USERNAME="..."; $env:SMOKE_PASSWORD="..."; node scripts/smoke.mjs htt
 5. Roll back to the previous deploy. Expected: the app runs; nothing lost.
 6. Open `/privacy` in both languages. Expected: what is stored and for how long, and how to ask for deletion.
 7. Download a backup and restore it into a scratch database. Expected: the data is there.
+
+## Results (code part, 18 October 2026)
+
+- `pnpm verify`: shared 22, server 306 (+99 needing a database), web 205 tests; all 405 server tests pass against Postgres.
+- `pnpm e2e` 16/16 against the production build on a copy of the dev database; the a11y spec now opens `/privacy` from the login page and checks it in both modes.
+- `node scripts/smoke.mjs http://localhost:3999` passes (the HSTS check runs only over https); it left no quiz or game behind.
+- Screenshots of the join and login links, `/privacy` (hu light and dark, en) and the Feedback item (sidebar and phone account menu) at 1440 × 900 and 390 × 844; no horizontal scroll.
+- `pnpm audit --prod`: no known vulnerabilities; the full audit has the two documented development-only esbuild findings.
+- Steps 5 to 9 (provisioning, first deploy, backups and restore drill, the live load test, the release) run on the user's Railway account, following `docs/deploy.md`.
+
+## Deviations
+
+- `trustProxy: true` was unsafe (any client could fake its address on a deployment without a proxy, and `true` takes the client-written first address behind one). It is now `TRUST_PROXY` hops, through a trust function: Fastify 5 ignores a numeric `trustProxy`.
+- Request logs no longer record client addresses (data minimisation; the privacy page says no IP address is kept).
+- The privacy page's operator, contact and retention days and the Feedback link come from environment variables through a new public `GET /api/site`, so the repository holds no personal contact details and other installs show their own.
+- `railway.json` added for the build, health check and restart policy.
+- The first hosted version follows 1.0.0 instead of `v0.1.0` (see Decisions).
+- Deploys must wait until no game runs (`activeGames: 0`): Railway runs the old and new process side by side for a moment, and the game registry lives in one process. Documented in `docs/deploy.md` rather than changed.

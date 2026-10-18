@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### Hosted beta
+- Privacy page (`/privacy`, Hungarian and English), linked from the join and login pages: what is stored, for how long, cookies, where it runs, and whom to ask, with the operator's name and e-mail from `OPERATOR_NAME` and `OPERATOR_EMAIL`.
+- A Feedback item in the host navigation when `FEEDBACK_URL` is set, and a feedback issue form in the repository.
+- Proxies are trusted only when `TRUST_PROXY` is set, and then exactly that many, so a client can no longer fake its address to get round the login limit. Request logs no longer contain IP addresses.
+- `scripts/smoke.mjs` checks a deployed address end to end; `railway.json` sets the build and health check; `docs/deploy.md` describes Railway first, with releases, rollback, backups and a restore drill.
+
 ### New name
 - The app is now called Quizmoo, with a cow as its logo (in the header and as the browser tab icon).
 - Hosts are logged out once after the update, and phones forget their saved language, colour mode and game once.

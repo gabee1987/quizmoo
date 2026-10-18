@@ -82,13 +82,18 @@ function LoginPage() {
             </form>
           </CardContent>
         </Card>
-        <Link
-          to="/"
-          className="self-center rounded-md text-sm font-semibold text-muted-foreground underline underline-offset-4 outline-none hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring"
-        >
-          {t('home.joinLink')}
-        </Link>
+        <div className="flex flex-wrap justify-center gap-x-5 gap-y-2">
+          <Link to="/" className={footerLink}>
+            {t('home.joinLink')}
+          </Link>
+          <Link to="/privacy" className={footerLink}>
+            {t('privacy.link')}
+          </Link>
+        </div>
       </div>
     </div>
   )
 }
+
+const footerLink =
+  'rounded-md text-sm font-semibold text-muted-foreground underline underline-offset-4 outline-none hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring'

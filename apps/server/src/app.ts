@@ -1,7 +1,7 @@
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { sql } from 'drizzle-orm'
-import Fastify from 'fastify'
+import Fastify, { type FastifyRequest } from 'fastify'
 import cookie from '@fastify/cookie'
 import helmet from '@fastify/helmet'
 import multipart from '@fastify/multipart'
@@ -29,12 +29,16 @@ export interface AppDeps {
 }
 
 export async function buildApp(config: Config, { db, manager, webDist: webDistOverride }: AppDeps) {
+  // Request logs leave out the client's address and port (data minimisation).
+  const serializers = { req: (req: FastifyRequest) => ({ method: req.method, url: req.url, hostname: req.hostname }) }
   const app = Fastify({
     logger:
       config.NODE_ENV === 'development'
-        ? { level: 'info', transport: { target: 'pino-pretty' } }
-        : { level: config.NODE_ENV === 'test' ? 'silent' : 'info' },
-    trustProxy: true,
+        ? { level: 'info', transport: { target: 'pino-pretty' }, serializers }
+        : { level: config.NODE_ENV === 'test' ? 'silent' : 'info', serializers },
+    // Trust exactly that many proxies: the client is the address the outermost one added.
+    // (`true` would take the first address in the header, which the client writes itself.)
+    trustProxy: config.TRUST_PROXY > 0 ? (_address: string, hop: number) => hop < config.TRUST_PROXY : false,
     // JSON bodies (quizzes) stay small; image uploads have their own 5 MB multipart limit.
     bodyLimit: 1024 * 1024,
   })
@@ -96,6 +100,13 @@ export async function buildApp(config: Config, { db, manager, webDist: webDistOv
     ])
     return reply.code(dbOk ? 200 : 503).send({ ok: dbOk, db: dbOk, activeGames: manager.activeCount() })
   })
+  // Install details for the privacy page and the Feedback link; public, set by whoever runs it.
+  app.get('/api/site', async () => ({
+    operator: config.OPERATOR_NAME ?? null,
+    contact: config.OPERATOR_EMAIL ?? null,
+    feedbackUrl: config.FEEDBACK_URL ?? null,
+    retentionDays: config.RESULTS_RETENTION_DAYS,
+  }))
   await app.register(authRoutes, { db, secureCookies })
   await app.register(multipart)
   await app.register(quizRoutes, { db })
