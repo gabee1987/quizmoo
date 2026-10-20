@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### Host control during a game
+- The host can show the standings after any question, whatever the scoreboard setting, also when answers are revealed only at the end; then the projector and the phones show the totals and ranks so far, without the last question's points or rank arrows.
+- A Standings card on the host control lists teams and players by rank in every phase after the lobby, with the real scores also while results are held back (only the host sees them), and "Results so far" opens the running game's results in a new tab.
+- The main button and the question's Pause, +30 s and Skip stay in view while the page scrolls: at the bottom above the tab bar on phones, at the top of the main column on laptops. "End game" moved below the question.
+- Player names are shown in full on the host control (the fastest right answer, the player list, the standings, the answers and the grading groups) instead of being cut off.
+
 ### Hosted beta
 - Privacy page (`/privacy`, Hungarian and English), linked from the join and login pages: what is stored, for how long, cookies, where it runs, and whom to ask, with the operator's name and e-mail from `OPERATOR_NAME` and `OPERATOR_EMAIL`.
 - Hosts can sign up on `/register` when `REGISTRATION_OPEN=true`: the account waits until an admin approves or rejects it under "Waiting for approval" on the Users page. Username and password only, no e-mail; unapproved sign-ups are deleted after 7 days.

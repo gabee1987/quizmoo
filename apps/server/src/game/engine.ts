@@ -492,9 +492,12 @@ export function next(state: GameState, now: number): GameState {
   throw new EngineError('errors.invalidTransition')
 }
 
-/** From the reveal to the scoreboard. Not available while scores are held back until the end. */
+/**
+ * From the reveal to the scoreboard, whatever the scoreboard setting. While results are held back
+ * until the end the snapshots show only the totals and ranks so far (see `conceal`).
+ */
 export function showScoreboard(state: GameState): GameState {
-  if (state.phase !== 'reveal' || state.awaitingGrading || answersHidden(state, 'screen')) {
+  if (state.phase !== 'reveal' || state.awaitingGrading) {
     throw new EngineError('errors.invalidTransition')
   }
   return { ...state, phase: 'scoreboard', reviewIndex: null }

@@ -8,8 +8,17 @@ import { stagger } from '../../lib/motion'
 
 const medals = ['bg-yellow-400 text-black', 'bg-slate-300 text-black', 'bg-orange-400 text-black']
 
-export function ScreenScoreboard({ host }: { host: HostSnapshot }) {
+export function ScreenScoreboard({ host: snapshot }: { host: HostSnapshot }) {
   const { t } = useTranslation()
+  // Standings shown midgame while answers wait for the end: totals and ranks only. A projector the
+  // host opened gets the host's full snapshot, so what moved on the last question is dropped here.
+  const host = snapshot.answersHidden
+    ? {
+        ...snapshot,
+        players: snapshot.players.map((p) => ({ ...p, previousRank: p.rank, roundPoints: 0 })),
+        teams: snapshot.teams.map((team) => ({ ...team, previousRank: team.rank })),
+      }
+    : snapshot
   return (
     <div className="flex flex-1 flex-col gap-6">
       <h1 className="animate-fade-up text-5xl font-black">{t('play.leaderboard')}</h1>

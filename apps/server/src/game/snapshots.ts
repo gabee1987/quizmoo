@@ -191,17 +191,32 @@ export function toPlayerSnapshot(state: GameState, playerId: string, now: number
 /**
  * While results are held back until the end, strips everything that tells who was right:
  * the reveal (correct answer, distribution), points, scores, ranks and correct counts.
- * The question itself stays visible during its reveal.
+ * The question itself stays visible during its reveal. A scoreboard the host shows midgame keeps
+ * the totals and ranks, but not what moved on the last question.
  */
 function conceal(state: GameState, base: GameSnapshotBase): GameSnapshotBase {
   if (!base.answersHidden) return base
   const question = state.quiz.questions[state.questionIndex]
+  const standings = base.phase === 'scoreboard'
   return {
     ...base,
     question: base.reveal && question ? toPublicQuestion(question) : base.question,
     reveal: null,
-    players: base.players.map((p) => ({ ...p, score: 0, rank: 1, previousRank: 1, correctCount: 0, roundPoints: 0, streak: 0 })),
-    teams: base.teams.map((t) => ({ ...t, score: 0, rank: 1, previousRank: 1 })),
+    players: base.players.map((p) => ({
+      ...p,
+      score: standings ? p.score : 0,
+      rank: standings ? p.rank : 1,
+      previousRank: standings ? p.rank : 1,
+      correctCount: 0,
+      roundPoints: 0,
+      streak: 0,
+    })),
+    teams: base.teams.map((t) => ({
+      ...t,
+      score: standings ? t.score : 0,
+      rank: standings ? t.rank : 1,
+      previousRank: standings ? t.rank : 1,
+    })),
     questionStats: base.questionStats.map((q) => ({ ...q, correctCount: 0 })),
   }
 }

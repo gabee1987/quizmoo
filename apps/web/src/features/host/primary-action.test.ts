@@ -34,8 +34,13 @@ describe('host actions after a question', () => {
     expect(labels(reveal({ scoreboard: 'onDemand' }))).toEqual(['host.game.nextQuestion', 'host.game.showScoreboard'])
   })
 
-  it('results at the end: only next question, no scoreboard', () => {
-    expect(labels(reveal({ revealAnswers: 'atEnd' }))).toEqual(['host.game.nextQuestion', null])
+  it('results at the end: next question first, the standings so far as the alternative', () => {
+    expect(labels(reveal({ revealAnswers: 'atEnd' }))).toEqual(['host.game.nextQuestion', 'host.game.showScoreboard'])
+    expect(labels(reveal({ revealAnswers: 'atEnd', scoreboard: 'onDemand' }))).toEqual([
+      'host.game.nextQuestion',
+      'host.game.showScoreboard',
+    ])
+    expect(alternativeAction(reveal({ revealAnswers: 'atEnd' }))?.command).toEqual({ type: 'scoreboard' })
   })
 
   it('finishes after the last question', () => {

@@ -922,7 +922,16 @@ describeDb('sockets (database)', () => {
     }
     expect((await playerReveal).lastCorrect).toBeNull()
     expect((await hostReveal).players[0]!.score).toBeGreaterThan(0)
-    expect(await command(hostSocket, { type: 'scoreboard' })).toEqual({ error: 'errors.invalidTransition' })
+    // The host may show the standings midgame: totals and ranks, nothing about the last question.
+    const playerBoard = nextSnapshot<PlayerSnapshot>(a.socket, 'game:player', (s) => s.phase === 'scoreboard')
+    const screenBoard = nextSnapshot<HostSnapshot>(screen, 'game:host', (s) => s.phase === 'scoreboard')
+    expect(await command(hostSocket, { type: 'scoreboard' })).toEqual({ ok: true })
+    for (const snap of [await playerBoard, await screenBoard]) {
+      expect(snap.reveal).toBeNull()
+      expect(snap.players[0]).toMatchObject({ rank: 1, previousRank: 1, roundPoints: 0, correctCount: 0 })
+      expect(snap.players[0]!.score).toBeGreaterThan(0)
+    }
+    expect((await playerBoard).lastPoints).toBeNull()
 
     const finished = nextSnapshot<PlayerSnapshot>(a.socket, 'game:player', (s) => s.phase === 'finished')
     expect(await command(hostSocket, { type: 'end' })).toEqual({ ok: true })

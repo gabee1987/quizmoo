@@ -6,10 +6,11 @@ import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { useGameTheme } from '@/lib/themes'
+import { useMediaQuery } from '@/lib/use-media-query'
 import { ConnectionBar } from '../../components/connection-bar'
 import { PlayerAvatar } from '../../components/player-avatar'
 import { Spinner } from '../../components/spinner'
-import { Controls } from '../../features/host/controls'
+import { Controls, EndGameButton } from '../../features/host/controls'
 import { GradingPanel } from '../../features/host/grading-panel'
 import { HostToastsToggle, useHostToasts } from '../../features/host/host-toasts'
 import { HostLobby } from '../../features/host/host-lobby'
@@ -19,6 +20,7 @@ import { PlayAgainButton } from '../../features/host/play-again-button'
 import { PlayerPanel } from '../../features/host/player-panel'
 import { ReviewPanel } from '../../features/host/review-panel'
 import { ShownQuestion } from '../../features/host/shown-question'
+import { Standings } from '../../features/host/standings'
 import { TeamModesPanel } from '../../features/host/team-modes-panel'
 import { RoundTripBadge } from '../../features/host/round-trip-badge'
 import { settingsLine } from '../../features/host/settings-line'
@@ -37,6 +39,8 @@ function HostGamePage() {
   const { t } = useTranslation()
   const { pin } = Route.useParams()
   const { status, since, host, clockOffset, closed } = useGameStore()
+  // Tailwind's lg: the two-column layout.
+  const wide = useMediaQuery('(min-width: 64rem)')
   useGameTheme(host?.settings)
   useHostToasts(host)
   const info = useQuery({
@@ -90,23 +94,25 @@ function HostGamePage() {
     )
   }
 
+  const gameId = info.data?.gameId ?? null
+  const controls = <Controls host={host} onCommand={(c) => void send(c)} placement={wide ? 'top' : 'bottom'} />
+  // One column on phones (a flex column, so the control bar can stick to the bottom of the whole
+  // page), two on laptops (the bar sticks to the top of the main column).
   return (
-    <div className="mx-auto grid w-full max-w-6xl gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
       <ConnectionBar status={status} since={since} />
       <div className="flex min-w-0 flex-col gap-5">
         <Header host={host} connected={status === 'connected'} />
-        <Controls host={host} onCommand={(c) => void send(c)} />
+        {wide && controls}
         <MessageBox announcement={host.announcement} quickMessages={host.quickMessages} clockOffset={clockOffset} onCommand={send} />
-        <PhaseDetail
-          host={host}
-          clockOffset={clockOffset}
-          gameId={info.data?.gameId ?? null}
-        />
+        <PhaseDetail host={host} clockOffset={clockOffset} gameId={gameId} />
         {host.phase === 'reveal' && host.awaitingGrading && (
           <GradingPanel host={host} onGrade={(ids) => void send({ type: 'gradeText', correctPlayerIds: ids })} />
         )}
+        <EndGameButton host={host} onCommand={(c) => void send(c)} />
       </div>
       <div className="flex min-w-0 flex-col gap-6">
+        <Standings host={host} gameId={gameId} />
         <TeamModesPanel host={host} onTeamMode={(mode, teamId) => void send({ type: 'teamMode', mode, teamId })} />
         <PlayerPanel
           host={host}
@@ -117,6 +123,7 @@ function HostGamePage() {
         />
         <ReviewPanel host={host} onShowQuestion={(index) => void send({ type: 'showQuestion', index })} />
       </div>
+      {!wide && controls}
     </div>
   )
 }

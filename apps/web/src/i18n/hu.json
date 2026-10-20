@@ -154,6 +154,7 @@
       "waitingForPlayers": "Még senki sincs itt. Oszd meg a PIN-kódot vagy a QR-kódot.",
       "backToQuizzes": "Vissza a kvízekhez",
       "showScoreboard": "Eredménytábla",
+      "controls": "Játékvezérlés",
       "nextQuestion": "Következő kérdés",
       "finish": "Vége",
       "gradeFirst": "A folytatáshoz értékeld a lenti válaszokat.",
@@ -264,12 +265,20 @@
       "noAnswer_one": "{{count}} játékos nem válaszolt:",
       "noAnswer_other": "{{count}} játékos nem válaszolt:"
     },
+    "standings": {
+      "resultsSoFar": "Eddigi eredmények",
+      "hiddenNote": "Ezeket a pontokat csak te látod. A játékosok és a kivetítő a végén látják, vagy amikor megmutatod az állást.",
+      "correct_one": "{{count}} helyes",
+      "correct_other": "{{count}} helyes",
+      "members_one": "{{count}} tag",
+      "members_other": "{{count}} tag",
+      "empty": "Még senki sem játszik.",
+      "showAll": "Mind ({{count}})",
+      "showFewer": "Kevesebb"
+    },
     "review": {
       "title": "Áttekintés",
       "standings": "Állás",
-      "name": "Név",
-      "correct": "Helyes",
-      "score": "Pont",
       "questions": "Eddigi kérdések",
       "noQuestionsYet": "Még egy kérdés válasza sem derült ki.",
       "pollAnswers_one": "{{count}} szavazat",
@@ -358,7 +367,7 @@
         "afterQuestion": "Minden kérdés után",
         "onDemand": "Amikor megmutatom"
       },
-      "scoreboardAtEnd": "A pontokból kiderülnének a válaszok, ezért az állást csak a végén mutatjuk.",
+      "scoreboardAtEnd": "A pontokból kiderülnének a válaszok, ezért az állást csak akkor mutatjuk, ha te kéred, és akkor is csak az összpontszámot.",
       "answerStyle": "Válaszgombok a telefonokon",
       "answerStyleOptions": {
         "plain": "Egyszerű",

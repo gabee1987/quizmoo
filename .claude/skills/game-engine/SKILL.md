@@ -63,6 +63,7 @@ Each command is `(state, input, now) => GameState` and returns a new object (no 
 | `endQuestion()` | question | scores all answers, goes to reveal; sets `awaitingGrading` for host-graded text |
 | `gradeText(correctPlayerIds)` | reveal with `awaitingGrading` | marks listed answers correct, scores them, clears flag |
 | `next()` | reveal -> scoreboard; scoreboard -> question (index+1) or finished | |
+| `showScoreboard()` | reveal, not `awaitingGrading` | scoreboard on demand, whatever `settings.scoreboard`, also with `revealAnswers: 'atEnd'`: `conceal` then keeps totals and ranks in the scoreboard phase but drops `previousRank`, `roundPoints`, `correctCount`, streaks and the reveal |
 | `skipQuestion()` | question | discards answers of the current question, goes to scoreboard |
 | `extendTime(seconds)` | question | pushes `questionEndsAt` |
 | `endGame()` | any | finished, sets `finishedAt` |

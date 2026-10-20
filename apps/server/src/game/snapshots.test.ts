@@ -334,6 +334,39 @@ describe('results held back until the end', () => {
     expect(player.myAnswer).toEqual({ type: 'single', optionId: 'a' })
   })
 
+  it('a scoreboard the host shows midgame has the totals and ranks, but not what moved', () => {
+    const state = showScoreboard(revealedHidden())
+    const player = toPlayerSnapshot(state, 'p2', T0)
+    const screen = toHostSnapshot(state, T0)
+    for (const snap of [player, screen]) {
+      expect(snap.phase).toBe('scoreboard')
+      expect(snap.reveal).toBeNull()
+      expect(snap.players.map((p) => [p.id, p.score, p.rank, p.previousRank, p.roundPoints, p.correctCount])).toEqual([
+        ['p1', 1000, 1, 1, 0, 0],
+        ['p2', 0, 2, 2, 0, 0],
+      ])
+      expect(JSON.stringify(snap)).not.toContain('correctOptionId')
+    }
+    expect(player.me).toMatchObject({ score: 0, rank: 2 })
+    expect(player.lastPoints).toBeNull()
+    // Back to a hidden reveal on the next question: nothing to read again.
+    const nextReveal = toPlayerSnapshot(endQuestion(next(state, T0 + 1)), 'p2', T0 + 2)
+    expect(nextReveal.players.every((p) => p.score === 0 && p.rank === 1)).toBe(true)
+  })
+
+  it('a scoreboard midgame keeps team totals and ranks without the arrows', () => {
+    let state = createGame(fixtureQuiz(), fixtureSettings({ mode: 'team', teamNames: ['Red', 'Blue'], revealAnswers: 'atEnd' }), '123456', 'g', T0)
+    state = joinPlayer(state, { id: 'p1', name: 'Anna', teamId: 'team-1', token: 't1' })
+    state = joinPlayer(state, { id: 'p2', name: 'Bela', teamId: 'team-2', token: 't2' })
+    state = startGame(state, T0)
+    state = submitAnswer(state, { playerId: 'p2', questionId: 'q-single', answer: { type: 'single', optionId: 'a' } }, T0)
+    const teams = toHostSnapshot(showScoreboard(endQuestion(state)), T0).teams
+    expect(teams.map((t) => [t.name, t.rank, t.previousRank, t.score > 0])).toEqual([
+      ['Blue', 1, 1, true],
+      ['Red', 2, 2, false],
+    ])
+  })
+
   it('the host room still gets everything', () => {
     const host = toHostSnapshot(revealedHidden(), T0, { includeAnswers: true })
     expect(host.answersHidden).toBe(true)

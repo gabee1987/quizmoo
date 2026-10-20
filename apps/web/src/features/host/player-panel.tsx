@@ -64,9 +64,9 @@ export function PlayerPanel({
               />
               <PlayerAvatar avatar={player.avatar} size="md" />
               <span className="min-w-0 flex-1">
-                <span className="block truncate font-semibold">{player.name}</span>
-                {player.teamId && <span className="block truncate text-xs text-muted-foreground">{teamName(player.teamId)}</span>}
-                {offline && <span className="block truncate text-xs font-semibold text-muted-foreground tabular-nums">{offline}</span>}
+                <span className="block font-semibold wrap-break-word">{player.name}</span>
+                {player.teamId && <span className="block text-xs text-muted-foreground wrap-break-word">{teamName(player.teamId)}</span>}
+                {offline && <span className="block text-xs font-semibold text-muted-foreground tabular-nums">{offline}</span>}
               </span>
               <span className="font-bold tabular-nums">{player.score}</span>
               {teams &&

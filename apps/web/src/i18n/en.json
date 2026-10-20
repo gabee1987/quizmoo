@@ -154,6 +154,7 @@
       "waitingForPlayers": "No players yet. Share the PIN or the QR code.",
       "backToQuizzes": "Back to quizzes",
       "showScoreboard": "Show scoreboard",
+      "controls": "Game controls",
       "nextQuestion": "Next question",
       "finish": "Finish",
       "gradeFirst": "Grade the answers below to continue.",
@@ -264,12 +265,20 @@
       "noAnswer_one": "{{count}} player did not answer:",
       "noAnswer_other": "{{count}} players did not answer:"
     },
+    "standings": {
+      "resultsSoFar": "Results so far",
+      "hiddenNote": "Only you see these scores. The players and the projector see them at the end, or when you show the standings.",
+      "correct_one": "{{count}} correct",
+      "correct_other": "{{count}} correct",
+      "members_one": "{{count}} member",
+      "members_other": "{{count}} members",
+      "empty": "Nobody is playing yet.",
+      "showAll": "Show all ({{count}})",
+      "showFewer": "Show fewer"
+    },
     "review": {
       "title": "Review",
       "standings": "Standings",
-      "name": "Name",
-      "correct": "Correct",
-      "score": "Score",
       "questions": "Questions so far",
       "noQuestionsYet": "No question has been revealed yet.",
       "pollAnswers_one": "{{count}} vote",
@@ -358,7 +367,7 @@
         "afterQuestion": "After each question",
         "onDemand": "When I show it"
       },
-      "scoreboardAtEnd": "Scores would give the answers away, so the scoreboard is shown at the end.",
+      "scoreboardAtEnd": "Scores would give the answers away, so the standings appear only when you show them, with totals only.",
       "answerStyle": "Answer buttons on phones",
       "answerStyleOptions": {
         "plain": "Plain",
