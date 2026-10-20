@@ -97,6 +97,19 @@
       "tooShort_other": "Legalább {{count}} karakter legyen.",
       "mismatch": "A két jelszó nem egyezik.",
       "submit": "Jelszó mentése"
+    },
+    "register": {
+      "link": "Kérj játékvezetői fiókot",
+      "title": "Regisztrálj!",
+      "intro": "Válassz felhasználónevet és jelszót. Az új fiókokat az adminisztrátor hagyja jóvá, utána be tudsz lépni.",
+      "repeat": "Jelszó még egyszer",
+      "website": "Ezt hagyd üresen",
+      "submit": "Regisztrálok",
+      "doneTitle": "Köszi!",
+      "done": "A fiókod ({{name}}) az adminisztrátor jóváhagyására vár. Ha jóváhagyta, lépj be a jelszavaddal.",
+      "closed": "Ezen az oldalon nem lehet regisztrálni. Kérj fiókot az adminisztrátortól.",
+      "toLogin": "Tovább a belépéshez",
+      "haveAccount": "Van már fiókod? Lépj be"
     }
   },
   "host": {
@@ -848,7 +861,17 @@
     "initialPasswordHint": "A kezdeti jelszót négyszemközt add át. Első belépéskor le kell cserélni.",
     "usernameRules": "3–40 karakter: betű, szám, pont, kötőjel, aláhúzás. E-mail-cím nem lehet.",
     "pendingPassword": "Még nem cserélte le a jelszavát",
-    "created": "{{name}} felhasználó létrehozva."
+    "created": "{{name}} felhasználó létrehozva.",
+    "pending": {
+      "title": "Jóváhagyásra várnak",
+      "hint": "Akik a regisztrációs oldalon jelentkeztek. Csak azt hagyd jóvá, akit felismersz; a jóvá nem hagyott regisztrációkat 7 nap után töröljük.",
+      "approve": "Jóváhagyás",
+      "reject": "Elutasítás",
+      "approved": "{{name}} már be tud lépni.",
+      "rejected": "{{name}} regisztrációja törölve.",
+      "rejectTitle": "Elutasítod: {{name}}?",
+      "rejectBody": "A regisztrációt töröljük. Később újra jelentkezhet."
+    }
   },
   "errors": {
     "gameNotFound": "Nincs ilyen játék. Ellenőrizd a PIN-t.",
@@ -882,6 +905,9 @@
     "fileTooLarge": "A fájl nagyobb 5 MB-nál.",
     "passwordChangeRequired": "Előbb cseréld le a kezdeti jelszót.",
     "usernameTaken": "Ez a felhasználónév már foglalt.",
+    "accountPending": "A fiókod az adminisztrátor jóváhagyására vár.",
+    "registrationClosed": "Nem lehet regisztrálni. Kérj fiókot az adminisztrátortól.",
+    "registrationsFull": "Túl sok regisztráció vár jóváhagyásra. Próbáld újra pár nap múlva.",
     "wrongCurrentPassword": "A jelenlegi jelszó hibás.",
     "samePassword": "Az új jelszónak különböznie kell a jelenlegitől.",
     "gameNotFinished": "Előbb fejezd be a játékot.",
@@ -898,7 +924,9 @@
     "signedInAs": "Belépve mint",
     "games": "Játékok",
     "account": "Fiók",
-    "settings": "Beállításaim"
+    "settings": "Beállításaim",
+    "feedback": "Visszajelzés",
+    "opensInNewTab": "új lapon nyílik meg"
   },
   "settings": {
     "title": "Beállításaim",
@@ -1076,6 +1104,60 @@
     "add": "Naptárba",
     "summary": "Quizmoo: {{title}}",
     "description": "PIN-kód: {{pin}}\nCsatlakozz itt: {{url}}"
+  },
+  "privacy": {
+    "link": "Adatvédelem",
+    "title": "Adatvédelem",
+    "intro": "A Quizmoo egy kvízjáték. A lehető legkevesebbet tárolja rólad, és csak a játékhoz.",
+    "operator": "Ezt az oldalt {{name}} üzemelteti.",
+    "operatorUnknown": "Ezt az oldalt az üzemelteti, aki a játékaidat szervezi: a kérdéseiddel fordulj hozzá.",
+    "contact": "Kérdés, kérés:",
+    "sections": [
+      {
+        "heading": "Ha játszol",
+        "items": [
+          "A beírt beceneved, az avatarod és a csapatod.",
+          "A válaszaid és a pontjaid a játékban.",
+          "Semmi más: se e-mail-cím, se telefonszám, se fiók, se hely, se IP-cím."
+        ]
+      },
+      {
+        "heading": "Ha játékot vezetsz",
+        "items": [
+          "A felhasználóneved, a jelszavad pedig csak hash-ként, amiből senki nem tudja visszafejteni.",
+          "A kvízeid, képeid, beállításaid és a játékaid."
+        ]
+      },
+      {
+        "heading": "Meddig",
+        "items": [
+          "A befejezett játékokat a játékosok becenevével és válaszaival együtt legkésőbb {{days}} nappal a játék után töröljük.",
+          "A játékvezetői fiókok és a kvízek addig maradnak, amíg valaki nem törli őket.",
+          "Ha az adminisztrátor 7 napon belül nem hagy jóvá egy regisztrációt, töröljük."
+        ]
+      },
+      {
+        "heading": "Sütik és a készüléked",
+        "items": [
+          "A játékvezetők egy sütit kapnak, ami legfeljebb 30 napig bejelentkezve tartja őket. A játékosok egyet sem.",
+          "A böngésződ megjegyzi a nyelvet, a színmódot és a helyedet a játékban, hogy újratöltés után visszajuss. Ez a készülékeden marad.",
+          "Nincs követés, statisztika vagy reklám, és más oldalról semmi nem töltődik be."
+        ]
+      },
+      {
+        "heading": "Hol fut",
+        "items": [
+          "Az alkalmazás és az adatbázisa egy tárhelyszolgáltatónál fut, akit az oldal üzemeltetője választott. A szolgáltató az adatokat csak a működtetéshez kezeli."
+        ]
+      },
+      {
+        "heading": "A jogaid",
+        "items": [
+          "Megkérdezheted, mit tárolunk rólad, és kérheted, hogy javítsuk vagy töröljük. Írj a fenti címre a játék dátumával és a beceneveddel.",
+          "A játékvezetők a játékaikat és a kvízeiket bármikor maguk is törölhetik."
+        ]
+      }
+    ]
   },
   "quizFile": {
     "importTitle": "Importálj egy kvízt",

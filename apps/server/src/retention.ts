@@ -1,8 +1,21 @@
 import { and, eq, lt, sql } from 'drizzle-orm'
 import type { Db } from './db/index.js'
-import { games } from './db/schema.js'
+import { games, users } from './db/schema.js'
 
 export const DAY_MS = 24 * 60 * 60 * 1000
+
+/** Self sign-ups the admin has not approved within this many days are deleted. */
+export const SIGNUP_EXPIRY_DAYS = 7
+
+/** Data minimisation: deletes pending sign-ups older than `SIGNUP_EXPIRY_DAYS`. Returns how many. */
+export async function deleteExpiredSignups(db: Db, now: number): Promise<number> {
+  const cutoff = new Date(now - SIGNUP_EXPIRY_DAYS * DAY_MS)
+  const deleted = await db
+    .delete(users)
+    .where(and(eq(users.status, 'pending'), lt(users.createdAt, cutoff)))
+    .returning({ id: users.id })
+  return deleted.length
+}
 
 /**
  * Data minimisation: deletes finished games (with their players' nicknames and answers)
@@ -53,6 +66,8 @@ export function scheduleRetention(db: Db, { days, maxPerHost, onDeleted, log, no
       await onDeleted([...ids, ...capped])
       if (ids.length > 0) log.info({ deleted: ids.length, days }, 'deleted expired games')
       if (capped.length > 0) log.info({ deleted: capped.length, maxPerHost }, 'deleted games over the cap')
+      const signups = await deleteExpiredSignups(db, now())
+      if (signups > 0) log.info({ deleted: signups }, 'deleted unapproved sign-ups')
     } catch (error) {
       log.error(error, 'deleting expired games failed')
     }

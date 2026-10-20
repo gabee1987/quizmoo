@@ -1,4 +1,4 @@
-import { asc } from 'drizzle-orm'
+import { and, asc, eq } from 'drizzle-orm'
 import type { FastifyInstance } from 'fastify'
 import { z } from 'zod'
 import { MIN_PASSWORD_LENGTH } from '../auth/password.js'
@@ -9,16 +9,20 @@ import { users } from '../db/schema.js'
 import { parseOr400 } from './http.js'
 
 // Login names only: no e-mail addresses or other personal data in usernames.
+export const usernameSchema = z
+  .string()
+  .trim()
+  .min(3)
+  .max(40)
+  .regex(/^[a-zA-Z0-9._-]+$/)
+
 const createUserSchema = z.object({
-  username: z
-    .string()
-    .trim()
-    .min(3)
-    .max(40)
-    .regex(/^[a-zA-Z0-9._-]+$/),
+  username: usernameSchema,
   password: z.string().min(MIN_PASSWORD_LENGTH).max(200),
   role: z.enum(['admin', 'editor']).default('editor'),
 })
+
+const userIdParams = z.object({ id: z.string().min(1).max(40) })
 
 export async function userRoutes(app: FastifyInstance, { db }: { db: Db }) {
   const adminOnly = { preHandler: requireSession(db, { admin: true }) }
@@ -30,6 +34,7 @@ export async function userRoutes(app: FastifyInstance, { db }: { db: Db }) {
         username: users.username,
         role: users.role,
         mustChangePassword: users.mustChangePassword,
+        status: users.status,
         createdAt: users.createdAt,
       })
       .from(users)
@@ -49,9 +54,33 @@ export async function userRoutes(app: FastifyInstance, { db }: { db: Db }) {
       throw error
     }
   })
+
+  // Self sign-ups wait here: approving lets the account log in, rejecting deletes it.
+  app.post('/api/users/:id/approve', adminOnly, async (request, reply) => {
+    const params = parseOr400(userIdParams, request.params, reply)
+    if (!params) return reply
+    const updated = await db
+      .update(users)
+      .set({ status: 'active' })
+      .where(and(eq(users.id, params.id), eq(users.status, 'pending')))
+      .returning({ id: users.id })
+    if (updated.length === 0) return reply.code(404).send({ error: 'errors.notFound' })
+    return reply.code(204).send()
+  })
+
+  app.post('/api/users/:id/reject', adminOnly, async (request, reply) => {
+    const params = parseOr400(userIdParams, request.params, reply)
+    if (!params) return reply
+    const deleted = await db
+      .delete(users)
+      .where(and(eq(users.id, params.id), eq(users.status, 'pending')))
+      .returning({ id: users.id })
+    if (deleted.length === 0) return reply.code(404).send({ error: 'errors.notFound' })
+    return reply.code(204).send()
+  })
 }
 
-function isUniqueViolation(error: unknown): boolean {
+export function isUniqueViolation(error: unknown): boolean {
   const code = (error as { code?: unknown; cause?: { code?: unknown } }).code ?? (error as { cause?: { code?: unknown } }).cause?.code
   return code === '23505'
 }

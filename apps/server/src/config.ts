@@ -16,6 +16,23 @@ const envSchema = z.object({
   RESULTS_RETENTION_DAYS: z.coerce.number().int().min(0).default(90),
   /** Finished games kept per host account; finishing one more deletes the oldest. */
   MAX_GAMES_PER_HOST: z.coerce.number().int().min(1).default(200),
+  /**
+   * Proxies in front of the app whose X-Forwarded-For is trusted (1 on Railway). 0 without one:
+   * otherwise any client could send the header and dodge the per-IP rate limits.
+   */
+  TRUST_PROXY: emptyAsUnset(z.coerce.number().int().min(0).max(5).default(0)),
+  /** Who runs this install and how to reach them, shown on the privacy page. */
+  OPERATOR_NAME: emptyAsUnset(z.string().trim().min(1).max(100).optional()),
+  OPERATOR_EMAIL: emptyAsUnset(z.string().trim().email().max(200).optional()),
+  /** Where the host navigation's Feedback link points; no link without it. */
+  FEEDBACK_URL: emptyAsUnset(z.string().url().startsWith('https://').optional()),
+  /** `true` lets anyone sign up as a host on /register; the account waits for an admin's approval. */
+  REGISTRATION_OPEN: emptyAsUnset(
+    z
+      .enum(['true', 'false'])
+      .default('false')
+      .transform((v) => v === 'true'),
+  ),
 })
 
 export type Config = z.infer<typeof envSchema>

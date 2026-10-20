@@ -1,0 +1,34 @@
+name: Visszajelzés / Feedback
+description: Hiba, ötlet vagy bármi a Quizmoo-ról / A bug, an idea or anything about Quizmoo
+labels: [feedback]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Köszi, hogy írsz! Ez az oldal nyilvános: ne írj ide jelszót, e-mail-címet vagy más személyes adatot, és játékosneveket se.
+        Thanks for writing! This page is public: do not include passwords, e-mail addresses or other personal data, and no player names either.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Hol? / Where?
+      options:
+        - Csatlakozás, játék telefonon / Joining or playing on a phone
+        - Kivetítő / Projector
+        - Játék vezetése / Running a game
+        - Kvízszerkesztő, kvízek / Quiz editor, quizzes
+        - Eredmények, előzmények / Results, history
+        - Más / Other
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: Mi történt, vagy mit szeretnél? / What happened, or what would you like?
+      description: Ha hiba, írd le a lépéseket és azt, amit vártál. / For a bug, the steps and what you expected.
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: Készülék és böngésző / Device and browser
+      placeholder: pl. / e.g. iPhone 13, Safari

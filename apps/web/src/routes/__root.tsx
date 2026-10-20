@@ -19,8 +19,8 @@ function RootLayout() {
   // A phone in a game gets the whole screen: no header, its settings behind a floating button.
   const pathname = useRouterState({ select: (state) => state.location.pathname })
   const inGame = pathname.startsWith('/play/')
-  // The join and login pages show the logo and name big in their hero.
-  const home = pathname === '/' || pathname === '/login'
+  // The join, login and sign-up pages show the logo and name big in their hero.
+  const home = pathname === '/' || pathname === '/login' || pathname === '/register'
   return (
     <>
       <Backdrop />

@@ -97,6 +97,19 @@
       "tooShort_other": "At least {{count}} characters.",
       "mismatch": "The two passwords differ.",
       "submit": "Save password"
+    },
+    "register": {
+      "link": "Create a host account",
+      "title": "Sign up",
+      "intro": "Pick a username and a password. The admin approves new accounts, then you can log in.",
+      "repeat": "Password again",
+      "website": "Leave this empty",
+      "submit": "Sign up",
+      "doneTitle": "Thanks!",
+      "done": "Your account {{name}} is waiting for the admin's approval. Once it is approved, log in with your password.",
+      "closed": "Sign-up is closed on this site. Ask the admin for an account.",
+      "toLogin": "Go to login",
+      "haveAccount": "Already have an account? Log in"
     }
   },
   "host": {
@@ -848,7 +861,17 @@
     "initialPasswordHint": "Share the initial password privately. The user must change it at first login.",
     "usernameRules": "3–40 characters: letters, digits, dot, dash, underscore. No e-mail addresses.",
     "pendingPassword": "Password not changed yet",
-    "created": "User {{name}} created."
+    "created": "User {{name}} created.",
+    "pending": {
+      "title": "Waiting for approval",
+      "hint": "People who signed up on the sign-up page. Only approve names you recognise; unapproved sign-ups are deleted after 7 days.",
+      "approve": "Approve",
+      "reject": "Reject",
+      "approved": "{{name}} can log in now.",
+      "rejected": "Sign-up {{name}} deleted.",
+      "rejectTitle": "Reject {{name}}?",
+      "rejectBody": "The sign-up is deleted. They can sign up again."
+    }
   },
   "errors": {
     "gameNotFound": "No such game. Check the PIN.",
@@ -882,6 +905,9 @@
     "fileTooLarge": "The file is larger than 5 MB.",
     "passwordChangeRequired": "Change your initial password first.",
     "usernameTaken": "This username is already taken.",
+    "accountPending": "Your account is waiting for the admin's approval.",
+    "registrationClosed": "Sign-up is closed. Ask the admin for an account.",
+    "registrationsFull": "Too many sign-ups are waiting for approval. Try again in a few days.",
     "wrongCurrentPassword": "The current password is wrong.",
     "samePassword": "The new password must differ from the current one.",
     "gameNotFinished": "End the game first.",
@@ -898,7 +924,9 @@
     "signedInAs": "Signed in as",
     "games": "Games",
     "account": "Account",
-    "settings": "My settings"
+    "settings": "My settings",
+    "feedback": "Feedback",
+    "opensInNewTab": "opens in a new tab"
   },
   "settings": {
     "title": "My settings",
@@ -1076,6 +1104,60 @@
     "add": "Add to calendar",
     "summary": "Quizmoo: {{title}}",
     "description": "PIN: {{pin}}\nJoin at: {{url}}"
+  },
+  "privacy": {
+    "link": "Privacy",
+    "title": "Privacy",
+    "intro": "Quizmoo is a quiz game. It keeps as little about you as it can, and only for the game.",
+    "operator": "This site is run by {{name}}.",
+    "operatorUnknown": "This site is run by whoever organises your games: ask them your questions.",
+    "contact": "Questions and requests:",
+    "sections": [
+      {
+        "heading": "If you play",
+        "items": [
+          "The nickname you type, your avatar and your team.",
+          "Your answers and points in the game.",
+          "Nothing else: no e-mail, phone number, account, location or IP address."
+        ]
+      },
+      {
+        "heading": "If you host",
+        "items": [
+          "Your username, and your password only as a hash that nobody can read back.",
+          "Your quizzes, pictures, settings and the games you ran."
+        ]
+      },
+      {
+        "heading": "How long",
+        "items": [
+          "Finished games, with the players' nicknames and answers, are deleted {{days}} days after the game at the latest.",
+          "Host accounts and quizzes stay until they are deleted.",
+          "A sign-up the admin does not approve within 7 days is deleted."
+        ]
+      },
+      {
+        "heading": "Cookies and your device",
+        "items": [
+          "Hosts get one cookie that keeps them logged in for up to 30 days. Players get none.",
+          "Your browser remembers your language, your colour mode and your place in a game, so a reload brings you back. This stays on your device.",
+          "No tracking, analytics or ads, and nothing is loaded from other sites."
+        ]
+      },
+      {
+        "heading": "Where it runs",
+        "items": [
+          "The app and its database run at a hosting provider chosen by whoever runs this site. The provider handles the data only to run the service."
+        ]
+      },
+      {
+        "heading": "Your rights",
+        "items": [
+          "You can ask what is stored about you, and have it corrected or deleted. Write to the contact above with the date of the game and your nickname.",
+          "Hosts can delete their games and quizzes themselves at any time."
+        ]
+      }
+    ]
   },
   "quizFile": {
     "importTitle": "Import a quiz",

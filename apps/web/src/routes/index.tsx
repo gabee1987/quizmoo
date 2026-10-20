@@ -321,12 +321,14 @@ function JoinPage() {
             error && <FormAlert>{t(error)}</FormAlert>
           )}
         </form>
-        <Link
-          to="/login"
-          className="self-center rounded-md text-sm font-semibold text-muted-foreground underline underline-offset-4 outline-none hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring"
-        >
-          {t('join.hostLogin')}
-        </Link>
+        <div className="flex flex-wrap justify-center gap-x-5 gap-y-2">
+          <Link to="/login" className={footerLink}>
+            {t('join.hostLogin')}
+          </Link>
+          <Link to="/privacy" className={footerLink}>
+            {t('privacy.link')}
+          </Link>
+        </div>
         {/* Room below for scrolling the card up; out of the layout, so nothing moves when it comes and goes. */}
         {pinFocused && <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-full h-dvh lg:hidden" />}
       </div>
@@ -344,3 +346,6 @@ function JoinPage() {
     </div>
   )
 }
+
+const footerLink =
+  'rounded-md text-sm font-semibold text-muted-foreground underline underline-offset-4 outline-none hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring'

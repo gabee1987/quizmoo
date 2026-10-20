@@ -9,12 +9,12 @@ export async function createUser(
   username: string,
   password: string,
   role: 'admin' | 'editor' = 'editor',
-  { mustChangePassword = false } = {},
+  { mustChangePassword = false, status = 'active' }: { mustChangePassword?: boolean; status?: 'active' | 'pending' } = {},
 ) {
   const id = nanoid(12)
   const passwordHash = await hashPassword(password)
   await db.transaction(async (tx) => {
-    await tx.insert(users).values({ id, username, role, mustChangePassword })
+    await tx.insert(users).values({ id, username, role, mustChangePassword, status })
     await tx.insert(localCredentials).values({ userId: id, passwordHash })
   })
   return { id, username, role }

@@ -1,10 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link, createFileRoute } from '@tanstack/react-router'
-import { UserPlusIcon } from 'lucide-react'
+import { CheckIcon, UserPlusIcon, XIcon } from 'lucide-react'
 import { useId, useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
+import { ConfirmDialog } from '@/components/dialog'
 import { FormAlert } from '@/components/form-alert'
+import { toastError } from '@/lib/toast'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
@@ -17,6 +19,7 @@ interface UserRow {
   username: string
   role: 'admin' | 'editor'
   mustChangePassword: boolean
+  status: 'active' | 'pending'
   createdAt: string
 }
 
@@ -50,6 +53,18 @@ function UsersPage() {
     },
   })
 
+  const [rejecting, setRejecting] = useState<UserRow | null>(null)
+  const decide = useMutation({
+    mutationFn: ({ user, action }: { user: UserRow; action: 'approve' | 'reject' }) =>
+      apiFetch(`/api/users/${user.id}/${action}`, { method: 'POST' }),
+    onSuccess: (_, { user, action }) => {
+      toast.success(t(action === 'approve' ? 'users.pending.approved' : 'users.pending.rejected', { name: user.username }))
+      setRejecting(null)
+      void queryClient.invalidateQueries({ queryKey: ['users'] })
+    },
+    onError: toastError,
+  })
+
   const usernameValid = /^[a-zA-Z0-9._-]{3,40}$/.test(username.trim())
   function onSubmit(e: FormEvent) {
     e.preventDefault()
@@ -70,12 +85,59 @@ function UsersPage() {
   }
 
   const date = new Intl.DateTimeFormat(i18n.language, { dateStyle: 'medium' })
+  const pending = users.data?.filter((user) => user.status === 'pending') ?? []
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
       <h1 className="text-3xl font-black tracking-tight">{t('users.title')}</h1>
 
+      {pending.length > 0 && (
+        <section aria-labelledby="pending-title" className="flex flex-col overflow-hidden rounded-2xl border-2 border-warning bg-card shadow-soft">
+          <div className="bg-warning px-4 py-3 text-warning-foreground">
+            <h2 id="pending-title" className="text-lg font-extrabold">
+              {t('users.pending.title')} ({pending.length})
+            </h2>
+            <p className="text-sm font-semibold">{t('users.pending.hint')}</p>
+          </div>
+          <ul className="flex flex-col divide-y">
+            {pending.map((user) => (
+              <li key={user.id} className="flex flex-wrap items-center gap-x-3 gap-y-2 px-4 py-3">
+                <span className="min-w-0 flex-1 font-bold wrap-break-word">{user.username}</span>
+                <span className="text-sm text-muted-foreground">{date.format(new Date(user.createdAt))}</span>
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    variant="success"
+                    disabled={decide.isPending}
+                    onClick={() => decide.mutate({ user, action: 'approve' })}
+                  >
+                    <CheckIcon aria-hidden="true" />
+                    {t('users.pending.approve')}
+                  </Button>
+                  <Button size="sm" variant="outline" disabled={decide.isPending} onClick={() => setRejecting(user)}>
+                    <XIcon aria-hidden="true" />
+                    {t('users.pending.reject')}
+                  </Button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+      {rejecting && (
+        <ConfirmDialog
+          title={t('users.pending.rejectTitle', { name: rejecting.username })}
+          confirmLabel={t('users.pending.reject')}
+          danger
+          pending={decide.isPending}
+          onConfirm={() => decide.mutate({ user: rejecting, action: 'reject' })}
+          onCancel={() => setRejecting(null)}
+        >
+          {t('users.pending.rejectBody')}
+        </ConfirmDialog>
+      )}
+
       <ul className="flex flex-col divide-y overflow-hidden rounded-2xl border bg-card shadow-soft">
-        {users.data?.map((user) => (
+        {users.data?.filter((user) => user.status === 'active').map((user) => (
           <li key={user.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-3">
             <span
               aria-hidden="true"

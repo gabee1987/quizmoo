@@ -99,6 +99,38 @@ describe('app', () => {
     rmSync(webDist, { recursive: true })
   })
 
+  it('ignores X-Forwarded-For for rate limits unless a proxy is trusted', async () => {
+    const limitedBy = async (trustProxy: number) => {
+      const app = (await buildApp({ ...config, TRUST_PROXY: trustProxy }, { db: { execute: async () => [] } as unknown as Db, manager: newManager() })).app
+      const responses = await Promise.all(
+        Array.from({ length: 320 }, (_, i) =>
+          app.inject({ method: 'GET', url: '/api/site', remoteAddress: '10.0.0.1', headers: { 'x-forwarded-for': forwarded(i) } }),
+        ),
+      )
+      await app.close()
+      return responses.some((res) => res.statusCode === 429)
+    }
+    // Without a proxy every request comes from 10.0.0.1, whatever the header says.
+    let forwarded = (i: number) => `198.51.${Math.floor(i / 250)}.${i % 250}`
+    expect(await limitedBy(0)).toBe(true)
+    // Behind one proxy the address it added last is the client: 320 different ones.
+    expect(await limitedBy(1)).toBe(false)
+    // A client writing its own addresses in front of the proxy's still counts as one.
+    forwarded = (i: number) => `198.51.${Math.floor(i / 250)}.${i % 250}, 203.0.113.7`
+    expect(await limitedBy(1)).toBe(true)
+  })
+
+  it('tells the privacy page and the host navigation who runs the install', async () => {
+    expect((await built.app.inject({ method: 'GET', url: '/api/site' })).json()).toEqual({ operator: null, contact: null, feedbackUrl: null, retentionDays: 90, registrationOpen: false })
+    const site = await buildApp(
+      { ...config, OPERATOR_NAME: 'Test Operator', OPERATOR_EMAIL: 'privacy@example.test', FEEDBACK_URL: 'https://example.test/feedback' },
+      { db: { execute: async () => [] } as unknown as Db, manager: newManager() },
+    )
+    const res = await site.app.inject({ method: 'GET', url: '/api/site' })
+    expect(res.json()).toEqual({ operator: 'Test Operator', contact: 'privacy@example.test', feedbackUrl: 'https://example.test/feedback', retentionDays: 90, registrationOpen: false })
+    await site.app.close()
+  })
+
   it('rejects JSON bodies over 1 MB', async () => {
     const res = await built.app.inject({
       method: 'POST',
@@ -120,6 +152,23 @@ describe('app', () => {
     expect(parsed.SEED_ADMIN_PASSWORD).toBeUndefined()
     expect(parsed.RESULTS_RETENTION_DAYS).toBe(90)
     expect(parsed.MAX_GAMES_PER_HOST).toBe(200)
+    expect(parsed.TRUST_PROXY).toBe(0)
+    expect(parsed.REGISTRATION_OPEN).toBe(false)
+  })
+
+  it('opens registration only for the exact value true', () => {
+    const env = { DATABASE_URL: 'postgres://test:test@localhost:5432/test', SESSION_SECRET: 'x'.repeat(32) }
+    expect(loadConfig({ ...env, REGISTRATION_OPEN: 'true' }).REGISTRATION_OPEN).toBe(true)
+    expect(loadConfig({ ...env, REGISTRATION_OPEN: 'false' }).REGISTRATION_OPEN).toBe(false)
+    expect(loadConfig({ ...env, REGISTRATION_OPEN: '' }).REGISTRATION_OPEN).toBe(false)
+    expect(() => loadConfig({ ...env, REGISTRATION_OPEN: 'yes' })).toThrow(/REGISTRATION_OPEN/)
+  })
+
+  it('accepts only an https feedback link and a valid operator e-mail', () => {
+    const env = { DATABASE_URL: 'postgres://test:test@localhost:5432/test', SESSION_SECRET: 'x'.repeat(32) }
+    expect(() => loadConfig({ ...env, FEEDBACK_URL: 'javascript:alert(1)' })).toThrow(/FEEDBACK_URL/)
+    expect(() => loadConfig({ ...env, FEEDBACK_URL: 'http://example.test' })).toThrow(/FEEDBACK_URL/)
+    expect(() => loadConfig({ ...env, OPERATOR_EMAIL: 'not-an-address' })).toThrow(/OPERATOR_EMAIL/)
   })
 
   it('rejects an invalid environment', () => {
