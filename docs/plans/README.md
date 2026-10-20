@@ -33,8 +33,9 @@ Finished plans are deleted once their branch is merged: `CHANGELOG.md` records w
 | 24 | Player and host polish from testing | `feature/player-host-polish` | done |
 | 25 | Game history at scale | `feature/game-history` | done |
 | 26 | [Friends and family beta on a hosting provider](phase-26-beta-deploy.md) | `chore/beta-deploy` | in progress |
-| 27 | [Quiz files: spreadsheet and Quizmoo file import and export](phase-27-quiz-files.md) | `feature/quiz-files` | done |
+| 27 | Quiz files: spreadsheet and Quizmoo file import and export | `feature/quiz-files` | done |
 | 28 | [Admin pages: users and names](phase-28-admin-pages.md) | `feature/admin-pages` | done |
+| 29 | [My settings in tabs, and the host's own account](phase-29-settings-tabs.md) | `feature/admin-pages` | done |
 
 ## Conventions every plan follows
 

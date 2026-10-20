@@ -41,6 +41,9 @@ Error shape everywhere: `{ error: '<i18n key>' }`. Status codes: 400 invalid inp
 | `POST /api/users/:id/role` | admin | `{ role }` |
 | `POST /api/users/:id/logout` | admin | ends every session of the account |
 | `DELETE /api/users/:id` | admin | ends the host's running games, then deletes the account (the database cascades to quizzes, games, images, settings) |
+| `GET /api/me/account` | session | own `{ account }`: username, role, dates, active logins, quizzes, finished games, images |
+| `POST /api/me/account/logout-others` | session | ends every own session except this one |
+| `DELETE /api/me/account` | session | `{ password }` -> deletes the own account like `DELETE /api/users/:id` (`deleteAccount`); 400 `errors.wrongCurrentPassword`, 409 `errors.lastAdmin` for the only admin |
 | `GET /api/site` | - | `{ operator, contact, feedbackUrl, retentionDays, registrationOpen }` from the environment, for `/privacy` and the Feedback link |
 | `GET /api/quizzes` | session | list own quizzes (id, title, questionCount, updatedAt) |
 | `POST /api/quizzes` | session | create from `quizInputSchema`; a body without `settings` gets the host's game defaults. A `branding.logoImageId` that is not the host's own image: 400 `errors.invalidInput` (also on PUT) |

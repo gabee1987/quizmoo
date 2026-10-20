@@ -59,6 +59,7 @@ Collected while testing phases 9 to 12. Effort as above.
 - Game history in pages while scrolling, search by title or PIN, state and period filters, and at most 200 finished games kept per host (phase 25).
 - Host sign-up with the admin's approval, without e-mail (phase 26).
 - Admin pages: a Users page with each account's figures and last login, setting a new password, changing the role, logging out everywhere and deleting an account; a Names page that edits the "Surprise me" names row by row (phase 28).
+- My settings in four tabs (Games first), and an Account tab: overview, this device's language and look, password, logging out other logins, deleting the own account (phase 29).
 - Quiz files: questions written in a spreadsheet anywhere (template with a guide and examples) imported with a row-by-row problem report, and quizzes downloaded as a spreadsheet or a full Quizmoo file with settings and pictures (phase 27).
 
 ### Open

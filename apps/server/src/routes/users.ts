@@ -37,7 +37,7 @@ const perUser = (expression: string, table: string, column: string, where = '', 
   sql.raw(`(select ${expression} from "${table}" t where t."${column}" = "users"."id"${where ? ` and ${where}` : ''})::${cast}`)
 
 // A handful of hosts, so a few small subqueries per row are fine.
-const figures = {
+export const figures = {
   quizzes: perUser('count(*)', 'quizzes', 'owner_id') as SQL<number>,
   gamesPlayed: perUser('count(*)', 'games', 'host_id', `t.phase = 'finished'`) as SQL<number>,
   playersReached: perUser('coalesce(sum(t.player_count), 0)', 'games', 'host_id', `t.phase = 'finished'`) as SQL<number>,
@@ -158,21 +158,25 @@ export async function userRoutes(app: FastifyInstance, { db, manager }: { db: Db
     return reply.code(204).send()
   })
 
-  /**
-   * Deletes the account with its quizzes, games, images and settings (the database cascades).
-   * Its running games end first, so the phones and the projector see the game end, then they are
-   * dropped from memory so no later transition saves them again.
-   */
   app.delete('/api/users/:id', adminOnly, async (request, reply) => {
     const id = await target(request, reply)
     if (!id) return reply
-    for (const game of manager.hostedBy(id)) {
-      if (game.state.phase !== 'finished') manager.apply(game.state.pin, endGame)
-      await manager.discard(game.state.id)
-    }
-    await db.delete(users).where(eq(users.id, id))
+    await deleteAccount(db, manager, id)
     return reply.code(204).send()
   })
+}
+
+/**
+ * Deletes the account with its quizzes, games, images and settings (the database cascades).
+ * Its running games end first, so the phones and the projector see the game end, then they are
+ * dropped from memory so no later transition saves them again.
+ */
+export async function deleteAccount(db: Db, manager: GameManager, id: string) {
+  for (const game of manager.hostedBy(id)) {
+    if (game.state.phase !== 'finished') manager.apply(game.state.pin, endGame)
+    await manager.discard(game.state.id)
+  }
+  await db.delete(users).where(eq(users.id, id))
 }
 
 export function isUniqueViolation(error: unknown): boolean {

@@ -991,6 +991,7 @@
     "passwordChangeRequired": "Előbb cseréld le a kezdeti jelszót.",
     "usernameTaken": "Ez a felhasználónév már foglalt.",
     "notOnYourself": "A saját fiókoddal ezt nem teheted meg. A jelszavadat a Beállításaimban cserélheted le.",
+    "lastAdmin": "Te vagy az egyetlen adminisztrátor. Előbb tegyél meg valaki mást adminisztrátornak.",
     "accountPending": "A fiókod az adminisztrátor jóváhagyására vár.",
     "registrationClosed": "Nem lehet regisztrálni. Kérj fiókot az adminisztrátortól.",
     "registrationsFull": "Túl sok regisztráció vár jóváhagyásra. Próbáld újra pár nap múlva.",
@@ -1060,6 +1061,46 @@
       "eventName": "Esemény neve",
       "eventNameHelp": "Az új játék ablaka ezzel indul, és játékonként átírhatod.",
       "eventNamePlaceholder": "pl. Karácsonyi buli"
+    },
+    "tabs": {
+      "label": "Beállítások csoportjai",
+      "games": "Játék",
+      "messages": "Üzenetek",
+      "branding": "Arculat",
+      "account": "Fiók"
+    },
+    "account": {
+      "title": "A fiókod",
+      "joined": "Itt vagy {{date}} óta",
+      "lastLogin": "utoljára beléptél {{when}}",
+      "logins": {
+        "title": "Belépések",
+        "body_one": "Csak ebben a böngészőben vagy belépve.",
+        "body_other": "{{count}} helyen vagy belépve, ezzel a böngészővel együtt. Ha közös gépen léptél be, vagy elhagytad az egyik eszközödet, léptesd ki a többit.",
+        "submit": "Többi kiléptetése",
+        "done": "Mindenhol máshol kiléptettünk"
+      },
+      "device": {
+        "title": "Ez az eszköz",
+        "help": "Ezen az eszközön azonnal elmentjük, a többi eszközöd a sajátját tartja meg."
+      },
+      "delete": {
+        "title": "Fiók törlése",
+        "help": "Végleg törli a fiókodat az összes kvízzel, játékkal, eredménnyel és képpel együtt.",
+        "open": "Fiókom törlése",
+        "dialogTitle": "Törlöd a fiókodat?",
+        "body": "Ezek végleg törlődnek, és nem lehet visszahozni őket:",
+        "quizzes_one": "{{count}} kvíz",
+        "quizzes_other": "{{count}} kvíz",
+        "games_one": "{{count}} lezárt játék az eredményeivel",
+        "games_other": "{{count}} lezárt játék az eredményeikkel",
+        "images_one": "{{count}} kép",
+        "images_other": "{{count}} kép",
+        "running": "A még futó játékaid azonnal véget érnek.",
+        "password": "A jelszavad",
+        "submit": "Végleges törlés",
+        "done": "Töröltük a fiókodat"
+      }
     }
   },
   "branding": {

@@ -6,7 +6,7 @@ import { PasswordForm } from '../../features/settings/password-form'
 // password is changed on My settings.
 export const Route = createFileRoute('/host/password')({
   beforeLoad: ({ context }) => {
-    if (!context.user.mustChangePassword) throw redirect({ to: '/host/settings', hash: 'account' })
+    if (!context.user.mustChangePassword) throw redirect({ to: '/host/settings', search: { tab: 'account' } })
   },
   component: PasswordPage,
 })

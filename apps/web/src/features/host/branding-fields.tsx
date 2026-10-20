@@ -38,6 +38,7 @@ export function BrandingFields({
         ) : (
           <Link
             to="/host/settings"
+            search={{ tab: 'branding' }}
             className="flex min-h-12 items-center gap-2 rounded-xl border-2 border-dashed border-input px-3 text-sm font-semibold text-muted-foreground outline-none hover:border-ring hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring"
           >
             <ImagePlusIcon className="size-5" aria-hidden="true" />

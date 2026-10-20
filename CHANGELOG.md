@@ -16,6 +16,10 @@
 - The last login time is stored for each account (shown to admins only, deleted with the account); the privacy page says so. After updating, run `pnpm --filter @quizmoo/server db:migrate` (production deploys migrate on start).
 - The Names page edits the "Surprise me" names one by one: each row shows the avatar the name gets, names are added one at a time or as a pasted list (duplicates skipped), renamed and removed in place, and a name the join would refuse is marked at once. A search, a name count per language, and the same unsaved changes bar as My settings.
 
+### My settings
+- My settings is split into four tabs, Games first: Games, Messages, Branding, Account. The open tab is in the address, and a dot marks each tab with unsaved changes.
+- The Account tab shows your username, role, when you joined and last logged in; sets this device's language and light or dark look; changes the password; logs out every other login; and deletes the account with all its quizzes, games, results and images after asking for the password again. The only admin cannot delete their own account.
+
 ### New name
 - The app is now called Quizmoo, with a cow as its logo (in the header and as the browser tab icon).
 - Hosts are logged out once after the update, and phones forget their saved language, colour mode and game once.

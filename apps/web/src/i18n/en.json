@@ -991,6 +991,7 @@
     "passwordChangeRequired": "Change your initial password first.",
     "usernameTaken": "This username is already taken.",
     "notOnYourself": "You can't do this to your own account. Change your password in My settings.",
+    "lastAdmin": "You're the only admin. Make someone else an admin first.",
     "accountPending": "Your account is waiting for the admin's approval.",
     "registrationClosed": "Sign-up is closed. Ask the admin for an account.",
     "registrationsFull": "Too many sign-ups are waiting for approval. Try again in a few days.",
@@ -1060,6 +1061,46 @@
       "eventName": "Event name",
       "eventNameHelp": "The new game dialog starts with it, and each game can change it.",
       "eventNamePlaceholder": "e.g. Christmas party"
+    },
+    "tabs": {
+      "label": "Settings groups",
+      "games": "Games",
+      "messages": "Messages",
+      "branding": "Branding",
+      "account": "Account"
+    },
+    "account": {
+      "title": "Your account",
+      "joined": "Here since {{date}}",
+      "lastLogin": "last logged in {{when}}",
+      "logins": {
+        "title": "Logins",
+        "body_one": "This browser is your only active login.",
+        "body_other": "You have {{count}} active logins, this browser included. Log out the others if you used a shared computer or lost a device.",
+        "submit": "Log out the others",
+        "done": "Logged out everywhere else"
+      },
+      "device": {
+        "title": "This device",
+        "help": "Saved on this device straight away; your other devices keep their own."
+      },
+      "delete": {
+        "title": "Delete account",
+        "help": "Deletes your account with every quiz, game, result and image, for good.",
+        "open": "Delete my account",
+        "dialogTitle": "Delete your account?",
+        "body": "These go for good and can't be brought back:",
+        "quizzes_one": "{{count}} quiz",
+        "quizzes_other": "{{count}} quizzes",
+        "games_one": "{{count}} finished game with its results",
+        "games_other": "{{count}} finished games with their results",
+        "images_one": "{{count}} image",
+        "images_other": "{{count}} images",
+        "running": "Games still running end at once.",
+        "password": "Your password",
+        "submit": "Delete for good",
+        "done": "Your account is deleted"
+      }
     }
   },
   "branding": {
