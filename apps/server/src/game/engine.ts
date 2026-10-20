@@ -534,6 +534,14 @@ export function endGame(state: GameState, now: number): GameState {
   return { ...state, phase: 'finished', finishedAt: now, awaitingGrading: false, pausedAt: null, reviewIndex: null }
 }
 
+/**
+ * "Close the game": ends it at once without a podium. Nothing waits for a release (the results
+ * stay in the history); the realtime layer sends everyone away and drops the game from memory.
+ */
+export function closeGame(state: GameState, now: number): GameState {
+  return { ...endGame(state, now), released: { screen: true, players: true } }
+}
+
 /** Stops the running question's clock: no answers and no deadline until `resume`. */
 export function pause(state: GameState, now: number): GameState {
   if (state.phase !== 'question' || state.questionEndsAt === null || state.pausedAt) {
@@ -559,28 +567,42 @@ export function resume(state: GameState, now: number): GameState {
   }
 }
 
+/** Between questions (not while grading), a closed question: the current one once revealed, or any before it. */
+function closedQuestion(state: GameState, index: number): boolean {
+  return (
+    (state.phase === 'reveal' || state.phase === 'scoreboard') &&
+    !state.awaitingGrading &&
+    Number.isInteger(index) &&
+    index >= 0 &&
+    index <= state.questionIndex
+  )
+}
+
 /**
- * Between questions, puts a revealed question back on every screen as its reveal, read only.
- * Not while an answer waits for grading or answers are held back until the end.
+ * Between questions, puts a closed question back on every screen as its reveal, read only, also
+ * while answers are held back until the end (the screens then show its answer, not the points).
+ * Moving within the questions chosen with `showAnswers` keeps that choice.
  */
 export function showQuestion(state: GameState, index: number): GameState {
-  if (
-    (state.phase !== 'reveal' && state.phase !== 'scoreboard') ||
-    state.awaitingGrading ||
-    answersHidden(state, 'screen') ||
-    !Number.isInteger(index) ||
-    index < 0 ||
-    index > state.questionIndex
-  ) {
+  if (!closedQuestion(state, index)) throw new EngineError('errors.invalidTransition')
+  const reviewing = state.reviewIndex !== null && state.reviewIndex !== undefined
+  const queue = reviewing && state.reviewQueue?.includes(index) ? state.reviewQueue : [index]
+  return { ...state, reviewIndex: index, reviewQueue: queue }
+}
+
+/** "Show answers": the chosen closed questions go on the screens one at a time, from the first. */
+export function showAnswers(state: GameState, indexes: readonly number[]): GameState {
+  const queue = [...new Set(indexes)].sort((a, b) => a - b)
+  if (queue.length === 0 || !queue.every((index) => closedQuestion(state, index))) {
     throw new EngineError('errors.invalidTransition')
   }
-  return { ...state, reviewIndex: index }
+  return { ...state, reviewIndex: queue[0]!, reviewQueue: queue }
 }
 
 /** Back from a question shown again to where the game was. */
 export function closeQuestion(state: GameState): GameState {
   if (state.reviewIndex === null || state.reviewIndex === undefined) return state
-  return { ...state, reviewIndex: null }
+  return { ...state, reviewIndex: null, reviewQueue: null }
 }
 
 /** Shows the held-back final results to one audience: the projector or the players. Each once, in any order. */

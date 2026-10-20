@@ -111,6 +111,7 @@ test('mixed play: solo players join, rank with the teams and are moved in and ou
     })
 
     await page.getByRole('button', { name: 'End game', exact: true }).click()
+    await page.getByRole('dialog').getByRole('button', { name: 'Show the podium' }).click()
     await expect(page.getByText('Game finished')).toBeVisible()
 
     await test.step('the results mark the solo players', async () => {

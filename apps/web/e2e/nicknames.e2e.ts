@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import { closeGame } from './close-game'
 
 /**
  * The admins' "Surprise me" names: an admin edits the English list on the Names page (pastes a list,
@@ -101,8 +102,7 @@ test('admin edits the Surprise me names and a phone gets one of them', async ({ 
     // Only a finished game can be deleted.
     page.on('dialog', (dialog) => void dialog.accept())
     await page.goto(`/host/games/${pin}`)
-    await page.getByRole('button', { name: 'End game', exact: true }).click()
-    await expect(page.getByText('Game finished')).toBeVisible()
+    await closeGame(page)
     await page.request.delete(`/api/games/${gameId}`)
     await page.request.delete(`/api/quizzes/${quiz.id}`)
   }

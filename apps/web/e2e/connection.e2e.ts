@@ -123,6 +123,7 @@ test('a phone survives going offline; host messages reach phones and the project
     })
 
     await page.getByRole('button', { name: 'End game', exact: true }).click()
+    await page.getByRole('dialog').getByRole('button', { name: 'Show the podium' }).click()
     await expect(page.getByText('Game finished')).toBeVisible()
     await context.close()
     await projector.close()

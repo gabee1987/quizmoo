@@ -246,6 +246,8 @@ export interface GameSnapshotBase {
    * `questionIndex` and `reveal` are that question's, read only, ranks do not move.
    */
   reviewing: boolean
+  /** While reviewing: every question index the host chose to show, in order (the current one is `questionIndex`). */
+  reviewQueue: number[] | null
   /** Server time at snapshot creation, lets clients compute their clock offset. */
   serverNow: number
   /**

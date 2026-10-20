@@ -1,8 +1,8 @@
 import type { GameHostInfo, HostCommand, HostSnapshot } from '@quizmoo/shared'
 import { useQuery } from '@tanstack/react-query'
 import { Link, createFileRoute } from '@tanstack/react-router'
-import { MonitorIcon, TrophyIcon } from 'lucide-react'
-import { useEffect } from 'react'
+import { EyeIcon, EyeOffIcon, MonitorIcon, TrophyIcon } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { useGameTheme } from '@/lib/themes'
@@ -19,6 +19,7 @@ import { MessageBox } from '../../features/host/message-box'
 import { PlayAgainButton } from '../../features/host/play-again-button'
 import { PlayerPanel } from '../../features/host/player-panel'
 import { ReviewPanel } from '../../features/host/review-panel'
+import { ScreenPreview } from '../../features/host/screen-preview'
 import { ShownQuestion } from '../../features/host/shown-question'
 import { Standings } from '../../features/host/standings'
 import { TeamModesPanel } from '../../features/host/team-modes-panel'
@@ -41,6 +42,8 @@ function HostGamePage() {
   const { status, since, host, clockOffset, closed } = useGameStore()
   // Tailwind's lg: the two-column layout.
   const wide = useMediaQuery('(min-width: 64rem)')
+  // "Hide screen": for this page only; a reload shows everything again.
+  const [hidden, setHidden] = useState(false)
   useGameTheme(host?.settings)
   useHostToasts(host)
   const info = useQuery({
@@ -95,40 +98,83 @@ function HostGamePage() {
   }
 
   const gameId = info.data?.gameId ?? null
-  const controls = <Controls host={host} onCommand={(c) => void send(c)} placement={wide ? 'top' : 'bottom'} />
+  const controls = <Controls host={host} send={send} placement={wide ? 'top' : 'bottom'} />
   // One column on phones (a flex column, so the control bar can stick to the bottom of the whole
   // page), two on laptops (the bar sticks to the top of the main column).
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
       <ConnectionBar status={status} since={since} />
       <div className="flex min-w-0 flex-col gap-5">
-        <Header host={host} connected={status === 'connected'} />
+        <Header host={host} connected={status === 'connected'} hidden={hidden} onHide={setHidden} />
         {wide && controls}
         <MessageBox announcement={host.announcement} quickMessages={host.quickMessages} clockOffset={clockOffset} onCommand={send} />
-        <PhaseDetail host={host} clockOffset={clockOffset} gameId={gameId} />
-        {host.phase === 'reveal' && host.awaitingGrading && (
-          <GradingPanel host={host} onGrade={(ids) => void send({ type: 'gradeText', correctPlayerIds: ids })} />
+        {hidden ? (
+          <HiddenCover onShow={() => setHidden(false)} />
+        ) : (
+          <>
+            <PhaseDetail host={host} clockOffset={clockOffset} gameId={gameId} />
+            {host.phase === 'reveal' && host.awaitingGrading && (
+              <GradingPanel host={host} onGrade={(ids) => void send({ type: 'gradeText', correctPlayerIds: ids })} />
+            )}
+          </>
         )}
-        <EndGameButton host={host} onCommand={(c) => void send(c)} />
+        <EndGameButton host={host} send={send} gameId={gameId} />
       </div>
-      <div className="flex min-w-0 flex-col gap-6">
-        <Standings host={host} gameId={gameId} />
-        <TeamModesPanel host={host} onTeamMode={(mode, teamId) => void send({ type: 'teamMode', mode, teamId })} />
-        <PlayerPanel
-          host={host}
-          clockOffset={clockOffset}
-          onKick={(playerId) => void send({ type: 'kick', playerId })}
-          onCaptain={(playerId) => void send({ type: 'captain', playerId })}
-          onMove={(playerId, teamId) => void send({ type: 'movePlayer', playerId, teamId })}
-        />
-        <ReviewPanel host={host} onShowQuestion={(index) => void send({ type: 'showQuestion', index })} />
-      </div>
+      {!hidden && (
+        <div className="flex min-w-0 flex-col gap-6">
+          <ScreenPreview host={host} clockOffset={clockOffset} defaultOpen={wide} />
+          <Standings host={host} gameId={gameId} />
+          <TeamModesPanel host={host} onTeamMode={(mode, teamId) => void send({ type: 'teamMode', mode, teamId })} />
+          <PlayerPanel
+            host={host}
+            clockOffset={clockOffset}
+            onKick={(playerId) => void send({ type: 'kick', playerId })}
+            onCaptain={(playerId) => void send({ type: 'captain', playerId })}
+            onMove={(playerId, teamId) => void send({ type: 'movePlayer', playerId, teamId })}
+          />
+          <ReviewPanel host={host} onShowQuestion={(index) => void send({ type: 'showQuestion', index })} />
+        </div>
+      )}
       {!wide && controls}
     </div>
   )
 }
 
-function Header({ host, connected }: { host: HostSnapshot; connected: boolean }) {
+/**
+ * Stands in for everything that could give answers or standings away while the host has hidden
+ * the screen (a laptop left on a table). Not a lock: "Show" brings it all back.
+ */
+function HiddenCover({ onShow }: { onShow: () => void }) {
+  const { t } = useTranslation()
+  return (
+    <section
+      aria-labelledby="hidden-title"
+      className="flex flex-col items-center gap-3 rounded-2xl border-2 border-dashed bg-card px-5 py-10 text-center shadow-soft"
+    >
+      <EyeOffIcon className="size-10 text-muted-foreground" aria-hidden="true" />
+      <h2 id="hidden-title" className="text-xl font-extrabold">
+        {t('host.hide.title')}
+      </h2>
+      <p className="max-w-md text-muted-foreground">{t('host.hide.body')}</p>
+      <Button onClick={onShow}>
+        <EyeIcon aria-hidden="true" />
+        {t('host.hide.show')}
+      </Button>
+    </section>
+  )
+}
+
+function Header({
+  host,
+  connected,
+  hidden,
+  onHide,
+}: {
+  host: HostSnapshot
+  connected: boolean
+  hidden: boolean
+  onHide: (hidden: boolean) => void
+}) {
   const { t } = useTranslation()
   const online = host.players.filter((p) => p.connected).length
   const settings = settingsLine(host, t)
@@ -154,21 +200,28 @@ function Header({ host, connected }: { host: HostSnapshot; connected: boolean })
           <HostToastsToggle />
         </div>
       </div>
-      <Button asChild variant="secondary">
-        {/* A second click brings the same projector window up instead of opening another one. */}
-        <a
-          href={`/screen/${host.pin}`}
-          target="_blank"
-          rel="noreferrer"
-          onClick={(e) => {
-            e.preventDefault()
-            openProjector(host.pin)
-          }}
-        >
-          <MonitorIcon aria-hidden="true" />
-          {t('host.game.openScreen')}
-        </a>
-      </Button>
+      <div className="flex flex-wrap gap-2">
+        {/* Hides answers, standings and players from anyone glancing at this screen. */}
+        <Button variant="secondary" aria-pressed={hidden} onClick={() => onHide(!hidden)}>
+          {hidden ? <EyeIcon aria-hidden="true" /> : <EyeOffIcon aria-hidden="true" />}
+          {hidden ? t('host.hide.show') : t('host.hide.button')}
+        </Button>
+        <Button asChild variant="secondary">
+          {/* A second click brings the same projector window up instead of opening another one. */}
+          <a
+            href={`/screen/${host.pin}`}
+            target="_blank"
+            rel="noreferrer"
+            onClick={(e) => {
+              e.preventDefault()
+              openProjector(host.pin)
+            }}
+          >
+            <MonitorIcon aria-hidden="true" />
+            {t('host.game.openScreen')}
+          </a>
+        </Button>
+      </div>
     </header>
   )
 }

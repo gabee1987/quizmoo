@@ -1,5 +1,6 @@
 import AxeBuilder from '@axe-core/playwright'
 import { expect, test, type Browser, type BrowserContext, type Page } from '@playwright/test'
+import { closeGame } from './close-game'
 
 /**
  * Automated accessibility check (axe, WCAG 2.1 A and AA, including colour contrast) of the
@@ -120,8 +121,7 @@ for (const mode of modes) {
       // A running game can only be ended from the host control; then it can be deleted.
       if (pin) {
         await host.goto(`/host/games/${pin}`)
-        await host.getByRole('button', { name: 'End game' }).click()
-        await expect(host.getByRole('link', { name: 'Results', exact: true })).toBeVisible()
+        await closeGame(host)
         const games = (await (await host.request.get('/api/games')).json()) as { games: { gameId: string; pin: string }[] }
         const game = games.games.find((g) => g.pin === pin)
         if (game) await host.request.delete(`/api/games/${game.gameId}`)

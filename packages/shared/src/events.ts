@@ -81,6 +81,8 @@ export const hostCommandSchema = z.discriminatedUnion('type', [
   /** Host grading of a text question without accepted answers: listed players are correct. */
   z.object({ type: z.literal('gradeText'), correctPlayerIds: z.array(z.string().min(1)).max(MAX_PLAYERS) }),
   z.object({ type: z.literal('end') }),
+  /** Ends the game at once without the podium and sends every phone and the projector away. */
+  z.object({ type: z.literal('close') }),
   /**
    * A message on every phone and the projector until cleared (or the next question starts);
    * with `durationSec` it clears itself after that long.
@@ -108,6 +110,8 @@ export const hostCommandSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('resume') }),
   /** Between questions: puts a revealed question (by index) back on every screen, read only. */
   z.object({ type: z.literal('showQuestion'), index: z.number().int().min(0) }),
+  /** Between questions: the answers of the chosen closed questions, on every screen one at a time. */
+  z.object({ type: z.literal('showAnswers'), indexes: z.array(z.number().int().min(0)).min(1).max(200) }),
   /** Back from a question shown again to where the game was. */
   z.object({ type: z.literal('closeQuestion') }),
   /** A scheduled game whose joining has not opened yet: a new opening time. */
@@ -136,8 +140,7 @@ export interface ClientToServerEvents {
   'player:leave': (data: Record<string, never>, ack: (res: { ok: true } | ErrorPayload) => void) => void
   'host:attach': (data: { pin: string }, ack: (res: { ok: true } | ErrorPayload) => void) => void
   'host:command': (data: HostCommand, ack: (res: { ok: true } | ErrorPayload) => void) => void
-  'screen:attach': (data: { pin: string }, ack: (res: { ok: true } | ErrorPayload) => void) => void
-  /** Round-trip check from the host control; no server state. */
+  'screen:attach': (data: { pin: string }, ack: (res: { ok: true } | ErrorPayload) => void) => void  /** Round-trip check from the host control; no server state. */
   'host:ping': (data: Record<string, never>, ack: (res: { ok: true } | ErrorPayload) => void) => void
 }
 

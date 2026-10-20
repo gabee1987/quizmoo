@@ -940,6 +940,37 @@ describeDb('sockets (database)', () => {
     expect(final.myResults![0]).toMatchObject({ correct: true, answer: { type: 'single', optionId: 'a' } })
   })
 
+  it('closing a game sends the phones and the projector away; nobody can rejoin it', async () => {
+    const pin = await newGame({ finalResults: 'onRelease' })
+    const hostSocket = await host(pin)
+    const screen = await connect()
+    await screen.emitWithAck('screen:attach', { pin })
+    const a = await player(pin, 'Anna')
+    const question = nextSnapshot<PlayerSnapshot>(a.socket, 'game:player', (s) => s.phase === 'question')
+    await command(hostSocket, { type: 'start' })
+    await question
+
+    // A projector opened from the host's browser attaches as a second host socket.
+    const hostProjector = await host(pin)
+    const phoneClosed = new Promise((resolve) => a.socket.once('game:closed', resolve))
+    const screenClosed = new Promise((resolve) => screen.once('game:closed', resolve))
+    const projectorClosed = new Promise((resolve) => hostProjector.once('game:closed', resolve))
+    let commanderClosed = false
+    hostSocket.once('game:closed', () => (commanderClosed = true))
+    const hostFinished = nextSnapshot<HostSnapshot>(hostSocket, 'game:host', (s) => s.phase === 'finished')
+    expect(await command(hostSocket, { type: 'close' })).toEqual({ ok: true })
+    expect(await phoneClosed).toEqual({ error: 'errors.gameClosed' })
+    expect(await screenClosed).toEqual({ error: 'errors.gameClosed' })
+    expect(await projectorClosed).toEqual({ error: 'errors.gameClosed' })
+    expect(commanderClosed).toBe(false)
+    // Nothing waits for a release: no podium to show, no phones waiting.
+    expect(await hostFinished).toMatchObject({ resultsPending: false, playersWaiting: false })
+
+    const again = await connect()
+    expect(await again.emitWithAck('player:join', { pin, name: 'Anna', token: a.ack.token })).toEqual({ error: 'errors.gameNotFound' })
+    expect(built.manager.get(pin)).toBeUndefined()
+  })
+
   it('final results on release: phones wait after the game until the host releases them', async () => {
     const res = await built.app.inject({
       method: 'POST',

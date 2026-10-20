@@ -8,9 +8,9 @@ import { formatAnswer } from '../questions/format-answer'
 /** Mid-game review: how each question went, and the answers to the current one (the standings are in `Standings`). */
 export function ReviewPanel({ host, onShowQuestion }: { host: HostSnapshot; onShowQuestion: (index: number) => void }) {
   const { t, i18n } = useTranslation()
-  // Between questions (the engine's showQuestion rules): put a played question back on the screens.
-  const canShowAgain =
-    (host.phase === 'reveal' || host.phase === 'scoreboard') && !host.awaitingGrading && !host.answersHidden
+  // Between questions (the engine's showQuestion rules): put a played question back on the screens,
+  // also while answers are held back (the screens then show its answer, not the points).
+  const canShowAgain = (host.phase === 'reveal' || host.phase === 'scoreboard') && !host.awaitingGrading
   const seconds = new Intl.NumberFormat(i18n.language, { maximumFractionDigits: 1 })
   const percent = new Intl.NumberFormat(i18n.language, { style: 'percent' })
   const question = host.reveal?.question ?? host.question

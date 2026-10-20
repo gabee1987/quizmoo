@@ -31,6 +31,7 @@ Keepalive: `pingInterval: 10000`, `pingTimeout: 20000` in `app.ts`. A phone that
 
 - `game:<pin>:player:<playerId>` (one room per player, so all their sockets get the same snapshot), `game:<pin>:host`, `game:<pin>:screen`.
 - `socket.data` carries `{ pin, playerId }` for players or `{ pin, role: 'host' | 'screen' }`.
+- The `close` host command (`closeGame`: finished, nothing left to release) sends `game:closed { error: 'errors.gameClosed' }` to every player room, the screen room and the host room except the commanding socket (a projector opened from the host's browser is a host socket), empties them and `discard`s the game from memory, so a stored token gets `errors.gameNotFound`. The row stays as the game's results.
 - A player is identified by their token, never by socket id. `player:join` with a valid token reclaims the existing player even if the name differs; the stored name wins. Without a token it is a fresh join, which the engine allows only in the lobby.
 - Two sockets with the same token (phone and tablet) are allowed; both receive snapshots. `connected` is true while at least one is open.
 - `host:attach` requires a valid session cookie whose user is the game's host and has no pending password change (the cookie name comes from `SocketDeps.sessionCookie`). Every `host:command` and `host:ping` checks the session again (`stillHost`), so an ended login loses control at once. `screen:attach` is public read-only by pin: the projector laptop is not logged in.

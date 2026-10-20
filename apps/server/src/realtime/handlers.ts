@@ -22,6 +22,7 @@ import {
   allAnswered,
   announce,
   clearAnnouncement,
+  closeGame,
   closeQuestion,
   confirmTeamAnswer,
   createTeam,
@@ -47,6 +48,7 @@ import {
   schedule,
   setCaptain,
   setTeamMode,
+  showAnswers,
   showQuestion,
   showScoreboard,
   skipQuestion,
@@ -93,8 +95,7 @@ const MAX_EVENTS_PER_SECOND = 10
 const rooms = {
   host: (pin: string) => `game:${pin}:host`,
   screen: (pin: string) => `game:${pin}:screen`,
-  player: (pin: string, playerId: string) => `game:${pin}:player:${playerId}`,
-}
+  player: (pin: string, playerId: string) => `game:${pin}:player:${playerId}`,}
 
 const invalidInput: ErrorPayload = { error: 'errors.invalidInput' }
 
@@ -343,12 +344,20 @@ export function registerSocketHandlers(io: AppSocketServer, { manager, db, parse
         const pin = socket.data.pin!
         const parsed = hostCommandSchema.safeParse(data)
         if (!parsed.success) return invalidInput
-        manager.apply(pin, (state, now) => runHostCommand(state, parsed.data, now))
+        const state = manager.apply(pin, (current, now) => runHostCommand(current, parsed.data, now))
 
         if (parsed.data.type === 'kick') {
           const room = rooms.player(pin, parsed.data.playerId)
           io.to(room).emit('game:closed', { error: 'errors.kicked' })
           io.in(room).socketsLeave(room)
+        }
+        if (parsed.data.type === 'close') {
+          // Everyone but this host control is sent away (a projector opened from the host's browser
+          // sits in the host room); the game leaves memory, so nobody can rejoin it.
+          const away = [rooms.screen(pin), rooms.host(pin), ...Object.keys(state.players).map((playerId) => rooms.player(pin, playerId))]
+          io.to(away).except(socket.id).emit('game:closed', { error: 'errors.gameClosed' })
+          io.in(away).socketsLeave(away)
+          await manager.discard(state.id)
         }
         return { ok: true as const }
       }),
@@ -404,6 +413,8 @@ function runHostCommand(state: GameState, command: HostCommand, now: number): Ga
       return gradeText(state, command.correctPlayerIds)
     case 'end':
       return endGame(state, now)
+    case 'close':
+      return closeGame(state, now)
     case 'releaseResults':
       return releaseResults(state, command.audience)
     case 'announce':
@@ -422,6 +433,8 @@ function runHostCommand(state: GameState, command: HostCommand, now: number): Ga
       return resume(state, now)
     case 'showQuestion':
       return showQuestion(state, command.index)
+    case 'showAnswers':
+      return showAnswers(state, command.indexes)
     case 'closeQuestion':
       return closeQuestion(state)
     case 'schedule':

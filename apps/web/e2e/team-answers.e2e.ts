@@ -156,6 +156,7 @@ test('teams choose: the captain decides, a majority vote, and the fallback', asy
     })
 
     await page.getByRole('button', { name: 'End game', exact: true }).click()
+    await page.getByRole('dialog').getByRole('button', { name: 'Show the podium' }).click()
     await expect(page.getByText('Game finished')).toBeVisible()
   } finally {
     await page.request.delete(`/api/games/${gameId}`)

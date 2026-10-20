@@ -51,7 +51,9 @@ describe('app', () => {
     const csp = String(res.headers['content-security-policy'])
     expect(csp).toContain("default-src 'self'")
     expect(csp).toContain("script-src 'self'")
-    expect(csp).toContain("frame-ancestors 'none'")
+    // Only the app's own pages may frame it (the host's live previews); other sites may not.
+    expect(csp).toContain("frame-ancestors 'self'")
+    expect(res.headers['x-frame-options']).toBe('SAMEORIGIN')
     expect(csp).toContain('connect-src')
     expect(csp).not.toContain('upgrade-insecure-requests')
     expect(res.headers['strict-transport-security']).toBeUndefined()

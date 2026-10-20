@@ -1,7 +1,7 @@
 # Phase 31: The host's running-game screen
 
 **Branch:** `feature/host-game-screen` (from `develop`)
-**Commit:** `Show standings midgame and keep the host controls in view`
+**Commit:** `Add standings, answers on demand and closing to the host game screen`
 **Skills to load:** `game-engine`, `scoring`, `realtime`, `web-ui`, `game-screens`, `design-system`, `motion`, `i18n`, `verification`, `browser-checks`, `git-workflow`
 
 ## Goal
@@ -80,3 +80,34 @@ $env:E2E_BASE_URL="http://localhost:3999"; $env:E2E_USERNAME="admin"; $env:E2E_P
 - "End game" sits below the question details rather than at the very end of the page.
 - The "Fastest right" figure has a row of its own: in a quarter-width card a 24-character name broke mid-word.
 - The help text of the scoreboard setting with "Only at the end" now says the standings appear when the host shows them.
+
+## Extension (21 October 2026): showing answers on demand, and a live preview of every screen
+
+From the user's review of the first delivery:
+- "The scoreboard show feature is good, but we need a similar one to show the answer as well for the last question or all questions that have been answered, I want options, flexibility." Clarified: only questions that are closed (everybody answered or the time ran out), whatever the quiz's reveal setting; the host picks the last one, any of them, or all so far; showing the standings stays a separate button.
+- "I want to extend this with a proper preview feature so the host can see all times what everyone sees. A chip should be always shown to the host what the players are seeing atm."
+
+Decisions:
+1. **Show answers** (between questions, not while grading): a dialog with "Last question", "All so far" and "Choose" (a checklist of the closed questions). The chosen questions go on the projector and the phones one at a time as their reveal (correct answer, bars, each phone its own right or wrong), with Previous and Next in the control bar and "Back to the game". With answers held until the end, points, scores and ranks stay hidden on the screens; the standings remain a separate button. "Show again" in "Questions so far" also works while answers are held back.
+2. **What everyone sees:** a chip in the control bar, always visible after the lobby, names what the phones and the projector show right now (question N, paused, answer saved, answer revealed, question shown again with its position, standings, podium, waiting for the results).
+3. **Live preview:** a Preview card with Projector and Phone tabs showing the real pages live in scaled-down frames: the projector as a public projector sees it (`/screen/$pin?preview=1`, read only), and a phone as a player the host picks (`/play/$pin?watch=<playerId>`). The frames are inert (nothing in them can be pressed). The server's new `host:watch` lets a host session receive one player's snapshots without counting as that player's connection.
+
+Steps:
+7. Engine: `showAnswers(indexes)` with a review queue, `showQuestion` keeps the queue and works while answers are held back; snapshots reveal the reviewed question (not points, scores or ranks) while answers are held back. Check: engine and snapshot tests.
+8. Realtime: `host:watch` with its own room, snapshots to watchers, no effect on connection state. Check: realtime test.
+9. Web: Show answers dialog and the review stepper; `screenStatus` chip (pure, tested); the Preview card with the `preview` / `watch` page modes. Check: unit tests, screenshots, e2e.
+
+### Results of the extension
+
+- Engine: `showAnswers` and the review queue; `showQuestion` while answers are held back. New cases in `host-control.test.ts` (the queue, refusals, the held-back reveal without points). Realtime: closing a game (phones, the screen and a host-opened projector get `errors.gameClosed`, the closing host does not, nothing waits for a release, a stored token can no longer rejoin). All 457 server tests pass against Postgres; `pnpm verify` passes (web 233).
+- Web: `screen-status.test.ts` (every phase, held answers, each audience after the game).
+- E2E: `standings-midgame.e2e.ts` also shows the last answer (phone right or wrong, no points or score line, projector reveal, the chip), checks the live projector frame and the phones' screen in the preview, hides and shows the screen, and closes the game (phones and projector told, the host on the results). The whole suite (22) passes on the production build.
+- Screens: dialog, stepper, chip, preview, phone and projector reveals, hidden cover, at 1440 × 900 and 390 × 844, light and dark, Hungarian and English.
+
+### Deviations of the extension
+
+- "Hide screen" was asked for during the work (21 October 2026: "a dedicated button to hide all information on the host's ongoing screen, so no one can cheat by inspecting the host's screen if he left his laptop on a table") and is part of this phase. It is a cover, not a lock: "Show screen" brings everything back, and a reload shows the page again.
+- The CSP's `frame-ancestors` moved from `'none'` to `'self'` (with `X-Frame-Options: SAMEORIGIN`) so the previews can frame the app's own pages; other sites still cannot frame it.
+- The phone's "Score · Rank" line under a reveal is hidden while answers are held back (it showed the concealed 0 and 1 during "Show answers").
+- The phone preview is not a live view of one player's phone: the user clarified (21 October 2026) "with phone preview I just meant that show what they should see, not a real live preview". The Phone tab draws the screen the phones get from the host snapshot; `host:watch`, the watch room and the phone page's watch mode were removed again. The projector tab stays live.
+- Closing a game was asked for during the work ("I should be able to just close a game no matter where the game is at, without the usual flow"; then: "choose when hit end game to show podium or just close the game and disconnect everybody"). "End game" opens a dialog with both; a lobby's End game closes it. E2E specs end games through `e2e/close-game.ts` or "Show the podium".

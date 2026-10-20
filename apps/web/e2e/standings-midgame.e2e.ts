@@ -4,7 +4,9 @@ import { expect, test, type Page } from '@playwright/test'
  * The host's running-game screen: with answers held until the end, the host shows the standings
  * after a question (totals and ranks on the projector and the phone, no points of the last
  * question), sees them in the Standings card, finds "Results so far", sees a long name in full,
- * and the control bar stays in view while the page scrolls on a phone-sized screen.
+ * and the control bar stays in view while the page scrolls on a phone-sized screen. Then the host
+ * shows the last answer (right or wrong on the phone, no points), sees the projector live and the
+ * phones' screen in the preview, hides the screen, and closes the game without the podium.
  */
 
 const username = process.env.E2E_USERNAME
@@ -96,14 +98,50 @@ test('standings midgame with answers held until the end, controls in view', asyn
       await expect(phone.getByText(/^\+\d+$/)).toHaveCount(0)
     })
 
+    await test.step('showing the last answer midgame: right or wrong on the phone, no points', async () => {
+      await controls.getByRole('button', { name: 'Show answers' }).click()
+      const dialog = page.getByRole('dialog', { name: 'Show answers' })
+      await expect(dialog.getByRole('radio', { name: /^Last question/ })).toBeChecked()
+      await dialog.getByRole('button', { name: 'Show 1 answer' }).click()
+      await expect(phone.getByText('Correct!', { exact: true })).toBeVisible()
+      await expect(phone.getByText(/\d+ points?/)).toHaveCount(0)
+      await expect(phone.getByText(/^Score:/)).toHaveCount(0)
+      await expect(projector.getByText('Correct answer')).toBeVisible()
+      await expect(controls.getByRole('status').first()).toContainText('answer to question 1')
+    })
+
+    await test.step('the preview shows the projector live and what the phones show', async () => {
+      const preview = page.getByRole('region', { name: 'What everyone sees' })
+      await expect(preview.frameLocator('iframe[title="Live preview of the projector"]').getByText('Correct answer')).toBeVisible()
+      await preview.getByRole('tab', { name: 'Phone' }).click()
+      const phonePanel = preview.getByRole('tabpanel', { name: 'Phone' })
+      await expect(phonePanel.getByText('Correct answer')).toBeVisible()
+      await expect(phonePanel.getByText('Each phone also shows whether its player was right.')).toBeVisible()
+    })
+
+    await test.step('hiding the screen covers answers, standings and players', async () => {
+      await page.getByRole('button', { name: 'Hide screen' }).click()
+      await expect(page.getByRole('region', { name: 'Standings' })).toHaveCount(0)
+      await expect(page.getByText(LONG_NAME)).toHaveCount(0)
+      await expect(controls.getByRole('button', { name: 'Back to the game' })).toBeVisible()
+      await page.getByRole('button', { name: 'Show screen' }).first().click()
+      await expect(page.getByRole('region', { name: 'Standings' })).toBeVisible()
+      await controls.getByRole('button', { name: 'Back to the game' }).click()
+    })
+
     await test.step('on to the next question, answers still hidden', async () => {
       await controls.getByRole('button', { name: 'Next question' }).click()
       await expect(phone.getByRole('button', { name: 'False', exact: true })).toBeVisible()
     })
 
-    // "End game" is outside the bar, below the question; the confirm is accepted above.
-    await page.getByRole('button', { name: 'End game', exact: true }).click()
-    await expect(page.getByText('The podium is on the projector.')).toBeVisible()
+    await test.step('closing the game at once: no podium, everyone sent away, the host on the results', async () => {
+      // "End game" is outside the bar, below the question.
+      await page.getByRole('button', { name: 'End game', exact: true }).click()
+      await page.getByRole('dialog', { name: 'End the game?' }).getByRole('button', { name: 'Close the game' }).click()
+      await expect(page).toHaveURL(new RegExp(`/host/results/${gameId}$`))
+      await expect(phone.getByText('The host closed the game. Thanks for playing!')).toBeVisible()
+      await expect(projector.getByText('The host closed the game. Thanks for playing!')).toBeVisible()
+    })
     await context.close()
     await projector.close()
   } finally {

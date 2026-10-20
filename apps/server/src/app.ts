@@ -69,7 +69,8 @@ export async function buildApp(config: Config, { db, manager, webDist: webDistOv
         connectSrc: ["'self'", config.APP_ORIGIN.replace(/^http/, 'ws')],
         fontSrc: ["'self'", 'data:'],
         objectSrc: ["'none'"],
-        frameAncestors: ["'none'"],
+        // Only the app itself may frame its pages: the host's live preview of the projector and a phone.
+        frameAncestors: ["'self'"],
         baseUri: ["'self'"],
         formAction: ["'self'"],
         // Plain-http LAN deployments must not be told to upgrade to https.
