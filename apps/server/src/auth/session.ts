@@ -1,10 +1,17 @@
 import { createHash, randomBytes } from 'node:crypto'
+import { TERMS_VERSION } from '@quizmoo/shared'
 import { and, eq, ne } from 'drizzle-orm'
 import type { FastifyReply } from 'fastify'
 import type { Db } from '../db/index.js'
 import { sessions, users } from '../db/schema.js'
 
-export const SESSION_COOKIE = 'quizmoo_session'
+/**
+ * Over HTTPS the cookie takes the `__Host-` prefix: browsers then accept it only from this exact
+ * origin, secure and for the whole path, so a neighbouring site on the same parent domain (another
+ * app on the hosting provider's domain) cannot plant a session cookie of its own. A venue laptop on
+ * plain http keeps the plain name, which the prefix would not allow.
+ */
+export const sessionCookieName = (secure: boolean) => (secure ? '__Host-quizmoo_session' : 'quizmoo_session')
 export const SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000
 
 export interface SessionUser {
@@ -12,6 +19,8 @@ export interface SessionUser {
   username: string
   role: 'admin' | 'editor'
   mustChangePassword: boolean
+  /** Never accepted the terms, or accepted an older version than `TERMS_VERSION`. */
+  mustAcceptTerms: boolean
 }
 
 /** The database only stores the SHA-256 of the cookie token. */
@@ -35,6 +44,7 @@ export async function verifySession(db: Db, token: string, now = Date.now()): Pr
       username: users.username,
       role: users.role,
       mustChangePassword: users.mustChangePassword,
+      termsVersion: users.termsVersion,
     })
     .from(sessions)
     .innerJoin(users, eq(users.id, sessions.userId))
@@ -45,7 +55,13 @@ export async function verifySession(db: Db, token: string, now = Date.now()): Pr
     await db.delete(sessions).where(eq(sessions.id, id))
     return null
   }
-  return { id: row.id, username: row.username, role: row.role, mustChangePassword: row.mustChangePassword }
+  return {
+    id: row.id,
+    username: row.username,
+    role: row.role,
+    mustChangePassword: row.mustChangePassword,
+    mustAcceptTerms: row.termsVersion !== TERMS_VERSION,
+  }
 }
 
 /** Ends every session of a user except `keepToken` (after a password change). */
@@ -58,7 +74,7 @@ export async function destroySession(db: Db, token: string): Promise<void> {
 }
 
 export function setSessionCookie(reply: FastifyReply, token: string, secure: boolean) {
-  reply.setCookie(SESSION_COOKIE, token, {
+  reply.setCookie(sessionCookieName(secure), token, {
     httpOnly: true,
     sameSite: 'lax',
     secure,
@@ -68,5 +84,5 @@ export function setSessionCookie(reply: FastifyReply, token: string, secure: boo
 }
 
 export function clearSessionCookie(reply: FastifyReply, secure: boolean) {
-  reply.clearCookie(SESSION_COOKIE, { httpOnly: true, sameSite: 'lax', secure, path: '/' })
+  reply.clearCookie(sessionCookieName(secure), { httpOnly: true, sameSite: 'lax', secure, path: '/' })
 }

@@ -27,6 +27,40 @@ Reviewed before the app went on a public HTTPS address (phase 26):
 - **Seed variables** are removed from the service after the admin is created (`docs/deploy.md`).
 - **To check on the live address** after the first deploy: HSTS present (the smoke script checks it), the login limit (10 failed logins block that network for a minute while another network can still log in, which also proves `TRUST_PROXY` is right), and the password rules on the admin's Users page.
 
+## Second review before the public beta (phase 30, 2026-10-20)
+
+A full review of the server, sockets, uploads, logs and data handling. Every finding below was fixed, each with a test (`apps/server/test/security.test.ts`, `hardening.test.ts`, `src/log-safety.test.ts`, `src/realtime/pin-guard.test.ts`, `apps/web/src/lib/player-storage.test.ts`).
+
+| Severity | Finding | Fix |
+|---|---|---|
+| High | Every rate limit could be skipped with a percent-encoded path: `/%61pi/auth/login` reached the login route, but the limiter's allow list checked the raw URL text. Unlimited password guessing and Argon2 work. | The allow list follows the matched route (`request.routeOptions.url`), falling back to the text only for unmatched URLs. |
+| Medium | Failed database queries logged their SQL parameters: a failed game save would have written nicknames, answers and player tokens into the hosting provider's logs; a failed password change, the new hash. | An `err` serializer (`src/log-safety.ts`) drops the query, its parameters and Postgres' `detail` from every logged error. Request logs also drop the query string (the history search carries player names). |
+| Medium | Running games could be found by trying PINs over sockets (no limit beyond 10 events a second per socket) and lobbies flooded. | Wrong PINs are budgeted per network address (50 a minute) across `player:join`, `screen:attach`, `host:attach` and the public HTTP PIN lookups. Only misses count, so a venue whose phones share one address is not affected. |
+| Medium | A host socket kept control of a game after its login ended (logout, "log out the others", an admin's password reset or logout, a deleted account). | Every host command and ping checks the session again; attach also refuses an account that must still change its password. |
+| Medium | No pixel limit on uploads: a 5 MB one-colour PNG can decode to gigabytes (decompression bomb). | Images over 50 megapixels are refused from their header, before decoding (`errors.imageTooBig`), for uploads and quiz file imports. |
+| Medium | No ceiling on what one host account could create. | At most 20 open games (`errors.tooManyGames`) and 1,000 images (`errors.tooManyImages`) per host. |
+| Medium (GDPR) | Images were never deleted until the account was: a removed or replaced picture (possibly of a person) stayed public by its address. | The daily job deletes images no quiz, host setting or stored game of the owner uses any more, after a day's grace. |
+| Medium (LAN) | `docker-compose.yml` published Postgres on every interface with default credentials; Docker's ports skip the system firewall, so anyone on the venue wifi could reach it. | Bound to `127.0.0.1`; the password can be set with `POSTGRES_PASSWORD`. |
+| Low | Expired sessions were deleted only when their cookie came back; unfinished games only closed at a restart. | Both in the daily job (`deleteExpiredSessions`, `GameManager.endStale`). |
+| Low | No Origin check on Socket.IO; the cookie had no `__Host-` prefix, so a neighbouring site on the hosting provider's domain could plant one. | Production accepts sockets only from `APP_ORIGIN` (or from scripts without an Origin, which carry no cookie); over HTTPS the cookie is `__Host-quizmoo_session` and only that name is read. Changing the name logs every host out once. |
+| Low | A typo like `APP_ORIGIN=http://…` on the hosting provider would silently drop the Secure flag and HSTS. | Production behind a proxy (`TRUST_PROXY > 0`) refuses to start without an https `APP_ORIGIN`. |
+| Low | No Permissions-Policy header. | `camera=(self)` for the QR scanner, everything else off. |
+| Low | Player seats (`quizmoo.player.<PIN>`: token, nickname) piled up in shared browsers. | Removed after 2 days when the app starts. |
+| Info | The `/api/` 404 body was `notFound`, not an i18n key. | `errors.notFound`. |
+
+Checked and fine: session tokens (32 random bytes, stored as SHA-256), cookie flags, password length limits, equal answers for unknown users, ownership checks on every route, admin-only routes, snapshots without correct answers or player tokens, payload validation on every socket event, the 1 MB body and 5 MB upload limits, re-encoding of uploads, CSV formula injection, no `dangerouslySetInnerHTML`, no open redirects, the service worker skipping `/api/` and `/socket.io/`, the strict CSP, the non-root Docker image. `SESSION_SECRET` signs nothing today (no signed cookies); it stays required for a future use.
+
+Dependencies on 2026-10-20: `pnpm audit --prod` no known vulnerabilities; the full audit reports the two development-only esbuild findings above.
+
+Known gaps, accepted for the beta: a host cannot lock a lobby against late joiners (they can remove players, and the PIN budget stops strangers from finding the game); there is no two-factor login (in the backlog). Before a mass rollout: a lawyer's review of the legal pages, the hosting provider's compliance review (DPA, sub-processors, EU region), and a penetration test.
+
+## Legal and data rights (phase 30)
+
+- `/privacy` (GDPR Article 13 notice), `/terms`, `/cookies` (every cookie and storage key, kept in step with the code by `storage-inventory.test.ts`) and `/imprint`, in both languages; operator, contact and hosting provider from `OPERATOR_NAME`, `OPERATOR_EMAIL` and `HOSTING_PROVIDER`.
+- Hosts accept the terms at sign-up (16 or older), and again when `TERMS_VERSION` changes; the accepted version and time are stored as proof. The server refuses everything but accepting, logging out, downloading the data and deleting the account until then (`errors.termsRequired`).
+- "Download my data" (`GET /api/me/export`): account, settings, quizzes, image list, games with results, never player tokens.
+- The processing records and the breach procedure are in `docs/legal/records-of-processing.md`.
+
 ### Front-end packages
 
 The web app bundles the following open-source packages. None of them calls a network service at runtime; everything, fonts included, is served from the app's own origin, so players' phones contact no third party.

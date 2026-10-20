@@ -24,6 +24,8 @@ const envSchema = z.object({
   /** Who runs this install and how to reach them, shown on the privacy page. */
   OPERATOR_NAME: emptyAsUnset(z.string().trim().min(1).max(100).optional()),
   OPERATOR_EMAIL: emptyAsUnset(z.string().trim().email().max(200).optional()),
+  /** The hosting provider and where the data lives, named on the privacy page and imprint (a processor under the GDPR). */
+  HOSTING_PROVIDER: emptyAsUnset(z.string().trim().min(1).max(200).optional()),
   /** Where the host navigation's Feedback link points; no link without it. */
   FEEDBACK_URL: emptyAsUnset(z.string().url().startsWith('https://').optional()),
   /** `true` lets anyone sign up as a host on /register; the account waits for an admin's approval. */
@@ -43,5 +45,11 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     const issues = result.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('\n')
     throw new Error(`Invalid environment:\n${issues}`)
   }
-  return result.data
+  const config = result.data
+  // Behind a hosting provider's proxy the app is on the internet: an http:// APP_ORIGIN (a typo)
+  // would quietly drop the Secure cookie flag and HSTS. Only a venue laptop (no proxy) runs on http.
+  if (config.NODE_ENV === 'production' && config.TRUST_PROXY > 0 && !config.APP_ORIGIN.startsWith('https://')) {
+    throw new Error('Invalid environment:\nAPP_ORIGIN: must start with https:// in production behind a proxy (TRUST_PROXY > 0)')
+  }
+  return config
 }

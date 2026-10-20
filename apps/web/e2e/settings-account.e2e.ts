@@ -30,6 +30,9 @@ test('a host sees, logs out and deletes their own account on My settings', async
     // The initial password is replaced first, as every new host does; then a second login elsewhere.
     await own.request.post('/api/auth/login', { data: { username: host, password: 'e2e-account-pass-1' } })
     await own.request.post('/api/auth/password', { data: { currentPassword: 'e2e-account-pass-1', newPassword: hostPassword } })
+    // An admin-made account accepts the terms next (legal.e2e.ts covers that screen).
+    const { termsVersion } = (await (await own.request.get('/api/site')).json()) as { termsVersion: string }
+    await own.request.post('/api/auth/terms', { data: { version: termsVersion } })
     await other.request.post('/api/auth/login', { data: { username: host, password: hostPassword } })
 
     await test.step('the overview and the logins', async () => {

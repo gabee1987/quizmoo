@@ -67,6 +67,15 @@ for (const mode of modes) {
     await expect(host.getByRole('heading', { name: 'If you play' })).toBeVisible()
     await expect(host.getByText(/deleted \d+ days after the game/)).toBeVisible()
     await expectAccessible(host, 'privacy')
+    for (const [link, heading] of [
+      ['Terms', 'Terms of use'],
+      ['Cookies', 'Cookies and storage'],
+      ['Imprint', 'Imprint'],
+    ] as const) {
+      await host.getByRole('navigation', { name: 'Legal' }).first().getByRole('link', { name: link, exact: true }).click()
+      await expect(host.getByRole('heading', { name: heading, level: 1 })).toBeVisible()
+      await expectAccessible(host, heading)
+    }
     const site = (await (await host.request.get('/api/site')).json()) as { registrationOpen: boolean }
     if (site.registrationOpen) {
       await host.goto('/register')

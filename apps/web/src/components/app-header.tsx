@@ -1,18 +1,22 @@
+import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { languages, setLanguage } from '@/i18n'
 import { cn } from '@/lib/cn'
 import { ModeToggle } from './mode-toggle'
 
-/** Compact header: logo mark, language and colour mode. Without `brand` (the home pages show a big one) only the settings. */
+/** Compact header: logo mark (a link home), language and colour mode. Without `brand` (the home pages show a big one) only the settings. */
 export function AppHeader({ brand = true }: { brand?: boolean }) {
   const { t } = useTranslation()
   return (
     <header className={cn('flex items-center gap-3 px-4 py-3', brand ? 'justify-between' : 'justify-end')}>
       {brand && (
-        <span className="flex items-center gap-2.5">
+        <Link
+          to="/"
+          className="-m-1 flex items-center gap-2.5 rounded-xl p-1 outline-none focus-visible:ring-[3px] focus-visible:ring-ring"
+        >
           <LogoMark />
           <span className="text-lg font-black tracking-tight">{t('app.name')}</span>
-        </span>
+        </Link>
       )}
       <span className="flex items-center gap-1">
         <LanguageSwitch />

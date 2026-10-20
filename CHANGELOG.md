@@ -20,6 +20,19 @@
 - My settings is split into four tabs, Games first: Games, Messages, Branding, Account. The open tab is in the address, and a dot marks each tab with unsaved changes.
 - The Account tab shows your username, role, when you joined and last logged in; sets this device's language and light or dark look; changes the password; logs out every other login; and deletes the account with all its quizzes, games, results and images after asking for the password again. The only admin cannot delete their own account.
 
+### Legal pages and data rights
+- A full privacy notice (what, why, legal basis, how long, who else, your rights, complaints to NAIH), terms of use, a cookies and storage page listing everything the browser keeps, and an imprint, in Hungarian and English, linked from the join, login and sign-up pages and the host navigation. The hosting provider is named with the new `HOSTING_PROVIDER` setting.
+- Signing up needs the box "I'm 16 or older, I accept the terms of use and I've read the privacy notice"; the accepted version and time are stored. Accounts made by an admin, existing accounts, and everyone after a terms change accept the terms at their next login; until then they can only download their data, delete the account or log out. After updating, run `pnpm --filter @quizmoo/server db:migrate` (production deploys migrate on start).
+- "Download my data" on My settings → Account: one JSON file with the account, settings, quizzes, image list and games with results.
+- The Quizmoo logo in the header links to the join page, so the legal pages have a way back.
+- A calm one-time note on the first visit that only necessary things are stored, with a link to the details. The join page says the nickname is shown to everyone in the game.
+
+### Security
+- Fixed: rate limits could be skipped with a percent-encoded path. Database errors are logged without their values, and request logs without query strings.
+- Wrong game PINs are limited per network address; a host's browser loses control of running games as soon as its login ends; images over 50 megapixels are refused; a host can have at most 20 open games and 1,000 images.
+- Unused images, expired logins and games nobody finished are cleaned up daily; old player seats are removed from the browser after two days.
+- Over HTTPS the session cookie is `__Host-quizmoo_session` (everyone logs in once again after this update); production sockets accept only the app's own pages; production behind a proxy refuses to start without an https `APP_ORIGIN`; a Permissions-Policy header; the local Postgres in `docker-compose.yml` listens on this computer only.
+
 ### New name
 - The app is now called Quizmoo, with a cow as its logo (in the header and as the browser tab icon).
 - Hosts are logged out once after the update, and phones forget their saved language, colour mode and game once.

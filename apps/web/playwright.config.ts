@@ -8,9 +8,12 @@ import { defineConfig } from '@playwright/test'
  * Locally the installed Chrome is used (no browser download); CI sets E2E_CHANNEL=chromium
  * after `playwright install chromium`.
  */
+const baseURL = process.env.E2E_BASE_URL ?? 'http://localhost:3000'
+
 export default defineConfig({
   testDir: 'e2e',
   testMatch: '*.e2e.ts',
+  globalSetup: './e2e/global-setup.ts',
   timeout: 120_000,
   expect: { timeout: 15_000 },
   fullyParallel: false,
@@ -18,7 +21,13 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? [['list'], ['html', { open: 'never' }]] : 'list',
   use: {
-    baseURL: process.env.E2E_BASE_URL ?? 'http://localhost:3000',
+    baseURL,
+    // The first visit's storage notice is a fixed card that could cover buttons; legal.e2e.ts checks it
+    // in a context of its own. Contexts the specs open themselves inherit this too.
+    storageState: {
+      cookies: [],
+      origins: [{ origin: new URL(baseURL).origin, localStorage: [{ name: 'quizmoo.storageNotice', value: 'seen' }] }],
+    },
     locale: 'en-US',
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',

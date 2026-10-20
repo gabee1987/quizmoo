@@ -4,6 +4,7 @@ import { useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { FloatingShapes } from '@/components/floating-shapes'
 import { HomeHero } from '@/components/home-hero'
+import { LegalLinks } from '@/components/legal-links'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { toastError } from '@/lib/toast'
@@ -93,10 +94,8 @@ function LoginPage() {
               {t('auth.register.link')}
             </Link>
           )}
-          <Link to="/privacy" className={footerLink}>
-            {t('privacy.link')}
-          </Link>
         </div>
+        <LegalLinks />
       </div>
     </div>
   )

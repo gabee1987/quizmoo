@@ -338,6 +338,7 @@ describeDb('sockets (database)', () => {
   let built: Awaited<ReturnType<typeof buildTestApp>>
   let url: string
   let hostCookie: string
+  let hostId: string
   let quizId: string
   const sockets: Socket[] = []
 
@@ -345,6 +346,7 @@ describeDb('sockets (database)', () => {
     ;({ db, cleanup } = await withTestDb())
     built = await buildTestApp(db)
     const host = await createUser(db, 'test_host', 'test-password-123')
+    hostId = host.id
     quizId = 'quiz-rt'
     await db.insert(quizzes).values({ id: quizId, ownerId: host.id, title: 'RT', questions: fixtureQuiz().questions })
     const ungraded = { ...fixtureQuiz().questions[3]!, acceptedAnswers: [] } as ReturnType<typeof fixtureQuiz>['questions'][number]
@@ -359,6 +361,8 @@ describeDb('sockets (database)', () => {
   })
   afterEach(() => {
     for (const s of sockets.splice(0)) s.disconnect()
+    // Each test opens its own games; a host may keep only so many open (MAX_OPEN_GAMES_PER_HOST).
+    for (const { state } of built.manager.hostedBy(hostId)) if (state.phase !== 'finished') built.manager.apply(state.pin, endGame)
   })
   afterAll(async () => {
     await built.app.close()

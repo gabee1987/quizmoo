@@ -8,6 +8,8 @@ import { nicknameLists } from '../db/schema.js'
 import { isNameAllowed } from '../game/names.js'
 import { avatarForNickname, defaultNicknames, pickNickname } from '../game/nicknames.js'
 import type { GameManager } from '../realtime/game-manager.js'
+import type { PinGuard } from '../realtime/pin-guard.js'
+import { publicGame } from './games.js'
 import { parseOr400 } from './http.js'
 
 const languageSchema = z.enum(nicknameLanguages)
@@ -27,7 +29,10 @@ export async function nicknamesFor(db: Db, language: NicknameLanguage): Promise<
   return row?.names ?? defaultNicknames[language]
 }
 
-export async function nicknameRoutes(app: FastifyInstance, { db, manager }: { db: Db; manager: GameManager }) {
+export async function nicknameRoutes(
+  app: FastifyInstance,
+  { db, manager, pinGuard }: { db: Db; manager: GameManager; pinGuard: PinGuard },
+) {
   const adminOnly = { preHandler: requireSession(db, { admin: true }) }
 
   app.get('/api/nicknames', adminOnly, async () => {
@@ -81,8 +86,8 @@ export async function nicknameRoutes(app: FastifyInstance, { db, manager }: { db
   // Public, for "Surprise me": a name nobody in this game has yet, with the avatar that fits it
   // (null: none fits, the phone picks one). Only the name and the avatar leave the server.
   app.get<{ Params: { pin: string }; Querystring: { lang?: string } }>('/api/games/:pin/nickname', async (request, reply) => {
-    const game = pinSchema.safeParse(request.params.pin).success ? manager.get(request.params.pin) : undefined
-    if (!game) return reply.code(404).send({ error: 'errors.gameNotFound' })
+    const game = publicGame(pinGuard, manager, request.ip, request.params.pin)
+    if ('error' in game) return reply.code(game.error === 'errors.rateLimited' ? 429 : 404).send(game)
     const language = languageSchema.catch('hu').parse(request.query.lang)
     const taken = Object.values(game.state.players).map((p) => p.name)
     const name = pickNickname(await nicknamesFor(db, language), taken)

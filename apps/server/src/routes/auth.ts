@@ -1,3 +1,4 @@
+import { TERMS_VERSION } from '@quizmoo/shared'
 import { count, eq } from 'drizzle-orm'
 import type { FastifyInstance } from 'fastify'
 import { z } from 'zod'
@@ -5,7 +6,6 @@ import { MIN_PASSWORD_LENGTH, dummyHashPromise, hashPassword, verifyPassword } f
 import { requireSession } from '../auth/require-session.js'
 import { createUser } from '../auth/users.js'
 import {
-  SESSION_COOKIE,
   clearSessionCookie,
   createSession,
   destroyOtherSessions,
@@ -30,6 +30,8 @@ const loginSchema = z.object({
 const registerSchema = z.object({
   username: usernameSchema,
   password: z.string().min(MIN_PASSWORD_LENGTH).max(200),
+  /** "I'm 16 or older, I accept the Terms and I've read the Privacy notice": required, and recorded with the version. */
+  acceptTerms: z.literal(true),
   /** Honeypot: hidden from people, filled in by form-filling bots. */
   website: z.string().max(200).optional(),
 })
@@ -59,6 +61,7 @@ export async function authRoutes(app: FastifyInstance, { db, secureCookies, regi
           role: users.role,
           mustChangePassword: users.mustChangePassword,
           status: users.status,
+          termsVersion: users.termsVersion,
           passwordHash: localCredentials.passwordHash,
         })
         .from(users)
@@ -75,7 +78,13 @@ export async function authRoutes(app: FastifyInstance, { db, secureCookies, regi
       await db.update(users).set({ lastLoginAt: new Date() }).where(eq(users.id, row.id))
       setSessionCookie(reply, token, secureCookies)
       return {
-        user: { id: row.id, username: row.username, role: row.role, mustChangePassword: row.mustChangePassword },
+        user: {
+          id: row.id,
+          username: row.username,
+          role: row.role,
+          mustChangePassword: row.mustChangePassword,
+          mustAcceptTerms: row.termsVersion !== TERMS_VERSION,
+        },
       }
     },
   )
@@ -94,7 +103,7 @@ export async function authRoutes(app: FastifyInstance, { db, secureCookies, regi
       const [pending] = await db.select({ n: count() }).from(users).where(eq(users.status, 'pending'))
       if ((pending?.n ?? 0) >= MAX_PENDING_SIGNUPS) return reply.code(503).send({ error: 'errors.registrationsFull' })
       try {
-        await createUser(db, body.username, body.password, 'editor', { status: 'pending' })
+        await createUser(db, body.username, body.password, 'editor', { status: 'pending', termsVersion: TERMS_VERSION })
       } catch (error) {
         if (isUniqueViolation(error)) return reply.code(409).send({ error: 'errors.usernameTaken' })
         throw error
@@ -106,13 +115,24 @@ export async function authRoutes(app: FastifyInstance, { db, secureCookies, regi
   const pendingOk = { preHandler: requireSession(db, { allowPendingPasswordChange: true }) }
 
   app.post('/api/auth/logout', pendingOk, async (request, reply) => {
-    const token = request.cookies[SESSION_COOKIE]
+    const token = request.sessionToken
     if (token) await destroySession(db, token)
     clearSessionCookie(reply, secureCookies)
     return reply.code(204).send()
   })
 
   app.get('/api/auth/me', pendingOk, async (request) => ({ user: request.user }))
+
+  // Accepting the terms in force. The version the page showed is sent, so terms that changed while
+  // the page was open are never accepted unseen.
+  app.post('/api/auth/terms', { preHandler: requireSession(db, { allowPendingTerms: true }) }, async (request, reply) => {
+    const body = parseOr400(z.object({ version: z.string().max(40) }), request.body, reply)
+    if (!body) return reply
+    if (body.version !== TERMS_VERSION) return reply.code(409).send({ error: 'errors.termsOutdated' })
+    const user = request.user!
+    await db.update(users).set({ termsVersion: TERMS_VERSION, termsAcceptedAt: new Date() }).where(eq(users.id, user.id))
+    return { user: { ...user, mustAcceptTerms: false } }
+  })
 
   // Change own password. Clears the forced-change flag and signs out every other session.
   app.post(
@@ -137,7 +157,7 @@ export async function authRoutes(app: FastifyInstance, { db, secureCookies, regi
           .where(eq(localCredentials.userId, user.id))
         await tx.update(users).set({ mustChangePassword: false }).where(eq(users.id, user.id))
       })
-      await destroyOtherSessions(db, user.id, request.cookies[SESSION_COOKIE]!)
+      await destroyOtherSessions(db, user.id, request.sessionToken!)
       return { user: { ...user, mustChangePassword: false } }
     },
   )

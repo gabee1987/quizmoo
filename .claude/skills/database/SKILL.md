@@ -19,7 +19,7 @@ description: Drizzle and PostgreSQL conventions for apps/server: schema, migrati
 
 ## Results and retention
 
-Results are derived from the persisted `games.state` (player answers and scores), never stored twice. A daily job (also run once at start) deletes finished games older than `RESULTS_RETENTION_DAYS` (default 90) in line with data minimisation, then each host's finished games beyond the newest `MAX_GAMES_PER_HOST` (default 200, `deleteGamesOverCap` in `retention.ts`); saving a finished game applies the cap to its host at once (`createGameStore` options). Running and scheduled games never count.
+Results are derived from the persisted `games.state` (player answers and scores), never stored twice. A daily job (also run once at start) deletes finished games older than `RESULTS_RETENTION_DAYS` (default 90) in line with data minimisation, then each host's finished games beyond the newest `MAX_GAMES_PER_HOST` (default 200, `deleteGamesOverCap` in `retention.ts`); saving a finished game applies the cap to its host at once (`createGameStore` options). Running and scheduled games never count. The same run first ends games nobody finished that began more than 12 hours ago (`GameManager.endStale`), and afterwards deletes expired sessions and images that no quiz, host setting or stored game of their owner names any more (`deleteUnusedImages`, after a day's grace; ids are searched as text in the JSON columns). A new kind of stored data needs a retention rule here, a line on the privacy page and a row in `docs/legal/records-of-processing.md`.
 
 ## Game history columns
 

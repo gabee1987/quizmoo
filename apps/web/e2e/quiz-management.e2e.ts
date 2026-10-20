@@ -42,7 +42,8 @@ test('host batch edits and batch deletes quizzes, and deletes one from the edito
       }
       await page.goto('/host/quizzes')
       await page.getByLabel('Search quizzes').fill(prefix)
-      await expect(page.getByRole('listitem')).toHaveCount(3)
+      // Only the quiz cards: the sidebar's legal links are list items too.
+      await expect(page.getByRole('listitem').filter({ hasText: prefix })).toHaveCount(3)
     })
 
     await test.step('select two: a click on the card and a click on the checkbox', async () => {
@@ -91,7 +92,7 @@ test('host batch edits and batch deletes quizzes, and deletes one from the edito
       await expect.poll(async () => (await dialog.getByRole('listitem').allInnerTexts()).sort()).toEqual([`${prefix} 1`, `${prefix} 2`])
       await dialog.getByRole('button', { name: 'Delete' }).click()
       await expect(page.getByText('2 quizzes deleted')).toBeVisible()
-      await expect(page.getByRole('listitem')).toHaveCount(1)
+      await expect(page.getByRole('listitem').filter({ hasText: prefix })).toHaveCount(1)
       expect([await status(ids[0]!), await status(ids[1]!), await status(ids[2]!)]).toEqual([404, 404, 200])
     })
 

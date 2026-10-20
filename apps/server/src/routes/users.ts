@@ -72,7 +72,8 @@ export async function userRoutes(app: FastifyInstance, { db, manager }: { db: Db
     if (!body) return reply
     try {
       // The initial password is known to the admin, so the new user must replace it.
-      const user = await createUser(db, body.username, body.password, body.role, { mustChangePassword: true })
+      // Made for someone else: its owner changes the password and accepts the terms at the first login.
+      const user = await createUser(db, body.username, body.password, body.role, { mustChangePassword: true, termsVersion: null })
       return reply.code(201).send({ user: { ...user, mustChangePassword: true } })
     } catch (error) {
       if (isUniqueViolation(error)) return reply.code(409).send({ error: 'errors.usernameTaken' })

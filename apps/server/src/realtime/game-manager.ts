@@ -2,6 +2,7 @@ import { gameSettingsSchema, type GameBranding, type GameSettings, type QuickMes
 import {
   EngineError,
   createGame,
+  endGame,
   endQuestion,
   expireAnnouncement,
   resultsPending,
@@ -76,6 +77,24 @@ export class GameManager {
   /** The games in memory that a host runs or ran (finished ones stay a while). */
   hostedBy(hostId: string): ManagedGame[] {
     return [...this.games.values()].filter((entry) => entry.game.hostId === hostId).map((entry) => entry.game)
+  }
+
+  /**
+   * Ends the games nobody finished that began (or were scheduled to begin) more than `windowMs`
+   * ago: a lobby left open, a game the host walked away from. A restart closes those too; without
+   * this a long-running server kept their players' nicknames for good. They then age out like any
+   * finished game. Returns how many were ended.
+   */
+  endStale(windowMs: number): number {
+    const cutoff = this.now() - windowMs
+    let ended = 0
+    for (const { game } of [...this.games.values()]) {
+      const began = Math.max(game.state.createdAt, game.state.scheduledAt ?? 0)
+      if (game.state.phase === 'finished' || began > cutoff) continue
+      this.apply(game.state.pin, endGame)
+      ended += 1
+    }
+    return ended
   }
 
   /** The `seq` of the game's latest snapshots, for a socket that gets its snapshot directly. */

@@ -6,12 +6,14 @@ import { useTranslation } from 'react-i18next'
 import { FloatingShapes } from '@/components/floating-shapes'
 import { FormAlert } from '@/components/form-alert'
 import { HomeHero } from '@/components/home-hero'
+import { LegalLinks } from '@/components/legal-links'
 import { Spinner } from '@/components/spinner'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { apiFetch, errorCode } from '@/lib/api'
 import { useSiteInfo } from '@/lib/site'
 import { TextField } from '../components/text-field'
+import { TermsCheckbox } from '../features/legal/terms-checkbox'
 
 export const Route = createFileRoute('/register')({
   component: RegisterPage,
@@ -27,13 +29,14 @@ function RegisterPage() {
   const [password, setPassword] = useState('')
   const [repeat, setRepeat] = useState('')
   const [website, setWebsite] = useState('')
+  const [accepted, setAccepted] = useState(false)
   const [submitted, setSubmitted] = useState(false)
 
   const register = useMutation({
     mutationFn: () =>
       apiFetch('/api/auth/register', {
         method: 'POST',
-        body: JSON.stringify({ username: username.trim(), password, ...(website ? { website } : {}) }),
+        body: JSON.stringify({ username: username.trim(), password, acceptTerms: accepted, ...(website ? { website } : {}) }),
       }),
   })
 
@@ -44,7 +47,7 @@ function RegisterPage() {
   function onSubmit(e: FormEvent) {
     e.preventDefault()
     setSubmitted(true)
-    if (!usernameValid || !passwordValid || !repeatValid) return
+    if (!usernameValid || !passwordValid || !repeatValid || !accepted) return
     register.mutate()
   }
 
@@ -105,6 +108,7 @@ function RegisterPage() {
           onChange={(e) => setRepeat(e.target.value)}
           error={submitted && passwordValid && !repeatValid ? t('auth.passwordChange.mismatch') : undefined}
         />
+        <TermsCheckbox checked={accepted} onChange={setAccepted} error={submitted && !accepted} />
         {/* Honeypot: off screen and out of the tab order, so only form-filling bots fill it in. */}
         <div aria-hidden="true" className="absolute left-[-9999px] size-px overflow-hidden">
           <label>
@@ -137,10 +141,8 @@ function RegisterPage() {
           <Link to="/login" className={footerLink}>
             {t('auth.register.haveAccount')}
           </Link>
-          <Link to="/privacy" className={footerLink}>
-            {t('privacy.link')}
-          </Link>
         </div>
+        <LegalLinks />
       </div>
     </div>
   )

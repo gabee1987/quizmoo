@@ -1,8 +1,18 @@
 import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useNavigate } from '@tanstack/react-router'
-import { KeyRoundIcon, LogOutIcon, MonitorIcon, MoonIcon, SmartphoneIcon, SunIcon, Trash2Icon, UserRoundIcon } from 'lucide-react'
+import { Link, useNavigate } from '@tanstack/react-router'
+import {
+  FileDownIcon,
+  KeyRoundIcon,
+  LogOutIcon,
+  MonitorIcon,
+  MoonIcon,
+  SmartphoneIcon,
+  SunIcon,
+  Trash2Icon,
+  UserRoundIcon,
+} from 'lucide-react'
 import { useState } from 'react'
-import { useTranslation } from 'react-i18next'
+import { Trans, useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { ChoiceCards } from '@/components/choice-cards'
 import { FormDialog } from '@/components/form-dialog'
@@ -18,11 +28,14 @@ import { timeAgo } from '../users/format'
 import { PasswordForm } from './password-form'
 import { SettingsSection } from './settings-section'
 
-interface Account {
+export interface Account {
   username: string
   role: 'admin' | 'editor'
   createdAt: string
   lastLoginAt: string | null
+  /** The terms of use version accepted, and when; null if never. */
+  termsVersion: string | null
+  termsAcceptedAt: string | null
   /** Active logins, this browser's included. */
   sessions: number
   quizzes: number
@@ -30,7 +43,7 @@ interface Account {
   images: number
 }
 
-const accountQueryOptions = queryOptions({
+export const accountQueryOptions = queryOptions({
   queryKey: ['account'],
   queryFn: async () => (await apiFetch<{ account: Account }>('/api/me/account')).account,
 })
@@ -134,6 +147,22 @@ export function AccountPanel() {
         </Button>
       </SettingsSection>
 
+      <SettingsSection icon={FileDownIcon} title={t('settings.account.data.title')} help={t('settings.account.data.help')}>
+        {account.data?.termsVersion && account.data.termsAcceptedAt && (
+          <p className="text-sm">
+            <Trans
+              i18nKey="settings.account.data.terms"
+              values={{
+                version: account.data.termsVersion,
+                date: new Intl.DateTimeFormat(i18n.language, { dateStyle: 'long' }).format(new Date(account.data.termsAcceptedAt)),
+              }}
+              components={{ terms: <Link to="/terms" className={inlineLink} />, privacy: <Link to="/privacy" className={inlineLink} /> }}
+            />
+          </p>
+        )}
+        <DownloadDataButton />
+      </SettingsSection>
+
       <SettingsSection icon={Trash2Icon} title={t('settings.account.delete.title')} help={t('settings.account.delete.help')} danger>
         <Button variant="destructive" className="self-start" disabled={!account.data} onClick={() => setDeleting(true)}>
           <Trash2Icon aria-hidden="true" />
@@ -146,8 +175,23 @@ export function AccountPanel() {
   )
 }
 
+const inlineLink = 'rounded-sm font-semibold underline underline-offset-2 outline-none focus-visible:ring-[3px] focus-visible:ring-ring'
+
+/** "Download my data": a plain link, so the browser saves the server's JSON file under its own name. */
+export function DownloadDataButton() {
+  const { t } = useTranslation()
+  return (
+    <Button asChild variant="outline" className="self-start">
+      <a href="/api/me/export" download>
+        <FileDownIcon aria-hidden="true" />
+        {t('settings.account.data.download')}
+      </a>
+    </Button>
+  )
+}
+
 /** Deleting takes everything the account owns, so the password is asked again (an open laptop is not enough). */
-function DeleteAccountDialog({ account, onClose }: { account: Account; onClose: () => void }) {
+export function DeleteAccountDialog({ account, onClose }: { account: Account; onClose: () => void }) {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
   const navigate = useNavigate()

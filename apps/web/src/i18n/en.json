@@ -989,6 +989,11 @@
     "unsupportedImage": "Use a JPG, PNG or WebP image.",
     "fileTooLarge": "The file is larger than 5 MB.",
     "passwordChangeRequired": "Change your initial password first.",
+    "termsRequired": "Accept the terms of use first.",
+    "termsOutdated": "The terms changed in the meantime. Reload the page and read the new version.",
+    "tooManyGames": "You can have at most 20 open games at once. End an older one (End game), then try again.",
+    "tooManyImages": "You reached the image limit (1000). Delete old quizzes; unused images are cleaned up daily.",
+    "imageTooBig": "This picture has too many pixels (50 megapixels at most). Make it smaller and upload it again.",
     "usernameTaken": "This username is already taken.",
     "notOnYourself": "You can't do this to your own account. Change your password in My settings.",
     "lastAdmin": "You're the only admin. Make someone else an admin first.",
@@ -1079,6 +1084,12 @@
         "body_other": "You have {{count}} active logins, this browser included. Log out the others if you used a shared computer or lost a device.",
         "submit": "Log out the others",
         "done": "Logged out everywhere else"
+      },
+      "data": {
+        "title": "Your data",
+        "help": "One JSON file with your account, settings, quizzes, the list of your pictures and your games with their results.",
+        "download": "Download my data",
+        "terms": "You accepted the <terms>terms of use</terms> (version {{version}}) on {{date}}. See also the <privacy>privacy notice</privacy>."
       },
       "device": {
         "title": "This device",
@@ -1233,60 +1244,266 @@
     "summary": "Quizmoo: {{title}}",
     "description": "PIN: {{pin}}\nJoin at: {{url}}"
   },
-  "privacy": {
-    "link": "Privacy",
-    "title": "Privacy",
-    "intro": "Quizmoo is a quiz game. It keeps as little about you as it can, and only for the game.",
-    "operator": "This site is run by {{name}}.",
-    "operatorUnknown": "This site is run by whoever organises your games: ask them your questions.",
-    "contact": "Questions and requests:",
-    "sections": [
-      {
-        "heading": "If you play",
-        "items": [
-          "The nickname you type, your avatar and your team.",
-          "Your answers and points in the game.",
-          "Nothing else: no e-mail, phone number, account, location or IP address."
-        ]
+  "legal": {
+    "nav": {
+      "label": "Legal",
+      "privacy": "Privacy",
+      "terms": "Terms",
+      "cookies": "Cookies",
+      "imprint": "Imprint"
+    },
+    "updated": "Last updated: {{date}}",
+    "operator": {
+      "title": "Who runs Quizmoo here",
+      "name": "Operator",
+      "nameUnknown": "Not set by this site. Ask whoever invited you to play.",
+      "contact": "Contact",
+      "contactUnknown": "Ask the organiser of your game.",
+      "hosting": "Hosting",
+      "hostingUnknown": "a hosting provider chosen by the operator",
+      "nature": "A free, non-commercial hobby project of a private individual: no company, no ads, no paid plans."
+    },
+    "privacy": {
+      "title": "Privacy notice",
+      "intro": "This notice explains, as the GDPR requires, what Quizmoo stores about you, why, for how long, and what you can do about it. The short version: as little as possible, only to run the game, never sold, never used for advertising or tracking.",
+      "sections": [
+        {
+          "heading": "Who is responsible",
+          "paragraphs": [
+            "The controller of your data is the operator named above, a private individual running Quizmoo as a free hobby project. Write to the contact above with any question or request about your data."
+          ]
+        },
+        {
+          "heading": "If you play",
+          "items": [
+            "The nickname you type, the avatar you pick and your team. Everyone in the game sees them: the host, the other players and the shared screen. Use a nickname, not your full name.",
+            "Your answers, how fast you gave them and your points, to score the game and show the results.",
+            "A random player code in your browser, so you get back into the game after a reload.",
+            "Nothing else: no account, e-mail address, phone number, location or IP address is stored."
+          ],
+          "paragraphs": [
+            "Legal basis: taking part in the game you chose to join (GDPR Article 6(1)(b)), and the host's legitimate interest in looking back at the results of their event (Article 6(1)(f))."
+          ]
+        },
+        {
+          "heading": "If you host",
+          "items": [
+            "Your username, and your password only as a one-way hash that nobody can turn back into the password.",
+            "When you last logged in (shown only to the admin, to see which accounts are still used), and which version of the terms you accepted and when (the record of our agreement).",
+            "Your logins: a random code per browser, stored as a hash, for up to {{sessionDays}} days.",
+            "Your quizzes, the pictures you upload, your settings, and the games you ran with their results."
+          ],
+          "paragraphs": [
+            "Legal basis: the agreement to use the service, i.e. the terms of use (Article 6(1)(b)); for the last login, the record of the terms and the security measures, the legitimate interest in running the service safely (Article 6(1)(f))."
+          ]
+        },
+        {
+          "heading": "Pictures and quiz content",
+          "paragraphs": [
+            "Hosts decide what goes into their quizzes. If a picture or a question shows or names someone, the host must be allowed to use it. To have something removed, ask the host or write to the contact above."
+          ]
+        },
+        {
+          "heading": "Security",
+          "items": [
+            "The connection is encrypted (HTTPS), and passwords and login codes are stored only as hashes.",
+            "To stop password guessing and abuse, the server counts requests per network address for a minute, in memory only. Addresses are never written to the database or the logs.",
+            "The hosting provider may log network addresses for its own security, under its own privacy policy.",
+            "If a data breach puts your rights at risk, the operator reports it to the authority within 72 hours and tells the people affected where the law requires it."
+          ]
+        },
+        {
+          "heading": "How long",
+          "items": [
+            "Finished games, with the players' nicknames and answers, are deleted {{days}} days after the game at the latest, and each host keeps at most their newest 200.",
+            "Games nobody finished are closed after 12 hours and then deleted like finished ones.",
+            "Pictures that no quiz, setting or game uses any more are deleted within two days.",
+            "Expired logins are deleted daily. A sign-up the admin does not approve within {{signupDays}} days is deleted.",
+            "A player's seat in the browser is removed when they leave the game, or after {{seatDays}} days.",
+            "Host accounts, with their quizzes and pictures, stay until the host or the admin deletes them.",
+            "The hosting provider's backups can hold deleted data for up to 30 days before they are overwritten."
+          ]
+        },
+        {
+          "heading": "Who else gets your data",
+          "paragraphs": [
+            "Nobody, for their own purposes. The service runs at a hosting provider ({{hosting}}), which stores and processes the data only to run it, as a processor under its data processing terms. If the provider or its parent company is outside the EU/EEA, transfers rely on the safeguards the GDPR requires: an adequacy decision such as the EU–US Data Privacy Framework, or standard contractual clauses.",
+            "There are no analytics, advertising or social media tools, and the app loads nothing from other sites. The Feedback link for hosts leads to GitHub, a separate service with its own privacy policy; using it is optional."
+          ]
+        },
+        {
+          "heading": "Your rights",
+          "items": [
+            "Access: a copy of the data about you. Hosts: My settings → Account → Download my data.",
+            "Correction of data that is wrong.",
+            "Erasure. Hosts: delete your account on My settings → Account; games and quizzes can be deleted at any time. Players: ask the host or write to the contact above with the date of the game, its PIN and your nickname.",
+            "Restriction of processing, and objection to processing based on legitimate interest.",
+            "Portability: the download above is a machine-readable JSON file."
+          ],
+          "paragraphs": [
+            "We answer within one month. As players have no account, we may ask for the game's date, PIN and your nickname to find your data, and never for more than that."
+          ]
+        },
+        {
+          "heading": "Complaints",
+          "paragraphs": [
+            "You can complain to the Hungarian data protection authority: Nemzeti Adatvédelmi és Információszabadság Hatóság (NAIH), 1055 Budapest, Falk Miksa utca 9–11., ugyfelszolgalat@naih.hu, naih.hu. You can also turn to the authority where you live or work, or go to court. It helps if you write to the contact above first, so we can put it right."
+          ]
+        },
+        {
+          "heading": "Children",
+          "paragraphs": [
+            "Hosts must be at least {{age}} years old. Players need no account and give only a nickname; when children play, the host running the event makes sure their parents, school or organisers agree."
+          ]
+        },
+        {
+          "heading": "Automated decisions and changes",
+          "paragraphs": [
+            "Quizmoo makes no decisions about you by automated means, apart from scoring the quiz you play.",
+            "When this notice changes, the date above changes. If a change affects what hosts agreed to, they are asked to accept the new terms at their next login."
+          ]
+        }
+      ]
+    },
+    "terms": {
+      "title": "Terms of use",
+      "intro": "These terms apply between you and the operator named above whenever you use Quizmoo here. They are short, please read them. Hosts accept them when they sign up; players accept them by joining a game.",
+      "version": "Version {{version}}",
+      "sections": [
+        {
+          "heading": "The service",
+          "paragraphs": [
+            "Quizmoo is a free, non-commercial quiz game run as a hobby by a private individual. It has no paid plans and shows no ads. It is offered as it is: features can change, and the service can pause or stop, if possible with notice on this site."
+          ]
+        },
+        {
+          "heading": "Who can use it",
+          "items": [
+            "Players join a game with its PIN and a nickname; they need no account.",
+            "Hosts need an account, must be at least {{age}} years old and use it themselves: one person per account, no sharing.",
+            "Sign-ups wait for the admin's approval. The admin may decline one without giving a reason."
+          ]
+        },
+        {
+          "heading": "Your account",
+          "items": [
+            "Keep your password to yourself, and don't use it anywhere else.",
+            "If you think someone else used your account, change your password and log out your other devices on My settings, and tell the operator.",
+            "You can delete your account at any time on My settings → Account."
+          ]
+        },
+        {
+          "heading": "What you put in",
+          "items": [
+            "You are responsible for your quizzes, pictures, team names and messages, and you must have the right to use them: your own work, licensed to you, or allowed by law.",
+            "Not allowed: anything illegal, hate speech, harassment, sexual content, content that sexualises minors, glorified violence, or other people's personal data without a legal basis.",
+            "No advertising, spam or links to harmful sites.",
+            "Nicknames must not be offensive or pretend to be someone else. Hosts can remove players from their games.",
+            "You keep the rights to what you create. You allow the operator to store and show it only as far as needed to run the service for you, for example on the screens and phones of your games."
+          ]
+        },
+        {
+          "heading": "Running an event",
+          "items": [
+            "Tell the players before they join that their nicknames and answers appear on the shared screen.",
+            "When children play, make sure their parents, school or organisers agree."
+          ]
+        },
+        {
+          "heading": "Fair use",
+          "items": [
+            "Don't attack, overload or probe the service, get around its limits, or use automated tools to join games or create accounts.",
+            "Limits keep it fair for everyone, for example 20 open games and 1,000 pictures per host.",
+            "Found a security problem? Report it privately to the contact, and don't use or publish it before it is fixed. Thank you!"
+          ]
+        },
+        {
+          "heading": "When something goes wrong",
+          "items": [
+            "The operator may remove content, or suspend or delete an account, that breaks these terms or the law; without notice when that is needed to prevent harm.",
+            "Keep your own copy of important quizzes: download them from the quiz list. There are backups, but losing data can't be ruled out entirely."
+          ]
+        },
+        {
+          "heading": "Liability",
+          "paragraphs": [
+            "The service is free and provided as it is, without any guarantee that it is available or fits a particular purpose. As far as the law allows, the operator is not liable for indirect damage or lost data. This does not limit liability for damage caused intentionally or by gross negligence, for harm to life, body or health, or for anything else the law (in particular Section 6:152 of the Hungarian Civil Code) does not allow to be excluded."
+          ]
+        },
+        {
+          "heading": "Changes to these terms",
+          "paragraphs": [
+            "The version and date are shown above. When the terms change in a way that matters, hosts are asked to accept the new version at their next login; until they do, they can still download their data or delete their account."
+          ]
+        },
+        {
+          "heading": "Law and disputes",
+          "paragraphs": [
+            "Hungarian law applies. If you are a consumer living elsewhere in the EU, you keep the protection of your country's mandatory law. Please write to the contact above first: most problems can be solved that way."
+          ]
+        }
+      ]
+    },
+    "cookies": {
+      "title": "Cookies and storage",
+      "intro": "Quizmoo uses one cookie, for hosts who log in, and a few entries in your browser's storage, each needed for something you asked for. That is why it does not ask for consent: the ePrivacy Directive and Section 155(4) of the Hungarian Electronic Communications Act allow strictly necessary storage without it. No tracking, analytics or advertising cookies, and nothing from other sites.",
+      "columns": {
+        "name": "Name",
+        "kind": "Where",
+        "who": "Who",
+        "purpose": "What for, and how long"
       },
-      {
-        "heading": "If you host",
-        "items": [
-          "Your username, and your password only as a hash that nobody can read back.",
-          "When you last logged in, which only the admin sees, to know which accounts are still used.",
-          "Your quizzes, pictures, settings and the games you ran."
-        ]
+      "kinds": {
+        "cookie": "Cookie",
+        "localStorage": "Browser storage",
+        "sessionStorage": "Tab storage",
+        "cache": "App cache"
       },
-      {
-        "heading": "How long",
-        "items": [
-          "Finished games, with the players' nicknames and answers, are deleted {{days}} days after the game at the latest.",
-          "Host accounts and quizzes stay until they are deleted.",
-          "A sign-up the admin does not approve within 7 days is deleted."
-        ]
+      "who": {
+        "hosts": "Hosts",
+        "players": "Players",
+        "everyone": "Everyone"
       },
-      {
-        "heading": "Cookies and your device",
-        "items": [
-          "Hosts get one cookie that keeps them logged in for up to 30 days. Players get none.",
-          "Your browser remembers your language, your colour mode and your place in a game, so a reload brings you back. This stays on your device.",
-          "No tracking, analytics or ads, and nothing is loaded from other sites."
-        ]
+      "items": {
+        "session": "Keeps you logged in. Page scripts can't read it, and it is sent only to this site over HTTPS. Up to 30 days, or until you log out. On a local network without HTTPS it is called quizmoo_session.",
+        "player": "Your seat in a game (a random code, your nickname and avatar), so a reload brings you back. Removed when you leave the game, or after 2 days.",
+        "draft": "What you filled in while waiting for a scheduled game. Removed when you join or leave.",
+        "dismissed": "The host message you swiped away. Until you close the tab.",
+        "picksOpen": "Whether your team's picks are open. Until you close the tab.",
+        "lang": "Your language. Until you change it or clear your browser data.",
+        "mode": "Light, dark or system look. Until you change it or clear your browser data.",
+        "notice": "That you have seen the storage notice, so it does not come back.",
+        "hostToasts": "Whether the host page shows short notes about players joining and leaving.",
+        "appCache": "The app's own files (code, fonts, pictures), so it starts quickly and can be installed. No personal data."
       },
-      {
-        "heading": "Where it runs",
-        "items": [
-          "The app and its database run at a hosting provider chosen by whoever runs this site. The provider handles the data only to run the service."
-        ]
-      },
-      {
-        "heading": "Your rights",
-        "items": [
-          "You can ask what is stored about you, and have it corrected or deleted. Write to the contact above with the date of the game and your nickname.",
-          "Hosts can delete their games and quizzes themselves at any time."
-        ]
-      }
-    ]
+      "removeTitle": "Removing them",
+      "remove": "You can delete all of it in your browser's settings (site data for this address). You will be logged out, and a player loses their seat in a running game."
+    },
+    "imprint": {
+      "title": "Imprint",
+      "intro": "Quizmoo here is a free, non-commercial hobby project of a private individual, not a business.",
+      "items": [
+        "Quizzes, pictures and messages are created by their hosts, who are responsible for them.",
+        "To report illegal content or a security problem, write to the contact above."
+      ]
+    },
+    "notice": {
+      "label": "About storage",
+      "text": "Quizmoo only stores what it needs to work: your login if you host, your seat in a game, your language and look. No tracking, no ads.",
+      "details": "What exactly?",
+      "ok": "Got it"
+    },
+    "accept": {
+      "title": "Accept the terms of use",
+      "intro": "Before you go on, please read the terms of use (version {{version}}). The privacy notice explains what we store about you.",
+      "checkbox": "I'm {{age}} or older, I accept the <terms>terms of use</terms> and I've read the <privacy>privacy notice</privacy>.",
+      "required": "Tick this to go on.",
+      "submit": "Accept and continue",
+      "otherTitle": "Don't agree?",
+      "other": "You can download your data or delete your account instead, or just log out.",
+      "done": "Thank you!"
+    },
+    "joinNote": "Everyone in the game sees your nickname. By joining you accept the <terms>terms</terms>; see the <privacy>privacy notice</privacy>."
   },
   "quizFile": {
     "importTitle": "Import a quiz",

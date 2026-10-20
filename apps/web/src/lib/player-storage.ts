@@ -31,9 +31,31 @@ export function getStoredPlayer(pin: string): StoredPlayer | null {
 
 export function storePlayer(pin: string, player: StoredPlayer) {
   try {
-    localStorage.setItem(key(pin), JSON.stringify(player))
+    localStorage.setItem(key(pin), JSON.stringify({ ...player, savedAt: Date.now() }))
   } catch {
     // ignore: the game still works, only reload-rejoin is lost
+  }
+}
+
+/** A seat in a game is useful for a day at most: games end within 12 hours. */
+export const PLAYER_SEAT_DAYS = 2
+
+/**
+ * Removes seats in old games, so a shared or borrowed phone does not keep everyone's nicknames
+ * (and the tokens to act as them) for good. Seats saved before the save time existed get one now
+ * and go two days later, so a game running during an update keeps its players.
+ */
+export function forgetOldPlayers(now = Date.now()) {
+  try {
+    for (const name of Object.keys(localStorage)) {
+      if (!name.startsWith('quizmoo.player.')) continue
+      const value = JSON.parse(localStorage.getItem(name) ?? 'null') as { savedAt?: unknown } | null
+      if (!value || typeof value !== 'object') localStorage.removeItem(name)
+      else if (typeof value.savedAt !== 'number') localStorage.setItem(name, JSON.stringify({ ...value, savedAt: now }))
+      else if (now - value.savedAt > PLAYER_SEAT_DAYS * 24 * 60 * 60 * 1000) localStorage.removeItem(name)
+    }
+  } catch {
+    // Storage unavailable or a corrupted entry: nothing to clean up now.
   }
 }
 

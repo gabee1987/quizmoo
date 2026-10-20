@@ -1,3 +1,4 @@
+import { TERMS_VERSION } from '@quizmoo/shared'
 import { afterAll, beforeAll, expect, it } from 'vitest'
 import { createUser } from '../src/auth/users.js'
 import type { Db } from '../src/db/index.js'
@@ -76,6 +77,8 @@ describeDb('users and password change (database)', () => {
     })
     expect(changed.statusCode).toBe(200)
     expect(changed.json().user.mustChangePassword).toBe(false)
+    // An admin-made account then accepts the terms (test/terms.test.ts covers that step).
+    await req(cookie, 'POST', '/api/auth/terms', { version: TERMS_VERSION })
     expect((await req(cookie, 'GET', '/api/quizzes')).statusCode).toBe(200)
     expect((await login('test_hr2', 'initial-pass-2')).res.statusCode).toBe(401)
     expect((await login('test_hr2', 'brand-new-pass-1')).res.statusCode).toBe(200)

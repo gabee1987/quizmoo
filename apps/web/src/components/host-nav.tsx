@@ -8,6 +8,7 @@ import {
   LayoutGridIcon,
   LogOutIcon,
   MessageSquareHeartIcon,
+  ScaleIcon,
   SettingsIcon,
   ShieldIcon,
   UserRoundIcon,
@@ -23,6 +24,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { LegalLinks } from '@/components/legal-links'
 import { apiFetch } from '@/lib/api'
 import type { User } from '@/lib/auth'
 import { cn } from '@/lib/cn'
@@ -128,6 +130,7 @@ export function HostNav({ user }: { user: User }) {
             <LogOutIcon className="size-5" />
             {t('auth.logout')}
           </button>
+          <LegalLinks className="mt-3 [&_ul]:justify-start [&_ul]:px-3" />
         </div>
       </nav>
 
@@ -185,6 +188,12 @@ export function HostNav({ user }: { user: User }) {
                     </a>
                   </MenuLink>
                 )}
+                <MenuLink>
+                  <Link to="/privacy">
+                    <ScaleIcon />
+                    {t('legal.nav.label')}
+                  </Link>
+                </MenuLink>
                 <DropdownMenuItem className="min-h-11" disabled={logout.isPending} onSelect={() => logout.mutate()}>
                   <LogOutIcon />
                   {t('auth.logout')}
