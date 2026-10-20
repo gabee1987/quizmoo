@@ -18,6 +18,9 @@ export const users = pgTable('users', {
   status: text('status', { enum: ['active', 'pending'] }).notNull().default('active'),
   /** Set on each successful login; shown to admins only, deleted with the account. */
   lastLoginAt: timestamp('last_login_at', { withTimezone: true }),
+  /** The terms of use version the host accepted (`TERMS_VERSION`), and when: proof of acceptance. Null: never accepted. */
+  termsVersion: text('terms_version'),
+  termsAcceptedAt: timestamp('terms_accepted_at', { withTimezone: true }),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 })
 

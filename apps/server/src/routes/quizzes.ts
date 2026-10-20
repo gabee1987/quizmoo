@@ -18,7 +18,7 @@ import { requireSession } from '../auth/require-session.js'
 import type { Db } from '../db/index.js'
 import { images, quizzes } from '../db/schema.js'
 import { parseOr400 } from './http.js'
-import { MAX_IMAGE_BYTES, imageRow, ownsImage, toWebp } from './images.js'
+import { MAX_IMAGES_PER_HOST, MAX_IMAGE_BYTES, imageCount, imageRow, ownsImage, toWebp } from './images.js'
 import { readHostSettings } from './me.js'
 
 /** A quiz's stored branding read through the schema; a value that no longer validates falls back to the defaults. */
@@ -175,15 +175,19 @@ export async function quizRoutes(app: FastifyInstance, { db }: { db: Db }) {
     const input = parseQuiz(await withHostDefaults(file.quiz, userId), reply)
     if (!input) return reply
 
+    const imageIds = quizImageIds(input)
+    if ((await imageCount(db, userId)) + imageIds.length > MAX_IMAGES_PER_HOST) {
+      return reply.code(409).send({ error: 'errors.tooManyImages' })
+    }
     const rows: ReturnType<typeof imageRow>[] = []
     const newIds = new Map<string, string>()
-    for (const id of quizImageIds(input)) {
+    for (const id of imageIds) {
       const data = file.images[id]
       if (!data) return reply.code(400).send({ error: 'errors.invalidInput', issues: [{ path: `images.${id}`, code: 'missing' }] })
       const bytes = Buffer.from(data, 'base64')
       if (bytes.length > MAX_IMAGE_BYTES) return reply.code(400).send({ error: 'errors.fileTooLarge' })
       const output = await toWebp(bytes)
-      if (!output) return reply.code(400).send({ error: 'errors.unsupportedImage' })
+      if (typeof output === 'string') return reply.code(400).send({ error: output })
       const row = imageRow(userId, output)
       rows.push(row)
       newIds.set(id, row.id)

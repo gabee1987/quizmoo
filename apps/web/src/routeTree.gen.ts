@@ -10,14 +10,18 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CookiesRouteImport } from './routes/cookies'
 import { Route as HostRouteRouteImport } from './routes/host/route'
+import { Route as ImprintRouteImport } from './routes/imprint'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as RegisterRouteImport } from './routes/register'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as HostIndexRouteImport } from './routes/host/index'
 import { Route as HostNicknamesRouteImport } from './routes/host/nicknames'
 import { Route as HostPasswordRouteImport } from './routes/host/password'
 import { Route as HostSettingsRouteImport } from './routes/host/settings'
+import { Route as HostTermsRouteImport } from './routes/host/terms'
 import { Route as HostUsersRouteImport } from './routes/host/users'
 import { Route as PlayPinRouteImport } from './routes/play.$pin'
 import { Route as ScreenPinRouteImport } from './routes/screen.$pin'
@@ -33,9 +37,19 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CookiesRoute = CookiesRouteImport.update({
+  id: '/cookies',
+  path: '/cookies',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HostRouteRoute = HostRouteRouteImport.update({
   id: '/host',
   path: '/host',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ImprintRoute = ImprintRouteImport.update({
+  id: '/imprint',
+  path: '/imprint',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -51,6 +65,11 @@ const PrivacyRoute = PrivacyRouteImport.update({
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
   path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HostIndexRoute = HostIndexRouteImport.update({
@@ -71,6 +90,11 @@ const HostPasswordRoute = HostPasswordRouteImport.update({
 const HostSettingsRoute = HostSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => HostRouteRoute,
+} as any)
+const HostTermsRoute = HostTermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
   getParentRoute: () => HostRouteRoute,
 } as any)
 const HostUsersRoute = HostUsersRouteImport.update({
@@ -122,12 +146,16 @@ const ScreenResultsGameIdRoute = ScreenResultsGameIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/host': typeof HostRouteRouteWithChildren
+  '/cookies': typeof CookiesRoute
+  '/imprint': typeof ImprintRoute
   '/login': typeof LoginRoute
   '/privacy': typeof PrivacyRoute
   '/register': typeof RegisterRoute
+  '/terms': typeof TermsRoute
   '/host/nicknames': typeof HostNicknamesRoute
   '/host/password': typeof HostPasswordRoute
   '/host/settings': typeof HostSettingsRoute
+  '/host/terms': typeof HostTermsRoute
   '/host/users': typeof HostUsersRoute
   '/play/$pin': typeof PlayPinRoute
   '/screen/$pin': typeof ScreenPinRoute
@@ -141,12 +169,16 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/cookies': typeof CookiesRoute
+  '/imprint': typeof ImprintRoute
   '/login': typeof LoginRoute
   '/privacy': typeof PrivacyRoute
   '/register': typeof RegisterRoute
+  '/terms': typeof TermsRoute
   '/host/nicknames': typeof HostNicknamesRoute
   '/host/password': typeof HostPasswordRoute
   '/host/settings': typeof HostSettingsRoute
+  '/host/terms': typeof HostTermsRoute
   '/host/users': typeof HostUsersRoute
   '/play/$pin': typeof PlayPinRoute
   '/screen/$pin': typeof ScreenPinRoute
@@ -162,12 +194,16 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/host': typeof HostRouteRouteWithChildren
+  '/cookies': typeof CookiesRoute
+  '/imprint': typeof ImprintRoute
   '/login': typeof LoginRoute
   '/privacy': typeof PrivacyRoute
   '/register': typeof RegisterRoute
+  '/terms': typeof TermsRoute
   '/host/nicknames': typeof HostNicknamesRoute
   '/host/password': typeof HostPasswordRoute
   '/host/settings': typeof HostSettingsRoute
+  '/host/terms': typeof HostTermsRoute
   '/host/users': typeof HostUsersRoute
   '/play/$pin': typeof PlayPinRoute
   '/screen/$pin': typeof ScreenPinRoute
@@ -184,12 +220,16 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/host'
+    | '/cookies'
+    | '/imprint'
     | '/login'
     | '/privacy'
     | '/register'
+    | '/terms'
     | '/host/nicknames'
     | '/host/password'
     | '/host/settings'
+    | '/host/terms'
     | '/host/users'
     | '/play/$pin'
     | '/screen/$pin'
@@ -203,12 +243,16 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/cookies'
+    | '/imprint'
     | '/login'
     | '/privacy'
     | '/register'
+    | '/terms'
     | '/host/nicknames'
     | '/host/password'
     | '/host/settings'
+    | '/host/terms'
     | '/host/users'
     | '/play/$pin'
     | '/screen/$pin'
@@ -223,12 +267,16 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/host'
+    | '/cookies'
+    | '/imprint'
     | '/login'
     | '/privacy'
     | '/register'
+    | '/terms'
     | '/host/nicknames'
     | '/host/password'
     | '/host/settings'
+    | '/host/terms'
     | '/host/users'
     | '/play/$pin'
     | '/screen/$pin'
@@ -244,9 +292,12 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   HostRouteRoute: typeof HostRouteRouteWithChildren
+  CookiesRoute: typeof CookiesRoute
+  ImprintRoute: typeof ImprintRoute
   LoginRoute: typeof LoginRoute
   PrivacyRoute: typeof PrivacyRoute
   RegisterRoute: typeof RegisterRoute
+  TermsRoute: typeof TermsRoute
   PlayPinRoute: typeof PlayPinRoute
   ScreenPinRoute: typeof ScreenPinRoute
   ScreenResultsGameIdRoute: typeof ScreenResultsGameIdRoute
@@ -261,11 +312,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/cookies': {
+      id: '/cookies'
+      path: '/cookies'
+      fullPath: '/cookies'
+      preLoaderRoute: typeof CookiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/host': {
       id: '/host'
       path: '/host'
       fullPath: '/host'
       preLoaderRoute: typeof HostRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/imprint': {
+      id: '/imprint'
+      path: '/imprint'
+      fullPath: '/imprint'
+      preLoaderRoute: typeof ImprintRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -287,6 +352,13 @@ declare module '@tanstack/react-router' {
       path: '/register'
       fullPath: '/register'
       preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/host/': {
@@ -315,6 +387,13 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/host/settings'
       preLoaderRoute: typeof HostSettingsRouteImport
+      parentRoute: typeof HostRouteRoute
+    }
+    '/host/terms': {
+      id: '/host/terms'
+      path: '/terms'
+      fullPath: '/host/terms'
+      preLoaderRoute: typeof HostTermsRouteImport
       parentRoute: typeof HostRouteRoute
     }
     '/host/users': {
@@ -387,6 +466,7 @@ interface HostRouteRouteChildren {
   HostNicknamesRoute: typeof HostNicknamesRoute
   HostPasswordRoute: typeof HostPasswordRoute
   HostSettingsRoute: typeof HostSettingsRoute
+  HostTermsRoute: typeof HostTermsRoute
   HostUsersRoute: typeof HostUsersRoute
   HostIndexRoute: typeof HostIndexRoute
   HostGamesPinRoute: typeof HostGamesPinRoute
@@ -400,6 +480,7 @@ const HostRouteRouteChildren: HostRouteRouteChildren = {
   HostNicknamesRoute: HostNicknamesRoute,
   HostPasswordRoute: HostPasswordRoute,
   HostSettingsRoute: HostSettingsRoute,
+  HostTermsRoute: HostTermsRoute,
   HostUsersRoute: HostUsersRoute,
   HostIndexRoute: HostIndexRoute,
   HostGamesPinRoute: HostGamesPinRoute,
@@ -416,9 +497,12 @@ const HostRouteRouteWithChildren = HostRouteRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   HostRouteRoute: HostRouteRouteWithChildren,
+  CookiesRoute: CookiesRoute,
+  ImprintRoute: ImprintRoute,
   LoginRoute: LoginRoute,
   PrivacyRoute: PrivacyRoute,
   RegisterRoute: RegisterRoute,
+  TermsRoute: TermsRoute,
   PlayPinRoute: PlayPinRoute,
   ScreenPinRoute: ScreenPinRoute,
   ScreenResultsGameIdRoute: ScreenResultsGameIdRoute,

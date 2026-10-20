@@ -6,6 +6,10 @@ import cookie from '@fastify/cookie'
 import helmet from '@fastify/helmet'
 import multipart from '@fastify/multipart'
 import rateLimit from '@fastify/rate-limit'
+import { TERMS_VERSION } from '@quizmoo/shared'
+import { sessionCookieName } from './auth/session.js'
+import { serializeError } from './log-safety.js'
+import { createPinGuard } from './realtime/pin-guard.js'
 import fastifyStatic from '@fastify/static'
 import { Server as SocketServer } from 'socket.io'
 import type { Config } from './config.js'
@@ -30,8 +34,12 @@ export interface AppDeps {
 }
 
 export async function buildApp(config: Config, { db, manager, webDist: webDistOverride }: AppDeps) {
-  // Request logs leave out the client's address and port (data minimisation).
-  const serializers = { req: (req: FastifyRequest) => ({ method: req.method, url: req.url, hostname: req.hostname }) }
+  // Request logs leave out the client's address and port, and the query string (the game history
+  // search carries player names), and errors leave out queries and their values (data minimisation).
+  const serializers = {
+    req: (req: FastifyRequest) => ({ method: req.method, url: req.url.split('?')[0] ?? req.url, hostname: req.hostname }),
+    err: serializeError,
+  }
   const app = Fastify({
     logger:
       config.NODE_ENV === 'development'
@@ -46,6 +54,8 @@ export async function buildApp(config: Config, { db, manager, webDist: webDistOv
 
   // Secure cookies need HTTPS; a laptop on the venue LAN serves plain http://<ip>:3000.
   const secureCookies = config.APP_ORIGIN.startsWith('https://')
+  // Wrong PINs per address, shared by the sockets and the public PIN lookups.
+  const pinGuard = createPinGuard()
 
   // Everything is same-origin: no CDN, no third-party scripts. Inline style attributes stay
   // allowed (React sets widths and animation delays); inline scripts do not.
@@ -68,13 +78,29 @@ export async function buildApp(config: Config, { db, manager, webDist: webDistOv
     },
     strictTransportSecurity: secureCookies ? { maxAge: 31_536_000 } : false,
   })
+  // Helmet sends no Permissions-Policy. The camera stays for the join page's QR scanner; nothing else is used.
+  app.addHook('onSend', async (_request, reply) => {
+    reply.header('permissions-policy', 'camera=(self), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()')
+  })
   await app.register(cookie, { secret: config.SESSION_SECRET })
+  // Each request carries its session token under this install's cookie name; a cookie under the
+  // other name (one planted without the __Host- prefix) is never read.
+  const sessionCookie = sessionCookieName(secureCookies)
+  app.decorateRequest('sessionToken', undefined)
+  app.addHook('onRequest', async (request) => {
+    request.sessionToken = request.cookies[sessionCookie]
+  })
   await app.register(rateLimit, {
     max: 300,
     timeWindow: '1 minute',
     // API calls only. A page load fetches ~25 static files, and at an event every phone on the
     // venue wifi can share one public IP: limiting those would leave phones with a blank page.
-    allowList: (request) => !request.url.startsWith('/api/'),
+    // Decided by the matched route, not the raw URL: `/%61pi/auth/login` reaches the login route too,
+    // and checking the text let it skip every limit. Unmatched URLs fall back to the text.
+    allowList: (request) => {
+      const route = request.routeOptions.url
+      return !(route && route !== '*' ? route : request.url).startsWith('/api/')
+    },
     errorResponseBuilder: () => ({ statusCode: 429, error: 'errors.rateLimited' }),
   })
 
@@ -105,6 +131,8 @@ export async function buildApp(config: Config, { db, manager, webDist: webDistOv
   app.get('/api/site', async () => ({
     operator: config.OPERATOR_NAME ?? null,
     contact: config.OPERATOR_EMAIL ?? null,
+    hosting: config.HOSTING_PROVIDER ?? null,
+    termsVersion: TERMS_VERSION,
     feedbackUrl: config.FEEDBACK_URL ?? null,
     retentionDays: config.RESULTS_RETENTION_DAYS,
     registrationOpen: config.REGISTRATION_OPEN,
@@ -116,13 +144,13 @@ export async function buildApp(config: Config, { db, manager, webDist: webDistOv
   await app.register(userRoutes, { db, manager })
   await app.register(meRoutes, { db })
   await app.register(accountRoutes, { db, manager, secureCookies })
-  await app.register(gameRoutes, { db, manager, appOrigin: config.APP_ORIGIN })
+  await app.register(gameRoutes, { db, manager, appOrigin: config.APP_ORIGIN, pinGuard })
   await app.register(resultRoutes, {
     db,
     manager,
     keep: { max: config.MAX_GAMES_PER_HOST, days: config.RESULTS_RETENTION_DAYS },
   })
-  await app.register(nicknameRoutes, { db, manager })
+  await app.register(nicknameRoutes, { db, manager, pinGuard })
 
   const webDist =
     webDistOverride ??
@@ -132,7 +160,7 @@ export async function buildApp(config: Config, { db, manager, webDist: webDistOv
     // SPA fallback: every non-API route serves index.html.
     app.setNotFoundHandler((req, reply) => {
       if (req.url.startsWith('/api/') || req.url.startsWith('/socket.io/')) {
-        return reply.code(404).send({ error: 'notFound' })
+        return reply.code(404).send({ error: 'errors.notFound' })
       }
       return reply.sendFile('index.html')
     })
@@ -144,8 +172,23 @@ export async function buildApp(config: Config, { db, manager, webDist: webDistOv
     pingTimeout: 20_000,
     // Socket messages are answers and host commands: a few hundred bytes.
     maxHttpBufferSize: 64 * 1024,
+    // A browser always says which page opened a socket. In production only this app's own pages may
+    // (another site must not drive a host's game with the host's cookie); scripts without a browser
+    // send no Origin and need no cookie. Development is left open for Vite's proxy and LAN phones.
+    allowRequest: (req, callback) => {
+      const origin = req.headers.origin
+      callback(null, config.NODE_ENV !== 'production' || origin === undefined || origin === config.APP_ORIGIN)
+    },
   })
-  registerSocketHandlers(io, { manager, db, parseCookie: (header) => app.parseCookie(header), log: app.log })
+  registerSocketHandlers(io, {
+    manager,
+    db,
+    parseCookie: (header) => app.parseCookie(header),
+    log: app.log,
+    pinGuard,
+    trustProxy: config.TRUST_PROXY,
+    sessionCookie,
+  })
   // Before the HTTP server closes: it waits for every open connection, and websockets never end
   // on their own. Clients reconnect to the next server; their disconnects are saved as usual.
   app.addHook('preClose', async () => {

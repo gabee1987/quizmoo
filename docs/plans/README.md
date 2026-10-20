@@ -36,6 +36,8 @@ Finished plans are deleted once their branch is merged: `CHANGELOG.md` records w
 | 27 | Quiz files: spreadsheet and Quizmoo file import and export | `feature/quiz-files` | done |
 | 28 | [Admin pages: users and names](phase-28-admin-pages.md) | `feature/admin-pages` | done |
 | 29 | [My settings in tabs, and the host's own account](phase-29-settings-tabs.md) | `feature/admin-pages` | done |
+| 30 | [Legal pages, data rights and a security pass](phase-30-legal-and-security.md) | `feature/legal-and-security` | done |
+| later | [Hosting without an account](later-guest-hosting.md) | `feature/guest-hosting` | planned, after the MVP |
 
 ## Conventions every plan follows
 

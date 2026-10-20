@@ -3,13 +3,14 @@ import { useMutation, useQuery } from '@tanstack/react-query'
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 import { CalendarClockIcon, CameraIcon, CheckIcon, DicesIcon, Loader2Icon, LogOutIcon, PlayIcon } from 'lucide-react'
 import { Suspense, lazy, useEffect, useRef, useState, type FormEvent } from 'react'
-import { useTranslation } from 'react-i18next'
+import { Trans, useTranslation } from 'react-i18next'
 import { z } from 'zod'
 import { AddToCalendarButton } from '@/components/add-to-calendar-button'
 import { AvatarPicker } from '@/components/avatar-picker'
 import { FloatingShapes } from '@/components/floating-shapes'
 import { FormAlert } from '@/components/form-alert'
 import { HomeHero } from '@/components/home-hero'
+import { LegalLinks } from '@/components/legal-links'
 import { PinInput } from '@/components/pin-input'
 import { Button } from '@/components/ui/button'
 import { TextField } from '../components/text-field'
@@ -316,6 +317,16 @@ function JoinPage() {
                 {pending ? <Loader2Icon className="animate-spin" aria-hidden="true" /> : <PlayIcon aria-hidden="true" />}
                 {pending ? t('common.loading') : waiting ? t('join.opensAtStart') : t('join.submit')}
               </Button>
+              {/* Players have no account to accept anything with: they are told here, where they decide. */}
+              <p className="text-center text-xs text-muted-foreground">
+                <Trans
+                  i18nKey="legal.joinNote"
+                  components={{
+                    terms: <Link to="/terms" className={inlineLink} />,
+                    privacy: <Link to="/privacy" className={inlineLink} />,
+                  }}
+                />
+              </p>
             </div>
           ) : (
             error && <FormAlert>{t(error)}</FormAlert>
@@ -325,10 +336,8 @@ function JoinPage() {
           <Link to="/login" className={footerLink}>
             {t('join.hostLogin')}
           </Link>
-          <Link to="/privacy" className={footerLink}>
-            {t('privacy.link')}
-          </Link>
         </div>
+        <LegalLinks />
         {/* Room below for scrolling the card up; out of the layout, so nothing moves when it comes and goes. */}
         {pinFocused && <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-full h-dvh lg:hidden" />}
       </div>
@@ -349,3 +358,4 @@ function JoinPage() {
 
 const footerLink =
   'rounded-md text-sm font-semibold text-muted-foreground underline underline-offset-4 outline-none hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring'
+const inlineLink = 'rounded-sm font-semibold underline underline-offset-2 outline-none hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring'

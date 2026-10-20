@@ -5,6 +5,10 @@ import { apiFetch } from './api'
 export interface SiteInfo {
   operator: string | null
   contact: string | null
+  /** The hosting provider and where the data lives (`HOSTING_PROVIDER`). */
+  hosting: string | null
+  /** The terms of use in force (`TERMS_VERSION`). */
+  termsVersion: string
   feedbackUrl: string | null
   retentionDays: number
   /** Whether hosts may sign up on /register (`REGISTRATION_OPEN`). */

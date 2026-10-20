@@ -989,6 +989,11 @@
     "unsupportedImage": "JPG, PNG vagy WebP képet használj.",
     "fileTooLarge": "A fájl nagyobb 5 MB-nál.",
     "passwordChangeRequired": "Előbb cseréld le a kezdeti jelszót.",
+    "termsRequired": "Előbb fogadd el a felhasználási feltételeket.",
+    "termsOutdated": "A feltételek közben változtak. Töltsd újra az oldalt, és nézd át az új változatot.",
+    "tooManyGames": "Egyszerre legfeljebb 20 nyitott játékod lehet. Zárj le egy régebbit (Játék vége), aztán próbáld újra.",
+    "tooManyImages": "Elérted a képek felső határát (1000). Töröld a régi kvízeket, a nem használt képeket naponta takarítjuk.",
+    "imageTooBig": "Ez a kép túl nagy felbontású (legfeljebb 50 megapixel). Kicsinyítsd le, és töltsd fel újra.",
     "usernameTaken": "Ez a felhasználónév már foglalt.",
     "notOnYourself": "A saját fiókoddal ezt nem teheted meg. A jelszavadat a Beállításaimban cserélheted le.",
     "lastAdmin": "Te vagy az egyetlen adminisztrátor. Előbb tegyél meg valaki mást adminisztrátornak.",
@@ -1079,6 +1084,12 @@
         "body_other": "{{count}} helyen vagy belépve, ezzel a böngészővel együtt. Ha közös gépen léptél be, vagy elhagytad az egyik eszközödet, léptesd ki a többit.",
         "submit": "Többi kiléptetése",
         "done": "Mindenhol máshol kiléptettünk"
+      },
+      "data": {
+        "title": "Az adataid",
+        "help": "Egy JSON-fájl a fiókoddal, a beállításaiddal, a kvízeiddel, a képeid listájával és a játékaiddal az eredményeikkel együtt.",
+        "download": "Adataim letöltése",
+        "terms": "A <terms>felhasználási feltételeket</terms> ({{version}} változat) {{date}} napon fogadtad el. Lásd még az <privacy>adatkezelési tájékoztatót</privacy>."
       },
       "device": {
         "title": "Ez az eszköz",
@@ -1233,60 +1244,266 @@
     "summary": "Quizmoo: {{title}}",
     "description": "PIN-kód: {{pin}}\nCsatlakozz itt: {{url}}"
   },
-  "privacy": {
-    "link": "Adatvédelem",
-    "title": "Adatvédelem",
-    "intro": "A Quizmoo egy kvízjáték. A lehető legkevesebbet tárolja rólad, és csak a játékhoz.",
-    "operator": "Ezt az oldalt {{name}} üzemelteti.",
-    "operatorUnknown": "Ezt az oldalt az üzemelteti, aki a játékaidat szervezi: a kérdéseiddel fordulj hozzá.",
-    "contact": "Kérdés, kérés:",
-    "sections": [
-      {
-        "heading": "Ha játszol",
-        "items": [
-          "A beírt beceneved, az avatarod és a csapatod.",
-          "A válaszaid és a pontjaid a játékban.",
-          "Semmi más: se e-mail-cím, se telefonszám, se fiók, se hely, se IP-cím."
-        ]
+  "legal": {
+    "nav": {
+      "label": "Jogi tudnivalók",
+      "privacy": "Adatvédelem",
+      "terms": "Feltételek",
+      "cookies": "Sütik",
+      "imprint": "Impresszum"
+    },
+    "updated": "Utoljára frissítve: {{date}}",
+    "operator": {
+      "title": "Ki üzemelteti itt a Quizmoót",
+      "name": "Üzemeltető",
+      "nameUnknown": "Ez az oldal nem adta meg. Kérdezd azt, aki játszani hívott.",
+      "contact": "Kapcsolat",
+      "contactUnknown": "Kérdezd a játékod szervezőjét.",
+      "hosting": "Tárhely",
+      "hostingUnknown": "az üzemeltető által választott tárhelyszolgáltató",
+      "nature": "Egy magánszemély ingyenes, nem üzleti hobbiprojektje: nincs mögötte cég, nincs reklám, nincs fizetős csomag."
+    },
+    "privacy": {
+      "title": "Adatkezelési tájékoztató",
+      "intro": "Ez a tájékoztató a GDPR szerint elmondja, mit tárol rólad a Quizmoo, miért, meddig, és mit tehetsz ezzel kapcsolatban. Röviden: a lehető legkevesebbet, csak a játék működéséhez, és soha nem adjuk el, nem használjuk reklámra vagy követésre.",
+      "sections": [
+        {
+          "heading": "Ki a felelős",
+          "paragraphs": [
+            "Az adataid kezelője (adatkezelő) a fent megnevezett üzemeltető, egy magánszemély, aki ingyenes hobbiprojektként működteti a Quizmoót. Az adataiddal kapcsolatos kérdéseiddel és kéréseiddel írj a fenti címre."
+          ]
+        },
+        {
+          "heading": "Ha játszol",
+          "items": [
+            "A beírt beceneved, a választott avatarod és a csapatod. Ezeket a játékban mindenki látja: a játékvezető, a többi játékos és a közös kijelző. Becenevet adj meg, ne a teljes neved.",
+            "A válaszaid, a válaszidőd és a pontjaid, hogy a játékot pontozni és az eredményt megmutatni lehessen.",
+            "Egy véletlen játékoskód a böngésződben, hogy újratöltés után visszajuss a játékba.",
+            "Semmi más: se fiók, se e-mail-cím, se telefonszám, se hely, se IP-cím nem kerül tárolásra."
+          ],
+          "paragraphs": [
+            "Jogalap: részvétel a játékban, amihez csatlakozni döntöttél (GDPR 6. cikk (1) bekezdés b) pont), valamint a játékvezető jogos érdeke, hogy utólag visszanézhesse a rendezvénye eredményét (6. cikk (1) bekezdés f) pont)."
+          ]
+        },
+        {
+          "heading": "Ha játékot vezetsz",
+          "items": [
+            "A felhasználóneved, a jelszavad pedig csak egyirányú hash-ként, amiből senki nem tudja visszafejteni a jelszót.",
+            "Mikor léptél be utoljára (ezt csak az adminisztrátor látja, hogy tudja, mely fiókokat használják még), és hogy a feltételek melyik változatát mikor fogadtad el (a megállapodásunk nyoma).",
+            "A belépéseid: böngészőnként egy véletlen kód, hash-ként, legfeljebb {{sessionDays}} napig.",
+            "A kvízeid, a feltöltött képeid, a beállításaid és a játékaid az eredményeikkel."
+          ],
+          "paragraphs": [
+            "Jogalap: a szolgáltatás használatára kötött megállapodás, vagyis a felhasználási feltételek (6. cikk (1) bekezdés b) pont); az utolsó belépés, a feltételek elfogadásának nyoma és a biztonsági intézkedések esetén a szolgáltatás biztonságos működtetéséhez fűződő jogos érdek (6. cikk (1) bekezdés f) pont)."
+          ]
+        },
+        {
+          "heading": "Képek és kvíztartalom",
+          "paragraphs": [
+            "Hogy mi kerül egy kvízbe, azt a játékvezető dönti el. Ha egy kép vagy kérdés valakit ábrázol vagy megnevez, a játékvezetőnek jogosultnak kell lennie a felhasználására. Ha valamit el szeretnél távolíttatni, szólj a játékvezetőnek, vagy írj a fenti címre."
+          ]
+        },
+        {
+          "heading": "Biztonság",
+          "items": [
+            "A kapcsolat titkosított (HTTPS), a jelszavakat és a belépési kódokat pedig csak hash-ként tároljuk.",
+            "A jelszópróbálgatás és a visszaélések ellen a szerver hálózati címenként egy percig, csak a memóriában számolja a kéréseket. A címek soha nem kerülnek az adatbázisba vagy a naplókba.",
+            "A tárhelyszolgáltató a saját biztonsága érdekében, a saját adatvédelmi szabályai szerint naplózhat hálózati címeket.",
+            "Ha egy adatvédelmi incidens veszélyezteti a jogaidat, az üzemeltető 72 órán belül bejelenti a hatóságnak, és ha a jogszabály előírja, az érintetteket is értesíti."
+          ]
+        },
+        {
+          "heading": "Meddig",
+          "items": [
+            "A befejezett játékokat a játékosok becenevével és válaszaival együtt legkésőbb {{days}} nappal a játék után töröljük, és minden játékvezetőnek legfeljebb a 200 legutóbbi marad meg.",
+            "A be nem fejezett játékokat 12 óra után lezárjuk, aztán ugyanúgy töröljük, mint a befejezetteket.",
+            "Azokat a képeket, amelyeket már egy kvíz, beállítás vagy játék sem használ, két napon belül töröljük.",
+            "A lejárt belépéseket naponta töröljük. Ha az adminisztrátor {{signupDays}} napon belül nem hagy jóvá egy regisztrációt, töröljük.",
+            "A játékos helye a böngészőben akkor törlődik, amikor kilép a játékból, de legkésőbb {{seatDays}} nap után.",
+            "A játékvezetői fiók a kvízekkel és képekkel együtt addig marad, amíg a játékvezető vagy az adminisztrátor nem törli.",
+            "A tárhelyszolgáltató mentéseiben a törölt adatok legfeljebb 30 napig maradhatnak meg, utána felülíródnak."
+          ]
+        },
+        {
+          "heading": "Ki kapja még meg az adataidat",
+          "paragraphs": [
+            "Senki, a saját céljaira. A szolgáltatás egy tárhelyszolgáltatónál fut ({{hosting}}), amely az adatokat csak a működtetéshez tárolja és kezeli, adatfeldolgozóként, a saját adatfeldolgozási feltételei szerint. Ha a szolgáltató vagy az anyavállalata az EU/EGT-n kívül van, az adattovábbítás a GDPR által előírt garanciákon alapul: megfelelőségi határozaton (például az EU–USA adatvédelmi kereten) vagy általános szerződési feltételeken.",
+            "Nincs statisztika, reklám vagy közösségimédia-eszköz, és az alkalmazás más oldalról semmit nem tölt be. A játékvezetőknek szóló Visszajelzés link a GitHubra visz, ami külön szolgáltatás a saját adatvédelmi szabályaival; a használata nem kötelező."
+          ]
+        },
+        {
+          "heading": "A jogaid",
+          "items": [
+            "Hozzáférés: másolatot kérhetsz a rólad tárolt adatokról. Játékvezetőként: Beállításaim → Fiók → Adataim letöltése.",
+            "Helyesbítés, ha valami nem stimmel.",
+            "Törlés. Játékvezetőként: a fiókodat a Beállításaim → Fiók oldalon törölheted, a játékokat és a kvízeket pedig bármikor. Játékosként: szólj a játékvezetőnek, vagy írj a fenti címre a játék dátumával, PIN-kódjával és a beceneveddel.",
+            "Az adatkezelés korlátozása, és tiltakozás a jogos érdeken alapuló adatkezelés ellen.",
+            "Adathordozhatóság: a fenti letöltés géppel olvasható JSON-fájl."
+          ],
+          "paragraphs": [
+            "Egy hónapon belül válaszolunk. Mivel a játékosoknak nincs fiókjuk, az adataid megtalálásához elkérhetjük a játék dátumát, PIN-kódját és a beceneved, ennél többet soha."
+          ]
+        },
+        {
+          "heading": "Panasz",
+          "paragraphs": [
+            "Panaszt tehetsz a Nemzeti Adatvédelmi és Információszabadság Hatóságnál (NAIH, 1055 Budapest, Falk Miksa utca 9–11., ugyfelszolgalat@naih.hu, naih.hu), vagy a lakóhelyed, munkahelyed szerinti hatóságnál, és bírósághoz is fordulhatsz. Sokat segít, ha előbb a fenti címre írsz, hogy rendbe tehessük."
+          ]
+        },
+        {
+          "heading": "Gyerekek",
+          "paragraphs": [
+            "Játékot vezetni {{age}} éves kortól lehet. A játékosoknak nincs fiókjuk, csak becenevet adnak meg; ha gyerekek játszanak, a rendezvényt vezető játékvezető gondoskodik róla, hogy a szüleik, az iskola vagy a szervezők beleegyezzenek."
+          ]
+        },
+        {
+          "heading": "Automatikus döntések és változások",
+          "paragraphs": [
+            "A Quizmoo rólad semmilyen automatizált döntést nem hoz, azon kívül, hogy pontozza a kvízt, amit játszol.",
+            "Ha ez a tájékoztató változik, a fenti dátum is változik. Ha a változás azt érinti, amibe a játékvezetők beleegyeztek, a következő belépéskor újra elfogadják a feltételeket."
+          ]
+        }
+      ]
+    },
+    "terms": {
+      "title": "Felhasználási feltételek",
+      "intro": "Ezek a feltételek közted és a fent megnevezett üzemeltető között érvényesek, amikor itt a Quizmoót használod. Rövidek, kérlek, olvasd el őket. A játékvezetők a regisztrációkor fogadják el, a játékosok azzal, hogy csatlakoznak egy játékhoz.",
+      "version": "Változat: {{version}}",
+      "sections": [
+        {
+          "heading": "A szolgáltatás",
+          "paragraphs": [
+            "A Quizmoo egy ingyenes, nem üzleti kvízjáték, amit egy magánszemély hobbiból működtet. Nincs fizetős csomag és nincs reklám. Úgy kínáljuk, ahogy van: a funkciók változhatnak, és a szolgáltatás szünetelhet vagy megszűnhet, lehetőleg előre jelezve ezen az oldalon."
+          ]
+        },
+        {
+          "heading": "Ki használhatja",
+          "items": [
+            "A játékosok PIN-kóddal és becenévvel csatlakoznak egy játékhoz, fiók nélkül.",
+            "A játékvezetőknek fiók kell, legalább {{age}} évesnek kell lenniük, és a fiókot maguk használják: egy fiók egy ember, nem adható tovább.",
+            "A regisztrációk az adminisztrátor jóváhagyására várnak. Az adminisztrátor indoklás nélkül is elutasíthat egyet."
+          ]
+        },
+        {
+          "heading": "A fiókod",
+          "items": [
+            "A jelszavadat tartsd meg magadnak, és máshol ne használd.",
+            "Ha úgy gondolod, más is használta a fiókodat, a Beállításaimban cseréld le a jelszavad és léptesd ki a többi eszközt, és szólj az üzemeltetőnek.",
+            "A fiókodat bármikor törölheted a Beállításaim → Fiók oldalon."
+          ]
+        },
+        {
+          "heading": "Amit feltöltesz",
+          "items": [
+            "A kvízeidért, képeidért, csapatneveidért és üzeneteidért te felelsz, és jogosultnak kell lenned a felhasználásukra: a saját munkád, licenced van rá, vagy a törvény megengedi.",
+            "Tilos: bármi jogellenes, gyűlöletkeltés, zaklatás, szexuális tartalom, kiskorúakat szexualizáló tartalom, az erőszak dicsőítése, és mások személyes adatai jogalap nélkül.",
+            "Nincs reklám, spam és káros oldalakra mutató link.",
+            "A becenév nem lehet sértő, és nem adhatod ki magad másnak. A játékvezető eltávolíthat játékosokat a játékából.",
+            "Amit létrehozol, az a tiéd marad. Az üzemeltetőnek csak annyit engedsz meg, hogy a szolgáltatás működtetéséhez szükséges mértékben tárolja és megjelenítse, például a játékaid kijelzőin és telefonjain."
+          ]
+        },
+        {
+          "heading": "Ha rendezvényt tartasz",
+          "items": [
+            "Csatlakozás előtt mondd el a játékosoknak, hogy a becenevük és a válaszaik megjelennek a közös kijelzőn.",
+            "Ha gyerekek játszanak, gondoskodj róla, hogy a szüleik, az iskola vagy a szervezők beleegyezzenek."
+          ]
+        },
+        {
+          "heading": "Tisztességes használat",
+          "items": [
+            "Ne támadd, ne terheld túl és ne próbálgasd a szolgáltatást, ne kerüld meg a korlátait, és ne csatlakozz játékokhoz vagy hozz létre fiókokat automatizált eszközökkel.",
+            "A korlátok mindenkinek fair használatot biztosítanak, például játékvezetőnként 20 nyitott játék és 1000 kép.",
+            "Biztonsági hibát találtál? Jelezd négyszemközt a fenti címen, és ne használd ki, ne hozd nyilvánosságra, amíg nincs javítva. Köszönjük!"
+          ]
+        },
+        {
+          "heading": "Ha valami nem stimmel",
+          "items": [
+            "Az üzemeltető eltávolíthatja azt a tartalmat, illetve felfüggesztheti vagy törölheti azt a fiókot, amely sérti ezeket a feltételeket vagy a jogszabályokat; ha a károk megelőzéséhez szükséges, előzetes értesítés nélkül is.",
+            "A fontos kvízeidről legyen saját másolatod: a kvízlistából letöltheted őket. Vannak mentések, de az adatvesztést teljesen kizárni nem lehet."
+          ]
+        },
+        {
+          "heading": "Felelősség",
+          "paragraphs": [
+            "A szolgáltatás ingyenes, és úgy nyújtjuk, ahogy van, annak garantálása nélkül, hogy elérhető, vagy hogy egy adott célra megfelel. A jogszabályok által megengedett mértékben az üzemeltető nem felel a közvetett károkért és az adatvesztésért. Ez nem korlátozza a felelősséget a szándékosan vagy súlyos gondatlansággal okozott károkért, az életet, testi épséget vagy egészséget megsértő károkért, és semmiért, aminek a kizárását a jogszabályok (különösen a Polgári Törvénykönyv 6:152. §-a) nem engedik."
+          ]
+        },
+        {
+          "heading": "A feltételek változása",
+          "paragraphs": [
+            "A változat és a dátum fent látható. Ha a feltételek lényegesen változnak, a játékvezetők a következő belépéskor elfogadják az új változatot; addig is letölthetik az adataikat vagy törölhetik a fiókjukat."
+          ]
+        },
+        {
+          "heading": "Jog és vita",
+          "paragraphs": [
+            "A magyar jog az irányadó. Ha az EU más országában élő fogyasztó vagy, megmarad az országod kötelező jogszabályai szerinti védelem. Kérlek, előbb írj a fenti címre: a legtöbb gond így megoldható."
+          ]
+        }
+      ]
+    },
+    "cookies": {
+      "title": "Sütik és tárolás",
+      "intro": "A Quizmoo egyetlen sütit használ, a belépő játékvezetőknek, és néhány bejegyzést a böngésződ tárhelyén, mindegyiket valamihez, amit te kértél. Ezért nem kér hozzájárulást: az ePrivacy-irányelv és az elektronikus hírközlésről szóló törvény (Eht.) 155. § (4) bekezdése a feltétlenül szükséges tárolást hozzájárulás nélkül is megengedi. Nincs követő, statisztikai vagy reklámsüti, és más oldalról semmi.",
+      "columns": {
+        "name": "Név",
+        "kind": "Hol",
+        "who": "Kinek",
+        "purpose": "Mire és meddig"
       },
-      {
-        "heading": "Ha játékot vezetsz",
-        "items": [
-          "A felhasználóneved, a jelszavad pedig csak hash-ként, amiből senki nem tudja visszafejteni.",
-          "Mikor léptél be utoljára: ezt csak az adminisztrátor látja, hogy tudja, mely fiókokat használják még.",
-          "A kvízeid, képeid, beállításaid és a játékaid."
-        ]
+      "kinds": {
+        "cookie": "Süti",
+        "localStorage": "Böngészőtárhely",
+        "sessionStorage": "Lap tárhelye",
+        "cache": "Alkalmazás-gyorsítótár"
       },
-      {
-        "heading": "Meddig",
-        "items": [
-          "A befejezett játékokat a játékosok becenevével és válaszaival együtt legkésőbb {{days}} nappal a játék után töröljük.",
-          "A játékvezetői fiókok és a kvízek addig maradnak, amíg valaki nem törli őket.",
-          "Ha az adminisztrátor 7 napon belül nem hagy jóvá egy regisztrációt, töröljük."
-        ]
+      "who": {
+        "hosts": "Játékvezetők",
+        "players": "Játékosok",
+        "everyone": "Mindenki"
       },
-      {
-        "heading": "Sütik és a készüléked",
-        "items": [
-          "A játékvezetők egy sütit kapnak, ami legfeljebb 30 napig bejelentkezve tartja őket. A játékosok egyet sem.",
-          "A böngésződ megjegyzi a nyelvet, a színmódot és a helyedet a játékban, hogy újratöltés után visszajuss. Ez a készülékeden marad.",
-          "Nincs követés, statisztika vagy reklám, és más oldalról semmi nem töltődik be."
-        ]
+      "items": {
+        "session": "Bejelentkezve tart. Az oldal szkriptjei nem olvashatják, és csak ennek az oldalnak, HTTPS-en megy el. Legfeljebb 30 napig, vagy amíg ki nem lépsz. Helyi hálózaton, HTTPS nélkül quizmoo_session a neve.",
+        "player": "A helyed egy játékban (egy véletlen kód, a beceneved és az avatarod), hogy újratöltés után visszajuss. Törlődik, amikor kilépsz a játékból, de legkésőbb 2 nap után.",
+        "draft": "Amit egy ütemezett játékra várva kitöltöttél. Törlődik, amikor csatlakozol vagy kilépsz.",
+        "dismissed": "A játékvezető üzenete, amit elsöpörtél. Amíg be nem zárod a lapot.",
+        "picksOpen": "Hogy nyitva vannak-e a csapatod tippjei. Amíg be nem zárod a lapot.",
+        "lang": "A nyelved. Amíg át nem állítod, vagy nem törlöd a böngészőadatokat.",
+        "mode": "Világos, sötét vagy rendszer szerinti megjelenés. Amíg át nem állítod, vagy nem törlöd a böngészőadatokat.",
+        "notice": "Hogy már láttad a tárolásról szóló tájékoztatót, így nem jön elő újra.",
+        "hostToasts": "Hogy a játékvezetői oldal mutasson-e rövid értesítést a csatlakozó és távozó játékosokról.",
+        "appCache": "Az alkalmazás saját fájljai (kód, betűk, képek), hogy gyorsan induljon és telepíthető legyen. Személyes adat nincs benne."
       },
-      {
-        "heading": "Hol fut",
-        "items": [
-          "Az alkalmazás és az adatbázisa egy tárhelyszolgáltatónál fut, akit az oldal üzemeltetője választott. A szolgáltató az adatokat csak a működtetéshez kezeli."
-        ]
-      },
-      {
-        "heading": "A jogaid",
-        "items": [
-          "Megkérdezheted, mit tárolunk rólad, és kérheted, hogy javítsuk vagy töröljük. Írj a fenti címre a játék dátumával és a beceneveddel.",
-          "A játékvezetők a játékaikat és a kvízeiket bármikor maguk is törölhetik."
-        ]
-      }
-    ]
+      "removeTitle": "Törlésük",
+      "remove": "Mindet törölheted a böngésződ beállításaiban (ennek a címnek a webhelyadatai). Ekkor kilépsz, a játékos pedig elveszíti a helyét egy futó játékban."
+    },
+    "imprint": {
+      "title": "Impresszum",
+      "intro": "Az itteni Quizmoo egy magánszemély ingyenes, nem üzleti hobbiprojektje, nem vállalkozás.",
+      "items": [
+        "A kvízeket, képeket és üzeneteket a játékvezetők készítik, és ők felelnek értük.",
+        "Jogellenes tartalmat vagy biztonsági hibát a fenti címen jelezhetsz."
+      ]
+    },
+    "notice": {
+      "label": "A tárolásról",
+      "text": "A Quizmoo csak azt tárolja, ami a működéshez kell: a belépésed, ha játékot vezetsz, a helyed egy játékban, a nyelved és a megjelenés. Nincs követés, nincs reklám.",
+      "details": "Mit pontosan?",
+      "ok": "Rendben"
+    },
+    "accept": {
+      "title": "Fogadd el a felhasználási feltételeket",
+      "intro": "Mielőtt továbbmész, olvasd el a felhasználási feltételeket ({{version}} változat). Az adatkezelési tájékoztató elmondja, mit tárolunk rólad.",
+      "checkbox": "Elmúltam {{age}} éves, elfogadom a <terms>felhasználási feltételeket</terms>, és elolvastam az <privacy>adatkezelési tájékoztatót</privacy>.",
+      "required": "Pipáld be a továbblépéshez.",
+      "submit": "Elfogadom, tovább",
+      "otherTitle": "Nem értesz egyet?",
+      "other": "Helyette letöltheted az adataidat vagy törölheted a fiókodat, vagy egyszerűen kiléphetsz.",
+      "done": "Köszönjük!"
+    },
+    "joinNote": "A becenevedet a játékban mindenki látja. A csatlakozással elfogadod a <terms>feltételeket</terms>; lásd az <privacy>adatkezelési tájékoztatót</privacy>."
   },
   "quizFile": {
     "importTitle": "Importálj egy kvízt",

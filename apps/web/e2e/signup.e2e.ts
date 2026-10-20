@@ -29,6 +29,10 @@ test('a sign-up waits for approval and the admin rejects it', async ({ browser, 
       await phone.getByRole('button', { name: 'Sign up' }).click()
       await expect(phone.getByText('The two passwords differ.')).toBeVisible()
       await phone.getByLabel('Password again').fill('e2e-signup-pass-1')
+      // The terms box is required.
+      await phone.getByRole('button', { name: 'Sign up' }).click()
+      await expect(phone.getByText('Tick this to go on.')).toBeVisible()
+      await phone.getByRole('checkbox', { name: /I'm 16 or older, I accept the terms of use/ }).check()
       await phone.getByRole('button', { name: 'Sign up' }).click()
       await expect(phone.getByText(`Your account ${newcomer} is waiting for the admin's approval.`)).toBeVisible()
     })

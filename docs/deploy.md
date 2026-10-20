@@ -10,12 +10,13 @@ Quizmoo runs as one Node process (API, Socket.IO and the web app on the same ori
 |---|---|---|
 | `DATABASE_URL` | yes | PostgreSQL connection string |
 | `SESSION_SECRET` | yes | At least 32 random characters, e.g. `openssl rand -base64 48` |
-| `APP_ORIGIN` | yes | Public URL players open, no trailing slash. Used in QR codes and join links. `https://...` also turns on `Secure` session cookies and HSTS |
+| `APP_ORIGIN` | yes | Public URL players open, no trailing slash. Used in QR codes and join links. `https://...` also turns on `Secure` `__Host-` session cookies and HSTS; in production behind a proxy (`TRUST_PROXY` above 0) the server refuses to start without `https://`. In production only pages of this origin may open sockets |
 | `PORT` | no | Defaults to `3000`; Railway and Render set it automatically |
 | `TRUST_PROXY` | behind a proxy | How many proxies sit in front of the app; their `X-Forwarded-For` gives the client address for the rate limits. `1` on Railway and Render, unset (0) on the venue LAN, where a client could otherwise fake its address |
 | `RESULTS_RETENTION_DAYS` | no | Finished games older than this are deleted, default `90`. Shown on the privacy page |
 | `MAX_GAMES_PER_HOST` | no | Finished games kept per host account; finishing one more deletes that host's oldest, default `200` |
-| `OPERATOR_NAME`, `OPERATOR_EMAIL` | for a public site | Who runs this install and where to send privacy questions and deletion requests, shown on `/privacy` |
+| `OPERATOR_NAME`, `OPERATOR_EMAIL` | for a public site | Who runs this install and where to send privacy questions and deletion requests, shown on `/privacy`, `/terms` and `/imprint` |
+| `HOSTING_PROVIDER` | for a public site | The hosting provider and the data's location, named as processor on the privacy page and imprint, e.g. `Railway Corporation, EU West (Amsterdam)` |
 | `REGISTRATION_OPEN` | no | `true` lets anyone sign up as a host on `/register`; the account cannot log in until an admin approves it on the Users page. Off (`false`) by default: leave it off on the venue LAN |
 | `FEEDBACK_URL` | no | An `https://` link for the Feedback item in the host navigation, e.g. the repository's issue form `https://github.com/<owner>/quizmoo/issues/new?template=feedback.yml`. No item without it |
 | `SEED_ADMIN_USERNAME`, `SEED_ADMIN_PASSWORD` | only for seeding | First admin account, password at least 10 characters. Remove them after seeding |
@@ -41,7 +42,8 @@ The seed script is idempotent: it creates the admin if missing and a sample quiz
    - `SESSION_SECRET` = 48 random characters
    - `APP_ORIGIN` = the generated `https://` address
    - `TRUST_PROXY` = `1`
-   - `OPERATOR_NAME`, `OPERATOR_EMAIL`, `FEEDBACK_URL` as above
+   - `OPERATOR_NAME`, `OPERATOR_EMAIL`, `HOSTING_PROVIDER`, `FEEDBACK_URL` as above
+   - Before going public, fill in `docs/legal/records-of-processing.md` (the provider's data processing agreement, region, transfer safeguards) and read the four legal pages on the live address once
    - `REGISTRATION_OPEN` = `true` if friends should sign up themselves
 5. Deploy. The log shows the migrations and `Server listening`.
 6. Seed once: add `SEED_ADMIN_USERNAME` and `SEED_ADMIN_PASSWORD`, run `node apps/server/dist/seed.js` in the service (`railway ssh`), then **remove both variables**. Log in and change the password if asked.
@@ -53,11 +55,12 @@ Friends who want to host either get an account from the admin's Users page, or, 
 ### Releasing
 
 1. Run `pnpm verify` and the e2e suite locally (see `.claude/skills/browser-checks`).
-2. In `CHANGELOG.md`, move "Unreleased" under a new version heading (`## 1.1.0 – <date>`) and set the same version in the root `package.json`, on `develop`.
-3. **Pick a moment when no game is running**: `/api/health` must report `"activeGames": 0`. During a deploy the old and the new process run side by side for a moment, and a game played across the switch can lose its last steps. A lobby or a finished game is safe.
-4. Merge `develop` into `main` (pull request). Railway builds and deploys.
-5. Run the smoke test against the live address.
-6. Tag the release on `main`: `git tag v1.1.0; git push origin v1.1.0`.
+2. If the terms of use changed in substance, raise `TERMS_VERSION` in `packages/shared/src/legal.ts` (the date of the change): every host accepts the new version at their next login.
+3. In `CHANGELOG.md`, move "Unreleased" under a new version heading (`## 1.1.0 – <date>`) and set the same version in the root `package.json`, on `develop`.
+4. **Pick a moment when no game is running**: `/api/health` must report `"activeGames": 0`. During a deploy the old and the new process run side by side for a moment, and a game played across the switch can lose its last steps. A lobby or a finished game is safe.
+5. Merge `develop` into `main` (pull request). Railway builds and deploys.
+6. Run the smoke test against the live address.
+7. Tag the release on `main`: `git tag v1.1.0; git push origin v1.1.0`.
 
 ### Smoke test
 

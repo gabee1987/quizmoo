@@ -18,8 +18,9 @@ describeDb('host sign-up with approval (database)', () => {
   let ip = 0
 
   // Each sign-up from its own address, so the 5-per-hour limit only bites where a test wants it.
+  // The terms box is ticked unless a test says otherwise.
   const register = (payload: object, remoteAddress = `192.0.2.${++ip}`, app = built.app) =>
-    app.inject({ method: 'POST', url: '/api/auth/register', payload, remoteAddress })
+    app.inject({ method: 'POST', url: '/api/auth/register', payload: { acceptTerms: true, ...payload }, remoteAddress })
   const login = (username: string, password: string) =>
     built.app.inject({ method: 'POST', url: '/api/auth/login', payload: { username, password }, remoteAddress: `198.51.100.${++ip % 250}` })
   const req = (cookie: string, method: 'GET' | 'POST', url: string) => built.app.inject({ method, url, headers: { cookie } })

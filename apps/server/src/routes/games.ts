@@ -5,6 +5,7 @@ import {
   pinSchema,
   playersCreateTeams,
   scheduledAtSchema,
+  type ErrorPayload,
   type GameBranding,
   type GameHostInfo,
   type GamePublicInfo,
@@ -17,7 +18,8 @@ import { requireSession } from '../auth/require-session.js'
 import type { Db } from '../db/index.js'
 import { quizzes } from '../db/schema.js'
 import { EngineError, quickMessagesOf, setNextGame } from '../game/index.js'
-import type { GameManager } from '../realtime/game-manager.js'
+import type { GameManager, ManagedGame } from '../realtime/game-manager.js'
+import type { PinGuard } from '../realtime/pin-guard.js'
 import { parseOr400 } from './http.js'
 import { readHostSettings, rememberEventName } from './me.js'
 import { parseQuizBranding } from './quizzes.js'
@@ -32,18 +34,37 @@ const createGameSchema = z.object({
   branding: brandingChoiceSchema.optional(),
 })
 
+/**
+ * Games a host may have open (not finished) at once, scheduled ones included. Each keeps a copy of
+ * its quiz in memory, so without a ceiling one account could fill the server.
+ */
+export const MAX_OPEN_GAMES_PER_HOST = 20
+
+/** A game looked up by PIN without a login, counting wrong PINs against the address (see `pin-guard.ts`). */
+export function publicGame(pinGuard: PinGuard, manager: GameManager, address: string, pin: string): ManagedGame | ErrorPayload {
+  if (pinGuard.blocked(address)) return { error: 'errors.rateLimited' }
+  const game = pinSchema.safeParse(pin).success ? manager.get(pin) : undefined
+  if (game) return game
+  pinGuard.miss(address)
+  return { error: 'errors.gameNotFound' }
+}
+
 export interface GameRouteOptions {
   db: Db
   manager: GameManager
   appOrigin: string
+  pinGuard: PinGuard
 }
 
-export async function gameRoutes(app: FastifyInstance, { db, manager, appOrigin }: GameRouteOptions) {
+export async function gameRoutes(app: FastifyInstance, { db, manager, appOrigin, pinGuard }: GameRouteOptions) {
   const auth = { preHandler: requireSession(db) }
+  const tooManyOpen = (hostId: string) =>
+    manager.hostedBy(hostId).filter((game) => game.state.phase !== 'finished').length >= MAX_OPEN_GAMES_PER_HOST
 
   app.post('/api/games', auth, async (request, reply) => {
     const body = parseOr400(createGameSchema, request.body, reply)
     if (!body) return reply
+    if (tooManyOpen(request.user!.id)) return reply.code(409).send({ error: 'errors.tooManyGames' })
     const quiz = (await db.select().from(quizzes).where(eq(quizzes.id, body.quizId)))[0]
     if (!quiz) return reply.code(404).send({ error: 'errors.notFound' })
     if (quiz.ownerId !== request.user!.id) return reply.code(403).send({ error: 'errors.forbidden' })
@@ -93,6 +114,7 @@ export async function gameRoutes(app: FastifyInstance, { db, manager, appOrigin 
     if (old.state.phase !== 'finished') return reply.code(409).send({ error: 'errors.gameNotFinished' })
     const existing = old.state.nextPin ? manager.get(old.state.nextPin) : undefined
     if (existing) return reply.code(200).send({ pin: existing.state.pin })
+    if (tooManyOpen(old.hostId)) return reply.code(409).send({ error: 'errors.tooManyGames' })
 
     const game = await manager.create({
       id: nanoid(12),
@@ -130,8 +152,8 @@ export async function gameRoutes(app: FastifyInstance, { db, manager, appOrigin 
 
   // Public: what the join page needs before a player picks a name. Nothing else leaks.
   app.get<{ Params: { pin: string } }>('/api/games/:pin/public', async (request, reply) => {
-    const game = pinSchema.safeParse(request.params.pin).success ? manager.get(request.params.pin) : undefined
-    if (!game) return reply.code(404).send({ error: 'errors.gameNotFound' })
+    const game = publicGame(pinGuard, manager, request.ip, request.params.pin)
+    if ('error' in game) return reply.code(game.error === 'errors.rateLimited' ? 429 : 404).send(game)
     const { state } = game
     // Solo players' entries are no team to join.
     const teams = Object.values(state.teams).filter((t) => !t.solo)

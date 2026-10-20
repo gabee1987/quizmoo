@@ -3,7 +3,7 @@ import { loadConfig } from './config.js'
 import { createDb } from './db/index.js'
 import { runMigrations } from './migrate.js'
 import { GameManager } from './realtime/game-manager.js'
-import { createGameStore } from './realtime/persist.js'
+import { RESTORE_WINDOW_MS, createGameStore } from './realtime/persist.js'
 import { scheduleRetention } from './retention.js'
 import { closeResources, shutdownHandler } from './shutdown.js'
 
@@ -28,6 +28,7 @@ const stopRetention = scheduleRetention(db, {
   onDeleted: async (ids) => {
     for (const id of ids) await manager.discard(id)
   },
+  endStale: () => manager.endStale(RESTORE_WINDOW_MS),
   log: app.log,
 })
 app.addHook('onClose', () => closeResources({ stopJobs: stopRetention, manager, closeDb: close }))

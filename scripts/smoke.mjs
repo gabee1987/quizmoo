@@ -72,7 +72,7 @@ await check('service worker', async () => {
 })
 await check('unknown API path', async () => {
   const res = await fetch(`${base}/api/nope`)
-  expect(res.status === 404 && (await res.json()).error === 'notFound', `status ${res.status}`)
+  expect(res.status === 404 && (await res.json()).error === 'errors.notFound', `status ${res.status}`)
 })
 await check('site details for the privacy page', async () => {
   const site = await api('GET', '/api/site')

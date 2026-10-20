@@ -2,6 +2,7 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import type { AddressInfo } from 'node:net'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
+import { TERMS_VERSION } from '@quizmoo/shared'
 import { io as ioClient } from 'socket.io-client'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { buildApp } from '../src/app.js'
@@ -121,13 +122,35 @@ describe('app', () => {
   })
 
   it('tells the privacy page and the host navigation who runs the install', async () => {
-    expect((await built.app.inject({ method: 'GET', url: '/api/site' })).json()).toEqual({ operator: null, contact: null, feedbackUrl: null, retentionDays: 90, registrationOpen: false })
+    expect((await built.app.inject({ method: 'GET', url: '/api/site' })).json()).toEqual({
+      operator: null,
+      contact: null,
+      hosting: null,
+      termsVersion: TERMS_VERSION,
+      feedbackUrl: null,
+      retentionDays: 90,
+      registrationOpen: false,
+    })
     const site = await buildApp(
-      { ...config, OPERATOR_NAME: 'Test Operator', OPERATOR_EMAIL: 'privacy@example.test', FEEDBACK_URL: 'https://example.test/feedback' },
+      {
+        ...config,
+        OPERATOR_NAME: 'Test Operator',
+        OPERATOR_EMAIL: 'privacy@example.test',
+        HOSTING_PROVIDER: 'Example Cloud, EU region',
+        FEEDBACK_URL: 'https://example.test/feedback',
+      },
       { db: { execute: async () => [] } as unknown as Db, manager: newManager() },
     )
     const res = await site.app.inject({ method: 'GET', url: '/api/site' })
-    expect(res.json()).toEqual({ operator: 'Test Operator', contact: 'privacy@example.test', feedbackUrl: 'https://example.test/feedback', retentionDays: 90, registrationOpen: false })
+    expect(res.json()).toEqual({
+      operator: 'Test Operator',
+      contact: 'privacy@example.test',
+      hosting: 'Example Cloud, EU region',
+      termsVersion: TERMS_VERSION,
+      feedbackUrl: 'https://example.test/feedback',
+      retentionDays: 90,
+      registrationOpen: false,
+    })
     await site.app.close()
   })
 

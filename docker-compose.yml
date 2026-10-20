@@ -6,10 +6,13 @@ services:
     image: postgres:17-alpine
     environment:
       POSTGRES_USER: quizmoo
-      POSTGRES_PASSWORD: quizmoo
+      # Takes effect only when the volume is first created; the default is fine because the port below is local.
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-quizmoo}
       POSTGRES_DB: quizmoo
     ports:
-      - "5432:5432"
+      # This computer only: Docker's published ports skip the system firewall, and on venue wifi
+      # anyone could otherwise reach the database. The app container uses the internal network.
+      - "127.0.0.1:5432:5432"
     volumes:
       - dbdata:/var/lib/postgresql/data
     healthcheck:
@@ -26,7 +29,7 @@ services:
       db:
         condition: service_healthy
     environment:
-      DATABASE_URL: postgres://quizmoo:quizmoo@db:5432/quizmoo
+      DATABASE_URL: postgres://quizmoo:${POSTGRES_PASSWORD:-quizmoo}@db:5432/quizmoo
       SESSION_SECRET: ${SESSION_SECRET:?set SESSION_SECRET in .env}
       APP_ORIGIN: ${APP_ORIGIN:-http://localhost:3000}
       RESULTS_RETENTION_DAYS: ${RESULTS_RETENTION_DAYS:-90}
@@ -35,6 +38,7 @@ services:
       TRUST_PROXY: ${TRUST_PROXY:-}
       OPERATOR_NAME: ${OPERATOR_NAME:-}
       OPERATOR_EMAIL: ${OPERATOR_EMAIL:-}
+      HOSTING_PROVIDER: ${HOSTING_PROVIDER:-}
       FEEDBACK_URL: ${FEEDBACK_URL:-}
       SEED_ADMIN_USERNAME: ${SEED_ADMIN_USERNAME:-}
       SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:-}

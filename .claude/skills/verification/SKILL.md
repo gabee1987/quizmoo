@@ -45,7 +45,7 @@ Then check:
 
 - `curl -s localhost:3999/api/health` returns `{"ok":true}`
 - `curl -s -o /dev/null -w '%{http_code}' localhost:3999/play/123456` returns `200` (SPA fallback)
-- `curl -s localhost:3999/api/nope` returns `{"error":"notFound"}`
+- `curl -s localhost:3999/api/nope` returns `{"error":"errors.notFound"}`
 
 Stop the process afterwards. On Windows: `Get-NetTCPConnection -LocalPort 3999 -State Listen | % { Stop-Process -Id $_.OwningProcess -Force }`.
 

@@ -41,7 +41,9 @@ Error shape everywhere: `{ error: '<i18n key>' }`. Status codes: 400 invalid inp
 | `POST /api/users/:id/role` | admin | `{ role }` |
 | `POST /api/users/:id/logout` | admin | ends every session of the account |
 | `DELETE /api/users/:id` | admin | ends the host's running games, then deletes the account (the database cascades to quizzes, games, images, settings) |
-| `GET /api/me/account` | session | own `{ account }`: username, role, dates, active logins, quizzes, finished games, images |
+| `POST /api/auth/terms` | session (terms pending ok) | `{ version }` must equal `TERMS_VERSION` (else 409 `errors.termsOutdated`); records the acceptance |
+| `GET /api/me/export` | session (terms pending ok) | "Download my data": one JSON attachment (account, settings, quizzes, image list, games through `toResults`, never player tokens) |
+| `GET /api/me/account` | session (terms pending ok) | own `{ account }`: username, role, dates, accepted terms, active logins, quizzes, finished games, images |
 | `POST /api/me/account/logout-others` | session | ends every own session except this one |
 | `DELETE /api/me/account` | session | `{ password }` -> deletes the own account like `DELETE /api/users/:id` (`deleteAccount`); 400 `errors.wrongCurrentPassword`, 409 `errors.lastAdmin` for the only admin |
 | `GET /api/site` | - | `{ operator, contact, feedbackUrl, retentionDays, registrationOpen }` from the environment, for `/privacy` and the Feedback link |
@@ -76,7 +78,10 @@ Quiz question ids and option ids are generated server-side with `nanoid(8)` when
 ## Auth and sessions
 
 - Passwords hashed with `@node-rs/argon2` (defaults). Minimum length 10, no other complexity rules.
-- Session token: 32 random bytes, base64url, in an `httpOnly`, `sameSite=lax`, `secure` (production) cookie named `quizmoo_session`, 30 days. The DB stores the SHA-256 of the token.
+- Session token: 32 random bytes, base64url, in an `httpOnly`, `sameSite=lax` cookie, 30 days, named by `sessionCookieName(secure)`: `__Host-quizmoo_session` over HTTPS (Secure), `quizmoo_session` on plain http. Routes read `request.sessionToken` (set in `app.ts` from the one name this install uses), never `request.cookies` directly. The DB stores the SHA-256 of the token.
+- Terms of use: `requireSession` answers 403 `errors.termsRequired` while `user.mustAcceptTerms` (accepted version ≠ `TERMS_VERSION` in `packages/shared/src/legal.ts`), after the password check; routes a person must reach to accept, take their data or leave pass `allowPendingTerms`. `createUser` records the current version unless given `termsVersion: null` (accounts made for someone else). Sockets do not check the terms, so a terms change never cuts off a running game.
+- Limits beyond the login one: wrong PINs per address (`realtime/pin-guard.ts`, shared by sockets and the public PIN routes via `publicGame`), 20 open games and 1,000 images per host, 50 megapixels per image. The rate limiter's allow list follows the matched route, never the raw URL (percent-encoding bypassed it once).
+- Logging: the `err` serializer (`log-safety.ts`) strips SQL, parameters and Postgres' `detail`; request logs drop the query string. Never log a payload, cookie or game state yourself.
 - `requireSession` preHandler loads the user onto `request.user`. Expired sessions are deleted on sight.
 - Login is rate limited to 10 attempts per minute per IP. The IP comes from `X-Forwarded-For` only for `TRUST_PROXY` hops, through a trust function (`hop < n`): Fastify 5 ignores a numeric `trustProxy` (fails closed), and `true` takes the first address, which the client writes itself. Request logs leave out the client address. Failed login returns `401 { error: 'errors.invalidCredentials' }` regardless of whether the user exists.
 - Users are created by the seed script, by an admin via `POST /api/users` (admin only, phase 6), or by self sign-up (`users.status = 'pending'`; login answers 403 `errors.accountPending` only after the password checks out). Pending sign-ups older than 7 days are deleted by the daily retention job (`deleteExpiredSignups`).

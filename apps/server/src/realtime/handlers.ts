@@ -14,7 +14,7 @@ import {
 } from '@quizmoo/shared'
 import { nanoid } from 'nanoid'
 import type { DefaultEventsMap, Server, Socket } from 'socket.io'
-import { SESSION_COOKIE, verifySession } from '../auth/session.js'
+import { verifySession } from '../auth/session.js'
 import type { Db } from '../db/index.js'
 import {
   EngineError,
@@ -56,7 +56,8 @@ import {
   toPlayerSnapshot,
   type GameState,
 } from '../game/index.js'
-import type { GameManager } from './game-manager.js'
+import type { GameManager, ManagedGame } from './game-manager.js'
+import { clientAddress, type PinGuard } from './pin-guard.js'
 import { createRateLimiter } from './rate-limit.js'
 
 export interface SocketData {
@@ -78,6 +79,12 @@ export interface SocketDeps {
   db: Db
   parseCookie: (header: string) => Record<string, string | undefined>
   log: Logger
+  /** Shared with the HTTP PIN lookups, so one budget of wrong PINs covers both. */
+  pinGuard: PinGuard
+  /** `TRUST_PROXY`: how the client's address is read behind the hosting provider's proxy. */
+  trustProxy: number
+  /** The session cookie's name on this install (`sessionCookieName`). */
+  sessionCookie: string
 }
 
 /** A player socket may send at most this many events per second. */
@@ -91,7 +98,28 @@ const rooms = {
 
 const invalidInput: ErrorPayload = { error: 'errors.invalidInput' }
 
-export function registerSocketHandlers(io: AppSocketServer, { manager, db, parseCookie, log }: SocketDeps) {
+export function registerSocketHandlers(io: AppSocketServer, { manager, db, parseCookie, log, pinGuard, trustProxy, sessionCookie }: SocketDeps) {
+  /** The game behind a PIN, counting wrong PINs per address so nobody can walk all of them. */
+  function lookUp(socket: AppSocket, pin: string): ManagedGame | ErrorPayload {
+    const address = clientAddress(socket.handshake.address, socket.handshake.headers['x-forwarded-for'], trustProxy)
+    if (pinGuard.blocked(address)) return { error: 'errors.rateLimited' }
+    const game = manager.get(pin)
+    if (game) return game
+    pinGuard.miss(address)
+    return { error: 'errors.gameNotFound' }
+  }
+
+  /**
+   * The session behind a host socket, checked again on every command and ping rather than only at
+   * attach: logging out, "log out the others", a password reset or a deleted account then also
+   * takes control of running games away from that browser.
+   */
+  async function sessionHost(socket: AppSocket, hostId: string): Promise<boolean> {
+    const token = parseCookie(socket.handshake.headers.cookie ?? '')[sessionCookie]
+    const user = token ? await verifySession(db, token) : null
+    return !!user && user.id === hostId && !user.mustChangePassword
+  }
+
   manager.subscribe(({ state }, seq) => {
     const now = Date.now()
     // The public screen never receives the live answer list.
@@ -155,8 +183,8 @@ export function registerSocketHandlers(io: AppSocketServer, { manager, db, parse
         const parsed = playerJoinSchema.safeParse(data)
         if (!parsed.success) return invalidInput
         const { pin, name, teamId, newTeamName, solo, token, avatar } = parsed.data
-        const game = manager.get(pin)
-        if (!game) return { error: 'errors.gameNotFound' }
+        const game = lookUp(socket, pin)
+        if ('error' in game) return game
 
         // A known token reclaims that player; otherwise the server issues a fresh identity.
         const existing = token ? Object.values(game.state.players).find((p) => p.token === token) : undefined
@@ -266,11 +294,11 @@ export function registerSocketHandlers(io: AppSocketServer, { manager, db, parse
       respond(ack, async () => {
         const pin = pinSchema.safeParse(data?.pin)
         if (!pin.success) return invalidInput
-        const game = manager.get(pin.data)
-        if (!game) return { error: 'errors.gameNotFound' }
-        const token = parseCookie(socket.handshake.headers.cookie ?? '')[SESSION_COOKIE]
+        const game = lookUp(socket, pin.data)
+        if ('error' in game) return game
+        const token = parseCookie(socket.handshake.headers.cookie ?? '')[sessionCookie]
         const user = token ? await verifySession(db, token) : null
-        if (!user) return { error: 'errors.unauthorized' }
+        if (!user || user.mustChangePassword) return { error: 'errors.unauthorized' }
         if (user.id !== game.hostId) return { error: 'errors.forbidden' }
 
         leaveGameRooms(socket)
@@ -286,8 +314,8 @@ export function registerSocketHandlers(io: AppSocketServer, { manager, db, parse
       respond(ack, async () => {
         const pin = pinSchema.safeParse(data?.pin)
         if (!pin.success) return invalidInput
-        const game = manager.get(pin.data)
-        if (!game) return { error: 'errors.gameNotFound' }
+        const game = lookUp(socket, pin.data)
+        if ('error' in game) return game
 
         leaveGameRooms(socket)
         socket.data = { pin: pin.data, role: 'screen' }
@@ -297,10 +325,22 @@ export function registerSocketHandlers(io: AppSocketServer, { manager, db, parse
       }),
     )
 
+    /** False, and the socket no longer a host, once its login has ended. */
+    async function stillHost(): Promise<boolean> {
+      const { pin, role } = socket.data
+      const game = pin ? manager.get(pin) : undefined
+      if (role === 'host' && game && (await sessionHost(socket, game.hostId))) return true
+      if (role === 'host') {
+        leaveGameRooms(socket)
+        socket.data = {}
+      }
+      return false
+    }
+
     socket.on('host:command', (data, ack) =>
-      respond(ack, () => {
-        const { pin, role } = socket.data
-        if (role !== 'host' || !pin) return { error: 'errors.unauthorized' }
+      respond(ack, async () => {
+        if (!(await stillHost())) return { error: 'errors.unauthorized' }
+        const pin = socket.data.pin!
         const parsed = hostCommandSchema.safeParse(data)
         if (!parsed.success) return invalidInput
         manager.apply(pin, (state, now) => runHostCommand(state, parsed.data, now))
@@ -315,7 +355,7 @@ export function registerSocketHandlers(io: AppSocketServer, { manager, db, parse
     )
 
     socket.on('host:ping', (_data, ack) =>
-      respond(ack, () => (socket.data.role === 'host' ? { ok: true as const } : { error: 'errors.unauthorized' })),
+      respond(ack, async () => ((await stillHost()) ? { ok: true as const } : { error: 'errors.unauthorized' })),
     )
 
     socket.on('disconnect', () => {

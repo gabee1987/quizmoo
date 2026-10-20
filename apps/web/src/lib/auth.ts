@@ -7,6 +7,8 @@ export interface User {
   role: 'admin' | 'editor'
   /** Created by an admin with an initial password: must change it before anything else. */
   mustChangePassword: boolean
+  /** Has not accepted the terms of use in force: must before anything else (after a password change). */
+  mustAcceptTerms: boolean
 }
 
 export const meQueryOptions = queryOptions({

@@ -3,8 +3,10 @@ import { Outlet, createRootRouteWithContext, useRouterState } from '@tanstack/re
 import { AppHeader } from '@/components/app-header'
 import { Backdrop } from '@/components/backdrop'
 import { GAME_MENU_SPACE, GameMenu } from '@/components/game-menu'
+import { StorageNotice } from '@/components/storage-notice'
 import { Toaster } from '@/components/ui/sonner'
 import { cn } from '@/lib/cn'
+import { forgetOldPlayers } from '@/lib/player-storage'
 import { installSocketToasts } from '@/lib/socket-toasts'
 import { installSquish } from '@/lib/squish'
 import { useEffect } from 'react'
@@ -16,6 +18,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 function RootLayout() {
   useEffect(() => installSquish(), [])
   useEffect(() => installSocketToasts(), [])
+  useEffect(() => forgetOldPlayers(), [])
   // A phone in a game gets the whole screen: no header, its settings behind a floating button.
   const pathname = useRouterState({ select: (state) => state.location.pathname })
   const inGame = pathname.startsWith('/play/')
@@ -30,6 +33,8 @@ function RootLayout() {
           <Outlet />
         </main>
       </div>
+      {/* Not over a phone's answers or on the projector: players see it on the join page first. */}
+      {!inGame && !pathname.startsWith('/screen/') && <StorageNotice />}
       <Toaster position="top-center" />
     </>
   )

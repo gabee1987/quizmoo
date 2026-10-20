@@ -60,6 +60,7 @@ Collected while testing phases 9 to 12. Effort as above.
 - Host sign-up with the admin's approval, without e-mail (phase 26).
 - Admin pages: a Users page with each account's figures and last login, setting a new password, changing the role, logging out everywhere and deleting an account; a Names page that edits the "Surprise me" names row by row (phase 28).
 - My settings in four tabs (Games first), and an Account tab: overview, this device's language and look, password, logging out other logins, deleting the own account (phase 29).
+- Legal pages (privacy notice, terms, cookies and storage, imprint), terms accepted at sign-up and recorded, "Download my data", a storage notice, and a security review with every finding fixed (phase 30).
 - Quiz files: questions written in a spreadsheet anywhere (template with a guide and examples) imported with a row-by-row problem report, and quizzes downloaded as a spreadsheet or a full Quizmoo file with settings and pictures (phase 27).
 
 ### Open
@@ -68,6 +69,8 @@ Collected while testing phases 9 to 12. Effort as above.
 |---|---|---|---|
 | Every member's own answer in team results (after the MVP) | Feature | M | Teams that answer as one keep only the team's answer today: members' votes and suggestions are replaced at the reveal. Keep them (`votes` per team answer), and show on the results page and the phones' review what each member would have answered ("so they can blame each other"). From the 13 October test notes. |
 | Estimated game length | Feature | S | How long a quiz will take, from its questions: the sum of the time limits plus a grace time per question for the reveal, the scoreboard, pauses and the host talking (a fixed number of seconds per question, or a share of the total; to decide in the plan). Shown as "about 25 min" in the quiz list, the editor, the new game dialog and the phone lobby's "About the game" (the phones know only the question count today, so the snapshot needs the estimate). Settings that add steps (scoreboard after every question, host-graded text) could raise it. From the 16 October 2026 request. |
+| Hosting without an account (after the MVP) | Feature | L | A guest host with a short-lived identity, tighter limits, the terms checkbox, and "Keep my quizzes" to turn it into an account. Design and open questions in [later-guest-hosting.md](later-guest-hosting.md). Requested 20 October 2026. |
+| Lock joining | Feature | S | A host switch that closes the lobby to new players (bots or latecomers), found in the phase 30 security review. |
 | Rooms with their own admin | Feature | L | Each room (workspace) has an admin; only its members see and edit its quizzes and games. Today every quiz and game belongs to one host account. Needs a rooms table, membership and roles, permission checks on every route and socket attach, migration of existing quizzes. |
 | Play-through preview in the editor | Feature | M | The host plays the quiz on a phone-like frame (question, answer, reveal) without starting a game. Reuses the phone screens with a local fake snapshot; no server state. |
 | Host live dashboard and hints | Feature | L | One coherent view of the running game: answers in, who is stuck or offline, per-question stats, standings. Hints or messages to selected players (host-to-player messages were out of scope in phase 12). |
