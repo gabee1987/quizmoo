@@ -82,11 +82,15 @@ The server is the only judge of time and scores: it sends the question's end tim
 - **Seven question types:** single choice, multiple choice, true/false, free text (accepted answers or graded by the host), number (with tolerance), poll, and "Put in order". Every question can have an image.
 - **Game settings** per quiz, overridable per game: twelve themes (playful ones and subdued ones for formal events) plus a custom colour theme, six answer colour sets plus custom colours, symbol sets, time limits, points, speed and streak bonuses, answer changes with an optional lock-in, answers revealed at once or only at the end, and late joining.
 - **Teams:** the host sets the teams, the players create them, or both; mixed play with solo players. Each team answers as "Captain decides", "Majority vote" or "Everyone counts".
-- **Running a game** from a laptop or a phone: a lobby built around the QR code, the live answers coming in, pause and resume, extra time, skip, host messages on every screen (timed or until cleared, optionally "important"), showing an earlier question again, removing players, and "Play again" with the same people.
+- **Running a game** from a laptop or a phone: a lobby built around the QR code, the live answers coming in, pause and resume, extra time, skip, host messages on every screen (timed or until cleared, optionally "important"), removing players, and "Play again" with the same people. The main controls stay in view while the page scrolls, and player names are always shown in full.
+- **Standings and answers on demand:** a live Standings card (real scores, also while results are held until the end) with "Results so far", the scoreboard on the screens after any question, and "Show answers" for the last question, all so far or any chosen ones, whatever the quiz's reveal setting.
+- **What everyone sees:** a chip in the control bar always says what the phones and the projector show, and a preview shows the projector live and the screen the phones get.
+- **Ending a game:** with the podium as usual, or closed at once from any point, which sends every phone and the projector away.
+- **Screen lock:** "Lock screen" locks every host page of the account, on every device, until the host types a lock code (4 to 8 digits) or the password. It is enforced by the server, so a reload, another tab or the browser's developer tools reveal no answers, scores or quizzes, while the game carries on for the players.
 - **Scheduled games** up to 30 days ahead, with the PIN reserved at once and an "Add to calendar" file.
 - **Results:** a summary with the podium, the easiest and hardest question and the averages; player, team and question tabs; CSV export. Game history with search by quiz title, player name or PIN.
 - **Quiz files:** import questions from a spreadsheet (CSV, with a downloadable template in both languages), and download any quiz as a spreadsheet or as a complete Quizmoo file for another install. See [docs/quiz-files.md](docs/quiz-files.md).
-- **My settings:** game defaults for new quizzes, quick messages, branding (logo and event name on the projector and, optionally, the phones), and the account itself.
+- **My settings:** game defaults for new quizzes, quick messages, branding (logo and event name on the projector and, optionally, the phones), the screen lock code, and the account itself.
 
 ### For the projector
 
@@ -106,7 +110,7 @@ Quizmoo is designed around data minimisation (GDPR Article 5(1)(c)).
 | Who | What is stored | How long |
 |---|---|---|
 | Players | The nickname they typed, the avatar they picked and their answers, inside the game | Until the game is deleted: after `RESULTS_RETENTION_DAYS` (default 90), or earlier when the host keeps more than `MAX_GAMES_PER_HOST` finished games (default 200) |
-| Hosts | Username, password hash (Argon2), role, sign-up and last login time, accepted terms version, own quizzes, images and settings | Until the account is deleted; unapproved sign-ups after 7 days |
+| Hosts | Username, password hash (Argon2), role, sign-up and last login time, accepted terms version, own quizzes, images and settings, and the screen lock code as an Argon2 hash | Until the account is deleted; unapproved sign-ups after 7 days |
 | Sessions | A hash of the session token, never the token itself | 30 days, or until logout |
 
 - No e-mail addresses, device identifiers or IP addresses are stored in the database, and request logs leave out IP addresses and query strings.
@@ -227,9 +231,9 @@ What the tests cover:
 
 - **Game engine:** every command and phase transition, scoring, teams, and the invariant that the state survives a JSON round trip.
 - **API:** routes through `app.inject`, authentication, ownership, validation, rate limits, terms acceptance, data export and account deletion, plus a set of security regression tests.
-- **Realtime:** real Socket.IO clients against the real engine: joining, reconnecting, host control, timers and restore after a restart.
+- **Realtime:** real Socket.IO clients against the real engine: joining, reconnecting, host control, closing a game, the screen lock, timers and restore after a restart.
 - **Web:** pure modules and logic-bearing components (timer, socket store, editor draft and validation, results summary, browser storage inventory).
-- **End to end:** joining and playing full games (classic, teams, mixed play, team answers, answer changes), reconnecting, host control, the editor, quiz management and quiz files, settings, admin pages, names, sign-up, the legal pages and accessibility.
+- **End to end:** joining and playing full games (classic, teams, mixed play, team answers, answer changes), reconnecting, host control (standings and answers midgame, the screen lock, closing a game), the editor, quiz management and quiz files, settings, admin pages, names, sign-up, the legal pages and accessibility.
 
 Security controls, the dependency audit and the documented exceptions are recorded in [docs/security-notes.md](docs/security-notes.md).
 
