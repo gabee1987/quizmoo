@@ -835,23 +835,52 @@
       "hu": "Hungarian",
       "en": "English"
     },
-    "label": "Names, one per line",
-    "hint": "At most 24 characters each. Duplicates are dropped; offensive names are refused, like on the join page.",
-    "count_one": "{{count}} name",
-    "count_other": "{{count}} names",
+    "count_one": "{{count}} name, at most {{max}}",
+    "count_other": "{{count}} names, at most {{max}}",
     "builtIn": "Built-in list",
     "custom": "Edited",
-    "save": "Save",
     "saved": "Names saved",
-    "tooLong": "longer than 24 characters",
-    "restore": "Restore built-in list",
-    "restoreTitle": "Restore the built-in list?",
+    "restore": "Restore built-in",
+    "restoreTitle": "Restore the built-in list ({{language}})?",
     "restoreBody": "The edited names of this language are replaced by the built-in ones.",
-    "restored": "Built-in list restored"
+    "restored": "Built-in list restored",
+    "addLabel": "New name",
+    "addPlaceholder": "Type a name, or paste a list",
+    "addHint": "At most {{max}} characters each. Paste a list and every line becomes a name.",
+    "add": "Add",
+    "full": "The list is full ({{max}} names).",
+    "note": {
+      "added_one": "Added {{count}} name.",
+      "added_other": "Added {{count}} names.",
+      "duplicates_one": "{{count}} was already in the list.",
+      "duplicates_other": "{{count}} were already in the list.",
+      "noRoom_one": "{{count}} did not fit (at most {{max}} names).",
+      "noRoom_other": "{{count}} did not fit (at most {{max}} names)."
+    },
+    "search": "Search the names",
+    "found_one": "{{count}} match of {{total}} names",
+    "found_other": "{{count}} matches of {{total}} names",
+    "noMatch": "No such name in the list.",
+    "empty": "No names yet. Add at least one.",
+    "listLabel": "Names",
+    "edit": "Edit {{name}}",
+    "editLabel": "New name for {{name}}",
+    "done": "Done",
+    "remove": "Remove {{name}}",
+    "randomAvatar": "No avatar fits: the player gets a random one",
+    "problems": {
+      "tooLong": "Longer than {{max}} characters.",
+      "duplicate": "Already in the list.",
+      "notAllowed": "The join page would refuse this name.",
+      "bar": "Some names have problems: fix or remove the ones marked red.",
+      "empty": "Neither list can be empty."
+    }
   },
   "users": {
     "title": "Users",
+    "intro": "The host accounts on this site: what each one does, and what you can change for it.",
     "add": "Add user",
+    "addSubmit": "Create",
     "role": "Role",
     "roles": {
       "admin": "Admin",
@@ -871,6 +900,62 @@
       "rejected": "Sign-up {{name}} deleted.",
       "rejectTitle": "Reject {{name}}?",
       "rejectBody": "The sign-up is deleted. They can sign up again."
+    },
+    "accounts_one": "{{count}} account",
+    "accounts_other": "{{count}} accounts",
+    "admins_one": "{{count}} admin",
+    "admins_other": "{{count}} admins",
+    "search": "Search by name",
+    "noMatch": "No user called “{{query}}”.",
+    "you": "You",
+    "joined": "Joined {{date}}",
+    "lastLogin": "last login {{when}}",
+    "neverLoggedIn": "never logged in",
+    "figures": {
+      "quizzes": "Quizzes",
+      "gamesPlayed": "Games played",
+      "playersReached": "Players",
+      "gamesActive": "Active games",
+      "images": "Images",
+      "sessions": "Active logins"
+    },
+    "actions": {
+      "menu": "Actions for {{name}}",
+      "resetPassword": "Set a new password",
+      "makeAdmin": "Make admin",
+      "makeHost": "Make host",
+      "logout": "Log out everywhere",
+      "delete": "Delete account"
+    },
+    "reset": {
+      "title": "New password for {{name}}",
+      "body": "They log in with this password and must change it right away. Every device they are logged in on is logged out. Share it privately.",
+      "field": "New password",
+      "submit": "Set password",
+      "done": "New password set for {{name}}."
+    },
+    "role": {
+      "adminTitle": "Make {{name}} an admin?",
+      "adminBody": "Admins see and manage every account and edit the Surprise me names.",
+      "hostTitle": "Make {{name}} a host?",
+      "hostBody": "They keep their quizzes and games but no longer see the admin pages.",
+      "madeAdmin": "{{name}} is an admin now.",
+      "madeHost": "{{name}} is a host now."
+    },
+    "logout": {
+      "title": "Log {{name}} out everywhere?",
+      "body_one": "Their {{count}} active login ends. Their password stays the same.",
+      "body_other": "All {{count}} of their active logins end. Their password stays the same.",
+      "done": "{{name}} is logged out everywhere."
+    },
+    "delete": {
+      "title": "Delete {{name}}?",
+      "body": "Their quizzes, games, results, images and settings are deleted with the account. This cannot be undone.",
+      "running_one": "Their {{count}} running or scheduled game ends now.",
+      "running_other": "Their {{count}} running or scheduled games end now.",
+      "typeName": "Type {{name}} to confirm",
+      "submit": "Delete account",
+      "done": "Account {{name}} deleted."
     }
   },
   "errors": {
@@ -905,6 +990,7 @@
     "fileTooLarge": "The file is larger than 5 MB.",
     "passwordChangeRequired": "Change your initial password first.",
     "usernameTaken": "This username is already taken.",
+    "notOnYourself": "You can't do this to your own account. Change your password in My settings.",
     "accountPending": "Your account is waiting for the admin's approval.",
     "registrationClosed": "Sign-up is closed. Ask the admin for an account.",
     "registrationsFull": "Too many sign-ups are waiting for approval. Try again in a few days.",
@@ -926,7 +1012,8 @@
     "account": "Account",
     "settings": "My settings",
     "feedback": "Feedback",
-    "opensInNewTab": "opens in a new tab"
+    "opensInNewTab": "opens in a new tab",
+    "admin": "Admin"
   },
   "settings": {
     "title": "My settings",
@@ -1125,6 +1212,7 @@
         "heading": "If you host",
         "items": [
           "Your username, and your password only as a hash that nobody can read back.",
+          "When you last logged in, which only the admin sees, to know which accounts are still used.",
           "Your quizzes, pictures, settings and the games you ran."
         ]
       },

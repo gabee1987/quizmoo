@@ -112,7 +112,7 @@ export async function buildApp(config: Config, { db, manager, webDist: webDistOv
   await app.register(multipart)
   await app.register(quizRoutes, { db })
   await app.register(imageRoutes, { db })
-  await app.register(userRoutes, { db })
+  await app.register(userRoutes, { db, manager })
   await app.register(meRoutes, { db })
   await app.register(gameRoutes, { db, manager, appOrigin: config.APP_ORIGIN })
   await app.register(resultRoutes, {

@@ -57,4 +57,5 @@ A failed run can leave "E2E" quizzes and games behind; delete them before rerunn
 
 - Edit source files with the Edit/Write tools while `dev:lan` runs, never `sed -i` or `cat >` (see AGENTS.md learnings).
 - After server edits check that the API on :3000 restarted after the last edit; after `styles.css` changes check that Vite serves the new classes (`curl -s localhost:<vite port>/src/styles.css | grep <class>`). If not, tell the user to restart `dev:lan`.
+- The Docker Compose `app` container also listens on :3000 and has `restart: unless-stopped`, so it comes back with Docker. Running next to `dev:lan`, it answers instead of the dev API with its old build (new routes 404, old response shapes). Check `docker ps`; `docker compose stop app` frees the port. When the API "did not restart", compare the process on :3000 too.
 - The web dev port is 15173 (5173+ belong to the user's other Vite projects); `dev:lan` moves up if it is taken, so read the port it printed.

@@ -73,6 +73,11 @@ export class GameManager {
     return undefined
   }
 
+  /** The games in memory that a host runs or ran (finished ones stay a while). */
+  hostedBy(hostId: string): ManagedGame[] {
+    return [...this.games.values()].filter((entry) => entry.game.hostId === hostId).map((entry) => entry.game)
+  }
+
   /** The `seq` of the game's latest snapshots, for a socket that gets its snapshot directly. */
   seq(pin: string): number {
     return this.games.get(pin)?.seq ?? 0

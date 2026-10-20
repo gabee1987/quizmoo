@@ -835,23 +835,52 @@
       "hu": "Magyar",
       "en": "Angol"
     },
-    "label": "Nevek, soronként egy",
-    "hint": "Egyenként legfeljebb 24 karakter. Az ismétlődéseket kiszűrjük, a sértő neveket elutasítjuk, ahogy a csatlakozásnál is.",
-    "count_one": "{{count}} név",
-    "count_other": "{{count}} név",
+    "count_one": "{{count}} név, legfeljebb {{max}}",
+    "count_other": "{{count}} név, legfeljebb {{max}}",
     "builtIn": "Beépített lista",
     "custom": "Szerkesztett",
-    "save": "Mentés",
     "saved": "Elmentettük a neveket",
-    "tooLong": "hosszabb 24 karakternél",
-    "restore": "Beépített lista visszaállítása",
-    "restoreTitle": "Visszaállítod a beépített listát?",
+    "restore": "Beépített lista vissza",
+    "restoreTitle": "Visszaállítod a beépített listát ({{language}})?",
     "restoreBody": "Ennek a nyelvnek a szerkesztett nevei helyett újra a beépítettek lesznek.",
-    "restored": "A beépített lista visszaállítva"
+    "restored": "A beépített lista visszaállítva",
+    "addLabel": "Új név",
+    "addPlaceholder": "Írj be egy nevet, vagy illessz be egy listát",
+    "addHint": "Egyenként legfeljebb {{max}} karakter. Ha listát illesztesz be, minden sora külön név lesz.",
+    "add": "Hozzáadás",
+    "full": "A lista megtelt ({{max}} név).",
+    "note": {
+      "added_one": "Hozzáadtunk {{count}} nevet.",
+      "added_other": "Hozzáadtunk {{count}} nevet.",
+      "duplicates_one": "{{count}} már szerepelt a listán.",
+      "duplicates_other": "{{count}} már szerepelt a listán.",
+      "noRoom_one": "{{count}} már nem fért el (legfeljebb {{max}} név).",
+      "noRoom_other": "{{count}} már nem fért el (legfeljebb {{max}} név)."
+    },
+    "search": "Keresés a nevek között",
+    "found_one": "{{count}} találat, összesen {{total}} név",
+    "found_other": "{{count}} találat, összesen {{total}} név",
+    "noMatch": "Nincs ilyen név a listán.",
+    "empty": "Még egy név sincs a listán. Adj hozzá legalább egyet.",
+    "listLabel": "Nevek",
+    "edit": "{{name}} szerkesztése",
+    "editLabel": "{{name}} új neve",
+    "done": "Kész",
+    "remove": "{{name}} törlése",
+    "randomAvatar": "Nincs hozzá illő avatar: a játékos véletlenszerűt kap",
+    "problems": {
+      "tooLong": "Hosszabb {{max}} karakternél.",
+      "duplicate": "Már szerepel a listán.",
+      "notAllowed": "Ezt a nevet a csatlakozásnál sem engednénk.",
+      "bar": "Pár név hibás: javítsd vagy töröld a pirossal jelölteket.",
+      "empty": "Egyik lista sem lehet üres."
+    }
   },
   "users": {
     "title": "Felhasználók",
+    "intro": "A játékvezetői fiókok ezen az oldalon: mit csinálnak, és mit állíthatsz rajtuk.",
     "add": "Felhasználó hozzáadása",
+    "addSubmit": "Létrehozás",
     "role": "Szerepkör",
     "roles": {
       "admin": "Adminisztrátor",
@@ -871,6 +900,62 @@
       "rejected": "{{name}} regisztrációja törölve.",
       "rejectTitle": "Elutasítod: {{name}}?",
       "rejectBody": "A regisztrációt töröljük. Később újra jelentkezhet."
+    },
+    "accounts_one": "{{count}} fiók",
+    "accounts_other": "{{count}} fiók",
+    "admins_one": "ebből {{count}} adminisztrátor",
+    "admins_other": "ebből {{count}} adminisztrátor",
+    "search": "Keresés név szerint",
+    "noMatch": "Nincs ilyen nevű felhasználó: „{{query}}”.",
+    "you": "Te",
+    "joined": "Csatlakozott: {{date}}",
+    "lastLogin": "utoljára belépett {{when}}",
+    "neverLoggedIn": "még nem lépett be",
+    "figures": {
+      "quizzes": "Kvízek",
+      "gamesPlayed": "Lezárt játékok",
+      "playersReached": "Játékosok",
+      "gamesActive": "Aktív játékok",
+      "images": "Képek",
+      "sessions": "Aktív belépések"
+    },
+    "actions": {
+      "menu": "Műveletek: {{name}}",
+      "resetPassword": "Új jelszó beállítása",
+      "makeAdmin": "Legyen adminisztrátor",
+      "makeHost": "Legyen játékvezető",
+      "logout": "Kiléptetés mindenhonnan",
+      "delete": "Fiók törlése"
+    },
+    "reset": {
+      "title": "Új jelszó: {{name}}",
+      "body": "Ezzel a jelszóval léphet be, és rögtön le kell cserélnie. Minden eszközéről kiléptetjük. A jelszót négyszemközt add át.",
+      "field": "Új jelszó",
+      "submit": "Jelszó beállítása",
+      "done": "Új jelszót állítottál be neki: {{name}}."
+    },
+    "role": {
+      "adminTitle": "{{name}} legyen adminisztrátor?",
+      "adminBody": "Az adminisztrátorok minden fiókot látnak és kezelnek, és ők szerkesztik a „Lepj meg!” neveket.",
+      "hostTitle": "{{name}} legyen játékvezető?",
+      "hostBody": "A kvízei és játékai megmaradnak, de az adminisztrációs oldalakat nem látja többé.",
+      "madeAdmin": "{{name}} mostantól adminisztrátor.",
+      "madeHost": "{{name}} mostantól játékvezető."
+    },
+    "logout": {
+      "title": "Kiléptetsz mindenhonnan: {{name}}?",
+      "body_one": "{{count}} aktív belépése van, ezt lezárjuk. A jelszava nem változik.",
+      "body_other": "{{count}} aktív belépése van, mindet lezárjuk. A jelszava nem változik.",
+      "done": "{{name}} kiléptetve mindenhonnan."
+    },
+    "delete": {
+      "title": "Törlöd: {{name}}?",
+      "body": "A fiókkal együtt töröljük minden kvízét, játékát, eredményét, képét és beállítását. Ezt nem lehet visszacsinálni.",
+      "running_one": "{{count}} futó vagy tervezett játéka most véget ér.",
+      "running_other": "{{count}} futó vagy tervezett játéka most véget ér.",
+      "typeName": "A megerősítéshez írd be: {{name}}",
+      "submit": "Fiók törlése",
+      "done": "{{name}} fiókja törölve."
     }
   },
   "errors": {
@@ -905,6 +990,7 @@
     "fileTooLarge": "A fájl nagyobb 5 MB-nál.",
     "passwordChangeRequired": "Előbb cseréld le a kezdeti jelszót.",
     "usernameTaken": "Ez a felhasználónév már foglalt.",
+    "notOnYourself": "A saját fiókoddal ezt nem teheted meg. A jelszavadat a Beállításaimban cserélheted le.",
     "accountPending": "A fiókod az adminisztrátor jóváhagyására vár.",
     "registrationClosed": "Nem lehet regisztrálni. Kérj fiókot az adminisztrátortól.",
     "registrationsFull": "Túl sok regisztráció vár jóváhagyásra. Próbáld újra pár nap múlva.",
@@ -926,7 +1012,8 @@
     "account": "Fiók",
     "settings": "Beállításaim",
     "feedback": "Visszajelzés",
-    "opensInNewTab": "új lapon nyílik meg"
+    "opensInNewTab": "új lapon nyílik meg",
+    "admin": "Adminisztráció"
   },
   "settings": {
     "title": "Beállításaim",
@@ -1125,6 +1212,7 @@
         "heading": "Ha játékot vezetsz",
         "items": [
           "A felhasználóneved, a jelszavad pedig csak hash-ként, amiből senki nem tudja visszafejteni.",
+          "Mikor léptél be utoljára: ezt csak az adminisztrátor látja, hogy tudja, mely fiókokat használják még.",
           "A kvízeid, képeid, beállításaid és a játékaid."
         ]
       },

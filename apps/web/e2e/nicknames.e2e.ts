@@ -1,10 +1,9 @@
 import { expect, test } from '@playwright/test'
 
 /**
- * The admins' "Surprise me" names: an admin replaces the English list on the Names page (a rude
- * name is refused first), and a phone joining in English gets a name from it with the avatar
- * that fits. The list the
- * database had before is put back at the end.
+ * The admins' "Surprise me" names: an admin edits the English list on the Names page (pastes a list,
+ * renames, removes; a rude name is refused), and a phone joining in English gets a name from it
+ * with the avatar that fits. The list the database had before is put back at the end.
  */
 
 const username = process.env.E2E_USERNAME
@@ -39,20 +38,45 @@ test('admin edits the Surprise me names and a phone gets one of them', async ({ 
   const gameId = ((await (await page.request.get(`/api/games/${pin}`)).json()) as { gameId: string }).gameId
 
   try {
-    await test.step('the admin replaces the English list; a rude name is refused', async () => {
+    await test.step('the admin edits the English list row by row; a rude name is refused', async () => {
+      // A small list to start from, so the phone's pick below can only be one of two names.
+      await page.request.put('/api/nicknames/en', { data: { names: ['Laser Llama', 'Sleepy Sloth'] } })
       await page.getByRole('link', { name: 'Names' }).first().click()
       await expect(page.getByRole('heading', { name: 'Surprise me names' })).toBeVisible()
-      await page.getByRole('tab', { name: 'English' }).click()
-      const box = page.getByRole('tabpanel').getByLabel('Names, one per line')
-      await box.fill('Disco Potato\nKurva Anna')
-      await page.getByRole('tabpanel').getByRole('button', { name: 'Save' }).click()
-      await expect(page.getByText('„Kurva Anna”')).toBeVisible()
-      await box.fill('Disco Potato\nTurbo Snail\ndisco potato')
-      await expect(page.getByText('3 names')).toBeVisible()
-      await page.getByRole('tabpanel').getByRole('button', { name: 'Save' }).click()
+      await page.getByRole('tab', { name: /English/ }).click()
+      const panel = page.getByRole('tabpanel')
+      const add = panel.getByLabel('New name', { exact: true })
+
+      // A pasted list: every line is a name, one already there is skipped.
+      await add.focus()
+      await page.evaluate(() => {
+        const data = new DataTransfer()
+        data.setData('text', 'Disco Potatoo\nTurbo Snail\nKurva Anna\nlaser llama')
+        document.activeElement!.dispatchEvent(new ClipboardEvent('paste', { clipboardData: data, bubbles: true, cancelable: true }))
+      })
+      await expect(panel.getByText('Added 3 names. 1 was already in the list.')).toBeVisible()
+      await expect(panel.getByRole('listitem').filter({ hasText: 'Kurva Anna' })).toContainText('The join page would refuse this name.')
+      await expect(page.getByText('Some names have problems')).toBeVisible()
+
+      await panel.getByRole('button', { name: 'Edit Disco Potatoo' }).click()
+      await panel.getByLabel('New name for Disco Potatoo').fill('Disco Potato')
+      await page.keyboard.press('Enter')
+      for (const name of ['Kurva Anna', 'Laser Llama', 'Sleepy Sloth']) {
+        await panel.getByRole('button', { name: `Remove ${name}`, exact: true }).click()
+        await expect(panel.getByText(name, { exact: true })).toHaveCount(0)
+      }
+      await expect(panel.getByText('2 names, at most 500')).toBeVisible()
+      await panel.getByLabel('Search the names').fill('snail')
+      await expect(panel.getByText('1 match of 2 names')).toBeVisible()
+      await panel.getByLabel('Search the names').fill('')
+
+      await page.getByRole('button', { name: 'Save', exact: true }).click()
       await expect(page.getByText('Names saved')).toBeVisible()
-      await expect(page.getByRole('tabpanel').getByText('Edited')).toBeVisible()
-      await expect(box).toHaveValue('Disco Potato\nTurbo Snail')
+      await expect(panel.getByText('Edited')).toBeVisible()
+      expect(((await (await page.request.get('/api/nicknames')).json()) as { lists: { en: List } }).lists.en.names).toEqual([
+        'Disco Potato',
+        'Turbo Snail',
+      ])
     })
 
     await test.step('the name and Surprise me appear once the PIN has found the game, which picks from the list', async () => {

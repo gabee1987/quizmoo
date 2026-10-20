@@ -1,12 +1,13 @@
 import { gameSettingsSchema, type HostSettings } from '@quizmoo/shared'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute, useBlocker } from '@tanstack/react-router'
-import { CircleAlertIcon, ImageIcon, KeyRoundIcon, MegaphoneIcon, RotateCcwIcon, SaveIcon, SlidersHorizontalIcon } from 'lucide-react'
+import { ImageIcon, KeyRoundIcon, MegaphoneIcon, RotateCcwIcon, SlidersHorizontalIcon } from 'lucide-react'
 import { useState, type ComponentType, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { SmoothHeight } from '@/components/smooth-height'
 import { TextField } from '@/components/text-field'
+import { UnsavedBar } from '@/components/unsaved-bar'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -62,7 +63,6 @@ function SettingsForm({ saved }: { saved: HostSettings }) {
   const problem = draft.quickMessages.some((m) => 'text' in m && !m.text.trim())
     ? 'settings.messages.textRequired'
     : draft.gameDefaults && settingsError(draft.gameDefaults)
-  const saveBar = usePresence(dirty)
   const resetButton = usePresence(draft.gameDefaults !== null)
 
   const save = useMutation({
@@ -167,35 +167,14 @@ function SettingsForm({ saved }: { saved: HostSettings }) {
         </Tabs>
       </Section>
 
-      {/*
-       * Stays in reach while either section is edited; the bottom tab bar is below it on phones.
-       * A blurred halo of the page colour behind it (no edges, so no box) keeps content scrolling
-       * under it apart, and on phones fills the gap down to the tab bar.
-       */}
-      {saveBar.mounted && (
-        <div
-          onAnimationEnd={saveBar.onAnimationEnd}
-          className={cn(
-            'sticky bottom-[calc(4rem+env(safe-area-inset-bottom)+0.75rem)] z-30 isolate lg:bottom-4',
-            'before:absolute before:-inset-x-3 before:-top-10 before:-bottom-5 before:-z-10 before:rounded-[3rem] before:bg-background/90 before:blur-2xl lg:before:-inset-x-10 lg:before:-top-14 lg:before:-bottom-8',
-            saveBar.leaving ? 'pointer-events-none animate-pop-out' : 'animate-pop',
-          )}
-        >
-          <div className="flex flex-wrap items-center gap-3 rounded-2xl border-2 border-primary bg-[color-mix(in_srgb,var(--primary)_9%,var(--card))] p-3 shadow-[0_4px_0_0_var(--primary-edge)]">
-            <p className="flex min-w-0 flex-1 items-center gap-2 font-bold">
-              <CircleAlertIcon className={cn('size-5 shrink-0', problem ? 'text-destructive' : 'text-primary')} aria-hidden="true" />
-              {problem ? <span className="text-destructive">{t(problem)}</span> : t('settings.unsaved')}
-            </p>
-            <Button variant="ghost" onClick={() => setDraft(saved)}>
-              {t('settings.discard')}
-            </Button>
-            <Button disabled={!!problem || save.isPending} onClick={() => save.mutate()}>
-              <SaveIcon aria-hidden="true" />
-              {t('common.save')}
-            </Button>
-          </div>
-        </div>
-      )}
+      {/* Stays in reach while either section is edited. */}
+      <UnsavedBar
+        dirty={dirty}
+        problem={problem}
+        saving={save.isPending}
+        onSave={() => save.mutate()}
+        onDiscard={() => setDraft(saved)}
+      />
 
       {blocker.status === 'blocked' && (
         <ConfirmDialog

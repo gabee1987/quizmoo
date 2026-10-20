@@ -32,7 +32,7 @@ describeDb('nickname lists (database)', () => {
     await cleanup()
   })
 
-  const req = (cookie: string, method: 'GET' | 'PUT' | 'DELETE', url: string, payload?: object) =>
+  const req = (cookie: string, method: 'GET' | 'PUT' | 'DELETE' | 'POST', url: string, payload?: object) =>
     built.app.inject({ method, url, headers: { cookie }, ...(payload ? { payload } : {}) })
 
   it('is for admins only', async () => {
@@ -43,16 +43,34 @@ describeDb('nickname lists (database)', () => {
 
   it('starts from the built-in lists, saves a list without duplicates and restores the built-in one', async () => {
     expect((await req(admin, 'GET', '/api/nicknames')).json().lists).toEqual({
-      hu: { names: defaultNicknames.hu, custom: false },
-      en: { names: defaultNicknames.en, custom: false },
+      hu: { names: defaultNicknames.hu, avatars: defaultNicknames.hu.map(avatarForNickname), custom: false },
+      en: { names: defaultNicknames.en, avatars: defaultNicknames.en.map(avatarForNickname), custom: false },
     })
     const saved = await req(admin, 'PUT', '/api/nicknames/en', { names: [' Disco Potato ', 'Turbo Snail', 'disco potato'] })
     expect(saved.statusCode).toBe(200)
     expect(saved.json()).toEqual({ names: ['Disco Potato', 'Turbo Snail'], custom: true })
-    expect((await req(admin, 'GET', '/api/nicknames')).json().lists.en).toEqual({ names: ['Disco Potato', 'Turbo Snail'], custom: true })
+    expect((await req(admin, 'GET', '/api/nicknames')).json().lists.en).toEqual({
+      names: ['Disco Potato', 'Turbo Snail'],
+      avatars: [avatarForNickname('Disco Potato'), avatarForNickname('Turbo Snail')],
+      custom: true,
+    })
 
     expect((await req(admin, 'DELETE', '/api/nicknames/en')).json()).toEqual({ names: defaultNicknames.en, custom: false })
     expect((await req(admin, 'GET', '/api/nicknames')).json().lists.en.custom).toBe(false)
+  })
+
+  it('checks names being added: the avatar each gets and whether the join filter allows it', async () => {
+    expect((await req(editor, 'POST', '/api/nicknames/check', { names: ['Disco Potato'] })).statusCode).toBe(403)
+    const checked = await req(admin, 'POST', '/api/nicknames/check', { names: ['Pattogó Pingvin', 'Kurva Anna', 'Plain Name'] })
+    expect(checked.json()).toEqual({
+      results: [
+        { avatar: avatarForNickname('Pattogó Pingvin'), allowed: true },
+        { avatar: null, allowed: false },
+        { avatar: null, allowed: true },
+      ],
+    })
+    expect(avatarForNickname('Pattogó Pingvin')).not.toBeNull()
+    expect((await req(admin, 'POST', '/api/nicknames/check', { names: [] })).statusCode).toBe(400)
   })
 
   it('rejects blocked and overlong names, empty lists and unknown languages, saving nothing', async () => {

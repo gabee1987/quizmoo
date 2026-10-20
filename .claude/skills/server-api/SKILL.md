@@ -37,6 +37,10 @@ Error shape everywhere: `{ error: '<i18n key>' }`. Status codes: 400 invalid inp
 | `GET /api/auth/me` | session | `{ user }` or 401 |
 | `POST /api/auth/register` | - | `{ username, password, website? }` (honeypot) -> 201 `{ pending: true }`, no session; 403 `errors.registrationClosed` unless `REGISTRATION_OPEN`, 503 `errors.registrationsFull` at 20 pending, 5 per hour per IP |
 | `POST /api/users/:id/approve` / `reject` | admin | pending sign-ups only (404 otherwise); reject deletes the account |
+| `POST /api/users/:id/password` | admin | `{ password }`: new password, `mustChangePassword` set, every session ended |
+| `POST /api/users/:id/role` | admin | `{ role }` |
+| `POST /api/users/:id/logout` | admin | ends every session of the account |
+| `DELETE /api/users/:id` | admin | ends the host's running games, then deletes the account (the database cascades to quizzes, games, images, settings) |
 | `GET /api/site` | - | `{ operator, contact, feedbackUrl, retentionDays, registrationOpen }` from the environment, for `/privacy` and the Feedback link |
 | `GET /api/quizzes` | session | list own quizzes (id, title, questionCount, updatedAt) |
 | `POST /api/quizzes` | session | create from `quizInputSchema`; a body without `settings` gets the host's game defaults. A `branding.logoImageId` that is not the host's own image: 400 `errors.invalidInput` (also on PUT) |
@@ -48,7 +52,8 @@ Error shape everywhere: `{ error: '<i18n key>' }`. Status codes: 400 invalid inp
 | `PUT /api/me/settings` | session | replace them; no user id in any `/api/me` URL, so a host only reaches their own row. `logoImageId` must be an image the host uploaded (else 400 `errors.invalidInput`) |
 | `POST /api/me/quick-messages` | session | `{ text, durationSec }` -> `{ message }` with its id, appended ("Save to my messages"); 409 `errors.quickMessagesFull` at 20 |
 | `POST /api/quizzes/import` | session | a quiz file `{ format: 'quizmoo-quiz', version: 1, quiz, images }` (25 MB route limit) -> new quiz, 201; all or nothing; referenced images re-encoded with `toWebp` under new ids; spreadsheets arrive here already parsed by the browser |
-| `GET /api/nicknames` | admin | "Surprise me" lists per language: `{ lists: { hu: { names, custom }, en: … } }`, built-in until saved |
+| `GET /api/nicknames` | admin | "Surprise me" lists per language: `{ lists: { hu: { names, avatars, custom }, en: … } }`, built-in until saved |
+| `POST /api/nicknames/check` | admin | `{ names }` -> `{ results: [{ avatar, allowed }] }` for names being added, before saving |
 | `PUT /api/nicknames/:language` | admin | `{ names }` (1–500 player names, each passing the name filter) -> saved without duplicates |
 | `DELETE /api/nicknames/:language` | admin | back to the built-in list |
 | `GET /api/games/:pin/nickname?lang=` | - | `{ name, avatar }`: a name from the list nobody in that game has yet, with `avatarForNickname` (built-in avatar, else a keyword, else null) |
@@ -72,5 +77,6 @@ Quiz question ids and option ids are generated server-side with `nanoid(8)` when
 - `requireSession` preHandler loads the user onto `request.user`. Expired sessions are deleted on sight.
 - Login is rate limited to 10 attempts per minute per IP. The IP comes from `X-Forwarded-For` only for `TRUST_PROXY` hops, through a trust function (`hop < n`): Fastify 5 ignores a numeric `trustProxy` (fails closed), and `true` takes the first address, which the client writes itself. Request logs leave out the client address. Failed login returns `401 { error: 'errors.invalidCredentials' }` regardless of whether the user exists.
 - Users are created by the seed script, by an admin via `POST /api/users` (admin only, phase 6), or by self sign-up (`users.status = 'pending'`; login answers 403 `errors.accountPending` only after the password checks out). Pending sign-ups older than 7 days are deleted by the daily retention job (`deleteExpiredSignups`).
+- Admin actions on an account (`password`, `role`, `logout`, `DELETE`) go through `target()` in `routes/users.ts`: never the admin's own account (403 `errors.notOnYourself`, which also keeps one admin), active accounts only (404). `GET /api/users` adds per-user figures as correlated subqueries and `lastLoginAt` (set on each login).
 - Keep `users` free of personal data: username only. Future SSO adds an `oidc_identities` table; do not add provider columns to `users`.
 

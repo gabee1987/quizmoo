@@ -16,6 +16,8 @@ export const users = pgTable('users', {
   mustChangePassword: boolean('must_change_password').notNull().default(false),
   /** `pending` after self sign-up: cannot log in until an admin approves the account. */
   status: text('status', { enum: ['active', 'pending'] }).notNull().default('active'),
+  /** Set on each successful login; shown to admins only, deleted with the account. */
+  lastLoginAt: timestamp('last_login_at', { withTimezone: true }),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 })
 
