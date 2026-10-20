@@ -303,6 +303,10 @@ export interface HostSnapshot extends GameSnapshotBase {
   teamAnswers: TeamAnswerPublic[] | null
   /** The message box's quick messages for this game. Host room only; null on the public screen. */
   quickMessages: QuickMessage[] | null
+  /** The host locked their screens: the host room then receives this public snapshot only. */
+  locked: boolean
+  /** The game has its own lock code. Host room only; false on the public screen. */
+  hasLockCode: boolean
 }
 
 /** What a player's phone receives. */

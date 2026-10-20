@@ -68,6 +68,7 @@ Each command is `(state, input, now) => GameState` and returns a new object (no 
 | `extendTime(seconds)` | question | pushes `questionEndsAt` |
 | `endGame()` | any | finished, sets `finishedAt` |
 | `closeGame()` | any | `endGame` with both audiences released (no podium waits); the realtime layer sends everyone away and drops the game from memory |
+| `lockHost(codeHash?)` / `unlockHost()` / `hostLocked(state)` | any | screen lock: `lock: { codeHash, locked }` (`codeHash` an argon2 hash of the game's lock code, kept unless a new one is given, never in a snapshot); host snapshots carry `locked` and, in the host room, `hasLockCode`. The realtime layer locks all of a host's games together and checks codes |
 
 `endQuestion` is also what the realtime layer calls when `allAnswered(state)` is true (every connected player, or in team mode every team with someone online, has its answer; see `team-modes`).
 

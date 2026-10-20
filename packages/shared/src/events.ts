@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { MAX_PLAYERS, announcementDurationSchema, announcementTextSchema, answerSchema, avatarSchema, scheduledAtSchema } from './game.js'
 import type { HostSnapshot, PlayerSnapshot } from './game.js'
-import { ownQuickMessageSchema } from './host.js'
+import { lockCodeSchema, ownQuickMessageSchema } from './host.js'
 import { teamAnswerModes, teamNameSchema } from './quiz.js'
 
 // ---- Client -> server payloads (validated with zod on the server) --------
@@ -114,6 +114,11 @@ export const hostCommandSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('showAnswers'), indexes: z.array(z.number().int().min(0)).min(1).max(200) }),
   /** Back from a question shown again to where the game was. */
   z.object({ type: z.literal('closeQuestion') }),
+  /**
+   * Screen lock: locks every game of the host until `POST /api/me/unlock`. `code` sets this game's
+   * lock code; without it the game's own code, the host's default code or the password unlocks.
+   */
+  z.object({ type: z.literal('lock'), code: lockCodeSchema.optional() }),
   /** A scheduled game whose joining has not opened yet: a new opening time. */
   z.object({ type: z.literal('schedule'), at: scheduledAtSchema }),
   /** A scheduled game: open joining now instead of at the scheduled time. */

@@ -41,6 +41,7 @@ Finished plans are deleted once their branch is merged: `CHANGELOG.md` records w
 | 32 | Random cow animations on various screens | `feature/cow-antics` | planned |
 | 33 | Patch notes in the app | `feature/patch-notes` | planned |
 | 34 | Help page and interactive tutorial | `feature/help-and-tutorial` | planned |
+| 35 | [Screen lock for the host's game screen](phase-35-screen-lock.md) | `feature/host-game-screen` | done |
 | later | [Hosting without an account](later-guest-hosting.md) | `feature/guest-hosting` | planned, after the MVP |
 
 ## Conventions every plan follows

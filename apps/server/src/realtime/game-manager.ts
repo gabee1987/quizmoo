@@ -5,6 +5,7 @@ import {
   endGame,
   endQuestion,
   expireAnnouncement,
+  hostLocked,
   resultsPending,
   schedule,
   type GameQuiz,
@@ -79,6 +80,11 @@ export class GameManager {
     return [...this.games.values()].filter((entry) => entry.game.hostId === hostId).map((entry) => entry.game)
   }
 
+  /** Screen lock: the host locked their screens (it locks all of their games at once). */
+  hostLocked(hostId: string): boolean {
+    return this.hostedBy(hostId).some((game) => hostLocked(game.state))
+  }
+
   /**
    * Ends the games nobody finished that began (or were scheduled to begin) more than `windowMs`
    * ago: a lobby left open, a game the host walked away from. A restart closes those too; without
@@ -122,11 +128,14 @@ export class GameManager {
     branding?: GameBranding | null | undefined
     /** "Play again": the last round's teams instead of the settings' team names. */
     teams?: readonly TeamSeed[] | undefined
+    /** Hash of the game's screen lock code (the new game dialog's, else the host's default). */
+    lockCodeHash?: string | null | undefined
   }) {
     const now = this.now()
     const pin = generatePin((candidate) => this.games.has(candidate))
     const game = createGame(input.quiz, input.settings, pin, input.id, now, Math.random, input.teams)
-    const created = { ...game, branding: input.branding ?? null }
+    const branded = { ...game, branding: input.branding ?? null }
+    const created = input.lockCodeHash ? { ...branded, lock: { codeHash: input.lockCodeHash, locked: false } } : branded
     const withMessages = input.quickMessages ? { ...created, quickMessages: input.quickMessages } : created
     const state = input.scheduledAt === undefined ? withMessages : schedule(withMessages, input.scheduledAt, now)
     const entry: Entry = {

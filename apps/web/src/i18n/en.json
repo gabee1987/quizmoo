@@ -318,11 +318,22 @@
       "closeHelp": "Ends at once with no podium. Every phone and the projector are told the game is over and disconnected. The results stay in your history.",
       "confirmClose": "Close the game for everyone? Every phone and the projector are disconnected."
     },
-    "hide": {
-      "button": "Hide screen",
-      "show": "Show screen",
-      "title": "Screen hidden",
-      "body": "Answers, standings and players are hidden so nobody can peek at this screen. The game keeps running and the buttons still work."
+    "lock": {
+      "button": "Lock screen",
+      "title": "Screen locked",
+      "body": "The game keeps running on the projector and the phones. Type your lock code or your password to get back to it.",
+      "code": "Lock code",
+      "password": "Password",
+      "unlock": "Unlock",
+      "usePassword": "Use my password",
+      "useCode": "Use my lock code",
+      "logout": "Log out",
+      "dialogTitle": "Lock the screen?",
+      "dialogHelp": "Nobody at this device sees answers, scores or your quizzes until you unlock it, on every page and every device you are logged in on. Choose a code to unlock it quickly, or leave it empty and unlock with your password.",
+      "newCode": "Lock code for this game (optional)",
+      "codeRule": "Use 4 to 8 digits.",
+      "lockWithCode": "Lock with this code",
+      "lockWithoutCode": "Lock"
     },
     "standings": {
       "resultsSoFar": "Results so far",
@@ -515,6 +526,8 @@
       },
       "startsAt": "Start time",
       "laterHelp": "The PIN and the link are yours now, ready to share. Players can join from that time on; you start the game.",
+      "lockCode": "Lock code for this game (optional)",
+      "lockCodeHelp": "Unlocks the host screen when you lock it during the game. Empty: your lock code from My settings, or your password.",
       "scheduleSubmit": "Schedule"
     },
     "newQuiz": "New quiz",
@@ -1054,6 +1067,8 @@
     "internal": "Something went wrong. Try again.",
     "kicked": "The host removed you from the game.",
     "gameClosed": "The host closed the game. Thanks for playing!",
+    "screenLocked": "Your screens are locked. Unlock them with your lock code or password.",
+    "wrongUnlockSecret": "That is not your lock code or password. Try again.",
     "leftGame": "You left this game.",
     "unsupportedImage": "Use a JPG, PNG or WebP image.",
     "fileTooLarge": "The file is larger than 5 MB.",
@@ -1097,6 +1112,18 @@
     "discard": "Discard",
     "saved": "Settings saved",
     "passwordSaved": "Password saved",
+    "lockCode": {
+      "title": "Screen lock code",
+      "help": "Unlocks your screens when you lock them during a game (\"Lock screen\"). New games use it unless you give one when you start them. Your password always unlocks too.",
+      "set": "You have a lock code.",
+      "none": "No lock code yet: your password unlocks your screens.",
+      "new": "New lock code (4 to 8 digits)",
+      "change": "Change it (4 to 8 digits)",
+      "submit": "Save code",
+      "remove": "Remove code",
+      "saved": "Lock code saved",
+      "removed": "Lock code removed"
+    },
     "leaveTitle": "Leave without saving?",
     "leaveBody": "Your changes to My settings are not saved yet.",
     "messages": {

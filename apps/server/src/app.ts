@@ -87,6 +87,7 @@ export async function buildApp(config: Config, { db, manager, webDist: webDistOv
   // Each request carries its session token under this install's cookie name; a cookie under the
   // other name (one planted without the __Host- prefix) is never read.
   const sessionCookie = sessionCookieName(secureCookies)
+  app.decorate('hostLocked', (userId: string) => manager.hostLocked(userId))
   app.decorateRequest('sessionToken', undefined)
   app.addHook('onRequest', async (request) => {
     request.sessionToken = request.cookies[sessionCookie]
@@ -143,7 +144,7 @@ export async function buildApp(config: Config, { db, manager, webDist: webDistOv
   await app.register(quizRoutes, { db })
   await app.register(imageRoutes, { db })
   await app.register(userRoutes, { db, manager })
-  await app.register(meRoutes, { db })
+  await app.register(meRoutes, { db, manager })
   await app.register(accountRoutes, { db, manager, secureCookies })
   await app.register(gameRoutes, { db, manager, appOrigin: config.APP_ORIGIN, pinGuard })
   await app.register(resultRoutes, {

@@ -612,6 +612,25 @@ export function releaseResults(state: GameState, audience: ResultsAudience): Gam
   return { ...state, released: { ...released, [audience]: true } }
 }
 
+/** The host locked their screens (screen lock). */
+export function hostLocked(state: GameState): boolean {
+  return state.lock?.locked === true
+}
+
+/**
+ * Screen lock: the host's screens get the public snapshot only until `unlockHost`. `codeHash`
+ * replaces the game's lock code hash; without it the code stays as it was. Any phase.
+ */
+export function lockHost(state: GameState, codeHash?: string): GameState {
+  const current = state.lock?.codeHash ?? null
+  return { ...state, lock: { codeHash: codeHash ?? current, locked: true } }
+}
+
+export function unlockHost(state: GameState): GameState {
+  if (!hostLocked(state)) return state
+  return { ...state, lock: { codeHash: state.lock?.codeHash ?? null, locked: false } }
+}
+
 /** Points a finished game's phones and projector to the next round ("Play again"). */
 export function setNextGame(state: GameState, pin: string): GameState {
   if (state.phase !== 'finished') throw new EngineError('errors.gameNotFinished')

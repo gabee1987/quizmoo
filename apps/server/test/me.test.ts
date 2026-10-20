@@ -48,7 +48,7 @@ describeDb('host settings (database)', () => {
     await cleanup()
   })
 
-  const req = (cookie: string, method: 'GET' | 'PUT' | 'POST', url: string, payload?: object) =>
+  const req = (cookie: string, method: 'GET' | 'PUT' | 'POST' | 'DELETE', url: string, payload?: object) =>
     built.app.inject({ method, url, headers: { cookie }, ...(payload ? { payload } : {}) })
   const settingsOf = async (cookie: string) => (await req(cookie, 'GET', '/api/me/settings')).json().settings
 
@@ -73,6 +73,28 @@ describeDb('host settings (database)', () => {
     })
     // Another host never sees them.
     expect((await settingsOf(second)).quickMessages).toEqual(builtIns)
+  })
+
+  it('sets, changes and removes the default lock code, keeping only a hash that is never sent back', async () => {
+    const hasLockCode = async () => (await req(second, 'GET', '/api/me/settings')).json().hasLockCode
+    expect(await hasLockCode()).toBe(false)
+    for (const code of ['123', '123456789', 'abcd', 12345]) {
+      expect((await req(second, 'PUT', '/api/me/lock-code', { code })).json()).toMatchObject({ error: 'errors.invalidInput' })
+    }
+    expect((await req(second, 'PUT', '/api/me/lock-code', { code: '4821' })).statusCode).toBe(204)
+    expect(await hasLockCode()).toBe(true)
+    const stored = (await db.select().from(hostSettings).where(eq(hostSettings.userId, secondId)))[0]!
+    expect(stored.lockCodeHash).toMatch(/^\$argon2/)
+    expect(stored.lockCodeHash).not.toContain('4821')
+    const page = (await req(second, 'GET', '/api/me/settings')).body
+    expect(page).not.toContain(stored.lockCodeHash!)
+    expect(page).not.toContain('argon2')
+
+    expect((await req(second, 'PUT', '/api/me/lock-code', { code: '00001111' })).statusCode).toBe(204)
+    const changed = (await db.select().from(hostSettings).where(eq(hostSettings.userId, secondId)))[0]!
+    expect(changed.lockCodeHash).not.toBe(stored.lockCodeHash)
+    expect((await req(second, 'DELETE', '/api/me/lock-code')).statusCode).toBe(204)
+    expect(await hasLockCode()).toBe(false)
   })
 
   it('refuses invalid settings with an i18n key and keeps the saved ones', async () => {

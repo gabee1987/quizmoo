@@ -61,7 +61,7 @@ Collected while testing phases 9 to 12. Effort as above.
 - Admin pages: a Users page with each account's figures and last login, setting a new password, changing the role, logging out everywhere and deleting an account; a Names page that edits the "Surprise me" names row by row (phase 28).
 - My settings in four tabs (Games first), and an Account tab: overview, this device's language and look, password, logging out other logins, deleting the own account (phase 29).
 - Legal pages (privacy notice, terms, cookies and storage, imprint), terms accepted at sign-up and recorded, "Download my data", a storage notice, and a security review with every finding fixed (phase 30).
-- The host's running-game screen: standings shown midgame (also with answers at the end), a Standings card with "Results so far", names in full, controls that stay in view, "Show answers" for any closed question, a chip and a preview of what everyone sees, "Hide screen", and closing a game at any point without the podium (phase 31).
+- The host's running-game screen: standings shown midgame (also with answers at the end), a Standings card with "Results so far", names in full, controls that stay in view, "Show answers" for any closed question, a chip and a preview of what everyone sees, a screen lock with a code or the password (phase 35), and closing a game at any point without the podium (phase 31).
 - Quiz files: questions written in a spreadsheet anywhere (template with a guide and examples) imported with a row-by-row problem report, and quizzes downloaded as a spreadsheet or a full Quizmoo file with settings and pictures (phase 27).
 
 ### Open

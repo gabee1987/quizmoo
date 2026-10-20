@@ -141,6 +141,11 @@ export interface GameState {
   quickMessages?: QuickMessage[] | { hidden: string[]; own: OwnQuickMessage[] }
   /** The host's logo and event name, copied at creation when the host chose to show them. Missing in games saved before it existed. */
   branding?: GameBranding | null
+  /**
+   * Screen lock. `codeHash`: argon2 hash of this game's lock code (null: none), never in a snapshot.
+   * `locked`: the host's screens get the public snapshot only. Missing in games without either.
+   */
+  lock?: { codeHash: string | null; locked: boolean }
 }
 
 /** Who sees the final results: the projector (podium) or the players' phones. */

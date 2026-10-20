@@ -1,7 +1,7 @@
 import type { GameHostInfo, HostCommand, HostSnapshot } from '@quizmoo/shared'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link, createFileRoute } from '@tanstack/react-router'
-import { EyeIcon, EyeOffIcon, MonitorIcon, TrophyIcon } from 'lucide-react'
+import { LockIcon, MonitorIcon, TrophyIcon } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
@@ -15,6 +15,7 @@ import { GradingPanel } from '../../features/host/grading-panel'
 import { HostToastsToggle, useHostToasts } from '../../features/host/host-toasts'
 import { HostLobby } from '../../features/host/host-lobby'
 import { LiveQuestion } from '../../features/host/live-question'
+import { LockDialog } from '../../features/host/lock-dialog'
 import { MessageBox } from '../../features/host/message-box'
 import { PlayAgainButton } from '../../features/host/play-again-button'
 import { PlayerPanel } from '../../features/host/player-panel'
@@ -27,7 +28,9 @@ import { RoundTripBadge } from '../../features/host/round-trip-badge'
 import { settingsLine } from '../../features/host/settings-line'
 import { RankList } from '../../features/play/scoreboard'
 import { ApiError, apiFetch } from '../../lib/api'
+import { meQueryOptions } from '../../lib/auth'
 import { openProjector } from '../../lib/projector'
+import { screenLockChanged } from '../../lib/screen-lock'
 import { toastError } from '../../lib/toast'
 import { closeSession, emitAck, startSession, useGameStore } from '../../lib/socket'
 
@@ -42,8 +45,8 @@ function HostGamePage() {
   const { status, since, host, clockOffset, closed } = useGameStore()
   // Tailwind's lg: the two-column layout.
   const wide = useMediaQuery('(min-width: 64rem)')
-  // "Hide screen": for this page only; a reload shows everything again.
-  const [hidden, setHidden] = useState(false)
+  const queryClient = useQueryClient()
+  const [locking, setLocking] = useState(false)
   useGameTheme(host?.settings)
   useHostToasts(host)
   const info = useQuery({
@@ -69,6 +72,19 @@ function HostGamePage() {
     return false
   }
 
+  // Locked from another tab or device: the host layout puts up the lock screen once it knows.
+  const locked = host?.locked ?? false
+  useEffect(() => {
+    if (locked) void queryClient.invalidateQueries({ queryKey: meQueryOptions.queryKey })
+  }, [locked, queryClient])
+
+  /** "Lock screen": at once when the game has a lock code, otherwise the dialog offers one. */
+  async function lock(command: HostCommand): Promise<boolean> {
+    const ok = await send(command)
+    if (ok) screenLockChanged(queryClient)
+    return ok
+  }
+
   if (closed) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center">
@@ -79,7 +95,8 @@ function HostGamePage() {
       </div>
     )
   }
-  if (!host) return <Spinner />
+  // A locked game's snapshot is the projector's; nothing of it here until the lock screen takes over.
+  if (!host || host.locked) return <Spinner />
 
   if (host.phase === 'lobby') {
     return (
@@ -105,76 +122,39 @@ function HostGamePage() {
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
       <ConnectionBar status={status} since={since} />
       <div className="flex min-w-0 flex-col gap-5">
-        <Header host={host} connected={status === 'connected'} hidden={hidden} onHide={setHidden} />
+        <Header
+          host={host}
+          connected={status === 'connected'}
+          onLock={() => (host.hasLockCode ? void lock({ type: 'lock' }) : setLocking(true))}
+        />
         {wide && controls}
         <MessageBox announcement={host.announcement} quickMessages={host.quickMessages} clockOffset={clockOffset} onCommand={send} />
-        {hidden ? (
-          <HiddenCover onShow={() => setHidden(false)} />
-        ) : (
-          <>
-            <PhaseDetail host={host} clockOffset={clockOffset} gameId={gameId} />
-            {host.phase === 'reveal' && host.awaitingGrading && (
-              <GradingPanel host={host} onGrade={(ids) => void send({ type: 'gradeText', correctPlayerIds: ids })} />
-            )}
-          </>
+        <PhaseDetail host={host} clockOffset={clockOffset} gameId={gameId} />
+        {host.phase === 'reveal' && host.awaitingGrading && (
+          <GradingPanel host={host} onGrade={(ids) => void send({ type: 'gradeText', correctPlayerIds: ids })} />
         )}
         <EndGameButton host={host} send={send} gameId={gameId} />
       </div>
-      {!hidden && (
-        <div className="flex min-w-0 flex-col gap-6">
-          <ScreenPreview host={host} clockOffset={clockOffset} defaultOpen={wide} />
-          <Standings host={host} gameId={gameId} />
-          <TeamModesPanel host={host} onTeamMode={(mode, teamId) => void send({ type: 'teamMode', mode, teamId })} />
-          <PlayerPanel
-            host={host}
-            clockOffset={clockOffset}
-            onKick={(playerId) => void send({ type: 'kick', playerId })}
-            onCaptain={(playerId) => void send({ type: 'captain', playerId })}
-            onMove={(playerId, teamId) => void send({ type: 'movePlayer', playerId, teamId })}
-          />
-          <ReviewPanel host={host} onShowQuestion={(index) => void send({ type: 'showQuestion', index })} />
-        </div>
-      )}
+      {locking && <LockDialog onLock={lock} onClose={() => setLocking(false)} />}
+      <div className="flex min-w-0 flex-col gap-6">
+        <ScreenPreview host={host} clockOffset={clockOffset} defaultOpen={wide} />
+        <Standings host={host} gameId={gameId} />
+        <TeamModesPanel host={host} onTeamMode={(mode, teamId) => void send({ type: 'teamMode', mode, teamId })} />
+        <PlayerPanel
+          host={host}
+          clockOffset={clockOffset}
+          onKick={(playerId) => void send({ type: 'kick', playerId })}
+          onCaptain={(playerId) => void send({ type: 'captain', playerId })}
+          onMove={(playerId, teamId) => void send({ type: 'movePlayer', playerId, teamId })}
+        />
+        <ReviewPanel host={host} onShowQuestion={(index) => void send({ type: 'showQuestion', index })} />
+      </div>
       {!wide && controls}
     </div>
   )
 }
 
-/**
- * Stands in for everything that could give answers or standings away while the host has hidden
- * the screen (a laptop left on a table). Not a lock: "Show" brings it all back.
- */
-function HiddenCover({ onShow }: { onShow: () => void }) {
-  const { t } = useTranslation()
-  return (
-    <section
-      aria-labelledby="hidden-title"
-      className="flex flex-col items-center gap-3 rounded-2xl border-2 border-dashed bg-card px-5 py-10 text-center shadow-soft"
-    >
-      <EyeOffIcon className="size-10 text-muted-foreground" aria-hidden="true" />
-      <h2 id="hidden-title" className="text-xl font-extrabold">
-        {t('host.hide.title')}
-      </h2>
-      <p className="max-w-md text-muted-foreground">{t('host.hide.body')}</p>
-      <Button onClick={onShow}>
-        <EyeIcon aria-hidden="true" />
-        {t('host.hide.show')}
-      </Button>
-    </section>
-  )
-}
-
-function Header({
-  host,
-  connected,
-  hidden,
-  onHide,
-}: {
-  host: HostSnapshot
-  connected: boolean
-  hidden: boolean
-  onHide: (hidden: boolean) => void
-}) {
+function Header({ host, connected, onLock }: { host: HostSnapshot; connected: boolean; onLock: () => void }) {
   const { t } = useTranslation()
   const online = host.players.filter((p) => p.connected).length
   const settings = settingsLine(host, t)
@@ -201,10 +181,10 @@ function Header({
         </div>
       </div>
       <div className="flex flex-wrap gap-2">
-        {/* Hides answers, standings and players from anyone glancing at this screen. */}
-        <Button variant="secondary" aria-pressed={hidden} onClick={() => onHide(!hidden)}>
-          {hidden ? <EyeIcon aria-hidden="true" /> : <EyeOffIcon aria-hidden="true" />}
-          {hidden ? t('host.hide.show') : t('host.hide.button')}
+        {/* Locks every host page of the account until the lock code or the password is typed. */}
+        <Button variant="secondary" onClick={onLock}>
+          <LockIcon aria-hidden="true" />
+          {t('host.lock.button')}
         </Button>
         <Button asChild variant="secondary">
           {/* A second click brings the same projector window up instead of opening another one. */}

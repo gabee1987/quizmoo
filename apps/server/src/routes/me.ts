@@ -1,17 +1,23 @@
 import {
   MAX_QUICK_MESSAGES,
   hostSettingsSchema,
+  lockCodeSchema,
   mergeLegacyQuickMessages,
   newQuickMessageSchema,
+  unlockSchema,
   type HostSettings,
   type OwnQuickMessage,
 } from '@quizmoo/shared'
 import { eq, sql } from 'drizzle-orm'
 import type { FastifyInstance } from 'fastify'
 import { nanoid } from 'nanoid'
+import { z } from 'zod'
+import { hashPassword, verifyPassword } from '../auth/password.js'
 import { requireSession } from '../auth/require-session.js'
 import type { Db } from '../db/index.js'
-import { hostSettings } from '../db/schema.js'
+import { hostSettings, localCredentials } from '../db/schema.js'
+import { hostLocked, unlockHost } from '../game/index.js'
+import type { GameManager } from '../realtime/game-manager.js'
 import { parseOr400 } from './http.js'
 import { ownsImage } from './images.js'
 
@@ -47,6 +53,38 @@ async function saveHostSettings(db: Db, userId: string, settings: HostSettings) 
     .onConflictDoUpdate({ target: hostSettings.userId, set: { settings, updatedAt } })
 }
 
+/** The hash of the host's default screen lock code, or null. */
+export async function readLockCodeHash(db: Db, userId: string): Promise<string | null> {
+  const row = (await db.select({ hash: hostSettings.lockCodeHash }).from(hostSettings).where(eq(hostSettings.userId, userId)))[0]
+  return row?.hash ?? null
+}
+
+async function saveLockCodeHash(db: Db, userId: string, lockCodeHash: string | null) {
+  const updatedAt = new Date()
+  await db
+    .insert(hostSettings)
+    .values({ userId, lockCodeHash, updatedAt })
+    .onConflictDoUpdate({ target: hostSettings.userId, set: { lockCodeHash, updatedAt } })
+}
+
+/**
+ * Screen lock: true when `secret` is the lock code of one of the host's locked games, their default
+ * lock code or their account password. Codes are checked only when the secret looks like one.
+ */
+async function unlocks(db: Db, manager: GameManager, userId: string, secret: string): Promise<boolean> {
+  if (lockCodeSchema.safeParse(secret).success) {
+    const gameHashes = manager.hostedBy(userId).flatMap((game) => (hostLocked(game.state) && game.state.lock?.codeHash) || [])
+    const defaultHash = await readLockCodeHash(db, userId)
+    for (const hash of new Set([...gameHashes, ...(defaultHash ? [defaultHash] : [])])) {
+      if (await verifyPassword(hash, secret)) return true
+    }
+  }
+  const credentials = (
+    await db.select({ hash: localCredentials.passwordHash }).from(localCredentials).where(eq(localCredentials.userId, userId))
+  )[0]
+  return !!credentials && (await verifyPassword(credentials.hash, secret))
+}
+
 /** Keeps the event name a game was created with for the next one; merged in, so the other settings stay as stored. */
 export async function rememberEventName(db: Db, userId: string, eventName: string) {
   const updatedAt = new Date()
@@ -62,10 +100,13 @@ export async function rememberEventName(db: Db, userId: string, eventName: strin
 /**
  * The logged-in host's own settings. No user id in the URL: a host can only ever reach their own row.
  */
-export async function meRoutes(app: FastifyInstance, { db }: { db: Db }) {
+export async function meRoutes(app: FastifyInstance, { db, manager }: { db: Db; manager: GameManager }) {
   const auth = { preHandler: requireSession(db) }
 
-  app.get('/api/me/settings', auth, async (request) => ({ settings: await readHostSettings(db, request.user!.id) }))
+  app.get('/api/me/settings', auth, async (request) => ({
+    settings: await readHostSettings(db, request.user!.id),
+    hasLockCode: (await readLockCodeHash(db, request.user!.id)) !== null,
+  }))
 
   app.put('/api/me/settings', auth, async (request, reply) => {
     const settings = parseOr400(hostSettingsSchema, request.body, reply)
@@ -87,4 +128,33 @@ export async function meRoutes(app: FastifyInstance, { db }: { db: Db }) {
     await saveHostSettings(db, request.user!.id, { ...settings, quickMessages: [...settings.quickMessages, message] })
     return reply.code(201).send({ message })
   })
+
+  // The default screen lock code for new games. Only its hash is stored; it is never sent back.
+  app.put('/api/me/lock-code', auth, async (request, reply) => {
+    const body = parseOr400(z.object({ code: lockCodeSchema }), request.body, reply)
+    if (!body) return reply
+    await saveLockCodeHash(db, request.user!.id, await hashPassword(body.code))
+    return reply.code(204).send()
+  })
+
+  app.delete('/api/me/lock-code', auth, async (request, reply) => {
+    await saveLockCodeHash(db, request.user!.id, null)
+    return reply.code(204).send()
+  })
+
+  // Screen lock: the lock code or the password unlocks every game of the host. Limited like login.
+  app.post(
+    '/api/me/unlock',
+    { preHandler: requireSession(db, { allowLocked: true }), config: { rateLimit: { max: 5, timeWindow: '1 minute' } } },
+    async (request, reply) => {
+      const body = parseOr400(unlockSchema, request.body, reply)
+      if (!body) return reply
+      const userId = request.user!.id
+      if (!(await unlocks(db, manager, userId, body.secret))) return reply.code(400).send({ error: 'errors.wrongUnlockSecret' })
+      for (const game of manager.hostedBy(userId)) {
+        if (hostLocked(game.state)) manager.apply(game.state.pin, unlockHost)
+      }
+      return reply.code(204).send()
+    },
+  )
 }

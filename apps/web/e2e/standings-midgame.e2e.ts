@@ -6,7 +6,8 @@ import { expect, test, type Page } from '@playwright/test'
  * question), sees them in the Standings card, finds "Results so far", sees a long name in full,
  * and the control bar stays in view while the page scrolls on a phone-sized screen. Then the host
  * shows the last answer (right or wrong on the phone, no points), sees the projector live and the
- * phones' screen in the preview, hides the screen, and closes the game without the podium.
+ * phones' screen in the preview, locks the screen (every host page, also in a new tab) and unlocks
+ * it with the password, and closes the game without the podium.
  */
 
 const username = process.env.E2E_USERNAME
@@ -17,7 +18,10 @@ const problems: string[] = []
 function watch(page: Page, who: string) {
   page.on('pageerror', (error) => problems.push(`${who}: ${error.message}`))
   page.on('console', (message) => {
-    if (message.type() !== 'error' || /status of 401/.test(message.text())) return
+    // 423: a host request while the screens are locked, expected in the lock step.
+    if (message.type() !== 'error' || /status of (401|423)/.test(message.text())) return
+    // The wrong lock code typed on purpose.
+    if (/status of 400/.test(message.text()) && message.location().url.includes('/api/me/unlock')) return
     problems.push(`${who}: ${message.text()}`)
   })
 }
@@ -119,13 +123,33 @@ test('standings midgame with answers held until the end, controls in view', asyn
       await expect(phonePanel.getByText('Each phone also shows whether its player was right.')).toBeVisible()
     })
 
-    await test.step('hiding the screen covers answers, standings and players', async () => {
-      await page.getByRole('button', { name: 'Hide screen' }).click()
+    await test.step('locking the screen hides every host page until the password unlocks it', async () => {
+      await page.getByRole('button', { name: 'Lock screen' }).click()
+      // A game without a lock code asks for one; the account may have a default code, then it locks at once.
+      const lockDialog = page.getByRole('dialog', { name: 'Lock the screen?' })
+      const lockScreen = page.getByRole('heading', { name: 'Screen locked' })
+      await expect(lockDialog.or(lockScreen)).toBeVisible()
+      if (await lockDialog.isVisible()) await lockDialog.getByRole('button', { name: 'Lock', exact: true }).click()
+      await expect(lockScreen).toBeVisible()
       await expect(page.getByRole('region', { name: 'Standings' })).toHaveCount(0)
       await expect(page.getByText(LONG_NAME)).toHaveCount(0)
-      await expect(controls.getByRole('button', { name: 'Back to the game' })).toBeVisible()
-      await page.getByRole('button', { name: 'Show screen' }).first().click()
+      // Another tab of the account is locked too; the phone and the projector carry on.
+      const other = await page.context().newPage()
+      watch(other, 'other tab')
+      await other.goto('/host/quizzes')
+      await expect(other.getByRole('heading', { name: 'Screen locked' })).toBeVisible()
+      await expect(phone.getByText('Correct answer')).toBeVisible()
+      await expect(projector.getByText('Correct answer')).toBeVisible()
+
+      await page.getByLabel('Lock code').fill('0000')
+      await page.getByRole('button', { name: 'Unlock' }).click()
+      await expect(page.getByText('That is not your lock code or password. Try again.')).toBeVisible()
+      await page.getByRole('button', { name: 'Use my password' }).click()
+      await page.getByLabel('Password', { exact: true }).fill(password!)
+      await page.getByRole('button', { name: 'Unlock' }).click()
       await expect(page.getByRole('region', { name: 'Standings' })).toBeVisible()
+      await expect(other.getByRole('heading', { name: 'Screen locked' })).toHaveCount(0)
+      await other.close()
       await controls.getByRole('button', { name: 'Back to the game' }).click()
     })
 

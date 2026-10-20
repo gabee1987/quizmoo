@@ -11,7 +11,9 @@ import {
   expireAnnouncement,
   extendTime,
   gradeText,
+  hostLocked,
   joinPlayer,
+  lockHost,
   next,
   pause,
   quickMessagesOf,
@@ -24,6 +26,7 @@ import {
   skipQuestion,
   startGame,
   submitAnswer,
+  unlockHost,
 } from './engine.js'
 import { fixtureSettings } from './fixtures.js'
 import { toHostSnapshot, toPlayerSnapshot } from './snapshots.js'
@@ -235,6 +238,28 @@ describe('showing a question again', () => {
     const back = toPlayerSnapshot(closeQuestion(state), 'p1', T0)
     expect(back.reveal).toBeNull()
     expect(back.lastCorrect).toBeNull()
+  })
+})
+
+describe('screen lock', () => {
+  it('locks and unlocks in any phase, keeping the code unless a new one is given', () => {
+    const state = game([tf('q1')])
+    expect(hostLocked(state)).toBe(false)
+    const locked = lockHost(state, 'hash-1')
+    expect(locked.lock).toEqual({ codeHash: 'hash-1', locked: true })
+    expect(lockHost(unlockHost(locked)).lock).toEqual({ codeHash: 'hash-1', locked: true })
+    expect(unlockHost(locked).lock).toEqual({ codeHash: 'hash-1', locked: false })
+    expect(unlockHost(state)).toBe(state)
+    expect(lockHost(endGame(state, T0)).lock?.locked).toBe(true)
+    expect(JSON.parse(JSON.stringify(locked))).toEqual(locked)
+  })
+
+  it('says so in the snapshots, never with the code', () => {
+    const locked = lockHost(game([tf('q1')]), 'hash-1')
+    expect(toHostSnapshot(locked, T0, { includeAnswers: true })).toMatchObject({ locked: true, hasLockCode: true })
+    expect(toHostSnapshot(locked, T0)).toMatchObject({ locked: true, hasLockCode: false })
+    expect(JSON.stringify(toHostSnapshot(locked, T0, { includeAnswers: true }))).not.toContain('hash-1')
+    expect(JSON.stringify(toPlayerSnapshot(locked, 'p1', T0))).not.toContain('hash-1')
   })
 })
 

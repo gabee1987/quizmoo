@@ -66,7 +66,8 @@ function ScreenPage() {
   }, [nextPin, navigate, preview])
 
   useEffect(() => {
-    if (!isHost || !host) return
+    // A locked host drives nothing from here either (the server refuses it).
+    if (!isHost || !host || host.locked) return
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== ' ' && e.key !== 'ArrowRight') return
       const action = primaryAction(host)
@@ -82,7 +83,7 @@ function ScreenPage() {
     return <p className="flex flex-1 items-center justify-center text-4xl">{t(closed)}</p>
   }
   if (!host) return <Spinner />
-  const action = isHost ? primaryAction(host) : null
+  const action = isHost && !host.locked ? primaryAction(host) : null
 
   return (
     <div className="flex min-h-[calc(100dvh-4rem)] flex-col px-4 py-4 lg:px-12">

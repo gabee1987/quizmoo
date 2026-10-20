@@ -34,7 +34,7 @@ Error shape everywhere: `{ error: '<i18n key>' }`. Status codes: 400 invalid inp
 |---|---|---|
 | `POST /api/auth/login` | - | `{ username, password }` -> sets session cookie, returns `{ user }` |
 | `POST /api/auth/logout` | session | clears cookie |
-| `GET /api/auth/me` | session | `{ user }` or 401 |
+| `GET /api/auth/me` | session (also while locked) | `{ user }` with `screenLocked`, or 401 |
 | `POST /api/auth/register` | - | `{ username, password, website? }` (honeypot) -> 201 `{ pending: true }`, no session; 403 `errors.registrationClosed` unless `REGISTRATION_OPEN`, 503 `errors.registrationsFull` at 20 pending, 5 per hour per IP |
 | `POST /api/users/:id/approve` / `reject` | admin | pending sign-ups only (404 otherwise); reject deletes the account |
 | `POST /api/users/:id/password` | admin | `{ password }`: new password, `mustChangePassword` set, every session ended |
@@ -53,7 +53,9 @@ Error shape everywhere: `{ error: '<i18n key>' }`. Status codes: 400 invalid inp
 | `PUT /api/quizzes/:id` | owner | replace from `quizInputSchema` |
 | `DELETE /api/quizzes/:id` | owner | |
 | `POST /api/quizzes/batch-delete` | owner of all | `{ ids }` -> `{ deleted }`; 404 and nothing deleted if any id is missing or not owned |
-| `GET /api/me/settings` | session | the host's own settings (`hostSettingsSchema`, defaults when never saved): `{ settings }` |
+| `GET /api/me/settings` | session | the host's own settings (`hostSettingsSchema`, defaults when never saved): `{ settings, hasLockCode }` |
+| `PUT /api/me/lock-code` / `DELETE /api/me/lock-code` | session | the default screen lock code `{ code }` (4 to 8 digits), stored only as an argon2 hash in `host_settings.lock_code_hash`, never sent back |
+| `POST /api/me/unlock` | session (also while locked) | `{ secret }`: a locked game's code, the default code or the password unlocks every game of the host (204), else 400 `errors.wrongUnlockSecret`; 5 per minute |
 | `PUT /api/me/settings` | session | replace them; no user id in any `/api/me` URL, so a host only reaches their own row. `logoImageId` must be an image the host uploaded (else 400 `errors.invalidInput`) |
 | `POST /api/me/quick-messages` | session | `{ text, durationSec }` -> `{ message }` with its id, appended ("Save to my messages"); 409 `errors.quickMessagesFull` at 20 |
 | `POST /api/quizzes/import` | session | a quiz file `{ format: 'quizmoo-quiz', version: 1, quiz, images }` (25 MB route limit) -> new quiz, 201; all or nothing; referenced images re-encoded with `toWebp` under new ids; spreadsheets arrive here already parsed by the browser |
@@ -76,6 +78,8 @@ Error shape everywhere: `{ error: '<i18n key>' }`. Status codes: 400 invalid inp
 Quiz question ids and option ids are generated server-side with `nanoid(8)` when missing, so the editor can send new questions without ids.
 
 ## Auth and sessions
+
+- Screen lock: while `app.hostLocked(userId)` (any of the host's games locked), `requireSession` answers `423 { error: 'errors.screenLocked' }` unless the route passes `allowLocked` (me, logout, unlock). `POST /api/games` takes an optional `lockCode`; without it the game copies the default code's hash; "Play again" copies the last round's.
 
 - Passwords hashed with `@node-rs/argon2` (defaults). Minimum length 10, no other complexity rules.
 - Session token: 32 random bytes, base64url, in an `httpOnly`, `sameSite=lax` cookie, 30 days, named by `sessionCookieName(secure)`: `__Host-quizmoo_session` over HTTPS (Secure), `quizmoo_session` on plain http. Routes read `request.sessionToken` (set in `app.ts` from the one name this install uses), never `request.cookies` directly. The DB stores the SHA-256 of the token.

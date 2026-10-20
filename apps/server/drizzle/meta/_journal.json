@@ -85,6 +85,13 @@
       "when": 1792492276190,
       "tag": "0011_bent_sentry",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1792511394551,
+      "tag": "0012_loud_phil_sheldon",
+      "breakpoints": true
     }
   ]
 }

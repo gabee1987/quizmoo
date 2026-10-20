@@ -318,11 +318,22 @@
       "closeHelp": "Azonnal véget ér, dobogó nélkül. Minden telefon és a kivetítő megtudja, hogy vége, és lecsatlakozik. Az eredmények megmaradnak az előzményeid között.",
       "confirmClose": "Lezárod a játékot mindenkinek? Minden telefon és a kivetítő lecsatlakozik."
     },
-    "hide": {
-      "button": "Képernyő elrejtése",
-      "show": "Képernyő mutatása",
-      "title": "A képernyő el van rejtve",
-      "body": "A válaszokat, az állást és a játékosokat elrejtettük, hogy senki ne lessen bele. A játék megy tovább, a gombok működnek."
+    "lock": {
+      "button": "Képernyő zárolása",
+      "title": "A képernyő zárolva",
+      "body": "A játék megy tovább a kivetítőn és a telefonokon. Írd be a zárkódot vagy a jelszavad, hogy visszatérj hozzá.",
+      "code": "Zárkód",
+      "password": "Jelszó",
+      "unlock": "Feloldás",
+      "usePassword": "Inkább a jelszavam",
+      "useCode": "Inkább a zárkódom",
+      "logout": "Kilépés",
+      "dialogTitle": "Zárolod a képernyőt?",
+      "dialogHelp": "Amíg fel nem oldod, ezen az eszközön senki nem látja a válaszokat, a pontokat és a kvízeidet: egyik oldalon sem, és egyik eszközödön sem, ahol be vagy lépve. Adj meg egy kódot a gyors feloldáshoz, vagy hagyd üresen, és oldd fel a jelszavaddal.",
+      "newCode": "Zárkód ehhez a játékhoz (nem kötelező)",
+      "codeRule": "4–8 számjegyet adj meg.",
+      "lockWithCode": "Zárolás ezzel a kóddal",
+      "lockWithoutCode": "Zárolás"
     },
     "standings": {
       "resultsSoFar": "Eddigi eredmények",
@@ -515,6 +526,8 @@
       },
       "startsAt": "Kezdés",
       "laterHelp": "A PIN-kód és a link már most a tiéd, megoszthatod. A játékosok a megadott időtől csatlakozhatnak, a játékot te indítod.",
+      "lockCode": "Zárkód ehhez a játékhoz (nem kötelező)",
+      "lockCodeHelp": "Ezzel oldod fel a vezérlőt, ha játék közben zárolod. Üresen hagyva a Beállításaimban megadott zárkód vagy a jelszavad oldja fel.",
       "scheduleSubmit": "Időzítés"
     },
     "newQuiz": "Új kvíz",
@@ -1054,6 +1067,8 @@
     "internal": "Valami elromlott. Próbáld újra.",
     "kicked": "A játékvezető eltávolított a játékból.",
     "gameClosed": "A játékvezető lezárta a játékot. Köszi, hogy játszottál!",
+    "screenLocked": "A képernyőid zárolva vannak. Oldd fel őket a zárkóddal vagy a jelszavaddal.",
+    "wrongUnlockSecret": "Ez nem a zárkódod és nem is a jelszavad. Próbáld újra.",
     "leftGame": "Kiléptél ebből a játékból.",
     "unsupportedImage": "JPG, PNG vagy WebP képet használj.",
     "fileTooLarge": "A fájl nagyobb 5 MB-nál.",
@@ -1097,6 +1112,18 @@
     "discard": "Elvetés",
     "saved": "Elmentettük",
     "passwordSaved": "Elmentettük az új jelszót",
+    "lockCode": {
+      "title": "Zárkód",
+      "help": "Ezzel oldod fel a képernyőidet, ha játék közben zárolod őket („Képernyő zárolása”). Az új játékok ezt használják, hacsak induláskor nem adsz meg másikat. A jelszavad is mindig feloldja.",
+      "set": "Van zárkódod.",
+      "none": "Még nincs zárkódod: a jelszavad oldja fel a képernyőidet.",
+      "new": "Új zárkód (4–8 számjegy)",
+      "change": "Módosítás (4–8 számjegy)",
+      "submit": "Kód mentése",
+      "remove": "Kód törlése",
+      "saved": "Elmentettük a zárkódot",
+      "removed": "Töröltük a zárkódot"
+    },
     "leaveTitle": "Kilépsz mentés nélkül?",
     "leaveBody": "A Beállításaimban tett változásokat még nem mentetted.",
     "messages": {

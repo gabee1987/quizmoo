@@ -185,7 +185,9 @@ function HostHome() {
           quizSettings={creating.settings}
           quizBranding={creating.branding}
           pending={play.isPending}
-          onCreate={(settings, scheduledAt, branding) => play.mutate({ quizId: creating.id, settings, scheduledAt, branding })}
+          onCreate={(settings, scheduledAt, branding, lockCode) =>
+            play.mutate({ quizId: creating.id, settings, scheduledAt, branding, lockCode })
+          }
           onCancel={() => {
             setCreating(null)
             play.reset()
