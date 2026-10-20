@@ -1,6 +1,7 @@
 import {
   MAX_TEAMS,
   brandingChoiceSchema,
+  lockCodeSchema,
   newGameSettingsSchema,
   pinSchema,
   playersCreateTeams,
@@ -14,6 +15,7 @@ import { eq } from 'drizzle-orm'
 import type { FastifyInstance } from 'fastify'
 import { nanoid } from 'nanoid'
 import { z } from 'zod'
+import { hashPassword } from '../auth/password.js'
 import { requireSession } from '../auth/require-session.js'
 import type { Db } from '../db/index.js'
 import { quizzes } from '../db/schema.js'
@@ -21,7 +23,7 @@ import { EngineError, quickMessagesOf, setNextGame } from '../game/index.js'
 import type { GameManager, ManagedGame } from '../realtime/game-manager.js'
 import type { PinGuard } from '../realtime/pin-guard.js'
 import { parseOr400 } from './http.js'
-import { readHostSettings, rememberEventName } from './me.js'
+import { readHostSettings, readLockCodeHash, rememberEventName } from './me.js'
 import { parseQuizBranding } from './quizzes.js'
 
 const createGameSchema = z.object({
@@ -32,6 +34,8 @@ const createGameSchema = z.object({
   scheduledAt: scheduledAtSchema.optional(),
   /** The new game dialog's branding choice; without it the game has no branding. */
   branding: brandingChoiceSchema.optional(),
+  /** This game's screen lock code; without it the host's default code (if any) applies. */
+  lockCode: lockCodeSchema.optional(),
 })
 
 /**
@@ -81,6 +85,7 @@ export async function gameRoutes(app: FastifyInstance, { db, manager, appOrigin,
     const logoImageId = quizBranding.logoImageId ?? host.logoImageId
     const branding: GameBranding | null =
       choice?.show && (logoImageId || eventName) ? { logoImageId, eventName, onPhones: choice.onPhones } : null
+    const lockCodeHash = body.lockCode ? await hashPassword(body.lockCode) : await readLockCodeHash(db, request.user!.id)
     let game
     try {
       game = await manager.create({
@@ -93,6 +98,7 @@ export async function gameRoutes(app: FastifyInstance, { db, manager, appOrigin,
         scheduledAt: body.scheduledAt,
         quickMessages: host.quickMessages,
         branding,
+        lockCodeHash,
       })
     } catch (error) {
       if (error instanceof EngineError) return reply.code(400).send({ error: error.code })
@@ -124,6 +130,7 @@ export async function gameRoutes(app: FastifyInstance, { db, manager, appOrigin,
       quizId: old.quizId,
       quickMessages: quickMessagesOf(old.state),
       branding: old.state.branding ?? null,
+      lockCodeHash: old.state.lock?.codeHash ?? null,
       // The same teams, so players rejoin theirs (the phones keep the team id).
       // Not solo players' entries: they choose again when they join.
       teams: Object.values(old.state.teams)

@@ -246,7 +246,7 @@ export function GameSettingsForm({
             legend={t('host.create.revealAnswers')}
             value={value.revealAnswers}
             choices={choices(['afterQuestion', 'atEnd'] as const, (v) => t(`host.create.revealAnswersOptions.${v}`))}
-            // Scores would give the answers away, so results at the end means no scoreboard until then.
+            // Scores would give the answers away, so results at the end means a scoreboard only when the host shows it.
             onChange={(revealAnswers) => set(revealAnswers === 'atEnd' ? { revealAnswers, scoreboard: 'onDemand' } : { revealAnswers })}
           />
           <ChoiceCards

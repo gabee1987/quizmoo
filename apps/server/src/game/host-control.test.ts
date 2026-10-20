@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest'
 import {
   addQuickMessage,
   announce,
+  closeGame,
   closeQuestion,
   createGame,
   endGame,
@@ -10,18 +11,22 @@ import {
   expireAnnouncement,
   extendTime,
   gradeText,
+  hostLocked,
   joinPlayer,
+  lockHost,
   next,
   pause,
   quickMessagesOf,
   removeQuickMessage,
   resume,
   setQuickMessageTime,
+  showAnswers,
   showQuestion,
   showScoreboard,
   skipQuestion,
   startGame,
   submitAnswer,
+  unlockHost,
 } from './engine.js'
 import { fixtureSettings } from './fixtures.js'
 import { toHostSnapshot, toPlayerSnapshot } from './snapshots.js'
@@ -181,19 +186,80 @@ describe('showing a question again', () => {
     expect(closeQuestion(back)).toBe(back)
   })
 
-  it('is refused during a question, for a question not played yet, while grading, and with answers held back', () => {
+  it('is refused during a question, for a question not played yet, and while grading', () => {
     const state = played()
     expect(code(() => showQuestion(state, 2))).toBe('errors.invalidTransition')
     expect(code(() => showQuestion(state, -1))).toBe('errors.invalidTransition')
     expect(code(() => showQuestion(next(state, T0 + 5_000), 0))).toBe('errors.invalidTransition')
-    expect(code(() => showQuestion(played({ revealAnswers: 'atEnd' }), 0))).toBe('errors.invalidTransition')
+    expect(code(() => showAnswers(state, [1, 2]))).toBe('errors.invalidTransition')
+    expect(code(() => showAnswers(state, []))).toBe('errors.invalidTransition')
+    expect(code(() => showAnswers(next(state, T0 + 5_000), [0]))).toBe('errors.invalidTransition')
 
     const text: Question = { ...base, id: 'q-text', type: 'text', text: 'Say', acceptedAnswers: [] }
     let grading = game([tf('q1'), text])
     grading = endQuestion(next(endQuestion(grading), T0 + 1_000))
     expect(grading.awaitingGrading).toBe(true)
     expect(code(() => showQuestion(grading, 0))).toBe('errors.invalidTransition')
+    expect(code(() => showAnswers(grading, [0]))).toBe('errors.invalidTransition')
     expect(showQuestion(gradeText(grading, []), 0).reviewIndex).toBe(0)
+  })
+
+  it('shows the chosen answers one at a time; moving within them keeps the choice', () => {
+    const shown = showAnswers(played(), [1, 0, 1])
+    expect(shown).toMatchObject({ reviewIndex: 0, reviewQueue: [0, 1] })
+    roundTrip(shown)
+    expect(toHostSnapshot(shown, T0)).toMatchObject({ phase: 'reveal', questionIndex: 0, reviewing: true, reviewQueue: [0, 1] })
+    const second = showQuestion(shown, 1)
+    expect(second).toMatchObject({ reviewIndex: 1, reviewQueue: [0, 1] })
+    // "Show again" for a single question starts a choice of its own.
+    expect(showQuestion(closeQuestion(second), 1).reviewQueue).toEqual([1])
+    expect(closeQuestion(second)).toMatchObject({ reviewIndex: null, reviewQueue: null })
+    expect(toHostSnapshot(closeQuestion(second), T0).reviewQueue).toBeNull()
+  })
+
+  it('closing ends the game at once with nothing left to release', () => {
+    const closed = closeGame(played({ finalResults: 'onRelease' }), T0 + 9_000)
+    expect(closed).toMatchObject({ phase: 'finished', finishedAt: T0 + 9_000, reviewIndex: null, released: { screen: true, players: true } })
+    expect(toHostSnapshot(closed, T0, { includeAnswers: true })).toMatchObject({ resultsPending: false, playersWaiting: false })
+    roundTrip(closed)
+  })
+
+  it('with answers held back: the shown question’s answer and own result, never points, scores or ranks', () => {
+    const state = showAnswers(played({ revealAnswers: 'atEnd' }), [0, 1])
+    const p1 = toPlayerSnapshot(state, 'p1', T0)
+    expect(p1).toMatchObject({ phase: 'reveal', reviewing: true, answersHidden: true, lastCorrect: true, lastPoints: null, lastBonus: null })
+    expect(p1.reveal?.correctKeys).toEqual(['true'])
+    expect(p1.players.every((p) => p.score === 0 && p.rank === 1)).toBe(true)
+    expect(p1.me.score).toBe(0)
+    const screen = toHostSnapshot(state, T0)
+    expect(screen.reveal?.question.id).toBe('q1')
+    expect(screen.players.every((p) => p.score === 0)).toBe(true)
+    // Back in the game, the current question's reveal is hidden again.
+    const back = toPlayerSnapshot(closeQuestion(state), 'p1', T0)
+    expect(back.reveal).toBeNull()
+    expect(back.lastCorrect).toBeNull()
+  })
+})
+
+describe('screen lock', () => {
+  it('locks and unlocks in any phase, keeping the code unless a new one is given', () => {
+    const state = game([tf('q1')])
+    expect(hostLocked(state)).toBe(false)
+    const locked = lockHost(state, 'hash-1')
+    expect(locked.lock).toEqual({ codeHash: 'hash-1', locked: true })
+    expect(lockHost(unlockHost(locked)).lock).toEqual({ codeHash: 'hash-1', locked: true })
+    expect(unlockHost(locked).lock).toEqual({ codeHash: 'hash-1', locked: false })
+    expect(unlockHost(state)).toBe(state)
+    expect(lockHost(endGame(state, T0)).lock?.locked).toBe(true)
+    expect(JSON.parse(JSON.stringify(locked))).toEqual(locked)
+  })
+
+  it('says so in the snapshots, never with the code', () => {
+    const locked = lockHost(game([tf('q1')]), 'hash-1')
+    expect(toHostSnapshot(locked, T0, { includeAnswers: true })).toMatchObject({ locked: true, hasLockCode: true })
+    expect(toHostSnapshot(locked, T0)).toMatchObject({ locked: true, hasLockCode: false })
+    expect(JSON.stringify(toHostSnapshot(locked, T0, { includeAnswers: true }))).not.toContain('hash-1')
+    expect(JSON.stringify(toPlayerSnapshot(locked, 'p1', T0))).not.toContain('hash-1')
   })
 })
 

@@ -2,6 +2,7 @@ import type { HostSnapshot } from '@quizmoo/shared'
 import { CheckCircle2Icon, ClockIcon, MonitorIcon, UsersIcon, ZapIcon, type LucideIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Badge } from '@/components/ui/badge'
+import { cn } from '@/lib/cn'
 import { DistributionBars } from '../../components/distribution-bars'
 import { PlayerAvatar } from '../../components/player-avatar'
 import { CorrectAnswer } from '../questions/correct-answer'
@@ -29,7 +30,7 @@ export function ShownQuestion({ host }: { host: HostSnapshot }) {
   const missing = host.players.filter((p) => !answered.has(p.id))
   const onScreen = host.reviewing ? 'shownAgain' : host.phase === 'scoreboard' ? 'scoreboard' : 'reveal'
 
-  const figures: { icon: LucideIcon; label: string; value: string; detail?: string | undefined }[] = [
+  const figures: { icon: LucideIcon; label: string; value: string; detail?: string | undefined; wide?: boolean }[] = [
     {
       icon: UsersIcon,
       label: t('host.shown.answered'),
@@ -54,6 +55,7 @@ export function ShownQuestion({ host }: { host: HostSnapshot }) {
       ? [
           {
             icon: ZapIcon,
+            wide: true,
             label: t('host.shown.fastest'),
             value: fastest ? fastest.name : '–',
             detail: fastest ? t('host.shown.seconds', { seconds: seconds.format(fastest.timeMs / 1000) }) : undefined,
@@ -86,14 +88,15 @@ export function ShownQuestion({ host }: { host: HostSnapshot }) {
         <CorrectAnswer question={question} symbols={host.settings.answerSymbols} />
       </div>
 
-      <dl className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-        {figures.map(({ icon: Icon, label, value, detail }) => (
-          <div key={label} className="flex min-w-0 flex-col gap-0.5 rounded-xl bg-muted px-3 py-2">
+      {/* The fastest right answer holds a whole name (up to 24 characters): it gets a row of its own. */}
+      <dl className={cn('grid gap-2', scored ? 'grid-cols-3' : 'grid-cols-2')}>
+        {figures.map(({ icon: Icon, label, value, detail, wide }) => (
+          <div key={label} className={cn('flex min-w-0 flex-col gap-0.5 rounded-xl bg-muted px-3 py-2', wide && 'col-span-3')}>
             <dt className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
               <Icon className="size-3.5" aria-hidden="true" />
               {label}
             </dt>
-            <dd className="truncate text-lg font-black tabular-nums">
+            <dd className="text-lg leading-snug font-black wrap-break-word tabular-nums">
               {value}
               {detail && <span className="ml-1.5 text-sm font-bold text-muted-foreground">{detail}</span>}
             </dd>

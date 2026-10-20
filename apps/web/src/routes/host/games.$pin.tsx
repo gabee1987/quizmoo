@@ -1,30 +1,36 @@
 import type { GameHostInfo, HostCommand, HostSnapshot } from '@quizmoo/shared'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link, createFileRoute } from '@tanstack/react-router'
-import { MonitorIcon, TrophyIcon } from 'lucide-react'
-import { useEffect } from 'react'
+import { LockIcon, MonitorIcon, TrophyIcon } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { useGameTheme } from '@/lib/themes'
+import { useMediaQuery } from '@/lib/use-media-query'
 import { ConnectionBar } from '../../components/connection-bar'
 import { PlayerAvatar } from '../../components/player-avatar'
 import { Spinner } from '../../components/spinner'
-import { Controls } from '../../features/host/controls'
+import { Controls, EndGameButton } from '../../features/host/controls'
 import { GradingPanel } from '../../features/host/grading-panel'
 import { HostToastsToggle, useHostToasts } from '../../features/host/host-toasts'
 import { HostLobby } from '../../features/host/host-lobby'
 import { LiveQuestion } from '../../features/host/live-question'
+import { LockDialog } from '../../features/host/lock-dialog'
 import { MessageBox } from '../../features/host/message-box'
 import { PlayAgainButton } from '../../features/host/play-again-button'
 import { PlayerPanel } from '../../features/host/player-panel'
 import { ReviewPanel } from '../../features/host/review-panel'
+import { ScreenPreview } from '../../features/host/screen-preview'
 import { ShownQuestion } from '../../features/host/shown-question'
+import { Standings } from '../../features/host/standings'
 import { TeamModesPanel } from '../../features/host/team-modes-panel'
 import { RoundTripBadge } from '../../features/host/round-trip-badge'
 import { settingsLine } from '../../features/host/settings-line'
 import { RankList } from '../../features/play/scoreboard'
 import { ApiError, apiFetch } from '../../lib/api'
+import { meQueryOptions } from '../../lib/auth'
 import { openProjector } from '../../lib/projector'
+import { screenLockChanged } from '../../lib/screen-lock'
 import { toastError } from '../../lib/toast'
 import { closeSession, emitAck, startSession, useGameStore } from '../../lib/socket'
 
@@ -37,6 +43,10 @@ function HostGamePage() {
   const { t } = useTranslation()
   const { pin } = Route.useParams()
   const { status, since, host, clockOffset, closed } = useGameStore()
+  // Tailwind's lg: the two-column layout.
+  const wide = useMediaQuery('(min-width: 64rem)')
+  const queryClient = useQueryClient()
+  const [locking, setLocking] = useState(false)
   useGameTheme(host?.settings)
   useHostToasts(host)
   const info = useQuery({
@@ -62,6 +72,19 @@ function HostGamePage() {
     return false
   }
 
+  // Locked from another tab or device: the host layout puts up the lock screen once it knows.
+  const locked = host?.locked ?? false
+  useEffect(() => {
+    if (locked) void queryClient.invalidateQueries({ queryKey: meQueryOptions.queryKey })
+  }, [locked, queryClient])
+
+  /** "Lock screen": at once when the game has a lock code, otherwise the dialog offers one. */
+  async function lock(command: HostCommand): Promise<boolean> {
+    const ok = await send(command)
+    if (ok) screenLockChanged(queryClient)
+    return ok
+  }
+
   if (closed) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center">
@@ -72,7 +95,8 @@ function HostGamePage() {
       </div>
     )
   }
-  if (!host) return <Spinner />
+  // A locked game's snapshot is the projector's; nothing of it here until the lock screen takes over.
+  if (!host || host.locked) return <Spinner />
 
   if (host.phase === 'lobby') {
     return (
@@ -90,23 +114,31 @@ function HostGamePage() {
     )
   }
 
+  const gameId = info.data?.gameId ?? null
+  const controls = <Controls host={host} send={send} placement={wide ? 'top' : 'bottom'} />
+  // One column on phones (a flex column, so the control bar can stick to the bottom of the whole
+  // page), two on laptops (the bar sticks to the top of the main column).
   return (
-    <div className="mx-auto grid w-full max-w-6xl gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
       <ConnectionBar status={status} since={since} />
       <div className="flex min-w-0 flex-col gap-5">
-        <Header host={host} connected={status === 'connected'} />
-        <Controls host={host} onCommand={(c) => void send(c)} />
-        <MessageBox announcement={host.announcement} quickMessages={host.quickMessages} clockOffset={clockOffset} onCommand={send} />
-        <PhaseDetail
+        <Header
           host={host}
-          clockOffset={clockOffset}
-          gameId={info.data?.gameId ?? null}
+          connected={status === 'connected'}
+          onLock={() => (host.hasLockCode ? void lock({ type: 'lock' }) : setLocking(true))}
         />
+        {wide && controls}
+        <MessageBox announcement={host.announcement} quickMessages={host.quickMessages} clockOffset={clockOffset} onCommand={send} />
+        <PhaseDetail host={host} clockOffset={clockOffset} gameId={gameId} />
         {host.phase === 'reveal' && host.awaitingGrading && (
           <GradingPanel host={host} onGrade={(ids) => void send({ type: 'gradeText', correctPlayerIds: ids })} />
         )}
+        <EndGameButton host={host} send={send} gameId={gameId} />
       </div>
+      {locking && <LockDialog onLock={lock} onClose={() => setLocking(false)} />}
       <div className="flex min-w-0 flex-col gap-6">
+        <ScreenPreview host={host} clockOffset={clockOffset} defaultOpen={wide} />
+        <Standings host={host} gameId={gameId} />
         <TeamModesPanel host={host} onTeamMode={(mode, teamId) => void send({ type: 'teamMode', mode, teamId })} />
         <PlayerPanel
           host={host}
@@ -117,11 +149,12 @@ function HostGamePage() {
         />
         <ReviewPanel host={host} onShowQuestion={(index) => void send({ type: 'showQuestion', index })} />
       </div>
+      {!wide && controls}
     </div>
   )
 }
 
-function Header({ host, connected }: { host: HostSnapshot; connected: boolean }) {
+function Header({ host, connected, onLock }: { host: HostSnapshot; connected: boolean; onLock: () => void }) {
   const { t } = useTranslation()
   const online = host.players.filter((p) => p.connected).length
   const settings = settingsLine(host, t)
@@ -147,21 +180,28 @@ function Header({ host, connected }: { host: HostSnapshot; connected: boolean })
           <HostToastsToggle />
         </div>
       </div>
-      <Button asChild variant="secondary">
-        {/* A second click brings the same projector window up instead of opening another one. */}
-        <a
-          href={`/screen/${host.pin}`}
-          target="_blank"
-          rel="noreferrer"
-          onClick={(e) => {
-            e.preventDefault()
-            openProjector(host.pin)
-          }}
-        >
-          <MonitorIcon aria-hidden="true" />
-          {t('host.game.openScreen')}
-        </a>
-      </Button>
+      <div className="flex flex-wrap gap-2">
+        {/* Locks every host page of the account until the lock code or the password is typed. */}
+        <Button variant="secondary" onClick={onLock}>
+          <LockIcon aria-hidden="true" />
+          {t('host.lock.button')}
+        </Button>
+        <Button asChild variant="secondary">
+          {/* A second click brings the same projector window up instead of opening another one. */}
+          <a
+            href={`/screen/${host.pin}`}
+            target="_blank"
+            rel="noreferrer"
+            onClick={(e) => {
+              e.preventDefault()
+              openProjector(host.pin)
+            }}
+          >
+            <MonitorIcon aria-hidden="true" />
+            {t('host.game.openScreen')}
+          </a>
+        </Button>
+      </div>
     </header>
   )
 }

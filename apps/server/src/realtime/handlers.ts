@@ -14,6 +14,7 @@ import {
 } from '@quizmoo/shared'
 import { nanoid } from 'nanoid'
 import type { DefaultEventsMap, Server, Socket } from 'socket.io'
+import { hashPassword } from '../auth/password.js'
 import { verifySession } from '../auth/session.js'
 import type { Db } from '../db/index.js'
 import {
@@ -22,6 +23,7 @@ import {
   allAnswered,
   announce,
   clearAnnouncement,
+  closeGame,
   closeQuestion,
   confirmTeamAnswer,
   createTeam,
@@ -30,9 +32,11 @@ import {
   endQuestion,
   extendTime,
   gradeText,
+  hostLocked,
   joinPlayer,
   kickPlayer,
   leavePlayer,
+  lockHost,
   movePlayer,
   next,
   openJoining,
@@ -47,6 +51,7 @@ import {
   schedule,
   setCaptain,
   setTeamMode,
+  showAnswers,
   showQuestion,
   showScoreboard,
   skipQuestion,
@@ -93,8 +98,7 @@ const MAX_EVENTS_PER_SECOND = 10
 const rooms = {
   host: (pin: string) => `game:${pin}:host`,
   screen: (pin: string) => `game:${pin}:screen`,
-  player: (pin: string, playerId: string) => `game:${pin}:player:${playerId}`,
-}
+  player: (pin: string, playerId: string) => `game:${pin}:player:${playerId}`,}
 
 const invalidInput: ErrorPayload = { error: 'errors.invalidInput' }
 
@@ -122,8 +126,8 @@ export function registerSocketHandlers(io: AppSocketServer, { manager, db, parse
 
   manager.subscribe(({ state }, seq) => {
     const now = Date.now()
-    // The public screen never receives the live answer list.
-    io.to(rooms.host(state.pin)).emit('game:host', toHostSnapshot(state, now, { includeAnswers: true, seq }))
+    // The public screen never receives the live answer list; locked host screens get what it gets.
+    io.to(rooms.host(state.pin)).emit('game:host', toHostSnapshot(state, now, { includeAnswers: !hostLocked(state), seq }))
     io.to(rooms.screen(state.pin)).emit('game:host', toHostSnapshot(state, now, { seq }))
     for (const playerId of Object.keys(state.players)) {
       io.to(rooms.player(state.pin, playerId)).emit('game:player', toPlayerSnapshot(state, playerId, now, seq))
@@ -160,7 +164,7 @@ export function registerSocketHandlers(io: AppSocketServer, { manager, db, parse
     if (role === 'player' && playerId && game.state.players[playerId]) {
       socket.emit('game:player', toPlayerSnapshot(game.state, playerId, Date.now(), seq))
     } else if (role === 'host' || role === 'screen') {
-      socket.emit('game:host', toHostSnapshot(game.state, Date.now(), { includeAnswers: role === 'host', seq }))
+      socket.emit('game:host', toHostSnapshot(game.state, Date.now(), { includeAnswers: role === 'host' && !hostLocked(game.state), seq }))
     }
   }
 
@@ -343,12 +347,31 @@ export function registerSocketHandlers(io: AppSocketServer, { manager, db, parse
         const pin = socket.data.pin!
         const parsed = hostCommandSchema.safeParse(data)
         if (!parsed.success) return invalidInput
-        manager.apply(pin, (state, now) => runHostCommand(state, parsed.data, now))
+        const { hostId } = manager.get(pin)!
+        if (parsed.data.type === 'lock') {
+          // Screen lock: every game of the host at once, so no other game's control shows anything.
+          const codeHash = parsed.data.code ? await hashPassword(parsed.data.code) : undefined
+          for (const game of manager.hostedBy(hostId)) {
+            manager.apply(game.state.pin, (current) => lockHost(current, game.state.pin === pin ? codeHash : undefined))
+          }
+          return { ok: true as const }
+        }
+        // Unlocking goes through `POST /api/me/unlock`, which checks the code or the password.
+        if (manager.hostLocked(hostId)) return { error: 'errors.screenLocked' }
+        const state = manager.apply(pin, (current, now) => runHostCommand(current, parsed.data, now))
 
         if (parsed.data.type === 'kick') {
           const room = rooms.player(pin, parsed.data.playerId)
           io.to(room).emit('game:closed', { error: 'errors.kicked' })
           io.in(room).socketsLeave(room)
+        }
+        if (parsed.data.type === 'close') {
+          // Everyone but this host control is sent away (a projector opened from the host's browser
+          // sits in the host room); the game leaves memory, so nobody can rejoin it.
+          const away = [rooms.screen(pin), rooms.host(pin), ...Object.keys(state.players).map((playerId) => rooms.player(pin, playerId))]
+          io.to(away).except(socket.id).emit('game:closed', { error: 'errors.gameClosed' })
+          io.in(away).socketsLeave(away)
+          await manager.discard(state.id)
         }
         return { ok: true as const }
       }),
@@ -404,6 +427,8 @@ function runHostCommand(state: GameState, command: HostCommand, now: number): Ga
       return gradeText(state, command.correctPlayerIds)
     case 'end':
       return endGame(state, now)
+    case 'close':
+      return closeGame(state, now)
     case 'releaseResults':
       return releaseResults(state, command.audience)
     case 'announce':
@@ -422,11 +447,15 @@ function runHostCommand(state: GameState, command: HostCommand, now: number): Ga
       return resume(state, now)
     case 'showQuestion':
       return showQuestion(state, command.index)
+    case 'showAnswers':
+      return showAnswers(state, command.indexes)
     case 'closeQuestion':
       return closeQuestion(state)
     case 'schedule':
       return schedule(state, command.at, now)
     case 'openJoining':
       return openJoining(state, now)
+    case 'lock':
+      return lockHost(state)
   }
 }

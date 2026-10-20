@@ -28,7 +28,13 @@ export function useNewQuiz() {
 export function useStartGame() {
   const navigate = useNavigate()
   return useMutation({
-    mutationFn: (game: { quizId: string; settings: GameSettings; scheduledAt: number | undefined; branding: BrandingChoice | undefined }) =>
+    mutationFn: (game: {
+      quizId: string
+      settings: GameSettings
+      scheduledAt: number | undefined
+      branding: BrandingChoice | undefined
+      lockCode: string | undefined
+    }) =>
       apiFetch<{ pin: string }>('/api/games', { method: 'POST', body: JSON.stringify(game) }),
     onSuccess: ({ pin }) => void navigate({ to: '/host/games/$pin', params: { pin } }),
     onError: toastError,

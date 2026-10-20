@@ -113,15 +113,19 @@ export async function authRoutes(app: FastifyInstance, { db, secureCookies, regi
   )
 
   const pendingOk = { preHandler: requireSession(db, { allowPendingPasswordChange: true }) }
+  // Me and logout answer while the screens are locked: the lock screen needs them.
+  const lockedOk = { preHandler: requireSession(db, { allowPendingPasswordChange: true, allowLocked: true }) }
 
-  app.post('/api/auth/logout', pendingOk, async (request, reply) => {
+  app.post('/api/auth/logout', lockedOk, async (request, reply) => {
     const token = request.sessionToken
     if (token) await destroySession(db, token)
     clearSessionCookie(reply, secureCookies)
     return reply.code(204).send()
   })
 
-  app.get('/api/auth/me', pendingOk, async (request) => ({ user: request.user }))
+  app.get('/api/auth/me', lockedOk, async (request) => ({
+    user: { ...request.user!, screenLocked: app.hostLocked(request.user!.id) },
+  }))
 
   // Accepting the terms in force. The version the page showed is sent, so terms that changed while
   // the page was open are never accepted unseen.

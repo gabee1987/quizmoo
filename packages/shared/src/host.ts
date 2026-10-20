@@ -78,6 +78,12 @@ export const brandingChoiceSchema = z.object({
 })
 export type BrandingChoice = z.infer<typeof brandingChoiceSchema>
 
+/** The screen lock's code: 4 to 8 digits. Stored only as a hash. */
+export const lockCodeSchema = z.string().regex(/^\d{4,8}$/)
+
+/** Unlocking the screen lock: the lock code or the host's account password. */
+export const unlockSchema = z.object({ secret: z.string().min(1).max(200) })
+
 /** "Save to my messages": one own message added to the list (and to the running game). */
 export const newQuickMessageSchema = ownQuickMessageSchema.omit({ id: true })
 export type NewQuickMessage = z.infer<typeof newQuickMessageSchema>

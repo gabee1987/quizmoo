@@ -24,12 +24,12 @@ Topic skills: `game-screens` (phone, projector, host control and results layouts
 | `/host/games/$pin` | hosts | control view (phone or laptop) |
 | `/host/games` | hosts | game history |
 | `/host/results/$gameId` | hosts | results summary and export |
-| `/screen/$pin` | projector | public read-only big-screen view |
+| `/screen/$pin` | projector | public read-only big-screen view; `?preview=1` (the host's live preview frame) attaches as a public screen even when logged in |
 | `/screen/results/$gameId` | projector | results summary (host session required) |
 | `/privacy`, `/terms`, `/cookies`, `/imprint` | everyone | legal pages through `LegalPage` (`features/legal/`): texts in `legal.*` as heading/paragraphs/items sections, operator details from `/api/site` |
 | `/host/terms` | hosts | accepting the terms (the host layout redirects there while `user.mustAcceptTerms`), with download, delete and log out as ways out |
 
-Browser storage: every `localStorage` / `sessionStorage` key is `quizmoo.<name>` and must be listed in `lib/storage-inventory.ts` with its text in `legal.cookies.items` (a test fails otherwise). The first-visit `StorageNotice` (not on `/play` or `/screen`) stays informational: nothing stored needs consent; anything optional would need a real choice first. Legal links: `LegalLinks` under the public cards and in the host sidebar.
+Browser storage: every `localStorage` / `sessionStorage` key is `quizmoo.<name>` and must be listed in `lib/storage-inventory.ts` with its text in `legal.cookies.items` (a test fails otherwise). The test finds any `'quizmoo.<name>'` string in the source, so names that are not storage (a BroadcastChannel) use `quizmoo-<name>`. The first-visit `StorageNotice` (not on `/play` or `/screen`) stays informational: nothing stored needs consent; anything optional would need a real choice first. Legal links: `LegalLinks` under the public cards and in the host sidebar.
 
 `/host/*` routes have a layout route that loads `/api/auth/me` and redirects to `/login` on 401. `HostNav`: Home, Quizzes, Games (plus Users and Names for admins) in the laptop sidebar; the phone tab bar keeps four tabs, so the admin pages sit in its Account menu. Shared host queries (`quizzesQueryOptions`, `gamesQueryOptions`) are in `features/host/queries.ts`, "New quiz" and "Play" in `features/host/quiz-actions.ts`. `/play/$pin` and `/screen/$pin` need no login.
 

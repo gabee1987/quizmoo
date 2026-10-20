@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+### Host control during a game
+- The host can show the standings after any question, whatever the scoreboard setting, also when answers are revealed only at the end; then the projector and the phones show the totals and ranks so far, without the last question's points or rank arrows.
+- A Standings card on the host control lists teams and players by rank in every phase after the lobby, with the real scores also while results are held back (only the host sees them), and "Results so far" opens the running game's results in a new tab.
+- The main button and the question's Pause, +30 s and Skip stay in view while the page scrolls: at the bottom above the tab bar on phones, at the top of the main column on laptops. "End game" moved below the question.
+- Player names are shown in full on the host control (the fastest right answer, the player list, the standings, the answers and the grading groups) instead of being cut off.
+- "Show answers" between questions, whatever the quiz's reveal setting: the last question, all so far, or the ones the host ticks go on the projector and the phones one at a time (Previous, Next, Back to the game). Each phone shows whether its player was right; while answers are held until the end, points and scores stay hidden. "Show again" in "Questions so far" also works then.
+- A chip in the host's control bar always says what the phones and the projector show right now, and "What everyone sees" shows the projector live, scaled down, and the screen the phones get.
+- "End game" asks how: "Show the podium" as before, or "Close the game", which ends it at once from any point, skips the podium and any results waiting for release, tells every phone and the projector the game is over and disconnects them; the host lands on the results, which stay in the history. Ending a game still in its lobby closes it.
+- "Lock screen" replaces "Hide screen": it locks every host page of the account, on every device it is logged in on, until the host types their lock code or password. While locked the server sends the host's screens only what the projector shows, refuses host commands and answers every other host request with 423, so neither a reload, another tab nor the browser's developer tools reveal answers, scores or quizzes. The projector and the phones carry on. Five unlock tries a minute.
+- The lock code (4 to 8 digits) is set in My settings (Account) as the default for new games, in the new game dialog for one game, or when locking a game without one; with none, the password unlocks. Codes are stored only as argon2 hashes. After updating, run `pnpm --filter @quizmoo/server db:migrate` (production deploys migrate on start).
+
 ### Hosted beta
 - Privacy page (`/privacy`, Hungarian and English), linked from the join and login pages: what is stored, for how long, cookies, where it runs, and whom to ask, with the operator's name and e-mail from `OPERATOR_NAME` and `OPERATOR_EMAIL`.
 - Hosts can sign up on `/register` when `REGISTRATION_OPEN=true`: the account waits until an admin approves or rejects it under "Waiting for approval" on the Users page. Username and password only, no e-mail; unapproved sign-ups are deleted after 7 days.

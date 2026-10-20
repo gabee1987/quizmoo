@@ -57,7 +57,7 @@ export function GradingPanel({ host, onGrade }: { host: HostSnapshot; onGrade: (
               />
               <span className="min-w-0 flex-1">
                 <span className="block font-semibold wrap-break-word">{group.label}</span>
-                <span className="block truncate text-xs opacity-80">{group.answers.map((a) => a.name).join(', ')}</span>
+                <span className="block text-xs opacity-80 wrap-break-word">{group.answers.map((a) => a.name).join(', ')}</span>
               </span>
               <span className="tabular-nums">×{group.answers.length}</span>
             </label>

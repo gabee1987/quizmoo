@@ -1,4 +1,5 @@
 import { expect, test, type Browser, type Page } from '@playwright/test'
+import { closeGame } from './close-game'
 
 /**
  * Phase 13 in one game: a rude name is refused, "Surprise me" fills a name, avatars show on
@@ -161,8 +162,8 @@ test('streaks, ordering, avatars, nicknames and play again', async ({ browser, p
       }
       await expect(page.getByText('2 / 2 connected')).toBeVisible()
       await expect(page.locator('li').filter({ hasText: 'Player Blue' }).getByText('🐼')).toBeVisible()
-      await host('End game').click()
-      await expect(page.getByText('Game finished')).toBeVisible()
+      // The next round is still in its lobby: closing it ends it.
+      await closeGame(page)
     })
   } finally {
     for (const id of gameIds) await page.request.delete(`/api/games/${id}`)

@@ -1,4 +1,4 @@
-import type { BrandingChoice, GameSettings, QuizBranding } from '@quizmoo/shared'
+import { lockCodeSchema, type BrandingChoice, type GameSettings, type QuizBranding } from '@quizmoo/shared'
 import { useQuery } from '@tanstack/react-query'
 import { CalendarClockIcon, PlayIcon, RotateCcwIcon } from 'lucide-react'
 import { useId, useState, type FormEvent } from 'react'
@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Collapse } from '@/components/collapse'
 import { DateTimePicker } from '@/components/date-time-picker'
+import { TextField } from '@/components/text-field'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { cn } from '@/lib/cn'
@@ -43,8 +44,16 @@ export function CreateGameDialog({
   quizSettings: GameSettings
   quizBranding: QuizBranding
   pending: boolean
-  /** `scheduledAt` (unix ms) when the host picked "Later"; `branding` once the host's settings loaded. */
-  onCreate: (settings: GameSettings, scheduledAt: number | undefined, branding: BrandingChoice | undefined) => void
+  /**
+   * `scheduledAt` (unix ms) when the host picked "Later"; `branding` once the host's settings loaded;
+   * `lockCode` when the host typed a screen lock code for this game.
+   */
+  onCreate: (
+    settings: GameSettings,
+    scheduledAt: number | undefined,
+    branding: BrandingChoice | undefined,
+    lockCode: string | undefined,
+  ) => void
   onCancel: () => void
 }) {
   const { t } = useTranslation()
@@ -56,6 +65,9 @@ export function CreateGameDialog({
   const [later, setLater] = useState(false)
   const [scheduledAt, setScheduledAt] = useState(() => defaultStart(Date.now()))
   const timeError = later ? scheduleError(scheduledAt, Date.now()) : null
+  const [lockCode, setLockCode] = useState('')
+  const lockError = lockCode !== '' && !lockCodeSchema.safeParse(lockCode).success ? 'host.lock.codeRule' : null
+  // The lock code's problem shows under its own field only.
   const error = settingsError(settings, { newGame: true }) ?? timeError
   // The last problem stays as text while its line closes, so it does not blank out first.
   const [shownError, setShownError] = useState(error)
@@ -72,8 +84,8 @@ export function CreateGameDialog({
 
   function submit(e: FormEvent) {
     e.preventDefault()
-    if (error) return
-    onCreate(settings, later ? scheduledAt : undefined, branding ?? undefined)
+    if (error || lockError) return
+    onCreate(settings, later ? scheduledAt : undefined, branding ?? undefined, lockCode || undefined)
   }
 
   return (
@@ -177,6 +189,21 @@ export function CreateGameDialog({
                   </div>
                 )}
                 <GameSettingsForm value={settings} onChange={setSettings} sections={[section]} newGame />
+                {section === 'flow' && (
+                  <div className="flex max-w-sm flex-col gap-1 pt-8">
+                    <TextField
+                      label={t('host.create.lockCode')}
+                      type="password"
+                      inputMode="numeric"
+                      autoComplete="off"
+                      maxLength={8}
+                      value={lockCode}
+                      onChange={(e) => setLockCode(e.target.value.replace(/\D/g, ''))}
+                      error={lockError ? t(lockError) : undefined}
+                    />
+                    <p className="text-sm text-muted-foreground">{t('host.create.lockCodeHelp')}</p>
+                  </div>
+                )}
               </TabsContent>
             ))}
           </Tabs>
@@ -244,7 +271,7 @@ export function CreateGameDialog({
                   {t('common.cancel')}
                 </Button>
                 {/* Narrow phones drop the icon, so a longer label ("Játék létrehozása") still fits beside Now / Later. */}
-                <Button type="submit" className="flex-1 max-[26rem]:[&>svg]:hidden md:flex-none" disabled={pending || error !== null}>
+                <Button type="submit" className="flex-1 max-[26rem]:[&>svg]:hidden md:flex-none" disabled={pending || error !== null || lockError !== null}>
                   {later ? <CalendarClockIcon aria-hidden="true" /> : <PlayIcon aria-hidden="true" />}
                   {later ? t('host.create.scheduleSubmit') : t('host.create.submit')}
                 </Button>

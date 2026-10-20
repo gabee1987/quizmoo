@@ -8,6 +8,7 @@ import { CorrectAnswer } from '../questions/correct-answer'
 import { formatAnswer } from '../questions/format-answer'
 import { myTeamMode } from './change-window'
 import { MyAnswer } from './my-answer'
+import { reviewPosition } from './review-position'
 import { usePicksOpen } from './picks-open'
 import { TeamPicksPanel } from './team-picks-panel'
 import { TeamSummary } from './team-summary'
@@ -15,7 +16,8 @@ import { TeamSummary } from './team-summary'
 export function Reveal({ snapshot }: { snapshot: PlayerSnapshot }) {
   const { t, i18n } = useTranslation()
   const points = useCountUp(snapshot.lastPoints ?? 0, 900, 350)
-  if (snapshot.answersHidden) return <AnswerKept snapshot={snapshot} />
+  // A question the host shows ("Show answers") has its answer even while the rest is held back.
+  if (snapshot.answersHidden && !snapshot.reviewing) return <AnswerKept snapshot={snapshot} />
 
   const question = snapshot.reveal?.question
   const isPoll = question?.type === 'poll'
@@ -39,6 +41,7 @@ export function Reveal({ snapshot }: { snapshot: PlayerSnapshot }) {
       {snapshot.reviewing && (
         <p className="rounded-full bg-secondary px-4 py-1 text-sm font-bold text-secondary-foreground">
           {t('play.questionOf', { index: snapshot.questionIndex + 1, count: snapshot.questionCount })} · {t('play.shownAgain')}
+          {reviewPosition(snapshot)}
         </p>
       )}
       <div className={cn('relative flex w-full animate-pop flex-col items-center gap-3 rounded-3xl px-4 py-8 shadow-soft', tone)}>
@@ -83,8 +86,9 @@ export function Reveal({ snapshot }: { snapshot: PlayerSnapshot }) {
         </div>
       )}
       {snapshot.teamResult && <TeamResult snapshot={snapshot} team={snapshot.teamResult} />}
-      {/* The running rank is a scoreboard of its own: only shown when the scoreboard follows every question. */}
-      {snapshot.settings.scoreboard === 'afterQuestion' && (
+      {/* The running rank is a scoreboard of its own: only shown when the scoreboard follows every
+          question, and never while scores are held back (a question the host shows meanwhile). */}
+      {snapshot.settings.scoreboard === 'afterQuestion' && !snapshot.answersHidden && (
         <p className="flex animate-fade-up items-center gap-2 font-semibold text-muted-foreground" style={stagger(1, 0, 450)}>
           <span>{t('play.totalScore', { score: snapshot.me.score })}</span>
           <span aria-hidden="true">·</span>

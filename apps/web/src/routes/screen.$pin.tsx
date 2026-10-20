@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { AnnouncementBanner } from '../components/announcement-banner'
 import { ConnectionBar } from '../components/connection-bar'
@@ -19,6 +20,9 @@ import { closeSession, emitAck, startSession, useGameStore } from '../lib/socket
 import { useGameTheme } from '../lib/themes'
 
 export const Route = createFileRoute('/screen/$pin')({
+  // `preview`: the host's live preview (an inert frame on the host control) sees what a public
+  // projector sees, never the host's controls.
+  validateSearch: z.object({ preview: z.union([z.literal(1), z.literal('1'), z.literal(true)]).optional().catch(undefined) }),
   component: ScreenPage,
 })
 
@@ -29,6 +33,7 @@ export const Route = createFileRoute('/screen/$pin')({
 function ScreenPage() {
   const { t } = useTranslation()
   const { pin } = Route.useParams()
+  const preview = Route.useSearch().preview !== undefined
   const navigate = useNavigate()
   const { status, since, host, clockOffset, closed } = useGameStore()
   useGameTheme(host?.settings)
@@ -39,7 +44,7 @@ function ScreenPage() {
     retry: false,
   })
   const [isHost, setIsHost] = useState(false)
-  const loggedIn = me.isSuccess
+  const loggedIn = me.isSuccess && !preview
 
   useEffect(() => {
     if (me.isPending) return
@@ -57,11 +62,12 @@ function ScreenPage() {
   // "Play again": the projector moves to the next round's lobby by itself.
   const nextPin = host?.pin === pin ? host.nextPin : null
   useEffect(() => {
-    if (nextPin) void navigate({ to: '/screen/$pin', params: { pin: nextPin }, replace: true })
-  }, [nextPin, navigate])
+    if (nextPin) void navigate({ to: '/screen/$pin', params: { pin: nextPin }, search: preview ? { preview: 1 } : {}, replace: true })
+  }, [nextPin, navigate, preview])
 
   useEffect(() => {
-    if (!isHost || !host) return
+    // A locked host drives nothing from here either (the server refuses it).
+    if (!isHost || !host || host.locked) return
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== ' ' && e.key !== 'ArrowRight') return
       const action = primaryAction(host)
@@ -77,7 +83,7 @@ function ScreenPage() {
     return <p className="flex flex-1 items-center justify-center text-4xl">{t(closed)}</p>
   }
   if (!host) return <Spinner />
-  const action = isHost ? primaryAction(host) : null
+  const action = isHost && !host.locked ? primaryAction(host) : null
 
   return (
     <div className="flex min-h-[calc(100dvh-4rem)] flex-col px-4 py-4 lg:px-12">

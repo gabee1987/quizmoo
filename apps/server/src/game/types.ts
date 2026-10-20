@@ -124,6 +124,11 @@ export interface GameState {
   /** Index of a revealed question the host put back on the screens; null otherwise. Missing in games saved before it existed. */
   reviewIndex?: number | null
   /**
+   * The questions the host chose to show ("Show answers"), in order; `reviewIndex` is the one on the
+   * screens. Means nothing while `reviewIndex` is null. Missing in games saved before it existed.
+   */
+  reviewQueue?: number[] | null
+  /**
    * Unix ms when joining opens (a scheduled game) or opened ("Open now" moves it to that moment);
    * kept afterwards, as the restore window counts from it. Null or missing for a game never scheduled.
    */
@@ -136,6 +141,11 @@ export interface GameState {
   quickMessages?: QuickMessage[] | { hidden: string[]; own: OwnQuickMessage[] }
   /** The host's logo and event name, copied at creation when the host chose to show them. Missing in games saved before it existed. */
   branding?: GameBranding | null
+  /**
+   * Screen lock. `codeHash`: argon2 hash of this game's lock code (null: none), never in a snapshot.
+   * `locked`: the host's screens get the public snapshot only. Missing in games without either.
+   */
+  lock?: { codeHash: string | null; locked: boolean }
 }
 
 /** Who sees the final results: the projector (podium) or the players' phones. */

@@ -5,7 +5,19 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } 
 import { createUser } from '../src/auth/users.js'
 import type { Db } from '../src/db/index.js'
 import { games, quizzes } from '../src/db/schema.js'
-import { announce, endGame, extendTime, joinPlayer, pause, quickMessagesOf, releaseResults, resume, startGame, submitAnswer } from '../src/game/index.js'
+import {
+  announce,
+  endGame,
+  extendTime,
+  joinPlayer,
+  pause,
+  quickMessagesOf,
+  releaseResults,
+  resume,
+  startGame,
+  submitAnswer,
+  unlockHost,
+} from '../src/game/index.js'
 import { fixtureQuiz, fixtureSettings } from '../src/game/fixtures.js'
 import {
   FINISHED_TTL_MS,
@@ -362,7 +374,10 @@ describeDb('sockets (database)', () => {
   afterEach(() => {
     for (const s of sockets.splice(0)) s.disconnect()
     // Each test opens its own games; a host may keep only so many open (MAX_OPEN_GAMES_PER_HOST).
-    for (const { state } of built.manager.hostedBy(hostId)) if (state.phase !== 'finished') built.manager.apply(state.pin, endGame)
+    for (const { state } of built.manager.hostedBy(hostId)) {
+      built.manager.apply(state.pin, unlockHost)
+      if (state.phase !== 'finished') built.manager.apply(state.pin, endGame)
+    }
   })
   afterAll(async () => {
     await built.app.close()
@@ -414,6 +429,63 @@ describeDb('sockets (database)', () => {
   }
 
   const command = (socket: Socket, data: object) => socket.emitWithAck('host:command', data)
+
+  it('screen lock: locked host screens get the public snapshot only, and the code or the password unlocks', async () => {
+    const res = await built.app.inject({
+      method: 'POST',
+      url: '/api/games',
+      headers: { cookie: hostCookie },
+      payload: { quizId, lockCode: '4821' },
+    })
+    const pin: string = res.json().pin
+    const other = await newGame()
+    const control = await host(pin)
+    const otherControl = await host(other)
+    await player(pin, 'Anna')
+    const running = nextSnapshot<HostSnapshot>(control, 'game:host', (s) => s.phase === 'question')
+    expect(await command(control, { type: 'start' })).toEqual({ ok: true })
+    expect((await running).live).not.toBeNull()
+
+    const locked = nextSnapshot<HostSnapshot>(control, 'game:host', (s) => s.locked)
+    const otherLocked = nextSnapshot<HostSnapshot>(otherControl, 'game:host', (s) => s.locked)
+    expect(await command(control, { type: 'lock' })).toEqual({ ok: true })
+    for (const snapshot of [await locked, await otherLocked]) {
+      expect(snapshot).toMatchObject({ live: null, currentAnswers: null, quickMessages: null, teamAnswers: null, hasLockCode: false })
+      expect(JSON.stringify(snapshot)).not.toMatch(/argon2|codeHash/)
+    }
+    // A reload stays locked.
+    const reloaded = await connect(hostCookie)
+    const first = nextSnapshot<HostSnapshot>(reloaded, 'game:host')
+    expect(await reloaded.emitWithAck('host:attach', { pin })).toEqual({ ok: true })
+    expect(await first).toMatchObject({ locked: true, live: null })
+
+    expect(await command(control, { type: 'skip' })).toEqual({ error: 'errors.screenLocked' })
+    expect(await command(otherControl, { type: 'start' })).toEqual({ error: 'errors.screenLocked' })
+    const api = (method: 'GET' | 'POST', url: string, payload?: object) =>
+      built.app.inject({ method, url, headers: { cookie: hostCookie }, ...(payload ? { payload } : {}) })
+    expect((await api('GET', '/api/quizzes')).statusCode).toBe(423)
+    expect((await api('GET', `/api/quizzes/${quizId}`)).json()).toEqual({ error: 'errors.screenLocked' })
+    expect((await api('GET', '/api/auth/me')).json().user.screenLocked).toBe(true)
+
+    expect((await api('POST', '/api/me/unlock', { secret: '0000' })).json()).toEqual({ error: 'errors.wrongUnlockSecret' })
+    const unlocked = nextSnapshot<HostSnapshot>(control, 'game:host', (s) => !s.locked)
+    expect((await api('POST', '/api/me/unlock', { secret: '4821' })).statusCode).toBe(204)
+    expect(await unlocked).toMatchObject({ hasLockCode: true, live: expect.anything() })
+    expect((await api('GET', '/api/quizzes')).statusCode).toBe(200)
+    expect((await api('GET', '/api/auth/me')).json().user.screenLocked).toBe(false)
+
+    // Without a code of its own the other game still unlocks with the password; a new code is kept.
+    expect(await command(otherControl, { type: 'lock', code: '13579' })).toEqual({ ok: true })
+    expect((await api('POST', '/api/me/unlock', { secret: 'test-password-123' })).statusCode).toBe(204)
+    expect(built.manager.get(other)!.state.lock).toEqual({ codeHash: expect.stringMatching(/^\$argon2/), locked: false })
+
+    // Five tries a minute, right or wrong.
+    expect(await command(control, { type: 'lock' })).toEqual({ ok: true })
+    expect((await api('POST', '/api/me/unlock', { secret: '1111' })).statusCode).toBe(400)
+    expect((await api('POST', '/api/me/unlock', { secret: '2222' })).statusCode).toBe(400)
+    expect((await api('POST', '/api/me/unlock', { secret: '4821' })).json()).toEqual({ error: 'errors.rateLimited' })
+    expect(built.manager.hostLocked(hostId)).toBe(true)
+  })
 
   it('join returns a token and a lobby snapshot', async () => {
     const pin = await newGame()
@@ -922,13 +994,53 @@ describeDb('sockets (database)', () => {
     }
     expect((await playerReveal).lastCorrect).toBeNull()
     expect((await hostReveal).players[0]!.score).toBeGreaterThan(0)
-    expect(await command(hostSocket, { type: 'scoreboard' })).toEqual({ error: 'errors.invalidTransition' })
+    // The host may show the standings midgame: totals and ranks, nothing about the last question.
+    const playerBoard = nextSnapshot<PlayerSnapshot>(a.socket, 'game:player', (s) => s.phase === 'scoreboard')
+    const screenBoard = nextSnapshot<HostSnapshot>(screen, 'game:host', (s) => s.phase === 'scoreboard')
+    expect(await command(hostSocket, { type: 'scoreboard' })).toEqual({ ok: true })
+    for (const snap of [await playerBoard, await screenBoard]) {
+      expect(snap.reveal).toBeNull()
+      expect(snap.players[0]).toMatchObject({ rank: 1, previousRank: 1, roundPoints: 0, correctCount: 0 })
+      expect(snap.players[0]!.score).toBeGreaterThan(0)
+    }
+    expect((await playerBoard).lastPoints).toBeNull()
 
     const finished = nextSnapshot<PlayerSnapshot>(a.socket, 'game:player', (s) => s.phase === 'finished')
     expect(await command(hostSocket, { type: 'end' })).toEqual({ ok: true })
     const final = await finished
     expect(final.me.score).toBeGreaterThan(0)
     expect(final.myResults![0]).toMatchObject({ correct: true, answer: { type: 'single', optionId: 'a' } })
+  })
+
+  it('closing a game sends the phones and the projector away; nobody can rejoin it', async () => {
+    const pin = await newGame({ finalResults: 'onRelease' })
+    const hostSocket = await host(pin)
+    const screen = await connect()
+    await screen.emitWithAck('screen:attach', { pin })
+    const a = await player(pin, 'Anna')
+    const question = nextSnapshot<PlayerSnapshot>(a.socket, 'game:player', (s) => s.phase === 'question')
+    await command(hostSocket, { type: 'start' })
+    await question
+
+    // A projector opened from the host's browser attaches as a second host socket.
+    const hostProjector = await host(pin)
+    const phoneClosed = new Promise((resolve) => a.socket.once('game:closed', resolve))
+    const screenClosed = new Promise((resolve) => screen.once('game:closed', resolve))
+    const projectorClosed = new Promise((resolve) => hostProjector.once('game:closed', resolve))
+    let commanderClosed = false
+    hostSocket.once('game:closed', () => (commanderClosed = true))
+    const hostFinished = nextSnapshot<HostSnapshot>(hostSocket, 'game:host', (s) => s.phase === 'finished')
+    expect(await command(hostSocket, { type: 'close' })).toEqual({ ok: true })
+    expect(await phoneClosed).toEqual({ error: 'errors.gameClosed' })
+    expect(await screenClosed).toEqual({ error: 'errors.gameClosed' })
+    expect(await projectorClosed).toEqual({ error: 'errors.gameClosed' })
+    expect(commanderClosed).toBe(false)
+    // Nothing waits for a release: no podium to show, no phones waiting.
+    expect(await hostFinished).toMatchObject({ resultsPending: false, playersWaiting: false })
+
+    const again = await connect()
+    expect(await again.emitWithAck('player:join', { pin, name: 'Anna', token: a.ack.token })).toEqual({ error: 'errors.gameNotFound' })
+    expect(built.manager.get(pin)).toBeUndefined()
   })
 
   it('final results on release: phones wait after the game until the host releases them', async () => {

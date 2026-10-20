@@ -6,7 +6,7 @@ export interface PrimaryAction {
   label: string
 }
 
-/** Scoreboard after every question; otherwise only when the host asks for it (never while results wait for the end). */
+/** Scoreboard after every question; otherwise only when the host asks for it. */
 const scoreboardAfterEachQuestion = (host: HostSnapshot) =>
   host.settings.scoreboard === 'afterQuestion' && host.settings.revealAnswers === 'afterQuestion'
 
@@ -75,6 +75,6 @@ export function alternativeAction(host: HostSnapshot): PrimaryAction | null {
   if (host.reviewing) return null
   if (host.phase === 'finished') return host.resultsPending && host.playersWaiting ? releaseToPlayers : null
   if (host.phase !== 'reveal' || host.awaitingGrading) return null
-  if (scoreboardAfterEachQuestion(host)) return nextQuestion(host)
-  return host.settings.revealAnswers === 'afterQuestion' ? showScoreboard : null
+  // The scoreboard on demand, also while results wait for the end (totals and ranks only).
+  return scoreboardAfterEachQuestion(host) ? nextQuestion(host) : showScoreboard
 }

@@ -95,6 +95,7 @@ test('a player changes their answer and the last one is scored', async ({ browse
     })
 
     await page.getByRole('button', { name: 'End game', exact: true }).click()
+    await page.getByRole('dialog').getByRole('button', { name: 'Show the podium' }).click()
     await expect(page.getByText('Game finished')).toBeVisible()
   } finally {
     await page.request.delete(`/api/games/${gameId}`)

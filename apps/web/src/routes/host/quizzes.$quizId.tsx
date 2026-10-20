@@ -673,7 +673,9 @@ function Editor({ quiz }: { quiz: Quiz }) {
             quizSettings={draft.settings}
             quizBranding={draft.branding}
             pending={play.isPending}
-            onCreate={(settings, scheduledAt, branding) => play.mutate({ quizId: quiz.id, settings, scheduledAt, branding })}
+            onCreate={(settings, scheduledAt, branding, lockCode) =>
+              play.mutate({ quizId: quiz.id, settings, scheduledAt, branding, lockCode })
+            }
             onCancel={() => {
               setStarting(false)
               play.reset()

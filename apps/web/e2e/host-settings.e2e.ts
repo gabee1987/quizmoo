@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
+import { closeGame } from './close-game'
 
 /**
  * My settings: the host removes a built-in quick message and saves an own one with its own time on
@@ -93,8 +94,8 @@ test('quick messages from My settings, sent and saved during a game', async ({ b
       ])
     })
 
-    await page.getByRole('button', { name: 'End game', exact: true }).click()
-    await expect(page.getByText('Game finished')).toBeVisible()
+    // Still in the lobby: closing it is the only way to end it.
+    await closeGame(page)
     await context.close()
   } finally {
     if (gameId) await page.request.delete(`/api/games/${gameId}`)
@@ -196,8 +197,7 @@ test('the event name from My settings on the projector, and on the phones only w
       if (!game) continue
       // A running game can only be ended from the host control; then it can be deleted.
       await page.goto(`/host/games/${game.pin}`)
-      await page.getByRole('button', { name: 'End game', exact: true }).click()
-      await expect(page.getByText('Game finished')).toBeVisible()
+      await closeGame(page)
       await page.request.delete(`/api/games/${gameId}`)
     }
     await page.request.delete(`/api/quizzes/${quiz.id}`)

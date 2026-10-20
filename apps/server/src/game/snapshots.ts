@@ -18,7 +18,7 @@ import {
 } from '@quizmoo/shared'
 import { normalise } from './normalise.js'
 import { displayOrder } from './order.js'
-import { answersHidden, quickMessagesOf, resultsPendingFor } from './engine.js'
+import { answersHidden, hostLocked, quickMessagesOf, resultsPendingFor } from './engine.js'
 import { denseRank } from './scoring.js'
 import {
   answersAsOne,
@@ -86,6 +86,8 @@ export function toHostSnapshot(state: GameState, now: number, { includeAnswers =
     playersWaiting: includeAnswers && resultsPendingFor(state, 'players'),
     teamAnswers: includeAnswers ? teamAnswers(state, base.questionIndex) : null,
     quickMessages: includeAnswers ? quickMessagesOf(state) : null,
+    locked: hostLocked(state),
+    hasLockCode: includeAnswers && !!state.lock?.codeHash,
   }
 }
 
@@ -181,8 +183,9 @@ export function toPlayerSnapshot(state: GameState, playerId: string, now: number
     teamLive: teamLive(state, player),
     teamResult: teamResult(state, player, base.phase, base.questionIndex),
     teamFallback: base.phase === 'reveal' && Boolean(teamRecord?.fallback),
-    lastPoints: base.reveal ? (record?.points ?? 0) : null,
-    lastBonus: base.reveal ? (record?.bonus ?? 0) : null,
+    // A question the host shows while answers are held back: right or wrong, but no points.
+    lastPoints: base.reveal && !base.answersHidden ? (record?.points ?? 0) : null,
+    lastBonus: base.reveal && !base.answersHidden ? (record?.bonus ?? 0) : null,
     lastCorrect: base.reveal ? (record?.correct ?? null) : null,
     myResults: state.phase === 'finished' && !base.answersHidden ? playerResults(state, player) : null,
   }
@@ -191,17 +194,33 @@ export function toPlayerSnapshot(state: GameState, playerId: string, now: number
 /**
  * While results are held back until the end, strips everything that tells who was right:
  * the reveal (correct answer, distribution), points, scores, ranks and correct counts.
- * The question itself stays visible during its reveal.
+ * The question itself stays visible during its reveal. A scoreboard the host shows midgame keeps
+ * the totals and ranks, but not what moved on the last question; a question the host shows
+ * ("Show answers", "Show again") keeps its reveal (correct answer, distribution), never points.
  */
 function conceal(state: GameState, base: GameSnapshotBase): GameSnapshotBase {
   if (!base.answersHidden) return base
   const question = state.quiz.questions[state.questionIndex]
+  const standings = base.phase === 'scoreboard'
   return {
     ...base,
-    question: base.reveal && question ? toPublicQuestion(question) : base.question,
-    reveal: null,
-    players: base.players.map((p) => ({ ...p, score: 0, rank: 1, previousRank: 1, correctCount: 0, roundPoints: 0, streak: 0 })),
-    teams: base.teams.map((t) => ({ ...t, score: 0, rank: 1, previousRank: 1 })),
+    question: base.reveal && question && !base.reviewing ? toPublicQuestion(question) : base.question,
+    reveal: base.reviewing ? base.reveal : null,
+    players: base.players.map((p) => ({
+      ...p,
+      score: standings ? p.score : 0,
+      rank: standings ? p.rank : 1,
+      previousRank: standings ? p.rank : 1,
+      correctCount: 0,
+      roundPoints: 0,
+      streak: 0,
+    })),
+    teams: base.teams.map((t) => ({
+      ...t,
+      score: standings ? t.score : 0,
+      rank: standings ? t.rank : 1,
+      previousRank: standings ? t.rank : 1,
+    })),
     questionStats: base.questionStats.map((q) => ({ ...q, correctCount: 0 })),
   }
 }
@@ -316,6 +335,7 @@ function baseSnapshot(state: GameState, now: number, audience: ResultsAudience, 
     questionEndsAt: inQuestion ? state.questionEndsAt : null,
     pausedAt: inQuestion ? (state.pausedAt ?? null) : null,
     reviewing,
+    reviewQueue: reviewing ? (state.reviewQueue ?? [index]) : null,
     serverNow: now,
     answeredCount: question ? players.filter((p) => p.answers[question.id]).length : 0,
     players: rankedPlayers,

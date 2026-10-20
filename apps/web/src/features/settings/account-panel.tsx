@@ -3,6 +3,7 @@ import { Link, useNavigate } from '@tanstack/react-router'
 import {
   FileDownIcon,
   KeyRoundIcon,
+  LockIcon,
   LogOutIcon,
   MonitorIcon,
   MoonIcon,
@@ -25,6 +26,7 @@ import { apiFetch } from '@/lib/api'
 import { modes, setMode, useMode } from '@/lib/mode'
 import { toastError } from '@/lib/toast'
 import { timeAgo } from '../users/format'
+import { LockCodeForm } from './lock-code-form'
 import { PasswordForm } from './password-form'
 import { SettingsSection } from './settings-section'
 
@@ -128,6 +130,10 @@ export function AccountPanel() {
             void queryClient.invalidateQueries({ queryKey: accountQueryOptions.queryKey })
           }}
         />
+      </SettingsSection>
+
+      <SettingsSection icon={LockIcon} title={t('settings.lockCode.title')} help={t('settings.lockCode.help')}>
+        <LockCodeForm />
       </SettingsSection>
 
       <SettingsSection icon={LogOutIcon} title={t('settings.account.logins.title')}>

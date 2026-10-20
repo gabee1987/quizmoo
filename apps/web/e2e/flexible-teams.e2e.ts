@@ -134,6 +134,7 @@ test('flexible teams: players create teams, the host moves, a latecomer joins, t
     })
 
     await page.getByRole('button', { name: 'End game', exact: true }).click()
+    await page.getByRole('dialog').getByRole('button', { name: 'Show the podium' }).click()
     await expect(page.getByText('Game finished')).toBeVisible()
   } finally {
     if (gameId) await page.request.delete(`/api/games/${gameId}`)

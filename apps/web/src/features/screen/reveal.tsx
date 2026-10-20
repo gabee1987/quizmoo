@@ -1,10 +1,12 @@
 import type { HostSnapshot } from '@quizmoo/shared'
 import { useTranslation } from 'react-i18next'
+import { reviewPosition } from '../play/review-position'
 import { RevealLayout } from './reveal-layout'
 
 export function ScreenReveal({ host }: { host: HostSnapshot }) {
   const { t } = useTranslation()
-  if (host.answersHidden) return <AnswersHidden host={host} />
+  // A question the host shows ("Show answers") has its answer even while the rest is held back.
+  if (host.answersHidden && !host.reviewing) return <AnswersHidden host={host} />
   const reveal = host.reveal
   if (!reveal) return null
   const isPoll = reveal.question.type === 'poll'
@@ -26,6 +28,7 @@ export function ScreenReveal({ host }: { host: HostSnapshot }) {
         <span>
           {t('play.questionOf', { index: host.questionIndex + 1, count: host.questionCount })}
           {host.reviewing && ` · ${t('play.shownAgain')}`}
+          {reviewPosition(host)}
         </span>
       }
       stats={stats}

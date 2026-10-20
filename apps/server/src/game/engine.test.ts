@@ -382,12 +382,15 @@ describe('question flow', () => {
     expect(state.players.p1!.answers).toEqual({})
   })
 
-  it('with results at the end there is no scoreboard before the finish', () => {
+  it('with results at the end the scoreboard comes only when the host asks for it', () => {
     let state = startGame(withPlayers(1, { revealAnswers: 'atEnd' }), T0)
     expect(answersHidden(state, 'players')).toBe(true)
     const reveal = endQuestion(answer(state, 'p1', correctAnswers[0]!, T0))
-    expectCode(() => showScoreboard(reveal), 'errors.invalidTransition')
-    state = skipQuestion(next(reveal, T0 + 1), T0 + 2)
+    expect(next(reveal, T0 + 1).phase).toBe('question')
+    const standings = showScoreboard(reveal)
+    expect(standings.phase).toBe('scoreboard')
+    expect(answersHidden(standings, 'players')).toBe(true)
+    state = skipQuestion(next(standings, T0 + 1), T0 + 2)
     expect(state.phase).toBe('question')
     expect(state.questionIndex).toBe(2)
     const finished = endGame(state, T0 + 3)

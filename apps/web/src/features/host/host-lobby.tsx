@@ -1,4 +1,5 @@
 import type { HostCommand, HostSnapshot } from '@quizmoo/shared'
+import { useNavigate } from '@tanstack/react-router'
 import { CopyIcon, MonitorIcon, PlayIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
@@ -35,8 +36,11 @@ export function HostLobby({
 }) {
   const { t } = useTranslation()
   const open = useTimeReached(host.scheduledAt, clockOffset)
-  const endGame = () => {
-    if (window.confirm(t('host.game.confirmEnd'))) void send({ type: 'end' })
+  const navigate = useNavigate()
+  // Nothing has been played yet: no podium to choose, the game is closed and everyone sent away.
+  const endGame = async () => {
+    if (!window.confirm(t('host.endGame.confirmClose'))) return
+    if (await send({ type: 'close' })) void navigate({ to: '/host' })
   }
   return (
     <div className="mx-auto grid w-full max-w-6xl gap-6 lg:grid-cols-2 lg:items-start">
@@ -68,7 +72,7 @@ export function HostLobby({
           teamActions={teamActions(send)}
         />
         <MessageBox announcement={host.announcement} quickMessages={host.quickMessages} clockOffset={clockOffset} onCommand={send} />
-        <Button variant="outline" className="self-start" onClick={endGame}>
+        <Button variant="outline" className="self-start" onClick={() => void endGame()}>
           {t('host.game.end')}
         </Button>
       </div>

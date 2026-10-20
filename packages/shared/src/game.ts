@@ -246,6 +246,8 @@ export interface GameSnapshotBase {
    * `questionIndex` and `reveal` are that question's, read only, ranks do not move.
    */
   reviewing: boolean
+  /** While reviewing: every question index the host chose to show, in order (the current one is `questionIndex`). */
+  reviewQueue: number[] | null
   /** Server time at snapshot creation, lets clients compute their clock offset. */
   serverNow: number
   /**
@@ -301,6 +303,10 @@ export interface HostSnapshot extends GameSnapshotBase {
   teamAnswers: TeamAnswerPublic[] | null
   /** The message box's quick messages for this game. Host room only; null on the public screen. */
   quickMessages: QuickMessage[] | null
+  /** The host locked their screens: the host room then receives this public snapshot only. */
+  locked: boolean
+  /** The game has its own lock code. Host room only; false on the public screen. */
+  hasLockCode: boolean
 }
 
 /** What a player's phone receives. */

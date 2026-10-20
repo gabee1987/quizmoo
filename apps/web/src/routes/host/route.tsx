@@ -1,5 +1,8 @@
+import { useQuery } from '@tanstack/react-query'
 import { Outlet, createFileRoute, redirect, useMatches } from '@tanstack/react-router'
 import { HostNav } from '@/components/host-nav'
+import { LockScreen } from '@/features/host/lock-screen'
+import { useScreenLockSync } from '@/lib/screen-lock'
 import { ApiError } from '../../lib/api'
 import { meQueryOptions } from '../../lib/auth'
 
@@ -25,10 +28,14 @@ export const Route = createFileRoute('/host')({
  * Sidebar on laptops, a bottom tab bar on phones. Hidden until a forced password change is done
  * and the terms are accepted,
  * and in the quiz editor, a full-width workspace with its own back button.
+ * While the screens are locked, the lock screen instead of every page.
  */
 function HostLayout() {
   const { user } = Route.useRouteContext()
+  const me = useQuery(meQueryOptions)
+  useScreenLockSync()
   const editing = useMatches({ select: (matches) => matches.some((m) => m.routeId === '/host/quizzes/$quizId') })
+  if (me.data?.screenLocked) return <LockScreen />
   const nav = !user.mustChangePassword && !user.mustAcceptTerms && !editing
   return (
     <div className={`flex flex-1 flex-col gap-4 lg:flex-row lg:gap-8 ${nav ? 'pb-20 lg:pb-0' : ''}`}>
