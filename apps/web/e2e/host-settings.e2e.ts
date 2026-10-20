@@ -41,6 +41,7 @@ test('quick messages from My settings, sent and saved during a game', async ({ b
 
     await test.step('remove a built-in message and save an own one with its own time on My settings', async () => {
       await page.getByRole('link', { name: 'My settings' }).click()
+      await page.getByRole('tab', { name: 'Messages' }).click()
       await page.getByRole('button', { name: 'Remove message 3' }).click()
       await expect(page.getByRole('textbox', { name: 'Message 3', exact: true })).toHaveCount(0)
       await page.getByLabel('New message').fill('Pizza is here!')
@@ -154,7 +155,13 @@ test('the event name from My settings on the projector, and on the phones only w
   try {
     await test.step('save an event name on My settings', async () => {
       await page.getByRole('link', { name: 'My settings' }).click()
+      await page.getByRole('tab', { name: 'Branding' }).click()
+      await expect(page).toHaveURL(/tab=branding/)
       await page.getByRole('textbox', { name: 'Event name' }).fill('E2E party')
+      // The tab with the change is marked while the others are visited.
+      await page.getByRole('tab', { name: 'Games' }).click()
+      await expect(page.getByRole('tab', { name: 'Branding Unsaved changes' })).toBeVisible()
+      await page.getByRole('tab', { name: /^Branding/ }).click()
       await page.getByRole('button', { name: 'Save', exact: true }).click()
       await expect(page.getByText('Settings saved')).toBeVisible()
     })

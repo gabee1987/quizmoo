@@ -1,30 +1,40 @@
 import { gameSettingsSchema, type HostSettings } from '@quizmoo/shared'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute, useBlocker } from '@tanstack/react-router'
-import { CircleAlertIcon, ImageIcon, KeyRoundIcon, MegaphoneIcon, RotateCcwIcon, SaveIcon, SlidersHorizontalIcon } from 'lucide-react'
-import { useState, type ComponentType, type ReactNode } from 'react'
+import { ImageIcon, MegaphoneIcon, RotateCcwIcon, SlidersHorizontalIcon, UserRoundIcon } from 'lucide-react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
+import { z } from 'zod'
 import { SmoothHeight } from '@/components/smooth-height'
 import { TextField } from '@/components/text-field'
+import { UnsavedBar } from '@/components/unsaved-bar'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { cn } from '@/lib/cn'
 import { usePresence } from '@/lib/presence'
 import { toastError } from '@/lib/toast'
 import { ConfirmDialog } from '../../components/dialog'
 import { ImageField } from '../../features/editor/image-field'
 import { GameSettingsForm, allSections, sectionIcons, settingsError } from '../../features/host/game-settings-form'
+import { AccountPanel } from '../../features/settings/account-panel'
 import { hostSettingsQueryOptions, saveHostSettings } from '../../features/settings/host-settings'
-import { PasswordForm } from '../../features/settings/password-form'
 import { QuickMessagesEditor } from '../../features/settings/quick-messages-editor'
+import { SettingsSection } from '../../features/settings/settings-section'
+
+const settingsTabs = ['games', 'messages', 'branding', 'account'] as const
+type SettingsTab = (typeof settingsTabs)[number]
+const tabIcons = { games: SlidersHorizontalIcon, messages: MegaphoneIcon, branding: ImageIcon, account: UserRoundIcon } as const
 
 export const Route = createFileRoute('/host/settings')({
+  // The open tab is in the address, so a reload or a link (e.g. after the forced password change) lands on it.
+  validateSearch: z.object({ tab: z.enum(settingsTabs).optional().catch(undefined) }),
   component: SettingsPage,
 })
 
-/** My settings: what belongs to the host account and outlasts quizzes and games. */
+const same = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b)
+
+/** My settings: what belongs to the host account and outlasts quizzes and games, one tab per group. */
 function SettingsPage() {
   const { t } = useTranslation()
   const settings = useQuery(hostSettingsQueryOptions)
@@ -37,12 +47,11 @@ function SettingsPage() {
       </div>
       {settings.isPending ? (
         <Skeleton className="h-96 rounded-2xl" />
-      ) : settings.isError ? null : (
+      ) : settings.isError ? (
+        <AccountPanel />
+      ) : (
         <SettingsForm saved={settings.data} />
       )}
-      <Section id="account" icon={KeyRoundIcon} title={t('auth.passwordChange.title')}>
-        <PasswordForm onDone={() => toast.success(t('settings.passwordSaved'))} />
-      </Section>
     </div>
   )
 }
@@ -50,19 +59,27 @@ function SettingsPage() {
 function SettingsForm({ saved }: { saved: HostSettings }) {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
+  const { tab = 'games' } = Route.useSearch()
+  const navigate = Route.useNavigate()
   const [draft, setDraft] = useState(saved)
   // A change saved elsewhere ("Save to my messages" in a game) starts a fresh draft.
   const [base, setBase] = useState(saved)
-  if (JSON.stringify(saved) !== JSON.stringify(base)) {
+  if (!same(saved, base)) {
     setBase(saved)
     setDraft(saved)
   }
-  const dirty = JSON.stringify(draft) !== JSON.stringify(saved)
+  const dirty = !same(draft, saved)
+  // A dot on each tab with unsaved changes: the bar below says something changed, the dot says where.
+  const changed: Record<SettingsTab, boolean> = {
+    games: !same(draft.gameDefaults, saved.gameDefaults),
+    messages: !same(draft.quickMessages, saved.quickMessages),
+    branding: draft.logoImageId !== saved.logoImageId || draft.eventName !== saved.eventName,
+    account: false,
+  }
   const defaults = draft.gameDefaults ?? gameSettingsSchema.parse({})
   const problem = draft.quickMessages.some((m) => 'text' in m && !m.text.trim())
     ? 'settings.messages.textRequired'
     : draft.gameDefaults && settingsError(draft.gameDefaults)
-  const saveBar = usePresence(dirty)
   const resetButton = usePresence(draft.gameDefaults !== null)
 
   const save = useMutation({
@@ -75,127 +92,144 @@ function SettingsForm({ saved }: { saved: HostSettings }) {
     onError: toastError,
   })
 
-  const blocker = useBlocker({ shouldBlockFn: () => dirty, enableBeforeUnload: () => dirty, withResolver: true })
+  // Switching tabs only changes the search, so it never asks.
+  const blocker = useBlocker({
+    shouldBlockFn: ({ current, next }) => dirty && current.pathname !== next.pathname,
+    enableBeforeUnload: () => dirty,
+    withResolver: true,
+  })
 
   return (
     <>
-      <Section icon={MegaphoneIcon} title={t('settings.messages.title')} help={t('settings.messages.help')}>
-        <SmoothHeight>
-          <QuickMessagesEditor
-            messages={draft.quickMessages}
-            onMessages={(quickMessages) => setDraft((d) => ({ ...d, quickMessages }))}
-          />
-        </SmoothHeight>
-      </Section>
-
-      <Section icon={ImageIcon} title={t('settings.branding.title')} help={t('settings.branding.help')}>
-        <div className="flex flex-col gap-2">
-          <p className="font-semibold">{t('settings.branding.logo')}</p>
-          <ImageField
-            imageId={draft.logoImageId ?? undefined}
-            label={t('settings.branding.logo')}
-            onChange={(logoImageId) => setDraft((d) => ({ ...d, logoImageId: logoImageId ?? null }))}
-          />
-          <p className="text-sm text-muted-foreground">{t('settings.branding.logoHelp')}</p>
-        </div>
-        <div className="flex flex-col gap-1">
-          <TextField
-            label={t('settings.branding.eventName')}
-            value={draft.eventName}
-            maxLength={60}
-            placeholder={t('settings.branding.eventNamePlaceholder')}
-            autoComplete="off"
-            onChange={(e) => {
-              const eventName = e.target.value
-              setDraft((d) => ({ ...d, eventName }))
-            }}
-          />
-          <p className="text-sm text-muted-foreground">{t('settings.branding.eventNameHelp')}</p>
-        </div>
-      </Section>
-
-      <Section icon={SlidersHorizontalIcon} title={t('settings.defaults.title')} help={t('settings.defaults.help')}>
-        <div className="flex min-h-9 flex-wrap items-center justify-between gap-2">
-          <p key={String(!!draft.gameDefaults)} className="animate-panel-swap text-sm font-semibold text-muted-foreground">
-            {draft.gameDefaults ? t('settings.defaults.own') : t('settings.defaults.app')}
-          </p>
-          {resetButton.mounted && (
-            <Button
-              variant="outline"
-              size="sm"
-              className={resetButton.leaving ? 'pointer-events-none animate-pop-out' : 'animate-pop'}
-              onAnimationEnd={resetButton.onAnimationEnd}
-              onClick={() => setDraft((d) => ({ ...d, gameDefaults: null }))}
-            >
-              <RotateCcwIcon aria-hidden="true" />
-              {t('settings.defaults.reset')}
-            </Button>
-          )}
-        </div>
-        <Tabs defaultValue="flow" className="gap-4">
-          <TabsList className="h-auto! w-full gap-1 rounded-2xl p-1.5">
-            {allSections.map((section) => {
-              const Icon = sectionIcons[section]
-              return (
-                <TabsTrigger
-                  key={section}
-                  value={section}
-                  className={cn(
-                    'group/tab min-h-12 gap-2 rounded-xl px-2 text-base font-extrabold sm:px-4',
-                    'transition-[color,background-color,box-shadow,transform] duration-300 ease-spring hover:bg-card/60',
-                    'data-[state=active]:border-transparent! data-[state=active]:bg-primary! data-[state=active]:text-primary-foreground!',
-                    'data-[state=active]:shadow-[0_3px_0_0_var(--primary-edge)]! data-[state=active]:-translate-y-px',
+      <Tabs
+        value={tab}
+        onValueChange={(next) => void navigate({ search: { tab: next as SettingsTab }, replace: true })}
+        className="gap-5"
+      >
+        <TabsList variant="bold" aria-label={t('settings.tabs.label')}>
+          {settingsTabs.map((value) => {
+            const Icon = tabIcons[value]
+            return (
+              <TabsTrigger key={value} value={value} className="data-[state=inactive]:text-foreground!">
+                <Icon aria-hidden="true" />
+                <span className="relative">
+                  {t(`settings.tabs.${value}`)}
+                  {changed[value] && (
+                    <span className="absolute -top-0.5 -right-2.5 size-2 animate-pop rounded-full bg-current">
+                      <span className="sr-only">{t('settings.unsaved')}</span>
+                    </span>
                   )}
-                >
-                  <Icon className="size-5! transition-transform duration-500 ease-spring group-data-[state=active]/tab:animate-wiggle" />
-                  {t(`host.batch.groups.${section}`)}
-                </TabsTrigger>
-              )
-            })}
-          </TabsList>
-          <SmoothHeight>
-            {allSections.map((section) => (
-              <TabsContent key={section} value={section}>
-                <GameSettingsForm
-                  value={defaults}
-                  onChange={(gameDefaults) => setDraft((d) => ({ ...d, gameDefaults }))}
-                  sections={[section]}
-                />
-              </TabsContent>
-            ))}
-          </SmoothHeight>
-        </Tabs>
-      </Section>
+                </span>
+              </TabsTrigger>
+            )
+          })}
+        </TabsList>
 
-      {/*
-       * Stays in reach while either section is edited; the bottom tab bar is below it on phones.
-       * A blurred halo of the page colour behind it (no edges, so no box) keeps content scrolling
-       * under it apart, and on phones fills the gap down to the tab bar.
-       */}
-      {saveBar.mounted && (
-        <div
-          onAnimationEnd={saveBar.onAnimationEnd}
-          className={cn(
-            'sticky bottom-[calc(4rem+env(safe-area-inset-bottom)+0.75rem)] z-30 isolate lg:bottom-4',
-            'before:absolute before:-inset-x-3 before:-top-10 before:-bottom-5 before:-z-10 before:rounded-[3rem] before:bg-background/90 before:blur-2xl lg:before:-inset-x-10 lg:before:-top-14 lg:before:-bottom-8',
-            saveBar.leaving ? 'pointer-events-none animate-pop-out' : 'animate-pop',
-          )}
-        >
-          <div className="flex flex-wrap items-center gap-3 rounded-2xl border-2 border-primary bg-[color-mix(in_srgb,var(--primary)_9%,var(--card))] p-3 shadow-[0_4px_0_0_var(--primary-edge)]">
-            <p className="flex min-w-0 flex-1 items-center gap-2 font-bold">
-              <CircleAlertIcon className={cn('size-5 shrink-0', problem ? 'text-destructive' : 'text-primary')} aria-hidden="true" />
-              {problem ? <span className="text-destructive">{t(problem)}</span> : t('settings.unsaved')}
-            </p>
-            <Button variant="ghost" onClick={() => setDraft(saved)}>
-              {t('settings.discard')}
-            </Button>
-            <Button disabled={!!problem || save.isPending} onClick={() => save.mutate()}>
-              <SaveIcon aria-hidden="true" />
-              {t('common.save')}
-            </Button>
-          </div>
-        </div>
-      )}
+        {/* origin-top: the panels are tall, and their squash and stretch would lift their top into the tabs from a centre origin. */}
+        <TabsContent value="games" className="origin-top">
+          <SettingsSection icon={SlidersHorizontalIcon} title={t('settings.defaults.title')} help={t('settings.defaults.help')}>
+            <div className="flex min-h-9 flex-wrap items-center justify-between gap-2">
+              <p key={String(!!draft.gameDefaults)} className="animate-panel-swap text-sm font-semibold text-muted-foreground">
+                {draft.gameDefaults ? t('settings.defaults.own') : t('settings.defaults.app')}
+              </p>
+              {resetButton.mounted && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className={resetButton.leaving ? 'pointer-events-none animate-pop-out' : 'animate-pop'}
+                  onAnimationEnd={resetButton.onAnimationEnd}
+                  onClick={() => setDraft((d) => ({ ...d, gameDefaults: null }))}
+                >
+                  <RotateCcwIcon aria-hidden="true" />
+                  {t('settings.defaults.reset')}
+                </Button>
+              )}
+            </div>
+            {/* A plain segmented switch inside the page's bold tabs, so the two levels never look alike. */}
+            <Tabs defaultValue="flow" className="gap-4">
+              <TabsList className="h-12! w-full rounded-xl p-1">
+                {allSections.map((section) => {
+                  const Icon = sectionIcons[section]
+                  return (
+                    <TabsTrigger
+                      key={section}
+                      value={section}
+                      // Three labels fit a 360 px phone only without their icons.
+                      className="gap-2 rounded-lg text-sm font-bold data-[state=inactive]:text-foreground! max-sm:[&_svg]:hidden sm:text-base"
+                    >
+                      <Icon aria-hidden="true" />
+                      {t(`host.batch.groups.${section}`)}
+                    </TabsTrigger>
+                  )
+                })}
+              </TabsList>
+              <SmoothHeight>
+                {allSections.map((section) => (
+                  <TabsContent key={section} value={section} className="origin-top">
+                    <GameSettingsForm
+                      value={defaults}
+                      onChange={(gameDefaults) => setDraft((d) => ({ ...d, gameDefaults }))}
+                      sections={[section]}
+                    />
+                  </TabsContent>
+                ))}
+              </SmoothHeight>
+            </Tabs>
+          </SettingsSection>
+        </TabsContent>
+
+        <TabsContent value="messages" className="origin-top">
+          <SettingsSection icon={MegaphoneIcon} title={t('settings.messages.title')} help={t('settings.messages.help')}>
+            <SmoothHeight>
+              <QuickMessagesEditor
+                messages={draft.quickMessages}
+                onMessages={(quickMessages) => setDraft((d) => ({ ...d, quickMessages }))}
+              />
+            </SmoothHeight>
+          </SettingsSection>
+        </TabsContent>
+
+        <TabsContent value="branding" className="origin-top">
+          <SettingsSection icon={ImageIcon} title={t('settings.branding.title')} help={t('settings.branding.help')}>
+            <div className="flex flex-col gap-2">
+              <p className="font-semibold">{t('settings.branding.logo')}</p>
+              <ImageField
+                imageId={draft.logoImageId ?? undefined}
+                label={t('settings.branding.logo')}
+                onChange={(logoImageId) => setDraft((d) => ({ ...d, logoImageId: logoImageId ?? null }))}
+              />
+              <p className="text-sm text-muted-foreground">{t('settings.branding.logoHelp')}</p>
+            </div>
+            <div className="flex flex-col gap-1">
+              <TextField
+                label={t('settings.branding.eventName')}
+                value={draft.eventName}
+                maxLength={60}
+                placeholder={t('settings.branding.eventNamePlaceholder')}
+                autoComplete="off"
+                onChange={(e) => {
+                  const eventName = e.target.value
+                  setDraft((d) => ({ ...d, eventName }))
+                }}
+              />
+              <p className="text-sm text-muted-foreground">{t('settings.branding.eventNameHelp')}</p>
+            </div>
+          </SettingsSection>
+        </TabsContent>
+
+        <TabsContent value="account" className="origin-top">
+          <AccountPanel />
+        </TabsContent>
+      </Tabs>
+
+      {/* Stays in reach on every tab while anything is unsaved. */}
+      <UnsavedBar
+        dirty={dirty}
+        problem={problem}
+        saving={save.isPending}
+        onSave={() => save.mutate()}
+        onDiscard={() => setDraft(saved)}
+      />
 
       {blocker.status === 'blocked' && (
         <ConfirmDialog
@@ -209,32 +243,5 @@ function SettingsForm({ saved }: { saved: HostSettings }) {
         </ConfirmDialog>
       )}
     </>
-  )
-}
-
-function Section({
-  id,
-  icon: Icon,
-  title,
-  help,
-  children,
-}: {
-  id?: string
-  icon: ComponentType<{ className?: string }>
-  title: string
-  help?: string
-  children: ReactNode
-}) {
-  return (
-    <section id={id} className="flex scroll-mt-4 flex-col gap-4 rounded-2xl border bg-card p-4 shadow-soft sm:p-5">
-      <div className="flex flex-col gap-1">
-        <h2 className="flex items-center gap-2 text-xl font-extrabold">
-          <Icon className="size-5" aria-hidden="true" />
-          {title}
-        </h2>
-        {help && <p className="text-sm text-muted-foreground">{help}</p>}
-      </div>
-      {children}
-    </section>
   )
 }

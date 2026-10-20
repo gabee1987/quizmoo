@@ -26,7 +26,7 @@ Candidate features after the design phases (9 to 12). None is planned in detail 
 |---|---|---|---|
 | Admin dashboard | See running games, player counts, errors | M | Reuses `/api/health` data; admin only |
 | Metrics endpoint | Operations in the cloud | S | Prometheus-style counters; protected |
-| Password reset | Host forgot the password | M | Needs e-mail delivery, which is a third-party service (compliance review) or an admin-side reset link instead |
+| Password reset | Host forgot the password | M | The admin can set a new password on the Users page (phase 28); a self-service reset needs e-mail delivery, which is a third-party service (compliance review) |
 | Two-factor login for hosts | Security for public deployments | M | TOTP, no SMS |
 
 ## From the test notes (October 2026)
@@ -57,6 +57,9 @@ Collected while testing phases 9 to 12. Effort as above.
 - Teams set up per game (host teams, player-made teams or both), moving players, late joining, the captaincy at any time, team toasts, the team's answer and picks on the phones, and mixed play with solo players ranked with the teams (phase 23).
 - Player and host polish from testing: player details and "Leave game" in the phone menu, offline and left teammates, the player's own answer kept in view, swipeable host messages with "Important", the menu button bottom left, a desktop waiting screen, readable lobby rows and join/drop notes for the host, "Running now" for 12 hours, about 180 funny names per language with fitting avatars (phase 24).
 - Game history in pages while scrolling, search by title or PIN, state and period filters, and at most 200 finished games kept per host (phase 25).
+- Host sign-up with the admin's approval, without e-mail (phase 26).
+- Admin pages: a Users page with each account's figures and last login, setting a new password, changing the role, logging out everywhere and deleting an account; a Names page that edits the "Surprise me" names row by row (phase 28).
+- My settings in four tabs (Games first), and an Account tab: overview, this device's language and look, password, logging out other logins, deleting the own account (phase 29).
 - Quiz files: questions written in a spreadsheet anywhere (template with a guide and examples) imported with a row-by-row problem report, and quizzes downloaded as a spreadsheet or a full Quizmoo file with settings and pictures (phase 27).
 
 ### Open
@@ -68,5 +71,4 @@ Collected while testing phases 9 to 12. Effort as above.
 | Rooms with their own admin | Feature | L | Each room (workspace) has an admin; only its members see and edit its quizzes and games. Today every quiz and game belongs to one host account. Needs a rooms table, membership and roles, permission checks on every route and socket attach, migration of existing quizzes. |
 | Play-through preview in the editor | Feature | M | The host plays the quiz on a phone-like frame (question, answer, reveal) without starting a game. Reuses the phone screens with a local fake snapshot; no server state. |
 | Host live dashboard and hints | Feature | L | One coherent view of the running game: answers in, who is stuck or offline, per-question stats, standings. Hints or messages to selected players (host-to-player messages were out of scope in phase 12). |
-| Registration for new hosts | Feature | L | People who want to use the app create their own host account instead of asking the admin (today accounts come from the seed or the admin's Users page, and phase 26 keeps it that way for the beta). Decisions to make before the plan: open sign-up, an invite link from the admin, or sign-up waiting for the admin's approval; whether an e-mail address is needed (personal data under GDPR, with a privacy notice, consent and erasure; sending mail is a third-party service needing a compliance review, see "Password reset"); bot protection without a third-party CAPTCHA (rate limits per IP that are not stored, a proof-of-work or a honeypot field); terms of use and age limit; limits per new account (quizzes, games, image storage). Builds on the forced first password change and My settings (phase 22). From the 15 October 2026 request. |
 | Sounds for key moments | Feature | M | Short playful sounds for important events and messages, switched on per quiz. Generated in the browser (Web Audio) to avoid licensed audio files; projector only, phones silent by default. Same as the "Sounds and music" item above. |

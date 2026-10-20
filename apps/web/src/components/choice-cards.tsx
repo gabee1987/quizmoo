@@ -27,7 +27,7 @@ export function ChoiceCards<T extends string>({
   onChange: (value: T) => void
   disabled?: boolean
   help?: ReactNode
-  columns?: 1 | 2
+  columns?: 1 | 2 | 3
 }) {
   const id = useId()
   const lastHelp = useRef(help)
@@ -40,7 +40,7 @@ export function ChoiceCards<T extends string>({
         value={value}
         onValueChange={(next) => onChange(next as T)}
         disabled={disabled}
-        className={cn('gap-2', columns === 2 && '@md:grid-cols-2')}
+        className={cn('gap-2', columns === 2 && '@md:grid-cols-2', columns === 3 && '@md:grid-cols-3')}
       >
         {choices.map((choice) => (
           <label

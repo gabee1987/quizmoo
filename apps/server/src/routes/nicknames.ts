@@ -19,6 +19,8 @@ const saveSchema = nicknameListSchema.superRefine(({ names }, ctx) => {
   })
 })
 
+const checkSchema = z.object({ names: z.array(z.string().max(200)).min(1).max(500) })
+
 /** The list "Surprise me" uses: the admins' one, else the built-in one. */
 export async function nicknamesFor(db: Db, language: NicknameLanguage): Promise<string[]> {
   const row = (await db.select().from(nicknameLists).where(eq(nicknameLists.language, language)))[0]
@@ -33,10 +35,19 @@ export async function nicknameRoutes(app: FastifyInstance, { db, manager }: { db
     const lists = Object.fromEntries(
       nicknameLanguages.map((language) => {
         const row = rows.find((r) => r.language === language)
-        return [language, { names: row?.names ?? defaultNicknames[language], custom: !!row }]
+        const names = row?.names ?? defaultNicknames[language]
+        return [language, { names, avatars: names.map(avatarForNickname), custom: !!row }]
       }),
     )
     return { lists }
+  })
+
+  // Names the admin is adding: the avatar each gets and whether the join filter lets it through,
+  // so a refused name is marked before saving. Length is checked by the page itself.
+  app.post('/api/nicknames/check', adminOnly, async (request, reply) => {
+    const body = parseOr400(checkSchema, request.body, reply)
+    if (!body) return reply
+    return { results: body.names.map((name) => ({ avatar: avatarForNickname(name), allowed: isNameAllowed(name) })) }
   })
 
   // Duplicates (case-insensitive) are dropped; the first spelling stays.

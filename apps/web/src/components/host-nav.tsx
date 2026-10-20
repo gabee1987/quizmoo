@@ -9,6 +9,7 @@ import {
   LogOutIcon,
   MessageSquareHeartIcon,
   SettingsIcon,
+  ShieldIcon,
   UserRoundIcon,
   UsersIcon,
 } from 'lucide-react'
@@ -63,7 +64,6 @@ export function HostNav({ user }: { user: User }) {
           { to: '/host/nicknames', label: t('nicknames.nav'), icon: DicesIcon, exact: false },
         ]
       : []
-  const items = [...main, ...admin]
   const feedbackUrl = useSiteInfo().data?.feedbackUrl
 
   return (
@@ -75,19 +75,26 @@ export function HostNav({ user }: { user: User }) {
         aria-label={t('nav.label')}
         className="hidden lg:sticky lg:top-4 lg:flex lg:w-60 lg:shrink-0 lg:flex-col lg:gap-1 lg:self-start"
       >
+        {/* One highlight across both groups, so it springs from a host page to an admin page too. */}
         <SlidingItems>
-          {items.map((item) => (
-            <Link
-              key={item.to}
-              to={item.to}
-              // A page's filters in the address (the game history's search) keep its link active.
-              activeOptions={{ exact: item.exact, includeSearch: false }}
-              className="group relative z-10 flex min-h-12 items-center gap-3 rounded-xl px-3 font-semibold text-muted-foreground transition-colors duration-300 outline-none hover:bg-muted hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring data-[status=active]:text-primary-foreground data-[status=active]:hover:bg-transparent"
-            >
-              <item.icon className="size-5 transition-transform duration-300 ease-spring group-hover:scale-115 group-hover:-rotate-8 group-data-[status=active]:animate-wiggle" />
-              {item.label}
-            </Link>
+          {main.map((item) => (
+            <SidebarLink key={item.to} item={item} />
           ))}
+          {admin.length > 0 && (
+            // Not positioned, so the links' offsetTop stays relative to the list and the highlight finds them.
+            <div role="group" aria-labelledby="admin-nav" className="flex flex-col gap-1">
+              <p
+                id="admin-nav"
+                className="mt-4 flex items-center gap-2 border-t px-3 pt-4 pb-1 text-xs font-extrabold tracking-wider text-muted-foreground uppercase"
+              >
+                <ShieldIcon className="size-3.5" aria-hidden="true" />
+                {t('nav.admin')}
+              </p>
+              {admin.map((item) => (
+                <SidebarLink key={item.to} item={item} />
+              ))}
+            </div>
+          )}
         </SlidingItems>
         <div className="mt-4 flex flex-col gap-1 border-t pt-4">
           <p className="flex items-center gap-2 px-3 pb-1 text-sm text-muted-foreground" title={t('nav.signedInAs')}>
@@ -149,6 +156,12 @@ export function HostNav({ user }: { user: User }) {
                   {t('nav.signedInAs')}: {user.username}
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
+                {admin.length > 0 && (
+                  <DropdownMenuLabel className="flex items-center gap-2 text-xs font-extrabold tracking-wider text-muted-foreground uppercase">
+                    <ShieldIcon className="size-3.5" aria-hidden="true" />
+                    {t('nav.admin')}
+                  </DropdownMenuLabel>
+                )}
                 {admin.map((item) => (
                   <MenuLink key={item.to}>
                     <Link to={item.to}>
@@ -157,6 +170,7 @@ export function HostNav({ user }: { user: User }) {
                     </Link>
                   </MenuLink>
                 ))}
+                {admin.length > 0 && <DropdownMenuSeparator />}
                 <MenuLink>
                   <Link to="/host/settings">
                     <SettingsIcon />
@@ -227,6 +241,20 @@ function SlidingItems({ children }: { children: ReactNode }) {
       />
       {children}
     </div>
+  )
+}
+
+function SidebarLink({ item }: { item: Item }) {
+  return (
+    <Link
+      to={item.to}
+      // A page's filters in the address (the game history's search) keep its link active.
+      activeOptions={{ exact: item.exact, includeSearch: false }}
+      className="group relative z-10 flex min-h-12 items-center gap-3 rounded-xl px-3 font-semibold text-muted-foreground transition-colors duration-300 outline-none hover:bg-muted hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring data-[status=active]:text-primary-foreground data-[status=active]:hover:bg-transparent"
+    >
+      <item.icon className="size-5 transition-transform duration-300 ease-spring group-hover:scale-115 group-hover:-rotate-8 group-data-[status=active]:animate-wiggle" />
+      {item.label}
+    </Link>
   )
 }
 

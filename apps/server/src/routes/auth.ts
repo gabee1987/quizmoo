@@ -72,6 +72,7 @@ export async function authRoutes(app: FastifyInstance, { db, secureCookies, regi
       if (row.status === 'pending') return reply.code(403).send({ error: 'errors.accountPending' })
 
       const token = await createSession(db, row.id)
+      await db.update(users).set({ lastLoginAt: new Date() }).where(eq(users.id, row.id))
       setSessionCookie(reply, token, secureCookies)
       return {
         user: { id: row.id, username: row.username, role: row.role, mustChangePassword: row.mustChangePassword },

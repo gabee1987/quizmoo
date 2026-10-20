@@ -51,10 +51,11 @@ Run the final e2e pass against the production build (:3999): against the Vite de
 
 Quizzes created without `settings` start with the host's game defaults (My settings), which may hold answers back ("Only at the end") and break specs that expect "Correct!": create quizzes in specs with `settings: {}` (the app's defaults), and a spec that builds one in the editor switches the host's `gameDefaults` off for the run and restores them in `afterEach`. A projector page in a logged-out browser context logs a 401 console error (it asks `/api/auth/me` whether the host is there); a spec that fails on console errors opens the projector with `page.context().newPage()` from the host's page.
 
-A failed run can leave "E2E" quizzes and games behind; delete them before rerunning. When a UI change moves something an e2e spec looks for (a tab, a dialog step), update the spec in the same change.
+The whole suite shares the login limit (10 a minute from one address) and runs its files in alphabetical order, with the login-heavy specs (`a11y`, `admin-users`) first. A new spec logs in as few times as it can (check results through the admin's API rather than by a login that must fail) and is named so it does not run among them; 429s or "expected URL /host, got /login" in later specs mean the limit, not a bug. Wait a minute before rerunning. A failed run can leave "E2E" quizzes and games behind; delete them before rerunning. When a UI change moves something an e2e spec looks for (a tab, a dialog step), update the spec in the same change.
 
 ## The user's running dev servers
 
 - Edit source files with the Edit/Write tools while `dev:lan` runs, never `sed -i` or `cat >` (see AGENTS.md learnings).
 - After server edits check that the API on :3000 restarted after the last edit; after `styles.css` changes check that Vite serves the new classes (`curl -s localhost:<vite port>/src/styles.css | grep <class>`). If not, tell the user to restart `dev:lan`.
+- The Docker Compose `app` container also listens on :3000 and has `restart: unless-stopped`, so it comes back with Docker. Running next to `dev:lan`, it answers instead of the dev API with its old build (new routes 404, old response shapes). Check `docker ps`; `docker compose stop app` frees the port. When the API "did not restart", compare the process on :3000 too.
 - The web dev port is 15173 (5173+ belong to the user's other Vite projects); `dev:lan` moves up if it is taken, so read the port it printed.

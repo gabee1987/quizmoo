@@ -12,6 +12,7 @@ import type { Config } from './config.js'
 import type { Db } from './db/index.js'
 import type { GameManager } from './realtime/game-manager.js'
 import { registerSocketHandlers, type AppSocketServer } from './realtime/handlers.js'
+import { accountRoutes } from './routes/account.js'
 import { authRoutes } from './routes/auth.js'
 import { gameRoutes } from './routes/games.js'
 import { imageRoutes } from './routes/images.js'
@@ -112,8 +113,9 @@ export async function buildApp(config: Config, { db, manager, webDist: webDistOv
   await app.register(multipart)
   await app.register(quizRoutes, { db })
   await app.register(imageRoutes, { db })
-  await app.register(userRoutes, { db })
+  await app.register(userRoutes, { db, manager })
   await app.register(meRoutes, { db })
+  await app.register(accountRoutes, { db, manager, secureCookies })
   await app.register(gameRoutes, { db, manager, appOrigin: config.APP_ORIGIN })
   await app.register(resultRoutes, {
     db,
