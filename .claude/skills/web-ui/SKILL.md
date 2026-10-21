@@ -20,6 +20,7 @@ Topic skills: `game-screens` (phone, projector, host control and results layouts
 | `/host/quizzes` | hosts | quiz list with search, Play, Edit, New, Import (spreadsheet or Quizmoo file), downloads, batch edit and delete |
 | `/host/quizzes/$quizId` | hosts | editor |
 | `/host/settings` | hosts | My settings: quick messages, branding (logo, event name), game defaults, password (`#account`); one draft with a sticky Save bar, keyed by the stored settings |
+| `/host/whats-new` | hosts | patch notes, newest first (`features/whats-new/releases.ts`, texts under `whatsNew.releases.<1_1_0>`); opening it marks the running version as read (`PUT /api/me/release`), which clears the nav dot |
 | `/host/password` | hosts | the forced first password change only, without navigation; otherwise redirects to `/host/settings#account` |
 | `/host/games/$pin` | hosts | control view (phone or laptop) |
 | `/host/games` | hosts | game history |

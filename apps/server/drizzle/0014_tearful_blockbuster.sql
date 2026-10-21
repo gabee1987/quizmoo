@@ -1,0 +1,1 @@
+ALTER TABLE "host_settings" ADD COLUMN "seen_release" text;

@@ -1113,6 +1113,71 @@
     "opensInNewTab": "opens in a new tab",
     "admin": "Admin"
   },
+  "whatsNew": {
+    "title": "What's new",
+    "help": "What changed in Quizmoo, newest first.",
+    "unseen": "New notes",
+    "versionShort": "v{{version}}",
+    "release": "Quizmoo {{version}}",
+    "current": "Current version",
+    "releasedOn": "Released {{date}}",
+    "releases": {
+      "1_1_0": {
+        "title": "The first public beta",
+        "intro": "Quizmoo is online for friends and family. Here is what you can do as a host.",
+        "sections": [
+          {
+            "title": "Make quizzes",
+            "items": [
+              "Seven question types: single and multiple choice, true or false, free text, number, poll and put in order, each with a picture if you like.",
+              "The editor saves as you type, shows each question in a phone preview and lists what still needs fixing.",
+              "Import questions from a spreadsheet (Excel, Google Sheets) or a Quizmoo file, and download any quiz to share it.",
+              "Themes, answer colours and symbols, or your own colours, and your logo and event name on the projector."
+            ]
+          },
+          {
+            "title": "Run games",
+            "items": [
+              "Players join with the PIN or the QR code on any phone, no app or account needed. Up to 60 players.",
+              "Pause, add 30 seconds, skip a question, send a message to every phone, and show a question again or the standings at any time.",
+              "Schedule a game up to 30 days ahead and share its link; players can add it to their calendar.",
+              "Lock your screen during a game, so nobody reads the answers off your laptop.",
+              "\"Play again\" starts a new round with the same players in one tap."
+            ]
+          },
+          {
+            "title": "Play in teams",
+            "items": [
+              "You set the teams, the players make them, or both; anyone can also play on their own next to the teams.",
+              "Each team answers its own way: the captain decides, a majority vote, or everyone counts."
+            ]
+          },
+          {
+            "title": "See the results",
+            "items": [
+              "A summary with the podium and the easiest and hardest question, then every player's, team's and question's details, and a CSV export.",
+              "Results are kept for 90 days, then deleted."
+            ]
+          },
+          {
+            "title": "Your account",
+            "items": [
+              "My settings: quick messages, your usual game settings, branding, password and screen lock code.",
+              "Download all your data or delete your account at any time.",
+              "Friends can ask for a host account on the home page; an admin approves it."
+            ]
+          },
+          {
+            "title": "Good to know",
+            "items": [
+              "Quizmoo installs on a phone or laptop like an app.",
+              "Found a bug or have an idea? Tell us through Feedback in the menu."
+            ]
+          }
+        ]
+      }
+    }
+  },
   "settings": {
     "title": "My settings",
     "help": "Yours across every quiz and game.",

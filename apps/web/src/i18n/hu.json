@@ -1113,6 +1113,71 @@
     "opensInNewTab": "új lapon nyílik meg",
     "admin": "Adminisztráció"
   },
+  "whatsNew": {
+    "title": "Újdonságok",
+    "help": "Mi változott a Quizmoóban, a legújabb elöl.",
+    "unseen": "Új hírek",
+    "versionShort": "v{{version}}",
+    "release": "Quizmoo {{version}}",
+    "current": "Mostani verzió",
+    "releasedOn": "Megjelent: {{date}}",
+    "releases": {
+      "1_1_0": {
+        "title": "Az első nyilvános béta",
+        "intro": "A Quizmoo már online is fut barátoknak és családnak. Ezt tudod játékvezetőként.",
+        "sections": [
+          {
+            "title": "Készíts kvízt",
+            "items": [
+              "Hét kérdéstípus: egy vagy több helyes válasz, igaz vagy hamis, szabad szöveg, szám, szavazás és sorba rendezés, bármelyikhez tehetsz képet is.",
+              "A szerkesztő gépelés közben ment, telefonos előnézetben mutatja a kérdést, és felsorolja, mit kell még javítanod.",
+              "Kérdéseket táblázatból (Excel, Google Táblázatok) vagy Quizmoo-fájlból is betölthetsz, és bármelyik kvízt letöltheted, hogy megoszd.",
+              "Témák, válaszszínek és jelek vagy saját színek, a kivetítőn pedig a logód és a rendezvényed neve."
+            ]
+          },
+          {
+            "title": "Vezesd a játékot",
+            "items": [
+              "A játékosok PIN-nel vagy QR-kóddal lépnek be bármilyen telefonról, alkalmazás és fiók nélkül. Legfeljebb 60-an.",
+              "Megállíthatod az időt, adhatsz még 30 másodpercet, átugorhatsz kérdést, üzenhetsz minden telefonra, és bármikor megmutathatsz újra egy kérdést vagy az állást.",
+              "Akár 30 nappal előre beütemezhetsz egy játékot, és elküldheted a linkjét; a játékosok a naptárukba is felvehetik.",
+              "Játék közben zárold a képernyődet, hogy senki ne lesse le a válaszokat a gépedről.",
+              "Az „Új kör” egy koppintással indít új játékot ugyanazokkal a játékosokkal."
+            ]
+          },
+          {
+            "title": "Játsszatok csapatban",
+            "items": [
+              "A csapatokat te állítod össze, a játékosok alakítják, vagy mindkettő; aki akar, a csapatok mellett egyedül is játszhat.",
+              "Minden csapat a maga módján válaszol: a kapitány dönt, többségi szavazás, vagy mindenki számít."
+            ]
+          },
+          {
+            "title": "Nézd meg az eredményeket",
+            "items": [
+              "Összegzés a dobogóval, a legkönnyebb és a legnehezebb kérdéssel, utána minden játékos, csapat és kérdés részletei, és CSV-export.",
+              "Az eredményeket 90 napig őrizzük, utána töröljük."
+            ]
+          },
+          {
+            "title": "A fiókod",
+            "items": [
+              "Beállításaim: gyorsüzenetek, a megszokott játékbeállításaid, arculat, jelszó és zárkód.",
+              "Bármikor letöltheted minden adatodat, vagy törölheted a fiókodat.",
+              "A barátaid a kezdőlapon kérhetnek játékvezetői fiókot; egy admin hagyja jóvá."
+            ]
+          },
+          {
+            "title": "Jó tudni",
+            "items": [
+              "A Quizmoo alkalmazásként is telepíthető telefonra vagy gépre.",
+              "Hibát találtál, vagy van egy ötleted? Írd meg nekünk a menü Visszajelzés pontjában."
+            ]
+          }
+        ]
+      }
+    }
+  },
   "settings": {
     "title": "Beállításaim",
     "help": "Minden kvízedhez és játékodhoz ezek járnak.",

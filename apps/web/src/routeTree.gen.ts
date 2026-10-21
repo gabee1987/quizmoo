@@ -23,6 +23,7 @@ import { Route as HostPasswordRouteImport } from './routes/host/password'
 import { Route as HostSettingsRouteImport } from './routes/host/settings'
 import { Route as HostTermsRouteImport } from './routes/host/terms'
 import { Route as HostUsersRouteImport } from './routes/host/users'
+import { Route as HostWhatsNewRouteImport } from './routes/host/whats-new'
 import { Route as PlayPinRouteImport } from './routes/play.$pin'
 import { Route as ScreenPinRouteImport } from './routes/screen.$pin'
 import { Route as HostGamesIndexRouteImport } from './routes/host/games.index'
@@ -102,6 +103,11 @@ const HostUsersRoute = HostUsersRouteImport.update({
   path: '/users',
   getParentRoute: () => HostRouteRoute,
 } as any)
+const HostWhatsNewRoute = HostWhatsNewRouteImport.update({
+  id: '/whats-new',
+  path: '/whats-new',
+  getParentRoute: () => HostRouteRoute,
+} as any)
 const PlayPinRoute = PlayPinRouteImport.update({
   id: '/play/$pin',
   path: '/play/$pin',
@@ -157,6 +163,7 @@ export interface FileRoutesByFullPath {
   '/host/settings': typeof HostSettingsRoute
   '/host/terms': typeof HostTermsRoute
   '/host/users': typeof HostUsersRoute
+  '/host/whats-new': typeof HostWhatsNewRoute
   '/play/$pin': typeof PlayPinRoute
   '/screen/$pin': typeof ScreenPinRoute
   '/host/': typeof HostIndexRoute
@@ -180,6 +187,7 @@ export interface FileRoutesByTo {
   '/host/settings': typeof HostSettingsRoute
   '/host/terms': typeof HostTermsRoute
   '/host/users': typeof HostUsersRoute
+  '/host/whats-new': typeof HostWhatsNewRoute
   '/play/$pin': typeof PlayPinRoute
   '/screen/$pin': typeof ScreenPinRoute
   '/host': typeof HostIndexRoute
@@ -205,6 +213,7 @@ export interface FileRoutesById {
   '/host/settings': typeof HostSettingsRoute
   '/host/terms': typeof HostTermsRoute
   '/host/users': typeof HostUsersRoute
+  '/host/whats-new': typeof HostWhatsNewRoute
   '/play/$pin': typeof PlayPinRoute
   '/screen/$pin': typeof ScreenPinRoute
   '/host/': typeof HostIndexRoute
@@ -231,6 +240,7 @@ export interface FileRouteTypes {
     | '/host/settings'
     | '/host/terms'
     | '/host/users'
+    | '/host/whats-new'
     | '/play/$pin'
     | '/screen/$pin'
     | '/host/'
@@ -254,6 +264,7 @@ export interface FileRouteTypes {
     | '/host/settings'
     | '/host/terms'
     | '/host/users'
+    | '/host/whats-new'
     | '/play/$pin'
     | '/screen/$pin'
     | '/host'
@@ -278,6 +289,7 @@ export interface FileRouteTypes {
     | '/host/settings'
     | '/host/terms'
     | '/host/users'
+    | '/host/whats-new'
     | '/play/$pin'
     | '/screen/$pin'
     | '/host/'
@@ -403,6 +415,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HostUsersRouteImport
       parentRoute: typeof HostRouteRoute
     }
+    '/host/whats-new': {
+      id: '/host/whats-new'
+      path: '/whats-new'
+      fullPath: '/host/whats-new'
+      preLoaderRoute: typeof HostWhatsNewRouteImport
+      parentRoute: typeof HostRouteRoute
+    }
     '/play/$pin': {
       id: '/play/$pin'
       path: '/play/$pin'
@@ -468,6 +487,7 @@ interface HostRouteRouteChildren {
   HostSettingsRoute: typeof HostSettingsRoute
   HostTermsRoute: typeof HostTermsRoute
   HostUsersRoute: typeof HostUsersRoute
+  HostWhatsNewRoute: typeof HostWhatsNewRoute
   HostIndexRoute: typeof HostIndexRoute
   HostGamesPinRoute: typeof HostGamesPinRoute
   HostQuizzesQuizIdRoute: typeof HostQuizzesQuizIdRoute
@@ -482,6 +502,7 @@ const HostRouteRouteChildren: HostRouteRouteChildren = {
   HostSettingsRoute: HostSettingsRoute,
   HostTermsRoute: HostTermsRoute,
   HostUsersRoute: HostUsersRoute,
+  HostWhatsNewRoute: HostWhatsNewRoute,
   HostIndexRoute: HostIndexRoute,
   HostGamesPinRoute: HostGamesPinRoute,
   HostQuizzesQuizIdRoute: HostQuizzesQuizIdRoute,

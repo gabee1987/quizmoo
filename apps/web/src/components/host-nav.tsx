@@ -11,6 +11,7 @@ import {
   ScaleIcon,
   SettingsIcon,
   ShieldIcon,
+  SparklesIcon,
   UserRoundIcon,
   UsersIcon,
 } from 'lucide-react'
@@ -29,6 +30,7 @@ import { apiFetch } from '@/lib/api'
 import type { User } from '@/lib/auth'
 import { cn } from '@/lib/cn'
 import { useSiteInfo } from '@/lib/site'
+import { useUnseenRelease } from '../features/whats-new/use-release-seen'
 
 type To = '/host' | '/host/quizzes' | '/host/games' | '/host/users' | '/host/nicknames'
 
@@ -67,6 +69,7 @@ export function HostNav({ user }: { user: User }) {
         ]
       : []
   const feedbackUrl = useSiteInfo().data?.feedbackUrl
+  const unseen = useUnseenRelease()
 
   return (
     <>
@@ -110,6 +113,14 @@ export function HostNav({ user }: { user: User }) {
             <SettingsIcon className="size-5 transition-transform duration-500 ease-spring group-hover:rotate-45 group-data-[status=active]:animate-wiggle" />
             {t('nav.settings')}
           </Link>
+          <Link
+            to="/host/whats-new"
+            className="group flex min-h-11 items-center gap-3 rounded-xl px-3 font-semibold text-muted-foreground transition-colors duration-300 outline-none hover:bg-muted hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring data-[status=active]:bg-secondary data-[status=active]:text-secondary-foreground"
+          >
+            <SparklesIcon className="size-5 transition-transform duration-300 ease-spring group-hover:scale-115 group-hover:-rotate-8 group-data-[status=active]:animate-wiggle" />
+            {t('whatsNew.title')}
+            {unseen && <UnseenDot />}
+          </Link>
           {feedbackUrl && (
             <a
               href={feedbackUrl}
@@ -151,7 +162,7 @@ export function HostNav({ user }: { user: User }) {
           <li className="flex-1">
             <DropdownMenu>
               <DropdownMenuTrigger className={cn(tabClass, 'w-full')}>
-                <TabIcon icon={UserRoundIcon} />
+                <TabIcon icon={UserRoundIcon} dot={unseen} />
                 {t('nav.account')}
               </DropdownMenuTrigger>
               <DropdownMenuContent side="top" align="end" className="min-w-52">
@@ -178,6 +189,13 @@ export function HostNav({ user }: { user: User }) {
                   <Link to="/host/settings">
                     <SettingsIcon />
                     {t('nav.settings')}
+                  </Link>
+                </MenuLink>
+                <MenuLink>
+                  <Link to="/host/whats-new">
+                    <SparklesIcon />
+                    {t('whatsNew.title')}
+                    {unseen && <UnseenDot />}
                   </Link>
                 </MenuLink>
                 {feedbackUrl && (
@@ -210,10 +228,21 @@ export function HostNav({ user }: { user: User }) {
 const tabClass =
   'group flex min-h-16 flex-col items-center justify-center gap-0.5 text-xs font-bold text-muted-foreground outline-none focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:ring-inset data-[status=active]:text-primary dark:data-[status=active]:text-foreground'
 
-function TabIcon({ icon: Icon }: { icon: ComponentType<{ className?: string }> }) {
+function TabIcon({ icon: Icon, dot = false }: { icon: ComponentType<{ className?: string }>; dot?: boolean }) {
   return (
-    <span className="flex h-8 w-14 items-center justify-center rounded-full transition-colors duration-300 group-data-[status=active]:animate-pop group-data-[status=active]:bg-secondary">
+    <span className="relative flex h-8 w-14 items-center justify-center rounded-full transition-colors duration-300 group-data-[status=active]:animate-pop group-data-[status=active]:bg-secondary">
       <Icon className="size-5 group-data-[status=active]:animate-wiggle" />
+      {dot && <UnseenDot className="absolute top-0.5 right-3" />}
+    </span>
+  )
+}
+
+/** "What's new" has notes the host has not opened yet. */
+function UnseenDot({ className }: { className?: string }) {
+  const { t } = useTranslation()
+  return (
+    <span className={cn('size-2.5 shrink-0 animate-pop rounded-full bg-primary', className)}>
+      <span className="sr-only">({t('whatsNew.unseen')})</span>
     </span>
   )
 }

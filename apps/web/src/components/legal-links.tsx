@@ -1,8 +1,9 @@
 import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/cn'
+import { APP_VERSION } from '@/lib/version'
 
-/** Privacy · Terms · Cookies · Imprint, under the join, login and sign-up cards and in the host sidebar. */
+/** Privacy · Terms · Cookies · Imprint and the version, under the join, login and sign-up cards and in the host sidebar. */
 export function LegalLinks({ className }: { className?: string }) {
   const { t } = useTranslation()
   const link =
@@ -30,6 +31,7 @@ export function LegalLinks({ className }: { className?: string }) {
             {t('legal.nav.imprint')}
           </Link>
         </li>
+        <li>{t('whatsNew.versionShort', { version: APP_VERSION })}</li>
       </ul>
     </nav>
   )

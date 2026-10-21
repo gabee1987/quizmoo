@@ -56,6 +56,7 @@ Error shape everywhere: `{ error: '<i18n key>' }`. Status codes: 400 invalid inp
 | `GET /api/me/settings` | session | the host's own settings (`hostSettingsSchema`, defaults when never saved): `{ settings, hasLockCode }` |
 | `PUT /api/me/lock-code` / `DELETE /api/me/lock-code` | session | the default screen lock code `{ code }` (4 to 8 digits), stored only as an argon2 hash in `host_settings.lock_code_hash`, never sent back |
 | `GET` / `PUT` / `DELETE /api/me/signup-email` | admin | `{ email, mailConfigured }` / `{ email }` / 204: the admin's address for sign-up e-mails (`host_settings.signup_notify_email`), shown to its own admin only; demoting to editor clears it |
+| `GET` / `PUT /api/me/release` | session | `{ seen }` / `{ version }` (`x.y.z`) -> 204: the last version whose patch notes the host opened (`host_settings.seen_release`), for the "What's new" dot; in the export |
 | `POST /api/me/signup-email/test` | admin | sends a test e-mail to the saved address (204); 409 `errors.mailNotConfigured` / `errors.noSignupEmail`, 502 `errors.mailFailed`; 3 per hour |
 | `POST /api/me/unlock` | session (also while locked) | `{ secret }`: a locked game's code, the default code or the password unlocks every game of the host (204), else 400 `errors.wrongUnlockSecret`; 5 per minute |
 | `PUT /api/me/settings` | session | replace them; no user id in any `/api/me` URL, so a host only reaches their own row. `logoImageId` must be an image the host uploaded (else 400 `errors.invalidInput`) |

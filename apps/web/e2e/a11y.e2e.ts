@@ -101,6 +101,9 @@ for (const mode of modes) {
       await host.goto('/host/quizzes')
       await expect(host.getByText(title)).toBeVisible()
       await expectAccessible(host, 'quiz list')
+      await host.goto('/host/whats-new')
+      await expect(host.getByRole('heading', { name: "What's new", level: 1 })).toBeVisible()
+      await expectAccessible(host, "what's new")
 
       pin = ((await (await host.request.post('/api/games', { data: { quizId: quiz.id } })).json()) as { pin: string }).pin
 

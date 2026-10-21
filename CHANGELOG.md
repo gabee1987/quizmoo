@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 1.1.0 – 2026-10-21
+
+The first hosted release, for friends and family.
+
+### What's new and the version
+- Hosts get a "What's new" page in the navigation with patch notes written for them, in Hungarian and English, newest first. A dot marks it until the host opens the notes of the running version; this is remembered on the account, so it clears on every device. After updating, run `pnpm --filter @quizmoo/server db:migrate` (production deploys migrate on start).
+- The version (`v1.1.0`) shows next to the legal links under the join, login and sign-up cards and in the host sidebar. It comes from the root `package.json`; a test fails when the version has no patch notes.
+
 ### Home page
 - The join card now has a Play / Host switch: Play (chosen by default, where QR codes land) holds the PIN as before, Host holds the login form and "Ask for one" when sign-up is open, instead of the small "Host login" link under the card.
 
