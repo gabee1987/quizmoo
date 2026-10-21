@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### Home page
+- The join card now has a Play / Host switch: Play (chosen by default, where QR codes land) holds the PIN as before, Host holds the login form and "Ask for one" when sign-up is open, instead of the small "Host login" link under the card.
+
 ### Host control during a game
 - The host can show the standings after any question, whatever the scoreboard setting, also when answers are revealed only at the end; then the projector and the phones show the totals and ranks so far, without the last question's points or rank arrows.
 - A Standings card on the host control lists teams and players by rank in every phase after the lobby, with the real scores also while results are held back (only the host sees them), and "Results so far" opens the running game's results in a new tab.
@@ -12,6 +15,11 @@
 - "End game" asks how: "Show the podium" as before, or "Close the game", which ends it at once from any point, skips the podium and any results waiting for release, tells every phone and the projector the game is over and disconnects them; the host lands on the results, which stay in the history. Ending a game still in its lobby closes it.
 - "Lock screen" replaces "Hide screen": it locks every host page of the account, on every device it is logged in on, until the host types their lock code or password. While locked the server sends the host's screens only what the projector shows, refuses host commands and answers every other host request with 423, so neither a reload, another tab nor the browser's developer tools reveal answers, scores or quizzes. The projector and the phones carry on. Five unlock tries a minute.
 - The lock code (4 to 8 digits) is set in My settings (Account) as the default for new games, in the new game dialog for one game, or when locking a game without one; with none, the password unlocks. Codes are stored only as argon2 hashes. After updating, run `pnpm --filter @quizmoo/server db:migrate` (production deploys migrate on start).
+
+### Sign-up e-mails
+- Admins can get an e-mail when someone signs up as a host: My settings, Account, "Sign-up e-mails", with "Send a test e-mail". It says how many sign-ups are waiting (never who) and links to the Users page; at most one e-mail every 15 minutes, sign-ups in between are counted in the next one. Sent through Brevo's HTTPS API when `BREVO_API_KEY` and `MAIL_FROM` are set (Railway's Hobby plan blocks SMTP); the privacy page names the provider from `MAIL_PROVIDER`.
+- A logged-out visitor who opens a host page (such as the e-mail's link) returns to it after logging in.
+- The address is visible only to its own admin, never logged, included in "Download my data", and deleted when the admin removes it or becomes a host. After updating, run `pnpm --filter @quizmoo/server db:migrate` (production deploys migrate on start).
 
 ### Hosted beta
 - Privacy page (`/privacy`, Hungarian and English), linked from the join and login pages: what is stored, for how long, cookies, where it runs, and whom to ask, with the operator's name and e-mail from `OPERATOR_NAME` and `OPERATOR_EMAIL`.

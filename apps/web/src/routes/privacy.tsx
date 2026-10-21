@@ -22,6 +22,7 @@ function PrivacyPage() {
               seatDays: PLAYER_SEAT_DAYS,
               age: MIN_HOST_AGE,
               hosting: site.hosting ?? t('legal.operator.hostingUnknown'),
+              mail: site.mailProvider ?? t('legal.operator.mailUnknown'),
             }) as LegalSection[]
           }
         />

@@ -34,7 +34,6 @@
     "newTeamPlaceholder": "e.g. Quiz Wizards",
     "newTeamNameRequired": "Give your team a name.",
     "submit": "Join",
-    "hostLogin": "Host login",
     "pinInvalid": "Enter the 6-digit PIN.",
     "nameRequired": "Enter a name.",
     "scan": "Scan QR code",
@@ -61,6 +60,12 @@
     "tagline": "Think. Quiz. Outsmart the herd!",
     "cowLabel": "Pet the cow",
     "joinLink": "Joining as a player? Enter the PIN",
+    "sides": "Play or host",
+    "play": "Play",
+    "host": "Host",
+    "hostIntro": "Log in to make quizzes and run games for your crowd.",
+    "noAccount": "No account yet?",
+    "createAccount": "Ask for one",
     "moo": {
       "line1": "Moo!",
       "line2": "Type the PIN, I’m waiting!",
@@ -1069,6 +1074,9 @@
     "gameClosed": "The host closed the game. Thanks for playing!",
     "screenLocked": "Your screens are locked. Unlock them with your lock code or password.",
     "wrongUnlockSecret": "That is not your lock code or password. Try again.",
+    "mailNotConfigured": "E-mail is not set up on this server.",
+    "noSignupEmail": "Save an address first.",
+    "mailFailed": "The e-mail could not be sent. Check the address, or ask whoever runs the server to check the e-mail set-up.",
     "leftGame": "You left this game.",
     "unsupportedImage": "Use a JPG, PNG or WebP image.",
     "fileTooLarge": "The file is larger than 5 MB.",
@@ -1123,6 +1131,21 @@
       "remove": "Remove code",
       "saved": "Lock code saved",
       "removed": "Lock code removed"
+    },
+    "signupEmail": {
+      "title": "Sign-up e-mails",
+      "help": "When someone signs up as a host, we e-mail this address with a link to the Users page, where you approve or reject them. The e-mail says only how many are waiting, never who. At most one e-mail every 15 minutes.",
+      "set": "Sign-up e-mails go to {{email}}.",
+      "none": "No address yet: you see new sign-ups only on the Users page.",
+      "notConfigured": "E-mail is not set up on this server, so nothing is sent. Whoever runs it needs to add a Brevo API key and a sender address (see the deploy guide).",
+      "address": "E-mail address",
+      "invalid": "Type an e-mail address, like name@example.com.",
+      "submit": "Save address",
+      "remove": "Remove address",
+      "test": "Send a test e-mail",
+      "saved": "Address saved",
+      "removed": "Address removed",
+      "testSent": "Test e-mail sent. Check your inbox (and the spam folder)."
     },
     "leaveTitle": "Leave without saving?",
     "leaveBody": "Your changes to My settings are not saved yet.",
@@ -1357,6 +1380,7 @@
       "contactUnknown": "Ask the organiser of your game.",
       "hosting": "Hosting",
       "hostingUnknown": "a hosting provider chosen by the operator",
+      "mailUnknown": "an e-mail provider chosen by the operator",
       "nature": "A free, non-commercial hobby project of a private individual: no company, no ads, no paid plans."
     },
     "privacy": {
@@ -1387,7 +1411,8 @@
             "Your username, and your password only as a one-way hash that nobody can turn back into the password.",
             "When you last logged in (shown only to the admin, to see which accounts are still used), and which version of the terms you accepted and when (the record of our agreement).",
             "Your logins: a random code per browser, stored as a hash, for up to {{sessionDays}} days.",
-            "Your quizzes, the pictures you upload, your settings, and the games you ran with their results."
+            "Your quizzes, the pictures you upload, your settings, and the games you ran with their results.",
+            "Admins only, if they enter one: an e-mail address for notices about new sign-ups, used for nothing else and deleted when they remove it or stop being an admin."
           ],
           "paragraphs": [
             "Legal basis: the agreement to use the service, i.e. the terms of use (Article 6(1)(b)); for the last login, the record of the terms and the security measures, the legitimate interest in running the service safely (Article 6(1)(f))."
@@ -1424,6 +1449,7 @@
           "heading": "Who else gets your data",
           "paragraphs": [
             "Nobody, for their own purposes. The service runs at a hosting provider ({{hosting}}), which stores and processes the data only to run it, as a processor under its data processing terms. If the provider or its parent company is outside the EU/EEA, transfers rely on the safeguards the GDPR requires: an adequacy decision such as the EU–US Data Privacy Framework, or standard contractual clauses.",
+            "When an admin has entered an address for sign-up notices, those e-mails go out through an e-mail provider ({{mail}}), also as a processor. It receives the admin's address and the notice, which says only how many sign-ups are waiting.",
             "There are no analytics, advertising or social media tools, and the app loads nothing from other sites. The Feedback link for hosts leads to GitHub, a separate service with its own privacy policy; using it is optional."
           ]
         },

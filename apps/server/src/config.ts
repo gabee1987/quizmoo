@@ -35,6 +35,12 @@ const envSchema = z.object({
       .default('false')
       .transform((v) => v === 'true'),
   ),
+  /** Brevo's HTTPS API (Railway's Hobby plan blocks SMTP): e-mails admins about new sign-ups. Nothing is sent without it. */
+  BREVO_API_KEY: emptyAsUnset(z.string().trim().min(1).max(200).optional()),
+  /** Sender address, verified in Brevo. */
+  MAIL_FROM: emptyAsUnset(z.string().trim().email().max(200).optional()),
+  /** The e-mail provider and where it keeps data, named on the privacy page as a processor. */
+  MAIL_PROVIDER: emptyAsUnset(z.string().trim().min(1).max(200).optional()),
 })
 
 export type Config = z.infer<typeof envSchema>

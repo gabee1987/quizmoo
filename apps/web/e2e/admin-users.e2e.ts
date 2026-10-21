@@ -3,7 +3,8 @@ import { expect, test } from '@playwright/test'
 /**
  * The admin's Users page: add an account, change its role, set a new password (which logs the
  * account out and must be changed), log it out everywhere and delete it after typing its name.
- * The admin's own card has no actions. Anything left behind is deleted at the end.
+ * The admin's own card has no actions. Anything left behind is deleted at the end. Then the admin's
+ * sign-up e-mail address in My settings, put back as it was afterwards.
  */
 
 const username = process.env.E2E_USERNAME
@@ -25,6 +26,7 @@ test('an admin manages a host account from the Users page', async ({ browser, pa
   await page.getByLabel('Password', { exact: true }).fill(password!)
   await page.getByRole('button', { name: 'Log in' }).click()
   await expect(page).toHaveURL(/\/host$/)
+  const before = ((await (await page.request.get('/api/me/signup-email')).json()) as { email: string | null }).email
 
   try {
     await test.step('the admin pages sit in their own group and the own card has no actions', async () => {
@@ -95,7 +97,23 @@ test('an admin manages a host account from the Users page', async ({ browser, pa
       await expect(card).toHaveCount(0)
       expect((await login('e2e-reset-pass-1')).status()).toBe(401)
     })
+
+    await test.step('the admin sets and removes the address for sign-up e-mails', async () => {
+      await page.goto('/host/settings?tab=account')
+      const section = page.locator('section').filter({ has: page.getByRole('heading', { name: 'Sign-up e-mails' }) })
+      const field = section.getByLabel('E-mail address')
+      await field.fill('not-an-address')
+      await section.getByRole('button', { name: 'Save address' }).click()
+      await expect(section.getByText('Type an e-mail address, like name@example.com.')).toBeVisible()
+      await field.fill('E2E-Admin@Example.test')
+      await section.getByRole('button', { name: 'Save address' }).click()
+      await expect(section.getByText('Sign-up e-mails go to e2e-admin@example.test.')).toBeVisible()
+      await section.getByRole('button', { name: 'Remove address' }).click()
+      await expect(section.getByText('No address yet: you see new sign-ups only on the Users page.')).toBeVisible()
+    })
   } finally {
+    if (before) await page.request.put('/api/me/signup-email', { data: { email: before } })
+    else await page.request.delete('/api/me/signup-email')
     const list = await page.request.get('/api/users')
     if (list.ok()) {
       const { users } = (await list.json()) as { users: { id: string; username: string }[] }

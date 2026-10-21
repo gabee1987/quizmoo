@@ -1,7 +1,17 @@
 import type { Avatar, GamePublicInfo } from '@quizmoo/shared'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
-import { CalendarClockIcon, CameraIcon, CheckIcon, DicesIcon, Loader2Icon, LogOutIcon, PlayIcon } from 'lucide-react'
+import {
+  CalendarClockIcon,
+  CameraIcon,
+  CheckIcon,
+  DicesIcon,
+  Gamepad2Icon,
+  Loader2Icon,
+  LogOutIcon,
+  PlayIcon,
+  PresentationIcon,
+} from 'lucide-react'
 import { Suspense, lazy, useEffect, useRef, useState, type FormEvent } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
 import { z } from 'zod'
@@ -13,6 +23,9 @@ import { HomeHero } from '@/components/home-hero'
 import { LegalLinks } from '@/components/legal-links'
 import { PinInput } from '@/components/pin-input'
 import { Button } from '@/components/ui/button'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { LoginForm } from '@/features/auth/login-form'
+import { useSiteInfo } from '@/lib/site'
 import { TextField } from '../components/text-field'
 import { TeamPicker, teamChoice } from '../features/join/team-picker'
 import { useTimeReached } from '@/lib/clock'
@@ -51,6 +64,8 @@ function JoinPage() {
   const [scanning, setScanning] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [pinChecked, setPinChecked] = useState(false)
+  const [side, setSide] = useState<'play' | 'host'>('play')
+  const site = useSiteInfo()
 
   const pinValid = PIN_PATTERN.test(pin)
   const info = useQuery({
@@ -102,7 +117,7 @@ function JoinPage() {
   // Typing the PIN brings the card to the top; once the game is found (also after a reload or a QR
   // link) the keyboard closes and the page settles with the Quizmoo name at the top, the form below it.
   const pinBox = useRef<HTMLDivElement>(null)
-  const card = useRef<HTMLFormElement>(null)
+  const card = useRef<HTMLDivElement>(null)
   const title = useRef<HTMLHeadingElement>(null)
   // The empty page fits the screen, so while the PIN boxes have focus a spacer below the card makes
   // room to scroll it up (the phone's keyboard covers the lower half anyway).
@@ -202,140 +217,161 @@ function JoinPage() {
       <FloatingShapes />
       <HomeHero tagline={t('home.tagline')} titleRef={title} />
       <div className="relative flex w-full flex-col gap-5 lg:max-w-sm lg:justify-self-center">
-        <form
-          ref={card}
-          className="flex animate-pop scroll-mt-4 flex-col gap-5 rounded-3xl border bg-card p-5 shadow-soft"
-          onSubmit={(e) => void onSubmit(e)}
-          noValidate
-        >
-          <h2 className="text-center text-2xl font-black tracking-tight">{t('join.title')}</h2>
-          <div
-            ref={pinBox}
-            className="flex flex-col gap-2"
-            onFocus={() => setPinFocused(true)}
-            onBlur={(e) => {
-              if (!pinBox.current?.contains(e.relatedTarget)) setPinFocused(false)
-            }}
-          >
-            <div className="flex min-h-10 items-center justify-between gap-2">
-              <span className="font-semibold">{t('join.pin')}</span>
-              {canScan && (
-                <Button type="button" variant="outline" size="sm" onClick={() => setScanning(true)}>
-                  <CameraIcon aria-hidden="true" />
-                  {t('join.scan')}
-                </Button>
-              )}
-            </div>
-            <PinInput value={pin} onChange={setPin} invalid={!!pinError} describedBy={pinError ? 'pin-error' : undefined} />
-            {pinError && (
-              <p id="pin-error" className="text-sm font-semibold text-destructive">
-                {pinError}
-              </p>
-            )}
-            {/* Until the game is found: OK closes the keyboard and checks the PIN. */}
-            {!game &&
-              (pinValid && info.isFetching ? (
-                <p role="status" className="flex min-h-11 items-center justify-center gap-2 font-semibold text-muted-foreground">
-                  <Loader2Icon className="size-4 animate-spin" aria-hidden="true" />
-                  {t('join.findingGame')}
-                </p>
-              ) : (
-                <Button type="button" variant="secondary" onClick={confirmPin}>
-                  <CheckIcon aria-hidden="true" />
-                  {t('join.pinOk')}
-                </Button>
-              ))}
-          </div>
-          {/* Name, avatar and team come once the PIN has found a game: they belong to that game. */}
-          {game ? (
-            <div className="flex animate-pop flex-col gap-5">
-              {waiting && game.scheduledAt !== null ? (
-                <div role="status" className="flex flex-col items-center gap-3 rounded-2xl bg-secondary p-4 text-center text-secondary-foreground">
-                  <p className="font-bold wrap-break-word">{game.quizTitle}</p>
-                  <CalendarClockIcon className="size-10 text-primary dark:text-ring" aria-hidden="true" />
-                  <p className="text-xl font-black text-balance">
-                    {t('join.scheduled', { date: formatStart(game.scheduledAt, i18n.language) })}
-                  </p>
-                  <p className="text-sm">{t('join.scheduledHelp')}</p>
-                  <div className="flex flex-wrap justify-center gap-2">
-                    <AddToCalendarButton
-                      pin={pin}
-                      scheduledAt={game.scheduledAt}
-                      quizTitle={game.quizTitle}
-                      joinUrl={game.joinUrl}
-                      variant="outline"
-                    />
-                    <Button type="button" variant="ghost" onClick={leave}>
-                      <LogOutIcon aria-hidden="true" />
-                      {t('join.leave')}
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                <p className="rounded-xl bg-secondary px-4 py-2 text-center font-bold text-secondary-foreground wrap-break-word">
-                  {game.quizTitle}
-                </p>
-              )}
-              <TextField
-                label={t('join.name')}
-                name="name"
-                maxLength={24}
-                autoComplete="off"
-                enterKeyHint="go"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder={t('join.namePlaceholder')}
-                error={nameError}
-              />
-              <Button
-                type="button"
-                variant="secondary"
-                size="sm"
-                className="-mt-3 self-start"
-                disabled={surprise.isPending}
-                onClick={() => surprise.mutate()}
-              >
-                {surprise.isPending ? <Loader2Icon className="animate-spin" aria-hidden="true" /> : <DicesIcon aria-hidden="true" />}
-                {t('join.surprise')}
-              </Button>
-              <AvatarPicker value={avatar} onChange={setAvatar} />
-              {teamMode && (
-                <TeamPicker
-                  teams={game.teams}
-                  newTeams={game.newTeams}
-                  solo={game.solo}
-                  selected={teamId ?? ''}
-                  newName={newTeamName}
-                  onSelect={setTeamId}
-                  onNewName={setNewTeamName}
-                  error={teamError && <span className="font-semibold text-destructive">{teamError}</span>}
-                />
-              )}
-              {error && <FormAlert>{t(error)}</FormAlert>}
-              {/* A scheduled game: the details can be filled in now, joining opens at the start. */}
-              <Button type="submit" size="xl" disabled={pending || waiting}>
-                {pending ? <Loader2Icon className="animate-spin" aria-hidden="true" /> : <PlayIcon aria-hidden="true" />}
-                {pending ? t('common.loading') : waiting ? t('join.opensAtStart') : t('join.submit')}
-              </Button>
-              {/* Players have no account to accept anything with: they are told here, where they decide. */}
-              <p className="text-center text-xs text-muted-foreground">
-                <Trans
-                  i18nKey="legal.joinNote"
-                  components={{
-                    terms: <Link to="/terms" className={inlineLink} />,
-                    privacy: <Link to="/privacy" className={inlineLink} />,
+        {/* One card, two sides: playing with a PIN (the default, where QR codes land) or logging in to host. */}
+        <div ref={card} className="flex animate-pop scroll-mt-4 flex-col rounded-3xl border bg-card p-5 shadow-soft">
+          <Tabs value={side} onValueChange={(value) => setSide(value as typeof side)} className="gap-5">
+            <TabsList variant="bold" aria-label={t('home.sides')}>
+              {/* The unchosen side's text needs more than the default 60 % for 4.5:1 on the light track. */}
+              <TabsTrigger value="play" className="text-foreground/80">
+                <Gamepad2Icon aria-hidden="true" />
+                {t('home.play')}
+              </TabsTrigger>
+              <TabsTrigger value="host" className="text-foreground/80">
+                <PresentationIcon aria-hidden="true" />
+                {t('home.host')}
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value="play">
+              <form className="flex flex-col gap-5" onSubmit={(e) => void onSubmit(e)} noValidate>
+                <h2 className="sr-only">{t('join.title')}</h2>
+                <div
+                  ref={pinBox}
+                  className="flex flex-col gap-2"
+                  onFocus={() => setPinFocused(true)}
+                  onBlur={(e) => {
+                    if (!pinBox.current?.contains(e.relatedTarget)) setPinFocused(false)
                   }}
-                />
-              </p>
-            </div>
-          ) : (
-            error && <FormAlert>{t(error)}</FormAlert>
-          )}
-        </form>
-        <div className="flex flex-wrap justify-center gap-x-5 gap-y-2">
-          <Link to="/login" className={footerLink}>
-            {t('join.hostLogin')}
-          </Link>
+                >
+                  <div className="flex min-h-10 items-center justify-between gap-2">
+                    <span className="font-semibold">{t('join.pin')}</span>
+                    {canScan && (
+                      <Button type="button" variant="outline" size="sm" onClick={() => setScanning(true)}>
+                        <CameraIcon aria-hidden="true" />
+                        {t('join.scan')}
+                      </Button>
+                    )}
+                  </div>
+                  <PinInput value={pin} onChange={setPin} invalid={!!pinError} describedBy={pinError ? 'pin-error' : undefined} />
+                  {pinError && (
+                    <p id="pin-error" className="text-sm font-semibold text-destructive">
+                      {pinError}
+                    </p>
+                  )}
+                  {/* Until the game is found: OK closes the keyboard and checks the PIN. */}
+                  {!game &&
+                    (pinValid && info.isFetching ? (
+                      <p role="status" className="flex min-h-11 items-center justify-center gap-2 font-semibold text-muted-foreground">
+                        <Loader2Icon className="size-4 animate-spin" aria-hidden="true" />
+                        {t('join.findingGame')}
+                      </p>
+                    ) : (
+                      <Button type="button" variant="secondary" onClick={confirmPin}>
+                        <CheckIcon aria-hidden="true" />
+                        {t('join.pinOk')}
+                      </Button>
+                    ))}
+                </div>
+                {/* Name, avatar and team come once the PIN has found a game: they belong to that game. */}
+                {game ? (
+                  <div className="flex animate-pop flex-col gap-5">
+                    {waiting && game.scheduledAt !== null ? (
+                      <div role="status" className="flex flex-col items-center gap-3 rounded-2xl bg-secondary p-4 text-center text-secondary-foreground">
+                        <p className="font-bold wrap-break-word">{game.quizTitle}</p>
+                        <CalendarClockIcon className="size-10 text-primary dark:text-ring" aria-hidden="true" />
+                        <p className="text-xl font-black text-balance">
+                          {t('join.scheduled', { date: formatStart(game.scheduledAt, i18n.language) })}
+                        </p>
+                        <p className="text-sm">{t('join.scheduledHelp')}</p>
+                        <div className="flex flex-wrap justify-center gap-2">
+                          <AddToCalendarButton
+                            pin={pin}
+                            scheduledAt={game.scheduledAt}
+                            quizTitle={game.quizTitle}
+                            joinUrl={game.joinUrl}
+                            variant="outline"
+                          />
+                          <Button type="button" variant="ghost" onClick={leave}>
+                            <LogOutIcon aria-hidden="true" />
+                            {t('join.leave')}
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="rounded-xl bg-secondary px-4 py-2 text-center font-bold text-secondary-foreground wrap-break-word">
+                        {game.quizTitle}
+                      </p>
+                    )}
+                    <TextField
+                      label={t('join.name')}
+                      name="name"
+                      maxLength={24}
+                      autoComplete="off"
+                      enterKeyHint="go"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder={t('join.namePlaceholder')}
+                      error={nameError}
+                    />
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="sm"
+                      className="-mt-3 self-start"
+                      disabled={surprise.isPending}
+                      onClick={() => surprise.mutate()}
+                    >
+                      {surprise.isPending ? <Loader2Icon className="animate-spin" aria-hidden="true" /> : <DicesIcon aria-hidden="true" />}
+                      {t('join.surprise')}
+                    </Button>
+                    <AvatarPicker value={avatar} onChange={setAvatar} />
+                    {teamMode && (
+                      <TeamPicker
+                        teams={game.teams}
+                        newTeams={game.newTeams}
+                        solo={game.solo}
+                        selected={teamId ?? ''}
+                        newName={newTeamName}
+                        onSelect={setTeamId}
+                        onNewName={setNewTeamName}
+                        error={teamError && <span className="font-semibold text-destructive">{teamError}</span>}
+                      />
+                    )}
+                    {error && <FormAlert>{t(error)}</FormAlert>}
+                    {/* A scheduled game: the details can be filled in now, joining opens at the start. */}
+                    <Button type="submit" size="xl" disabled={pending || waiting}>
+                      {pending ? <Loader2Icon className="animate-spin" aria-hidden="true" /> : <PlayIcon aria-hidden="true" />}
+                      {pending ? t('common.loading') : waiting ? t('join.opensAtStart') : t('join.submit')}
+                    </Button>
+                    {/* Players have no account to accept anything with: they are told here, where they decide. */}
+                    <p className="text-center text-xs text-muted-foreground">
+                      <Trans
+                        i18nKey="legal.joinNote"
+                        components={{
+                          terms: <Link to="/terms" className={inlineLink} />,
+                          privacy: <Link to="/privacy" className={inlineLink} />,
+                        }}
+                      />
+                    </p>
+                  </div>
+                ) : (
+                  error && <FormAlert>{t(error)}</FormAlert>
+                )}
+              </form>
+            </TabsContent>
+            <TabsContent value="host" className="flex flex-col gap-4">
+              <h2 className="sr-only">{t('auth.title')}</h2>
+              <p className="text-center text-muted-foreground text-balance">{t('home.hostIntro')}</p>
+              <LoginForm />
+              {site.data?.registrationOpen && (
+                <p className="text-center text-sm text-muted-foreground">
+                  {t('home.noAccount')}{' '}
+                  <Link to="/register" className={inlineLink}>
+                    {t('home.createAccount')}
+                  </Link>
+                </p>
+              )}
+            </TabsContent>
+          </Tabs>
         </div>
         <LegalLinks />
         {/* Room below for scrolling the card up; out of the layout, so nothing moves when it comes and goes. */}
@@ -356,6 +392,4 @@ function JoinPage() {
   )
 }
 
-const footerLink =
-  'rounded-md text-sm font-semibold text-muted-foreground underline underline-offset-4 outline-none hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring'
 const inlineLink = 'rounded-sm font-semibold underline underline-offset-2 outline-none hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring'

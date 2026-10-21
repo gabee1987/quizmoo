@@ -37,11 +37,12 @@ Finished plans are deleted once their branch is merged: `CHANGELOG.md` records w
 | 28 | Admin pages: users and names | `feature/admin-pages` | done |
 | 29 | My settings in tabs, and the host's own account | `feature/admin-pages` | done |
 | 30 | Legal pages, data rights and a security pass | `feature/legal-and-security` | done |
-| 31 | [The host's running-game screen: standings midgame, names in full, controls in view](phase-31-host-game-screen.md) | `feature/host-game-screen` | done |
+| 31 | The host's running-game screen: standings midgame, names in full, controls in view | `feature/host-game-screen` | done |
 | 32 | Random cow animations on various screens | `feature/cow-antics` | planned |
 | 33 | Patch notes in the app | `feature/patch-notes` | planned |
 | 34 | Help page and interactive tutorial | `feature/help-and-tutorial` | planned |
-| 35 | [Screen lock for the host's game screen](phase-35-screen-lock.md) | `feature/host-game-screen` | done |
+| 35 | Screen lock for the host's game screen | `feature/host-game-screen` | done |
+| 36 | [E-mail to admins about new sign-ups](phase-36-signup-emails.md) | `feature/signup-emails` | done |
 | later | [Hosting without an account](later-guest-hosting.md) | `feature/guest-hosting` | planned, after the MVP |
 
 ## Conventions every plan follows

@@ -1,50 +1,23 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useState, type FormEvent } from 'react'
+import { Link, createFileRoute } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
+import { z } from 'zod'
 import { FloatingShapes } from '@/components/floating-shapes'
 import { HomeHero } from '@/components/home-hero'
 import { LegalLinks } from '@/components/legal-links'
-import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { toastError } from '@/lib/toast'
-import { TextField } from '../components/text-field'
-import { apiFetch } from '../lib/api'
-import { meQueryOptions, type User } from '../lib/auth'
+import { LoginForm } from '@/features/auth/login-form'
 import { useSiteInfo } from '../lib/site'
 
 export const Route = createFileRoute('/login')({
+  // The host page that sent a logged-out visitor here (e.g. the Users page from a sign-up e-mail).
+  validateSearch: z.object({ redirect: z.string().optional().catch(undefined) }),
   component: LoginPage,
 })
 
 function LoginPage() {
   const { t } = useTranslation()
-  const navigate = useNavigate()
-  const queryClient = useQueryClient()
+  const { redirect } = Route.useSearch()
   const site = useSiteInfo()
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
-  const [submitted, setSubmitted] = useState(false)
-
-  const login = useMutation({
-    mutationFn: () =>
-      apiFetch<{ user: User }>('/api/auth/login', { method: 'POST', body: JSON.stringify({ username, password }) }),
-    onSuccess: ({ user }) => {
-      queryClient.setQueryData(meQueryOptions.queryKey, user)
-      void navigate({ to: user.mustChangePassword ? '/host/password' : '/host' })
-    },
-    onError: toastError,
-  })
-
-  const usernameError = submitted && !username.trim() ? t('auth.required') : undefined
-  const passwordError = submitted && !password ? t('auth.required') : undefined
-
-  function onSubmit(e: FormEvent) {
-    e.preventDefault()
-    setSubmitted(true)
-    if (!username.trim() || !password) return
-    login.mutate()
-  }
 
   return (
     <div className="mx-auto grid w-full max-w-sm flex-1 content-center gap-7 lg:max-w-5xl lg:grid-cols-2 lg:items-center lg:gap-16">
@@ -58,31 +31,7 @@ function LoginPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <form className="flex flex-col gap-4" onSubmit={onSubmit} noValidate>
-              <TextField
-                label={t('auth.username')}
-                name="username"
-                autoComplete="username"
-                autoCapitalize="none"
-                enterKeyHint="next"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                error={usernameError}
-              />
-              <TextField
-                label={t('auth.password')}
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                enterKeyHint="go"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                error={passwordError}
-              />
-              <Button type="submit" size="lg" className="mt-2" disabled={login.isPending}>
-                {login.isPending ? t('common.loading') : t('auth.submit')}
-              </Button>
-            </form>
+            <LoginForm redirect={redirect} />
           </CardContent>
         </Card>
         <div className="flex flex-wrap justify-center gap-x-5 gap-y-2">

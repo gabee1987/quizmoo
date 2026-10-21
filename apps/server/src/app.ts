@@ -14,6 +14,7 @@ import fastifyStatic from '@fastify/static'
 import { Server as SocketServer } from 'socket.io'
 import type { Config } from './config.js'
 import type { Db } from './db/index.js'
+import { createMailer, type Mailer } from './mail.js'
 import type { GameManager } from './realtime/game-manager.js'
 import { registerSocketHandlers, type AppSocketServer } from './realtime/handlers.js'
 import { accountRoutes } from './routes/account.js'
@@ -25,15 +26,18 @@ import { quizRoutes } from './routes/quizzes.js'
 import { nicknameRoutes } from './routes/nicknames.js'
 import { resultRoutes } from './routes/results.js'
 import { userRoutes } from './routes/users.js'
+import { createSignupNotifier } from './signup-notify.js'
 
 export interface AppDeps {
   db: Db
   manager: GameManager
   /** Built web app to serve. Defaults to apps/web/dist in production; tests pass a fixture directory. */
   webDist?: string
+  /** Sends the sign-up e-mails. Defaults to Brevo from the config; tests pass a fake. */
+  mailer?: Mailer
 }
 
-export async function buildApp(config: Config, { db, manager, webDist: webDistOverride }: AppDeps) {
+export async function buildApp(config: Config, { db, manager, webDist: webDistOverride, mailer }: AppDeps) {
   // Request logs leave out the client's address and port, and the query string (the game history
   // search carries player names), and errors leave out queries and their values (data minimisation).
   const serializers = {
@@ -138,13 +142,19 @@ export async function buildApp(config: Config, { db, manager, webDist: webDistOv
     feedbackUrl: config.FEEDBACK_URL ?? null,
     retentionDays: config.RESULTS_RETENTION_DAYS,
     registrationOpen: config.REGISTRATION_OPEN,
+    mailProvider: config.MAIL_PROVIDER ?? null,
   }))
-  await app.register(authRoutes, { db, secureCookies, registrationOpen: config.REGISTRATION_OPEN })
+  const signupNotifier = createSignupNotifier({ db, mailer: mailer ?? createMailer(config), appOrigin: config.APP_ORIGIN, log: app.log })
+  app.addHook('onClose', async () => {
+    signupNotifier.close()
+    await signupNotifier.flush()
+  })
+  await app.register(authRoutes, { db, secureCookies, registrationOpen: config.REGISTRATION_OPEN, onSignup: signupNotifier.notify })
   await app.register(multipart)
   await app.register(quizRoutes, { db })
   await app.register(imageRoutes, { db })
   await app.register(userRoutes, { db, manager })
-  await app.register(meRoutes, { db, manager })
+  await app.register(meRoutes, { db, manager, signupNotifier })
   await app.register(accountRoutes, { db, manager, secureCookies })
   await app.register(gameRoutes, { db, manager, appOrigin: config.APP_ORIGIN, pinGuard })
   await app.register(resultRoutes, {
