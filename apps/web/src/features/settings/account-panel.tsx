@@ -5,6 +5,7 @@ import {
   KeyRoundIcon,
   LockIcon,
   LogOutIcon,
+  MailIcon,
   MonitorIcon,
   MoonIcon,
   SmartphoneIcon,
@@ -29,6 +30,7 @@ import { timeAgo } from '../users/format'
 import { LockCodeForm } from './lock-code-form'
 import { PasswordForm } from './password-form'
 import { SettingsSection } from './settings-section'
+import { SignupEmailForm } from './signup-email-form'
 
 export interface Account {
   username: string
@@ -135,6 +137,12 @@ export function AccountPanel() {
       <SettingsSection icon={LockIcon} title={t('settings.lockCode.title')} help={t('settings.lockCode.help')}>
         <LockCodeForm />
       </SettingsSection>
+
+      {account.data?.role === 'admin' && (
+        <SettingsSection icon={MailIcon} title={t('settings.signupEmail.title')} help={t('settings.signupEmail.help')}>
+          <SignupEmailForm />
+        </SettingsSection>
+      )}
 
       <SettingsSection icon={LogOutIcon} title={t('settings.account.logins.title')}>
         {account.data ? (

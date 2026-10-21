@@ -13,6 +13,8 @@ export interface SiteInfo {
   retentionDays: number
   /** Whether hosts may sign up on /register (`REGISTRATION_OPEN`). */
   registrationOpen: boolean
+  /** The e-mail provider for sign-up notices and where it keeps data (`MAIL_PROVIDER`). */
+  mailProvider: string | null
 }
 
 export function useSiteInfo() {

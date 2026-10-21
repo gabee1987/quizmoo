@@ -5,7 +5,7 @@ import { MIN_PASSWORD_LENGTH, hashPassword } from '../auth/password.js'
 import { requireSession } from '../auth/require-session.js'
 import { createUser } from '../auth/users.js'
 import type { Db } from '../db/index.js'
-import { localCredentials, sessions, users } from '../db/schema.js'
+import { hostSettings, localCredentials, sessions, users } from '../db/schema.js'
 import { endGame } from '../game/engine.js'
 import type { GameManager } from '../realtime/game-manager.js'
 import { parseOr400 } from './http.js'
@@ -148,6 +148,8 @@ export async function userRoutes(app: FastifyInstance, { db, manager }: { db: Db
     const body = parseOr400(z.object({ role: roleSchema }), request.body, reply)
     if (!body) return reply
     await db.update(users).set({ role: body.role }).where(eq(users.id, id))
+    // Sign-up e-mails are for admins: an editor's address is not kept.
+    if (body.role === 'editor') await db.update(hostSettings).set({ signupNotifyEmail: null }).where(eq(hostSettings.userId, id))
     return reply.code(204).send()
   })
 

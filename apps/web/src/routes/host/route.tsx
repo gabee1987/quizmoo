@@ -13,7 +13,10 @@ export const Route = createFileRoute('/host')({
     try {
       user = await context.queryClient.ensureQueryData(meQueryOptions)
     } catch (error) {
-      if (error instanceof ApiError && error.status === 401) throw redirect({ to: '/login' })
+      // Back to this page after logging in, e.g. the Users page from a sign-up e-mail.
+      if (error instanceof ApiError && error.status === 401) {
+        throw redirect({ to: '/login', search: { redirect: location.href === '/host' ? undefined : location.href } })
+      }
       throw error
     }
     // The server enforces this too; the redirect just takes the user where they can act.

@@ -132,6 +132,7 @@ describe('app', () => {
       feedbackUrl: null,
       retentionDays: 90,
       registrationOpen: false,
+      mailProvider: null,
     })
     const site = await buildApp(
       {
@@ -140,6 +141,7 @@ describe('app', () => {
         OPERATOR_EMAIL: 'privacy@example.test',
         HOSTING_PROVIDER: 'Example Cloud, EU region',
         FEEDBACK_URL: 'https://example.test/feedback',
+        MAIL_PROVIDER: 'Example Mail, EU',
       },
       { db: { execute: async () => [] } as unknown as Db, manager: newManager() },
     )
@@ -152,6 +154,7 @@ describe('app', () => {
       feedbackUrl: 'https://example.test/feedback',
       retentionDays: 90,
       registrationOpen: false,
+      mailProvider: 'Example Mail, EU',
     })
     await site.app.close()
   })

@@ -18,6 +18,7 @@ import type { Db } from '../db/index.js'
 import { hostSettings, localCredentials } from '../db/schema.js'
 import { hostLocked, unlockHost } from '../game/index.js'
 import type { GameManager } from '../realtime/game-manager.js'
+import type { SignupNotifier } from '../signup-notify.js'
 import { parseOr400 } from './http.js'
 import { ownsImage } from './images.js'
 
@@ -67,6 +68,22 @@ async function saveLockCodeHash(db: Db, userId: string, lockCodeHash: string | n
     .onConflictDoUpdate({ target: hostSettings.userId, set: { lockCodeHash, updatedAt } })
 }
 
+/** An admin's address for sign-up e-mails, or null. */
+export async function readSignupEmail(db: Db, userId: string): Promise<string | null> {
+  const row = (await db.select({ email: hostSettings.signupNotifyEmail }).from(hostSettings).where(eq(hostSettings.userId, userId)))[0]
+  return row?.email ?? null
+}
+
+export async function saveSignupEmail(db: Db, userId: string, signupNotifyEmail: string | null) {
+  const updatedAt = new Date()
+  await db
+    .insert(hostSettings)
+    .values({ userId, signupNotifyEmail, updatedAt })
+    .onConflictDoUpdate({ target: hostSettings.userId, set: { signupNotifyEmail, updatedAt } })
+}
+
+const signupEmailSchema = z.object({ email: z.string().trim().toLowerCase().email().max(200) })
+
 /**
  * Screen lock: true when `secret` is the lock code of one of the host's locked games, their default
  * lock code or their account password. Codes are checked only when the secret looks like one.
@@ -100,8 +117,12 @@ export async function rememberEventName(db: Db, userId: string, eventName: strin
 /**
  * The logged-in host's own settings. No user id in the URL: a host can only ever reach their own row.
  */
-export async function meRoutes(app: FastifyInstance, { db, manager }: { db: Db; manager: GameManager }) {
+export async function meRoutes(
+  app: FastifyInstance,
+  { db, manager, signupNotifier }: { db: Db; manager: GameManager; signupNotifier: SignupNotifier },
+) {
   const auth = { preHandler: requireSession(db) }
+  const adminOnly = { preHandler: requireSession(db, { admin: true }) }
 
   app.get('/api/me/settings', auth, async (request) => ({
     settings: await readHostSettings(db, request.user!.id),
@@ -141,6 +162,42 @@ export async function meRoutes(app: FastifyInstance, { db, manager }: { db: Db; 
     await saveLockCodeHash(db, request.user!.id, null)
     return reply.code(204).send()
   })
+
+  // Admins: the address that hears about new sign-ups. Only its own admin ever sees it.
+  app.get('/api/me/signup-email', adminOnly, async (request) => ({
+    email: await readSignupEmail(db, request.user!.id),
+    mailConfigured: signupNotifier.configured,
+  }))
+
+  app.put('/api/me/signup-email', adminOnly, async (request, reply) => {
+    const body = parseOr400(signupEmailSchema, request.body, reply)
+    if (!body) return reply
+    await saveSignupEmail(db, request.user!.id, body.email)
+    return reply.code(204).send()
+  })
+
+  app.delete('/api/me/signup-email', adminOnly, async (request, reply) => {
+    await saveSignupEmail(db, request.user!.id, null)
+    return reply.code(204).send()
+  })
+
+  // Checks the address and the provider set-up. Limited, so it cannot be used to flood a mailbox.
+  app.post(
+    '/api/me/signup-email/test',
+    { ...adminOnly, config: { rateLimit: { max: 3, timeWindow: '1 hour' } } },
+    async (request, reply) => {
+      if (!signupNotifier.configured) return reply.code(409).send({ error: 'errors.mailNotConfigured' })
+      const email = await readSignupEmail(db, request.user!.id)
+      if (!email) return reply.code(409).send({ error: 'errors.noSignupEmail' })
+      try {
+        await signupNotifier.sendTest(email)
+      } catch (error) {
+        request.log.error({ reason: (error as Error).message }, 'test e-mail failed')
+        return reply.code(502).send({ error: 'errors.mailFailed' })
+      }
+      return reply.code(204).send()
+    },
+  )
 
   // Screen lock: the lock code or the password unlocks every game of the host. Limited like login.
   app.post(

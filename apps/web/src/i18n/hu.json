@@ -34,7 +34,6 @@
     "newTeamPlaceholder": "pl. Kvízvarázslók",
     "newTeamNameRequired": "Adj nevet a csapatodnak.",
     "submit": "Beszállok!",
-    "hostLogin": "Belépés játékvezetőknek",
     "pinInvalid": "Írd be a 6 jegyű PIN-kódot.",
     "nameRequired": "Írj be egy nevet.",
     "scan": "QR-kód beolvasása",
@@ -61,6 +60,12 @@
     "tagline": "Gondolkodj. Válaszolj. Győzd le a csordát!",
     "cowLabel": "Simogasd meg a tehenet",
     "joinLink": "Játszani jöttél? Írd be a PIN-kódot",
+    "sides": "Játék vagy játékvezetés",
+    "play": "Játszom",
+    "host": "Játékot vezetek",
+    "hostIntro": "Lépj be, és készíts kvízeket, vezess játékokat a csapatodnak.",
+    "noAccount": "Még nincs fiókod?",
+    "createAccount": "Kérj egyet",
     "moo": {
       "line1": "Múú!",
       "line2": "Írd be a PIN-kódot, várok!",
@@ -1069,6 +1074,9 @@
     "gameClosed": "A játékvezető lezárta a játékot. Köszi, hogy játszottál!",
     "screenLocked": "A képernyőid zárolva vannak. Oldd fel őket a zárkóddal vagy a jelszavaddal.",
     "wrongUnlockSecret": "Ez nem a zárkódod és nem is a jelszavad. Próbáld újra.",
+    "mailNotConfigured": "Ezen a szerveren nincs beállítva az e-mail-küldés.",
+    "noSignupEmail": "Előbb mentsd el a címet.",
+    "mailFailed": "Nem sikerült elküldeni az e-mailt. Ellenőrizd a címet, vagy kérd meg az üzemeltetőt, hogy nézze meg az e-mail-beállítást.",
     "leftGame": "Kiléptél ebből a játékból.",
     "unsupportedImage": "JPG, PNG vagy WebP képet használj.",
     "fileTooLarge": "A fájl nagyobb 5 MB-nál.",
@@ -1123,6 +1131,21 @@
       "remove": "Kód törlése",
       "saved": "Elmentettük a zárkódot",
       "removed": "Töröltük a zárkódot"
+    },
+    "signupEmail": {
+      "title": "Értesítés regisztrációkról",
+      "help": "Ha valaki házigazdának regisztrál, e-mailt küldünk erre a címre egy linkkel a Felhasználók oldalra, ahol jóváhagyod vagy elutasítod. Az e-mailben csak az áll, hányan várnak, az nem, hogy kik. Legfeljebb 15 percenként egy e-mail.",
+      "set": "Az értesítések ide mennek: {{email}}.",
+      "none": "Még nincs címed: az új regisztrációkat csak a Felhasználók oldalon látod.",
+      "notConfigured": "Ezen a szerveren nincs beállítva az e-mail-küldés, így semmi nem megy ki. Az üzemeltetőnek kell megadnia egy Brevo API-kulcsot és egy feladócímet (lásd a telepítési útmutatót).",
+      "address": "E-mail-cím",
+      "invalid": "Írj be egy e-mail-címet, például nev@pelda.hu.",
+      "submit": "Cím mentése",
+      "remove": "Cím törlése",
+      "test": "Próba e-mail küldése",
+      "saved": "Elmentettük a címet",
+      "removed": "Töröltük a címet",
+      "testSent": "Elküldtük a próba e-mailt. Nézd meg a postafiókodat (és a spam mappát)."
     },
     "leaveTitle": "Kilépsz mentés nélkül?",
     "leaveBody": "A Beállításaimban tett változásokat még nem mentetted.",
@@ -1357,6 +1380,7 @@
       "contactUnknown": "Kérdezd a játékod szervezőjét.",
       "hosting": "Tárhely",
       "hostingUnknown": "az üzemeltető által választott tárhelyszolgáltató",
+      "mailUnknown": "az üzemeltető által választott e-mail-szolgáltató",
       "nature": "Egy magánszemély ingyenes, nem üzleti hobbiprojektje: nincs mögötte cég, nincs reklám, nincs fizetős csomag."
     },
     "privacy": {
@@ -1387,7 +1411,8 @@
             "A felhasználóneved, a jelszavad pedig csak egyirányú hash-ként, amiből senki nem tudja visszafejteni a jelszót.",
             "Mikor léptél be utoljára (ezt csak az adminisztrátor látja, hogy tudja, mely fiókokat használják még), és hogy a feltételek melyik változatát mikor fogadtad el (a megállapodásunk nyoma).",
             "A belépéseid: böngészőnként egy véletlen kód, hash-ként, legfeljebb {{sessionDays}} napig.",
-            "A kvízeid, a feltöltött képeid, a beállításaid és a játékaid az eredményeikkel."
+            "A kvízeid, a feltöltött képeid, a beállításaid és a játékaid az eredményeikkel.",
+            "Csak adminoknál, ha megadnak egyet: egy e-mail-cím az új regisztrációkról szóló értesítésekhez. Másra nem használjuk, és töröljük, ha az admin kiveszi, vagy már nem admin."
           ],
           "paragraphs": [
             "Jogalap: a szolgáltatás használatára kötött megállapodás, vagyis a felhasználási feltételek (6. cikk (1) bekezdés b) pont); az utolsó belépés, a feltételek elfogadásának nyoma és a biztonsági intézkedések esetén a szolgáltatás biztonságos működtetéséhez fűződő jogos érdek (6. cikk (1) bekezdés f) pont)."
@@ -1424,6 +1449,7 @@
           "heading": "Ki kapja még meg az adataidat",
           "paragraphs": [
             "Senki, a saját céljaira. A szolgáltatás egy tárhelyszolgáltatónál fut ({{hosting}}), amely az adatokat csak a működtetéshez tárolja és kezeli, adatfeldolgozóként, a saját adatfeldolgozási feltételei szerint. Ha a szolgáltató vagy az anyavállalata az EU/EGT-n kívül van, az adattovábbítás a GDPR által előírt garanciákon alapul: megfelelőségi határozaton (például az EU–USA adatvédelmi kereten) vagy általános szerződési feltételeken.",
+            "Ha egy admin megadott címet a regisztrációs értesítésekhez, ezek az e-mailek egy e-mail-szolgáltatón keresztül mennek ki ({{mail}}), szintén adatfeldolgozóként. A szolgáltató megkapja az admin címét és az értesítést, amelyben csak az áll, hány regisztráció vár.",
             "Nincs statisztika, reklám vagy közösségimédia-eszköz, és az alkalmazás más oldalról semmit nem tölt be. A játékvezetőknek szóló Visszajelzés link a GitHubra visz, ami külön szolgáltatás a saját adatvédelmi szabályaival; a használata nem kötelező."
           ]
         },

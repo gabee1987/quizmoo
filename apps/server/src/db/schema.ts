@@ -127,5 +127,7 @@ export const hostSettings = pgTable('host_settings', {
   settings: jsonb('settings').$type<Partial<HostSettings>>().notNull().default({}),
   /** Argon2 hash of the default screen lock code; null: none. Outside `settings`, so it is never sent back. */
   lockCodeHash: text('lock_code_hash'),
+  /** Admins only: where new sign-ups are announced; null: no e-mail. Shown to its own admin only, never logged. */
+  signupNotifyEmail: text('signup_notify_email'),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 })

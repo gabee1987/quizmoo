@@ -44,9 +44,11 @@ export interface AuthRouteOptions {
   secureCookies: boolean
   /** `REGISTRATION_OPEN`: whether `/api/auth/register` accepts sign-ups. */
   registrationOpen: boolean
+  /** After a sign-up is stored: tells the admins (by e-mail); never throws. */
+  onSignup?: () => void
 }
 
-export async function authRoutes(app: FastifyInstance, { db, secureCookies, registrationOpen }: AuthRouteOptions) {
+export async function authRoutes(app: FastifyInstance, { db, secureCookies, registrationOpen, onSignup }: AuthRouteOptions) {
   app.post(
     '/api/auth/login',
     { config: { rateLimit: { max: 10, timeWindow: '1 minute' } } },
@@ -108,6 +110,7 @@ export async function authRoutes(app: FastifyInstance, { db, secureCookies, regi
         if (isUniqueViolation(error)) return reply.code(409).send({ error: 'errors.usernameTaken' })
         throw error
       }
+      onSignup?.()
       return reply.code(201).send({ pending: true })
     },
   )

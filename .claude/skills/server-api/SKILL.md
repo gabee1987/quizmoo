@@ -55,6 +55,8 @@ Error shape everywhere: `{ error: '<i18n key>' }`. Status codes: 400 invalid inp
 | `POST /api/quizzes/batch-delete` | owner of all | `{ ids }` -> `{ deleted }`; 404 and nothing deleted if any id is missing or not owned |
 | `GET /api/me/settings` | session | the host's own settings (`hostSettingsSchema`, defaults when never saved): `{ settings, hasLockCode }` |
 | `PUT /api/me/lock-code` / `DELETE /api/me/lock-code` | session | the default screen lock code `{ code }` (4 to 8 digits), stored only as an argon2 hash in `host_settings.lock_code_hash`, never sent back |
+| `GET` / `PUT` / `DELETE /api/me/signup-email` | admin | `{ email, mailConfigured }` / `{ email }` / 204: the admin's address for sign-up e-mails (`host_settings.signup_notify_email`), shown to its own admin only; demoting to editor clears it |
+| `POST /api/me/signup-email/test` | admin | sends a test e-mail to the saved address (204); 409 `errors.mailNotConfigured` / `errors.noSignupEmail`, 502 `errors.mailFailed`; 3 per hour |
 | `POST /api/me/unlock` | session (also while locked) | `{ secret }`: a locked game's code, the default code or the password unlocks every game of the host (204), else 400 `errors.wrongUnlockSecret`; 5 per minute |
 | `PUT /api/me/settings` | session | replace them; no user id in any `/api/me` URL, so a host only reaches their own row. `logoImageId` must be an image the host uploaded (else 400 `errors.invalidInput`) |
 | `POST /api/me/quick-messages` | session | `{ text, durationSec }` -> `{ message }` with its id, appended ("Save to my messages"); 409 `errors.quickMessagesFull` at 20 |
@@ -92,3 +94,6 @@ Quiz question ids and option ids are generated server-side with `nanoid(8)` when
 - Admin actions on an account (`password`, `role`, `logout`, `DELETE`) go through `target()` in `routes/users.ts`: never the admin's own account (403 `errors.notOnYourself`, which also keeps one admin), active accounts only (404). `GET /api/users` adds per-user figures as correlated subqueries and `lastLoginAt` (set on each login).
 - Keep `users` free of personal data: username only. Future SSO adds an `oidc_identities` table; do not add provider columns to `users`.
 
+## E-mail
+
+One provider, Brevo's HTTPS API, in `src/mail.ts` (`createMailer`, plain `fetch`, 10 s timeout; a no-op without `BREVO_API_KEY` and `MAIL_FROM`). Railway's Hobby plan blocks outbound SMTP, so no SMTP. Errors name the status only, never the provider's answer (it can repeat the address); log lines never contain an address. Sign-up notices live in `src/signup-notify.ts`: one e-mail per admin (no shared `to`), the count and a link only, never a username (stranger-chosen text), throttled to one per 15 minutes with a trailing send. `buildApp` takes a `mailer` so tests pass a fake. Any further e-mail use is a third-party data flow: note the compliance review.

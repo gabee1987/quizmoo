@@ -1,6 +1,7 @@
 import { buildApp } from '../../src/app.js'
 import { loadConfig } from '../../src/config.js'
 import type { Db } from '../../src/db/index.js'
+import type { Mailer } from '../../src/mail.js'
 import { GameManager, type GameStore } from '../../src/realtime/game-manager.js'
 import { createGameStore } from '../../src/realtime/persist.js'
 
@@ -13,9 +14,9 @@ export const testConfig = loadConfig({
 /** Silent logger for managers in tests. */
 export const quietLog = { error: () => {}, warn: () => {} }
 
-export async function buildTestApp(db: Db, store: GameStore = createGameStore(db), config = testConfig) {
+export async function buildTestApp(db: Db, store: GameStore = createGameStore(db), config = testConfig, mailer?: Mailer) {
   const manager = new GameManager(store, quietLog)
-  const built = await buildApp(config, { db, manager })
+  const built = await buildApp(config, { db, manager, ...(mailer ? { mailer } : {}) })
   built.app.addHook('onClose', async () => {
     manager.close()
     await manager.flush()

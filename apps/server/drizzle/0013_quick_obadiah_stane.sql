@@ -1,0 +1,1 @@
+ALTER TABLE "host_settings" ADD COLUMN "signup_notify_email" text;
