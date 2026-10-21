@@ -53,6 +53,10 @@ Stop the process afterwards. On Windows: `Get-NetTCPConnection -LocalPort 3999 -
 
 Screenshots, the production build on :3999 and the e2e suite (`pnpm e2e`) are described in the `browser-checks` skill. UI phases are not done until their screens were looked at and the e2e specs pass.
 
+## A package the lockfile has is missing
+
+When the build or a test fails with `Cannot find module '<pkg>'` (or Vite "failed to resolve import") for a package listed in `pnpm-lock.yaml`, its folder in `node_modules/.pnpm` is gone while the link to it stays (`find node_modules/.pnpm -mindepth 3 -maxdepth 4 -xtype l` lists such links). Plain `pnpm install` reports "up to date" and fixes nothing; the user stops `dev:lan` and runs `pnpm install --force`, then restarts it.
+
 ## Tests that need a database
 
 Server tests that touch Postgres read `TEST_DATABASE_URL`. If it is unset they are skipped with a visible `skipped` line, not silently passed. Locally: `pnpm db:up` and set `TEST_DATABASE_URL=postgres://quizmoo:quizmoo@localhost:5432/quizmoo`. Tests create and drop their own schema; they never touch the dev data.

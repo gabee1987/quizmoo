@@ -84,6 +84,22 @@ export async function saveSignupEmail(db: Db, userId: string, signupNotifyEmail:
 
 const signupEmailSchema = z.object({ email: z.string().trim().toLowerCase().email().max(200) })
 
+/** The last version whose patch notes the host opened, or null. */
+export async function readSeenRelease(db: Db, userId: string): Promise<string | null> {
+  const row = (await db.select({ seen: hostSettings.seenRelease }).from(hostSettings).where(eq(hostSettings.userId, userId)))[0]
+  return row?.seen ?? null
+}
+
+async function saveSeenRelease(db: Db, userId: string, seenRelease: string) {
+  const updatedAt = new Date()
+  await db
+    .insert(hostSettings)
+    .values({ userId, seenRelease, updatedAt })
+    .onConflictDoUpdate({ target: hostSettings.userId, set: { seenRelease, updatedAt } })
+}
+
+const seenReleaseSchema = z.object({ version: z.string().regex(/^\d{1,4}\.\d{1,4}\.\d{1,4}$/) })
+
 /**
  * Screen lock: true when `secret` is the lock code of one of the host's locked games, their default
  * lock code or their account password. Codes are checked only when the secret looks like one.
@@ -160,6 +176,16 @@ export async function meRoutes(
 
   app.delete('/api/me/lock-code', auth, async (request, reply) => {
     await saveLockCodeHash(db, request.user!.id, null)
+    return reply.code(204).send()
+  })
+
+  // "What's new": which release's notes the host has opened, so the dot follows them across devices.
+  app.get('/api/me/release', auth, async (request) => ({ seen: await readSeenRelease(db, request.user!.id) }))
+
+  app.put('/api/me/release', auth, async (request, reply) => {
+    const body = parseOr400(seenReleaseSchema, request.body, reply)
+    if (!body) return reply
+    await saveSeenRelease(db, request.user!.id, body.version)
     return reply.code(204).send()
   })
 

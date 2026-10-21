@@ -147,6 +147,23 @@ describeDb('host settings (database)', () => {
     expect((await settingsOf(first)).logoImageId).toBe('logo-first')
   })
 
+  it('remembers which release notes the host opened, per account, and in the export', async () => {
+    expect((await built.app.inject({ method: 'GET', url: '/api/me/release' })).statusCode).toBe(401)
+    expect((await built.app.inject({ method: 'PUT', url: '/api/me/release', payload: { version: '1.1.0' } })).statusCode).toBe(401)
+    expect((await req(first, 'GET', '/api/me/release')).json()).toEqual({ seen: null })
+    for (const version of ['', 'latest', '1.1', '1.1.0-beta', '1.1.0 ', '12345.0.0']) {
+      const refused = await req(first, 'PUT', '/api/me/release', { version })
+      expect(refused.statusCode).toBe(400)
+      expect(refused.json().error).toBe('errors.invalidInput')
+    }
+    expect((await req(first, 'PUT', '/api/me/release', { version: '1.1.0' })).statusCode).toBe(204)
+    expect((await req(first, 'GET', '/api/me/release')).json()).toEqual({ seen: '1.1.0' })
+    // Saving it leaves the other settings alone.
+    expect((await settingsOf(first)).eventName).toBe('Christmas party')
+    expect((await req(second, 'GET', '/api/me/release')).json()).toEqual({ seen: null })
+    expect((await req(first, 'GET', '/api/me/export')).json().seenRelease).toBe('1.1.0')
+  })
+
   it('deletes the settings and the logo with the host account', async () => {
     expect(await db.select().from(hostSettings).where(eq(hostSettings.userId, firstId))).toHaveLength(1)
     await db.delete(users).where(eq(users.id, firstId))

@@ -9,7 +9,7 @@ import { games, images, localCredentials, quizzes, users } from '../db/schema.js
 import { toResults } from '../game/results.js'
 import type { GameManager } from '../realtime/game-manager.js'
 import { parseOr400 } from './http.js'
-import { readHostSettings, readSignupEmail } from './me.js'
+import { readHostSettings, readSeenRelease, readSignupEmail } from './me.js'
 import { deleteAccount, figures } from './users.js'
 
 const deleteAccountSchema = z.object({ password: z.string().min(1).max(200) })
@@ -108,6 +108,7 @@ export async function accountRoutes(
         account: account!,
         settings: await readHostSettings(db, id),
         signupNotifyEmail: await readSignupEmail(db, id),
+        seenRelease: await readSeenRelease(db, id),
         quizzes: ownQuizzes,
         images: ownImages.map((image) => ({ ...image, url: `/api/images/${image.id}` })),
         games: ownGames.map(({ state, ...game }) => ({ ...game, quizTitle: state.quiz.title, results: toResults(state) })),

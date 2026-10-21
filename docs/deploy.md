@@ -71,11 +71,11 @@ With `REGISTRATION_OPEN=true`, admins can get an e-mail when someone signs up, w
 
 1. Run `pnpm verify` and the e2e suite locally (see `.claude/skills/browser-checks`).
 2. If the terms of use changed in substance, raise `TERMS_VERSION` in `packages/shared/src/legal.ts` (the date of the change): every host accepts the new version at their next login.
-3. In `CHANGELOG.md`, move "Unreleased" under a new version heading (`## 1.1.0 – <date>`) and set the same version in the root `package.json`, on `develop`.
+3. In `CHANGELOG.md`, move "Unreleased" under a new version heading (`## 1.2.0 – <date>`) and set the same version in the root `package.json`, on `develop`. Add the host-facing patch notes for it: the version and date first in `apps/web/src/features/whats-new/releases.ts`, the texts under `whatsNew.releases.<1_2_0>` in `hu.json` and `en.json` (`pnpm verify` fails without them). Hosts see a dot on "What's new" until they read them.
 4. **Pick a moment when no game is running**: `/api/health` must report `"activeGames": 0`. During a deploy the old and the new process run side by side for a moment, and a game played across the switch can lose its last steps. A lobby or a finished game is safe.
 5. Merge `develop` into `main` (pull request). Railway builds and deploys.
 6. Run the smoke test against the live address.
-7. Tag the release on `main`: `git tag v1.1.0; git push origin v1.1.0`.
+7. Tag the release on `main`: `git tag v1.2.0; git push origin v1.2.0`.
 
 ### Smoke test
 

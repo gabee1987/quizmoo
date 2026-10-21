@@ -35,6 +35,20 @@ test('a host sees, logs out and deletes their own account on My settings', async
     await own.request.post('/api/auth/terms', { data: { version: termsVersion } })
     await other.request.post('/api/auth/login', { data: { username: host, password: hostPassword } })
 
+    await test.step("What's new has a dot until the notes are opened, on every login of the account", async () => {
+      await tab.goto('/host')
+      const nav = tab.getByRole('navigation', { name: 'Host menu' })
+      await nav.getByRole('link', { name: "What's new (New notes)" }).click()
+      await expect(tab.getByRole('heading', { name: "What's new", level: 1 })).toBeVisible()
+      const release = tab.getByRole('heading', { name: /^Quizmoo \d+\.\d+\.\d+$/, level: 2 }).first()
+      await expect(release).toBeVisible()
+      const version = (await release.textContent())!.replace('Quizmoo ', '')
+      await expect(nav.getByRole('link', { name: "What's new", exact: true })).toBeVisible()
+      expect(await (await other.request.get('/api/me/release')).json()).toEqual({ seen: version })
+      await tab.reload()
+      await expect(nav.getByRole('link', { name: "What's new", exact: true })).toBeVisible()
+    })
+
     await test.step('the overview and the logins', async () => {
       await tab.goto('/host/settings?tab=account')
       await expect(tab.getByRole('tab', { name: 'Account', selected: true })).toBeVisible()

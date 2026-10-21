@@ -59,6 +59,7 @@ Collected while testing phases 9 to 12. Effort as above.
 - Game history in pages while scrolling, search by title or PIN, state and period filters, and at most 200 finished games kept per host (phase 25).
 - Host sign-up with the admin's approval, without e-mail (phase 26).
 - E-mail to admins about new sign-ups through Brevo, with a link to the Users page and a return to it after login (phase 36).
+- Patch notes for hosts ("What's new" with a dot until read, remembered per account) and the version in the footer (phase 33).
 - Admin pages: a Users page with each account's figures and last login, setting a new password, changing the role, logging out everywhere and deleting an account; a Names page that edits the "Surprise me" names row by row (phase 28).
 - My settings in four tabs (Games first), and an Account tab: overview, this device's language and look, password, logging out other logins, deleting the own account (phase 29).
 - Legal pages (privacy notice, terms, cookies and storage, imprint), terms accepted at sign-up and recorded, "Download my data", a storage notice, and a security review with every finding fixed (phase 30).
