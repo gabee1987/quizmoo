@@ -203,6 +203,13 @@ Out:
 - [ ] The load test figures with 200 questions and 60 players are recorded, and the editor stays smooth with 200 questions.
 - [ ] `pnpm verify` and `pnpm e2e` pass; axe passes on the new screens in both modes.
 
+## Deviations
+
+- **Hold and release** are the existing `pause` and `resume` host commands, which now also work in a timed intro (shifting `introEndsAt`), instead of new `holdIntro` and `releaseIntro` commands. The intro has no `introHeld` field: `pausedAt` marks a held intro.
+- **During the intro** `questionIndex` stays on the question before it (-1 before the first), so ending the game in an intro never counts the unasked question. The intro is about `questionIndex + 1`.
+- **Snapshots carry the effective settings** (`settingsAt`) of the question on the screens, so the phone and host rules (answer changes, the scoreboard step) follow group overrides without their own merging. The lobby and the finished game keep the game's own settings.
+- **A group's `revealAnswers`** may be `afterQuestion` or `afterGroup` only; `atEnd` stays quiz-wide in the schema too.
+
 ## Verification command
 
 ```powershell

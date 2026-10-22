@@ -285,7 +285,8 @@ export const groupSettingsSchema = z.object({
   answerChanges: game.answerChanges.unwrap().optional(),
   answerLockSec: game.answerLockSec.unwrap().optional(),
   shuffleOptions: game.shuffleOptions.unwrap().optional(),
-  revealAnswers: game.revealAnswers.unwrap().optional(),
+  // "Only at the end of the game" is for the whole game, never one group.
+  revealAnswers: z.enum(['afterQuestion', 'afterGroup']).optional(),
   scoreboard: game.scoreboard.unwrap().optional(),
   groupIntroSec: game.groupIntroSec.unwrap().optional(),
   groupStandings: game.groupStandings.unwrap().optional(),

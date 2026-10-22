@@ -17,7 +17,8 @@ export const MAX_SCHEDULE_DAYS = 30
 /** When joining opens: a unix ms time, at most `MAX_SCHEDULE_DAYS` ahead (checked against the clock by the engine). */
 export const scheduledAtSchema = z.number().int().positive()
 
-export const gamePhases =['lobby', 'question', 'reveal', 'scoreboard', 'finished'] as const
+/** `intro`: a group's intro screen before its first question (`questionIndex` is still the question before it). */
+export const gamePhases =['lobby', 'intro', 'question', 'reveal', 'scoreboard', 'finished'] as const
 export type GamePhase = (typeof gamePhases)[number]
 
 // ---- Answers --------------------------------------------------------------
@@ -174,6 +175,8 @@ export interface QuestionStat {
   index: number
   text: string
   type: QuestionType
+  /** The question's group; null outside any group. */
+  groupId: string | null
   answeredCount: number
   correctCount: number
   /** Mean answer time in ms over everyone who answered; null when nobody did. */
@@ -191,6 +194,31 @@ export interface CurrentAnswer {
   correct: boolean | null
   points: number
   timeMs: number
+}
+
+/** The group (round) of the question on the screens, or of the next question during its intro. */
+export interface GroupPublic {
+  id: string
+  title: string
+  info: string
+  imageId: string | null
+  /** 0-based position among the quiz's groups. */
+  index: number
+  /** Groups in the quiz. */
+  count: number
+  /** Index of its first question, and how many it has. */
+  firstIndex: number
+  questionCount: number
+  /** Its answers were held back until its end (`revealAnswers: 'afterGroup'`) and the host has shown them. */
+  revealed: boolean
+}
+
+/** One group in the host's lists: where its questions are. */
+export interface GroupOutline {
+  id: string
+  title: string
+  firstIndex: number
+  questionCount: number
 }
 
 /** A message the host pushes to every phone and the projector until it is cleared. */
@@ -237,10 +265,15 @@ export interface GameSnapshotBase {
   /** Unix ms when the current question closes. Present in the 'question' phase. */
   questionEndsAt: number | null
   /**
-   * Server time when the host paused the running question; null while it runs. The clock then
-   * shows `questionEndsAt - pausedAt` frozen, and answers are refused until the host resumes.
+   * Server time when the host paused the running question (or held a timed intro); null while it
+   * runs. The clock then shows `questionEndsAt - pausedAt` (`introEndsAt - pausedAt`) frozen, and
+   * answers are refused until the host resumes.
    */
   pausedAt: number | null
+  /** Unix ms when a timed intro opens its question by itself. Null outside the intro and while it waits for the host. */
+  introEndsAt: number | null
+  /** The group of the question on the screens (in the intro: of the next one); null outside groups. */
+  group: GroupPublic | null
   /**
    * The host put an earlier (or the current) question back on the screens: `phase` is 'reveal',
    * `questionIndex` and `reveal` are that question's, read only, ranks do not move.
@@ -264,6 +297,10 @@ export interface GameSnapshotBase {
   awaitingGrading: boolean
   /** Every question revealed so far, in order. */
   questionStats: QuestionStat[]
+  /**
+   * The rules for the question on the screens (in the intro: the next one): the game's settings
+   * with its group's overrides. `revealAnswers` is `afterGroup` only inside a group.
+   */
   settings: GameSettings
   /**
    * Correct answers and scores are held back until the end (`revealAnswers: 'atEnd'`).
@@ -303,6 +340,8 @@ export interface HostSnapshot extends GameSnapshotBase {
   teamAnswers: TeamAnswerPublic[] | null
   /** The message box's quick messages for this game. Host room only; null on the public screen. */
   quickMessages: QuickMessage[] | null
+  /** The quiz's groups in order; empty without groups. */
+  groups: GroupOutline[]
   /** The host locked their screens: the host room then receives this public snapshot only. */
   locked: boolean
   /** The game has its own lock code. Host room only; false on the public screen. */

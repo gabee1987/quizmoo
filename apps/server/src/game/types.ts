@@ -125,6 +125,16 @@ export interface GameState {
   nextPin?: string | null
   /** Unix ms when the host paused the running question; null while it runs. Missing in games saved before it existed. */
   pausedAt?: number | null
+  /**
+   * The intro phase: unix ms when it opens question `questionIndex + 1` by itself; null while it waits
+   * for the host. A held intro keeps it and sets `pausedAt`. Missing in games saved before groups existed.
+   */
+  introEndsAt?: number | null
+  /**
+   * Groups whose answers were held back until their end (`revealAnswers: 'afterGroup'`) and which the
+   * host has shown since. Missing in games saved before groups existed.
+   */
+  revealedGroups?: string[]
   /** Index of a revealed question the host put back on the screens; null otherwise. Missing in games saved before it existed. */
   reviewIndex?: number | null
   /**

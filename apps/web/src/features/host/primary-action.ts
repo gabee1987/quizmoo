@@ -24,6 +24,8 @@ export function primaryAction(host: HostSnapshot): PrimaryAction | null {
   switch (host.phase) {
     case 'lobby':
       return host.players.length > 0 ? { command: { type: 'start' }, label: 'host.game.start' } : null
+    case 'intro':
+      return { command: { type: 'next' }, label: 'host.game.startRound' }
     case 'question':
       return host.pausedAt
         ?{ command: { type: 'resume' }, label: 'host.game.resume' }

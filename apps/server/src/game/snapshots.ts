@@ -4,6 +4,8 @@ import {
   type BrandingPublic,
   type CurrentAnswer,
   type GameSnapshotBase,
+  type GroupOutline,
+  type GroupPublic,
   type HostSnapshot,
   type PlayerPublic,
   type PlayerQuestionResult,
@@ -16,6 +18,7 @@ import {
   type TeamLive,
   type TeamPublic,
 } from '@quizmoo/shared'
+import { groupAt, groupBounds, groupsOf, settingsAt } from './groups.js'
 import { normalise } from './normalise.js'
 import { displayOrder } from './order.js'
 import { answersHidden, hostLocked, quickMessagesOf, resultsPendingFor } from './engine.js'
@@ -86,6 +89,7 @@ export function toHostSnapshot(state: GameState, now: number, { includeAnswers =
     playersWaiting: includeAnswers && resultsPendingFor(state, 'players'),
     teamAnswers: includeAnswers ? teamAnswers(state, base.questionIndex) : null,
     quickMessages: includeAnswers ? quickMessagesOf(state) : null,
+    groups: groupOutlines(state),
     locked: hostLocked(state),
     hasLockCode: includeAnswers && !!state.lock?.codeHash,
   }
@@ -275,7 +279,10 @@ function baseSnapshot(state: GameState, now: number, audience: ResultsAudience, 
     (state.phase === 'reveal' || state.phase === 'scoreboard')
   const index = reviewing ? state.reviewIndex! : state.questionIndex
   const phase = reviewing ? 'reveal' : state.phase
-  const question = state.quiz.questions[index] ?? null
+  const intro = phase === 'intro'
+  // The intro is about the question after the current one, which nobody has seen yet.
+  const question = intro ? null : (state.quiz.questions[index] ?? null)
+  const shownIndex = intro ? index + 1 : index
   const inQuestion = phase === 'question' && question !== null
   const revealed = question !== null && isRevealed(state)
   const players = Object.values(state.players)
@@ -333,7 +340,9 @@ function baseSnapshot(state: GameState, now: number, audience: ResultsAudience, 
     questionCount: state.quiz.questions.length,
     question: inQuestion ? toPublicQuestion(question) : null,
     questionEndsAt: inQuestion ? state.questionEndsAt : null,
-    pausedAt: inQuestion ? (state.pausedAt ?? null) : null,
+    pausedAt: inQuestion || intro ? (state.pausedAt ?? null) : null,
+    introEndsAt: intro ? (state.introEndsAt ?? null) : null,
+    group: groupPublic(state, shownIndex),
     reviewing,
     reviewQueue: reviewing ? (state.reviewQueue ?? [index]) : null,
     serverNow: now,
@@ -343,7 +352,8 @@ function baseSnapshot(state: GameState, now: number, audience: ResultsAudience, 
     reveal: revealed ? revealInfo(state, question) : null,
     awaitingGrading: reviewing ? false : state.awaitingGrading,
     questionStats: questionStats(state),
-    settings: state.settings,
+    // Before and after the questions the game's own settings; in between the current question's rules.
+    settings: phase === 'lobby' || phase === 'finished' ? state.settings : settingsAt(state, shownIndex),
     answersHidden: answersHidden(state, audience),
     resultsPending: resultsPendingFor(state, audience),
     announcement: state.announcement ?? null,
@@ -351,6 +361,32 @@ function baseSnapshot(state: GameState, now: number, audience: ResultsAudience, 
     scheduledAt: state.scheduledAt ?? null,
     branding: brandingFor(state, audience),
   }
+}
+
+/** The group of question `index`, with where it sits in the quiz. */
+function groupPublic(state: GameState, index: number): GroupPublic | null {
+  const group = groupAt(state.quiz, index)
+  if (!group) return null
+  const groups = groupsOf(state.quiz)
+  const { first, last } = groupBounds(state.quiz, group.id)
+  return {
+    id: group.id,
+    title: group.title,
+    info: group.info,
+    imageId: group.imageId ?? null,
+    index: groups.indexOf(group),
+    count: groups.length,
+    firstIndex: first,
+    questionCount: last - first + 1,
+    revealed: state.revealedGroups?.includes(group.id) ?? false,
+  }
+}
+
+function groupOutlines(state: GameState): GroupOutline[] {
+  return groupsOf(state.quiz).map((group) => {
+    const { first, last } = groupBounds(state.quiz, group.id)
+    return { id: group.id, title: group.title, firstIndex: first, questionCount: last - first + 1 }
+  })
 }
 
 /** The game's branding for the projector, and for the phones only when the host chose to show it there. */
@@ -417,7 +453,8 @@ function staticCorrectKeys(question: Question): string[] {
 
 /** Stats for every question revealed so far (the current one once it is revealed). */
 function questionStats(state: GameState): QuestionStat[] {
-  const lastRevealed = isRevealed(state) ? state.questionIndex : state.questionIndex - 1
+  // A group's intro comes after the question before it was revealed.
+  const lastRevealed = isRevealed(state) || state.phase === 'intro' ? state.questionIndex : state.questionIndex - 1
   return state.quiz.questions.slice(0, Math.max(0, lastRevealed + 1)).map((question, index) => {
     const records = Object.values(state.players).flatMap((p) => (p.answers[question.id] ? [p.answers[question.id]!] : []))
     const totalTime = records.reduce((sum, r) => sum + r.timeMs, 0)
@@ -426,6 +463,7 @@ function questionStats(state: GameState): QuestionStat[] {
       index,
       text: question.text,
       type: question.type,
+      groupId: question.groupId ?? null,
       answeredCount: records.length,
       correctCount: records.filter((r) => r.correct === true).length,
       averageTimeMs: records.length > 0 ? Math.round(totalTime / records.length) : null,

@@ -177,6 +177,62 @@ describe('GameManager', () => {
     restored.close()
   })
 
+  describe('group intros', () => {
+    /** Every fixture question in one group whose intro lasts 10 s: the game starts with it. */
+    async function inIntro() {
+      const quiz = fixtureQuiz()
+      quiz.groups = [{ id: 'g1', title: 'Round one', info: '', settings: { groupIntroSec: 10 } }]
+      quiz.questions = quiz.questions.map((q) => ({ ...q, groupId: 'g1' }))
+      const store = memoryStore()
+      const manager = new GameManager(store, quietLog)
+      const { state } = await manager.create({ ...createInput, quiz })
+      manager.apply(state.pin, (s) => joinPlayer(s, { id: 'p1', name: 'Player 1', token: 'tok-1' }))
+      manager.apply(state.pin, startGame)
+      expect(manager.get(state.pin)!.state.phase).toBe('intro')
+      return { manager, pin: state.pin }
+    }
+
+    it('opens the question when a timed intro ends', async () => {
+      const { manager, pin } = await inIntro()
+      vi.advanceTimersByTime(10_000 - 1)
+      expect(manager.get(pin)!.state.phase).toBe('intro')
+      vi.advanceTimersByTime(1)
+      expect(manager.get(pin)!.state).toMatchObject({ phase: 'question', questionIndex: 0 })
+      manager.close()
+    })
+
+    it('keeps a held intro until it is released, then counts down what was left', async () => {
+      const { manager, pin } = await inIntro()
+      vi.advanceTimersByTime(4_000)
+      manager.apply(pin, pause)
+      vi.advanceTimersByTime(60_000)
+      expect(manager.get(pin)!.state.phase).toBe('intro')
+      manager.apply(pin, resume)
+      vi.advanceTimersByTime(6_000 - 1)
+      expect(manager.get(pin)!.state.phase).toBe('intro')
+      vi.advanceTimersByTime(1)
+      expect(manager.get(pin)!.state.phase).toBe('question')
+      manager.close()
+    })
+
+    it('resumes a timed intro after a restart', async () => {
+      const { manager, pin } = await inIntro()
+      vi.advanceTimersByTime(3_000)
+      const saved = structuredClone(manager.get(pin)!)
+      manager.close()
+
+      const store = memoryStore()
+      store.active = [saved]
+      const restored = new GameManager(store, quietLog)
+      await restored.restore()
+      vi.advanceTimersByTime(7_000 - 1)
+      expect(restored.get(pin)!.state.phase).toBe('intro')
+      vi.advanceTimersByTime(1)
+      expect(restored.get(pin)!.state.phase).toBe('question')
+      restored.close()
+    })
+  })
+
   it('restores games disconnected and fires a passed deadline immediately', async () => {
     const { manager, pin } = await started()
     const snapshot = structuredClone(manager.get(pin)!)

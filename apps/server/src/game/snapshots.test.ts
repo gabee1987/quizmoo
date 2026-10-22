@@ -279,7 +279,7 @@ describe('review and grading data', () => {
     state = endQuestion(state)
     const snap = toHostSnapshot(state, T0)
     expect(snap.questionStats).toEqual([
-      { questionId: 'q-single', index: 0, text: 'Capital of Hungary?', type: 'single', answeredCount: 2, correctCount: 1, averageTimeMs: 3_000 },
+      { questionId: 'q-single', index: 0, text: 'Capital of Hungary?', type: 'single', groupId: null, answeredCount: 2, correctCount: 1, averageTimeMs: 3_000 },
     ])
     expect(snap.players.find((p) => p.id === 'p1')).toMatchObject({ correctCount: 1, roundPoints: 950 })
     expect(snap.players.find((p) => p.id === 'p3')).toMatchObject({ correctCount: 0, roundPoints: 0 })

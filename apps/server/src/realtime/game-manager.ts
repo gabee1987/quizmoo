@@ -6,6 +6,7 @@ import {
   endQuestion,
   expireAnnouncement,
   hostLocked,
+  introTimeUp,
   resultsPending,
   schedule,
   type GameQuiz,
@@ -264,6 +265,10 @@ export class GameManager {
     // A paused question has no deadline until it resumes.
     if (state.phase === 'question' && state.questionEndsAt !== null && !state.pausedAt) {
       entry.timer = setTimeout(() => this.onDeadline(pin), Math.max(0, state.questionEndsAt - this.now()))
+    } else if (state.phase === 'intro' && state.introEndsAt && !state.pausedAt) {
+      // A timed intro opens its question by itself; a held one, or one waiting for the host, does not.
+      const endsAt = state.introEndsAt
+      entry.timer = setTimeout(() => this.onIntroEnd(pin), Math.max(0, endsAt - this.now()))
     } else if (state.phase === 'finished' && state.finishedAt !== null) {
       // Kept longer while its results wait for the host, so a late release still reaches everyone.
       const ttl = resultsPending(state) ? PENDING_RELEASE_TTL_MS : FINISHED_TTL_MS
@@ -284,6 +289,19 @@ export class GameManager {
       this.apply(pin, endQuestion)
     } catch (error) {
       this.log.error(error, 'ending question on timer failed')
+    }
+  }
+
+  private onIntroEnd(pin: string) {
+    const entry = this.games.get(pin)
+    if (!entry) return
+    const { state } = entry.game
+    if (state.phase !== 'intro' || !state.introEndsAt || state.pausedAt) return
+    if (this.now() < state.introEndsAt) return this.schedule(pin, entry)
+    try {
+      this.apply(pin, introTimeUp)
+    } catch (error) {
+      this.log.error(error, 'opening a question after its intro failed')
     }
   }
 
