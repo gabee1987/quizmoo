@@ -150,7 +150,7 @@ Boris Cherny (creator of Claude Code) keeps his team's file around 100 lines. Un
 
 **Fill this in per project. Keep it specific. Delete sections that don't apply.**
 
-ASH Quiz: a browser-based, mobile-first live quiz (Kahoot-like) for company events. Players join with a 6-digit PIN or QR code and a nickname only; no accounts, no personal data. Hosts (HR) log in with username + password to create quizzes and run games. Up to ~50 players, individual or team mode. UI in Hungarian and English.
+Quizmoo: a browser-based, mobile-first live quiz (Kahoot-like) for team events, parties and company gatherings; a personal hobby project that keeps growing. Players join with a 6-digit PIN or QR code and a nickname only; no accounts, no personal data. Hosts log in with username + password to create quizzes and run games. About 50 players expected, 60 allowed, individual or team mode. UI in Hungarian and English.
 
 ### Stack
 - Language and version: TypeScript 5.9, Node 22+ (ESM everywhere)
@@ -159,20 +159,22 @@ ASH Quiz: a browser-based, mobile-first live quiz (Kahoot-like) for company even
 - Runtime / deployment target: one Node process serving both API, Socket.IO and the built SPA on the same origin. Docker image for Render/Railway or a laptop on the venue LAN. Postgres via docker-compose locally, Railway/Render/Supabase Postgres in the cloud.
 
 ### Git and delivery
-- The user runs every git command. The agent never runs `git`.
+- The user runs every git command. The agent never runs `git`, not even read-only commands (`log`, `show`, `diff`, `status`): read the files, `CHANGELOG.md` and `docs/plans/` instead, and `gh` for pull request state.
 - Branches: `main` (production only), `develop` (integration), `feature/*`, `fix/*`, `chore/*` off `develop`.
-- Work is organised in phases under `docs/plans/`, implemented with the `implement-phase` skill. Every phase or task ends with the delivery report defined in the `git-workflow` skill: branch, one-line Conventional Commit message, verification command, tests added, manual test list.
-- Skills in `.claude/skills/`: `implement-phase`, `git-workflow`, `verification`, `game-engine`, `realtime`, `server-api`, `web-ui`, `i18n`.
+- Work is organised in phases under `docs/plans/`, implemented with the `implement-phase` skill. Every phase or task ends with the delivery report defined in the `git-workflow` skill: branch, one-line commit message (sentence case, no type prefix, e.g. "Add socket game sessions"), verification command, tests added, manual test list.
+- Skills in `.claude/skills/`, one small file per topic. Process: `implement-phase`, `git-workflow`, `verification`, `browser-checks`. Server: `game-engine`, `scoring`, `realtime`, `server-api`, `database`. Web: `web-ui`, `game-screens`, `quiz-editor`, `design-system`, `motion`, `socket-client`. Both: `i18n`, `team-modes`. Session learnings go into the matching skill (see `implement-phase`).
 
 ### Commands
 - Install: `pnpm install`
 - Verify (typecheck + test + build): `pnpm verify`
 - Build: `pnpm build` (web: `vite build`, server: `tsup` bundle in `apps/server/dist`)
 - Test (all): `pnpm test`
-- Test (single file): `pnpm --filter @ash-quiz/server exec vitest run test/app.test.ts`
+- Test (single file): `pnpm --filter @quizmoo/server exec vitest run test/app.test.ts`
 - Lint: not configured yet
 - Typecheck: `pnpm typecheck`
-- Run locally: `pnpm db:up` (Postgres in Docker), copy `.env.example` to `.env`, then `pnpm dev` (server on :3000, Vite on :5173 proxying `/api` and `/socket.io`)
+- Migrate and seed: `pnpm --filter @quizmoo/server db:migrate`, then `SEED_ADMIN_USERNAME=admin SEED_ADMIN_PASSWORD=<10+ chars> pnpm --filter @quizmoo/server seed`
+- Run locally: `pnpm db:up` (Postgres in Docker), copy `.env.example` to `.env`, then `pnpm dev` (server on :3000, Vite on :15173 proxying `/api` and `/socket.io`)
+- Test with phones on the same wifi: `pnpm dev:lan` (detects the LAN IP and a free port, sets `APP_ORIGIN` so QR codes point there, prints the URLs)
 
 Prefer single-file or single-test runs during iteration. Full suites are for the final verification pass.
 
@@ -183,7 +185,7 @@ Prefer single-file or single-test runs during iteration. Full suites are for the
 
 ### Conventions specific to this repo
 - Naming: kebab-case files, camelCase identifiers, `*Schema` suffix for Zod schemas with the inferred type exported next to it
-- Import style: relative imports with `.js` extension inside `packages/shared` and `apps/server`; extensionless in `apps/web`; cross-package imports only via `@ash-quiz/shared`
+- Import style: relative imports with `.js` extension inside `packages/shared` and `apps/server`; extensionless in `apps/web`; cross-package imports only via `@quizmoo/shared`
 - Error handling pattern: validate every socket payload and HTTP body with the shared Zod schemas on the server. Errors sent to clients are i18n keys (`{ error: 'errors.gameNotFound' }`), never human-readable strings; the web app translates them.
 - Realtime pattern: the server is authoritative and broadcasts full snapshots (`game:host`, `game:player`) on every state change. Clients render the latest snapshot and never derive state from event sequences. Players are identified by a token stored in the browser, not by socket id.
 - Game engine: pure functions in `apps/server/src/game` with no I/O or timers; side effects (sockets, DB, timers) live in `realtime/`.
@@ -205,7 +207,13 @@ Prefer single-file or single-test runs during iteration. Full suites are for the
 
 When the user corrects your approach, append a one-line rule here before ending the session. Write it concretely ("Always use X for Y"), never abstractly ("be careful with Y"). If an existing line already covers the correction, tighten it instead of adding a new one. Remove lines when the underlying issue goes away (model upgrades, refactors, process changes).
 
-- (empty)
+- The user runs PowerShell on Windows: write commands in delivery reports and manual tests as `$env:VAR="value"; command`, never `VAR=value command`.
+- While the user's dev server runs, edit every file under `apps/*/src` and `packages/*/src` (the i18n JSON dictionaries too: several keys at once means several Edit calls) with the Edit/Write tools only, never `cat > file`, `sed -i` (not even a one-line rename across a file: use Edit with `replace_all`) or a Python/Node script that rewrites the file (scripts are fine for tests, e2e specs, docs and skills): Vite can read a truncated empty file, and `sed -i` replaces the file so `tsx watch` stops seeing later changes to it (the API keeps running stale code).
+- After a burst of server edits while the user's `dev:lan` runs, check that the API on port 3000 restarted after the last edit (process start time vs file times) before browser-testing or handing over; `tsx watch` can miss changes made seconds apart. If it did not, tell the user to restart `dev:lan`.
+- When the dev app behaves like old code, first run `docker ps`: the compose `app` container (`restart: unless-stopped`) also publishes port 3000 on `[::]`, and Vite's proxy to `localhost:3000` reaches it over IPv6 instead of `dev:lan`'s API. Probe with `127.0.0.1:3000` vs `[::1]:3000`, and ask the user to run `docker compose stop app`.
+- Never tack a git command onto a shell one-liner to see what changed (`git diff --stat`, `git status`): read the files or list them with Glob. The no-git rule has no exception for read-only checks.
+- Python scripts that rewrite repo files must open them with `newline=''` (or use the Edit tool): on Windows text mode turns LF into CRLF, and a CRLF `SKILL.md` loses its frontmatter description.
+- After editing `styles.css` while `dev:lan` runs, check that Vite serves the change (`curl -s localhost:<vite port>/src/styles.css | grep <new class>`); a long-running Vite can keep serving a stale compiled stylesheet. If it does, tell the user to restart `dev:lan` in the handover.
 
 ---
 

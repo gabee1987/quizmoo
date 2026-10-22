@@ -1,0 +1,34 @@
+---
+name: database
+description: Drizzle and PostgreSQL conventions for apps/server: schema, migrations, JSON columns, image storage, results derived from game state, retention, and the dev database rules. Load when touching db/schema.ts, migrations, queries, images or results data.
+---
+
+# Database
+
+- Drizzle with the `postgres` driver. Schema in `db/schema.ts`, migrations generated with `pnpm --filter @quizmoo/server db:generate` into `apps/server/drizzle/`, applied with `db:migrate`. Never edit a generated migration that has been applied; add a new one.
+- Migrations run automatically at server start in production (`migrate()` from `drizzle-orm/postgres-js/migrator`) so Railway/Render deploys need no extra step.
+- Queries live in the route or manager that uses them. No repository layer.
+- A select from one table makes Drizzle write its columns unqualified (`"id"`), so a correlated subquery written as ``sql`... where ${quizzes.ownerId} = ${users.id}` `` compares the inner table with itself. Qualify the outer column by hand (`perUser` in `routes/users.ts`).
+- Comparing a raw `sql` expression with a time: pass ``sql`${date.toISOString()}::timestamptz` ``, not a `Date`. Drizzle maps a `Date` only against a typed column; next to a raw expression the driver throws `ERR_INVALID_ARG_TYPE`.
+- JSON columns are typed with `$type<>()` from shared types and validated with Zod on write.
+- Images: accept `image/jpeg`, `image/png`, `image/webp` up to 5 MB, resize with `sharp` to max 1280 px on the long edge, store as WebP. Reject anything else with 400.
+
+## Host settings
+
+`host_settings`: one row per host (`user_id` primary key, cascade on delete), `settings` jsonb stored as sent and read with `readHostSettings` / `parseHostSettings` (`routes/me.ts`): a stored field that no longer validates falls back to its own default without losing the others; rows saved before built-in and own quick messages were one list (`hiddenBuiltIns`) are merged with `mergeLegacyQuickMessages` on read. Games copy what they need (quick messages) at creation into their state; nothing public ever reads this table.
+
+## Results and retention
+
+Results are derived from the persisted `games.state` (player answers and scores), never stored twice. A daily job (also run once at start) deletes finished games older than `RESULTS_RETENTION_DAYS` (default 90) in line with data minimisation, then each host's finished games beyond the newest `MAX_GAMES_PER_HOST` (default 200, `deleteGamesOverCap` in `retention.ts`); saving a finished game applies the cap to its host at once (`createGameStore` options). Running and scheduled games never count. The same run first ends games nobody finished that began more than 12 hours ago (`GameManager.endStale`), and afterwards deletes expired sessions and images that no quiz, host setting or stored game of their owner names any more (`deleteUnusedImages`, after a day's grace; ids are searched as text in the JSON columns). A new kind of stored data needs a retention rule here, a line on the privacy page and a row in `docs/legal/records-of-processing.md`.
+
+## Game history columns
+
+`games.search_text` (quiz title and player names folded with `foldSql` from `db/search.ts`: lower case, accents translated, no extension), `quiz_title`, `player_count`, `scheduled_at` and `started_at` (scheduled time if later than creation) are stored generated columns: Postgres fills them from `state` on every save, inserts never set them, and old rows were filled by their migration. Lists and totals read these, never `state` (a large JSON per game). The history pages on `(host_id, started_at desc, id desc)`; a search folds the typed text with the same `foldSql`, so both sides always match. A generated expression may only use immutable functions (`jsonb_path_query_array` is fine, subqueries are not). Replacing a column makes `drizzle-kit generate` ask "rename or new?", which fails outside a terminal: add the new column in one migration and drop the old one in the next.
+
+## Personal data
+
+Players: the nickname they typed and an avatar id, nothing else (no emails, device ids or IPs). Hosts: `users` holds the username only. Future SSO adds an `oidc_identities` table; do not add provider columns to `users`.
+
+## The dev database is the user's
+
+The local Postgres (`quizmoo` database, Docker volume `quizmoo`) holds the user's own quizzes. Scripts and browser checks create their own quiz with a recognisable prefix and delete it, plus every game they started, when they finish (also after a failure). Never edit or delete the user's quizzes. Tests that need a database use `TEST_DATABASE_URL` and their own schema (see `verification`).

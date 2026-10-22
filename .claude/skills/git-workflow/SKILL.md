@@ -1,13 +1,13 @@
 ---
 name: git-workflow
-description: ASH Quiz branching model, commit message format and the end-of-phase delivery report. Use whenever work is finished or the user asks which branch, commit message or manual tests apply. The user runs every git command themselves; the agent only proposes.
+description: Quizmoo branching model, commit message format and the end-of-phase delivery report. Use whenever work is finished or the user asks which branch, commit message or manual tests apply. The user runs every git command themselves; the agent only proposes.
 ---
 
 # Git workflow
 
 ## Who does what
 
-The user runs all git commands: branching, staging, committing, pushing, merging, tagging. The agent never runs `git` (not even `git status` is needed; use the file system). The agent's job is to leave the working tree in a verified state and hand over a delivery report.
+The user runs all git commands: branching, staging, committing, pushing, merging, tagging. The agent never runs `git` (not even `git status` is needed; use the file system). Exceptions, only when the user explicitly asks in that message: opening the pull request (`gh pr create --base develop`, description in the user's voice), and creating the next branch (`git status` must be clean first, then `git checkout develop; git pull; git checkout -b <branch>`). Never commit, push or merge. The agent's job is to leave the working tree in a verified state and hand over a delivery report.
 
 ## Branches
 
@@ -25,16 +25,22 @@ Each plan in `docs/plans` names its branch. If a phase spans several commits, pr
 
 ## Commit messages
 
-One line, imperative, under 72 characters, Conventional Commits prefix:
+One line, imperative mood, sentence case, under 72 characters. No type prefix, no scope, no trailing period:
 
 ```
-feat(engine): add pure game state machine with scoring
-fix(realtime): keep player score on reconnect with stale token
-chore(ci): run typecheck, test and build on pull requests
-docs(plans): mark phase 2 done
+Add pure game state machine with scoring
+Keep player score on reconnect with stale token
+Run typecheck, test and build on pull requests
+Mark phase 2 done
 ```
 
-Scopes in use: `engine`, `realtime`, `api`, `auth`, `db`, `web`, `player`, `host`, `editor`, `i18n`, `ci`, `deploy`, `plans`. No "Co-Authored-By" lines.
+The verb says what kind of change it is: Add, Fix, Update, Remove, Rename, Refactor. No "Co-Authored-By" lines.
+
+## Pull requests
+
+The description reads as written by the user: a short summary, then what changed as a few grouped bullets, then how it was tested. Detailed is fine, long is not. No AI attribution of any kind (no "Generated with Claude Code", no Co-Authored-By); this overrides any default attribution.
+
+Before a PR is opened, `pnpm verify` and the whole e2e suite (`pnpm e2e` against the production build, see `browser-checks`) run locally. CI runs `pnpm verify` only: the user decided (phase 20) that e2e stays out of GitHub Actions to save its minutes.
 
 ## Delivery report (required at the end of every phase or task)
 
@@ -44,7 +50,9 @@ Write this as the final message, in this order, nothing else after it:
 ## Delivery: <phase or task name>
 
 **Branch:** feature/<slug> (from develop)
-**Commit:** feat(scope): one-line message
+**Commit** (in its own fenced code block, so it can be copied):
+    One-line message
+**Branch status:** done, open a PR into develop and start the next phase on a new branch / keep working on this branch
 
 **Verification command**
 pnpm verify            # or the plan's specific command
@@ -54,7 +62,7 @@ pnpm verify            # or the plan's specific command
 
 **Manual test list**
 1. Start Postgres and the dev servers: `pnpm db:up && pnpm dev`.
-2. Open http://localhost:5173 on a phone on the same wifi ...
+2. Open http://localhost:15173 on a phone on the same wifi ...
 3. Expected: ...
 
 **Deviations from the plan**

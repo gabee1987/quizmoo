@@ -1,6 +1,6 @@
 ---
 name: i18n
-description: Hungarian and English localisation rules for ASH Quiz: key naming, where strings live, server error keys, pluralisation and dates. Load whenever adding or changing any user-visible text on the web or any error code on the server.
+description: Hungarian and English localisation rules for Quizmoo: key naming, where strings live, server error keys, pluralisation and dates. Load whenever adding or changing any user-visible text on the web or any error code on the server.
 ---
 
 # i18n
@@ -30,11 +30,11 @@ t('play.answeredCount', { count: snapshot.answeredCount })
 - Never build sentences from fragments; use interpolation `{{name}}` and `count` pluralisation (`key_one`, `key_other` in both languages).
 - `aria-label` and `title` attributes are translated too.
 - Numbers and dates: `Intl.NumberFormat` / `Intl.DateTimeFormat` with `i18n.language`, never hand-formatted.
-- Language choice persists in `localStorage` (`ash-quiz.lang`) and is set on `<html lang>`.
+- Language choice persists in `localStorage` (`quizmoo.lang`) and is set on `<html lang>`.
 
 ## Tone
 
-Hungarian uses informal "te" for players (event atmosphere) and formal, concise wording for host and editor screens. English is plain and short. Keep button labels to one or two words. Error messages say what to do next: "Nincs ilyen játék. Ellenőrizd a PIN-t."
+Hungarian is friendly, natural and informal ("te") on every screen, hosts, editor and admin pages included; never "Ön" or "Kérjük, …" (the user decided it is a game, October 2026). Write what a person would say: headings and calls to action as verbs ("Csatlakozz!", "Lépj be!", "Értékeld a válaszokat", "Törlöd ezt a kvízt?"), not noun phrases ("Csatlakozás a játékhoz", "Válaszok értékelése"). Short nouns stay where Hungarian apps use them on buttons ("Mentés", "Törlés", "Mégse", "Kész"). Prefer everyday words: "online/offline", "végleg", "pár mező", "Valami elromlott". Messages from the app speak as "we" ("Keressük a játékot…", "Nem találjuk."). English is plain and short. English is plain and short. Keep button labels to one or two words. Error messages say what to do next: "Nincs ilyen játék. Ellenőrizd a PIN-t."
 
 ## Adding a new error code
 

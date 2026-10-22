@@ -1,11 +1,11 @@
 ---
 name: game-engine
-description: Rules for the pure ASH Quiz game engine in apps/server/src/game: state shape, phase transitions, scoring formulas for every question type, team scoring, error codes. Load when touching the engine, scoring, snapshots or anything that interprets answers.
+description: Rules for the pure Quizmoo game engine in apps/server/src/game: state shape, commands and phase transitions, error codes, snapshots. Load when touching the engine, its state or snapshots; scoring rules are in the scoring skill.
 ---
 
 # Game engine
 
-The engine is a set of pure functions over a `GameState` value. No I/O, no timers, no `Date.now()`: the caller passes `now` (unix ms). Side effects live in `apps/server/src/realtime`.
+The engine is a set of pure functions over a `GameState` value. No I/O, no timers, no `Date.now()`: the caller passes `now` (unix ms). Side effects live in `apps/server/src/realtime`. Points, correctness, teams and ranks are in the `scoring` skill.
 
 ## State
 
@@ -32,56 +32,45 @@ interface Player {
   score: number
   answers: Record<string /* questionId */, { answer: Answer; at: number; points: number; correct: boolean | null }>
 }
-interface Team { id: string; name: string; score: number }
+interface Team { id: string; name: string; score: number; answerMode?; captainId?; answers? }  // see team-modes
 ```
 
 `GameState` must be JSON-serialisable as is: it is persisted to Postgres on every transition and restored on boot.
 
 ## Commands
 
-Each command is `(state, input, now) => GameState` and returns a new object (no mutation). Invalid commands throw `EngineError` whose `code` is an i18n key (`errors.gameNotFound`, `errors.gameAlreadyStarted`, `errors.nameTaken`, `errors.gameFull`, `errors.notYourTurn`, `errors.questionClosed`, `errors.alreadyAnswered`, `errors.invalidAnswer`, `errors.unknownTeam`, `errors.invalidTransition`).
+Each command is `(state, input, now) => GameState` and returns a new object (no mutation). Invalid commands throw `EngineError` whose `code` is an i18n key (`errors.gameNotFound`, `errors.gameAlreadyStarted`, `errors.nameTaken`, `errors.gameFull`, `errors.notYourTurn`, `errors.questionClosed`, `errors.alreadyAnswered`, `errors.answerLocked`, `errors.invalidAnswer`, `errors.unknownTeam`, `errors.notCaptain`, `errors.invalidTransition`).
 
 | Command | Allowed in | Effect |
 |---|---|---|
 | `createGame(quiz, settings, pin, id, now)` | - | lobby state, teams created from `settings.teamNames` in team mode |
-| `joinPlayer({ id, name, teamId, token })` | lobby only (reconnect allowed any time via token) | adds player; name unique case-insensitively, max 50 players; team mode requires a known `teamId` |
-| `reconnectPlayer(token)` / `disconnectPlayer(playerId)` | any | flips `connected` only |
+| `joinPlayer({ id, name, teamId, newTeam?, solo?, token, avatar })` | lobby; with `settings.lateJoin` until finished (reconnect allowed any time via token) | adds player; name unique case-insensitively and allowed by `isNameAllowed` (`names.ts`, else `errors.nameNotAllowed`), max 60 players (`MAX_PLAYERS` in `packages/shared`); team mode requires a known `teamId`, `newTeam` or `solo` (`team-modes`); `avatar` from `avatars`, else `fallbackAvatar(id)`; a token rejoin keeps the stored name and avatar |
+| `schedule(at, now)` / `openJoining(now)` | lobby; `schedule` only with no players | `scheduledAt`: joining opens then (after `now`, at most `MAX_SCHEDULE_DAYS` = 30 ahead, else `errors.invalidSchedule`); `openJoining` moves it to `now` (kept, never cleared: the restore window counts from it); `joiningOpen(state, now)` tells; `joinPlayer(state, input, now)` refuses new players before it with `errors.gameNotOpenYet` (without `now` a scheduled game stays closed) |
+| `setNextGame(pin)` | finished | "Play again": `nextPin` points phones and the projector to the next round |
+| `reconnectPlayer(token)` / `disconnectPlayer(playerId, now)` | any | flips `connected`; disconnect stamps `disconnectedAt`, reconnect clears it |
+| `announce({ id, text, durationSec?, important? }, now)` / `clearAnnouncement()` | any | sets or clears `announcement: { id, text, at, expiresAt, important? }` (`important: true` only when set: phones cannot hide it) (1 to 200 characters, trimmed; `durationSec` 5 to 600 sets `expiresAt`, otherwise null); `startGame` and `next` clear it too |
+| `addQuickMessage(message)` / `removeQuickMessage(id)` / `setQuickMessageTime(id, durationSec)` | any | the game's `quickMessages`, one ordered list of built-in (`{ id, builtIn }`) and own (`{ id, text }`) messages copied from the host's settings by `GameManager.create`; always read through `quickMessagesOf` (missing in older games: the built-ins; the old `{ hidden, own }` shape is merged). Add an own message (same id again is a no-op, `errors.quickMessagesFull` at `MAX_QUICK_MESSAGES`), remove any by id, change one's own time; all for this game only. Host snapshots in the host room carry them, the public screen gets null |
+| `expireAnnouncement(id, now)` | any | clears the message only if it is still `id` and `expiresAt` has passed (the realtime layer's message timer calls it) |
+| `pause(now)` / `resume(now)` | question (pause: running and before the deadline; resume: paused) | `pausedAt` set / cleared; `submitAnswer` throws `errors.gamePaused` while paused; resume moves `questionStartedAt` and `questionEndsAt` by the pause; `endQuestion`, `skipQuestion`, `endGame` and opening a question clear it |
+| `showQuestion(index)` / `showAnswers(indexes)` / `closeQuestion()` | reveal or scoreboard, not `awaitingGrading`, every index closed (`0 <= index <= questionIndex`), also while answers are held back | `reviewIndex` set / cleared; `showAnswers` sets `reviewQueue` (sorted, unique) and starts at its first; `showQuestion` keeps the queue when moving within it, else starts a queue of one. Snapshots show that question as phase `reveal` with `reviewing: true` and `reviewQueue`, own results, no round points (ranks do not move); while answers are held back `conceal` keeps that reveal but no points, scores or ranks (`lastPoints` null). `next`, `showScoreboard` and `endGame` clear `reviewIndex` (a stale queue means nothing then) |
 | `kickPlayer(playerId)` | any except finished | removes player, recomputes nothing (their past points stay out of team totals from then on) |
+| `leavePlayer(playerId, now)` | any except finished | the player's own "Leave game": in the lobby as `kickPlayer`; later `left: true`, offline with `disconnectedAt` (kept by later `disconnectPlayer` calls), points kept; `joinPlayer` and `reconnectPlayer` with their token throw `errors.leftGame` |
+| `setTeamMode({ teamId?, mode, byPlayerId? })` / `setCaptain({ playerId, byPlayerId? })` | team mode; `setTeamMode` lobby (host also between questions), `setCaptain` any phase but finished | team answer mode and captain; rules in `team-modes` |
+| `createTeam` / `renameTeam` / `removeTeam` / `movePlayer` / `pickTeam` | team mode; see `team-modes` | flexible teams, set up per game; `movePlayer` with `teamId: null` and `pickTeam` with `solo` for solo players |
+| `confirmTeamAnswer(playerId, questionId, answer)` | question, captain-decides team, the team's captain | stores the team's answer; rules in `team-modes` |
 | `startGame()` | lobby, at least 1 player, at least 1 question | goes to question 0 |
-| `submitAnswer(playerId, questionId, answer)` | question, before `questionEndsAt`, once per player per question | records answer, answer type must match question type |
+| `submitAnswer(playerId, questionId, answer)` | question, before `questionEndsAt`, once per player per question unless `settings.answerChanges` | records answer, answer type must match question type; with `answerChanges` a different answer replaces the record (new `at` and `timeMs`) until `questionEndsAt - answerLockSec` (then `errors.answerLocked`; first answers still taken until the end), and an identical one returns the state unchanged so a retry keeps its time |
 | `endQuestion()` | question | scores all answers, goes to reveal; sets `awaitingGrading` for host-graded text |
 | `gradeText(correctPlayerIds)` | reveal with `awaitingGrading` | marks listed answers correct, scores them, clears flag |
 | `next()` | reveal -> scoreboard; scoreboard -> question (index+1) or finished | |
+| `showScoreboard()` | reveal, not `awaitingGrading` | scoreboard on demand, whatever `settings.scoreboard`, also with `revealAnswers: 'atEnd'`: `conceal` then keeps totals and ranks in the scoreboard phase but drops `previousRank`, `roundPoints`, `correctCount`, streaks and the reveal |
 | `skipQuestion()` | question | discards answers of the current question, goes to scoreboard |
 | `extendTime(seconds)` | question | pushes `questionEndsAt` |
 | `endGame()` | any | finished, sets `finishedAt` |
+| `closeGame()` | any | `endGame` with both audiences released (no podium waits); the realtime layer sends everyone away and drops the game from memory |
+| `lockHost(codeHash?)` / `unlockHost()` / `hostLocked(state)` | any | screen lock: `lock: { codeHash, locked }` (`codeHash` an argon2 hash of the game's lock code, kept unless a new one is given, never in a snapshot); host snapshots carry `locked` and, in the host room, `hasLockCode`. The realtime layer locks all of a host's games together and checks codes |
 
-`endQuestion` is also what the realtime layer calls when every connected player has answered, so "all answered" is not an engine concern.
-
-## Scoring
-
-Let `P` = question points, `T` = time limit in ms, `t` = answer time minus `questionStartedAt` (clamped to `[0, T]`).
-
-- Correct answer, speed bonus on: `round(P * (1 - t / T / 2))`, so between `P` and `P/2`.
-- Correct answer, speed bonus off: `P`.
-- Wrong or missing answer: `0`.
-- Poll: always `0`, `correct` is `null`.
-
-Correctness per type:
-
-| Type | Correct when |
-|---|---|
-| single | `optionId === correctOptionId` |
-| multiple | set of `optionIds` equals set of `correctOptionIds` (all or nothing) |
-| truefalse | `value === correct` |
-| text | `normalise(value)` equals `normalise(a)` for some accepted answer; with no accepted answers, `correct` stays `null` until `gradeText` |
-| number | `abs(value - correct) <= tolerance` |
-
-`normalise`: trim, lowercase, NFD then strip combining marks (so "Győr" matches "gyor"), collapse internal whitespace.
-
-Team mode: after scoring a question, each team's gain is `round(mean(points of all its current members))`, members without an answer counting as 0. Individual scores are still kept and shown.
-
-Ranks: dense ranking by score descending, ties share a rank; stable on name for display.
+`endQuestion` is also what the realtime layer calls when `allAnswered(state)` is true (every connected player, or in team mode every team with someone online, has its answer; see `team-modes`).
 
 ## Snapshots
 
@@ -89,4 +78,4 @@ Ranks: dense ranking by score descending, ties share a rank; stable on name for 
 
 ## Tests
 
-`engine.test.ts` covers every row of the command table, every scoring row, the normaliser, team averaging with a non-answering member, dense ranking with ties, and the invariant that `JSON.parse(JSON.stringify(state))` deep-equals `state` after each command. Use a small fixture quiz with one question of each type.
+`engine.test.ts` covers every row of the command table (scoring cases are listed in `scoring`) and the invariant that `JSON.parse(JSON.stringify(state))` deep-equals `state` after each command. Use a small fixture quiz with one question of each type.

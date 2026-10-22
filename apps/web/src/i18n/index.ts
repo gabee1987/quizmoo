@@ -6,7 +6,7 @@ import en from './en.json'
 export const languages = ['hu', 'en'] as const
 export type Language = (typeof languages)[number]
 
-const STORAGE_KEY = 'ash-quiz.lang'
+const STORAGE_KEY = 'quizmoo.lang'
 
 function detectLanguage(): Language {
   try {

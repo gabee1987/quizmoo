@@ -1,0 +1,96 @@
+import { nicknameLanguages, nicknameListSchema, pinSchema, type NicknameLanguage } from '@quizmoo/shared'
+import { eq } from 'drizzle-orm'
+import type { FastifyInstance } from 'fastify'
+import { z } from 'zod'
+import { requireSession } from '../auth/require-session.js'
+import type { Db } from '../db/index.js'
+import { nicknameLists } from '../db/schema.js'
+import { isNameAllowed } from '../game/names.js'
+import { avatarForNickname, defaultNicknames, pickNickname } from '../game/nicknames.js'
+import type { GameManager } from '../realtime/game-manager.js'
+import type { PinGuard } from '../realtime/pin-guard.js'
+import { publicGame } from './games.js'
+import { parseOr400 } from './http.js'
+
+const languageSchema = z.enum(nicknameLanguages)
+
+/** Every name must pass the join filter, or "Surprise me" would offer a name the join then refuses. */
+const saveSchema = nicknameListSchema.superRefine(({ names }, ctx) => {
+  names.forEach((name, i) => {
+    if (!isNameAllowed(name)) ctx.addIssue({ code: 'custom', path: ['names', i], message: 'errors.nameNotAllowed' })
+  })
+})
+
+const checkSchema = z.object({ names: z.array(z.string().max(200)).min(1).max(500) })
+
+/** The list "Surprise me" uses: the admins' one, else the built-in one. */
+export async function nicknamesFor(db: Db, language: NicknameLanguage): Promise<string[]> {
+  const row = (await db.select().from(nicknameLists).where(eq(nicknameLists.language, language)))[0]
+  return row?.names ?? defaultNicknames[language]
+}
+
+export async function nicknameRoutes(
+  app: FastifyInstance,
+  { db, manager, pinGuard }: { db: Db; manager: GameManager; pinGuard: PinGuard },
+) {
+  const adminOnly = { preHandler: requireSession(db, { admin: true }) }
+
+  app.get('/api/nicknames', adminOnly, async () => {
+    const rows = await db.select().from(nicknameLists)
+    const lists = Object.fromEntries(
+      nicknameLanguages.map((language) => {
+        const row = rows.find((r) => r.language === language)
+        const names = row?.names ?? defaultNicknames[language]
+        return [language, { names, avatars: names.map(avatarForNickname), custom: !!row }]
+      }),
+    )
+    return { lists }
+  })
+
+  // Names the admin is adding: the avatar each gets and whether the join filter lets it through,
+  // so a refused name is marked before saving. Length is checked by the page itself.
+  app.post('/api/nicknames/check', adminOnly, async (request, reply) => {
+    const body = parseOr400(checkSchema, request.body, reply)
+    if (!body) return reply
+    return { results: body.names.map((name) => ({ avatar: avatarForNickname(name), allowed: isNameAllowed(name) })) }
+  })
+
+  // Duplicates (case-insensitive) are dropped; the first spelling stays.
+  app.put<{ Params: { language: string } }>('/api/nicknames/:language', adminOnly, async (request, reply) => {
+    const language = parseOr400(languageSchema, request.params.language, reply)
+    if (!language) return reply
+    const body = parseOr400(saveSchema, request.body, reply)
+    if (!body) return reply
+    const seen = new Set<string>()
+    const names = body.names.filter((name) => {
+      const key = name.toLocaleLowerCase()
+      if (seen.has(key)) return false
+      seen.add(key)
+      return true
+    })
+    await db
+      .insert(nicknameLists)
+      .values({ language, names })
+      .onConflictDoUpdate({ target: nicknameLists.language, set: { names, updatedAt: new Date() } })
+    return { names, custom: true }
+  })
+
+  // Back to the built-in list.
+  app.delete<{ Params: { language: string } }>('/api/nicknames/:language', adminOnly, async (request, reply) => {
+    const language = parseOr400(languageSchema, request.params.language, reply)
+    if (!language) return reply
+    await db.delete(nicknameLists).where(eq(nicknameLists.language, language))
+    return { names: defaultNicknames[language], custom: false }
+  })
+
+  // Public, for "Surprise me": a name nobody in this game has yet, with the avatar that fits it
+  // (null: none fits, the phone picks one). Only the name and the avatar leave the server.
+  app.get<{ Params: { pin: string }; Querystring: { lang?: string } }>('/api/games/:pin/nickname', async (request, reply) => {
+    const game = publicGame(pinGuard, manager, request.ip, request.params.pin)
+    if ('error' in game) return reply.code(game.error === 'errors.rateLimited' ? 429 : 404).send(game)
+    const language = languageSchema.catch('hu').parse(request.query.lang)
+    const taken = Object.values(game.state.players).map((p) => p.name)
+    const name = pickNickname(await nicknamesFor(db, language), taken)
+    return { name, avatar: name ? avatarForNickname(name) : null }
+  })
+}

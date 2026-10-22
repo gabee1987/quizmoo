@@ -1,6 +1,14 @@
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import type { AddressInfo } from 'node:net'
+import { tmpdir } from 'node:os'
+import path from 'node:path'
+import { TERMS_VERSION } from '@quizmoo/shared'
+import { io as ioClient } from 'socket.io-client'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { buildApp } from '../src/app.js'
 import { loadConfig } from '../src/config.js'
+import type { Db } from '../src/db/index.js'
+import { GameManager } from '../src/realtime/game-manager.js'
 
 const config = loadConfig({
   NODE_ENV: 'test',
@@ -12,16 +20,183 @@ describe('app', () => {
   let built: Awaited<ReturnType<typeof buildApp>>
 
   beforeAll(async () => {
-    built = await buildApp(config)
+    // The health check only runs `select 1`, so a stub db is enough.
+    built = await buildApp(config, { db: { execute: async () => [] } as unknown as Db, manager: newManager() })
   })
   afterAll(async () => {
     await built.app.close()
   })
 
-  it('answers the health check', async () => {
+  const newManager = () => new GameManager({ save: async () => {}, loadActive: async () => [] }, console)
+
+  it('answers the health check with database status and the number of running games', async () => {
     const res = await built.app.inject({ method: 'GET', url: '/api/health' })
     expect(res.statusCode).toBe(200)
-    expect(res.json()).toEqual({ ok: true })
+    expect(res.json()).toEqual({ ok: true, db: true, activeGames: 0 })
+  })
+
+  it('reports 503 when the database is unreachable', async () => {
+    const down = await buildApp(config, {
+      db: { execute: async () => Promise.reject(new Error('connection refused')) } as unknown as Db,
+      manager: newManager(),
+    })
+    const res = await down.app.inject({ method: 'GET', url: '/api/health' })
+    expect(res.statusCode).toBe(503)
+    expect(res.json()).toEqual({ ok: false, db: false, activeGames: 0 })
+    await down.app.close()
+  })
+
+  it('sends security headers; a plain-http LAN origin gets no https upgrade or HSTS', async () => {
+    const res = await built.app.inject({ method: 'GET', url: '/api/health' })
+    const csp = String(res.headers['content-security-policy'])
+    expect(csp).toContain("default-src 'self'")
+    expect(csp).toContain("script-src 'self'")
+    // Only the app's own pages may frame it (the host's live previews); other sites may not.
+    expect(csp).toContain("frame-ancestors 'self'")
+    expect(res.headers['x-frame-options']).toBe('SAMEORIGIN')
+    expect(csp).toContain('connect-src')
+    expect(csp).not.toContain('upgrade-insecure-requests')
+    expect(res.headers['strict-transport-security']).toBeUndefined()
+    expect(res.headers['x-content-type-options']).toBe('nosniff')
+  })
+
+  it('adds HSTS and the https upgrade behind an https origin', async () => {
+    const https = await buildApp(
+      { ...config, APP_ORIGIN: 'https://quiz.example.test' },
+      { db: { execute: async () => [] } as unknown as Db, manager: newManager() },
+    )
+    const res = await https.app.inject({ method: 'GET', url: '/api/health' })
+    expect(res.headers['strict-transport-security']).toBe('max-age=31536000; includeSubDomains')
+    expect(String(res.headers['content-security-policy'])).toContain('upgrade-insecure-requests')
+    expect(String(res.headers['content-security-policy'])).toContain('wss://quiz.example.test')
+    await https.app.close()
+  })
+
+  it('closes promptly while socket clients are connected (they would keep the HTTP server open)', async () => {
+    const live = await buildApp(config, { db: { execute: async () => [] } as unknown as Db, manager: newManager() })
+    await live.app.listen({ port: 0, host: '127.0.0.1' })
+    const { port } = live.app.server.address() as AddressInfo
+    const client = ioClient(`http://127.0.0.1:${port}`, { transports: ['websocket'], reconnection: false })
+    await new Promise<void>((resolve) => client.once('connect', () => resolve()))
+    const disconnected = new Promise<void>((resolve) => client.once('disconnect', () => resolve()))
+    const started = Date.now()
+    await live.app.close()
+    expect(Date.now() - started).toBeLessThan(2000)
+    await disconnected
+    client.close()
+  })
+
+  it('rate limits the API but not page loads (phones behind one venue IP fetch many assets)', async () => {
+    const webDist = mkdtempSync(path.join(tmpdir(), 'quizmoo-web-'))
+    mkdirSync(path.join(webDist, 'assets'))
+    writeFileSync(path.join(webDist, 'index.html'), '<!doctype html><title>test</title>')
+    writeFileSync(path.join(webDist, 'assets', 'index.js'), 'export {}')
+    const limited = await buildApp(config, { db: { execute: async () => [] } as unknown as Db, manager: newManager(), webDist })
+    const get = (url: string) => limited.app.inject({ method: 'GET', url, remoteAddress: '10.0.0.1' })
+    const assets = await Promise.all(Array.from({ length: 320 }, () => get('/assets/index.js')))
+    expect(assets.filter((res) => res.statusCode !== 200)).toHaveLength(0)
+    expect((await get('/play/123456')).statusCode).toBe(200)
+    const api = await Promise.all(Array.from({ length: 320 }, () => get('/api/health')))
+    expect(api.filter((res) => res.statusCode === 429).length).toBeGreaterThan(0)
+    await limited.app.close()
+    rmSync(webDist, { recursive: true })
+  })
+
+  it('ignores X-Forwarded-For for rate limits unless a proxy is trusted', async () => {
+    const limitedBy = async (trustProxy: number) => {
+      const app = (await buildApp({ ...config, TRUST_PROXY: trustProxy }, { db: { execute: async () => [] } as unknown as Db, manager: newManager() })).app
+      const responses = await Promise.all(
+        Array.from({ length: 320 }, (_, i) =>
+          app.inject({ method: 'GET', url: '/api/site', remoteAddress: '10.0.0.1', headers: { 'x-forwarded-for': forwarded(i) } }),
+        ),
+      )
+      await app.close()
+      return responses.some((res) => res.statusCode === 429)
+    }
+    // Without a proxy every request comes from 10.0.0.1, whatever the header says.
+    let forwarded = (i: number) => `198.51.${Math.floor(i / 250)}.${i % 250}`
+    expect(await limitedBy(0)).toBe(true)
+    // Behind one proxy the address it added last is the client: 320 different ones.
+    expect(await limitedBy(1)).toBe(false)
+    // A client writing its own addresses in front of the proxy's still counts as one.
+    forwarded = (i: number) => `198.51.${Math.floor(i / 250)}.${i % 250}, 203.0.113.7`
+    expect(await limitedBy(1)).toBe(true)
+  })
+
+  it('tells the privacy page and the host navigation who runs the install', async () => {
+    expect((await built.app.inject({ method: 'GET', url: '/api/site' })).json()).toEqual({
+      operator: null,
+      contact: null,
+      hosting: null,
+      termsVersion: TERMS_VERSION,
+      feedbackUrl: null,
+      retentionDays: 90,
+      registrationOpen: false,
+      mailProvider: null,
+    })
+    const site = await buildApp(
+      {
+        ...config,
+        OPERATOR_NAME: 'Test Operator',
+        OPERATOR_EMAIL: 'privacy@example.test',
+        HOSTING_PROVIDER: 'Example Cloud, EU region',
+        FEEDBACK_URL: 'https://example.test/feedback',
+        MAIL_PROVIDER: 'Example Mail, EU',
+      },
+      { db: { execute: async () => [] } as unknown as Db, manager: newManager() },
+    )
+    const res = await site.app.inject({ method: 'GET', url: '/api/site' })
+    expect(res.json()).toEqual({
+      operator: 'Test Operator',
+      contact: 'privacy@example.test',
+      hosting: 'Example Cloud, EU region',
+      termsVersion: TERMS_VERSION,
+      feedbackUrl: 'https://example.test/feedback',
+      retentionDays: 90,
+      registrationOpen: false,
+      mailProvider: 'Example Mail, EU',
+    })
+    await site.app.close()
+  })
+
+  it('rejects JSON bodies over 1 MB', async () => {
+    const res = await built.app.inject({
+      method: 'POST',
+      url: '/api/auth/login',
+      headers: { 'content-type': 'application/json' },
+      payload: JSON.stringify({ username: 'x', password: 'y'.repeat(1024 * 1024) }),
+    })
+    expect(res.statusCode).toBe(413)
+  })
+
+  it('treats empty seed variables as unset', () => {
+    const parsed = loadConfig({
+      DATABASE_URL: 'postgres://test:test@localhost:5432/test',
+      SESSION_SECRET: 'x'.repeat(32),
+      SEED_ADMIN_USERNAME: '',
+      SEED_ADMIN_PASSWORD: '',
+    })
+    expect(parsed.SEED_ADMIN_USERNAME).toBeUndefined()
+    expect(parsed.SEED_ADMIN_PASSWORD).toBeUndefined()
+    expect(parsed.RESULTS_RETENTION_DAYS).toBe(90)
+    expect(parsed.MAX_GAMES_PER_HOST).toBe(200)
+    expect(parsed.TRUST_PROXY).toBe(0)
+    expect(parsed.REGISTRATION_OPEN).toBe(false)
+  })
+
+  it('opens registration only for the exact value true', () => {
+    const env = { DATABASE_URL: 'postgres://test:test@localhost:5432/test', SESSION_SECRET: 'x'.repeat(32) }
+    expect(loadConfig({ ...env, REGISTRATION_OPEN: 'true' }).REGISTRATION_OPEN).toBe(true)
+    expect(loadConfig({ ...env, REGISTRATION_OPEN: 'false' }).REGISTRATION_OPEN).toBe(false)
+    expect(loadConfig({ ...env, REGISTRATION_OPEN: '' }).REGISTRATION_OPEN).toBe(false)
+    expect(() => loadConfig({ ...env, REGISTRATION_OPEN: 'yes' })).toThrow(/REGISTRATION_OPEN/)
+  })
+
+  it('accepts only an https feedback link and a valid operator e-mail', () => {
+    const env = { DATABASE_URL: 'postgres://test:test@localhost:5432/test', SESSION_SECRET: 'x'.repeat(32) }
+    expect(() => loadConfig({ ...env, FEEDBACK_URL: 'javascript:alert(1)' })).toThrow(/FEEDBACK_URL/)
+    expect(() => loadConfig({ ...env, FEEDBACK_URL: 'http://example.test' })).toThrow(/FEEDBACK_URL/)
+    expect(() => loadConfig({ ...env, OPERATOR_EMAIL: 'not-an-address' })).toThrow(/OPERATOR_EMAIL/)
   })
 
   it('rejects an invalid environment', () => {

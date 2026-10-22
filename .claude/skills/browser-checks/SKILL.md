@@ -1,0 +1,63 @@
+---
+name: browser-checks
+description: How to check Quizmoo in a real browser: screenshots with Playwright scripts, the production build on port 3999 against the dev database, the e2e suite, and the stale dev-server traps while the user's dev:lan runs. Load before any screenshot, visual check or e2e run.
+---
+
+# Browser checks
+
+UI changes are checked visually (AGENTS.md section 5). Unit tests do not show layout.
+
+## Production build on :3999
+
+The user's `dev:lan` usually holds :3000 and a Vite port, so checks run on a separate production build:
+
+1. `pnpm build`.
+2. From `apps/server`, with the variables from the root `.env` plus `NODE_ENV=production`, `PORT=3999`, `APP_ORIGIN=http://localhost:3999` and `BREVO_API_KEY=` (empty): `node dist/index.js` in the background. The empty key wins over the `.env` file and switches e-mail off; without it `signup.e2e.ts` sends a real sign-up e-mail to the user's admin address (happened in phase 32). Load the file with `node --env-file=../../.env dist/index.js` (variables already set win), not by sourcing it in Bash: values such as `MAIL_PROVIDER=Brevo (…)` are a Bash syntax error.
+3. After every new web build, restart the :3999 process (it serves the built files it found at start).
+4. Stop it when done: `Get-NetTCPConnection -LocalPort 3999 -State Listen | % { Stop-Process -Id $_.OwningProcess -Force }`.
+
+It uses the dev database, which is the user's data (see `database`). A phase with a migration, or one that needs many seeded rows, runs :3999 against a throwaway copy instead (`docker exec quizmoo-db-1 sh -c "createdb -U quizmoo quizmoo_pNN && pg_dump -U quizmoo quizmoo | psql -q -U quizmoo quizmoo_pNN"`, `DATABASE_URL` pointing at it; production mode migrates it on start), dropped afterwards. Seeded `games` rows must be finished or older than 12 hours: the server restores recent unfinished games at start and crashes on a fake state.
+
+## Screenshot scripts
+
+- Playwright scripts (`.cjs`) live in the session scratchpad, never in the repo. Run them with Node and take `chromium` from `@playwright/test`, the only Playwright package installed (`require(require.resolve('@playwright/test', { paths: ['C:/Coding/quizmoo/apps/web'] }))`). Use the installed Chrome (`channel: 'chrome'`), as the e2e config does.
+- Log in with the host account the user gave for testing; never write that password into a repo file. If the session has no `E2E_USERNAME` / `E2E_PASSWORD` in its environment, ask the user for them (or to run the e2e and screenshots) at the start of the browser step; do not search old transcripts for the password or create extra accounts or databases to get around it (the permission guard refuses both).
+- Each script creates its own quiz and games with a fixed prefix (e.g. "Shots p16") and deletes every quiz and game with that prefix in a `finally` block, also after a failure.
+- Phone shots at 390 × 844, laptop at 1440 × 900, projector at 1920 × 1080; take both colour modes when colours changed. Assert the claim when there is one (e.g. "no scroll": `scrollHeight <= innerHeight`), then look at the picture.
+- Small details (borders, joins, 1–2 px overlaps) are checked at `deviceScaleFactor` 1, 1.25 and 1.5 as well, enlarged with nearest-neighbour scaling: a 3× render hides 1 px rounding gaps that the user's Windows laptop shows. When the user sends a screenshot that disagrees with yours, enlarge theirs first and compare before changing anything.
+- The production build registers a service worker (`public/sw.js`): a script's fresh browser context starts clean, but a reused profile (or the user's own browser on :3999) can show the previous build's page until a reload.
+- Check a phone screen under every path that reaches it: a question closes the moment everyone (every team) has answered, so the "answered" view is skipped and the reveal follows at once; with `revealAnswers: 'atEnd'` the reveal is the "Answer saved" card. A change shown only on one path looked done in screenshots and was missing for the user.
+- Wait 1.5–2 s after a phase change before a screenshot: entrance animations and count-ups are otherwise caught half-way (faded cards, "+0 points"); a `fullPage` shot right after a change is the worst case.
+- Selectors: `getByRole(..., { name, exact: true })`. Loose names match more than meant ("Pear" also matched "Appearance"). A `ChoiceCards` card with a description has both in its name ("Red Nobody yet"): match its start, `new RegExp(`^${name}\b`)`.
+- Toasts: Sonner pauses a toast while the mouse rests on it, so after a click near the top of a phone a toast can stay for good; wait for `[data-sonner-toast]` to detach before swiping or clicking what it covers, and check overlaps only after its 0.4 s slide-in.
+- To assert which element a press animation runs on (the squish wobble or dip), wrap `Element.prototype.animate` in `context.addInitScript` and record each call's target and keyframes; `getAnimations()` after the fact misses short ones.
+- Write scripts with the Write tool, not shell heredocs: backticks in a quoted `node -e` string get eaten, `cat > file` can hang the shell, and `\r\n` inside a heredoc'd Python string lands in the file as a real line break. Python on Windows writes `\r\n` in text mode: open files with `newline=''` when a script must touch them.
+
+## Performance measurement
+
+For work that adds animation or weight to a page, measure before and after on the production build: a Playwright script with a 390 × 844 mobile context, `Emulation.setCPUThrottlingRate` 4 over CDP, `PerformanceObserver` for `largest-contentful-paint` (log the element) and `layout-shift` (log the sources), `Performance.getMetrics` `TaskDuration` / `RecalcStyleDuration` deltas over 5 s of idle, the `.js` / `.css` bytes from resource timing, and the keyframe properties of `document.getAnimations()` (anything besides transform and opacity is a red flag). Take the median of 5 to 7 runs: idle numbers vary by 2× between identical runs.
+
+Git Bash turns a bare `/` argument into `C:/Program Files/Git/`; pass page names (`join`, `login`) to scripts, not paths.
+
+## E2E suite
+
+`apps/web/e2e/*.e2e.ts` against a running app (default `http://localhost:3000`, or `E2E_BASE_URL`):
+
+```powershell
+$env:E2E_BASE_URL="http://localhost:3999"; $env:E2E_USERNAME="admin"; $env:E2E_PASSWORD="..."; pnpm e2e
+```
+
+Run the final e2e pass against the production build (:3999): against the Vite dev server, React's development warnings (e.g. invalid HTML nesting) are console errors, and `nicknames.e2e.ts` fails on them. Scripts that clean up games must end an unfinished game first (from the host page: "Játék vége" / "End game", accept the confirm); the API refuses to delete it with `errors.gameNotFinished`.
+
+Quizzes created without `settings` start with the host's game defaults (My settings), which may hold answers back ("Only at the end") and break specs that expect "Correct!": create quizzes in specs with `settings: {}` (the app's defaults), and a spec that builds one in the editor switches the host's `gameDefaults` off for the run and restores them in `afterEach`. A projector page in a logged-out browser context logs a 401 console error (it asks `/api/auth/me` whether the host is there); a spec that fails on console errors opens the projector with `page.context().newPage()` from the host's page.
+
+`e2e/global-setup.ts` accepts the terms of use for the E2E host once per run (one login), and `playwright.config.ts` marks the storage notice as seen in every context (contexts the specs open inherit `use`); a spec that needs a first visit passes `storageState: { cookies: [], origins: [] }`. Count list items within what the spec owns (`filter({ hasText: prefix })`): the host sidebar has list items of its own (the legal links). In scratch scripts, send `content-type: application/json` only with a body: Fastify answers 400 to an empty JSON body, which made a cleanup DELETE fail silently and left a test account behind. Create test accounts inside the `try` whose `finally` deletes them, and delete a leftover one first.
+
+The whole suite shares the login limit (10 a minute from one address) and runs its files in alphabetical order, with the login-heavy specs (`a11y`, `admin-users`) first. A new spec logs in as few times as it can (check results through the admin's API rather than by a login that must fail) and is named so it does not run among them; 429s or "expected URL /host, got /login" in later specs mean the limit, not a bug. Wait a minute before rerunning. A failed run can leave "E2E" quizzes and games behind; delete them before rerunning. When a UI change moves something an e2e spec looks for (a tab, a dialog step), update the spec in the same change.
+
+## The user's running dev servers
+
+- Edit source files with the Edit/Write tools while `dev:lan` runs, never `sed -i` or `cat >` (see AGENTS.md learnings).
+- After server edits check that the API on :3000 restarted after the last edit; after `styles.css` changes check that Vite serves the new classes (`curl -s localhost:<vite port>/src/styles.css | grep <class>`). If not, tell the user to restart `dev:lan`.
+- The Docker Compose `app` container also listens on :3000 and has `restart: unless-stopped`, so it comes back with Docker. Running next to `dev:lan`, it answers instead of the dev API with its old build (new routes 404, old response shapes). Check `docker ps`; `docker compose stop app` frees the port. When the API "did not restart", compare the process on :3000 too.
+- The web dev port is 15173 (5173+ belong to the user's other Vite projects); `dev:lan` moves up if it is taken, so read the port it printed.

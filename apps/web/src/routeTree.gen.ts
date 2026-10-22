@@ -10,33 +10,309 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CookiesRouteImport } from './routes/cookies'
+import { Route as HostRouteRouteImport } from './routes/host/route'
+import { Route as ImprintRouteImport } from './routes/imprint'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as RegisterRouteImport } from './routes/register'
+import { Route as TermsRouteImport } from './routes/terms'
+import { Route as HostIndexRouteImport } from './routes/host/index'
+import { Route as HostNicknamesRouteImport } from './routes/host/nicknames'
+import { Route as HostPasswordRouteImport } from './routes/host/password'
+import { Route as HostSettingsRouteImport } from './routes/host/settings'
+import { Route as HostTermsRouteImport } from './routes/host/terms'
+import { Route as HostUsersRouteImport } from './routes/host/users'
+import { Route as HostWhatsNewRouteImport } from './routes/host/whats-new'
+import { Route as PlayPinRouteImport } from './routes/play.$pin'
+import { Route as ScreenPinRouteImport } from './routes/screen.$pin'
+import { Route as HostGamesIndexRouteImport } from './routes/host/games.index'
+import { Route as HostGamesPinRouteImport } from './routes/host/games.$pin'
+import { Route as HostQuizzesIndexRouteImport } from './routes/host/quizzes.index'
+import { Route as HostQuizzesQuizIdRouteImport } from './routes/host/quizzes.$quizId'
+import { Route as HostResultsGameIdRouteImport } from './routes/host/results.$gameId'
+import { Route as ScreenResultsGameIdRouteImport } from './routes/screen.results.$gameId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CookiesRoute = CookiesRouteImport.update({
+  id: '/cookies',
+  path: '/cookies',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HostRouteRoute = HostRouteRouteImport.update({
+  id: '/host',
+  path: '/host',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ImprintRoute = ImprintRouteImport.update({
+  id: '/imprint',
+  path: '/imprint',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RegisterRoute = RegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HostIndexRoute = HostIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => HostRouteRoute,
+} as any)
+const HostNicknamesRoute = HostNicknamesRouteImport.update({
+  id: '/nicknames',
+  path: '/nicknames',
+  getParentRoute: () => HostRouteRoute,
+} as any)
+const HostPasswordRoute = HostPasswordRouteImport.update({
+  id: '/password',
+  path: '/password',
+  getParentRoute: () => HostRouteRoute,
+} as any)
+const HostSettingsRoute = HostSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => HostRouteRoute,
+} as any)
+const HostTermsRoute = HostTermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => HostRouteRoute,
+} as any)
+const HostUsersRoute = HostUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => HostRouteRoute,
+} as any)
+const HostWhatsNewRoute = HostWhatsNewRouteImport.update({
+  id: '/whats-new',
+  path: '/whats-new',
+  getParentRoute: () => HostRouteRoute,
+} as any)
+const PlayPinRoute = PlayPinRouteImport.update({
+  id: '/play/$pin',
+  path: '/play/$pin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ScreenPinRoute = ScreenPinRouteImport.update({
+  id: '/screen/$pin',
+  path: '/screen/$pin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HostGamesIndexRoute = HostGamesIndexRouteImport.update({
+  id: '/games/',
+  path: '/games/',
+  getParentRoute: () => HostRouteRoute,
+} as any)
+const HostGamesPinRoute = HostGamesPinRouteImport.update({
+  id: '/games/$pin',
+  path: '/games/$pin',
+  getParentRoute: () => HostRouteRoute,
+} as any)
+const HostQuizzesIndexRoute = HostQuizzesIndexRouteImport.update({
+  id: '/quizzes/',
+  path: '/quizzes/',
+  getParentRoute: () => HostRouteRoute,
+} as any)
+const HostQuizzesQuizIdRoute = HostQuizzesQuizIdRouteImport.update({
+  id: '/quizzes/$quizId',
+  path: '/quizzes/$quizId',
+  getParentRoute: () => HostRouteRoute,
+} as any)
+const HostResultsGameIdRoute = HostResultsGameIdRouteImport.update({
+  id: '/results/$gameId',
+  path: '/results/$gameId',
+  getParentRoute: () => HostRouteRoute,
+} as any)
+const ScreenResultsGameIdRoute = ScreenResultsGameIdRouteImport.update({
+  id: '/screen/results/$gameId',
+  path: '/screen/results/$gameId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/host': typeof HostRouteRouteWithChildren
+  '/cookies': typeof CookiesRoute
+  '/imprint': typeof ImprintRoute
+  '/login': typeof LoginRoute
+  '/privacy': typeof PrivacyRoute
+  '/register': typeof RegisterRoute
+  '/terms': typeof TermsRoute
+  '/host/nicknames': typeof HostNicknamesRoute
+  '/host/password': typeof HostPasswordRoute
+  '/host/settings': typeof HostSettingsRoute
+  '/host/terms': typeof HostTermsRoute
+  '/host/users': typeof HostUsersRoute
+  '/host/whats-new': typeof HostWhatsNewRoute
+  '/play/$pin': typeof PlayPinRoute
+  '/screen/$pin': typeof ScreenPinRoute
+  '/host/': typeof HostIndexRoute
+  '/host/games/$pin': typeof HostGamesPinRoute
+  '/host/quizzes/$quizId': typeof HostQuizzesQuizIdRoute
+  '/host/results/$gameId': typeof HostResultsGameIdRoute
+  '/screen/results/$gameId': typeof ScreenResultsGameIdRoute
+  '/host/games/': typeof HostGamesIndexRoute
+  '/host/quizzes/': typeof HostQuizzesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/cookies': typeof CookiesRoute
+  '/imprint': typeof ImprintRoute
+  '/login': typeof LoginRoute
+  '/privacy': typeof PrivacyRoute
+  '/register': typeof RegisterRoute
+  '/terms': typeof TermsRoute
+  '/host/nicknames': typeof HostNicknamesRoute
+  '/host/password': typeof HostPasswordRoute
+  '/host/settings': typeof HostSettingsRoute
+  '/host/terms': typeof HostTermsRoute
+  '/host/users': typeof HostUsersRoute
+  '/host/whats-new': typeof HostWhatsNewRoute
+  '/play/$pin': typeof PlayPinRoute
+  '/screen/$pin': typeof ScreenPinRoute
+  '/host': typeof HostIndexRoute
+  '/host/games/$pin': typeof HostGamesPinRoute
+  '/host/quizzes/$quizId': typeof HostQuizzesQuizIdRoute
+  '/host/results/$gameId': typeof HostResultsGameIdRoute
+  '/screen/results/$gameId': typeof ScreenResultsGameIdRoute
+  '/host/games': typeof HostGamesIndexRoute
+  '/host/quizzes': typeof HostQuizzesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/host': typeof HostRouteRouteWithChildren
+  '/cookies': typeof CookiesRoute
+  '/imprint': typeof ImprintRoute
+  '/login': typeof LoginRoute
+  '/privacy': typeof PrivacyRoute
+  '/register': typeof RegisterRoute
+  '/terms': typeof TermsRoute
+  '/host/nicknames': typeof HostNicknamesRoute
+  '/host/password': typeof HostPasswordRoute
+  '/host/settings': typeof HostSettingsRoute
+  '/host/terms': typeof HostTermsRoute
+  '/host/users': typeof HostUsersRoute
+  '/host/whats-new': typeof HostWhatsNewRoute
+  '/play/$pin': typeof PlayPinRoute
+  '/screen/$pin': typeof ScreenPinRoute
+  '/host/': typeof HostIndexRoute
+  '/host/games/$pin': typeof HostGamesPinRoute
+  '/host/quizzes/$quizId': typeof HostQuizzesQuizIdRoute
+  '/host/results/$gameId': typeof HostResultsGameIdRoute
+  '/screen/results/$gameId': typeof ScreenResultsGameIdRoute
+  '/host/games/': typeof HostGamesIndexRoute
+  '/host/quizzes/': typeof HostQuizzesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/host'
+    | '/cookies'
+    | '/imprint'
+    | '/login'
+    | '/privacy'
+    | '/register'
+    | '/terms'
+    | '/host/nicknames'
+    | '/host/password'
+    | '/host/settings'
+    | '/host/terms'
+    | '/host/users'
+    | '/host/whats-new'
+    | '/play/$pin'
+    | '/screen/$pin'
+    | '/host/'
+    | '/host/games/$pin'
+    | '/host/quizzes/$quizId'
+    | '/host/results/$gameId'
+    | '/screen/results/$gameId'
+    | '/host/games/'
+    | '/host/quizzes/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/cookies'
+    | '/imprint'
+    | '/login'
+    | '/privacy'
+    | '/register'
+    | '/terms'
+    | '/host/nicknames'
+    | '/host/password'
+    | '/host/settings'
+    | '/host/terms'
+    | '/host/users'
+    | '/host/whats-new'
+    | '/play/$pin'
+    | '/screen/$pin'
+    | '/host'
+    | '/host/games/$pin'
+    | '/host/quizzes/$quizId'
+    | '/host/results/$gameId'
+    | '/screen/results/$gameId'
+    | '/host/games'
+    | '/host/quizzes'
+  id:
+    | '__root__'
+    | '/'
+    | '/host'
+    | '/cookies'
+    | '/imprint'
+    | '/login'
+    | '/privacy'
+    | '/register'
+    | '/terms'
+    | '/host/nicknames'
+    | '/host/password'
+    | '/host/settings'
+    | '/host/terms'
+    | '/host/users'
+    | '/host/whats-new'
+    | '/play/$pin'
+    | '/screen/$pin'
+    | '/host/'
+    | '/host/games/$pin'
+    | '/host/quizzes/$quizId'
+    | '/host/results/$gameId'
+    | '/screen/results/$gameId'
+    | '/host/games/'
+    | '/host/quizzes/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  HostRouteRoute: typeof HostRouteRouteWithChildren
+  CookiesRoute: typeof CookiesRoute
+  ImprintRoute: typeof ImprintRoute
+  LoginRoute: typeof LoginRoute
+  PrivacyRoute: typeof PrivacyRoute
+  RegisterRoute: typeof RegisterRoute
+  TermsRoute: typeof TermsRoute
+  PlayPinRoute: typeof PlayPinRoute
+  ScreenPinRoute: typeof ScreenPinRoute
+  ScreenResultsGameIdRoute: typeof ScreenResultsGameIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +324,209 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/cookies': {
+      id: '/cookies'
+      path: '/cookies'
+      fullPath: '/cookies'
+      preLoaderRoute: typeof CookiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/host': {
+      id: '/host'
+      path: '/host'
+      fullPath: '/host'
+      preLoaderRoute: typeof HostRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/imprint': {
+      id: '/imprint'
+      path: '/imprint'
+      fullPath: '/imprint'
+      preLoaderRoute: typeof ImprintRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/register': {
+      id: '/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/host/': {
+      id: '/host/'
+      path: '/'
+      fullPath: '/host/'
+      preLoaderRoute: typeof HostIndexRouteImport
+      parentRoute: typeof HostRouteRoute
+    }
+    '/host/nicknames': {
+      id: '/host/nicknames'
+      path: '/nicknames'
+      fullPath: '/host/nicknames'
+      preLoaderRoute: typeof HostNicknamesRouteImport
+      parentRoute: typeof HostRouteRoute
+    }
+    '/host/password': {
+      id: '/host/password'
+      path: '/password'
+      fullPath: '/host/password'
+      preLoaderRoute: typeof HostPasswordRouteImport
+      parentRoute: typeof HostRouteRoute
+    }
+    '/host/settings': {
+      id: '/host/settings'
+      path: '/settings'
+      fullPath: '/host/settings'
+      preLoaderRoute: typeof HostSettingsRouteImport
+      parentRoute: typeof HostRouteRoute
+    }
+    '/host/terms': {
+      id: '/host/terms'
+      path: '/terms'
+      fullPath: '/host/terms'
+      preLoaderRoute: typeof HostTermsRouteImport
+      parentRoute: typeof HostRouteRoute
+    }
+    '/host/users': {
+      id: '/host/users'
+      path: '/users'
+      fullPath: '/host/users'
+      preLoaderRoute: typeof HostUsersRouteImport
+      parentRoute: typeof HostRouteRoute
+    }
+    '/host/whats-new': {
+      id: '/host/whats-new'
+      path: '/whats-new'
+      fullPath: '/host/whats-new'
+      preLoaderRoute: typeof HostWhatsNewRouteImport
+      parentRoute: typeof HostRouteRoute
+    }
+    '/play/$pin': {
+      id: '/play/$pin'
+      path: '/play/$pin'
+      fullPath: '/play/$pin'
+      preLoaderRoute: typeof PlayPinRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/screen/$pin': {
+      id: '/screen/$pin'
+      path: '/screen/$pin'
+      fullPath: '/screen/$pin'
+      preLoaderRoute: typeof ScreenPinRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/host/games/': {
+      id: '/host/games/'
+      path: '/games'
+      fullPath: '/host/games/'
+      preLoaderRoute: typeof HostGamesIndexRouteImport
+      parentRoute: typeof HostRouteRoute
+    }
+    '/host/games/$pin': {
+      id: '/host/games/$pin'
+      path: '/games/$pin'
+      fullPath: '/host/games/$pin'
+      preLoaderRoute: typeof HostGamesPinRouteImport
+      parentRoute: typeof HostRouteRoute
+    }
+    '/host/quizzes/': {
+      id: '/host/quizzes/'
+      path: '/quizzes'
+      fullPath: '/host/quizzes/'
+      preLoaderRoute: typeof HostQuizzesIndexRouteImport
+      parentRoute: typeof HostRouteRoute
+    }
+    '/host/quizzes/$quizId': {
+      id: '/host/quizzes/$quizId'
+      path: '/quizzes/$quizId'
+      fullPath: '/host/quizzes/$quizId'
+      preLoaderRoute: typeof HostQuizzesQuizIdRouteImport
+      parentRoute: typeof HostRouteRoute
+    }
+    '/host/results/$gameId': {
+      id: '/host/results/$gameId'
+      path: '/results/$gameId'
+      fullPath: '/host/results/$gameId'
+      preLoaderRoute: typeof HostResultsGameIdRouteImport
+      parentRoute: typeof HostRouteRoute
+    }
+    '/screen/results/$gameId': {
+      id: '/screen/results/$gameId'
+      path: '/screen/results/$gameId'
+      fullPath: '/screen/results/$gameId'
+      preLoaderRoute: typeof ScreenResultsGameIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
+interface HostRouteRouteChildren {
+  HostNicknamesRoute: typeof HostNicknamesRoute
+  HostPasswordRoute: typeof HostPasswordRoute
+  HostSettingsRoute: typeof HostSettingsRoute
+  HostTermsRoute: typeof HostTermsRoute
+  HostUsersRoute: typeof HostUsersRoute
+  HostWhatsNewRoute: typeof HostWhatsNewRoute
+  HostIndexRoute: typeof HostIndexRoute
+  HostGamesPinRoute: typeof HostGamesPinRoute
+  HostQuizzesQuizIdRoute: typeof HostQuizzesQuizIdRoute
+  HostResultsGameIdRoute: typeof HostResultsGameIdRoute
+  HostGamesIndexRoute: typeof HostGamesIndexRoute
+  HostQuizzesIndexRoute: typeof HostQuizzesIndexRoute
+}
+
+const HostRouteRouteChildren: HostRouteRouteChildren = {
+  HostNicknamesRoute: HostNicknamesRoute,
+  HostPasswordRoute: HostPasswordRoute,
+  HostSettingsRoute: HostSettingsRoute,
+  HostTermsRoute: HostTermsRoute,
+  HostUsersRoute: HostUsersRoute,
+  HostWhatsNewRoute: HostWhatsNewRoute,
+  HostIndexRoute: HostIndexRoute,
+  HostGamesPinRoute: HostGamesPinRoute,
+  HostQuizzesQuizIdRoute: HostQuizzesQuizIdRoute,
+  HostResultsGameIdRoute: HostResultsGameIdRoute,
+  HostGamesIndexRoute: HostGamesIndexRoute,
+  HostQuizzesIndexRoute: HostQuizzesIndexRoute,
+}
+
+const HostRouteRouteWithChildren = HostRouteRoute._addFileChildren(
+  HostRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  HostRouteRoute: HostRouteRouteWithChildren,
+  CookiesRoute: CookiesRoute,
+  ImprintRoute: ImprintRoute,
+  LoginRoute: LoginRoute,
+  PrivacyRoute: PrivacyRoute,
+  RegisterRoute: RegisterRoute,
+  TermsRoute: TermsRoute,
+  PlayPinRoute: PlayPinRoute,
+  ScreenPinRoute: ScreenPinRoute,
+  ScreenResultsGameIdRoute: ScreenResultsGameIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

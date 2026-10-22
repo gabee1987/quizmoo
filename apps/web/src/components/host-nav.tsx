@@ -1,0 +1,316 @@
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { Link, useNavigate, useRouterState } from '@tanstack/react-router'
+import {
+  DicesIcon,
+  ExternalLinkIcon,
+  HistoryIcon,
+  HouseIcon,
+  LayoutGridIcon,
+  LogOutIcon,
+  MessageSquareHeartIcon,
+  ScaleIcon,
+  SettingsIcon,
+  ShieldIcon,
+  SparklesIcon,
+  UserRoundIcon,
+  UsersIcon,
+} from 'lucide-react'
+import { useEffect, useLayoutEffect, useRef, useState, type ComponentType, type ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { LegalLinks } from '@/components/legal-links'
+import { apiFetch } from '@/lib/api'
+import type { User } from '@/lib/auth'
+import { cn } from '@/lib/cn'
+import { useSiteInfo } from '@/lib/site'
+import { useUnseenRelease } from '../features/whats-new/use-release-seen'
+
+type To = '/host' | '/host/quizzes' | '/host/games' | '/host/users' | '/host/nicknames'
+
+interface Item {
+  to: To
+  label: string
+  icon: ComponentType<{ className?: string }>
+  exact: boolean
+}
+
+/**
+ * Host navigation: a sidebar from `lg` up, a bottom tab bar below (Home, Quizzes, Games, Account).
+ * On the tab bar the admin pages (Users, Names) sit in the Account menu: six tabs do not fit a phone.
+ */
+export function HostNav({ user }: { user: User }) {
+  const { t } = useTranslation()
+  const navigate = useNavigate()
+  const queryClient = useQueryClient()
+  const logout = useMutation({
+    mutationFn: () => apiFetch<void>('/api/auth/logout', { method: 'POST' }),
+    onSettled: () => {
+      queryClient.clear()
+      void navigate({ to: '/login' })
+    },
+  })
+  const main: Item[] = [
+    { to: '/host', label: t('nav.home'), icon: HouseIcon, exact: true },
+    { to: '/host/quizzes', label: t('nav.quizzes'), icon: LayoutGridIcon, exact: false },
+    { to: '/host/games', label: t('nav.games'), icon: HistoryIcon, exact: true },
+  ]
+  const admin: Item[] =
+    user.role === 'admin'
+      ? [
+          { to: '/host/users', label: t('users.title'), icon: UsersIcon, exact: false },
+          { to: '/host/nicknames', label: t('nicknames.nav'), icon: DicesIcon, exact: false },
+        ]
+      : []
+  const feedbackUrl = useSiteInfo().data?.feedbackUrl
+  const unseen = useUnseenRelease()
+
+  return (
+    <>
+      {/* Laptop: sidebar */}
+      {/* data-host-sidebar: the toasts centre on the page's column beside it (styles.css). */}
+      <nav
+        data-host-sidebar
+        aria-label={t('nav.label')}
+        className="hidden lg:sticky lg:top-4 lg:flex lg:w-60 lg:shrink-0 lg:flex-col lg:gap-1 lg:self-start"
+      >
+        {/* One highlight across both groups, so it springs from a host page to an admin page too. */}
+        <SlidingItems>
+          {main.map((item) => (
+            <SidebarLink key={item.to} item={item} />
+          ))}
+          {admin.length > 0 && (
+            // Not positioned, so the links' offsetTop stays relative to the list and the highlight finds them.
+            <div role="group" aria-labelledby="admin-nav" className="flex flex-col gap-1">
+              <p
+                id="admin-nav"
+                className="mt-4 flex items-center gap-2 border-t px-3 pt-4 pb-1 text-xs font-extrabold tracking-wider text-muted-foreground uppercase"
+              >
+                <ShieldIcon className="size-3.5" aria-hidden="true" />
+                {t('nav.admin')}
+              </p>
+              {admin.map((item) => (
+                <SidebarLink key={item.to} item={item} />
+              ))}
+            </div>
+          )}
+        </SlidingItems>
+        <div className="mt-4 flex flex-col gap-1 border-t pt-4">
+          <p className="flex items-center gap-2 px-3 pb-1 text-sm text-muted-foreground" title={t('nav.signedInAs')}>
+            <UserRoundIcon className="size-4" aria-hidden="true" />
+            <span className="truncate">{user.username}</span>
+          </p>
+          <Link
+            to="/host/settings"
+            className="group flex min-h-11 items-center gap-3 rounded-xl px-3 font-semibold text-muted-foreground transition-colors duration-300 outline-none hover:bg-muted hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring data-[status=active]:bg-secondary data-[status=active]:text-secondary-foreground"
+          >
+            <SettingsIcon className="size-5 transition-transform duration-500 ease-spring group-hover:rotate-45 group-data-[status=active]:animate-wiggle" />
+            {t('nav.settings')}
+          </Link>
+          <Link
+            to="/host/whats-new"
+            className="group flex min-h-11 items-center gap-3 rounded-xl px-3 font-semibold text-muted-foreground transition-colors duration-300 outline-none hover:bg-muted hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring data-[status=active]:bg-secondary data-[status=active]:text-secondary-foreground"
+          >
+            <SparklesIcon className="size-5 transition-transform duration-300 ease-spring group-hover:scale-115 group-hover:-rotate-8 group-data-[status=active]:animate-wiggle" />
+            {t('whatsNew.title')}
+            {unseen && <UnseenDot />}
+          </Link>
+          {feedbackUrl && (
+            <a
+              href={feedbackUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group flex min-h-11 items-center gap-3 rounded-xl px-3 font-semibold text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring"
+            >
+              <MessageSquareHeartIcon className="size-5 transition-transform duration-300 ease-spring group-hover:scale-115 group-hover:-rotate-8" />
+              <FeedbackLabel />
+            </a>
+          )}
+          <button
+            type="button"
+            className="flex min-h-11 items-center gap-3 rounded-xl px-3 text-left font-semibold text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring"
+            onClick={() => logout.mutate()}
+            disabled={logout.isPending}
+          >
+            <LogOutIcon className="size-5" />
+            {t('auth.logout')}
+          </button>
+          <LegalLinks className="mt-3 [&_ul]:justify-start [&_ul]:px-3" />
+        </div>
+      </nav>
+
+      {/* Phone and tablet: bottom tab bar */}
+      <nav
+        aria-label={t('nav.label')}
+        className="fixed inset-x-0 bottom-0 z-40 border-t bg-card/95 pb-[env(safe-area-inset-bottom)] shadow-soft backdrop-blur lg:hidden"
+      >
+        <ul className="mx-auto flex max-w-lg">
+          {main.map((item) => (
+            <li key={item.to} className="flex-1">
+              <Link to={item.to} activeOptions={{ exact: item.exact, includeSearch: false }} className={tabClass}>
+                <TabIcon icon={item.icon} />
+                {item.label}
+              </Link>
+            </li>
+          ))}
+          <li className="flex-1">
+            <DropdownMenu>
+              <DropdownMenuTrigger className={cn(tabClass, 'w-full')}>
+                <TabIcon icon={UserRoundIcon} dot={unseen} />
+                {t('nav.account')}
+              </DropdownMenuTrigger>
+              <DropdownMenuContent side="top" align="end" className="min-w-52">
+                <DropdownMenuLabel className="truncate">
+                  {t('nav.signedInAs')}: {user.username}
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {admin.length > 0 && (
+                  <DropdownMenuLabel className="flex items-center gap-2 text-xs font-extrabold tracking-wider text-muted-foreground uppercase">
+                    <ShieldIcon className="size-3.5" aria-hidden="true" />
+                    {t('nav.admin')}
+                  </DropdownMenuLabel>
+                )}
+                {admin.map((item) => (
+                  <MenuLink key={item.to}>
+                    <Link to={item.to}>
+                      <item.icon />
+                      {item.label}
+                    </Link>
+                  </MenuLink>
+                ))}
+                {admin.length > 0 && <DropdownMenuSeparator />}
+                <MenuLink>
+                  <Link to="/host/settings">
+                    <SettingsIcon />
+                    {t('nav.settings')}
+                  </Link>
+                </MenuLink>
+                <MenuLink>
+                  <Link to="/host/whats-new">
+                    <SparklesIcon />
+                    {t('whatsNew.title')}
+                    {unseen && <UnseenDot />}
+                  </Link>
+                </MenuLink>
+                {feedbackUrl && (
+                  <MenuLink>
+                    <a href={feedbackUrl} target="_blank" rel="noopener noreferrer">
+                      <MessageSquareHeartIcon />
+                      <FeedbackLabel />
+                    </a>
+                  </MenuLink>
+                )}
+                <MenuLink>
+                  <Link to="/privacy">
+                    <ScaleIcon />
+                    {t('legal.nav.label')}
+                  </Link>
+                </MenuLink>
+                <DropdownMenuItem className="min-h-11" disabled={logout.isPending} onSelect={() => logout.mutate()}>
+                  <LogOutIcon />
+                  {t('auth.logout')}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </li>
+        </ul>
+      </nav>
+    </>
+  )
+}
+
+const tabClass =
+  'group flex min-h-16 flex-col items-center justify-center gap-0.5 text-xs font-bold text-muted-foreground outline-none focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:ring-inset data-[status=active]:text-primary dark:data-[status=active]:text-foreground'
+
+function TabIcon({ icon: Icon, dot = false }: { icon: ComponentType<{ className?: string }>; dot?: boolean }) {
+  return (
+    <span className="relative flex h-8 w-14 items-center justify-center rounded-full transition-colors duration-300 group-data-[status=active]:animate-pop group-data-[status=active]:bg-secondary">
+      <Icon className="size-5 group-data-[status=active]:animate-wiggle" />
+      {dot && <UnseenDot className="absolute top-0.5 right-3" />}
+    </span>
+  )
+}
+
+/** "What's new" has notes the host has not opened yet. */
+function UnseenDot({ className }: { className?: string }) {
+  const { t } = useTranslation()
+  return (
+    <span className={cn('size-2.5 shrink-0 animate-pop rounded-full bg-primary', className)}>
+      <span className="sr-only">({t('whatsNew.unseen')})</span>
+    </span>
+  )
+}
+
+/**
+ * The sidebar's main links over one highlight that springs to the active link when the page
+ * changes, instead of the colour jumping from one link to the other. No active link, no highlight.
+ */
+function SlidingItems({ children }: { children: ReactNode }) {
+  const pathname = useRouterState({ select: (state) => state.location.pathname })
+  const list = useRef<HTMLDivElement>(null)
+  const [spot, setSpot] = useState<{ top: number; height: number } | null>(null)
+  // The first position is taken as is; after that the highlight moves.
+  const [moving, setMoving] = useState(false)
+
+  useLayoutEffect(() => {
+    const active = list.current?.querySelector<HTMLElement>('[data-status="active"]')
+    setSpot(active ? { top: active.offsetTop, height: active.offsetHeight } : null)
+  }, [pathname])
+  useEffect(() => {
+    if (spot && !moving) requestAnimationFrame(() => setMoving(true))
+  }, [spot, moving])
+
+  return (
+    <div ref={list} className="relative flex flex-col gap-1">
+      <span
+        aria-hidden="true"
+        className={cn(
+          'absolute inset-x-0 top-0 rounded-xl bg-primary shadow-[0_3px_0_0_var(--primary-edge)]',
+          moving && 'transition-[transform,height,opacity] duration-500 ease-spring',
+          !spot && 'opacity-0',
+        )}
+        style={{ transform: `translateY(${spot?.top ?? 0}px)`, height: spot?.height ?? 48 }}
+      />
+      {children}
+    </div>
+  )
+}
+
+function SidebarLink({ item }: { item: Item }) {
+  return (
+    <Link
+      to={item.to}
+      // A page's filters in the address (the game history's search) keep its link active.
+      activeOptions={{ exact: item.exact, includeSearch: false }}
+      className="group relative z-10 flex min-h-12 items-center gap-3 rounded-xl px-3 font-semibold text-muted-foreground transition-colors duration-300 outline-none hover:bg-muted hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring data-[status=active]:text-primary-foreground data-[status=active]:hover:bg-transparent"
+    >
+      <item.icon className="size-5 transition-transform duration-300 ease-spring group-hover:scale-115 group-hover:-rotate-8 group-data-[status=active]:animate-wiggle" />
+      {item.label}
+    </Link>
+  )
+}
+
+function FeedbackLabel() {
+  const { t } = useTranslation()
+  return (
+    <>
+      {t('nav.feedback')}
+      <ExternalLinkIcon className="size-4 opacity-70" aria-hidden="true" />
+      <span className="sr-only">({t('nav.opensInNewTab')})</span>
+    </>
+  )
+}
+
+function MenuLink({ children }: { children: ReactNode }) {
+  return (
+    <DropdownMenuItem asChild className="min-h-11">
+      {children}
+    </DropdownMenuItem>
+  )
+}

@@ -1,7 +1,18 @@
 {
   "app": {
-    "name": "ASH Quiz",
-    "language": "Language"
+    "name": "Quizmoo",
+    "language": "Language",
+    "settings": "Settings",
+    "mode": "Appearance",
+    "modes": {
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    },
+    "languages": {
+      "hu": "Magyar",
+      "en": "English"
+    }
   },
   "join": {
     "title": "Join a game",
@@ -9,17 +20,1834 @@
     "pinPlaceholder": "6 digits",
     "name": "Your name",
     "namePlaceholder": "What should we call you?",
+    "surprise": "Surprise me",
+    "avatar": "Your avatar",
     "team": "Team",
+    "teamMembers_zero": "Nobody yet",
+    "teamMembers_one": "{{count}} player",
+    "teamMembers_other": "{{count}} players",
+    "newTeam": "New team",
+    "newTeamHelp": "Start your own team; you will be its captain.",
+    "solo": "On my own",
+    "soloHelp": "Play without a team, ranked with the teams.",
+    "newTeamName": "Team name",
+    "newTeamPlaceholder": "e.g. Quiz Wizards",
+    "newTeamNameRequired": "Give your team a name.",
     "submit": "Join",
-    "hostLogin": "Host login"
+    "pinInvalid": "Enter the 6-digit PIN.",
+    "nameRequired": "Enter a name.",
+    "scan": "Scan QR code",
+    "scanHint": "Point the camera at the QR code on the screen.",
+    "cameraDenied": "Camera access was refused. Type the PIN instead.",
+    "cameraUnavailable": "The camera is not available. Type the PIN instead.",
+    "pinDigit": "Digit {{n}}",
+    "pinOk": "OK",
+    "findingGame": "Finding the game…",
+    "avatarChange": "Change",
+    "avatarDone": "Done",
+    "avatarGroups": {
+      "animals": "Animals",
+      "food": "Food",
+      "fantasy": "Fantasy",
+      "fun": "Fun and games"
+    },
+    "scheduled": "Starts {{date}}",
+    "scheduledHelp": "Fill in your details meanwhile. Keep this page open: you can join here when it starts.",
+    "leave": "Leave",
+    "opensAtStart": "Joining opens at the start"
+  },
+  "home": {
+    "tagline": "Think. Quiz. Outsmart the herd!",
+    "cowLabel": "Pet the cow",
+    "joinLink": "Joining as a player? Enter the PIN",
+    "sides": "Play or host",
+    "play": "Play",
+    "host": "Host",
+    "hostIntro": "Log in to make quizzes and run games for your crowd.",
+    "noAccount": "No account yet?",
+    "createAccount": "Ask for one",
+    "moo": {
+      "line1": "Moo!",
+      "line2": "Type the PIN, I’m waiting!",
+      "line3": "Quiz time!",
+      "line4": "Mooo… ready?"
+    }
+  },
+  "cow": {
+    "sneeze": "Achoo!",
+    "lines": {
+      "line1": "Mooo-ve it!",
+      "line2": "I know the answer. Not telling.",
+      "line3": "Is grass a vegetable?",
+      "line4": "Udderly ready!",
+      "line5": "Who’s the GOAT? Me. The COW.",
+      "line6": "Did someone say snacks?",
+      "line7": "I studied for this. Mostly grass.",
+      "line8": "Moo means hello."
+    },
+    "seasons": {
+      "newYear": {
+        "line1": "Happy New Year!",
+        "line2": "My resolution: more quizzes.",
+        "line3": "Moo-ve over, last year!"
+      },
+      "valentine": {
+        "line1": "You’re udderly lovely!",
+        "line2": "Be my valen-cow?",
+        "line3": "I love you a cow-tillion."
+      },
+      "aprilFools": {
+        "line1": "Fun fact: cows can fly. On Tuesdays.",
+        "line2": "Fun fact: milk comes from the moon.",
+        "line3": "Fun fact: I’m actually a horse."
+      },
+      "easter": {
+        "line1": "Happy Easter!",
+        "line2": "I’m the Easter bunny now.",
+        "line3": "Found any eggs yet?"
+      },
+      "halloween": {
+        "line1": "Boo! I mean… moo!",
+        "line2": "Trick or treat?",
+        "line3": "I’m a witch. A cow witch."
+      },
+      "christmas": {
+        "line1": "Merry Christmas!",
+        "line2": "Ho ho hooo… moo!",
+        "line3": "Have you been good this year?"
+      }
+    }
+  },
+  "common": {
+    "loading": "Loading…",
+    "next": "Next",
+    "cancel": "Cancel",
+    "save": "Save",
+    "add": "Add",
+    "delete": "Delete",
+    "removeItem": "Remove {{name}}",
+    "close": "Close",
+    "actions": "Actions"
+  },
+  "auth": {
+    "title": "Host login",
+    "username": "Username",
+    "password": "Password",
+    "showPassword": "Show password",
+    "submit": "Log in",
+    "logout": "Log out",
+    "required": "Required.",
+    "passwordChange": {
+      "title": "Change password",
+      "mustChange": "Please replace the initial password before you continue.",
+      "current": "Current password",
+      "new": "New password",
+      "repeat": "New password again",
+      "tooShort_one": "At least {{count}} character.",
+      "tooShort_other": "At least {{count}} characters.",
+      "mismatch": "The two passwords differ.",
+      "submit": "Save password"
+    },
+    "register": {
+      "link": "Create a host account",
+      "title": "Sign up",
+      "intro": "Pick a username and a password. The admin approves new accounts, then you can log in.",
+      "repeat": "Password again",
+      "website": "Leave this empty",
+      "submit": "Sign up",
+      "doneTitle": "Thanks!",
+      "done": "Your account {{name}} is waiting for the admin's approval. Once it is approved, log in with your password.",
+      "closed": "Sign-up is closed on this site. Ask the admin for an account.",
+      "toLogin": "Go to login",
+      "haveAccount": "Already have an account? Log in"
+    }
+  },
+  "host": {
+    "title": "Quizzes",
+    "empty": "No quizzes yet.",
+    "questionCount_one": "{{count}} question",
+    "questionCount_other": "{{count}} questions",
+    "updated": "updated {{date}}",
+    "play": "Play",
+    "game": {
+      "phase": {
+        "lobby": "Waiting for players",
+        "question": "Question running",
+        "reveal": "Answers revealed",
+        "scoreboard": "Scoreboard",
+        "finished": "Game finished"
+      },
+      "answered_one": "{{answered}} of {{count}} answered",
+      "answered_other": "{{answered}} of {{count}} answered",
+      "notAnswered_one": "{{count}} player has not answered yet:",
+      "notAnswered_other": "{{count}} players have not answered yet:",
+      "start": "Start",
+      "endQuestion": "End question",
+      "extend": "+30 s",
+      "pause": "Pause",
+      "resume": "Resume",
+      "pausedHint": "Paused: the clock has stopped and nobody can answer until you resume.",
+      "shownAgainHint": "Question {{index}} is on the screens again. Nothing changes in the scores.",
+      "backToGame": "Back to the game",
+      "podiumOnProjector": "The podium is on the projector.",
+      "openProjector": "Open projector",
+      "skip": "Skip",
+      "end": "End game",
+      "kick": "Remove",
+      "confirmKick": "Remove {{name}} from the game?",
+      "kickPlayer": "Remove {{name}}",
+      "teamEmpty": "Nobody yet",
+      "soloEmpty": "Nobody yet. Drag a player here to let them play on their own.",
+      "online": "Connected",
+      "offline": "Disconnected",
+      "waitingForPlayers": "No players yet. Share the PIN or the QR code.",
+      "backToQuizzes": "Back to quizzes",
+      "showScoreboard": "Show scoreboard",
+      "controls": "Game controls",
+      "nextQuestion": "Next question",
+      "finish": "Finish",
+      "gradeFirst": "Grade the answers below to continue.",
+      "onlineCount_one": "{{count}} online",
+      "onlineCount_other": "{{count}} online",
+      "openScreen": "Open screen",
+      "results": "Results",
+      "resultsPendingHint": "The projector and the players do not see the results yet.",
+      "showPodium": "Show podium",
+      "releaseToPlayers": "Show results on phones",
+      "podiumPendingHint": "The projector does not show the results yet.",
+      "playersWaitingHint": "The players do not see their results yet.",
+      "playAgain": "Play again",
+      "connectedOfTotal": "{{connected}} / {{count}} connected",
+      "offlineForSeconds": "Offline for {{count}} s",
+      "leftGame": "Left the game",
+      "toasts": {
+        "label": "Player alerts",
+        "on": "Player alerts are on: joins, drops and returns",
+        "off": "Player alerts are off",
+        "joined_one": "{{name}} joined",
+        "joined_other": "{{count}} players joined",
+        "offline_one": "{{name}} went offline",
+        "offline_other": "{{count}} players went offline",
+        "back_one": "{{name}} is back",
+        "back_other": "{{count}} players are back",
+        "left_one": "{{name}} left the game",
+        "left_other": "{{count}} players left the game",
+        "gone_one": "{{name}} is out of the game",
+        "gone_other": "{{count}} players are out of the game"
+      },
+      "offlineForMinutes": "Offline for {{count}} min",
+      "reconnectingHint_one": "{{count}} player is reconnecting",
+      "reconnectingHint_other": "{{count}} players are reconnecting",
+      "roundTrip": "Connection to the server: {{ms}} ms",
+      "roundTripNone": "No answer from the server",
+      "message": {
+        "title": "Message to everyone",
+        "help": "Shown on every phone and the projector until you clear it, its time runs out, or the next question starts.",
+        "label": "Message",
+        "send": "Send",
+        "clear": "Clear",
+        "showing": "Showing now",
+        "duration": "Shown",
+        "stays": "until cleared",
+        "seconds_one": "{{count}} s",
+        "seconds_other": "{{count}} s",
+        "disappearsIn_one": "disappears in {{count}} s",
+        "disappearsIn_other": "disappears in {{count}} s",
+        "ownTime": "own time",
+        "edit": "Edit",
+        "doneEditing": "Done",
+        "removeFromGame": "Remove \"{{text}}\" from this game",
+        "saveToMine": "Save",
+        "savedToMine": "Saved to your messages",
+        "customTime": "custom",
+        "secondsUnit": "s",
+        "customSeconds": "How many seconds is it shown?",
+        "timeOf": "How long \"{{text}}\" is shown",
+        "editHelp": "Changes here apply to this game only. Edit your list in My settings.",
+        "important": "Important",
+        "importantHelp": "Players can't swipe it away",
+        "importantShown": "important",
+        "importantPreset": "Always sent as important",
+        "presets": {
+          "getReady": "Get ready!",
+          "shortBreak": "Short break",
+          "lastQuestion": "Last question!"
+        }
+      },
+      "allTeamsMode": "All teams:",
+      "teamMode": "Answer mode of {{team}}",
+      "makeCaptain": "Make {{name}} captain",
+      "move": "Move",
+      "playerActions": "Actions for {{name}}",
+      "makeCaptainShort": "Make captain",
+      "movePlayer": "Move {{name}} to another team",
+      "moveTo": "Move to",
+      "renameTeam": "Rename {{team}}",
+      "removeTeam": "Remove {{team}}",
+      "confirmRemoveTeam": "Remove {{team}}? Its players pick another team on their phones.",
+      "addTeam": "Add team",
+      "withoutTeam": "Without a team",
+      "withoutTeamHelp": "Their team was removed. They pick another one on their phones, or you move them. The game starts once everyone has a team.",
+      "teamAnswers": "Team answers",
+      "teamDone": "Done",
+      "teamsAnswered_one": "{{answered}} of {{count}} teams answered",
+      "teamsAnswered_other": "{{answered}} of {{count}} teams answered",
+      "teamModes": "Team modes",
+      "teamModesHelp": "Changes apply from the next question.",
+      "teamConfirmed": "Confirmed",
+      "teamSuggesting": "Suggesting ({{picked}} of {{count}})",
+      "teamFallback": "Majority, not confirmed",
+      "copyLink": "Copy link",
+      "linkCopied": "Link copied."
+    },
+    "shown": {
+      "onScreen": {
+        "reveal": "On the screens: answers revealed",
+        "scoreboard": "On the screens: scoreboard after this question",
+        "shownAgain": "On the screens: shown again"
+      },
+      "answered": "Answered",
+      "right": "Right",
+      "averageTime": "Average time",
+      "fastest": "Fastest right",
+      "seconds": "{{seconds}} s",
+      "noAnswer_one": "{{count}} player did not answer:",
+      "noAnswer_other": "{{count}} players did not answer:"
+    },
+    "seen": {
+      "everyone": "Phones and projector:",
+      "phones": "Phones:",
+      "projector": "Projector:",
+      "lobby": "lobby",
+      "question": "question {{index}}",
+      "paused": "question {{index}}, paused",
+      "answer": "answer to question {{index}}",
+      "answerHidden": "question {{index}} closed, answers hidden",
+      "grading": "waiting while you grade question {{index}}",
+      "shownAgain": "answer to question {{index}}{{position}}",
+      "standings": "standings",
+      "standingsTotals": "standings, totals only",
+      "podium": "podium",
+      "waitingResults": "waiting for the results"
+    },
+    "showAnswers": {
+      "open": "Show answers",
+      "title": "Show answers",
+      "help": "Put the correct answers of questions already closed on the projector and the phones, one at a time. Each phone also shows whether its player was right. Points stay hidden while answers are held until the end.",
+      "which": "Which questions?",
+      "last": "Last question",
+      "all": "All so far",
+      "allHelp_one": "{{count}} question, one after another",
+      "allHelp_other": "{{count}} questions, one after another",
+      "choose": "Choose",
+      "chooseHelp": "Tick the questions to show",
+      "question": "{{index}}. {{text}}",
+      "submit_one": "Show {{count}} answer",
+      "submit_other": "Show {{count}} answers",
+      "previous": "Previous",
+      "next": "Next"
+    },
+    "preview": {
+      "title": "What everyone sees",
+      "open": "Show preview",
+      "close": "Hide preview",
+      "projector": "Projector",
+      "phone": "Phone",
+      "projectorFrame": "Live preview of the projector",
+      "ownResult": "Each phone also shows whether its player was right.",
+      "ownResultPoints": "Each phone also shows whether its player was right and the points they got.",
+      "ownRank": "Each phone also shows its player's own rank and score."
+    },
+    "endGame": {
+      "title": "End the game?",
+      "help": "Choose how it ends for everyone.",
+      "podium": "Show the podium",
+      "podiumHelp": "The game ends here and the podium goes on the projector and the phones.",
+      "podiumHeldHelp": "The game ends here; you release the podium to the projector and the phones when you are ready.",
+      "close": "Close the game",
+      "closeHelp": "Ends at once with no podium. Every phone and the projector are told the game is over and disconnected. The results stay in your history.",
+      "confirmClose": "Close the game for everyone? Every phone and the projector are disconnected."
+    },
+    "lock": {
+      "button": "Lock screen",
+      "title": "Screen locked",
+      "body": "The game keeps running on the projector and the phones. Type your lock code or your password to get back to it.",
+      "code": "Lock code",
+      "password": "Password",
+      "unlock": "Unlock",
+      "usePassword": "Use my password",
+      "useCode": "Use my lock code",
+      "logout": "Log out",
+      "dialogTitle": "Lock the screen?",
+      "dialogHelp": "Nobody at this device sees answers, scores or your quizzes until you unlock it, on every page and every device you are logged in on. Choose a code to unlock it quickly, or leave it empty and unlock with your password.",
+      "newCode": "Lock code for this game (optional)",
+      "codeRule": "Use 4 to 8 digits.",
+      "lockWithCode": "Lock with this code",
+      "lockWithoutCode": "Lock"
+    },
+    "standings": {
+      "resultsSoFar": "Results so far",
+      "hiddenNote": "Only you see these scores. The players and the projector see them at the end, or when you show the standings.",
+      "correct_one": "{{count}} correct",
+      "correct_other": "{{count}} correct",
+      "members_one": "{{count}} member",
+      "members_other": "{{count}} members",
+      "empty": "Nobody is playing yet.",
+      "showAll": "Show all ({{count}})",
+      "showFewer": "Show fewer"
+    },
+    "review": {
+      "title": "Review",
+      "standings": "Standings",
+      "questions": "Questions so far",
+      "noQuestionsYet": "No question has been revealed yet.",
+      "pollAnswers_one": "{{count}} vote",
+      "pollAnswers_other": "{{count}} votes",
+      "correctOf_one": "{{correct}} of {{count}} correct ({{percent}})",
+      "correctOf_other": "{{correct}} of {{count}} correct ({{percent}})",
+      "averageTime": "average {{seconds}} s",
+      "showAgain": "Show again",
+      "showAgainLabel": "Show question {{index}} on the screens again",
+      "currentAnswers_one": "Answers to this question ({{count}})",
+      "currentAnswers_other": "Answers to this question ({{count}})"
+    },
+    "grading": {
+      "title": "Grade the answers",
+      "help": "Tick every answer that counts as correct. Identical answers are grouped.",
+      "noAnswers": "Nobody answered this question.",
+      "apply": "Apply grading"
+    },
+    "create": {
+      "title": "New game",
+      "mode": "Mode",
+      "modes": {
+        "classic": "Classic",
+        "classicHelp": "Everyone plays for themselves.",
+        "team": "Teams",
+        "teamHelp": "Players join teams and score together as a team."
+      },
+      "teams": "Teams",
+      "teamName": "Team name",
+      "addTeam": "Add",
+      "removeTeam": "Remove {{name}}",
+      "defaultTeam": "Team {{n}}",
+      "needTwoTeams": "Add at least two teams.",
+      "duplicateTeams": "Team names must be different.",
+      "teamSetup": "Who makes the teams",
+      "teamSetupOptions": {
+        "host": "I set the teams",
+        "hostHelp": "Players pick one of your teams when joining.",
+        "players": "Players create teams",
+        "playersHelp": "Players start a team or join one when joining. Alone, a player is a team of one.",
+        "both": "Both",
+        "bothHelp": "Your teams, and players can start their own too."
+      },
+      "lateJoin": "Players can join late",
+      "lateJoinHelp": "New players can still join after the start; they get no points for earlier questions.",
+      "soloPlayers": "Players may play on their own",
+      "soloPlayersHelp": "Players can also pick “On my own” when joining; they are ranked with the teams by their own points.",
+      "speedBonus": "Speed bonus",
+      "speedBonusHelp": "Faster correct answers earn more points.",
+      "streakBonus": "Streak bonus",
+      "streakBonusHelp": "Correct answers in a row earn extra points: +100 from the second, up to +500.",
+      "answerChanges": "Change answers",
+      "answerChangesHelp": "Players can change their answer while the question runs. The last one counts, with its time.",
+      "answerLock": "Changes allowed until",
+      "answerLockEnd": "The time is up",
+      "answerLockBefore_one": "{{count}} s before the end",
+      "answerLockBefore_other": "{{count}} s before the end",
+      "answerChangesShort": "Answer changes",
+      "answerChangesLocked_one": "Answer changes until {{count}} s before the end",
+      "answerChangesLocked_other": "Answer changes until {{count}} s before the end",
+      "shuffle": "Shuffle answer options",
+      "submit": "Create game",
+      "branding": {
+        "title": "Branding",
+        "show": "Show my branding",
+        "showHelp": "Your logo and the event name on the projector's lobby and podium.",
+        "nothing": "Type an event name, or add a logo in My settings.",
+        "onPhones": "Also on the phones",
+        "onPhonesHelp": "In the lobby on the players' phones.",
+        "addLogo": "Add a logo",
+        "offInQuiz": "Turned off in this quiz's settings. Turn it on for this game only.",
+        "eventName": "Event name"
+      },
+      "groupsHelp": "The game starts with the quiz's settings. Change any group for this game only.",
+      "reset": "Reset",
+      "changedForGame": "Changed for this game",
+      "aboutThis": "About {{title}}",
+      "noBonuses": "No bonuses, fixed order",
+      "revealAnswers": "Correct answers",
+      "revealAnswersOptions": {
+        "afterQuestion": "After each question",
+        "atEnd": "Only at the end"
+      },
+      "scoreboard": "Scoreboard",
+      "scoreboardOptions": {
+        "afterQuestion": "After each question",
+        "onDemand": "When I show it"
+      },
+      "scoreboardAtEnd": "Scores would give the answers away, so the standings appear only when you show them, with totals only.",
+      "answerStyle": "Answer buttons on phones",
+      "answerStyleOptions": {
+        "plain": "Plain",
+        "colourful": "Colourful"
+      },
+      "answerStyleHelp": "The projector always shows the colours.",
+      "finalResults": "Final results",
+      "finalResultsOptions": {
+        "immediately": "When the game ends",
+        "onRelease": "When I release them"
+      },
+      "finalResultsHelp": "After the game, the projector and the phones wait. You show the podium on the projector and the results on the phones separately.",
+      "theme": "Theme",
+      "themeHelp": "Colours on the phones, the projector and the host control. Light or dark mode is each device's own choice. Graphite, Navy, Petrol, Stone and Bordeaux are subdued, for formal events.",
+      "themeOptions": {
+        "classic": "Classic",
+        "arcade": "Arcade",
+        "sunset": "Sunset",
+        "mint": "Mint",
+        "ocean": "Ocean",
+        "berry": "Berry",
+        "forest": "Forest",
+        "graphite": "Graphite",
+        "navy": "Navy",
+        "petrol": "Petrol",
+        "stone": "Stone",
+        "bordeaux": "Bordeaux",
+        "custom": "Custom"
+      },
+      "answerPalette": "Answer colours",
+      "answerPaletteHelp": "The answer buttons and the result bars on the phones and the projector, independent of the theme. Muted and Corporate are the calmer sets.",
+      "answerPaletteOptions": {
+        "vivid": "Vivid",
+        "candy": "Candy",
+        "neon": "Neon",
+        "earth": "Earth",
+        "muted": "Muted",
+        "corporate": "Corporate",
+        "custom": "Custom"
+      },
+      "answerSymbols": "Answer symbols",
+      "answerSymbolsOptions": {
+        "shapes": "Shapes",
+        "letters": "Letters",
+        "numbers": "Numbers",
+        "icons": "Icons"
+      },
+      "teamAnswer": "How teams answer",
+      "teamAnswerOptions": {
+        "captain": "Captain decides",
+        "captainHelp": "Everyone suggests an answer; the captain sees the team's picks and confirms the one that counts.",
+        "majority": "Majority vote",
+        "majorityHelp": "Everyone votes; the answer most members gave counts for the team.",
+        "average": "Everyone counts",
+        "averageHelp": "Each member answers; the team gets the average of their points."
+      },
+      "teamsChooseOptions": {
+        "choose": "Teams choose",
+        "chooseHelp": "Each team's captain picks the mode in the lobby. Teams start on Captain decides.",
+        "same": "Same for all teams",
+        "sameHelp": "You pick the mode; teams can't change it."
+      },
+      "teamAnswerMode": "Mode for every team",
+      "teamAnswerSame": "Same for all teams: {{mode}}",
+      "customTheme": {
+        "title": "Your colours",
+        "main": "Main colour",
+        "accent": "Accent colour",
+        "strength": "Colour strength",
+        "muted": "Black and white",
+        "vivid": "Vivid",
+        "help": "Drag the handles on the wheel, or use the arrow keys. The main colour shows on buttons and the countdown; the accent on the lobby card's ring, the avatar bubble and the winner's card. Strength at zero is black and white. Text stays readable in light and dark mode whatever you pick.",
+        "sample": "What players see in the lobby",
+        "sampleName": "You're in, Anna!",
+        "sampleButton": "Main colour"
+      },
+      "customPalette": {
+        "title": "Your answer colours",
+        "answer": "Answer {{n}}",
+        "help": "Pick any colour, black and white too. The app picks the text colour (white or dark) so it stays readable. The symbols still tell answers apart when two colours are close."
+      },
+      "when": "When does it start?",
+      "whenOptions": {
+        "now": "Now",
+        "later": "Later"
+      },
+      "startsAt": "Start time",
+      "laterHelp": "The PIN and the link are yours now, ready to share. Players can join from that time on; you start the game.",
+      "lockCode": "Lock code for this game (optional)",
+      "lockCodeHelp": "Unlocks the host screen when you lock it during the game. Empty: your lock code from My settings, or your password.",
+      "scheduleSubmit": "Schedule"
+    },
+    "newQuiz": "New quiz",
+    "edit": "Edit",
+    "duplicate": "Duplicate",
+    "copyTitle": "{{title}} (copy)",
+    "deleteTitle": "Delete this quiz?",
+    "deleteBody": "“{{title}}” will be deleted permanently. Results of games already played are kept.",
+    "moreActions": "More actions for {{title}}",
+    "select": "Select",
+    "batch": {
+      "selected_one": "{{count}} selected",
+      "selected_other": "{{count}} selected",
+      "selectAll": "Select all",
+      "clearSelection": "Deselect all",
+      "exit": "Stop selecting",
+      "selectQuiz": "Select {{title}}",
+      "edit": "Edit settings",
+      "editTitle_one": "Edit {{count}} quiz",
+      "editTitle_other": "Edit {{count}} quizzes",
+      "editHelp": "Tick what to change. Everything else keeps each quiz's own setting.",
+      "apply_one": "Apply to {{count}} quiz",
+      "apply_other": "Apply to {{count}} quizzes",
+      "groups": {
+        "look": "Look",
+        "lookHelp": "Theme, answer colours, symbols and style",
+        "scoring": "Scoring",
+        "scoringHelp": "Speed bonus, streak bonus, shuffled options",
+        "flow": "Game flow",
+        "flowHelp": "Mode and teams, when answers and the scoreboard show, final results",
+        "questions": "Every question",
+        "questionsHelp": "Time limit and points of all questions"
+      },
+      "deleteTitle_one": "Delete {{count}} quiz?",
+      "deleteTitle_other": "Delete {{count}} quizzes?",
+      "deleteBody": "These quizzes will be deleted permanently. Results of games already played are kept.",
+      "deleted_one": "{{count}} quiz deleted",
+      "deleted_other": "{{count}} quizzes deleted",
+      "updated_one": "{{count}} quiz updated",
+      "updated_other": "{{count}} quizzes updated"
+    },
+    "search": "Search quizzes",
+    "sort": "Sort",
+    "sortOptions": {
+      "updated": "Last edited",
+      "title": "Title"
+    },
+    "noMatches": "No quiz matches “{{query}}”.",
+    "scheduled": {
+      "title": "Scheduled game",
+      "opensAt": "Players can join from {{date}}",
+      "help": "Share the link or the QR code now. Anyone who opens it early sees when it starts.",
+      "openNow": "Open now",
+      "changeTime": "Change time",
+      "cancel": "Call off game",
+      "confirmCancel": "Call off this scheduled game? The PIN and the link stop working."
+    }
+  },
+  "play": {
+    "youAreIn": "You're in, {{name}}!",
+    "yourTeam": "Team: {{team}}",
+    "yourTeamLabel": "Your team",
+    "solo": "You're playing on your own",
+    "soloGroup": "On their own",
+    "soloRank": "Among the teams: rank {{rank}}.",
+    "mixedLeaderboard": "Teams and solo players",
+    "leave": {
+      "action": "Leave game",
+      "title": "Leave this game?",
+      "lobby": "You can join again with the PIN while the game has not started.",
+      "running": "Your points so far stay in the results, but you can't come back to this game.",
+      "confirm": "Leave",
+      "done": "You left the game."
+    },
+    "teammateOffline": "offline",
+    "teammateLeft": "left",
+    "waitingForHost": "Waiting for the host to start…",
+    "playerCount_one": "{{count}} player",
+    "playerCount_other": "{{count}} players",
+    "questionOf_one": "Question {{index}} of {{count}}",
+    "questionOf_other": "Question {{index}} of {{count}}",
+    "secondsLeft_one": "{{count}} second left",
+    "secondsLeft_other": "{{count}} seconds left",
+    "pausedSecondsLeft_one": "Paused, {{count}} second left",
+    "pausedSecondsLeft_other": "Paused, {{count}} seconds left",
+    "paused": "Paused",
+    "shownAgain": "shown again",
+    "selectAll": "Select every correct answer.",
+    "confirm": "Confirm",
+    "submit": "Send",
+    "true": "True",
+    "false": "False",
+    "typeAnswer": "Type your answer",
+    "typeNumber": "Type a number",
+    "answerSent": "Answer sent!",
+    "answeredIn": "Answered in {{seconds}} s",
+    "copyPin": "Copy PIN",
+    "copyPinLabel": "Copy the game PIN {{pin}}",
+    "copied": "Copied",
+    "pinCopied": "PIN copied. Send it to whoever wants to join.",
+    "copyFailed": "Could not copy. Select the PIN and copy it yourself.",
+    "info": {
+      "title": "About the game",
+      "questions_one": "{{count}} question",
+      "questions_other": "{{count}} questions",
+      "classic": "Everyone plays for themselves.",
+      "teams": "Teams play together and score as a team.",
+      "teamsAndSolo": "Teams and solo players compete in one ranking.",
+      "speedBonus": "Faster correct answers earn more points.",
+      "streakBonus": "Correct answers in a row earn extra points.",
+      "answerChanges": "You can change your answer while the time runs.",
+      "answerChangesLocked_one": "You can change your answer until {{count}} second before the end.",
+      "answerChangesLocked_other": "You can change your answer until {{count}} seconds before the end.",
+      "answersAtEnd": "Correct answers and scores are revealed at the end.",
+      "lateJoin": "Latecomers can still join after the start."
+    },
+    "answeredSoFar_one": "{{answered}} of {{count}} answered",
+    "answeredSoFar_other": "{{answered}} of {{count}} answered",
+    "changeAnswer": "Change answer",
+    "keepAnswer": "Keep it",
+    "changeSecondsLeft_one": "You can change it for {{count}} more second",
+    "changeSecondsLeft_other": "You can change it for {{count}} more seconds",
+    "correct": "Correct!",
+    "wrong": "Not this time",
+    "noAnswer": "No answer",
+    "thanksForVoting": "Thanks for voting!",
+    "awaitingGrading": "The host is checking the answers…",
+    "points_one": "+{{count}} point",
+    "points_other": "+{{count}} points",
+    "correctAnswer": "Correct answer",
+    "correctOrder": "Correct order",
+    "orderHint": "Drag the items into the right order",
+    "dragItem": "Move {{item}}",
+    "moveUp": "Move {{item}} up",
+    "moveDown": "Move {{item}} down",
+    "streak_one": "{{count}} in a row",
+    "streak_other": "{{count}} in a row",
+    "nextRoundReady": "The host started another round!",
+    "joinNextRound": "Join the next round",
+    "totalScore": "Score: {{score}}",
+    "rank": "Rank: {{rank}}.",
+    "yourRank": "Your rank",
+    "leaderboard": "Leaderboard",
+    "gameOver": "Game over!",
+    "finalRank": "Final rank",
+    "podium": "Podium",
+    "backToJoin": "Join a game",
+    "teamRank": "Team {{team}}: rank {{rank}}.",
+    "teamLeaderboard": "Teams",
+    "answerKept": "Answer saved",
+    "resultsAtEnd": "Correct answers are revealed at the end of the game.",
+    "backToHome": "Back to home",
+    "yourAnswers": "Your answers",
+    "voted": "Voted",
+    "yourAnswer": "Your answer",
+    "resultsComing": "The results will be shown soon.",
+    "movedUp_one": "Up {{count}} place",
+    "movedUp_other": "Up {{count}} places",
+    "movedDown_one": "Down {{count}} place",
+    "movedDown_other": "Down {{count}} places",
+    "wellPlayed": "Well played!",
+    "champion": "Winner",
+    "team": {
+      "answers": "Your team answers: {{mode}}",
+      "members": "Team members",
+      "captain": "Captain",
+      "youLead": "You're the captain",
+      "chooseMode": "How should your team answer?",
+      "passCaptaincy": "Pass the captaincy",
+      "moved": "The host moved you to {{team}}.",
+      "movedSolo": "The host made you play on your own.",
+      "nowCaptain": "You're the captain of {{team}} now.",
+      "joined": "{{name}} joined your team.",
+      "noLongerCaptain": "{{name}} is your team's captain now.",
+      "pickAgain": "Pick a team",
+      "pickAgainHelp": "The host removed your team. Join another one before the game starts.",
+      "pickTeam": "Join this team",
+      "voteSent": "Vote sent!",
+      "teamsAnswered_one": "{{answered}} of {{count}} teams answered",
+      "teamsAnswered_other": "{{answered}} of {{count}} teams answered",
+      "teamAnswered": "Your team answered: {{answer}}",
+      "confirm": "Confirm for the team",
+      "confirmed": "Team answer confirmed!",
+      "confirmedBy": "{{name}} confirmed: {{answer}}",
+      "confirmedByYou": "You confirmed: {{answer}}",
+      "yourTeamAnswer": "Your team's answer",
+      "everyoneAnswered": "Everyone in your team has answered",
+      "yourTeamPicks": "Your team's picks",
+      "confirmedByMe": "You confirmed it",
+      "confirmedByName": "Confirmed by {{name}}",
+      "votesFor_one": "{{count}} of {{total}} votes",
+      "votesFor_other": "{{count}} of {{total}} votes",
+      "waitingCaptain": "Waiting for your captain…",
+      "suggest": "Pick an answer; your captain decides.",
+      "youDecide": "You decide: pick the team's answer and confirm it.",
+      "picks": "Team picks",
+      "picksCount": "Team picks ({{picked}}/{{count}})",
+      "pickedBy": "Picked by {{names}}",
+      "thinking": "thinking…",
+      "you": "You",
+      "useAnswer": "Use",
+      "useAnswerFor": "Confirm {{name}}'s pick for the team",
+      "fallback": "Your captain did not confirm, so the team's majority counted.",
+      "teamAnswerLabel": "Your team's answer"
+    }
+  },
+  "screen": {
+    "joinAt": "Join at",
+    "pin": "Game PIN",
+    "answerOnPhone": "Type your answer on your phone",
+    "other": "Other",
+    "correctCount_one": "{{correct}} of {{count}} answered correctly",
+    "correctCount_other": "{{correct}} of {{count}} answered correctly",
+    "qrCode": "QR code to join the game",
+    "runnersUp": "Runners-up",
+    "previous": "Previous",
+    "next": "Next",
+    "keyHint": "Space",
+    "pause": "Pause",
+    "resume": "Resume",
+    "paused": "Paused"
+  },
+  "connection": {
+    "connecting": "Connecting…",
+    "reconnecting": "Reconnecting… {{seconds}} s",
+    "offline": "No network… {{seconds}} s",
+    "reconnected": "Reconnected",
+    "announcement": "Message from the host",
+    "dismissAnnouncement": "Hide this message"
+  },
+  "questionTypes": {
+    "single": "Single choice",
+    "singleHelp": "One correct option.",
+    "multiple": "Multiple choice",
+    "multipleHelp": "Several correct options, all must be picked.",
+    "truefalse": "True or false",
+    "truefalseHelp": "A statement to judge.",
+    "text": "Free text",
+    "textHelp": "Players type a short answer.",
+    "number": "Number",
+    "numberHelp": "Players type a number, with optional tolerance.",
+    "poll": "Poll",
+    "pollHelp": "Opinion vote, no points.",
+    "order": "Put in order",
+    "orderHelp": "Players sort the items into the right order."
+  },
+  "editor": {
+    "title": "Quiz title",
+    "description": "Description (optional)",
+    "untitledQuiz": "New quiz",
+    "gameSettings": "Game settings",
+    "gameSettingsHelp": "Every game of this quiz starts with these settings. You can still change them when starting a game.",
+    "generalTab": "General",
+    "branding": {
+      "title": "Branding",
+      "show": "Show branding",
+      "showHelp": "A logo and event name on the projector, and on the phones if chosen when starting a game.",
+      "offHelp": "No logo or event name in this quiz's games, on the projector or on the phones. You can still turn it on when starting a game.",
+      "logo": "Quiz logo",
+      "logoHelp": "Leave it empty to use the logo from My settings.",
+      "eventName": "Event name",
+      "eventNameHelp": "Leave it empty to use the last event name you used."
+    },
+    "untitledQuestion": "Untitled question",
+    "questionCount_one": "{{count}} question",
+    "questionCount_other": "{{count}} questions",
+    "addQuestion": "Add question",
+    "pickType": "Choose the question type",
+    "questionText": "Question",
+    "questionImage": "Question image",
+    "addImage": "Add an image",
+    "addImageShort": "Add image",
+    "removeImage": "Remove image",
+    "options": "Options",
+    "optionsMarkOne": "Options: mark the correct one",
+    "optionsMarkAll": "Options: mark every correct one",
+    "optionsInOrder": "Items in the correct order",
+    "orderHint": "Players see them shuffled and put them back in this order. Drag to reorder.",
+    "optionText": "Option {{n}}",
+    "optionImage": "Image for option {{n}}",
+    "removeOption": "Remove option {{n}}",
+    "addOption": "Add option",
+    "correct": "Correct",
+    "correctAnswer": "Correct answer",
+    "acceptedAnswers": "Accepted answers",
+    "acceptedAnswerPlaceholder": "e.g. Győr",
+    "acceptedAnswersHint": "Upper and lower case, accents and extra spaces are ignored when comparing.",
+    "hostGradedHint": "No accepted answers: you will mark the correct answers yourself during the game.",
+    "correctNumber": "Correct number",
+    "tolerance": "Tolerance (±)",
+    "timeLimit": "Time limit",
+    "seconds_one": "{{count}} second",
+    "seconds_other": "{{count}} seconds",
+    "points": "Points",
+    "pointsValue_one": "{{count}} point",
+    "pointsValue_other": "{{count}} points",
+    "moveUp": "Move up",
+    "moveDown": "Move down",
+    "duplicateQuestion": "Duplicate",
+    "deleteQuestion": "Delete question",
+    "needsFixing": "Fix",
+    "preview": "Phone preview",
+    "showPreview": "Show phone preview",
+    "hidePreview": "Hide phone preview",
+    "status": {
+      "saved": "Saved",
+      "pending": "Unsaved changes…",
+      "saving": "Saving…",
+      "invalid": "Not saved: some fields are incomplete",
+      "error": "Saving failed",
+      "offline": "Offline: saved once back online"
+    },
+    "errors": {
+      "required": "Required.",
+      "tooFew": "Add more.",
+      "tooMany": "Too many.",
+      "tooLong": "Too long.",
+      "tooSmall": "Too small.",
+      "tooBig": "Too big.",
+      "invalid": "Invalid value.",
+      "markCorrect": "Mark the correct option.",
+      "duplicateOptions": "Options must be distinct.",
+      "duplicateQuestions": "Duplicate question ids; duplicate the question again."
+    },
+    "sampleQuestion": "Which is the largest planet in the Solar System?",
+    "sampleOption1": "Jupiter",
+    "sampleOption2": "Mars",
+    "sampleOption3": "Venus",
+    "sampleOption4": "Saturn",
+    "previewSample": "A sample question to preview the settings.",
+    "addImageHint": "Drop, paste or choose a file. JPG, PNG or WebP, max 5 MB.",
+    "replaceImage": "Replace image",
+    "uploading": "Uploading…",
+    "questionN": "Question {{n}}",
+    "questionNOfCount": "Question {{n}} of {{count}}",
+    "dragQuestion": "Reorder question {{n}}",
+    "dragOption": "Reorder option {{n}}",
+    "correctOption": "Correct: option {{n}}",
+    "retrySave": "Try saving again",
+    "problemCount_one": "{{count}} to fix",
+    "problemCount_other": "{{count}} to fix",
+    "problemsTitle": "Fix these before playing",
+    "problemAt": "{{where}}: {{message}}",
+    "playNeedsQuestion": "Add a question first.",
+    "playNeedsFixes": "Fix these first:",
+    "settings": "Quiz settings",
+    "emptyHelp": "Pick the type of the first question. You can add more, reorder and duplicate them later.",
+    "listHelp": "Tap a question to edit it. Press and hold to drag it to a new place.",
+    "moreQuestionActions": "More question actions",
+    "moveToTop": "Move to top",
+    "moveToBottom": "Move to bottom",
+    "questionDuplicated": "Question duplicated",
+    "questionDeleted": "Question {{n}} deleted",
+    "undo": "Undo",
+    "deleteQuiz": "Delete quiz",
+    "deleteQuizHelp": "Deletes the quiz permanently. Results of games already played are kept.",
+    "leaveTitle": "Leave the editor?",
+    "leave": "Leave",
+    "leaveBody": {
+      "invalid": "Some fields are incomplete, so the latest changes are not saved. They are lost if you leave now.",
+      "offline": "You are offline and the latest changes are not saved yet. They are lost if you leave now.",
+      "error": "The latest changes could not be saved. They are lost if you leave now."
+    },
+    "shortcuts": {
+      "title": "Keyboard shortcuts",
+      "help": "Show this list",
+      "duplicate": "Duplicate the question",
+      "add": "Add a question",
+      "moveUp": "Move the question up",
+      "moveDown": "Move the question down"
+    },
+    "dnd": {
+      "instructions": "To reorder, press Space, move with the arrow keys, then press Space again to drop or Escape to cancel.",
+      "pickedUp": "Picked up {{item}}, position {{position}} of {{count}}.",
+      "movedOver": "{{item}} moved to position {{position}} of {{count}}.",
+      "outside": "{{item}} is outside the list.",
+      "dropped": "{{item}} dropped at position {{position}} of {{count}}.",
+      "cancelled": "Reordering cancelled, {{item}} is back in place."
+    }
+  },
+  "nicknames": {
+    "nav": "Names",
+    "title": "Surprise me names",
+    "help": "Players get one of these at random when they press “Surprise me” on the join page, from the list of their page's language, never one already taken in the game.",
+    "languages": {
+      "hu": "Hungarian",
+      "en": "English"
+    },
+    "count_one": "{{count}} name, at most {{max}}",
+    "count_other": "{{count}} names, at most {{max}}",
+    "builtIn": "Built-in list",
+    "custom": "Edited",
+    "saved": "Names saved",
+    "restore": "Restore built-in",
+    "restoreTitle": "Restore the built-in list ({{language}})?",
+    "restoreBody": "The edited names of this language are replaced by the built-in ones.",
+    "restored": "Built-in list restored",
+    "addLabel": "New name",
+    "addPlaceholder": "Type a name, or paste a list",
+    "addHint": "At most {{max}} characters each. Paste a list and every line becomes a name.",
+    "add": "Add",
+    "full": "The list is full ({{max}} names).",
+    "note": {
+      "added_one": "Added {{count}} name.",
+      "added_other": "Added {{count}} names.",
+      "duplicates_one": "{{count}} was already in the list.",
+      "duplicates_other": "{{count}} were already in the list.",
+      "noRoom_one": "{{count}} did not fit (at most {{max}} names).",
+      "noRoom_other": "{{count}} did not fit (at most {{max}} names)."
+    },
+    "search": "Search the names",
+    "found_one": "{{count}} match of {{total}} names",
+    "found_other": "{{count}} matches of {{total}} names",
+    "noMatch": "No such name in the list.",
+    "empty": "No names yet. Add at least one.",
+    "listLabel": "Names",
+    "edit": "Edit {{name}}",
+    "editLabel": "New name for {{name}}",
+    "done": "Done",
+    "remove": "Remove {{name}}",
+    "randomAvatar": "No avatar fits: the player gets a random one",
+    "problems": {
+      "tooLong": "Longer than {{max}} characters.",
+      "duplicate": "Already in the list.",
+      "notAllowed": "The join page would refuse this name.",
+      "bar": "Some names have problems: fix or remove the ones marked red.",
+      "empty": "Neither list can be empty."
+    }
+  },
+  "users": {
+    "title": "Users",
+    "intro": "The host accounts on this site: what each one does, and what you can change for it.",
+    "add": "Add user",
+    "addSubmit": "Create",
+    "role": "Role",
+    "roles": {
+      "admin": "Admin",
+      "editor": "Host"
+    },
+    "initialPassword": "Initial password",
+    "initialPasswordHint": "Share the initial password privately. The user must change it at first login.",
+    "usernameRules": "3–40 characters: letters, digits, dot, dash, underscore. No e-mail addresses.",
+    "pendingPassword": "Password not changed yet",
+    "created": "User {{name}} created.",
+    "pending": {
+      "title": "Waiting for approval",
+      "hint": "People who signed up on the sign-up page. Only approve names you recognise; unapproved sign-ups are deleted after 7 days.",
+      "approve": "Approve",
+      "reject": "Reject",
+      "approved": "{{name}} can log in now.",
+      "rejected": "Sign-up {{name}} deleted.",
+      "rejectTitle": "Reject {{name}}?",
+      "rejectBody": "The sign-up is deleted. They can sign up again."
+    },
+    "accounts_one": "{{count}} account",
+    "accounts_other": "{{count}} accounts",
+    "admins_one": "{{count}} admin",
+    "admins_other": "{{count}} admins",
+    "search": "Search by name",
+    "noMatch": "No user called “{{query}}”.",
+    "you": "You",
+    "joined": "Joined {{date}}",
+    "lastLogin": "last login {{when}}",
+    "neverLoggedIn": "never logged in",
+    "figures": {
+      "quizzes": "Quizzes",
+      "gamesPlayed": "Games played",
+      "playersReached": "Players",
+      "gamesActive": "Active games",
+      "images": "Images",
+      "sessions": "Active logins"
+    },
+    "actions": {
+      "menu": "Actions for {{name}}",
+      "resetPassword": "Set a new password",
+      "makeAdmin": "Make admin",
+      "makeHost": "Make host",
+      "logout": "Log out everywhere",
+      "delete": "Delete account"
+    },
+    "reset": {
+      "title": "New password for {{name}}",
+      "body": "They log in with this password and must change it right away. Every device they are logged in on is logged out. Share it privately.",
+      "field": "New password",
+      "submit": "Set password",
+      "done": "New password set for {{name}}."
+    },
+    "role": {
+      "adminTitle": "Make {{name}} an admin?",
+      "adminBody": "Admins see and manage every account and edit the Surprise me names.",
+      "hostTitle": "Make {{name}} a host?",
+      "hostBody": "They keep their quizzes and games but no longer see the admin pages.",
+      "madeAdmin": "{{name}} is an admin now.",
+      "madeHost": "{{name}} is a host now."
+    },
+    "logout": {
+      "title": "Log {{name}} out everywhere?",
+      "body_one": "Their {{count}} active login ends. Their password stays the same.",
+      "body_other": "All {{count}} of their active logins end. Their password stays the same.",
+      "done": "{{name}} is logged out everywhere."
+    },
+    "delete": {
+      "title": "Delete {{name}}?",
+      "body": "Their quizzes, games, results, images and settings are deleted with the account. This cannot be undone.",
+      "running_one": "Their {{count}} running or scheduled game ends now.",
+      "running_other": "Their {{count}} running or scheduled games end now.",
+      "typeName": "Type {{name}} to confirm",
+      "submit": "Delete account",
+      "done": "Account {{name}} deleted."
+    }
   },
   "errors": {
     "gameNotFound": "No such game. Check the PIN.",
     "gameFull": "The game is full.",
     "gameAlreadyStarted": "The game has already started.",
     "nameTaken": "That name is already taken.",
+    "nameNotAllowed": "Please choose another name.",
     "invalidInput": "Invalid input.",
     "notFound": "Not found.",
-    "connectionLost": "Connection lost, reconnecting…"
+    "connectionLost": "Connection lost, reconnecting…",
+    "questionClosed": "This question is closed.",
+    "gamePaused": "The game is paused. Answer once it continues.",
+    "alreadyAnswered": "You have already answered.",
+    "answerLocked": "Too late to change your answer.",
+    "invalidAnswer": "Invalid answer.",
+    "unknownTeam": "Choose a team.",
+    "teamNameTaken": "There is a team with this name already. Pick it from the list or choose another name.",
+    "teamNameNotAllowed": "Please choose another team name.",
+    "teamLimit": "There are as many teams as can be. Join one of them.",
+    "playersWithoutTeam": "Someone has no team yet. Move them to a team, or wait until they pick one.",
+    "invalidTransition": "That is not possible right now.",
+    "playerNotFound": "Player not found. Join again.",
+    "invalidCredentials": "Wrong username or password.",
+    "unauthorized": "Please log in.",
+    "forbidden": "You do not have access to this.",
+    "rateLimited": "Too many attempts. Wait a minute and try again.",
+    "internal": "Something went wrong. Try again.",
+    "kicked": "The host removed you from the game.",
+    "gameClosed": "The host closed the game. Thanks for playing!",
+    "screenLocked": "Your screens are locked. Unlock them with your lock code or password.",
+    "wrongUnlockSecret": "That is not your lock code or password. Try again.",
+    "mailNotConfigured": "E-mail is not set up on this server.",
+    "noSignupEmail": "Save an address first.",
+    "mailFailed": "The e-mail could not be sent. Check the address, or ask whoever runs the server to check the e-mail set-up.",
+    "leftGame": "You left this game.",
+    "unsupportedImage": "Use a JPG, PNG or WebP image.",
+    "fileTooLarge": "The file is larger than 5 MB.",
+    "passwordChangeRequired": "Change your initial password first.",
+    "termsRequired": "Accept the terms of use first.",
+    "termsOutdated": "The terms changed in the meantime. Reload the page and read the new version.",
+    "tooManyGames": "You can have at most 20 open games at once. End an older one (End game), then try again.",
+    "tooManyImages": "You reached the image limit (1000). Delete old quizzes; unused images are cleaned up daily.",
+    "imageTooBig": "This picture has too many pixels (50 megapixels at most). Make it smaller and upload it again.",
+    "usernameTaken": "This username is already taken.",
+    "notOnYourself": "You can't do this to your own account. Change your password in My settings.",
+    "lastAdmin": "You're the only admin. Make someone else an admin first.",
+    "accountPending": "Your account is waiting for the admin's approval.",
+    "registrationClosed": "Sign-up is closed. Ask the admin for an account.",
+    "registrationsFull": "Too many sign-ups are waiting for approval. Try again in a few days.",
+    "wrongCurrentPassword": "The current password is wrong.",
+    "samePassword": "The new password must differ from the current one.",
+    "gameNotFinished": "End the game first.",
+    "answerNotSent": "Your answer was not sent. Tap again.",
+    "notCaptain": "Only your team's captain can do that.",
+    "gameNotOpenYet": "This game has not opened yet. Come back at the start time.",
+    "invalidSchedule": "Pick a time in the future, at most 30 days ahead.",
+    "quickMessagesFull": "Your message list is full. Remove one in My settings first."
+  },
+  "nav": {
+    "label": "Host menu",
+    "home": "Home",
+    "quizzes": "Quizzes",
+    "signedInAs": "Signed in as",
+    "games": "Games",
+    "account": "Account",
+    "settings": "My settings",
+    "feedback": "Feedback",
+    "opensInNewTab": "opens in a new tab",
+    "admin": "Admin"
+  },
+  "whatsNew": {
+    "title": "What's new",
+    "help": "What changed in Quizmoo, newest first.",
+    "unseen": "New notes",
+    "versionShort": "v{{version}}",
+    "release": "Quizmoo {{version}}",
+    "current": "Current version",
+    "releasedOn": "Released {{date}}",
+    "releases": {
+      "1_1_0": {
+        "title": "The first public beta",
+        "intro": "Quizmoo is online for friends and family. Here is what you can do as a host.",
+        "sections": [
+          {
+            "title": "Make quizzes",
+            "items": [
+              "Seven question types: single and multiple choice, true or false, free text, number, poll and put in order, each with a picture if you like.",
+              "The editor saves as you type, shows each question in a phone preview and lists what still needs fixing.",
+              "Import questions from a spreadsheet (Excel, Google Sheets) or a Quizmoo file, and download any quiz to share it.",
+              "Themes, answer colours and symbols, or your own colours, and your logo and event name on the projector."
+            ]
+          },
+          {
+            "title": "Run games",
+            "items": [
+              "Players join with the PIN or the QR code on any phone, no app or account needed. Up to 60 players.",
+              "Pause, add 30 seconds, skip a question, send a message to every phone, and show a question again or the standings at any time.",
+              "Schedule a game up to 30 days ahead and share its link; players can add it to their calendar.",
+              "Lock your screen during a game, so nobody reads the answers off your laptop.",
+              "\"Play again\" starts a new round with the same players in one tap."
+            ]
+          },
+          {
+            "title": "Play in teams",
+            "items": [
+              "You set the teams, the players make them, or both; anyone can also play on their own next to the teams.",
+              "Each team answers its own way: the captain decides, a majority vote, or everyone counts."
+            ]
+          },
+          {
+            "title": "See the results",
+            "items": [
+              "A summary with the podium and the easiest and hardest question, then every player's, team's and question's details, and a CSV export.",
+              "Results are kept for 90 days, then deleted."
+            ]
+          },
+          {
+            "title": "Your account",
+            "items": [
+              "My settings: quick messages, your usual game settings, branding, password and screen lock code.",
+              "Download all your data or delete your account at any time.",
+              "Friends can ask for a host account on the home page; an admin approves it."
+            ]
+          },
+          {
+            "title": "Good to know",
+            "items": [
+              "Quizmoo installs on a phone or laptop like an app.",
+              "Found a bug or have an idea? Tell us through Feedback in the menu."
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "settings": {
+    "title": "My settings",
+    "help": "Yours across every quiz and game.",
+    "unsaved": "Unsaved changes",
+    "discard": "Discard",
+    "saved": "Settings saved",
+    "passwordSaved": "Password saved",
+    "lockCode": {
+      "title": "Screen lock code",
+      "help": "Unlocks your screens when you lock them during a game (\"Lock screen\"). New games use it unless you give one when you start them. Your password always unlocks too.",
+      "set": "You have a lock code.",
+      "none": "No lock code yet: your password unlocks your screens.",
+      "new": "New lock code (4 to 8 digits)",
+      "change": "Change it (4 to 8 digits)",
+      "submit": "Save code",
+      "remove": "Remove code",
+      "saved": "Lock code saved",
+      "removed": "Lock code removed"
+    },
+    "signupEmail": {
+      "title": "Sign-up e-mails",
+      "help": "When someone signs up as a host, we e-mail this address with a link to the Users page, where you approve or reject them. The e-mail says only how many are waiting, never who. At most one e-mail every 15 minutes.",
+      "set": "Sign-up e-mails go to {{email}}.",
+      "none": "No address yet: you see new sign-ups only on the Users page.",
+      "notConfigured": "E-mail is not set up on this server, so nothing is sent. Whoever runs it needs to add a Brevo API key and a sender address (see the deploy guide).",
+      "address": "E-mail address",
+      "invalid": "Type an e-mail address, like name@example.com.",
+      "submit": "Save address",
+      "remove": "Remove address",
+      "test": "Send a test e-mail",
+      "saved": "Address saved",
+      "removed": "Address removed",
+      "testSent": "Test e-mail sent. Check your inbox (and the spam folder)."
+    },
+    "leaveTitle": "Leave without saving?",
+    "leaveBody": "Your changes to My settings are not saved yet.",
+    "messages": {
+      "title": "Quick messages",
+      "help": "One tap sends them from the message box during a game. Edit, remove or reorder any of them. A game keeps the messages it started with.",
+      "builtIn": "Built-in, follows the language",
+      "count": "{{n}} / {{max}} messages",
+      "empty": "No messages. Add one below, or bring back the built-in ones.",
+      "new": "New message",
+      "add": "Add",
+      "full": "{{max}} messages is the limit",
+      "restore_one": "Bring back the built-in message",
+      "restore_other": "Bring back {{count}} built-in messages",
+      "messageN": "Message {{n}}",
+      "drag": "Move message {{n}}",
+      "moveUp": "Move message {{n}} up",
+      "moveDown": "Move message {{n}} down",
+      "remove": "Remove message {{n}}",
+      "textRequired": "A message needs some text.",
+      "important": "Important",
+      "custom": "Other…",
+      "customSeconds": "Seconds"
+    },
+    "defaults": {
+      "title": "Game defaults",
+      "help": "New quizzes start with these settings. Each quiz can still change them.",
+      "app": "Using the app's defaults.",
+      "own": "Using your own defaults.",
+      "reset": "Use the app's defaults"
+    },
+    "branding": {
+      "title": "Branding",
+      "help": "Your logo and the event name on the projector's lobby and podium, and on the phones if you like. You choose per game in the new game dialog.",
+      "logo": "Logo",
+      "logoHelp": "A wide logo on a transparent or white background works best: it is shown on a white tile.",
+      "eventName": "Event name",
+      "eventNameHelp": "The new game dialog starts with it, and each game can change it.",
+      "eventNamePlaceholder": "e.g. Christmas party"
+    },
+    "tabs": {
+      "label": "Settings groups",
+      "games": "Games",
+      "messages": "Messages",
+      "branding": "Branding",
+      "account": "Account"
+    },
+    "account": {
+      "title": "Your account",
+      "joined": "Here since {{date}}",
+      "lastLogin": "last logged in {{when}}",
+      "logins": {
+        "title": "Logins",
+        "body_one": "This browser is your only active login.",
+        "body_other": "You have {{count}} active logins, this browser included. Log out the others if you used a shared computer or lost a device.",
+        "submit": "Log out the others",
+        "done": "Logged out everywhere else"
+      },
+      "data": {
+        "title": "Your data",
+        "help": "One JSON file with your account, settings, quizzes, the list of your pictures and your games with their results.",
+        "download": "Download my data",
+        "terms": "You accepted the <terms>terms of use</terms> (version {{version}}) on {{date}}. See also the <privacy>privacy notice</privacy>."
+      },
+      "device": {
+        "title": "This device",
+        "help": "Saved on this device straight away; your other devices keep their own."
+      },
+      "delete": {
+        "title": "Delete account",
+        "help": "Deletes your account with every quiz, game, result and image, for good.",
+        "open": "Delete my account",
+        "dialogTitle": "Delete your account?",
+        "body": "These go for good and can't be brought back:",
+        "quizzes_one": "{{count}} quiz",
+        "quizzes_other": "{{count}} quizzes",
+        "games_one": "{{count}} finished game with its results",
+        "games_other": "{{count}} finished games with their results",
+        "images_one": "{{count}} image",
+        "images_other": "{{count}} images",
+        "running": "Games still running end at once.",
+        "password": "Your password",
+        "submit": "Delete for good",
+        "done": "Your account is deleted"
+      }
+    }
+  },
+  "branding": {
+    "logo": "Organiser's logo"
+  },
+  "dashboard": {
+    "greeting": "Hi, {{name}}!",
+    "subtitle": "What are we playing today?",
+    "figures": "At a glance",
+    "quizzes_one": "quiz",
+    "quizzes_other": "quizzes",
+    "played_one": "game played",
+    "played_other": "games played",
+    "players_one": "player",
+    "players_other": "players",
+    "live": "Running now",
+    "backToGame": "Back to the game",
+    "upcoming": "Coming up",
+    "recentQuizzes": "Recently edited",
+    "allQuizzes": "All quizzes",
+    "latestResults": "Latest results",
+    "allGames": "All games",
+    "noQuizzes": "No quizzes yet. Make your first one and play it in minutes.",
+    "firstQuiz": "Make your first quiz",
+    "noResults": "No finished games yet. Their results show up here."
+  },
+  "history": {
+    "title": "Games",
+    "empty": "No games yet. Start one from a quiz.",
+    "players_one": "{{count}} player",
+    "players_other": "{{count}} players",
+    "results": "Results",
+    "control": "Control",
+    "deleteTitle": "Delete game?",
+    "deleteBody": "The results of \"{{title}}\" ({{date}}) will be deleted permanently.",
+    "quiz": "Quiz",
+    "date": "Date",
+    "mode": "Mode",
+    "playerCount": "Players",
+    "status": "Status",
+    "scheduled": "Scheduled",
+    "cancel": "Call off",
+    "cancelTitle": "Call off game?",
+    "cancelBody": "The scheduled game \"{{title}}\" ({{date}}) will be deleted and its PIN and link stop working.",
+    "search": "Search",
+    "searchPlaceholder": "Quiz, player or PIN",
+    "searchHint": "A quiz title, a player's name or a PIN.",
+    "searchMin_one": "Type at least {{count}} character.",
+    "searchMin_other": "Type at least {{count}} characters.",
+    "matchedPlayers_one": "Player: {{names}}",
+    "matchedPlayers_other": "Players: {{names}}",
+    "state": "Status",
+    "states": {
+      "all": "All",
+      "running": "Running",
+      "finished": "Finished"
+    },
+    "period": "Period",
+    "periods": {
+      "any": "Any time",
+      "today": "Today",
+      "week": "Last 7 days",
+      "month": "Last 30 days"
+    },
+    "noMatches": "No games match. Try another search or filter.",
+    "clearFilters": "Clear filters",
+    "loadMore": "Load more",
+    "keep_one": "Finished games are kept for {{days}} day, your newest {{max}} at most.",
+    "keep_other": "Finished games are kept for {{days}} days, your newest {{max}} at most."
+  },
+  "results": {
+    "title": "Results",
+    "backToGames": "Back to games",
+    "running": "This game is still running. These are the results so far.",
+    "exportCsv": "Export CSV",
+    "showOnScreen": "Show on screen",
+    "podium": "Podium",
+    "questions": "Questions",
+    "noQuestions": "No question has been revealed yet.",
+    "questionNumber": "Question {{index}}",
+    "correctPercent": "{{percent}}% correct",
+    "correctPercentText": "{{share}} of the players got it right",
+    "summary": {
+      "title": "Summary",
+      "players": "Players",
+      "questions": "Questions",
+      "averageCorrect": "Right on average",
+      "averageTime": "Average answer time",
+      "seconds": "{{seconds}} s",
+      "easiest": "Easiest question",
+      "hardest": "Hardest question"
+    },
+    "answered_one": "{{answered}} of {{count}} answered",
+    "answered_other": "{{answered}} of {{count}} answered",
+    "averageTime": "Average time: {{seconds}} s",
+    "noAnswers": "No answers",
+    "players": "Players",
+    "teams": "Teams",
+    "rank": "Rank",
+    "name": "Name",
+    "team": "Team",
+    "score": "Score",
+    "correct": "Correct",
+    "members": "Members",
+    "sortedAscending": "sorted ascending",
+    "sortedDescending": "sorted descending",
+    "screenHint": "Space or → next, ← back, P pause",
+    "teamAnswers": "Team answers",
+    "noTeamAnswer": "No answer",
+    "length": "Played for {{length}}",
+    "winner_one": "Winner",
+    "winner_other": "Winners (tie)",
+    "points_one": "{{points}} point",
+    "points_other": "{{points}} points",
+    "bestPlayer": "Best player:",
+    "delete": "Delete game",
+    "details": "Details"
+  },
+  "datePicker": {
+    "title": "Pick a date and time",
+    "previousMonth": "Previous month",
+    "nextMonth": "Next month",
+    "time": "Time",
+    "hour": "Hour",
+    "minute": "Minute",
+    "done": "Done"
+  },
+  "calendar": {
+    "add": "Add to calendar",
+    "summary": "Quizmoo: {{title}}",
+    "description": "PIN: {{pin}}\nJoin at: {{url}}"
+  },
+  "legal": {
+    "nav": {
+      "label": "Legal",
+      "privacy": "Privacy",
+      "terms": "Terms",
+      "cookies": "Cookies",
+      "imprint": "Imprint"
+    },
+    "updated": "Last updated: {{date}}",
+    "operator": {
+      "title": "Who runs Quizmoo here",
+      "name": "Operator",
+      "nameUnknown": "Not set by this site. Ask whoever invited you to play.",
+      "contact": "Contact",
+      "contactUnknown": "Ask the organiser of your game.",
+      "hosting": "Hosting",
+      "hostingUnknown": "a hosting provider chosen by the operator",
+      "mailUnknown": "an e-mail provider chosen by the operator",
+      "nature": "A free, non-commercial hobby project of a private individual: no company, no ads, no paid plans."
+    },
+    "privacy": {
+      "title": "Privacy notice",
+      "intro": "This notice explains, as the GDPR requires, what Quizmoo stores about you, why, for how long, and what you can do about it. The short version: as little as possible, only to run the game, never sold, never used for advertising or tracking.",
+      "sections": [
+        {
+          "heading": "Who is responsible",
+          "paragraphs": [
+            "The controller of your data is the operator named above, a private individual running Quizmoo as a free hobby project. Write to the contact above with any question or request about your data."
+          ]
+        },
+        {
+          "heading": "If you play",
+          "items": [
+            "The nickname you type, the avatar you pick and your team. Everyone in the game sees them: the host, the other players and the shared screen. Use a nickname, not your full name.",
+            "Your answers, how fast you gave them and your points, to score the game and show the results.",
+            "A random player code in your browser, so you get back into the game after a reload.",
+            "Nothing else: no account, e-mail address, phone number, location or IP address is stored."
+          ],
+          "paragraphs": [
+            "Legal basis: taking part in the game you chose to join (GDPR Article 6(1)(b)), and the host's legitimate interest in looking back at the results of their event (Article 6(1)(f))."
+          ]
+        },
+        {
+          "heading": "If you host",
+          "items": [
+            "Your username, and your password only as a one-way hash that nobody can turn back into the password.",
+            "When you last logged in (shown only to the admin, to see which accounts are still used), and which version of the terms you accepted and when (the record of our agreement).",
+            "Your logins: a random code per browser, stored as a hash, for up to {{sessionDays}} days.",
+            "Your quizzes, the pictures you upload, your settings, and the games you ran with their results.",
+            "Admins only, if they enter one: an e-mail address for notices about new sign-ups, used for nothing else and deleted when they remove it or stop being an admin."
+          ],
+          "paragraphs": [
+            "Legal basis: the agreement to use the service, i.e. the terms of use (Article 6(1)(b)); for the last login, the record of the terms and the security measures, the legitimate interest in running the service safely (Article 6(1)(f))."
+          ]
+        },
+        {
+          "heading": "Pictures and quiz content",
+          "paragraphs": [
+            "Hosts decide what goes into their quizzes. If a picture or a question shows or names someone, the host must be allowed to use it. To have something removed, ask the host or write to the contact above."
+          ]
+        },
+        {
+          "heading": "Security",
+          "items": [
+            "The connection is encrypted (HTTPS), and passwords and login codes are stored only as hashes.",
+            "To stop password guessing and abuse, the server counts requests per network address for a minute, in memory only. Addresses are never written to the database or the logs.",
+            "The hosting provider may log network addresses for its own security, under its own privacy policy.",
+            "If a data breach puts your rights at risk, the operator reports it to the authority within 72 hours and tells the people affected where the law requires it."
+          ]
+        },
+        {
+          "heading": "How long",
+          "items": [
+            "Finished games, with the players' nicknames and answers, are deleted {{days}} days after the game at the latest, and each host keeps at most their newest 200.",
+            "Games nobody finished are closed after 12 hours and then deleted like finished ones.",
+            "Pictures that no quiz, setting or game uses any more are deleted within two days.",
+            "Expired logins are deleted daily. A sign-up the admin does not approve within {{signupDays}} days is deleted.",
+            "A player's seat in the browser is removed when they leave the game, or after {{seatDays}} days.",
+            "Host accounts, with their quizzes and pictures, stay until the host or the admin deletes them.",
+            "The hosting provider's backups can hold deleted data for up to 30 days before they are overwritten."
+          ]
+        },
+        {
+          "heading": "Who else gets your data",
+          "paragraphs": [
+            "Nobody, for their own purposes. The service runs at a hosting provider ({{hosting}}), which stores and processes the data only to run it, as a processor under its data processing terms. If the provider or its parent company is outside the EU/EEA, transfers rely on the safeguards the GDPR requires: an adequacy decision such as the EU–US Data Privacy Framework, or standard contractual clauses.",
+            "When an admin has entered an address for sign-up notices, those e-mails go out through an e-mail provider ({{mail}}), also as a processor. It receives the admin's address and the notice, which says only how many sign-ups are waiting.",
+            "There are no analytics, advertising or social media tools, and the app loads nothing from other sites. The Feedback link for hosts leads to GitHub, a separate service with its own privacy policy; using it is optional."
+          ]
+        },
+        {
+          "heading": "Your rights",
+          "items": [
+            "Access: a copy of the data about you. Hosts: My settings → Account → Download my data.",
+            "Correction of data that is wrong.",
+            "Erasure. Hosts: delete your account on My settings → Account; games and quizzes can be deleted at any time. Players: ask the host or write to the contact above with the date of the game, its PIN and your nickname.",
+            "Restriction of processing, and objection to processing based on legitimate interest.",
+            "Portability: the download above is a machine-readable JSON file."
+          ],
+          "paragraphs": [
+            "We answer within one month. As players have no account, we may ask for the game's date, PIN and your nickname to find your data, and never for more than that."
+          ]
+        },
+        {
+          "heading": "Complaints",
+          "paragraphs": [
+            "You can complain to the Hungarian data protection authority: Nemzeti Adatvédelmi és Információszabadság Hatóság (NAIH), 1055 Budapest, Falk Miksa utca 9–11., ugyfelszolgalat@naih.hu, naih.hu. You can also turn to the authority where you live or work, or go to court. It helps if you write to the contact above first, so we can put it right."
+          ]
+        },
+        {
+          "heading": "Children",
+          "paragraphs": [
+            "Hosts must be at least {{age}} years old. Players need no account and give only a nickname; when children play, the host running the event makes sure their parents, school or organisers agree."
+          ]
+        },
+        {
+          "heading": "Automated decisions and changes",
+          "paragraphs": [
+            "Quizmoo makes no decisions about you by automated means, apart from scoring the quiz you play.",
+            "When this notice changes, the date above changes. If a change affects what hosts agreed to, they are asked to accept the new terms at their next login."
+          ]
+        }
+      ]
+    },
+    "terms": {
+      "title": "Terms of use",
+      "intro": "These terms apply between you and the operator named above whenever you use Quizmoo here. They are short, please read them. Hosts accept them when they sign up; players accept them by joining a game.",
+      "version": "Version {{version}}",
+      "sections": [
+        {
+          "heading": "The service",
+          "paragraphs": [
+            "Quizmoo is a free, non-commercial quiz game run as a hobby by a private individual. It has no paid plans and shows no ads. It is offered as it is: features can change, and the service can pause or stop, if possible with notice on this site."
+          ]
+        },
+        {
+          "heading": "Who can use it",
+          "items": [
+            "Players join a game with its PIN and a nickname; they need no account.",
+            "Hosts need an account, must be at least {{age}} years old and use it themselves: one person per account, no sharing.",
+            "Sign-ups wait for the admin's approval. The admin may decline one without giving a reason."
+          ]
+        },
+        {
+          "heading": "Your account",
+          "items": [
+            "Keep your password to yourself, and don't use it anywhere else.",
+            "If you think someone else used your account, change your password and log out your other devices on My settings, and tell the operator.",
+            "You can delete your account at any time on My settings → Account."
+          ]
+        },
+        {
+          "heading": "What you put in",
+          "items": [
+            "You are responsible for your quizzes, pictures, team names and messages, and you must have the right to use them: your own work, licensed to you, or allowed by law.",
+            "Not allowed: anything illegal, hate speech, harassment, sexual content, content that sexualises minors, glorified violence, or other people's personal data without a legal basis.",
+            "No advertising, spam or links to harmful sites.",
+            "Nicknames must not be offensive or pretend to be someone else. Hosts can remove players from their games.",
+            "You keep the rights to what you create. You allow the operator to store and show it only as far as needed to run the service for you, for example on the screens and phones of your games."
+          ]
+        },
+        {
+          "heading": "Running an event",
+          "items": [
+            "Tell the players before they join that their nicknames and answers appear on the shared screen.",
+            "When children play, make sure their parents, school or organisers agree."
+          ]
+        },
+        {
+          "heading": "Fair use",
+          "items": [
+            "Don't attack, overload or probe the service, get around its limits, or use automated tools to join games or create accounts.",
+            "Limits keep it fair for everyone, for example 20 open games and 1,000 pictures per host.",
+            "Found a security problem? Report it privately to the contact, and don't use or publish it before it is fixed. Thank you!"
+          ]
+        },
+        {
+          "heading": "When something goes wrong",
+          "items": [
+            "The operator may remove content, or suspend or delete an account, that breaks these terms or the law; without notice when that is needed to prevent harm.",
+            "Keep your own copy of important quizzes: download them from the quiz list. There are backups, but losing data can't be ruled out entirely."
+          ]
+        },
+        {
+          "heading": "Liability",
+          "paragraphs": [
+            "The service is free and provided as it is, without any guarantee that it is available or fits a particular purpose. As far as the law allows, the operator is not liable for indirect damage or lost data. This does not limit liability for damage caused intentionally or by gross negligence, for harm to life, body or health, or for anything else the law (in particular Section 6:152 of the Hungarian Civil Code) does not allow to be excluded."
+          ]
+        },
+        {
+          "heading": "Changes to these terms",
+          "paragraphs": [
+            "The version and date are shown above. When the terms change in a way that matters, hosts are asked to accept the new version at their next login; until they do, they can still download their data or delete their account."
+          ]
+        },
+        {
+          "heading": "Law and disputes",
+          "paragraphs": [
+            "Hungarian law applies. If you are a consumer living elsewhere in the EU, you keep the protection of your country's mandatory law. Please write to the contact above first: most problems can be solved that way."
+          ]
+        }
+      ]
+    },
+    "cookies": {
+      "title": "Cookies and storage",
+      "intro": "Quizmoo uses one cookie, for hosts who log in, and a few entries in your browser's storage, each needed for something you asked for. That is why it does not ask for consent: the ePrivacy Directive and Section 155(4) of the Hungarian Electronic Communications Act allow strictly necessary storage without it. No tracking, analytics or advertising cookies, and nothing from other sites.",
+      "columns": {
+        "name": "Name",
+        "kind": "Where",
+        "who": "Who",
+        "purpose": "What for, and how long"
+      },
+      "kinds": {
+        "cookie": "Cookie",
+        "localStorage": "Browser storage",
+        "sessionStorage": "Tab storage",
+        "cache": "App cache"
+      },
+      "who": {
+        "hosts": "Hosts",
+        "players": "Players",
+        "everyone": "Everyone"
+      },
+      "items": {
+        "session": "Keeps you logged in. Page scripts can't read it, and it is sent only to this site over HTTPS. Up to 30 days, or until you log out. On a local network without HTTPS it is called quizmoo_session.",
+        "player": "Your seat in a game (a random code, your nickname and avatar), so a reload brings you back. Removed when you leave the game, or after 2 days.",
+        "draft": "What you filled in while waiting for a scheduled game. Removed when you join or leave.",
+        "dismissed": "The host message you swiped away. Until you close the tab.",
+        "picksOpen": "Whether your team's picks are open. Until you close the tab.",
+        "lang": "Your language. Until you change it or clear your browser data.",
+        "mode": "Light, dark or system look. Until you change it or clear your browser data.",
+        "notice": "That you have seen the storage notice, so it does not come back.",
+        "hostToasts": "Whether the host page shows short notes about players joining and leaving.",
+        "appCache": "The app's own files (code, fonts, pictures), so it starts quickly and can be installed. No personal data."
+      },
+      "removeTitle": "Removing them",
+      "remove": "You can delete all of it in your browser's settings (site data for this address). You will be logged out, and a player loses their seat in a running game."
+    },
+    "imprint": {
+      "title": "Imprint",
+      "intro": "Quizmoo here is a free, non-commercial hobby project of a private individual, not a business.",
+      "items": [
+        "Quizzes, pictures and messages are created by their hosts, who are responsible for them.",
+        "To report illegal content or a security problem, write to the contact above."
+      ]
+    },
+    "notice": {
+      "label": "About storage",
+      "text": "Quizmoo only stores what it needs to work: your login if you host, your seat in a game, your language and look. No tracking, no ads.",
+      "details": "What exactly?",
+      "ok": "Got it"
+    },
+    "accept": {
+      "title": "Accept the terms of use",
+      "intro": "Before you go on, please read the terms of use (version {{version}}). The privacy notice explains what we store about you.",
+      "checkbox": "I'm {{age}} or older, I accept the <terms>terms of use</terms> and I've read the <privacy>privacy notice</privacy>.",
+      "required": "Tick this to go on.",
+      "submit": "Accept and continue",
+      "otherTitle": "Don't agree?",
+      "other": "You can download your data or delete your account instead, or just log out.",
+      "done": "Thank you!"
+    },
+    "joinNote": "Everyone in the game sees your nickname. By joining you accept the <terms>terms</terms>; see the <privacy>privacy notice</privacy>."
+  },
+  "quizFile": {
+    "importTitle": "Import a quiz",
+    "importHelp": "Write your questions anywhere: in Excel, Google Sheets or on your phone, then bring them in here. A Quizmoo file someone shared with you works too.",
+    "templateHelp": "Start from the template: it explains every column and has an example of each question type.",
+    "downloadTemplate": "Download template",
+    "templateName": "quizmoo-question-template.csv",
+    "chooseFile": "Choose a file",
+    "fileTypes": "Spreadsheet (.csv) or Quizmoo file (.quizmoo.json)",
+    "invalid": {
+      "tooLarge": "This file is too large for a quiz.",
+      "notQuizFile": "This is not a Quizmoo file. Export one from Quizmoo, or use the spreadsheet template."
+    },
+    "problemsFound_one": "We found 1 problem. Fix it in the file and choose the file again:",
+    "problemsFound_other": "We found {{count}} problems. Fix them in the file and choose the file again:",
+    "problemsInFile": "The quiz in this file has problems:",
+    "found_one": "1 question, ready to import.",
+    "found_other": "{{count}} questions, ready to import.",
+    "sheetNote": "The quiz gets your default game settings. Add pictures in the editor.",
+    "import": "Import",
+    "imported_one": "Imported 1 question.",
+    "imported_other": "Imported {{count}} questions.",
+    "missingImage": "A picture is missing from the file.",
+    "exportMenu": "Download",
+    "exportCsv": "Download as spreadsheet",
+    "exportFile": "Download Quizmoo file",
+    "problemAt": "Row {{row}}, {{column}}: {{message}}",
+    "problemColumns": {
+      "type": "type",
+      "question": "question",
+      "answers": "answers",
+      "correct": "correct",
+      "time": "time",
+      "points": "points",
+      "tolerance": "tolerance"
+    },
+    "problems": {
+      "type": "unknown question type. Use one of: {{words}}.",
+      "question": "write the question, at most 500 characters.",
+      "answers": "give 2 to 6 answers, at most 200 characters each.",
+      "correct": {
+        "single": "write the number of the right answer's column, e.g. 2.",
+        "multiple": "write the numbers of the right answers, e.g. 1, 3; each needs an answer in its column.",
+        "truefalse": "write true or false.",
+        "text": "at most 20 accepted answers of at most 100 characters, separated by |.",
+        "number": "write a number, e.g. 1848 or 3.5."
+      },
+      "time": "seconds from 5 to 180, or leave it empty.",
+      "points": "a whole number from 0 to 5000, or leave it empty.",
+      "tolerance": "a number of 0 or more, or leave it empty.",
+      "empty": "No questions in this file. Fill in at least one row below the header.",
+      "tooMany": "A quiz holds at most 100 questions. Split the file in two."
+    },
+    "columns": {
+      "type": "type",
+      "question": "question",
+      "a1": "answer 1",
+      "a2": "answer 2",
+      "a3": "answer 3",
+      "a4": "answer 4",
+      "a5": "answer 5",
+      "a6": "answer 6",
+      "correct": "correct",
+      "time": "time (s)",
+      "points": "points",
+      "tolerance": "tolerance"
+    },
+    "guide": [
+      "QUIZMOO QUESTIONS: one question per row, below the header row. Save as CSV (UTF-8), then import it in Quizmoo under Quizzes > Import.",
+      "Rows starting with # are notes and are not imported; you may delete them. Keep the columns in this order and leave cells you don't need empty.",
+      "type: single (one right answer), multiple (several right answers), true-false, text (players type the answer), number (players type a number), poll (no right answer) or order (players put the answers in order).",
+      "question: the question itself, at most 500 characters.",
+      "answer 1 to answer 6: what players choose from, 2 to 6 answers of at most 200 characters (single, multiple, poll and order only). For order, write them in the right order; players see them shuffled.",
+      "correct, for single: the number of the right answer's column, e.g. 2",
+      "correct, for multiple: the numbers of all right answers, e.g. 1, 3",
+      "correct, for true-false: true or false",
+      "correct, for text: the accepted answers separated by |, e.g. Jupiter | planet Jupiter. Capitals and accents don't matter. Empty: you mark the answers right or wrong during the game.",
+      "correct, for number: the right number, e.g. 1848 or 3.5. For poll and order leave it empty.",
+      "time: seconds to answer, 5 to 180 (empty: 20). points: 0 to 5000 (empty: 1000). tolerance, for number only: answers this close also count, e.g. 10 (empty: exact).",
+      "Pictures and game settings can't go in this file: add them in the editor after importing."
+    ],
+    "templateNote": "The rows below the header are examples: overwrite or delete them.",
+    "jsonGuide": [
+      "This is a Quizmoo quiz file: a full copy of a quiz with its settings and pictures. Import it in Quizmoo under Quizzes > Import.",
+      "To write questions by hand, use the spreadsheet template instead (Quizzes > Import > Download template)."
+    ],
+    "examples": {
+      "single": "What is the capital of Hungary?",
+      "single1": "Vienna",
+      "single2": "Budapest",
+      "single3": "Prague",
+      "single4": "Bratislava",
+      "multiple": "Which are prime numbers?",
+      "multiple1": "2",
+      "multiple2": "4",
+      "multiple3": "5",
+      "multiple4": "9",
+      "truefalse": "The Danube flows through Budapest.",
+      "text": "Which is the largest planet in the Solar System?",
+      "text1": "Jupiter",
+      "text2": "planet Jupiter",
+      "number": "How high is Kékes, Hungary's highest peak, in metres?",
+      "poll": "Which season do you like best?",
+      "poll1": "Spring",
+      "poll2": "Summer",
+      "poll3": "Autumn",
+      "poll4": "Winter",
+      "order": "Put them in order, smallest first!",
+      "order1": "Mouse",
+      "order2": "Cat",
+      "order3": "Horse",
+      "order4": "Elephant"
+    }
   }
 }

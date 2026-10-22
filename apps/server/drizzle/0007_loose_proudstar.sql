@@ -1,0 +1,4 @@
+ALTER TABLE "games" ADD COLUMN "search_text" text GENERATED ALWAYS AS (translate(lower(("state"->'quiz'->>'title') || ' ' || jsonb_path_query_array("state"->'players', '$.*.name')::text), 'áàâäãåāăąçćčďéèêëēęěíìîïłńňñóòôöõøōőřśšşťúùûüūůűýÿźżž', 'aaaaaaaaacccdeeeeeeeiiiilnnnoooooooorssstuuuuuuuyyzzz')) STORED NOT NULL;--> statement-breakpoint
+ALTER TABLE "games" ADD COLUMN "quiz_title" text GENERATED ALWAYS AS ("state"->'quiz'->>'title') STORED NOT NULL;--> statement-breakpoint
+ALTER TABLE "games" ADD COLUMN "player_count" integer GENERATED ALWAYS AS (jsonb_array_length(jsonb_path_query_array("state"->'players', '$.*'))) STORED NOT NULL;--> statement-breakpoint
+ALTER TABLE "games" ADD COLUMN "scheduled_at" timestamp with time zone GENERATED ALWAYS AS (to_timestamp(("state"->>'scheduledAt')::double precision / 1000)) STORED;

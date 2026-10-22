@@ -1,5 +1,5 @@
 {
-  "name": "@ash-quiz/server",
+  "name": "@quizmoo/server",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -10,11 +10,14 @@
     "test": "vitest run",
     "typecheck": "tsc -p tsconfig.json",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate"
+    "db:migrate": "tsx --env-file-if-exists=../../.env src/scripts/migrate.ts",
+    "seed": "tsx --env-file-if-exists=../../.env src/scripts/seed.ts"
   },
   "dependencies": {
-    "@ash-quiz/shared": "workspace:*",
+    "@quizmoo/shared": "workspace:*",
     "@fastify/cookie": "11.1.2",
+    "@fastify/helmet": "13.1.1",
+    "@fastify/multipart": "10.1.2",
     "@fastify/rate-limit": "11.2.0",
     "@fastify/static": "10.1.5",
     "@node-rs/argon2": "2.2.2",
@@ -22,6 +25,7 @@
     "fastify": "5.12.5",
     "nanoid": "6.0.2",
     "postgres": "3.4.9",
+    "sharp": "0.35.5",
     "socket.io": "4.8.4",
     "zod": "4.6.5"
   },
@@ -29,6 +33,7 @@
     "@types/node": "26.6.4",
     "drizzle-kit": "0.31.11",
     "pino-pretty": "13.2.0",
+    "socket.io-client": "4.8.4",
     "tsup": "8.5.1",
     "tsx": "4.23.15",
     "typescript": "5.9.3",

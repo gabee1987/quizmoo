@@ -13,17 +13,17 @@ jobs:
       postgres:
         image: postgres:17-alpine
         env:
-          POSTGRES_USER: ashquiz
-          POSTGRES_PASSWORD: ashquiz
-          POSTGRES_DB: ashquiz_test
+          POSTGRES_USER: quizmoo
+          POSTGRES_PASSWORD: quizmoo
+          POSTGRES_DB: quizmoo_test
         ports: ['5432:5432']
         options: >-
-          --health-cmd "pg_isready -U ashquiz"
+          --health-cmd "pg_isready -U quizmoo"
           --health-interval 5s
           --health-timeout 5s
           --health-retries 10
     env:
-      TEST_DATABASE_URL: postgres://ashquiz:ashquiz@localhost:5432/ashquiz_test
+      TEST_DATABASE_URL: postgres://quizmoo:quizmoo@localhost:5432/quizmoo_test
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -33,3 +33,4 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm verify
+

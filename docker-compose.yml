@@ -1,13 +1,59 @@
+# Fixed project name, so the containers and the database volume keep their names whatever the folder is called.
+name: quizmoo
+
 services:
   db:
     image: postgres:17-alpine
     environment:
-      POSTGRES_USER: ashquiz
-      POSTGRES_PASSWORD: ashquiz
-      POSTGRES_DB: ashquiz
+      POSTGRES_USER: quizmoo
+      # Takes effect only when the volume is first created; the default is fine because the port below is local.
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-quizmoo}
+      POSTGRES_DB: quizmoo
     ports:
-      - "5432:5432"
+      # This computer only: Docker's published ports skip the system firewall, and on venue wifi
+      # anyone could otherwise reach the database. The app container uses the internal network.
+      - "127.0.0.1:5432:5432"
     volumes:
       - dbdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U quizmoo"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Full app on http://localhost:3000 (or http://<laptop-ip>:3000 on the venue LAN).
+  # The values come from .env next to this file (see .env.example); unset ones keep the app's defaults.
+  app:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://quizmoo:${POSTGRES_PASSWORD:-quizmoo}@db:5432/quizmoo
+      SESSION_SECRET: ${SESSION_SECRET:?set SESSION_SECRET in .env}
+      APP_ORIGIN: ${APP_ORIGIN:-http://localhost:3000}
+      RESULTS_RETENTION_DAYS: ${RESULTS_RETENTION_DAYS:-90}
+      MAX_GAMES_PER_HOST: ${MAX_GAMES_PER_HOST:-200}
+      REGISTRATION_OPEN: ${REGISTRATION_OPEN:-}
+      TRUST_PROXY: ${TRUST_PROXY:-}
+      OPERATOR_NAME: ${OPERATOR_NAME:-}
+      OPERATOR_EMAIL: ${OPERATOR_EMAIL:-}
+      HOSTING_PROVIDER: ${HOSTING_PROVIDER:-}
+      FEEDBACK_URL: ${FEEDBACK_URL:-}
+      BREVO_API_KEY: ${BREVO_API_KEY:-}
+      MAIL_FROM: ${MAIL_FROM:-}
+      MAIL_PROVIDER: ${MAIL_PROVIDER:-}
+      SEED_ADMIN_USERNAME: ${SEED_ADMIN_USERNAME:-}
+      SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:-}
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3000/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 15s
+
 volumes:
   dbdata:

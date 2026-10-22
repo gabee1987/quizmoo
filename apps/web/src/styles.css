@@ -1,18 +1,1342 @@
 @import 'tailwindcss';
+@import 'tw-animate-css';
 
-@theme {
-  --color-brand: #4f46e5;
-  --color-brand-dark: #1e1b4b;
+/* `dark:` follows the resolved colour mode on <html data-mode>, set before first paint by public/mode-init.js. */
+@custom-variant dark (&:where([data-mode='dark'], [data-mode='dark'] *));
+
+/*
+ * Design tokens. Components use only the semantic names below (bg-card, text-muted-foreground…).
+ * Colours are built from a theme hue (--hue), an accent hue (--hue-accent) and a chroma multiplier
+ * (--chroma), so a game theme only overrides those and both colour modes keep their contrast.
+ */
+:root {
+  --hue: 277;
+  --hue-accent: 330;
+  --tint: 0.012;
+  --chroma: 1;
+  --radius: 1rem;
 }
 
-html,
-body,
-#root {
-  height: 100%;
+/*
+ * The tokens are declared on every [data-theme] element as well as on :root, so a theme set on a
+ * wrapper (the editor's phone preview) recomputes them from its own hues. During a game the theme
+ * sits on <html> (useGameTheme), so dialogs and toasts in portals follow it too.
+ */
+:root,
+[data-theme] {
+  --background: oklch(0.975 calc(var(--tint) * var(--chroma)) var(--hue));
+  --foreground: oklch(0.22 calc(0.045 * var(--chroma)) var(--hue));
+  --card: oklch(1 0 0);
+  --card-foreground: var(--foreground);
+  --popover: oklch(1 0 0);
+  --popover-foreground: var(--foreground);
+  --primary: oklch(0.51 calc(0.22 * var(--chroma)) var(--hue));
+  --primary-foreground: oklch(0.99 0 0);
+  --primary-edge: oklch(0.38 calc(0.18 * var(--chroma)) var(--hue));
+  --secondary: oklch(0.93 calc(0.035 * var(--chroma)) var(--hue));
+  --secondary-foreground: oklch(0.3 calc(0.12 * var(--chroma)) var(--hue));
+  --secondary-edge: oklch(0.85 calc(0.05 * var(--chroma)) var(--hue));
+  --muted: oklch(0.945 calc(0.018 * var(--chroma)) var(--hue));
+  --muted-foreground: oklch(0.46 calc(0.04 * var(--chroma)) var(--hue));
+  --accent: oklch(0.93 calc(0.05 * var(--chroma)) var(--hue-accent));
+  --accent-foreground: oklch(0.32 calc(0.14 * var(--chroma)) var(--hue-accent));
+  --accent-strong: oklch(0.68 calc(0.17 * var(--chroma)) var(--hue-accent));
+  --destructive: oklch(0.55 0.21 27);
+  --destructive-foreground: oklch(0.99 0 0);
+  --destructive-edge: oklch(0.42 0.17 27);
+  --success: oklch(0.5 0.14 150);
+  --success-foreground: oklch(0.99 0 0);
+  --success-edge: oklch(0.4 0.12 150);
+  --warning: oklch(0.8 0.15 80);
+  --warning-foreground: oklch(0.25 0.06 60);
+  --border: oklch(0.89 calc(0.02 * var(--chroma)) var(--hue));
+  --input: oklch(0.86 calc(0.025 * var(--chroma)) var(--hue));
+  --ring: oklch(0.55 calc(0.22 * var(--chroma)) var(--hue));
+  --surface-wash: linear-gradient(180deg, oklch(0.96 calc(0.03 * var(--chroma)) var(--hue)) 0%, var(--background) 22rem);
+  --shadow-color: oklch(0.3 calc(0.08 * var(--chroma)) var(--hue) / 0.12);
+  /* Drifting backdrop blobs (components/backdrop.tsx). */
+  --blob-1: oklch(0.78 calc(0.13 * var(--chroma)) var(--hue) / 0.5);
+  --blob-2: oklch(0.8 calc(0.12 * var(--chroma)) var(--hue-accent) / 0.4);
+  --blob-3: oklch(0.82 calc(0.1 * var(--chroma)) calc(var(--hue) + 50) / 0.4);
+  color-scheme: light;
 }
 
-body {
-  @apply bg-brand-dark text-white antialiased;
-  /* Phones: avoid rubber-band scrolling on full-screen game views. */
-  overscroll-behavior: none;
+:root[data-mode='dark'],
+:root[data-mode='dark'] [data-theme] {
+  --background: oklch(0.21 calc(0.07 * var(--chroma)) var(--hue));
+  --foreground: oklch(0.97 calc(0.01 * var(--chroma)) var(--hue));
+  --card: oklch(0.27 calc(0.08 * var(--chroma)) var(--hue));
+  --card-foreground: var(--foreground);
+  --popover: oklch(0.29 calc(0.08 * var(--chroma)) var(--hue));
+  --popover-foreground: var(--foreground);
+  --primary: oklch(0.55 calc(0.22 * var(--chroma)) var(--hue));
+  --primary-foreground: oklch(0.99 0 0);
+  --primary-edge: oklch(0.4 calc(0.19 * var(--chroma)) var(--hue));
+  --secondary: oklch(0.34 calc(0.08 * var(--chroma)) var(--hue));
+  --secondary-foreground: oklch(0.96 calc(0.02 * var(--chroma)) var(--hue));
+  --secondary-edge: oklch(0.25 calc(0.07 * var(--chroma)) var(--hue));
+  --muted: oklch(0.3 calc(0.07 * var(--chroma)) var(--hue));
+  --muted-foreground: oklch(0.8 calc(0.04 * var(--chroma)) var(--hue));
+  --accent: oklch(0.36 calc(0.1 * var(--chroma)) var(--hue-accent));
+  --accent-foreground: oklch(0.95 calc(0.03 * var(--chroma)) var(--hue-accent));
+  --accent-strong: oklch(0.72 calc(0.16 * var(--chroma)) var(--hue-accent));
+  --destructive: oklch(0.7 0.18 25);
+  --destructive-foreground: oklch(0.2 0.06 25);
+  --destructive-edge: oklch(0.55 0.17 25);
+  --success: oklch(0.75 0.17 150);
+  --success-foreground: oklch(0.2 0.05 150);
+  --success-edge: oklch(0.58 0.15 150);
+  --warning: oklch(0.82 0.15 80);
+  --warning-foreground: oklch(0.22 0.06 60);
+  --border: oklch(0.36 calc(0.07 * var(--chroma)) var(--hue));
+  --input: oklch(0.42 calc(0.07 * var(--chroma)) var(--hue));
+  --ring: oklch(0.72 calc(0.17 * var(--chroma)) var(--hue));
+  --surface-wash: linear-gradient(180deg, oklch(0.26 calc(0.09 * var(--chroma)) var(--hue)) 0%, var(--background) 22rem);
+  --shadow-color: oklch(0.05 calc(0.04 * var(--chroma)) var(--hue) / 0.45);
+  --blob-1: oklch(0.5 calc(0.16 * var(--chroma)) var(--hue) / 0.35);
+  --blob-2: oklch(0.5 calc(0.14 * var(--chroma)) var(--hue-accent) / 0.3);
+  --blob-3: oklch(0.5 calc(0.12 * var(--chroma)) calc(var(--hue) + 50) / 0.28);
+  color-scheme: dark;
+}
+
+/* Game themes: chosen per quiz. Only the hues, the surface tint and the chroma change (lib/themes.ts mirrors them). */
+[data-theme='classic'] {
+  --hue: 277;
+  --hue-accent: 330;
+  --tint: 0.012;
+  --chroma: 1;
+}
+[data-theme='arcade'] {
+  --hue: 305;
+  --hue-accent: 195;
+  --tint: 0.02;
+  --chroma: 1;
+}
+[data-theme='sunset'] {
+  --hue: 35;
+  --hue-accent: 350;
+  --tint: 0.015;
+  --chroma: 1;
+}
+[data-theme='mint'] {
+  --hue: 170;
+  --hue-accent: 230;
+  --tint: 0.014;
+  --chroma: 1;
+}
+[data-theme='ocean'] {
+  --hue: 240;
+  --hue-accent: 185;
+  --tint: 0.016;
+  --chroma: 1;
+}
+[data-theme='berry'] {
+  --hue: 345;
+  --hue-accent: 285;
+  --tint: 0.016;
+  --chroma: 1;
+}
+[data-theme='forest'] {
+  --hue: 135;
+  --hue-accent: 75;
+  --tint: 0.014;
+  --chroma: 1;
+}
+[data-theme='graphite'] {
+  --hue: 255;
+  --hue-accent: 60;
+  --tint: 0.004;
+  --chroma: 0.3;
+}
+/* Subdued themes for formal events: low chroma, one calm hue each. */
+[data-theme='navy'] {
+  --hue: 262;
+  --hue-accent: 225;
+  --tint: 0.006;
+  --chroma: 0.55;
+}
+[data-theme='petrol'] {
+  --hue: 215;
+  --hue-accent: 185;
+  --tint: 0.006;
+  --chroma: 0.5;
+}
+[data-theme='stone'] {
+  --hue: 65;
+  --hue-accent: 40;
+  --tint: 0.008;
+  --chroma: 0.28;
+}
+[data-theme='bordeaux'] {
+  --hue: 12;
+  --hue-accent: 350;
+  --tint: 0.006;
+  --chroma: 0.5;
+}
+/* The host's own colours: themeVars() (lib/themes.ts) sets them inline; these are only the fallback. */
+[data-theme='custom'] {
+  --hue: 277;
+  --hue-accent: 330;
+  --tint: 0.012;
+  --chroma: 1;
+}
+
+/*
+ * Answer palettes: six fixed colours by option index (red, blue, yellow, green, orange, purple
+ * families), each with its own readable text colour, the same in both modes and every theme, so
+ * answers never blend into the background. Option buttons and result bars read --option-N.
+ */
+/* custom: Vivid until the host's colours arrive as inline variables (lib/themes.ts paletteVars). */
+:root,
+[data-palette='vivid'],
+[data-palette='custom'] {
+  --option-1: oklch(0.57 0.22 25);
+  --option-1-fg: oklch(0.99 0 0);
+  --option-2: oklch(0.5 0.2 262);
+  --option-2-fg: oklch(0.99 0 0);
+  --option-3: oklch(0.86 0.17 92);
+  --option-3-fg: oklch(0.25 0.05 92);
+  --option-4: oklch(0.55 0.17 145);
+  --option-4-fg: oklch(0.99 0 0);
+  --option-5: oklch(0.72 0.18 55);
+  --option-5-fg: oklch(0.25 0.06 55);
+  --option-6: oklch(0.5 0.22 300);
+  --option-6-fg: oklch(0.99 0 0);
+}
+[data-palette='candy'] {
+  --option-1: oklch(0.84 0.11 350);
+  --option-1-fg: oklch(0.3 0.13 350);
+  --option-2: oklch(0.84 0.09 235);
+  --option-2-fg: oklch(0.3 0.11 235);
+  --option-3: oklch(0.92 0.12 100);
+  --option-3-fg: oklch(0.32 0.08 100);
+  --option-4: oklch(0.87 0.1 160);
+  --option-4-fg: oklch(0.3 0.08 160);
+  --option-5: oklch(0.86 0.1 50);
+  --option-5-fg: oklch(0.32 0.1 50);
+  --option-6: oklch(0.83 0.09 295);
+  --option-6-fg: oklch(0.3 0.11 295);
+}
+[data-palette='neon'] {
+  --option-1: oklch(0.7 0.24 350);
+  --option-1-fg: oklch(0.15 0.05 350);
+  --option-2: oklch(0.85 0.14 200);
+  --option-2-fg: oklch(0.2 0.05 200);
+  --option-3: oklch(0.93 0.19 100);
+  --option-3-fg: oklch(0.25 0.06 100);
+  --option-4: oklch(0.88 0.22 130);
+  --option-4-fg: oklch(0.22 0.07 130);
+  --option-5: oklch(0.78 0.19 55);
+  --option-5-fg: oklch(0.2 0.06 55);
+  --option-6: oklch(0.66 0.22 300);
+  --option-6-fg: oklch(0.99 0 0);
+}
+[data-palette='earth'] {
+  --option-1: oklch(0.55 0.13 35);
+  --option-1-fg: oklch(0.99 0 0);
+  --option-2: oklch(0.48 0.08 260);
+  --option-2-fg: oklch(0.99 0 0);
+  --option-3: oklch(0.74 0.13 85);
+  --option-3-fg: oklch(0.25 0.06 85);
+  --option-4: oklch(0.55 0.1 125);
+  --option-4-fg: oklch(0.99 0 0);
+  --option-5: oklch(0.52 0.1 200);
+  --option-5-fg: oklch(0.99 0 0);
+  --option-6: oklch(0.48 0.12 330);
+  --option-6-fg: oklch(0.99 0 0);
+}
+/* Low-saturation sets for formal events; the symbols carry the distinction as much as the colours. */
+[data-palette='muted'] {
+  --option-1: oklch(0.52 0.1 25);
+  --option-1-fg: oklch(0.99 0 0);
+  --option-2: oklch(0.5 0.09 255);
+  --option-2-fg: oklch(0.99 0 0);
+  --option-3: oklch(0.82 0.09 90);
+  --option-3-fg: oklch(0.28 0.05 90);
+  --option-4: oklch(0.52 0.08 155);
+  --option-4-fg: oklch(0.99 0 0);
+  --option-5: oklch(0.76 0.09 60);
+  --option-5-fg: oklch(0.28 0.05 60);
+  --option-6: oklch(0.5 0.08 310);
+  --option-6-fg: oklch(0.99 0 0);
+}
+[data-palette='corporate'] {
+  --option-1: oklch(0.42 0.09 260);
+  --option-1-fg: oklch(0.99 0 0);
+  --option-2: oklch(0.52 0.08 195);
+  --option-2-fg: oklch(0.99 0 0);
+  --option-3: oklch(0.85 0.05 85);
+  --option-3-fg: oklch(0.3 0.04 85);
+  --option-4: oklch(0.5 0.03 250);
+  --option-4-fg: oklch(0.99 0 0);
+  --option-5: oklch(0.74 0.1 70);
+  --option-5-fg: oklch(0.27 0.05 70);
+  --option-6: oklch(0.45 0.07 330);
+  --option-6-fg: oklch(0.99 0 0);
+}
+
+/* Angle of the rotating gradient border, animatable thanks to @property. */
+@property --angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-edge: var(--primary-edge);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary-edge: var(--secondary-edge);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent-strong: var(--accent-strong);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-destructive-edge: var(--destructive-edge);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-success-edge: var(--success-edge);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --font-sans: 'Nunito Variable', ui-sans-serif, system-ui, sans-serif;
+
+  --radius-sm: calc(var(--radius) - 8px);
+  --radius-md: calc(var(--radius) - 4px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+
+  --shadow-soft: 0 1px 2px var(--shadow-color), 0 8px 24px -8px var(--shadow-color);
+
+  /* "Bubble gum" easings: ease-spring overshoots a little and settles, ease-spring-soft barely. */
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-spring-soft: cubic-bezier(0.3, 1.25, 0.5, 1);
+
+  /*
+   * Motion. Everything below animates transform or opacity only (compositor work, no layout), except
+   * `draw` (an SVG stroke) and `shimmer` (text background), which are used on single small elements.
+   * Lists stagger with an inline animation-delay. Durations are short; `both` keeps the final state.
+   */
+  --animate-rise: rise 0.9s ease-out both;
+  --animate-pop: pop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  --animate-fade-up: fade-up 0.5s ease-out both;
+  --animate-slide-in: slide-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-grow-x: grow-x 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-grow-y: grow-y 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-float: float 3s ease-in-out infinite;
+  --animate-wiggle: wiggle 0.7s ease-in-out both;
+  --animate-pulse-ring: pulse-ring 1s ease-in-out infinite;
+  --animate-burst: burst 0.9s ease-out both;
+  --animate-shimmer: shimmer 3s linear infinite;
+  --animate-draw: draw 0.7s ease-out both;
+  --animate-progress: progress linear both;
+  --animate-drift: drift 28s ease-in-out infinite alternate;
+  --animate-dot: dot 1.2s ease-in-out infinite;
+  --animate-spin-angle: spin-angle 6s linear infinite;
+  --animate-menu-pop: menu-pop 0.32s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  --animate-panel-in: panel-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-dialog-pop: dialog-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  --animate-bubble-pop: bubble-pop 0.6s ease-out both;
+  --animate-pop-out: pop-out 0.32s ease-in both;
+  --animate-panel-swap: panel-swap 0.5s var(--ease-spring) both;
+
+  /* Menus and select lists spring open from their trigger (transform-origin is set by Radix). */
+  @keyframes menu-pop {
+    from {
+      transform: scale(0.88);
+      opacity: 0;
+    }
+    to {
+      transform: none;
+      opacity: 1;
+    }
+  }
+  /*
+   * A popover that bubbles open (the date picker) like bubble gum pulled out of its corner: it grows
+   * from the corner at its trigger (Radix's transform origin), so its far corner shoots out along the
+   * opening direction, overshoots, snaps back a little and settles. Uniform scale only: a stretch along
+   * the diagonal reads as a skew on a rectangle.
+   */
+  @keyframes bubble-pop {
+    0% {
+      transform: scale(0.45);
+      opacity: 0;
+    }
+    26% {
+      transform: scale(1.045);
+      opacity: 1;
+    }
+    46% {
+      transform: scale(0.982);
+    }
+    66% {
+      transform: scale(1.008);
+    }
+    84% {
+      transform: scale(0.997);
+    }
+    100% {
+      transform: none;
+      opacity: 1;
+    }
+  }
+  @keyframes dialog-pop {
+    from {
+      transform: scale(0.9);
+      opacity: 0;
+    }
+    to {
+      transform: none;
+      opacity: 1;
+    }
+  }
+  @keyframes panel-in {
+    from {
+      transform: translateX(32px);
+      opacity: 0;
+    }
+    to {
+      transform: none;
+      opacity: 1;
+    }
+  }
+
+  @keyframes rise {
+    from {
+      transform: translateY(60px);
+      opacity: 0;
+    }
+    to {
+      transform: none;
+      opacity: 1;
+    }
+  }
+  @keyframes pop {
+    from {
+      transform: scale(0.6);
+      opacity: 0;
+    }
+    to {
+      transform: none;
+      opacity: 1;
+    }
+  }
+  /* The way out of `pop`: a little swell, then it shrinks away. */
+  @keyframes pop-out {
+    0% {
+      transform: none;
+      opacity: 1;
+    }
+    30% {
+      transform: scale(1.04, 0.94);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(0.6);
+      opacity: 0;
+    }
+  }
+  /* New content in a panel (a tab, a section that changed): rises in with a soft wobble. */
+  @keyframes panel-swap {
+    0% {
+      transform: translateY(10px) scale(0.985, 0.97);
+      opacity: 0;
+    }
+    55% {
+      transform: translateY(-2px) scale(1.005, 1.01);
+      opacity: 1;
+    }
+    100% {
+      transform: none;
+      opacity: 1;
+    }
+  }
+  @keyframes fade-up {
+    from {
+      transform: translateY(14px);
+      opacity: 0;
+    }
+    to {
+      transform: none;
+      opacity: 1;
+    }
+  }
+  @keyframes slide-in {
+    from {
+      transform: translateX(-28px);
+      opacity: 0;
+    }
+    to {
+      transform: none;
+      opacity: 1;
+    }
+  }
+  @keyframes grow-x {
+    from {
+      transform: scaleX(0);
+    }
+    to {
+      transform: scaleX(1);
+    }
+  }
+  @keyframes grow-y {
+    from {
+      transform: scaleY(0);
+    }
+    to {
+      transform: scaleY(1);
+    }
+  }
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-7px);
+    }
+  }
+  @keyframes wiggle {
+    0%,
+    100% {
+      transform: rotate(0);
+    }
+    25% {
+      transform: rotate(-4deg) scale(1.04);
+    }
+    75% {
+      transform: rotate(4deg) scale(1.04);
+    }
+  }
+  @keyframes pulse-ring {
+    0%,
+    100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.08);
+    }
+  }
+  @keyframes burst {
+    from {
+      transform: translate(0, 0) scale(1);
+      opacity: 1;
+    }
+    to {
+      transform: translate(var(--dx), var(--dy)) scale(0.2);
+      opacity: 0;
+    }
+  }
+  @keyframes shimmer {
+    from {
+      background-position: 200% 0;
+    }
+    to {
+      background-position: -200% 0;
+    }
+  }
+  @keyframes draw {
+    from {
+      stroke-dashoffset: 40;
+    }
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+  @keyframes progress {
+    from {
+      transform: scaleX(0);
+    }
+    to {
+      transform: scaleX(1);
+    }
+  }
+  @keyframes drift {
+    0% {
+      transform: translate(0, 0) scale(1);
+    }
+    50% {
+      transform: translate(9vmax, 7vmax) scale(1.15);
+    }
+    100% {
+      transform: translate(-7vmax, 11vmax) scale(0.95);
+    }
+  }
+  @keyframes dot {
+    0%,
+    80%,
+    100% {
+      transform: translateY(0);
+      opacity: 0.4;
+    }
+    40% {
+      transform: translateY(-6px);
+      opacity: 1;
+    }
+  }
+  @keyframes spin-angle {
+    to {
+      --angle: 360deg;
+    }
+  }
+}
+
+/* A slowly rotating gradient border (primary to accent), 3 px wide, following the element's radius. */
+@utility glow-border {
+  position: relative;
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    padding: 3px;
+    border-radius: inherit;
+    background: conic-gradient(from var(--angle), var(--primary), var(--accent-strong), var(--primary));
+    /* Keep only the 3 px ring: the content box is cut out of the mask. */
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    animation: var(--animate-spin-angle);
+    pointer-events: none;
+  }
+}
+
+/*
+ * Scrollbars: a rounded "gum" thumb in the theme colour on a clear track, plumper on hover and
+ * fully coloured while dragged. WebKit/Blink get the full shape; Firefox, which has no scrollbar
+ * pseudo-elements, the thin coloured variant. (Chrome ignores the ::-webkit rules on any element
+ * with scrollbar-color set, hence the @supports split.)
+ * Mouse devices only: styling ::-webkit-scrollbar turns a phone's overlay scrollbar (thin, hidden
+ * while not scrolling, no space taken) into a classic one that eats 14 px on the right.
+ */
+@media (hover: hover) and (pointer: fine) {
+  @supports not selector(::-webkit-scrollbar) {
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: color-mix(in oklch, var(--primary) 45%, transparent) transparent;
+    }
+  }
+  ::-webkit-scrollbar {
+    width: 14px;
+    height: 14px;
+  }
+  ::-webkit-scrollbar-track,
+  ::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    min-height: 48px;
+    border: 4px solid transparent;
+    border-radius: 999px;
+    background-color: color-mix(in oklch, var(--primary) 38%, transparent);
+    background-clip: padding-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    border-width: 3px;
+    background-color: color-mix(in oklch, var(--primary) 62%, transparent);
+  }
+  ::-webkit-scrollbar-thumb:active {
+    border-width: 2px;
+    background-color: var(--primary);
+  }
+}
+
+/*
+ * Notes: one design for everything the app tells people in passing, the toasts (Sonner) and
+ * the host's messages on phones and the projector. A chunky bubble with a pressed-in bottom
+ * edge like the buttons, springing in with a little overshoot, and a round icon that pops.
+ * Kinds differ only in colour (`--note-tone`) and in the icon's extra move: errors shake, host
+ * messages toot. `.toaster` is the Toaster's class; it lifts these rules above Sonner's own.
+ */
+.note,
+.toaster [data-sonner-toast] {
+  --note-tone: var(--primary);
+  --note-tone-foreground: var(--primary-foreground);
+}
+.toaster [data-sonner-toast] {
+  transition:
+    transform 550ms var(--ease-spring),
+    opacity 300ms,
+    height 400ms,
+    box-shadow 200ms;
+}
+/*
+ * From sm up, as wide as the page's panels (max-w-3xl, Sonner sets its 356 px inline); still the
+ * full width on phones. Beside the host sidebar (w-60 plus a gap-8) the page's column is centred
+ * 136 px right of the window's centre, and so are the toasts.
+ */
+@media (min-width: 640px) {
+  .toaster {
+    --width: min(48rem, calc(100vw - 2rem)) !important;
+  }
+}
+@media (min-width: 1024px) {
+  body:has([data-host-sidebar]) .toaster[data-x-position='center'] {
+    --width: min(48rem, calc(100vw - 2rem - 272px)) !important;
+    left: calc(50% + 136px) !important;
+  }
+}
+/*
+ * Toasts fall in like the host's messages and wobble back up when they go. `backwards`, not
+ * `both`: once it lands, Sonner's own transform stacks the toasts again. Sonner keeps a closing
+ * toast for 200 ms, which is all the way out gets.
+ */
+.toaster [data-sonner-toast][data-mounted='true']:not([data-removed='true']) {
+  --note-fly: -120px;
+  transform-origin: 50% 0;
+  animation: note-in 0.7s ease-out backwards;
+}
+.toaster [data-sonner-toast][data-removed='true'][data-swipe-out='false'] {
+  transform-origin: 50% 0;
+  animation: toast-out 0.2s ease-in both;
+}
+@keyframes toast-out {
+  0% {
+    transform: none;
+    opacity: 1;
+  }
+  40% {
+    transform: translateY(3px) scale(1, 0.84);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-48px) scale(0.84, 1.16);
+    opacity: 0;
+  }
+}
+.note-success,
+.toaster [data-sonner-toast][data-type='success'] {
+  --note-tone: var(--success);
+  --note-tone-foreground: var(--success-foreground);
+}
+.note-error,
+.toaster [data-sonner-toast][data-type='error'] {
+  --note-tone: var(--destructive);
+  --note-tone-foreground: var(--destructive-foreground);
+}
+.note-warning,
+.toaster [data-sonner-toast][data-type='warning'] {
+  --note-tone: var(--warning);
+  --note-tone-foreground: var(--warning-foreground);
+}
+.note,
+.toaster [data-sonner-toast][data-styled='true'] {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px 10px 10px;
+  border: 2px solid color-mix(in oklch, var(--note-tone) 35%, var(--border));
+  border-radius: 1.25rem;
+  background: var(--popover);
+  color: var(--popover-foreground);
+  font-size: 0.95rem;
+  box-shadow:
+    0 4px 0 color-mix(in oklch, var(--note-tone) 30%, var(--border)),
+    0 14px 30px -10px var(--shadow-color);
+}
+.note {
+  /* How far above its place it flies in from and out to: past the top of the screen. */
+  --note-fly: -180px;
+  font-weight: 800;
+  transform-origin: 50% 0;
+  animation: note-in 0.7s ease-out both;
+}
+.note.note-leaving {
+  animation: note-out 0.6s ease-in-out both;
+}
+.note.note-leaving .note-icon {
+  animation: note-icon-spin-out 0.45s ease-in 0.1s both;
+}
+.toaster [data-sonner-toast][data-styled='true'] [data-title] {
+  font-weight: 800;
+  line-height: 1.3;
+}.note-icon,
+.toaster [data-sonner-toast][data-styled='true'] [data-icon] {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  margin: 0;
+  border-radius: 999px;
+  background: var(--note-tone);
+  color: var(--note-tone-foreground);
+  animation: note-icon-pop 0.6s var(--ease-spring) 0.15s both;
+}
+.note-error .note-icon,
+.toaster [data-sonner-toast][data-type='error'] [data-icon] {
+  animation:
+    note-icon-pop 0.6s var(--ease-spring) 0.15s both,
+    note-icon-shake 0.5s ease-in-out 0.7s;
+}
+/* A host message: the megaphone toots twice after popping in. */
+.note-announce .note-icon {
+  animation:
+    note-icon-pop 0.45s var(--ease-spring) 0.08s both,
+    note-icon-toot 0.8s ease-in-out 0.5s;
+}
+.note-icon svg,
+.toaster [data-sonner-toast][data-styled='true'] [data-icon] svg {
+  width: 1.2rem;
+  height: 1.2rem;
+  margin: 0;
+}
+/* The projector's version, readable across a room. */
+.note-lg {
+  --note-fly: -260px;
+  gap: 24px;
+  padding: 18px 32px 18px 18px;
+  border-width: 3px;
+  border-radius: 2rem;
+  font-size: 2.25rem;
+  box-shadow:
+    0 8px 0 color-mix(in oklch, var(--note-tone) 30%, var(--border)),
+    0 24px 50px -16px var(--shadow-color);
+}
+.note-lg .note-icon {
+  width: 4.5rem;
+  height: 4.5rem;
+}
+.note-lg .note-icon svg {
+  width: 2.4rem;
+  height: 2.4rem;
+}
+/*
+ * A host message that clears itself: a striped candy bar along the bottom of the bubble drains
+ * over the message's time (--note-time, started --note-elapsed in), stripes rolling, and turns
+ * warm and wobbles in its last stretch.
+ */
+.note-timed {
+  position: relative;
+  padding-bottom: 24px;
+}
+.note-time {
+  position: absolute;
+  right: 14px;
+  bottom: 9px;
+  left: 14px;
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: color-mix(in oklch, var(--note-tone) 16%, transparent);
+}
+.note-time-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  overflow: hidden;
+  border-radius: inherit;
+  background: var(--note-tone);
+  animation: note-time var(--note-time) linear var(--note-elapsed) both;
+}
+.note-time-fill::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(-45deg, rgb(255 255 255 / 0.32) 0 5px, transparent 5px 10px);
+  background-size: 14.14px 100%;
+  animation: note-time-stripes 0.5s linear infinite;
+}
+.note-lg.note-timed {
+  padding-bottom: 40px;
+}
+.note-lg .note-time {
+  right: 28px;
+  bottom: 14px;
+  left: 28px;
+  height: 14px;
+}
+@keyframes note-time {
+  from {
+    width: 100%;
+  }
+  80% {
+    background: var(--note-tone);
+    translate: 0 0;
+  }
+  86% {
+    translate: 0 -2px;
+  }
+  92% {
+    translate: 0 1px;
+  }
+  to {
+    width: 0%;
+    background: var(--warning);
+    translate: 0 0;
+  }
+}
+@keyframes note-time-stripes {
+  to {
+    background-position: 14.14px 0;
+  }
+}
+.toaster [data-sonner-toast][data-styled='true'] [data-button] {
+  height: 2.25rem;
+  padding: 0 0.9rem;
+  border-radius: 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 800;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  box-shadow: 0 3px 0 var(--primary-edge);
+  transition:
+    transform 200ms var(--ease-spring),
+    box-shadow 200ms;
+}
+.toaster [data-sonner-toast][data-styled='true'] [data-button]:active {
+  transform: translateY(3px);
+  box-shadow: 0 0 0 var(--primary-edge);
+}
+/*
+ * Bubble gum: shoots in small, splats wide on landing, snaps back tall, and wobbles out the
+ * stretch in smaller and smaller bounces. It never gets wider than at rest (scaleX <= 1): the
+ * banner spans the screen on a phone, and anything wider would be cut off by the screen edge.
+ * The squash is vertical, the stretch narrow and tall.
+ */
+@keyframes note-in {
+  /* Falls in from above the screen, stretched by the speed. */
+  0% {
+    transform: translateY(var(--note-fly)) scale(0.85, 1.15);
+    animation-timing-function: ease-in;
+  }
+  28% {
+    transform: translateY(4px) scale(1, 0.7);
+    animation-timing-function: ease-out;
+  }
+  46% {
+    transform: translateY(-3px) scale(0.9, 1.16);
+  }
+  62% {
+    transform: translateY(0) scale(1, 0.9);
+  }
+  76% {
+    transform: scale(0.96, 1.05);
+  }
+  89% {
+    transform: scale(1, 0.98);
+  }
+  100% {
+    transform: none;
+  }
+}
+/*
+ * Winds up (squash), stretches tall, wobbles with a tilt, then flies back up off the screen,
+ * stretched like gum. Never wider than at rest, like note-in.
+ */
+@keyframes note-out {
+  0% {
+    transform: none;
+    opacity: 1;
+  }
+  16% {
+    transform: translateY(3px) scale(1, 0.8);
+  }
+  34% {
+    transform: translateY(-5px) scale(0.9, 1.14);
+  }
+  50% {
+    transform: translateY(-2px) scale(0.97, 0.93) rotate(-2deg);
+  }
+  66% {
+    transform: translateY(6px) scale(1, 0.82);
+    animation-timing-function: ease-in;
+  }
+  100% {
+    transform: translateY(var(--note-fly)) scale(0.8, 1.2);
+  }
+}
+@keyframes note-icon-spin-out {
+  30% {
+    transform: scale(1.2) rotate(-25deg);
+  }
+  100% {
+    transform: scale(0) rotate(300deg);
+  }
+}
+@keyframes note-icon-pop {
+  from {
+    transform: scale(0) rotate(-40deg);
+  }
+  60% {
+    transform: scale(1.2) rotate(8deg);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes note-icon-toot {
+  15%,
+  55% {
+    transform: scale(1.18) rotate(-14deg);
+  }
+  35%,
+  75% {
+    transform: scale(1) rotate(4deg);
+  }
+}
+@keyframes note-icon-shake {
+  20%,
+  60% {
+    transform: rotate(-12deg);
+  }
+  40%,
+  80% {
+    transform: rotate(12deg);
+  }
+}
+
+/*
+ * Home hero (join and login pages): the cow bobs, blinks and flicks its ears, jumps when tapped,
+ * and the name's letters drop in. Every moving part is an HTML element animated with transform
+ * or opacity only, so it all runs on the compositor (see cow-logo.tsx).
+ */
+.hero-bob {
+  transform-origin: 50% 100%;
+  animation: hero-bob 3.2s ease-in-out infinite;
+}
+.hero-shadow {
+  animation: hero-shadow 3.2s ease-in-out infinite;
+}
+.hero-jump {
+  transform-origin: 50% 100%;
+  animation: hero-jump 0.8s ease-out both;
+}
+.hero-bubble {
+  transform-origin: 0 100%;
+  animation: hero-bubble 2.6s ease-out both;
+}
+.hero-letter {
+  animation: hero-letter 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.cow-ear-left {
+  transform-origin: 26% 35%;
+  animation: cow-ear-left 5s ease-in-out infinite;
+}
+.cow-ear-right {
+  transform-origin: 74% 35%;
+  animation: cow-ear-right 6.5s ease-in-out infinite;
+}
+.cow-eyes {
+  transform-origin: 50% 43%;
+  animation: cow-blink 4.2s linear infinite;
+}
+.floating-shape {
+  animation: float-about 8s ease-in-out infinite alternate;
+}
+@keyframes hero-bob {
+  0%,
+  100% {
+    transform: none;
+  }
+  50% {
+    transform: translateY(-8px) rotate(2deg);
+  }
+}
+@keyframes hero-shadow {
+  50% {
+    transform: scaleX(0.75);
+    opacity: 0.6;
+  }
+}
+/* Squats, leaps with a stretch and a tilt, splats on landing and wobbles back. */
+@keyframes hero-jump {
+  15% {
+    transform: translateY(4px) scale(1.12, 0.82);
+  }
+  40% {
+    transform: translateY(-34px) scale(0.9, 1.12) rotate(-6deg);
+    animation-timing-function: ease-in;
+  }
+  60% {
+    transform: translateY(0) scale(1.1, 0.88);
+  }
+  78% {
+    transform: scale(0.96, 1.04) rotate(3deg);
+  }
+  100% {
+    transform: none;
+  }
+}
+/* Pops out of the cow's head, stays for a moment and floats off. */
+@keyframes hero-bubble {
+  0% {
+    transform: scale(0.3) rotate(-12deg);
+    opacity: 0;
+  }
+  12% {
+    transform: scale(1.1) rotate(4deg);
+    opacity: 1;
+  }
+  20%,
+  85% {
+    transform: none;
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-10px) scale(0.9);
+    opacity: 0;
+  }
+}
+/* Transform only: the letters are visible from the first frame, so the name paints (and counts as painted) at once. */
+@keyframes hero-letter {
+  from {
+    transform: translateY(-0.45em) scale(0.6) rotate(-15deg);
+  }
+  55% {
+    transform: translateY(0.08em) scale(1.12, 0.9);
+  }
+  75% {
+    transform: translateY(-0.05em) scale(0.97, 1.04);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes cow-ear-left {
+  0%,
+  80%,
+  96%,
+  100% {
+    transform: none;
+  }
+  84% {
+    transform: rotate(-18deg);
+  }
+  88% {
+    transform: rotate(6deg);
+  }
+  92% {
+    transform: rotate(-10deg);
+  }
+}
+@keyframes cow-ear-right {
+  0%,
+  60%,
+  76%,
+  100% {
+    transform: none;
+  }
+  64% {
+    transform: rotate(18deg);
+  }
+  68% {
+    transform: rotate(-6deg);
+  }
+  72% {
+    transform: rotate(10deg);
+  }
+}
+@keyframes cow-blink {
+  0%,
+  90%,
+  94%,
+  100% {
+    transform: none;
+  }
+  92% {
+    transform: scaleY(0.1);
+  }
+}
+@keyframes float-about {
+  from {
+    transform: translate(0, 0) rotate(-10deg);
+  }
+  50% {
+    transform: translate(10px, -18px) rotate(8deg);
+  }
+  to {
+    transform: translate(-8px, -6px) rotate(18deg) scale(1.1);
+  }
+}
+
+/*
+ * Cow antics (phase 32): one-off gags played while `data-antic` is set on the cow (cow-logo.tsx,
+ * use-cow-antics.ts). Transform only, on the cow's own layers. Distances are in % of the layer,
+ * which is the cow's size: 1.5625 % is one unit of the 64-unit drawing. Each eye is clipped to its
+ * white plus the outline, so a moving pupil stays inside.
+ */
+.cow-eye-left {
+  transform-origin: 37.5% 43.75%;
+  clip-path: circle(10.6% at 37.5% 43.75%);
+}
+.cow-eye-right {
+  transform-origin: 64.06% 42.19%;
+  clip-path: circle(8.3% at 64.06% 42.19%);
+}
+.cow-nostrils {
+  transform-origin: 50% 67%;
+}
+.cow-tongue {
+  transform-origin: 63% 80%;
+}
+.cow {
+  transform-origin: 50% 80%;
+}
+.cow[data-antic='wink'] .cow-eye-right {
+  animation: cow-wink 1.1s ease-in-out both;
+}
+.cow[data-antic='roll'] :is(.cow-pupil-left, .cow-pupil-right) {
+  animation: cow-roll 1.4s ease-in-out both;
+}
+.cow[data-antic='cross'] .cow-pupil-left {
+  animation: cow-cross-left 1.4s ease-in-out both;
+}
+.cow[data-antic='cross'] .cow-pupil-right {
+  animation: cow-cross-right 1.4s ease-in-out both;
+}
+.cow[data-antic='lick'] .cow-tongue {
+  animation: cow-lick 1.2s ease-in-out both;
+}
+.cow[data-antic='sneeze'] {
+  animation: cow-sneeze 1.2s ease-out both;
+}
+.cow[data-antic='sneeze'] .cow-nostrils {
+  animation: cow-nostrils 1.2s ease-out both;
+}
+@keyframes cow-wink {
+  12%,
+  60% {
+    transform: scaleY(0.1);
+  }
+  0%,
+  75%,
+  100% {
+    transform: none;
+  }
+}
+@keyframes cow-roll {
+  20% {
+    transform: translate(-3.1%, -1.6%);
+  }
+  45% {
+    transform: translate(0, -4.7%);
+  }
+  70% {
+    transform: translate(3.1%, -1.6%);
+  }
+  0%,
+  100% {
+    transform: none;
+  }
+}
+@keyframes cow-cross-left {
+  20%,
+  75% {
+    transform: translate(2.4%, -0.8%);
+  }
+  0%,
+  100% {
+    transform: none;
+  }
+}
+@keyframes cow-cross-right {
+  20%,
+  75% {
+    transform: translate(-2.4%, 1.6%);
+  }
+  0%,
+  100% {
+    transform: none;
+  }
+}
+@keyframes cow-lick {
+  20% {
+    transform: scale(1.1, 1.6) rotate(-14deg);
+  }
+  40% {
+    transform: scale(1.1, 1.6) rotate(12deg);
+  }
+  60% {
+    transform: scale(1.1, 1.6) rotate(-10deg);
+  }
+  0%,
+  85%,
+  100% {
+    transform: none;
+  }
+}
+/* Breathes in, sneezes with a squash and shakes it off. */
+@keyframes cow-sneeze {
+  30% {
+    transform: translateY(-3%) scale(0.97, 1.05) rotate(-3deg);
+  }
+  40% {
+    transform: translateY(2%) scale(1.08, 0.9) rotate(4deg);
+  }
+  55% {
+    transform: rotate(-4deg);
+  }
+  70% {
+    transform: rotate(2deg);
+  }
+  0%,
+  100% {
+    transform: none;
+  }
+}
+@keyframes cow-nostrils {
+  30% {
+    transform: scale(1.35);
+  }
+  0%,
+  45%,
+  100% {
+    transform: none;
+  }
+}
+
+/* Reduced motion: primitives and app animations end immediately in their final state. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  /* The message's time bar is information, not decoration: it still drains (its stripes stand still). */
+  .note-time-fill {
+    animation-duration: var(--note-time) !important;
+  }
+  /* The cow's speech bubble would end faded out at once: it just shows, until the next tap. */
+  .hero-bubble {
+    animation: none !important;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+  body {
+    @apply bg-background font-sans text-foreground antialiased;
+    background-image: var(--surface-wash);
+    background-repeat: no-repeat;
+    /* Phones: avoid rubber-band scrolling on full-screen game views. */
+    overscroll-behavior: none;
+  }
 }
