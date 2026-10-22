@@ -22,6 +22,7 @@ description: Quizmoo animation rules: CSS keyframe utilities, staggering, keying
 - Scrollbars are styled globally in `styles.css` (pill thumb in the theme colour, plumper on hover); Firefox gets the thin `scrollbar-color` variant. Only inside `@media (hover: hover) and (pointer: fine)`: any `::-webkit-scrollbar` rule turns Android's overlay scrollbar into a classic one that takes 14 px and never hides.
 - The projector's results summary (`useSlideshow`) moves on every 8 s and can be paused (button or P); resuming keeps the time that was left.
 - Host messages fly in and out with an elastic animation and show their remaining time as a progress bar on the message itself.
+- **Cow antics** (phase 32): `useCowAntics` (`features/cow/use-cow-antics.ts`) sets one antic at a time from the pure, tested `features/cow/antics.ts` (random pause, never the same twice, nothing while hidden or under reduced motion); `CowLogo` puts it on its root as `data-antic`, and the "Cow antics" block in `styles.css` animates the part (`.cow-eye-right`, `.cow-pupil-*`, `.cow-tongue`, `.cow-nostrils`, the whole `.cow`). Antics are one-off, so they add no endless animation. Each eye wrapper is clipped (`clip-path: circle`) to its white so moving pupils stay inside. Seasonal looks are extra layers chosen by `seasonFor(date)`. In development, `?cow=<season>` and `?cowAntics=fast` on the first page load try them.
 
 ## Performance rules (learned in phase 16)
 

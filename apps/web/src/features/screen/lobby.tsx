@@ -1,6 +1,7 @@
 import type { HostSnapshot, PlayerPublic } from '@quizmoo/shared'
 import { useTranslation } from 'react-i18next'
 import { BrandingMark } from '@/components/branding-mark'
+import { WaitingCow } from '@/components/waiting-cow'
 import { PlayerAvatar } from '../../components/player-avatar'
 import { QrCode } from '../../components/qr-code'
 
@@ -18,9 +19,12 @@ export function ScreenLobby({ host, joinUrl }: { host: HostSnapshot; joinUrl: st
           <p className="text-3xl">{t('screen.joinAt')}</p>
           <p className="text-4xl font-bold break-all">{joinUrl}</p>
         </div>
-        <div className="glow-border flex w-fit animate-pop flex-col rounded-3xl bg-card px-8 py-4 shadow-soft">
-          <p className="text-3xl">{t('screen.pin')}</p>
-          <p className="text-8xl font-black tracking-widest tabular-nums">{host.pin}</p>
+        <div className="flex items-end gap-8">
+          <div className="glow-border flex w-fit animate-pop flex-col rounded-3xl bg-card px-8 py-4 shadow-soft">
+            <p className="text-3xl">{t('screen.pin')}</p>
+            <p className="text-8xl font-black tracking-widest tabular-nums">{host.pin}</p>
+          </div>
+          <WaitingCow size="lg" className="mb-2" />
         </div>
         {/* Keyed by the count so the badge pops each time someone joins. */}
         <p key={host.players.length} className="w-fit animate-pop rounded-full bg-secondary px-5 py-1.5 text-3xl font-bold text-secondary-foreground">

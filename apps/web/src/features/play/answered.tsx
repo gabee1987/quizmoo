@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { answerProgress } from '@/lib/answer-progress'
 import { useNow } from '@/lib/clock'
 import { CheckIcon } from '../../components/icons'
+import { WaitingCow } from '../../components/waiting-cow'
 import { WaitingDots } from '../../components/waiting-dots'
 import { stagger } from '../../lib/motion'
 import { formatAnswer } from '../questions/format-answer'
@@ -86,7 +87,10 @@ export function Answered({
       <p className="animate-fade-up font-semibold text-muted-foreground" style={stagger(1, 0, 320)}>
         {t(progress.teams ? 'play.team.teamsAnswered' : 'play.answeredSoFar', { answered: progress.answered, count: progress.count })}
       </p>
-      <WaitingDots className="text-muted-foreground" />
+      <span className="flex items-center gap-3">
+        <WaitingCow />
+        <WaitingDots className="text-muted-foreground" />
+      </span>
       {change && (
         <div className="flex animate-fade-up flex-col items-center gap-2" style={stagger(1, 0, 440)}>
           <Button variant="secondary" size="lg" disabled={change.paused} onClick={onChange}>

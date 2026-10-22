@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { copyText } from '@/lib/clipboard'
 import { cn } from '@/lib/cn'
 import { PlayerAvatar } from '../../components/player-avatar'
+import { WaitingCow } from '../../components/waiting-cow'
 import { WaitingDots } from '../../components/waiting-dots'
 import { stagger } from '../../lib/motion'
 import { gameInfo } from './lobby-info'
@@ -19,6 +20,8 @@ export function PlayerCard({ snapshot, team, className }: { snapshot: PlayerSnap
   const { t } = useTranslation()
   return (
     <div className={cn('glow-border flex animate-pop flex-col items-center gap-4 rounded-3xl bg-card p-6 text-center shadow-soft', className)}>
+      {/* In the corner, clear of the centred avatar; its bubble speaks to the right. */}
+      <WaitingCow bubble="right" className="absolute top-4 left-4" />
       <PlayerAvatar avatar={snapshot.me.avatar} size="xl" className="animate-float bg-accent" />
       <h1 className="text-3xl font-black wrap-break-word">{t('play.youAreIn', { name: snapshot.me.name })}</h1>
       {team && <TeamBanner name={team.solo ? null : team.name} />}

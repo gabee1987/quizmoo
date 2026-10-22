@@ -73,6 +73,51 @@
       "line4": "Mooo… ready?"
     }
   },
+  "cow": {
+    "sneeze": "Achoo!",
+    "lines": {
+      "line1": "Mooo-ve it!",
+      "line2": "I know the answer. Not telling.",
+      "line3": "Is grass a vegetable?",
+      "line4": "Udderly ready!",
+      "line5": "Who’s the GOAT? Me. The COW.",
+      "line6": "Did someone say snacks?",
+      "line7": "I studied for this. Mostly grass.",
+      "line8": "Moo means hello."
+    },
+    "seasons": {
+      "newYear": {
+        "line1": "Happy New Year!",
+        "line2": "My resolution: more quizzes.",
+        "line3": "Moo-ve over, last year!"
+      },
+      "valentine": {
+        "line1": "You’re udderly lovely!",
+        "line2": "Be my valen-cow?",
+        "line3": "I love you a cow-tillion."
+      },
+      "aprilFools": {
+        "line1": "Fun fact: cows can fly. On Tuesdays.",
+        "line2": "Fun fact: milk comes from the moon.",
+        "line3": "Fun fact: I’m actually a horse."
+      },
+      "easter": {
+        "line1": "Happy Easter!",
+        "line2": "I’m the Easter bunny now.",
+        "line3": "Found any eggs yet?"
+      },
+      "halloween": {
+        "line1": "Boo! I mean… moo!",
+        "line2": "Trick or treat?",
+        "line3": "I’m a witch. A cow witch."
+      },
+      "christmas": {
+        "line1": "Merry Christmas!",
+        "line2": "Ho ho hooo… moo!",
+        "line3": "Have you been good this year?"
+      }
+    }
+  },
   "common": {
     "loading": "Loading…",
     "next": "Next",
