@@ -1,5 +1,7 @@
 import type { HostSnapshot } from '@quizmoo/shared'
 import { useTranslation } from 'react-i18next'
+import { RoundChip } from '@/components/round-chip'
+import { resultsWhen } from '@/lib/results-when'
 import { reviewPosition } from '../play/review-position'
 import { RevealLayout } from './reveal-layout'
 
@@ -25,10 +27,13 @@ export function ScreenReveal({ host }: { host: HostSnapshot }) {
       symbols={host.settings.answerSymbols}
       awaitingGrading={host.awaitingGrading}
       heading={
-        <span>
-          {t('play.questionOf', { index: host.questionIndex + 1, count: host.questionCount })}
-          {host.reviewing && ` · ${t('play.shownAgain')}`}
-          {reviewPosition(host)}
+        <span className="flex min-w-0 flex-wrap items-center gap-x-5 gap-y-2">
+          <span>
+            {t('play.questionOf', { index: host.questionIndex + 1, count: host.questionCount })}
+            {host.reviewing && ` · ${t('play.shownAgain')}`}
+            {reviewPosition(host)}
+          </span>
+          <RoundChip group={host.group} size="screen" />
         </span>
       }
       stats={stats}
@@ -45,14 +50,15 @@ function AnswersHidden({ host }: { host: HostSnapshot }) {
   const text = host.question?.text ?? host.reveal?.question.text ?? ''
   return (
     <div className="flex flex-1 flex-col gap-8">
-      <p className="text-3xl font-semibold text-muted-foreground">
+      <p className="flex min-w-0 flex-wrap items-center gap-x-5 gap-y-2 text-3xl font-semibold text-muted-foreground">
         {t('play.questionOf', { index: host.questionIndex + 1, count: host.questionCount })}
+        <RoundChip group={host.group} size="screen" />
       </p>
       <h1 className="animate-fade-up text-5xl leading-tight font-black wrap-break-word">{text}</h1>
       <p className="animate-fade-up text-4xl text-foreground" style={{ animationDelay: '150ms' }}>
         {t('play.answeredSoFar', { answered: host.answeredCount, count: host.players.length })}
       </p>
-      <p className="text-3xl text-muted-foreground">{t('play.resultsAtEnd')}</p>
+      <p className="text-3xl text-muted-foreground">{t(resultsWhen(host.settings))}</p>
     </div>
   )
 }

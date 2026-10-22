@@ -1,6 +1,8 @@
 import type { PlayerSnapshot, TeamLive } from '@quizmoo/shared'
 import { useTranslation } from 'react-i18next'
+import { RoundChip } from '@/components/round-chip'
 import { cn } from '@/lib/cn'
+import { resultsWhen } from '@/lib/results-when'
 import { CheckIcon, CrossIcon } from '../../components/icons'
 import { RankArrow } from '../../components/rank-arrow'
 import { stagger, useCountUp } from '../../lib/motion'
@@ -37,6 +39,7 @@ export function Reveal({ snapshot }: { snapshot: PlayerSnapshot }) {
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-5 text-center">
+      <RoundChip group={snapshot.group} />
       {/* The host put an earlier question back on the screens: this is how it went for you. */}
       {snapshot.reviewing && (
         <p className="rounded-full bg-secondary px-4 py-1 text-sm font-bold text-secondary-foreground">
@@ -139,13 +142,14 @@ function AnswerKept({ snapshot }: { snapshot: PlayerSnapshot }) {
   const answered = snapshot.myAnswer !== null
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-5 text-center">
+      <RoundChip group={snapshot.group} />
       <div className="flex w-full animate-pop flex-col items-center gap-2 rounded-3xl border bg-card px-4 py-8 shadow-soft">
         <h1 className="text-3xl font-black">{answered ? t('play.answerKept') : t('play.noAnswer')}</h1>
       </div>
       {/* Answering alone: what was kept. A team of more than one gets its summary with every pick. */}
       {snapshot.myAnswer && !snapshot.teamResult && <MyAnswer snapshot={snapshot} answer={snapshot.myAnswer} />}
       {snapshot.teamResult && <TeamResult snapshot={snapshot} team={snapshot.teamResult} />}
-      <p className="font-semibold text-muted-foreground">{t('play.resultsAtEnd')}</p>
+      <p className="font-semibold text-muted-foreground">{t(resultsWhen(snapshot.settings))}</p>
     </div>
   )
 }

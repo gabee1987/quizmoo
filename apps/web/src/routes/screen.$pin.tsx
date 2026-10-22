@@ -13,6 +13,7 @@ import { ScreenLobby } from '../features/screen/lobby'
 import { ScreenPodium } from '../features/screen/podium'
 import { ScreenQuestion } from '../features/screen/question'
 import { ScreenReveal } from '../features/screen/reveal'
+import { ScreenRoundIntro } from '../features/screen/round-intro'
 import { ScreenScoreboard } from '../features/screen/scoreboard'
 import { apiFetch } from '../lib/api'
 import { meQueryOptions } from '../lib/auth'
@@ -109,6 +110,8 @@ function ScreenPhase({ host, clockOffset, joinUrl }: { host: HostSnapshot; clock
   switch (host.phase) {
     case 'lobby':
       return <ScreenLobby host={host} joinUrl={joinUrl} />
+    case 'intro':
+      return <ScreenRoundIntro host={host} clockOffset={clockOffset} />
     case 'question':
       return <ScreenQuestion host={host} clockOffset={clockOffset} />
     case 'reveal':

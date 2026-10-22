@@ -276,6 +276,8 @@ export interface GameSnapshotBase {
   introEndsAt: number | null
   /** The group of the question on the screens (in the intro: of the next one); null outside groups. */
   group: GroupPublic | null
+  /** Groups in the quiz (0 without groups), for the lobbies' "24 questions in 4 rounds". */
+  groupCount: number
   /**
    * The host put an earlier (or the current) question back on the screens: `phase` is 'reveal',
    * `questionIndex` and `reveal` are that question's, read only, ranks do not move.

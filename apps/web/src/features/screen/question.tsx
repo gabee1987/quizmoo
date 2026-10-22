@@ -2,6 +2,7 @@ import type { HostSnapshot } from '@quizmoo/shared'
 import { useTranslation } from 'react-i18next'
 import { answerProgress } from '@/lib/answer-progress'
 import { PausedNote } from '../../components/paused-note'
+import { RoundChip } from '../../components/round-chip'
 import { Timer } from '../../components/timer'
 import { stagger } from '../../lib/motion'
 import { QuestionInput } from '../questions/question-input'
@@ -14,7 +15,10 @@ export function ScreenQuestion({ host, clockOffset }: { host: HostSnapshot; cloc
   return (
     <div className="flex flex-1 flex-col gap-6">
       <div className="flex items-center justify-between text-3xl font-semibold text-muted-foreground">
-        <span>{t('play.questionOf', { index: host.questionIndex + 1, count: host.questionCount })}</span>
+        <span className="flex min-w-0 items-center gap-5">
+          <span className="shrink-0">{t('play.questionOf', { index: host.questionIndex + 1, count: host.questionCount })}</span>
+          <RoundChip group={host.group} size="screen" />
+        </span>
         {/* Keyed by the count so it pops with every answer. */}
         <span key={progress.answered} className="animate-pop rounded-full bg-secondary px-5 py-1 text-secondary-foreground">
           {t(progress.teams ? 'host.game.teamsAnswered' : 'host.game.answered', { answered: progress.answered, count: progress.count })}

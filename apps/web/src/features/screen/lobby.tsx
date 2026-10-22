@@ -14,7 +14,14 @@ export function ScreenLobby({ host, joinUrl }: { host: HostSnapshot; joinUrl: st
       {joinUrl && <QrCode value={joinUrl} className="mx-auto w-[min(60vh,80vw)] animate-pop" />}
       <div className="flex flex-col gap-6">
         {host.branding && <BrandingMark branding={host.branding} size="lobby" />}
-        <p className="text-3xl font-semibold text-muted-foreground wrap-break-word">{host.quizTitle}</p>
+        <div>
+          <p className="text-3xl font-semibold text-muted-foreground wrap-break-word">{host.quizTitle}</p>
+          {host.groupCount > 0 && (
+            <p className="text-2xl text-muted-foreground">
+              {t('play.info.questionsInRounds', { questions: host.questionCount, count: host.groupCount })}
+            </p>
+          )}
+        </div>
         <div className="animate-fade-up">
           <p className="text-3xl">{t('screen.joinAt')}</p>
           <p className="text-4xl font-bold break-all">{joinUrl}</p>

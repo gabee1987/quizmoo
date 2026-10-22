@@ -39,4 +39,12 @@ describe('gameInfo', () => {
     expect(lines[4]!.values).toEqual({ count: 5 })
     expect(keys({ ...settings, answerLockSec: 0 }, 'classic', 2)).toContain('play.info.answerChanges')
   })
+
+  it('counts the rounds with the questions, and says when answers come at the end of each round', () => {
+    const settings = gameSettingsSchema.parse({ speedBonus: false, streakBonus: false, revealAnswers: 'afterGroup' })
+    const lines = gameInfo(settings, 'classic', 24, 4)
+    expect(lines[0]).toMatchObject({ text: 'play.info.questionsInRounds', values: { questions: 24, count: 4 } })
+    expect(lines.map((line) => line.text)).toContain('play.info.answersAtRoundEnd')
+    expect(keys(settings, 'classic', 24)).toEqual(['play.info.questions', 'play.info.classic'])
+  })
 })

@@ -120,6 +120,12 @@ describe('group intros', () => {
     ])
   })
 
+  it('tells every screen how many groups the quiz has, also in the lobby', () => {
+    expect(toHostSnapshot(game(groupedQuiz()), T0).groupCount).toBe(2)
+    expect(toPlayerSnapshot(game(groupedQuiz()), 'p1', T0).groupCount).toBe(2)
+    expect(toHostSnapshot(game(fixtureQuiz()), T0).groupCount).toBe(0)
+  })
+
   it('starts with the intro when the first question is in a group', () => {
     const quiz = groupedQuiz()
     quiz.questions = quiz.questions.slice(1)

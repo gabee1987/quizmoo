@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { FormAlert } from '@/components/form-alert'
 import { PausedNote } from '@/components/paused-note'
+import { RoundChip } from '@/components/round-chip'
 import { Button } from '@/components/ui/button'
 import { useNow } from '@/lib/clock'
 import { Timer } from '../../components/timer'
@@ -92,8 +93,9 @@ export function Question({ snapshot, clockOffset }: { snapshot: PlayerSnapshot; 
 
   return (
     <div className="flex flex-1 flex-col gap-4">
-      <p className="flex animate-fade-up items-center text-sm font-semibold text-muted-foreground">
+      <p className="flex min-w-0 animate-fade-up flex-wrap items-center gap-x-3 gap-y-1 text-sm font-semibold text-muted-foreground">
         {t('play.questionOf', { index: snapshot.questionIndex + 1, count: snapshot.questionCount })}
+        <RoundChip group={snapshot.group} />
       </p>
       {snapshot.questionEndsAt !== null && (
         <Timer
