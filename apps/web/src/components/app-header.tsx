@@ -1,7 +1,9 @@
 import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
+import { useCowAntics } from '@/features/cow/use-cow-antics'
 import { languages, setLanguage } from '@/i18n'
 import { cn } from '@/lib/cn'
+import { CowLogo } from './cow-logo'
 import { ModeToggle } from './mode-toggle'
 
 /** Compact header: logo mark (a link home), language and colour mode. Without `brand` (the home pages show a big one) only the settings. */
@@ -26,13 +28,15 @@ export function AppHeader({ brand = true }: { brand?: boolean }) {
   )
 }
 
+/** The small cow on its tile. No idle motion; now and then a face gag, and its look on special days. */
 export function LogoMark() {
+  const { antic, season } = useCowAntics({ bubble: false })
   return (
     <span
       aria-hidden="true"
       className="grid size-9 -rotate-6 place-items-center rounded-xl bg-primary shadow-[0_3px_0_0_var(--primary-edge)]"
     >
-      <img src="/logo.svg" alt="" className="size-8" />
+      <CowLogo idle={false} antic={antic} season={season} className="size-8" />
     </span>
   )
 }

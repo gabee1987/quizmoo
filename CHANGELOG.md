@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### The cow's antics
+- The cow does something silly by itself now and then (every 30–60 s at random, the first time after 10–20 s): a wink, an eye roll, crossed eyes, its tongue, a sneeze ("Hapci!"), or a short line in a speech bubble. It does this on the join, login and sign-up pages, in the header logo (which is now the drawn cow, without the bubbles), and as a small waiting cow in the phone lobby, on the "Answer sent!" screen and in the projector lobby. Nothing plays while the tab is hidden or when the device asks for reduced motion.
+- For about a week around special days it dresses up and has its own lines: a party hat from 28 December to 3 January, heart eyes from 11 to 17 February, a fake nose and glasses with "fun facts" from 29 March to 4 April, bunny ears from the Thursday before to the Wednesday after Easter Sunday, a witch hat from 28 October to 3 November, a Santa hat from 3 to 9 December (Mikulás) and from 20 to 27 December. 1 April is always April Fools; otherwise Easter wins where the two weeks overlap. Development builds take `?cow=<season>` and `?cowAntics=fast` to try them.
+
 ## 1.1.0 – 2026-10-21
 
 The first hosted release, for friends and family.

@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
-import { cleanup, fireEvent, render, screen } from '@testing-library/react'
-import { afterEach, beforeAll, describe, expect, it } from 'vitest'
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
+import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 import i18n from '../i18n'
 import { HomeHero, MOO_LINES, mooKey } from './home-hero'
 
@@ -45,5 +45,27 @@ describe('HomeHero', () => {
     render(<HomeHero tagline="" />)
     fireEvent.click(screen.getByRole('button', { name: 'Pet the cow' }))
     expect(screen.getByText('Moo!').closest('[aria-live="polite"]')).toBeTruthy()
+  })
+
+  it('says something by itself after a while, without announcing it, and a tap takes over', () => {
+    vi.useFakeTimers()
+    // The highest pick: the last antic (moo), an everyday line, the longest first wait.
+    vi.spyOn(Math, 'random').mockReturnValue(0.99)
+    try {
+      render(<HomeHero tagline="" />)
+      const line = i18n.t('cow.lines.line8')
+      act(() => vi.advanceTimersByTime(19_000))
+      expect(screen.queryByText(line)).toBeNull()
+
+      act(() => vi.advanceTimersByTime(1000))
+      expect(screen.getByText(line).closest('[aria-hidden="true"]')).toBeTruthy()
+
+      fireEvent.click(screen.getByRole('button', { name: 'Pet the cow' }))
+      expect(screen.queryByText(line)).toBeNull()
+      expect(screen.getByText('Moo!')).toBeTruthy()
+    } finally {
+      vi.restoreAllMocks()
+      vi.useRealTimers()
+    }
   })
 })

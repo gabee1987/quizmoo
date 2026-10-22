@@ -38,11 +38,16 @@ Finished plans are deleted once their branch is merged: `CHANGELOG.md` records w
 | 29 | My settings in tabs, and the host's own account | `feature/admin-pages` | done |
 | 30 | Legal pages, data rights and a security pass | `feature/legal-and-security` | done |
 | 31 | The host's running-game screen: standings midgame, names in full, controls in view | `feature/host-game-screen` | done |
-| 32 | Random cow animations on various screens | `feature/cow-antics` | planned |
+| 32 | [Cow antics: random face gags, moo bubbles and seasonal looks](phase-32-cow-antics.md) | `feature/cow-antics` | done |
 | 33 | [Patch notes in the app](phase-33-patch-notes.md) | `feature/patch-notes` | done |
-| 34 | Help page and interactive tutorial | `feature/help-and-tutorial` | planned |
+| 34 | Help page and interactive tutorial with hints | `feature/help-and-tutorial` | planned |
 | 35 | Screen lock for the host's game screen | `feature/host-game-screen` | done |
 | 36 | E-mail to admins about new sign-ups | `feature/signup-emails` | done |
+| 37 | [Fixes in the patch notes, kept for every release](phase-37-patch-notes-fixes.md) | `feature/patch-notes-fixes` | planned |
+| 38 | Default time and points for new questions | `feature/question-defaults` | planned |
+| 39 | Random question order | `feature/shuffle-questions` | planned |
+| 40 | Question groups within a quiz | `feature/question-groups` | planned |
+| 41 | Estimated game length, at the start and as time left during the game | `feature/game-length` | planned |
 | later | [Hosting without an account](later-guest-hosting.md) | `feature/guest-hosting` | planned, after the MVP |
 
 ## Conventions every plan follows
