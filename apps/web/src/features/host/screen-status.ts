@@ -20,7 +20,7 @@ export function screenStatus(host: HostSnapshot, audience: Audience): SeenStatus
     case 'lobby':
       return seen('lobby')
     case 'intro':
-      return seen('intro', { round: (host.group?.index ?? 0) + 1 })
+      return seen(host.pausedAt ? 'introHeld' : 'intro', { round: (host.group?.index ?? 0) + 1 })
     case 'question':
       return host.pausedAt ? seen('paused', { index }) : seen('question', { index })
     case 'reveal':

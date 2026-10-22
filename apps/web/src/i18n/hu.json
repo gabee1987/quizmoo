@@ -172,6 +172,7 @@
     "game": {
       "phase": {
         "lobby": "Várjuk a játékosokat",
+        "intro": "A kör bevezetője",
         "question": "Megy a kérdés",
         "reveal": "Kiderültek a válaszok",
         "scoreboard": "Eredménytábla",
@@ -206,6 +207,14 @@
       "controls": "Játékvezérlés",
       "nextQuestion": "Következő kérdés",
       "startRound": "Indulhat a kör",
+      "nextRound": "Következő kör",
+      "showRoundAnswers": "A kör megoldásai",
+      "holdIntro": "Várjunk",
+      "releaseIntro": "Mehet",
+      "introHeldHint": "Megállítva: a kör akkor indul, ha továbbengeded, vagy megnyomod az Indulhat a kör gombot.",
+      "introWaits": "A kör akkor indul, ha megnyomod az Indulhat a kör gombot.",
+      "roundRules": "A(z) {{round}}. kör szabályai",
+      "standingsOnDemand": "Állás a körök után, ha megmutatom",
       "finish": "Vége",
       "gradeFirst": "A folytatáshoz értékeld a lenti válaszokat.",
       "onlineCount_one": "{{count}} online",
@@ -304,6 +313,7 @@
     "shown": {
       "onScreen": {
         "reveal": "Most kint: a válaszok",
+        "answerHidden": "Most kint: lezárt kérdés, rejtett válaszok",
         "scoreboard": "Most kint: az állás e kérdés után",
         "shownAgain": "Most kint: újra ez a kérdés"
       },
@@ -321,6 +331,7 @@
       "projector": "Kivetítő:",
       "lobby": "váróterem",
       "intro": "a(z) {{round}}. kör bevezetője",
+      "introHeld": "a(z) {{round}}. kör bevezetője, megállítva",
       "question": "{{index}}. kérdés",
       "paused": "{{index}}. kérdés, szünet",
       "answer": "a(z) {{index}}. kérdés megoldása",
@@ -390,6 +401,7 @@
     "standings": {
       "resultsSoFar": "Eddigi eredmények",
       "hiddenNote": "Ezeket a pontokat csak te látod. A játékosok és a kivetítő a végén látják, vagy amikor megmutatod az állást.",
+      "hiddenNoteRound": "Ezeket a pontokat csak te látod. A játékosok és a kivetítő a kör végén látják, vagy amikor megmutatod az állást.",
       "correct_one": "{{count}} helyes",
       "correct_other": "{{count}} helyes",
       "members_one": "{{count}} tag",
@@ -482,6 +494,7 @@
       "revealAnswers": "Helyes válaszok",
       "revealAnswersOptions": {
         "afterQuestion": "Minden kérdés után",
+        "afterGroup": "Minden kör végén",
         "atEnd": "Csak a játék végén"
       },
       "scoreboard": "Eredménytábla",
@@ -661,6 +674,11 @@
     "playerCount_other": "{{count}} játékos",
     "questionOf_one": "{{index}}. kérdés / {{count}}",
     "questionOf_other": "{{index}}. kérdés / {{count}}",
+    "roundOf_one": "{{index}}. kör / {{count}}",
+    "roundOf_other": "{{index}}. kör / {{count}}",
+    "roundQuestions_one": "{{count}} kérdés",
+    "roundQuestions_other": "{{count}} kérdés",
+    "questionRange": "{{first}}–{{last}}. kérdés",
     "secondsLeft_one": "Még {{count}} másodperc",
     "secondsLeft_other": "Még {{count}} másodperc",
     "pausedSecondsLeft_one": "Szünet, még {{count}} másodperc",

@@ -385,7 +385,13 @@ function groupPublic(state: GameState, index: number): GroupPublic | null {
 function groupOutlines(state: GameState): GroupOutline[] {
   return groupsOf(state.quiz).map((group) => {
     const { first, last } = groupBounds(state.quiz, group.id)
-    return { id: group.id, title: group.title, firstIndex: first, questionCount: last - first + 1 }
+    return {
+      id: group.id,
+      title: group.title,
+      firstIndex: first,
+      questionCount: last - first + 1,
+      ownRules: Object.values(group.settings ?? {}).some((value) => value !== undefined),
+    }
   })
 }
 

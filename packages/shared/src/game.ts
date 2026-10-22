@@ -219,6 +219,8 @@ export interface GroupOutline {
   title: string
   firstIndex: number
   questionCount: number
+  /** The group sets some game settings of its own. */
+  ownRules: boolean
 }
 
 /** A message the host pushes to every phone and the projector until it is cleared. */

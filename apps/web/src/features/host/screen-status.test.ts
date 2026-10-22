@@ -25,6 +25,12 @@ describe('what the phones and the projector see', () => {
     expect(screenStatus(host({ pausedAt: 1 }), 'projector')).toEqual({ key: 'host.seen.paused', values: { index: 3 } })
   })
 
+  it('a round’s intro, counting down or held', () => {
+    const group = { index: 1 } as HostSnapshot['group']
+    expect(screenStatus(host({ phase: 'intro', group }), 'phones')).toEqual({ key: 'host.seen.intro', values: { round: 2 } })
+    expect(screenStatus(host({ phase: 'intro', group, pausedAt: 1 }), 'projector').key).toBe('host.seen.introHeld')
+  })
+
   it('the reveal: the answer, held back, or waiting for grading', () => {
     expect(screenStatus(host({ phase: 'reveal' }), 'phones').key).toBe('host.seen.answer')
     expect(screenStatus(host({ phase: 'reveal', answersHidden: true }), 'phones').key).toBe('host.seen.answerHidden')

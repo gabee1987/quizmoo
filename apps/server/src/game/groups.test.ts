@@ -112,6 +112,14 @@ describe('group intros', () => {
     expect(toHostSnapshot(state, T0).group?.id).toBe('g1')
   })
 
+  it('lists the groups for the host, with whether each has rules of its own', () => {
+    const snap = toHostSnapshot(game(groupedQuiz({}, { speedBonus: false })), T0)
+    expect(snap.groups).toEqual([
+      { id: 'g1', title: 'Round one', firstIndex: 1, questionCount: 3, ownRules: false },
+      { id: 'g2', title: 'Round two', firstIndex: 4, questionCount: 2, ownRules: true },
+    ])
+  })
+
   it('starts with the intro when the first question is in a group', () => {
     const quiz = groupedQuiz()
     quiz.questions = quiz.questions.slice(1)

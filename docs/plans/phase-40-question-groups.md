@@ -209,6 +209,8 @@ Out:
 - **During the intro** `questionIndex` stays on the question before it (-1 before the first), so ending the game in an intro never counts the unasked question. The intro is about `questionIndex + 1`.
 - **Snapshots carry the effective settings** (`settingsAt`) of the question on the screens, so the phone and host rules (answer changes, the scoreboard step) follow group overrides without their own merging. The lobby and the finished game keep the game's own settings.
 - **A group's `revealAnswers`** may be `afterQuestion` or `afterGroup` only; `atEnd` stays quiz-wide in the schema too.
+- **The host's settings line** lists the current question's effective rules, led by "Round 3 rules" when the group sets any of its own (`GroupOutline.ownRules`), instead of naming each override.
+- **The group end** is decided on the host's side (`primary-action.ts`), as the per-question scoreboard already was: the engine moves on only by the host's commands. After the walk through a round's answers, "Back to the game" comes before the standings.
 
 ## Verification command
 

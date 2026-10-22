@@ -10,12 +10,33 @@ export interface PrimaryAction {
 const scoreboardAfterEachQuestion = (host: HostSnapshot) =>
   host.settings.scoreboard === 'afterQuestion' && host.settings.revealAnswers === 'afterQuestion'
 
-const nextQuestion = (host: HostSnapshot): PrimaryAction =>
-  host.questionIndex + 1 < host.questionCount
-    ? { command: { type: 'next' }, label: 'host.game.nextQuestion' }
-    : { command: { type: 'next' }, label: 'host.game.finish' }
+const nextQuestion = (host: HostSnapshot): PrimaryAction => {
+  const index = host.questionIndex + 1
+  if (index >= host.questionCount) return { command: { type: 'next' }, label: 'host.game.finish' }
+  // The next question opens a group: its intro comes first.
+  const round = host.groups.some((group) => group.firstIndex === index)
+  return { command: { type: 'next' }, label: round ? 'host.game.nextRound' : 'host.game.nextQuestion' }
+}
 
 const showScoreboard: PrimaryAction = { command: { type: 'scoreboard' }, label: 'host.game.showScoreboard' }
+
+/**
+ * At the last question of a group, what its end offers first: its held-back answers, then its
+ * standings (when they follow the group). Null elsewhere, or when the group's end asks for nothing.
+ */
+function groupEnd(host: HostSnapshot): { first: PrimaryAction; then: PrimaryAction } | null {
+  const group = host.group
+  if (!group || host.questionIndex !== group.firstIndex + group.questionCount - 1) return null
+  const standings = host.settings.groupStandings === 'afterGroup'
+  if (host.settings.revealAnswers === 'afterGroup' && !group.revealed) {
+    const indexes = Array.from({ length: group.questionCount }, (_, i) => group.firstIndex + i)
+    return {
+      first: { command: { type: 'showAnswers', indexes }, label: 'host.game.showRoundAnswers' },
+      then: standings ? showScoreboard : nextQuestion(host),
+    }
+  }
+  return standings ? { first: showScoreboard, then: nextQuestion(host) } : null
+}
 
 /** The one obvious next step for the host in each phase (button, and Space on the screen). */
 export function primaryAction(host: HostSnapshot): PrimaryAction | null {
@@ -32,7 +53,7 @@ export function primaryAction(host: HostSnapshot): PrimaryAction | null {
         : { command: { type: 'endQuestion' }, label: 'host.game.endQuestion' }
     case 'reveal':
       if (host.awaitingGrading) return null
-      return scoreboardAfterEachQuestion(host) ? showScoreboard : nextQuestion(host)
+      return groupEnd(host)?.first ?? (scoreboardAfterEachQuestion(host) ? showScoreboard : nextQuestion(host))
     case 'scoreboard':
       return nextQuestion(host)
     case 'finished':
@@ -77,6 +98,8 @@ export function alternativeAction(host: HostSnapshot): PrimaryAction | null {
   if (host.reviewing) return null
   if (host.phase === 'finished') return host.resultsPending && host.playersWaiting ? releaseToPlayers : null
   if (host.phase !== 'reveal' || host.awaitingGrading) return null
+  const end = groupEnd(host)
+  if (end) return end.then
   // The scoreboard on demand, also while results wait for the end (totals and ranks only).
   return scoreboardAfterEachQuestion(host) ? nextQuestion(host) : showScoreboard
 }

@@ -172,6 +172,7 @@
     "game": {
       "phase": {
         "lobby": "Waiting for players",
+        "intro": "Round intro",
         "question": "Question running",
         "reveal": "Answers revealed",
         "scoreboard": "Scoreboard",
@@ -206,6 +207,14 @@
       "controls": "Game controls",
       "nextQuestion": "Next question",
       "startRound": "Start round",
+      "nextRound": "Next round",
+      "showRoundAnswers": "Show the round’s answers",
+      "holdIntro": "Hold",
+      "releaseIntro": "Release",
+      "introHeldHint": "On hold: the round starts when you release it or press Start round.",
+      "introWaits": "The round starts when you press Start round.",
+      "roundRules": "Round {{round}} rules",
+      "standingsOnDemand": "Standings after a round when I show them",
       "finish": "Finish",
       "gradeFirst": "Grade the answers below to continue.",
       "onlineCount_one": "{{count}} online",
@@ -304,6 +313,7 @@
     "shown": {
       "onScreen": {
         "reveal": "On the screens: answers revealed",
+        "answerHidden": "On the screens: question closed, answers hidden",
         "scoreboard": "On the screens: scoreboard after this question",
         "shownAgain": "On the screens: shown again"
       },
@@ -321,6 +331,7 @@
       "projector": "Projector:",
       "lobby": "lobby",
       "intro": "intro of round {{round}}",
+      "introHeld": "intro of round {{round}}, on hold",
       "question": "question {{index}}",
       "paused": "question {{index}}, paused",
       "answer": "answer to question {{index}}",
@@ -390,6 +401,7 @@
     "standings": {
       "resultsSoFar": "Results so far",
       "hiddenNote": "Only you see these scores. The players and the projector see them at the end, or when you show the standings.",
+      "hiddenNoteRound": "Only you see these scores. The players and the projector see them at the end of the round, or when you show the standings.",
       "correct_one": "{{count}} correct",
       "correct_other": "{{count}} correct",
       "members_one": "{{count}} member",
@@ -482,6 +494,7 @@
       "revealAnswers": "Correct answers",
       "revealAnswersOptions": {
         "afterQuestion": "After each question",
+        "afterGroup": "At the end of each round",
         "atEnd": "Only at the end"
       },
       "scoreboard": "Scoreboard",
@@ -661,6 +674,11 @@
     "playerCount_other": "{{count}} players",
     "questionOf_one": "Question {{index}} of {{count}}",
     "questionOf_other": "Question {{index}} of {{count}}",
+    "roundOf_one": "Round {{index}} of {{count}}",
+    "roundOf_other": "Round {{index}} of {{count}}",
+    "roundQuestions_one": "{{count}} question",
+    "roundQuestions_other": "{{count}} questions",
+    "questionRange": "Questions {{first}}–{{last}}",
     "secondsLeft_one": "{{count}} second left",
     "secondsLeft_other": "{{count}} seconds left",
     "pausedSecondsLeft_one": "Paused, {{count}} second left",
