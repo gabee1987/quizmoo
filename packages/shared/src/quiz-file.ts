@@ -21,10 +21,11 @@ export const quizFileSchema = z.object({
 })
 export type QuizFile = z.infer<typeof quizFileSchema>
 
-/** Every image a quiz refers to: question and option images and the logo, each once. */
+/** Every image a quiz refers to: question, option and group images and the logo, each once. */
 export function quizImageIds(quiz: QuizInput): string[] {
   const ids = quiz.questions.flatMap((q) => [q.imageId, ...('options' in q ? q.options.map((o) => o.imageId) : [])])
-  return [...new Set([...ids, quiz.branding.logoImageId].filter((id): id is string => !!id))]
+  const groupIds = quiz.groups.map((g) => g.imageId)
+  return [...new Set([...ids, ...groupIds, quiz.branding.logoImageId].filter((id): id is string => !!id))]
 }
 
 /** The quiz with its image ids swapped through `map` (ids missing from it are left as they are). */
@@ -35,6 +36,7 @@ export function mapQuizImages(quiz: QuizInput, map: ReadonlyMap<string, string>)
   return {
     ...quiz,
     questions: quiz.questions.map((q) => ('options' in q ? { ...swap(q), options: q.options.map(swap) } : swap(q))),
+    groups: quiz.groups.map(swap),
     branding: { ...quiz.branding, logoImageId: logo ? (map.get(logo) ?? logo) : null },
   }
 }

@@ -7,6 +7,7 @@ import {
   quizImageIds,
   quizInputSchema,
   type Question,
+  type QuestionGroup,
   type QuizBranding,
   type QuizInput,
 } from '@quizmoo/shared'
@@ -27,7 +28,10 @@ export function parseQuizBranding(raw: unknown): QuizBranding {
   return parsed.success ? parsed.data : quizBrandingSchema.parse({})
 }
 
-/** Gives every question and option without an id a fresh `nanoid(8)`, so the editor can send new items without ids. */
+/**
+ * Gives every question, option and group without an id a fresh `nanoid(8)`, so the editor can send
+ * new items without ids. (A question names its group by id, so groups normally come with theirs.)
+ */
 export function assignIds(body: unknown): unknown {
   if (typeof body !== 'object' || body === null || !Array.isArray((body as { questions?: unknown }).questions)) {
     return body
@@ -40,7 +44,8 @@ export function assignIds(body: unknown): unknown {
     const options = (question as { options?: unknown }).options
     return Array.isArray(options) ? { ...question, options: options.map(withId) } : question
   })
-  return { ...body, questions }
+  const groups = (body as { groups?: unknown }).groups
+  return { ...body, questions, ...(Array.isArray(groups) && { groups: groups.map(withId) }) }
 }
 
 /** The client sends the translated title ("… (copy)"); the server never writes human text itself. */
@@ -74,6 +79,18 @@ export function withFreshIds(question: Question): Question {
   }
 }
 
+/** A quiz's questions and groups with new ids, the questions still in their groups. */
+export function withFreshGroupIds(questions: Question[], groups: QuestionGroup[]): { questions: Question[]; groups: QuestionGroup[] } {
+  const map = new Map(groups.map((g) => [g.id, nanoid(8)]))
+  return {
+    questions: questions.map((q) => {
+      const fresh = withFreshIds(q)
+      return q.groupId ? { ...fresh, groupId: map.get(q.groupId) ?? q.groupId } : fresh
+    }),
+    groups: groups.map((g) => ({ ...g, id: map.get(g.id)! })),
+  }
+}
+
 type QuizRow = typeof quizzes.$inferSelect
 
 function toQuiz(row: QuizRow) {
@@ -82,6 +99,7 @@ function toQuiz(row: QuizRow) {
     title: row.title,
     description: row.description,
     questions: row.questions,
+    groups: row.groups,
     settings: gameSettingsSchema.parse(row.settings),
     branding: parseQuizBranding(row.branding),
     createdAt: row.createdAt,
@@ -136,6 +154,7 @@ export async function quizRoutes(app: FastifyInstance, { db }: { db: Db }) {
         id: quizzes.id,
         title: quizzes.title,
         questionCount: sql<number>`jsonb_array_length(${quizzes.questions})`.mapWith(Number),
+        groupCount: sql<number>`jsonb_array_length(${quizzes.groups})`.mapWith(Number),
         updatedAt: quizzes.updatedAt,
         settings: quizzes.settings,
         branding: quizzes.branding,
@@ -225,6 +244,7 @@ export async function quizRoutes(app: FastifyInstance, { db }: { db: Db }) {
           title: row.title,
           description: row.description,
           questions: row.questions.map((question) => ({ ...question, ...body.questions })),
+          groups: row.groups,
           settings: { ...row.settings, ...body.settings },
           branding: parseQuizBranding(row.branding),
         },
@@ -264,7 +284,7 @@ export async function quizRoutes(app: FastifyInstance, { db }: { db: Db }) {
     return { quiz: toQuiz(updated!) }
   })
 
-  // Copy with fresh question and option ids (answers in running games are keyed by them).
+  // Copy with fresh question, option and group ids (answers in running games are keyed by them).
   app.post<{ Params: { id: string } }>('/api/quizzes/:id/duplicate', auth, async (request, reply) => {
     const row = await ownQuiz(request.params.id, request.user!.id, reply)
     if (!row) return reply
@@ -277,7 +297,7 @@ export async function quizRoutes(app: FastifyInstance, { db }: { db: Db }) {
         ownerId: request.user!.id,
         title: body.title ?? row.title,
         description: row.description,
-        questions: row.questions.map(withFreshIds),
+        ...withFreshGroupIds(row.questions, row.groups),
         settings: row.settings,
         branding: row.branding,
       })

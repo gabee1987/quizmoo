@@ -900,7 +900,11 @@
       "invalid": "Ez így nem jó.",
       "markCorrect": "Jelöld meg a helyes választ.",
       "duplicateOptions": "Két lehetőség nem lehet egyforma.",
-      "duplicateQuestions": "Ismétlődő kérdésazonosító; másold újra a kérdést."
+      "duplicateQuestions": "Ismétlődő kérdésazonosító; másold újra a kérdést.",
+      "duplicateGroups": "Ismétlődő csoportazonosító; add hozzá újra a csoportot.",
+      "unknownGroup": "Ennek a kérdésnek eltűnt a csoportja; tedd át egy csoportba.",
+      "groupOrder": "Egy csoport kérdései maradjanak együtt; tedd vissza ezt a kérdést a csoportjába.",
+      "emptyGroup": "Tegyél ebbe a csoportba egy kérdést, vagy töröld."
     },
     "sampleQuestion": "Melyik a Naprendszer legnagyobb bolygója?",
     "sampleOption1": "Jupiter",
@@ -1787,7 +1791,7 @@
       "points": "egész szám 0 és 5000 között, vagy hagyd üresen.",
       "tolerance": "0 vagy nagyobb szám, vagy hagyd üresen.",
       "empty": "Nincs kérdés a fájlban. Tölts ki legalább egy sort a fejléc alatt.",
-      "tooMany": "Egy kvízben legfeljebb 100 kérdés lehet. Vágd ketté a fájlt."
+      "tooMany": "Egy kvízben legfeljebb 200 kérdés lehet. Vágd ketté a fájlt."
     },
     "columns": {
       "type": "típus",

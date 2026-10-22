@@ -12,8 +12,8 @@ export const csvLanguages = ['hu', 'en'] as const
 export type CsvLanguage = (typeof csvLanguages)[number]
 
 export const MAX_ANSWER_COLUMNS = 6
-/** Larger files are not a quiz of at most 100 questions; refuse them before parsing. */
-export const MAX_CSV_BYTES = 512 * 1024
+/** Larger files are not a quiz of at most `MAX_QUESTIONS` questions; refuse them before parsing. */
+export const MAX_CSV_BYTES = 1024 * 1024
 
 export type CsvColumn = 'type' | 'question' | 'answers' | 'correct' | 'time' | 'points' | 'tolerance'
 const at = { type: 0, question: 1, answers: 2, correct: 8, time: 9, points: 10, tolerance: 11 } as const

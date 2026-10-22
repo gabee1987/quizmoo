@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import type { Question } from './quiz.js'
+import { MAX_QUESTIONS, type Question } from './quiz.js'
 import { CSV_COLUMN_COUNT, parseQuizCsv, questionsToCsv, readCsv, type CsvLanguage } from './quiz-csv.js'
 
 const questions: Question[] = [
@@ -120,9 +120,9 @@ describe('quiz spreadsheet', () => {
     ])
   })
 
-  it('refuses an empty file and more than 100 questions', () => {
+  it(`refuses an empty file and more than ${MAX_QUESTIONS} questions`, () => {
     expect(parseQuizCsv('﻿# only guidance\ntype;question\n').problems).toEqual([{ row: 0, code: 'empty' }])
-    const many = Array.from({ length: 101 }, (_, i) => `truefalse;Q${i};;;;;;;true`).join('\n')
+    const many = Array.from({ length: MAX_QUESTIONS + 1 }, (_, i) => `truefalse;Q${i};;;;;;;true`).join('\n')
     expect(parseQuizCsv(many).problems).toEqual([{ row: 0, code: 'tooMany' }])
   })
 })

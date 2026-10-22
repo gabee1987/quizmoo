@@ -27,7 +27,7 @@ The template (**Import > Download template**) explains every column in its first
 | 12 tolerance | Number questions only: how far from the right number still counts; empty means exact |
 
 - A file with any problem imports nothing. The dialog lists each problem as row (as a spreadsheet numbers it) and column, with what to write there.
-- At most 100 questions and 512 KB per file.
+- At most 200 questions and 1 MB per file.
 - Text cells starting with `=`, `+`, `-` or `@` are written with a leading apostrophe so Excel does not run them as formulas; the import removes it.
 
 ## Quizmoo file

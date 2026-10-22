@@ -1,6 +1,6 @@
 import { pgTable, text, timestamp, jsonb, integer, boolean, customType, index } from 'drizzle-orm/pg-core'
 import { sql } from 'drizzle-orm'
-import type { GameSettings, HostSettings, Question, QuizBranding } from '@quizmoo/shared'
+import type { GameSettings, HostSettings, Question, QuestionGroup, QuizBranding } from '@quizmoo/shared'
 import type { GameState } from '../game/types.js'
 import { foldSql } from './search.js'
 
@@ -50,6 +50,8 @@ export const quizzes = pgTable('quizzes', {
   title: text('title').notNull(),
   description: text('description').notNull().default(''),
   questions: jsonb('questions').$type<Question[]>().notNull(),
+  /** The quiz's question groups (rounds), in order; questions point to them by `groupId`. */
+  groups: jsonb('groups').$type<QuestionGroup[]>().notNull().default([]),
   /** Default game settings. Stored as sent; read through `gameSettingsSchema` so new fields get defaults. */
   settings: jsonb('settings').$type<Partial<GameSettings>>().notNull().default({}),
   /** The quiz's own logo, event name and whether its games show branding; read through `quizBrandingSchema`. */

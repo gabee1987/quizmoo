@@ -1,4 +1,4 @@
-import type { GameSettings, Question, QuestionType, Quiz, QuizInput } from '@quizmoo/shared'
+import { MAX_QUESTIONS, type GameSettings, type Question, type QuestionType, type Quiz, type QuizInput } from '@quizmoo/shared'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link, createFileRoute, useBlocker, useNavigate } from '@tanstack/react-router'
 import { useCallback, useEffect, useMemo, useRef, useState, type ComponentType } from 'react'
@@ -75,7 +75,6 @@ const tabIcons: Record<SettingsTab, ComponentType<{ className?: string }>> = {
   branding: ImageIcon,
 }
 
-const MAX_QUESTIONS = 100
 const UNDO_MS = 10_000
 /** States in which leaving would lose edits: nothing is on its way to the server. */
 const UNSAVABLE: SaveStatus[] = ['invalid', 'offline', 'error']
@@ -117,6 +116,7 @@ function Editor({ quiz }: { quiz: Quiz }) {
     title: quiz.title,
     description: quiz.description,
     questions: quiz.questions,
+    groups: quiz.groups,
     settings: quiz.settings,
     branding: quiz.branding,
   })

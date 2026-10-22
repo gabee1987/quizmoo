@@ -7,6 +7,7 @@ import type {
   GameSettings,
   OwnQuickMessage,
   Quiz,
+  QuestionGroup,
   QuickMessage,
   TeamAnswerMode,
 } from '@quizmoo/shared'
@@ -91,8 +92,11 @@ export interface Team {
   gains?: Record<string, number>
 }
 
-/** The quiz frozen into a game. Its default settings are not part of it: the game has its own. */
-export type GameQuiz = Omit<Quiz, 'settings' | 'branding'>
+/**
+ * The quiz frozen into a game. Its default settings are not part of it: the game has its own.
+ * `groups` is missing in games saved before groups existed; read it through `groupsOf`.
+ */
+export type GameQuiz = Omit<Quiz, 'settings' | 'branding' | 'groups'> & { groups?: QuestionGroup[] }
 
 /** Plain JSON-serialisable value: persisted on every transition and restored on boot. */
 export interface GameState {

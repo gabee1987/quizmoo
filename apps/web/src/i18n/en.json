@@ -900,7 +900,11 @@
       "invalid": "Invalid value.",
       "markCorrect": "Mark the correct option.",
       "duplicateOptions": "Options must be distinct.",
-      "duplicateQuestions": "Duplicate question ids; duplicate the question again."
+      "duplicateQuestions": "Duplicate question ids; duplicate the question again.",
+      "duplicateGroups": "Duplicate group ids; add the group again.",
+      "unknownGroup": "This question's group is gone; move it into a group.",
+      "groupOrder": "A group's questions must stay together; move this question back to its group.",
+      "emptyGroup": "Add a question to this group, or delete it."
     },
     "sampleQuestion": "Which is the largest planet in the Solar System?",
     "sampleOption1": "Jupiter",
@@ -1787,7 +1791,7 @@
       "points": "a whole number from 0 to 5000, or leave it empty.",
       "tolerance": "a number of 0 or more, or leave it empty.",
       "empty": "No questions in this file. Fill in at least one row below the header.",
-      "tooMany": "A quiz holds at most 100 questions. Split the file in two."
+      "tooMany": "A quiz holds at most 200 questions. Split the file in two."
     },
     "columns": {
       "type": "type",

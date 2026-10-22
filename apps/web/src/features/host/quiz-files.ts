@@ -82,8 +82,8 @@ export async function exportQuiz(quiz: QuizInput, kind: 'csv' | 'file', t: TFunc
 }
 
 /** The full Quizmoo file: the quiz's own fields (no ids or dates of this install), with its images as base64. */
-async function downloadQuizFile({ title, description, questions, settings, branding }: QuizInput, t: TFunction): Promise<void> {
-  const quiz = { title, description, questions, settings, branding }
+async function downloadQuizFile({ title, description, questions, groups, settings, branding }: QuizInput, t: TFunction): Promise<void> {
+  const quiz = { title, description, questions, groups, settings, branding }
   const images: Record<string, string> = {}
   for (const id of quizImageIds(quiz)) {
     const res = await fetch(`/api/images/${encodeURIComponent(id)}`)
