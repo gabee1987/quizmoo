@@ -57,7 +57,7 @@ question.groupId?: string
 **Validation rules:**
 - every `groupId` names a group;
 - a group's questions are contiguous, and the groups appear in the order of `groups`;
-- questions without a group may only come before the first group;
+- questions without a group may come before, between and after groups (changed during step 7, see Deviations);
 - a group without questions is a problem shown in the editor, which also blocks starting a game, like other quiz problems.
 
 **New quiz-wide settings in `gameSettingsSchema`:**
@@ -210,6 +210,10 @@ Out:
 - **Snapshots carry the effective settings** (`settingsAt`) of the question on the screens, so the phone and host rules (answer changes, the scoreboard step) follow group overrides without their own merging. The lobby and the finished game keep the game's own settings.
 - **A group's `revealAnswers`** may be `afterQuestion` or `afterGroup` only; `atEnd` stays quiz-wide in the schema too.
 - **The host's settings line** lists the current question's effective rules, led by "Round 3 rules" when the group sets any of its own (`GroupOutline.ownRules`), instead of naming each override.
+- **Adding a group in the editor:** "Start a group here" in a question's menu starts the group above that question (it takes that question and the ones after it, up to the next group); "Add group" under the list adds an empty group at the end. Move up and down step one row, so each step past a group's header or end takes a question into or out of it.
+- **Ungrouped questions anywhere** (decided by the user while testing step 7): the schema no longer requires questions without a group to come first, so a warm-up, a bonus question between rounds or a final question works. The engine already found rounds by runs of the same `groupId`. In the editor's list a group is one rounded card in its colour with a question count: closed it is its header, open it grows down around its questions, which sit centred inside it; an invisible end row after it takes drops below the group. While dragging, the rows move aside and the dragged row waits as a dashed ghost card where it lands, inside a group's card when it lands in the group. Group headers drag like questions and move with all their questions (every group folds while one is dragged); "Groups only" folds them all; a question's "Group" select puts it at the end of a group or right below its own; pulling a row to the left drops it on a trash strip. Deleting a group with questions asks whether to keep them (ungrouped, where they are) or delete them too; both have Undo. A selected group shows "Settings" and "Questions" tabs, the second to reorder its questions. While editing, an emptied group keeps its place through `Layout.emptyAfter` (never saved: an empty group is invalid).
+- **Colour tags** (asked for while testing step 7): questions and groups take an optional `color` from eight fixed tags, shown only in the editor (a stripe on a question, the tint and rail of a group). `createGame` strips them from the game's copy of the quiz, so no screen receives them.
+- **The group form's overrides** are one select per rule ("Same as the quiz (…)" or a value) under Game flow and Scoring; the round settings show in the quiz settings and the new game dialog only for a quiz with groups.
 - **The group end** is decided on the host's side (`primary-action.ts`), as the per-question scoreboard already was: the engine moves on only by the host's commands. After the walk through a round's answers, "Back to the game" comes before the standings.
 
 ## Verification command
@@ -223,7 +227,7 @@ $env:E2E_BASE_URL="http://localhost:3999"; $env:E2E_USERNAME="admin"; $env:E2E_P
 
 1. In the editor, add a group above question 1 and another above question 6. Give each a title, info and a picture. Expected: the list shows two headers with their questions, and the preview shows the intro.
 2. Set the second group's time to 10 s and its points to 500, and accept "Apply". Expected: its questions change and the first group's do not. A question added to it starts at 10 s and 500.
-3. Drag a question from group 1 into group 2, then delete group 1. Expected: the question moves; after the delete its questions stay ungrouped at the top, and Undo brings the group back.
+3. Drag a question from group 1 into group 2, then delete group 1. Expected: the question moves; after the delete its questions stay where they were, ungrouped, and Undo brings the group back.
 4. Turn off the speed bonus for group 2 only and play. Expected: in group 2 every correct answer gets the full points; group 1 still rewards speed.
 5. Start the game with "wait for the host" intros. Expected: the projector and phones show group 1's intro until Next.
 6. Set group 2's intro to 10 s. Expected: it starts by itself; Hold stops the countdown, Release resumes it.

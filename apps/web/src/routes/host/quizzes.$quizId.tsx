@@ -1,4 +1,13 @@
-import { MAX_QUESTIONS, type GameSettings, type Question, type QuestionType, type Quiz, type QuizInput } from '@quizmoo/shared'
+import {
+  MAX_GROUPS,
+  MAX_QUESTIONS,
+  type GameSettings,
+  type Question,
+  type QuestionGroup,
+  type QuestionType,
+  type Quiz,
+  type QuizInput,
+} from '@quizmoo/shared'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link, createFileRoute, useBlocker, useNavigate } from '@tanstack/react-router'
 import { useCallback, useEffect, useMemo, useRef, useState, type ComponentType } from 'react'
@@ -12,6 +21,7 @@ import {
   FileTextIcon,
   ImageIcon,
   KeyboardIcon,
+  LayersIcon,
   ListOrderedIcon,
   PlayIcon,
   PlusIcon,
@@ -34,15 +44,39 @@ import { cn } from '@/lib/cn'
 import { toastError } from '@/lib/toast'
 import { useMediaQuery } from '@/lib/use-media-query'
 import { ConfirmDialog } from '../../components/dialog'
+import { SelectField } from '../../components/select-field'
 import { Spinner } from '../../components/spinner'
 import {
+  addGroup,
+  addGroupAround,
+  addQuestion as addToLayout,
+  applyToGroup,
+  differingQuestions,
   duplicateQuestion,
-  insertQuestion,
-  move,
+  forGroup,
+  fromItems,
+  groupMoves,
+  listItems,
+  moveToGroup,
+  newId,
   newQuestion,
+  placeGroup,
+  placeQuestion,
+  questionMoves,
+  removeGroup,
+  removeGroupWithQuestions,
   removeQuestion,
+  reorderInGroup,
+  restoreGroup,
+  restoreGroupWithQuestions,
   restoreQuestion,
+  stepGroup,
+  stepQuestion,
+  withTag,
+  type Layout,
 } from '../../features/editor/draft'
+import { GroupForm } from '../../features/editor/group-form'
+import { GroupQuestions } from '../../features/editor/group-questions'
 import { PhonePreview } from '../../features/editor/phone-preview'
 import { ProblemsMenu, listProblems, problemLabel, type Problem } from '../../features/editor/problems-menu'
 import { QuestionForm } from '../../features/editor/question-form'
@@ -76,6 +110,9 @@ const tabIcons: Record<SettingsTab, ComponentType<{ className?: string }>> = {
 }
 
 const UNDO_MS = 10_000
+/** The group picker's value for "No group" (Radix selects take no empty value). */
+const NO_GROUP = ':none'
+const NEW_GROUP = ':new'
 /** States in which leaving would lose edits: nothing is on its way to the server. */
 const UNSAVABLE: SaveStatus[] = ['invalid', 'offline', 'error']
 
@@ -112,7 +149,8 @@ function Editor({ quiz }: { quiz: Quiz }) {
   const { t, i18n } = useTranslation()
   const queryClient = useQueryClient()
   const navigate = useNavigate()
-  const [draft, setDraft] = useState<QuizInput>({
+  // The quiz being edited, plus where its empty groups sit in the list (not saved).
+  const [draft, setDraft] = useState<QuizInput & Pick<Layout, 'emptyAfter'>>({
     title: quiz.title,
     description: quiz.description,
     questions: quiz.questions,
@@ -150,6 +188,8 @@ function Editor({ quiz }: { quiz: Quiz }) {
   const [helpOpen, setHelpOpen] = useState(false)
   const [starting, setStarting] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  // The group with questions waiting for "keep them or delete them too".
+  const [confirmGroup, setConfirmGroup] = useState<QuestionGroup | null>(null)
   // Set while the quiz is being deleted and after: no more saves, and leaving needs no confirmation.
   const deleted = useRef(false)
   // Field errors of a question show once the user has left it (or it came from the server),
@@ -158,8 +198,16 @@ function Editor({ quiz }: { quiz: Quiz }) {
   const [focusField, setFocusField] = useState<string | null>(null)
 
   const questions = draft.questions
+  const groups = draft.groups
+  const layout = useMemo<Layout>(
+    () => ({ questions: draft.questions, groups: draft.groups, ...(draft.emptyAfter && { emptyAfter: draft.emptyAfter }) }),
+    [draft.questions, draft.groups, draft.emptyAfter],
+  )
+  // The selection is a question, or a group's header (then its form and intro preview show).
   const selectedIndex = questions.findIndex((q) => q.id === selectedId)
   const selected = questions[selectedIndex] ?? null
+  const selectedGroupIndex = groups.findIndex((g) => g.id === selectedId)
+  const selectedGroup = groups[selectedGroupIndex] ?? null
 
   const select = useCallback(
     (id: string | null) => {
@@ -170,6 +218,7 @@ function Editor({ quiz }: { quiz: Quiz }) {
   )
   const setQuestions = (update: (questions: Question[]) => Question[]) =>
     setDraft((d) => ({ ...d, questions: update(d.questions) }))
+  const setLayout = (update: (layout: Layout) => Layout) => setDraft((d) => ({ ...d, ...update(d) }))
 
   const errors = useMemo(() => validateQuiz(draft), [draft])
   const valid = Object.keys(errors).length === 0
@@ -177,7 +226,7 @@ function Editor({ quiz }: { quiz: Quiz }) {
   const { status, retry } = useAutosave(draft, {
     valid,
     isOffline: (error) => (error instanceof ApiError && error.status === 0) || navigator.onLine === false,
-    save: async (value) => {
+    save: async ({ emptyAfter: _, ...value }) => {
       if (deleted.current) return
       try {
         const res = await apiFetch<{ quiz: Quiz }>(`/api/quizzes/${quiz.id}`, { method: 'PUT', body: JSON.stringify(value) })
@@ -205,10 +254,10 @@ function Editor({ quiz }: { quiz: Quiz }) {
     if (complete.length > 0) setVisited((v) => new Set([...v, ...complete.map((q) => q.id)]))
   }, [questions, errors, visited])
 
-  // Keep a question selected while there are any.
+  // Keep a question (or a group) selected while there are any.
   useEffect(() => {
-    if (!selected && questions.length > 0) setSelectedId(questions[0]!.id)
-  }, [selected, questions])
+    if (!selected && !selectedGroup && questions.length > 0) setSelectedId(questions[0]!.id)
+  }, [selected, selectedGroup, questions])
 
   // Focus a field after the question that holds it has rendered and the menu or dialog that asked
   // for it has closed (its focus trap would take the focus back). If one is still open after a
@@ -240,22 +289,82 @@ function Editor({ quiz }: { quiz: Quiz }) {
       // An untouched new question gets no dot while it is being written.
       if ((visited.has(q.id) || q.id !== selectedId) && errorsUnder(errors, `questions.${i}`).length > 0) ids.add(q.id)
     })
+    groups.forEach((g, i) => {
+      if (errorsUnder(errors, `groups.${i}`).length > 0) ids.add(g.id)
+    })
     return ids
-  }, [questions, errors, visited, selectedId])
+  }, [questions, groups, errors, visited, selectedId])
 
   const picked = useRef(false)
+  // A new question goes after the selected one, into its group, or at the end of the selected group,
+  // with that group's time and points.
   const addQuestion = (type: QuestionType) => {
     picked.current = picking
-    const question = newQuestion(type)
-    setQuestions((list) => insertQuestion(list, question, selectedIndex + 1))
+    const question = forGroup(newQuestion(type), selectedGroup ?? groups.find((g) => g.id === selected?.groupId))
+    const next = addToLayout(layout, question, selectedId)
+    setLayout(() => next)
     select(question.id)
     setPicking(false)
     setListOpen(false)
-    setFocusField(`questions.${selectedIndex + 1}.text`)
+    setFocusField(`questions.${next.questions.findIndex((q) => q.id === question.id)}.text`)
   }
-  const moveSelected = (to: number) => {
-    if (selectedIndex < 0) return
-    setQuestions((list) => move(list, selectedIndex, to))
+  const moveSelected = (where: 'up' | 'down' | 'top' | 'bottom') => {
+    if (!selected) return
+    setLayout((l) => stepQuestion(l, selected.id, where))
+  }
+  /**
+   * Starts a group above the question `beforeId` (null: an empty one at the end), or with `around` one
+   * holding just the question `beforeId`, and selects it.
+   */
+  const newGroup = (beforeId: string | null, around = false) => {
+    if (groups.length >= MAX_GROUPS) return
+    const group: QuestionGroup = { id: newId(), title: '', info: '', settings: {} }
+    const placed = around && beforeId ? addGroupAround(layout, group, beforeId) : addGroup(layout, group, beforeId)
+    const index = placed.groups.findIndex((g) => g.id === group.id)
+    const named = { ...group, title: t('editor.groupDefaultTitle', { n: index + 1 }) }
+    setLayout(() => ({ ...placed, groups: placed.groups.map((g) => (g.id === group.id ? named : g)) }))
+    select(group.id)
+    setListOpen(false)
+    setFocusField(`groups.${index}.title`)
+  }
+  /** Deletes the group `id`, keeping its questions (ungrouped where they are) or deleting them too. */
+  const deleteGroup = (id: string, withQuestions: boolean) => {
+    const index = groups.findIndex((g) => g.id === id)
+    if (index < 0) return
+    let undo: () => void
+    if (withQuestions) {
+      const { layout: next, removed } = removeGroupWithQuestions(layout, id)
+      setLayout(() => next)
+      if (selectedId === id || removed.questions.some((q) => q.question.id === selectedId)) {
+        const at = Math.min(removed.questions[0]?.index ?? 0, next.questions.length - 1)
+        setSelectedId(next.questions[at]?.id ?? next.groups[0]?.id ?? null)
+      }
+      undo = () => setLayout((l) => restoreGroupWithQuestions(l, removed))
+    } else {
+      const { layout: next, removed } = removeGroup(layout, id)
+      setLayout(() => next)
+      if (selectedId === id) setSelectedId(removed.questionIds[0] ?? next.groups[Math.min(index, next.groups.length - 1)]?.id ?? null)
+      undo = () => setLayout((l) => restoreGroup(l, removed))
+    }
+    setConfirmGroup(null)
+    toast(t(withQuestions ? 'editor.groupDeletedWithQuestions' : 'editor.groupDeleted', { n: index + 1 }), {
+      id: `deleted-${id}`,
+      duration: UNDO_MS,
+      action: {
+        label: t('editor.undo'),
+        onClick: () => {
+          undo()
+          setSelectedId(id)
+        },
+      },
+    })
+  }
+  // A group with questions asks first whether they go too; an empty one goes at once (Undo is there).
+  const requestDeleteGroup = (id: string) => {
+    const group = groups.find((g) => g.id === id)
+    if (!group) return
+    if (questions.some((q) => q.groupId === id)) setConfirmGroup(group)
+    else deleteGroup(id, false)
   }
   const duplicateSelected = () => {
     if (selectedIndex < 0 || questions.length >= MAX_QUESTIONS) return
@@ -264,11 +373,13 @@ function Editor({ quiz }: { quiz: Quiz }) {
     select(copy.id)
     toast.success(t('editor.questionDuplicated'))
   }
-  const deleteSelected = () => {
-    if (selectedIndex < 0) return
-    const { questions: next, removed } = removeQuestion(questions, selectedIndex)
-    setQuestions(() => next)
-    setSelectedId(next[Math.min(selectedIndex, next.length - 1)]?.id ?? null)
+  const deleteQuestion = (id: string) => {
+    const index = questions.findIndex((q) => q.id === id)
+    if (index < 0) return
+    const { questions: next, removed } = removeQuestion(questions, index)
+    // Through the list, so a group it leaves empty stays where it was.
+    setLayout((l) => fromItems(listItems(l).filter((i) => !(i.kind === 'question' && i.question.id === removed.question.id))))
+    if (selectedId === id) setSelectedId(next[Math.min(index, next.length - 1)]?.id ?? null)
     toast(t('editor.questionDeleted', { n: removed.index + 1 }), {
       id: `deleted-${removed.question.id}`,
       duration: UNDO_MS,
@@ -282,6 +393,10 @@ function Editor({ quiz }: { quiz: Quiz }) {
     })
   }
   const goToProblem = (problem: Problem) => {
+    if (problem.groupIndex !== null) {
+      const group = groups[problem.groupIndex]
+      if (group) setSelectedId(group.id)
+    }
     if (problem.questionIndex !== null) {
       const question = questions[problem.questionIndex]
       if (question) {
@@ -294,8 +409,9 @@ function Editor({ quiz }: { quiz: Quiz }) {
   }
 
   // Latest handlers for the keyboard listener, which is registered once.
-  const shortcutActions = useRef({ duplicateSelected, moveSelected, selectedIndex, count: questions.length })
-  shortcutActions.current = { duplicateSelected, moveSelected, selectedIndex, count: questions.length }
+  const canMove = selected ? questionMoves(layout, selected.id) : { up: false, down: false }
+  const shortcutActions = useRef({ duplicateSelected, moveSelected, canMove })
+  shortcutActions.current = { duplicateSelected, moveSelected, canMove }
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       // A dialog or menu owns the keyboard while it is open.
@@ -306,8 +422,8 @@ function Editor({ quiz }: { quiz: Quiz }) {
       const a = shortcutActions.current
       if (shortcut === 'duplicate') a.duplicateSelected()
       if (shortcut === 'add') setPicking(true)
-      if (shortcut === 'moveUp' && a.selectedIndex > 0) a.moveSelected(a.selectedIndex - 1)
-      if (shortcut === 'moveDown' && a.selectedIndex >= 0 && a.selectedIndex < a.count - 1) a.moveSelected(a.selectedIndex + 1)
+      if (shortcut === 'moveUp' && a.canMove.up) a.moveSelected('up')
+      if (shortcut === 'moveDown' && a.canMove.down) a.moveSelected('down')
       if (shortcut === 'help') setHelpOpen(true)
     }
     window.addEventListener('keydown', onKeyDown)
@@ -339,23 +455,34 @@ function Editor({ quiz }: { quiz: Quiz }) {
           ? t(`editor.status.${status}`)
           : null
 
+  const listTitle =
+    groups.length > 0
+      ? t('editor.listSummary', { questions: t('editor.questionCount', { count: questions.length }), groups: t('editor.groupCount', { count: groups.length }) })
+      : t('editor.questionCount', { count: questions.length })
   const list = (
     <div className="flex flex-col gap-3">
       <QuestionList
-        questions={questions}
+        layout={layout}
         selectedId={selectedId}
         invalidIds={invalidIds}
         onSelect={(id) => {
           select(id)
           setListOpen(false)
         }}
-        onMove={(from, to) => setQuestions((l) => move(l, from, to))}
-      />
+        onPlace={(id, targetId, side) => setLayout((l) => placeQuestion(l, id, targetId, side))}
+        onPlaceGroup={(id, targetId, side) => setLayout((l) => placeGroup(l, id, targetId, side))}
+        onTrash={(id) => (groups.some((g) => g.id === id) ? requestDeleteGroup(id) : deleteQuestion(id))}      />
       {/* An empty quiz shows the type picker in the middle already. */}
       {questions.length > 0 && questions.length < MAX_QUESTIONS && (
         <Button variant="secondary" onClick={() => setPicking(true)}>
           <PlusIcon aria-hidden="true" />
           {t('editor.addQuestion')}
+        </Button>
+      )}
+      {questions.length > 0 && groups.length < MAX_GROUPS && (
+        <Button variant="outline" onClick={() => newGroup(null)}>
+          <LayersIcon aria-hidden="true" />
+          {t('editor.addGroup')}
         </Button>
       )}
     </div>
@@ -408,7 +535,12 @@ function Editor({ quiz }: { quiz: Quiz }) {
       {allSections.map((section) => (
         <TabsContent key={section} value={section} className="flex flex-col gap-4">
           <p className="text-sm text-muted-foreground">{t('editor.gameSettingsHelp')}</p>
-          <GameSettingsForm value={draft.settings} onChange={(settings) => setDraft((d) => ({ ...d, settings }))} sections={[section]} />
+          <GameSettingsForm
+            value={draft.settings}
+            onChange={(settings) => setDraft((d) => ({ ...d, settings }))}
+            sections={[section]}
+            rounds={groups.length > 0}
+          />
         </TabsContent>
       ))}
       <TabsContent value="branding">
@@ -416,7 +548,28 @@ function Editor({ quiz }: { quiz: Quiz }) {
       </TabsContent>
     </Tabs>
   )
-  const preview = <PhonePreview question={selected} index={selectedIndex} count={questions.length} settings={draft.settings} />
+  const preview = (
+    <PhonePreview
+      question={selected}
+      index={selectedIndex}
+      count={questions.length}
+      settings={draft.settings}
+      intro={
+        selectedGroup && {
+          group: {
+            id: selectedGroup.id,
+            title: selectedGroup.title,
+            info: selectedGroup.info,
+            imageId: selectedGroup.imageId ?? null,
+            index: selectedGroupIndex,
+            count: groups.length,
+            questionCount: questions.filter((q) => q.groupId === selectedGroup.id).length,
+          },
+          introSec: selectedGroup.settings.groupIntroSec ?? draft.settings.groupIntroSec,
+        }
+      }
+    />
+  )
 
   return (
     <TooltipProvider delayDuration={200}>
@@ -516,19 +669,19 @@ function Editor({ quiz }: { quiz: Quiz }) {
         */}
         <div
           className={cn(
-            '@container/editor grid items-start gap-4 lg:grid-cols-[17rem_minmax(0,1fr)] xl:gap-0 xl:transition-[grid-template-columns] xl:duration-700 xl:ease-spring-soft',
-            docked ? 'xl:grid-cols-[0rem_minmax(0,1fr)_22rem_calc(100%-22rem)]' : 'xl:grid-cols-[18.5rem_minmax(0,1fr)_22rem_0rem]',
+            '@container/editor grid items-start gap-4 lg:grid-cols-[20rem_minmax(0,1fr)] xl:gap-0 xl:transition-[grid-template-columns] xl:duration-700 xl:ease-spring-soft',
+            docked ? 'xl:grid-cols-[0rem_minmax(0,1fr)_22rem_calc(100%-22rem)]' : 'xl:grid-cols-[21.5rem_minmax(0,1fr)_22rem_0rem]',
           )}
         >
           <div className="hidden min-w-0 items-start justify-end self-stretch lg:flex xl:overflow-x-clip" inert={docked}>
             <aside
               className={cn(
-                'sticky top-22 flex max-h-[calc(100dvh-11rem)] w-[17rem] shrink-0 flex-col gap-3 overflow-y-auto rounded-2xl border bg-card p-3 shadow-soft xl:mr-6',
+                'sticky top-22 flex max-h-[calc(100dvh-11rem)] w-80 shrink-0 flex-col gap-3 overflow-y-auto rounded-2xl border bg-card p-3 shadow-soft xl:mr-6',
                 'transition-[translate,opacity] duration-500 ease-spring',
                 docked && '-translate-x-10 opacity-0',
               )}
             >
-              <h2 className="px-1 font-extrabold">{t('editor.questionCount', { count: questions.length })}</h2>
+              <h2 className="px-1 font-extrabold">{listTitle}</h2>
               {list}
             </aside>
           </div>
@@ -537,15 +690,69 @@ function Editor({ quiz }: { quiz: Quiz }) {
             className={cn('flex min-w-0 flex-col gap-4 xl:transition-opacity xl:duration-300', docked && 'xl:overflow-x-clip xl:opacity-0')}
             inert={docked}
           >
-            {selected ? (
+            {selectedGroup ? (
+              <div key={selectedGroup.id} className="flex animate-fade-up flex-col gap-4 rounded-2xl border bg-card p-4 shadow-soft sm:p-5">
+                <GroupForm
+                  group={selectedGroup}
+                  index={selectedGroupIndex}
+                  count={groups.length}
+                  canMove={groupMoves(layout, selectedGroup.id)}
+                  questionCount={questions.filter((q) => q.groupId === selectedGroup.id).length}
+                  quizSettings={draft.settings}
+                  differing={{
+                    timeLimitSec: differingQuestions(layout, selectedGroup, 'timeLimitSec').length,
+                    points: differingQuestions(layout, selectedGroup, 'points').length,
+                  }}
+                  errors={errors}
+                  path={`groups.${selectedGroupIndex}`}
+                  onChange={(next) => setDraft((d) => ({ ...d, groups: d.groups.map((g) => (g.id === next.id ? next : g)) }))}
+                  onApply={(field) =>
+                    setLayout((l) => {
+                      const group = l.groups.find((g) => g.id === selectedGroup.id)
+                      return group ? applyToGroup(l, group, field) : l
+                    })
+                  }
+                  onMove={(where) => setLayout((l) => stepGroup(l, selectedGroup.id, where))}
+                  onDelete={() => requestDeleteGroup(selectedGroup.id)}
+                  questions={
+                    <GroupQuestions
+                      questions={questions.filter((q) => q.groupId === selectedGroup.id)}
+                      numberOf={(id) => questions.findIndex((q) => q.id === id)}
+                      invalidIds={invalidIds}
+                      onOpen={select}
+                      onMove={(from, to) => setLayout((l) => reorderInGroup(l, selectedGroup.id, from, to))}
+                      onAdd={questions.length < MAX_QUESTIONS ? () => setPicking(true) : null}
+                    />
+                  }
+                />
+              </div>
+            ) : selected ? (
               <div key={selected.id} className="flex animate-fade-up flex-col gap-4 rounded-2xl border bg-card p-4 shadow-soft sm:p-5">
                 <QuestionToolbar
                   question={selected}
                   index={selectedIndex}
                   count={questions.length}
+                  canMove={canMove}
                   onMove={moveSelected}
                   onDuplicate={duplicateSelected}
-                  onDelete={deleteSelected}
+                  onDelete={() => deleteQuestion(selected.id)}
+                  onNewGroup={groups.length < MAX_GROUPS ? () => newGroup(selected.id) : null}
+                  onColor={(color) => setQuestions((l) => l.map((q) => (q.id === selected.id ? withTag(q, color) : q)))}
+                />
+                {/* "New group" starts one around this question alone and opens it to be named. */}
+                <SelectField
+                  label={t('editor.questionGroup')}
+                  value={selected.groupId ?? NO_GROUP}
+                  options={[
+                    { value: NO_GROUP, label: t('editor.noGroup') },
+                    ...groups.map((g, i) => ({ value: g.id, label: t('editor.groupOption', { n: i + 1, title: g.title }) })),
+                    ...(groups.length < MAX_GROUPS ? [{ value: NEW_GROUP, label: t('editor.newGroupOption') }] : []),
+                  ]}
+                  onChange={(groupId) =>
+                    groupId === NEW_GROUP
+                      ? newGroup(selected.id, true)
+                      : setLayout((l) => moveToGroup(l, selected.id, groupId === NO_GROUP ? null : groupId))
+                  }
                 />
                 <QuestionForm
                   question={selected}
@@ -613,7 +820,9 @@ function Editor({ quiz }: { quiz: Quiz }) {
           <div className="fixed inset-x-0 bottom-0 z-30 flex gap-2 border-t bg-card/95 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur lg:hidden">
             <Button variant="secondary" className="flex-1" onClick={() => setListOpen(true)}>
               <ListOrderedIcon aria-hidden="true" />
-              {t('editor.questionNOfCount', { n: selectedIndex + 1, count: questions.length })}
+              {selectedGroup
+                ? t('editor.groupNOfCount', { n: selectedGroupIndex + 1, count: groups.length })
+                : t('editor.questionNOfCount', { n: selectedIndex + 1, count: questions.length })}
               {invalidIds.size > 0 && <span className="size-2.5 rounded-full bg-destructive" aria-label={t('editor.needsFixing')} />}
             </Button>
             {questions.length < MAX_QUESTIONS && (
@@ -626,7 +835,7 @@ function Editor({ quiz }: { quiz: Quiz }) {
         <Sheet open={listOpen} onOpenChange={setListOpen}>
           <SheetContent side="bottom" className="max-h-[85dvh] gap-0 rounded-t-3xl lg:hidden">
             <SheetHeader>
-              <SheetTitle className="text-lg font-extrabold">{t('editor.questionCount', { count: questions.length })}</SheetTitle>
+              <SheetTitle className="text-lg font-extrabold">{listTitle}</SheetTitle>
               <SheetDescription className="text-sm">{t('editor.listHelp')}</SheetDescription>
             </SheetHeader>
             <div className="overflow-y-auto px-4 pb-[max(1rem,env(safe-area-inset-bottom))]">{list}</div>
@@ -672,6 +881,7 @@ function Editor({ quiz }: { quiz: Quiz }) {
             quizTitle={draft.title}
             quizSettings={draft.settings}
             quizBranding={draft.branding}
+            rounds={groups.length > 0}
             pending={play.isPending}
             onCreate={(settings, scheduledAt, branding, lockCode) =>
               play.mutate({ quizId: quiz.id, settings, scheduledAt, branding, lockCode })
@@ -693,6 +903,19 @@ function Editor({ quiz }: { quiz: Quiz }) {
             onCancel={() => setDeleting(false)}
           >
             {t('host.deleteBody', { title: draft.title })}
+          </ConfirmDialog>
+        )}
+
+        {confirmGroup && (
+          <ConfirmDialog
+            title={t('editor.deleteGroupTitle', { title: confirmGroup.title })}
+            confirmLabel={t('editor.deleteGroupWithQuestions')}
+            danger
+            extra={{ label: t('editor.deleteGroupKeepQuestions'), onClick: () => deleteGroup(confirmGroup.id, false) }}
+            onConfirm={() => deleteGroup(confirmGroup.id, true)}
+            onCancel={() => setConfirmGroup(null)}
+          >
+            {t('editor.deleteGroupBody', { count: questions.filter((q) => q.groupId === confirmGroup.id).length })}
           </ConfirmDialog>
         )}
 

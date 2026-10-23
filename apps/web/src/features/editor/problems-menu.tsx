@@ -30,6 +30,10 @@ function partLabel(part: ProblemPart, t: TFunction): string | null {
       return t('editor.acceptedAnswers')
     case 'number':
       return t('editor.correctNumber')
+    case 'groupTitle':
+      return t('editor.groupTitle')
+    case 'groupInfo':
+      return t('editor.groupInfo')
     case 'question':
     case 'other':
       return null
@@ -40,6 +44,7 @@ function partLabel(part: ProblemPart, t: TFunction): string | null {
 export function problemLabel(problem: Problem, t: TFunction): string {
   const where = [
     problem.questionIndex !== null ? t('editor.questionN', { n: problem.questionIndex + 1 }) : null,
+    problem.groupIndex !== null ? t('editor.groupN', { n: problem.groupIndex + 1 }) : null,
     partLabel(problem.part, t),
   ]
     .filter(Boolean)

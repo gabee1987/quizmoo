@@ -16,6 +16,7 @@ import { isScheduled } from '@/features/host/dashboard'
 import { hasFilters, historyPeriods, historyQuery, historySearchSchema, searchText, type HistorySearch } from '@/features/host/history'
 import { gameSummaryQueryOptions } from '@/features/host/queries'
 import { cn } from '@/lib/cn'
+import { stagger } from '@/lib/motion'
 import { toastError } from '@/lib/toast'
 import { ConfirmDialog } from '../../components/dialog'
 import { apiFetch } from '../../lib/api'
@@ -65,6 +66,8 @@ function GameHistory() {
   })
   const summary = useQuery(gameSummaryQueryOptions)
   const rows = games.data?.pages.flatMap((page) => page.games) ?? []
+  // Rows come in one after another, counted within their page, so a page loaded while scrolling does not wait behind the ones before it.
+  const entrance = new Map(games.data?.pages.flatMap((page) => page.games.map((game, i) => [game.gameId, stagger(Math.min(i, 12), 40, 120)] as const)))
 
   const [deleting, setDeleting] = useState<GameHistoryItem | null>(null)
   const remove = useMutation({
@@ -129,7 +132,7 @@ function GameHistory() {
         )}
       </div>
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start" role="search">
+      <div className="flex animate-fade-up flex-col gap-3 sm:flex-row sm:items-start" role="search">
         <div className="flex min-w-0 flex-1 flex-col gap-2">
           <Label htmlFor="history-search" className="text-sm font-semibold">
             {t('history.search')}
@@ -171,14 +174,17 @@ function GameHistory() {
       </div>
 
       {games.isPending && (
-        <div className="flex flex-col gap-2" role="status" aria-label={t('common.loading')}>
+        <div className="flex animate-fade-up flex-col gap-2" style={stagger(1)} role="status" aria-label={t('common.loading')}>
           <Skeleton className="h-20 rounded-2xl" />
           <Skeleton className="h-20 rounded-2xl" />
         </div>
       )}
       {games.isError && <FormAlert>{t('errors.internal')}</FormAlert>}
       {games.isSuccess && rows.length === 0 && (
-        <div className="flex flex-col items-center gap-3 rounded-2xl border-2 border-dashed px-6 py-12 text-center text-muted-foreground">
+        <div
+          className="flex animate-fade-up flex-col items-center gap-3 rounded-2xl border-2 border-dashed px-6 py-12 text-center text-muted-foreground"
+          style={stagger(1)}
+        >
           <HistoryIcon className="size-8 text-primary" aria-hidden="true" />
           <p className="font-semibold">{filtered ? t('history.noMatches') : t('history.empty')}</p>
           {filtered && (
@@ -203,7 +209,7 @@ function GameHistory() {
           aria-busy={games.isFetching || undefined}
         >
           {/* Laptop */}
-          <div className="hidden overflow-hidden rounded-2xl border bg-card shadow-soft md:block">
+          <div className="hidden animate-fade-up overflow-hidden rounded-2xl border bg-card shadow-soft md:block" style={stagger(1)}>
             <table className="w-full text-left">
               <thead className="bg-muted text-sm text-muted-foreground">
                 <tr>
@@ -219,7 +225,7 @@ function GameHistory() {
               </thead>
               <tbody>
                 {rows.map((game) => (
-                  <tr key={game.gameId} className="border-t">
+                  <tr key={game.gameId} className="animate-fade-up border-t" style={entrance.get(game.gameId)}>
                     <td className="max-w-64 px-4 py-3 wrap-break-word">
                       <p className="font-bold">{game.quizTitle}</p>
                       <MatchedPlayers names={game.matchedPlayers} />
@@ -242,7 +248,7 @@ function GameHistory() {
           {/* Phone */}
           <ul className="flex flex-col gap-3 md:hidden">
             {rows.map((game) => (
-              <li key={game.gameId} className="flex flex-col gap-3 rounded-2xl border bg-card p-4 shadow-soft">
+              <li key={game.gameId} className="flex animate-fade-up flex-col gap-3 rounded-2xl border bg-card p-4 shadow-soft" style={entrance.get(game.gameId)}>
                 <div className="flex items-start justify-between gap-2">
                   <p className="min-w-0 text-lg leading-snug font-extrabold wrap-break-word">{game.quizTitle}</p>
                   {status(game)}

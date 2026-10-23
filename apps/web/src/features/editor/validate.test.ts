@@ -79,11 +79,12 @@ describe('draft helpers', () => {
 
 describe('locateProblem', () => {
   it('names the field and the element to focus for each error path', () => {
-    expect(locateProblem('title')).toEqual({ questionIndex: null, part: { kind: 'title' }, field: 'title' })
-    expect(locateProblem('questions')).toEqual({ questionIndex: null, part: { kind: 'other' }, field: null })
-    expect(locateProblem('questions.2.text')).toEqual({ questionIndex: 2, part: { kind: 'text' }, field: 'questions.2.text' })
+    expect(locateProblem('title')).toEqual({ questionIndex: null, groupIndex: null, part: { kind: 'title' }, field: 'title' })
+    expect(locateProblem('questions')).toEqual({ questionIndex: null, groupIndex: null, part: { kind: 'other' }, field: null })
+    expect(locateProblem('questions.2.text')).toEqual({ questionIndex: 2, groupIndex: null, part: { kind: 'text' }, field: 'questions.2.text' })
     expect(locateProblem('questions.0.options.3.text')).toEqual({
       questionIndex: 0,
+      groupIndex: null,
       part: { kind: 'option', n: 4 },
       field: 'questions.0.options.3.text',
     })
@@ -93,6 +94,23 @@ describe('locateProblem', () => {
     expect(locateProblem('questions.4.acceptedAnswers.0')).toMatchObject({ part: { kind: 'acceptedAnswers' } })
     expect(locateProblem('questions.4.tolerance')).toMatchObject({ part: { kind: 'number' }, field: 'questions.4.correct' })
     expect(locateProblem('questions.4.timeLimitSec')).toMatchObject({ questionIndex: 4, part: { kind: 'question' } })
+  })
+
+  it("locates a group's problems in that group, focusing its title or info", () => {
+    expect(locateProblem('groups.1.title')).toEqual({ questionIndex: null, groupIndex: 1, part: { kind: 'groupTitle' }, field: 'groups.1.title' })
+    expect(locateProblem('groups.0.info')).toMatchObject({ groupIndex: 0, part: { kind: 'groupInfo' }, field: 'groups.0.info' })
+    // An empty group has no field to focus.
+    expect(locateProblem('groups.2')).toEqual({ questionIndex: null, groupIndex: 2, part: { kind: 'other' }, field: null })
+    expect(locateProblem('groups')).toMatchObject({ groupIndex: null, questionIndex: null, field: null })
+  })
+
+  it('reports an empty group and a group without a title by their paths', () => {
+    const group = { id: 'g', title: '', info: '', settings: {} }
+    const errors = validateQuiz({ ...quiz([filledSingle()]), groups: [group] })
+    expect(errors['groups.0.title']).toBe('editor.errors.required')
+    expect(errors['groups.0']).toBe('editor.errors.emptyGroup')
+    expect(errorsUnder(errors, 'groups.0')).toHaveLength(2)
+    expect(errorsUnder(errors, 'questions.0')).toEqual([])
   })
 
   it('locates every error of a broken draft inside its question', () => {

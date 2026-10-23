@@ -76,7 +76,7 @@ export function createGame(
   return {
     id,
     pin,
-    quiz: shuffleOptions(quiz, settings, random),
+    quiz: shuffleOptions(withoutTags(quiz), settings, random),
     settings,
     phase: 'lobby',
     questionIndex: -1,
@@ -863,6 +863,16 @@ function enterQuestion(state: GameState, index: number, now: number): GameState 
     awaitingGrading: false,
     pausedAt: null,
     reviewIndex: null,
+  }
+}
+
+/** The quiz without its colour tags: they only help the host in the editor, so no screen gets them. */
+function withoutTags(quiz: GameQuiz): GameQuiz {
+  const strip = <T extends { color?: unknown }>({ color: _, ...rest }: T): Omit<T, 'color'> => rest
+  return {
+    ...quiz,
+    questions: quiz.questions.map((q) => strip(q) as Question),
+    ...(quiz.groups && { groups: quiz.groups.map(strip) }),
   }
 }
 

@@ -6,6 +6,7 @@ export interface QuizSummary {
   id: string
   title: string
   questionCount: number
+  groupCount: number
   updatedAt: string
   settings: GameSettings
   branding: QuizBranding

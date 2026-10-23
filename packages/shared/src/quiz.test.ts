@@ -56,19 +56,27 @@ describe('question groups', () => {
     expect(quizInputSchema.parse({ title: 'Quiz', questions: [question('a')] }).groups).toEqual([])
   })
 
-  it('accepts ungrouped questions first, then each group together and in order', () => {
+  it('accepts each group together and in order, with ungrouped questions before, between and after them', () => {
     expect(issues([question('a'), question('b', 'g1'), question('c', 'g1'), question('d', 'g2')], [group('g1'), group('g2')])).toEqual([])
+    expect(issues([question('a', 'g1'), question('b'), question('c', 'g2'), question('d')], [group('g1'), group('g2')])).toEqual([])
   })
 
-  it('reports an unknown group, a split group, an ungrouped question after a group and groups out of order', () => {
+  it('reports an unknown group, a split group and groups out of order', () => {
     expect(issues([question('a', 'nope')], [])).toEqual([['questions.0.groupId', 'editor.errors.unknownGroup']])
     expect(issues([question('a', 'g1'), question('b', 'g2'), question('c', 'g1')], [group('g1'), group('g2')])).toEqual([
       ['questions.2.groupId', 'editor.errors.groupOrder'],
     ])
-    expect(issues([question('a', 'g1'), question('b')], [group('g1')])).toEqual([['questions.1.groupId', 'editor.errors.groupOrder']])
+    expect(issues([question('a', 'g1'), question('b'), question('c', 'g1')], [group('g1')])).toEqual([['questions.2.groupId', 'editor.errors.groupOrder']])
     expect(issues([question('a', 'g2'), question('b', 'g1')], [group('g1'), group('g2')])).toEqual([
       ['questions.1.groupId', 'editor.errors.groupOrder'],
     ])
+  })
+
+  it('keeps a known colour tag on questions and groups, and rejects others', () => {
+    const parsed = quizInputSchema.parse({ title: 'Quiz', questions: [{ ...question('a', 'g1'), color: 'teal' }], groups: [{ ...group('g1'), color: 'pink' }] })
+    expect(parsed.questions[0]!.color).toBe('teal')
+    expect(parsed.groups[0]!.color).toBe('pink')
+    expect(issues([{ ...question('a'), color: 'gold' }], []).map(([path]) => path)).toEqual(['questions.0.color'])
   })
 
   it('reports an empty group and duplicate group ids', () => {

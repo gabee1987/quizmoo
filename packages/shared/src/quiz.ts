@@ -12,14 +12,20 @@ export const optionSchema = z.object({
 })
 export type Option = z.infer<typeof optionSchema>
 
+/** Colour tags the host may give questions and groups to find them in the editor; no game screen shows them. */
+export const tagColors = ['red', 'orange', 'yellow', 'green', 'teal', 'blue', 'purple', 'pink'] as const
+export const tagColorSchema = z.enum(tagColors)
+export type TagColor = z.infer<typeof tagColorSchema>
+
 const baseQuestion = z.object({
   id: z.string().min(1),
   text: z.string().trim().min(1).max(500),
   imageId: z.string().optional(),
   timeLimitSec: z.number().int().min(5).max(180).default(20),
   points: z.number().int().min(0).max(5000).default(1000),
-  /** The group (round) the question belongs to; none for questions before the first group. */
+  /** The group (round) the question belongs to; none for questions outside every group. */
   groupId: z.string().min(1).optional(),
+  color: tagColorSchema.optional(),
 })
 
 export const singleChoiceQuestionSchema = baseQuestion.extend({
@@ -302,13 +308,15 @@ export const questionGroupSchema = z.object({
   /** What new questions in the group start with; the editor can apply them to the group's questions. */
   timeLimitSec: baseQuestion.shape.timeLimitSec.unwrap().optional(),
   points: baseQuestion.shape.points.unwrap().optional(),
+  color: tagColorSchema.optional(),
   settings: groupSettingsSchema.prefault({}),
 })
 export type QuestionGroup = z.infer<typeof questionGroupSchema>
 
 /**
  * Groups and the questions in them: every group is known and holds at least one question, a group's
- * questions are together and in the order of `groups`, and ungrouped questions come before the first group.
+ * questions are together and in the order of `groups`. Ungrouped questions may come before, between and
+ * after groups.
  */
 function checkGroups(quiz: { questions: Question[]; groups: QuestionGroup[] }, ctx: z.RefinementCtx) {
   const issue = (path: (string | number)[], message: string) => ctx.addIssue({ code: 'custom', path, message })
@@ -316,11 +324,18 @@ function checkGroups(quiz: { questions: Question[]; groups: QuestionGroup[] }, c
   if (position.size !== quiz.groups.length) issue(['groups'], 'editor.errors.duplicateGroups')
   const used = new Set<string>()
   let current = -1
+  let previous: string | undefined
   quiz.questions.forEach((question, i) => {
-    const at = question.groupId === undefined ? -1 : position.get(question.groupId)
+    const id = question.groupId
+    const before = previous
+    previous = id
+    if (id === undefined || id === before) return
+    const at = position.get(id)
     if (at === undefined) return issue(['questions', i, 'groupId'], 'editor.errors.unknownGroup')
-    if (question.groupId) used.add(question.groupId)
-    if (at < current) return issue(['questions', i, 'groupId'], 'editor.errors.groupOrder')
+    // A group starts here: it must not have started before, nor come before the last one in `groups`.
+    const split = used.has(id)
+    used.add(id)
+    if (split || at < current) return issue(['questions', i, 'groupId'], 'editor.errors.groupOrder')
     current = at
   })
   quiz.groups.forEach((group, g) => {

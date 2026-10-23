@@ -10,13 +10,17 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 
-/** Modal confirmation. Rendered while the question is open; Escape or Cancel calls onCancel. */
+/**
+ * Modal confirmation. Rendered while the question is open; Escape or Cancel calls onCancel. `extra` adds
+ * a milder second choice between Cancel and the confirm button.
+ */
 export function ConfirmDialog({
   title,
   children,
   confirmLabel,
   danger = false,
   pending = false,
+  extra,
   onConfirm,
   onCancel,
 }: {
@@ -25,13 +29,14 @@ export function ConfirmDialog({
   confirmLabel: string
   danger?: boolean
   pending?: boolean
+  extra?: { label: string; onClick: () => void }
   onConfirm: () => void
   onCancel: () => void
 }) {
   const { t } = useTranslation()
   return (
     <Dialog open onOpenChange={(open) => !open && onCancel()}>
-      <DialogContent showCloseButton={false} className="sm:max-w-md">
+      <DialogContent showCloseButton={false} className={extra ? 'sm:max-w-xl' : 'sm:max-w-md'}>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           {children && <DialogDescription asChild><div>{children}</div></DialogDescription>}
@@ -41,6 +46,11 @@ export function ConfirmDialog({
           <Button type="button" variant="secondary" className="sm:flex-1" onClick={onCancel}>
             {t('common.cancel')}
           </Button>
+          {extra && (
+            <Button type="button" variant="outline" className="sm:flex-1" disabled={pending} onClick={extra.onClick}>
+              {extra.label}
+            </Button>
+          )}
           <Button
             type="button"
             variant={danger ? 'destructive' : 'default'}

@@ -27,13 +27,12 @@ const T0 = 1_000_000
  * The fixture's six questions: q-single outside any group, then round one (q-multiple,
  * q-truefalse, q-text) and round two (q-number, q-poll).
  */
-function groupedQuiz(one: GroupSettings = {}, two: GroupSettings = {}): GameQuiz {
+function groupedQuiz(one: GroupSettings = {}, two: GroupSettings = {}, groupOf = ['', 'g1', 'g1', 'g1', 'g2', 'g2']): GameQuiz {
   const quiz = fixtureQuiz()
   const groups: QuestionGroup[] = [
     { id: 'g1', title: 'Round one', info: 'Warm up', imageId: 'img-1', settings: one },
     { id: 'g2', title: 'Round two', info: '', settings: two },
   ]
-  const groupOf = ['', 'g1', 'g1', 'g1', 'g2', 'g2']
   return {
     ...quiz,
     groups,
@@ -110,6 +109,33 @@ describe('group intros', () => {
     state = next(endQuestion(state), T0 + 3_000)
     expect(state).toMatchObject({ phase: 'question', questionIndex: 2 })
     expect(toHostSnapshot(state, T0).group?.id).toBe('g1')
+  })
+
+  it('plays ungrouped questions between and after groups without an intro or the groups’ rules', () => {
+    const quiz = groupedQuiz({ revealAnswers: 'afterGroup' }, {}, ['', 'g1', 'g1', '', 'g2', ''])
+    let state = playTo(startGame(game(quiz), T0), 3)
+    expect(toHostSnapshot(state, T0).group).toBeNull()
+    expect(answersHidden(state, 'players')).toBe(false)
+    state = endQuestion(state)
+    while (state.phase !== 'question' && state.phase !== 'intro') state = next(state, T0)
+    expect(state.phase).toBe('intro')
+    expect(toHostSnapshot(state, T0).group).toMatchObject({ id: 'g2', firstIndex: 4, questionCount: 1 })
+    state = playTo(state, 5)
+    expect(toHostSnapshot(state, T0).group).toBeNull()
+    roundTrip(state)
+  })
+
+  it('leaves the editor’s colour tags out of the game’s quiz copy', () => {
+    const quiz = groupedQuiz()
+    const tagged: GameQuiz = {
+      ...quiz,
+      questions: quiz.questions.map((q) => ({ ...q, color: 'red' as const })),
+      groups: quiz.groups!.map((g) => ({ ...g, color: 'blue' as const })),
+    }
+    const state = game(tagged)
+    expect(state.quiz.questions.some((q) => 'color' in q)).toBe(false)
+    expect(state.quiz.groups!.some((g) => 'color' in g)).toBe(false)
+    expect(state.quiz.groups![0]!.title).toBe('Round one')
   })
 
   it('lists the groups for the host, with whether each has rules of its own', () => {

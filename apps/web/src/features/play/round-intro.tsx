@@ -1,4 +1,5 @@
-import type { GameSnapshotBase } from '@quizmoo/shared'
+import type { GameSnapshotBase, GroupPublic } from '@quizmoo/shared'
+import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { PausedNote } from '@/components/paused-note'
 import { Timer } from '@/components/timer'
@@ -11,9 +12,36 @@ import { stagger } from '@/lib/motion'
  * so everything fits a 390 × 844 phone without scrolling.
  */
 export function PhoneRoundIntro({ snapshot, clockOffset }: { snapshot: GameSnapshotBase; clockOffset: number }) {
+  if (!snapshot.group) return null
+  return (
+    <RoundIntroCard
+      group={snapshot.group}
+      paused={snapshot.pausedAt !== null}
+      countdown={
+        snapshot.introEndsAt !== null && (
+          <Timer
+            endsAt={snapshot.introEndsAt}
+            totalMs={snapshot.settings.groupIntroSec * 1000}
+            clockOffset={clockOffset}
+            pausedAt={snapshot.pausedAt}
+          />
+        )
+      }
+    />
+  )
+}
+
+/** The intro itself; `countdown` (false: the round waits for the host, "Get ready!") is the game's timer or the editor's still one. */
+export function RoundIntroCard({
+  group,
+  countdown,
+  paused = false,
+}: {
+  group: Pick<GroupPublic, 'title' | 'info' | 'imageId' | 'index' | 'count' | 'questionCount'>
+  countdown: ReactNode
+  paused?: boolean
+}) {
   const { t } = useTranslation()
-  const { group } = snapshot
-  if (!group) return null
   return (
     // Without a picture the round stands alone in the middle.
     <div className={cn('flex flex-1 flex-col gap-4 pb-4', !group.imageId && 'items-center justify-center text-center')}>
@@ -39,19 +67,12 @@ export function PhoneRoundIntro({ snapshot, clockOffset }: { snapshot: GameSnaps
           />
         </div>
       )}
-      {snapshot.introEndsAt !== null ? (
-        <Timer
-          endsAt={snapshot.introEndsAt}
-          totalMs={snapshot.settings.groupIntroSec * 1000}
-          clockOffset={clockOffset}
-          pausedAt={snapshot.pausedAt}
-        />
-      ) : (
+      {countdown || (
         <p className="animate-fade-up self-center rounded-full bg-muted px-5 py-2 text-lg font-bold" style={stagger(3, 0, 120)}>
           {t('play.introGetReady')}
         </p>
       )}
-      {snapshot.pausedAt !== null && <PausedNote />}
+      {paused && <PausedNote />}
     </div>
   )
 }

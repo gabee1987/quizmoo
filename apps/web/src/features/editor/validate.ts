@@ -34,22 +34,38 @@ function messageFor(issue: z.core.$ZodIssue): string {
 }
 
 export type ProblemPart =
-  | { kind: 'title' | 'question' | 'text' | 'options' | 'correct' | 'acceptedAnswers' | 'number' | 'other' }
+  | { kind: 'title' | 'question' | 'text' | 'options' | 'correct' | 'acceptedAnswers' | 'number' | 'groupTitle' | 'groupInfo' | 'other' }
   | { kind: 'option'; n: number }
 
 /**
- * Where an error path lives: its question (null for quiz-level fields), what to call it, and the
- * `data-field` attribute of the element to focus (null when nothing can be focused).
+ * Where an error path lives: its question or group (both null for quiz-level fields), what to call it,
+ * and the `data-field` attribute of the element to focus (null when nothing can be focused).
  */
-export function locateProblem(path: string): { questionIndex: number | null; part: ProblemPart; field: string | null } {
+export function locateProblem(path: string): {
+  questionIndex: number | null
+  groupIndex: number | null
+  part: ProblemPart
+  field: string | null
+} {
+  const group = /^groups\.(\d+)(?:\.(.*))?$/.exec(path)
+  if (group) {
+    const groupIndex = Number(group[1])
+    const at = (kind: 'groupTitle' | 'groupInfo' | 'other', field: string | null) => ({ questionIndex: null, groupIndex, part: { kind }, field })
+    if (group[2] === 'title') return at('groupTitle', `groups.${groupIndex}.title`)
+    if (group[2] === 'info') return at('groupInfo', `groups.${groupIndex}.info`)
+    // An empty group: selecting it is all there is to do.
+    return at('other', null)
+  }
   const match = /^questions\.(\d+)(?:\.(.*))?$/.exec(path)
   if (!match) {
-    return path === 'title' ? { questionIndex: null, part: { kind: 'title' }, field: 'title' } : { questionIndex: null, part: { kind: 'other' }, field: null }
+    return path === 'title'
+      ? { questionIndex: null, groupIndex: null, part: { kind: 'title' }, field: 'title' }
+      : { questionIndex: null, groupIndex: null, part: { kind: 'other' }, field: null }
   }
   const questionIndex = Number(match[1])
   const base = `questions.${questionIndex}`
   const rest = match[2] ?? ''
-  const at = (part: ProblemPart, field: string) => ({ questionIndex, part, field: `${base}.${field}` })
+  const at = (part: ProblemPart, field: string) => ({ questionIndex, groupIndex: null, part, field: `${base}.${field}` })
   const option = /^options\.(\d+)/.exec(rest)
   if (option) return at({ kind: 'option', n: Number(option[1]) + 1 }, `options.${option[1]}.text`)
   if (rest === 'text') return at({ kind: 'text' }, 'text')
