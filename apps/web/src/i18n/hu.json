@@ -1844,7 +1844,7 @@
   "quizFile": {
     "importTitle": "Importálj egy kvízt",
     "importHelp": "Írd meg a kérdéseket bárhol: Excelben, Google Táblázatokban vagy a telefonodon, aztán töltsd be ide. Egy Quizmoo-fájl is jó, amit valaki megosztott veled.",
-    "templateHelp": "Kezdd a sablonnal: minden oszlopot elmagyaráz, és minden kérdéstípusra van benne példa.",
+    "templateHelp": "Kezdd a sablonnal: minden oszlopot elmagyaráz, és minden kérdéstípusra meg egy csoportra is van benne példa.",
     "downloadTemplate": "Sablon letöltése",
     "templateName": "quizmoo-kerdes-sablon.csv",
     "chooseFile": "Válassz fájlt",
@@ -1858,6 +1858,7 @@
     "problemsInFile": "A fájlban lévő kvíz hibás:",
     "found_one": "1 kérdés, importálhatod.",
     "found_other": "{{count}} kérdés, importálhatod.",
+    "foundInGroups": "{{questions}}, {{groups}}, importálhatod.",
     "sheetNote": "A kvíz az alapértelmezett játékbeállításaidat kapja. Képet a szerkesztőben adhatsz hozzá.",
     "import": "Importálás",
     "imported_one": "1 kérdést importáltunk.",
@@ -1874,7 +1875,9 @@
       "correct": "helyes",
       "time": "idő",
       "points": "pont",
-      "tolerance": "tűrés"
+      "tolerance": "tűrés",
+      "color": "szín",
+      "emptyGroup": "csoport"
     },
     "problems": {
       "type": "ismeretlen kérdéstípus. Ezek közül válassz: {{words}}.",
@@ -1890,8 +1893,15 @@
       "time": "5–180 másodperc, vagy hagyd üresen.",
       "points": "egész szám 0 és 5000 között, vagy hagyd üresen.",
       "tolerance": "0 vagy nagyobb szám, vagy hagyd üresen.",
+      "color": "ismeretlen szín. Ezek közül válassz: {{colors}}, vagy hagyd üresen.",
       "empty": "Nincs kérdés a fájlban. Tölts ki legalább egy sort a fejléc alatt.",
-      "tooMany": "Egy kvízben legfeljebb 200 kérdés lehet. Vágd ketté a fájlt."
+      "tooMany": "Egy kvízben legfeljebb 200 kérdés lehet. Vágd ketté a fájlt.",
+      "group": {
+        "question": "írd be a csoport címét, legfeljebb 120 karakter.",
+        "answers": "a csoport leírása legfeljebb 500 karakter lehet."
+      },
+      "emptyGroup": "nincs alatta kérdés. Írj alá legalább egyet, vagy töröld a sort.",
+      "tooManyGroups": "Egy kvízben legfeljebb 50 csoport lehet."
     },
     "columns": {
       "type": "típus",
@@ -1905,7 +1915,8 @@
       "correct": "helyes",
       "time": "idő (mp)",
       "points": "pont",
-      "tolerance": "tűrés"
+      "tolerance": "tűrés",
+      "color": "szín"
     },
     "guide": [
       "QUIZMOO KÉRDÉSEK: soronként egy kérdés, a fejléc sor alatt. Mentsd CSV-ként (UTF-8), aztán a Quizmooban: Kvízek > Importálás.",
@@ -1919,7 +1930,9 @@
       "helyes, szöveg típusnál: az elfogadott válaszok | jellel elválasztva, pl. Jupiter | a Jupiter. A kis- és nagybetű meg az ékezet nem számít. Ha üres, a játék közben te döntöd el, mi jó.",
       "helyes, szám típusnál: a jó szám, pl. 1848 vagy 3,5. Szavazásnál és sorrendnél hagyd üresen.",
       "idő: ennyi másodperc van a válaszra, 5–180 (ha üres: 20). pont: 0–5000 (ha üres: 1000). tűrés, csak szám típusnál: ennyivel eltérő válasz is jó, pl. 10 (ha üres: pontosan kell).",
-      "Képet és játékbeállítást ebbe a fájlba nem tudsz tenni: importálás után a szerkesztőben add hozzá."
+      "szín: a kérdés vagy a csoport színe a szerkesztőben: piros, narancs, sárga, zöld, türkiz, kék, lila vagy rózsaszín (ha üres: nincs színe).",
+      "csoport: egy forduló kezdete. A kérdés oszlopba a címét írd (legfeljebb 120 karakter), a válasz 1-be a leírását, az időhöz és a ponthoz azt, amit az új kérdései kapnak a szerkesztőben. Az alatta lévő kérdések a következő csoportig vagy egy csoport-vége sorig tartoznak hozzá.",
+      "Képet, játékbeállítást és a csoportok saját szabályait ebbe a fájlba nem tudsz tenni: importálás után a szerkesztőben add hozzá."
     ],
     "templateNote": "A fejléc alatti sorok csak példák: írd át vagy töröld őket.",
     "jsonGuide": [
@@ -1927,6 +1940,8 @@
       "Ha kézzel írnál kérdéseket, inkább a táblázatsablont használd (Kvízek > Importálás > Sablon letöltése)."
     ],
     "examples": {
+      "group": "Ráadás kör",
+      "groupInfo": "Két könnyű kérdés a végére.",
       "single": "Mi Magyarország fővárosa?",
       "single1": "Bécs",
       "single2": "Budapest",

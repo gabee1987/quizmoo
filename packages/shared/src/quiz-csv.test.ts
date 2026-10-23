@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { MAX_QUESTIONS, type Question } from './quiz.js'
+import { MAX_GROUPS, MAX_QUESTIONS, type Question, type QuestionGroup } from './quiz.js'
 import { CSV_COLUMN_COUNT, parseQuizCsv, questionsToCsv, readCsv, type CsvLanguage } from './quiz-csv.js'
 
 const questions: Question[] = [
@@ -124,5 +124,92 @@ describe('quiz spreadsheet', () => {
     expect(parseQuizCsv('﻿# only guidance\ntype;question\n').problems).toEqual([{ row: 0, code: 'empty' }])
     const many = Array.from({ length: MAX_QUESTIONS + 1 }, (_, i) => `truefalse;Q${i};;;;;;;true`).join('\n')
     expect(parseQuizCsv(many).problems).toEqual([{ row: 0, code: 'tooMany' }])
+  })
+
+  it.each(['hu', 'en'] as const)('reads back question and group colours in the last column (%s)', (language) => {
+    const coloured: Question[] = [
+      { ...questions[2]!, color: 'teal', groupId: 'g1' },
+      { ...questions[0]!, color: 'pink' },
+      questions[4]!,
+    ]
+    const groups: QuestionGroup[] = [{ id: 'g1', title: 'Round', info: '', settings: {}, color: 'orange' }]
+    const csv = questionsToCsv(coloured, texts(language), groups)
+    expect(csv).toContain(language === 'hu' ? ';;rózsaszín\r\n' : ',,pink\r\n')
+    const result = parseQuizCsv(csv)
+    expect(result.problems).toEqual([])
+    expect(result.questions.map((q) => q.color)).toEqual(['teal', 'pink', undefined])
+    expect(result.groups.map((g) => g.color)).toEqual(['orange'])
+  })
+
+  it('takes colour words in either language without accents, and reports an unknown one', () => {
+    const result = parseQuizCsv(sheet('truefalse;A;;;;;;;true;;;;Rozsaszin', 'group;G;;;;;;;;;;;BLUE', 'truefalse;B;;;;;;;true;;;;kék'))
+    expect(result.questions.map((q) => q.color)).toEqual(['pink', 'blue'])
+    expect(result.groups[0]!.color).toBe('blue')
+    expect(parseQuizCsv(sheet('truefalse;A;;;;;;;true;;;;mauve', 'group;G;;;;;;;;;;;grey', 'truefalse;B;;;;;;;true')).problems).toEqual([
+      { row: 1, code: 'color', type: 'truefalse' },
+      { row: 2, code: 'color', group: true },
+    ])
+  })
+
+  describe('groups', () => {
+    const groups: QuestionGroup[] = [
+      { id: 'g1', title: 'Warm-up; easy', info: 'Two to start', timeLimitSec: 10, points: 500, settings: {} },
+      { id: 'g2', title: 'Finale', info: '', settings: { speedBonus: false }, color: 'teal', imageId: 'img' },
+    ]
+    // An ungrouped question first, one between the groups and one at the end.
+    const grouped: Question[] = questions.map((q, i) => ({ ...q, ...([1, 2].includes(i) ? { groupId: 'g1' } : [4, 5].includes(i) ? { groupId: 'g2' } : {}) }))
+    /** What survives of a group: title, info, time and points (no overrides, colour or picture). */
+    const groupRow = ({ title, info, timeLimitSec, points }: QuestionGroup) => ({ title, info, timeLimitSec, points })
+    const groupOf = (result: { questions: Question[]; groups: QuestionGroup[] }) =>
+      result.questions.map((q) => result.groups.find((g) => g.id === q.groupId)?.title ?? null)
+
+    it.each(['hu', 'en'] as const)('reads back groups and where they end (%s)', (language) => {
+      const result = parseQuizCsv(questionsToCsv(grouped, texts(language), groups))
+      expect(result.problems).toEqual([])
+      expect(result.groups.map(groupRow)).toEqual(groups.map(groupRow))
+      expect(groupOf(result)).toEqual([null, 'Warm-up; easy', 'Warm-up; easy', null, 'Finale', 'Finale', null])
+      expect(result.questions.map(withoutIds).map(({ groupId: _g, ...q }) => q)).toEqual(questions.map(withoutIds))
+    })
+
+    it('writes a group row above its questions and a group end only before ungrouped ones', () => {
+      const csv = questionsToCsv(grouped, texts('hu'), groups)
+      const rows = csv.split('\r\n').map((line) => line.split(';')[0])
+      expect(rows.slice(3, -1)).toEqual(['egy', 'csoport', 'több', 'igaz-hamis', 'csoport-vége', 'szöveg', 'csoport', 'szám', 'szavazás', 'csoport-vége', 'sorrend'])
+      expect(csv).toContain('csoport;"Warm-up; easy";Two to start;;;;;;;10;500;')
+      expect(csv).toContain('csoport;Finale;;;;;;;;;;')
+    })
+
+    it('starts a new group at the next group row, without a group end between them', () => {
+      const result = parseQuizCsv(sheet('group;One', 'truefalse;A;;;;;;;true', 'Csoport;Two', 'truefalse;B;;;;;;;true', 'csoport vege', 'truefalse;C;;;;;;;true'))
+      expect(result.problems).toEqual([])
+      expect(groupOf(result)).toEqual(['One', 'Two', null])
+    })
+
+    it('reports a group row without a title, with a bad time or points, and a group without questions', () => {
+      const result = parseQuizCsv(
+        sheet(
+          'group;;;;;;;;;3;9999', // 1: no title, time and points out of range
+          'truefalse;A;;;;;;;true',
+          'group;Empty', // 3: nothing under it
+          'group-end',
+          'truefalse;B;;;;;;;true',
+          'group;Also empty', // 6: ends the file
+        ),
+      )
+      expect(result.questions).toEqual([])
+      expect(result.groups).toEqual([])
+      expect(result.problems).toEqual([
+        { row: 1, code: 'question', group: true },
+        { row: 1, code: 'time', group: true },
+        { row: 1, code: 'points', group: true },
+        { row: 3, code: 'emptyGroup', group: true },
+        { row: 6, code: 'emptyGroup', group: true },
+      ])
+    })
+
+    it(`refuses more than ${MAX_GROUPS} groups`, () => {
+      const many = Array.from({ length: MAX_GROUPS + 1 }, (_, i) => `group;G${i}\ntruefalse;Q${i};;;;;;;true`).join('\n')
+      expect(parseQuizCsv(many).problems).toEqual([{ row: 0, code: 'tooManyGroups' }])
+    })
   })
 })

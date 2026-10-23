@@ -8,6 +8,7 @@ import {
   type ResultQuestion,
 } from '@quizmoo/shared'
 import { resultsPendingFor } from './engine.js'
+import { groupsOf } from './groups.js'
 import { denseRank } from './scoring.js'
 import { isRevealed, revealInfo, soloOf, teamAnswers } from './snapshots.js'
 import { captainOf, rankedTeams, teamMode } from './team-answers.js'
@@ -89,6 +90,7 @@ export function toResults(state: GameState): GameResults {
     players: rankedPlayers,
     teams,
     questions,
+    groups: groupsOf(state.quiz).map(({ id, title }) => ({ id, title })),
     pendingRelease: { screen: resultsPendingFor(state, 'screen'), players: resultsPendingFor(state, 'players') },
   }
 }
@@ -97,23 +99,29 @@ export type CsvLanguage = 'hu' | 'en'
 
 const csvHeaders: Record<
   CsvLanguage,
-  { rank: string; name: string; team: string; solo: string; total: string; teamAnswer: string; true: string; false: string }
+  { rank: string; name: string; team: string; solo: string; total: string; teamAnswer: string; group: string; true: string; false: string }
 > = {
-  hu: { rank: 'Helyezés', name: 'Név', team: 'Csapat', solo: 'Egyéni', total: 'Összesen', teamAnswer: 'Csapat válasza', true: 'Igaz', false: 'Hamis' },
-  en: { rank: 'Rank', name: 'Name', team: 'Team', solo: 'On their own', total: 'Total', teamAnswer: 'Team answer', true: 'True', false: 'False' },
+  hu: { rank: 'Helyezés', name: 'Név', team: 'Csapat', solo: 'Egyéni', total: 'Összesen', teamAnswer: 'Csapat válasza', group: 'Csoport', true: 'Igaz', false: 'Hamis' },
+  en: { rank: 'Rank', name: 'Name', team: 'Team', solo: 'On their own', total: 'Total', teamAnswer: 'Team answer', group: 'Group', true: 'True', false: 'False' },
 }
 
 /**
  * Player table as CSV for Excel: UTF-8 with BOM (keeps accents), `;` separator
  * (the Hungarian Excel default), CRLF lines. One column per question with its points;
- * empty where the player did not answer; solo players are marked in the team column. Teams that
- * answered as one follow after an empty line with their answer to each question.
+ * empty where the player did not answer; solo players are marked in the team column. With groups,
+ * a first row names each question's group. Teams that answered as one follow after an empty line
+ * with their answer to each question.
  */
 export function toCsv(results: GameResults, language: CsvLanguage): string {
   const headers = csvHeaders[language]
   // A solo player's team column says so instead of repeating their name.
   const teamNames = new Map(results.teams.map((t) => [t.id, t.solo ? headers.solo : t.name]))
+  const groupTitles = new Map(results.groups.map((g) => [g.id, g.title]))
+  const grouped = results.questions.some((q) => q.question.groupId && groupTitles.has(q.question.groupId))
   const rows: (string | number)[][] = [
+    ...(grouped
+      ? [['', '', '', headers.group, ...results.questions.map((q) => (q.question.groupId && groupTitles.get(q.question.groupId)) || '')]]
+      : []),
     [headers.rank, headers.name, headers.team, headers.total, ...results.questions.map((q) => `${q.index + 1}. ${q.question.text}`)],
     ...results.players.map((p) => [
       p.rank,

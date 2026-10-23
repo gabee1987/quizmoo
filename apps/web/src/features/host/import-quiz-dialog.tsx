@@ -13,7 +13,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { listProblems, problemLabel } from '@/features/editor/problems-menu'
 import { ApiError, apiFetch } from '@/lib/api'
 import { toastError } from '@/lib/toast'
-import { csvLanguage, downloadCsv, readQuizFile, templateCsv, typeWords, type ReadFile } from './quiz-files'
+import { colorWords, csvLanguage, downloadCsv, readQuizFile, templateCsv, typeWords, type ReadFile } from './quiz-files'
 
 /** Imports a spreadsheet or a Quizmoo file as a new quiz and opens it in the editor. */
 export function ImportQuizDialog({ onClose }: { onClose: () => void }) {
@@ -97,7 +97,9 @@ export function ImportQuizDialog({ onClose }: { onClose: () => void }) {
           {ready && (
             <div className="flex flex-col gap-3 rounded-xl border p-4">
               <p className="font-bold" role="status">
-                {t('quizFile.found', { count: ready.questionCount })}
+                {ready.groupCount > 0
+                  ? t('quizFile.foundInGroups', { questions: t('editor.questionCount', { count: ready.questionCount }), groups: t('editor.groupCount', { count: ready.groupCount }) })
+                  : t('quizFile.found', { count: ready.questionCount })}
               </p>
               <TextField label={t('editor.title')} value={title} maxLength={120} onChange={(e) => setTitle(e.target.value)} />
               {ready.fromSheet && <p className="text-sm text-muted-foreground">{t('quizFile.sheetNote')}</p>}
@@ -135,7 +137,14 @@ function ProblemList({ intro, items }: { intro: string; items: string[] }) {
 /** "Row 4 · Correct: write the number of …"; the column names match the template's header. */
 export function csvProblemLabel(problem: CsvProblem, t: TFunction, language: CsvLanguage): string {
   const words = typeWords(language)
-  const message = t(`quizFile.problems.${problem.code === 'correct' ? `correct.${problem.type}` : problem.code}`, { words })
+  // A group row's question and answer 1 columns hold its title and info.
+  const key =
+    problem.code === 'correct'
+      ? `correct.${problem.type}`
+      : problem.group && (problem.code === 'question' || problem.code === 'answers')
+        ? `group.${problem.code}`
+        : problem.code
+  const message = t(`quizFile.problems.${key}`, { words, colors: colorWords(language) })
   if (problem.row === 0) return message
   return t('quizFile.problemAt', { row: problem.row, column: t(`quizFile.problemColumns.${problem.code}`), message })
 }

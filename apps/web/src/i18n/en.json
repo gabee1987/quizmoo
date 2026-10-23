@@ -1844,7 +1844,7 @@
   "quizFile": {
     "importTitle": "Import a quiz",
     "importHelp": "Write your questions anywhere: in Excel, Google Sheets or on your phone, then bring them in here. A Quizmoo file someone shared with you works too.",
-    "templateHelp": "Start from the template: it explains every column and has an example of each question type.",
+    "templateHelp": "Start from the template: it explains every column and has an example of each question type and of a group.",
     "downloadTemplate": "Download template",
     "templateName": "quizmoo-question-template.csv",
     "chooseFile": "Choose a file",
@@ -1858,6 +1858,7 @@
     "problemsInFile": "The quiz in this file has problems:",
     "found_one": "1 question, ready to import.",
     "found_other": "{{count}} questions, ready to import.",
+    "foundInGroups": "{{questions}} in {{groups}}, ready to import.",
     "sheetNote": "The quiz gets your default game settings. Add pictures in the editor.",
     "import": "Import",
     "imported_one": "Imported 1 question.",
@@ -1874,7 +1875,9 @@
       "correct": "correct",
       "time": "time",
       "points": "points",
-      "tolerance": "tolerance"
+      "tolerance": "tolerance",
+      "color": "colour",
+      "emptyGroup": "group"
     },
     "problems": {
       "type": "unknown question type. Use one of: {{words}}.",
@@ -1890,8 +1893,15 @@
       "time": "seconds from 5 to 180, or leave it empty.",
       "points": "a whole number from 0 to 5000, or leave it empty.",
       "tolerance": "a number of 0 or more, or leave it empty.",
+      "color": "unknown colour. Use one of: {{colors}}, or leave it empty.",
       "empty": "No questions in this file. Fill in at least one row below the header.",
-      "tooMany": "A quiz holds at most 200 questions. Split the file in two."
+      "tooMany": "A quiz holds at most 200 questions. Split the file in two.",
+      "group": {
+        "question": "write the group's title, at most 120 characters.",
+        "answers": "the group's info may be at most 500 characters."
+      },
+      "emptyGroup": "no questions below it. Add at least one, or delete the row.",
+      "tooManyGroups": "A quiz holds at most 50 groups."
     },
     "columns": {
       "type": "type",
@@ -1905,7 +1915,8 @@
       "correct": "correct",
       "time": "time (s)",
       "points": "points",
-      "tolerance": "tolerance"
+      "tolerance": "tolerance",
+      "color": "colour"
     },
     "guide": [
       "QUIZMOO QUESTIONS: one question per row, below the header row. Save as CSV (UTF-8), then import it in Quizmoo under Quizzes > Import.",
@@ -1919,7 +1930,9 @@
       "correct, for text: the accepted answers separated by |, e.g. Jupiter | planet Jupiter. Capitals and accents don't matter. Empty: you mark the answers right or wrong during the game.",
       "correct, for number: the right number, e.g. 1848 or 3.5. For poll and order leave it empty.",
       "time: seconds to answer, 5 to 180 (empty: 20). points: 0 to 5000 (empty: 1000). tolerance, for number only: answers this close also count, e.g. 10 (empty: exact).",
-      "Pictures and game settings can't go in this file: add them in the editor after importing."
+      "colour: the question's or group's colour in the editor: red, orange, yellow, green, teal, blue, purple or pink (empty: no colour).",
+      "group: starts a round. Write its title in the question column (at most 120 characters), its info in answer 1, and in time and points what its new questions get in the editor. The questions below it are in the group up to the next group or a group-end row.",
+      "Pictures, game settings and a group's own rules can't go in this file: add them in the editor after importing."
     ],
     "templateNote": "The rows below the header are examples: overwrite or delete them.",
     "jsonGuide": [
@@ -1927,6 +1940,8 @@
       "To write questions by hand, use the spreadsheet template instead (Quizzes > Import > Download template)."
     ],
     "examples": {
+      "group": "Bonus round",
+      "groupInfo": "Two easy ones to finish.",
       "single": "What is the capital of Hungary?",
       "single1": "Vienna",
       "single2": "Budapest",

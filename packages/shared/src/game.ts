@@ -476,6 +476,8 @@ export interface GameResults {
   teams: TeamPublic[]
   /** Questions revealed so far: every asked question once the game is finished. */
   questions: ResultQuestion[]
+  /** The quiz's groups, for headings over their questions (`question.groupId`); empty without groups. */
+  groups: { id: string; title: string }[]
   /**
    * Final results still held for release (`finalResults: 'onRelease'`) per audience, while
    * the game is live and can still be released (`POST /api/games/:gameId/release`).

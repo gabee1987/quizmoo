@@ -1,6 +1,6 @@
 import type { GameResults, Question, ResultPlayer, ResultQuestion } from '@quizmoo/shared'
 import { describe, expect, it } from 'vitest'
-import { gameLengthMs, splitPodium, summariseResults } from './summary'
+import { gameLengthMs, questionRuns, splitPodium, summariseResults } from './summary'
 
 const base = { timeLimitSec: 20, points: 1000, text: 'Q' }
 const tf = (id: string): Question => ({ ...base, id, type: 'truefalse', correct: true })
@@ -43,6 +43,7 @@ function results(questions: ResultQuestion[], players = 4): GameResults {
     players: list,
     teams: [],
     questions,
+    groups: [],
     pendingRelease: { screen: false, players: false },
   }
 }
@@ -100,5 +101,24 @@ describe('splitPodium', () => {
     const { winners, others } = splitPodium([place('a', 1), place('b', 1), place('c', 3)])
     expect(winners.map((p) => p.id)).toEqual(['a', 'b'])
     expect(others.map((p) => p.id)).toEqual(['c'])
+  })
+})
+
+describe('questionRuns', () => {
+  const inGroup = (id: string, groupId?: string): Question => ({ ...tf(id), ...(groupId && { groupId }) })
+  const groups = [{ id: 'g1', title: 'Warm-up' }, { id: 'g2', title: 'Finale' }]
+  it('splits the questions by group in order, with ungrouped runs between them', () => {
+    const qs = [inGroup('a'), inGroup('b', 'g1'), inGroup('c', 'g1'), inGroup('d'), inGroup('e', 'g2')].map((q, i) => question(q, i, 0, 0, null))
+    expect(questionRuns({ questions: qs, groups }).map((r) => [r.group && `${r.group.number} ${r.group.title}`, r.questions.map((q) => q.question.id)])).toEqual([
+      [null, ['a']],
+      ['1 Warm-up', ['b', 'c']],
+      [null, ['d']],
+      ['2 Finale', ['e']],
+    ])
+  })
+
+  it('keeps one run without groups, and treats an unknown group as none', () => {
+    const qs = [inGroup('a'), inGroup('b', 'gone')].map((q, i) => question(q, i, 0, 0, null))
+    expect(questionRuns({ questions: qs, groups: [] })).toEqual([{ group: null, questions: qs }])
   })
 })

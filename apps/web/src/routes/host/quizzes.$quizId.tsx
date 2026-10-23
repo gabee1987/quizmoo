@@ -16,6 +16,7 @@ import {
   ArrowLeftIcon,
   DownloadIcon,
   EyeIcon,
+  EyeOffIcon,
   FileDownIcon,
   FileSpreadsheetIcon,
   FileTextIcon,
@@ -185,6 +186,10 @@ function Editor({ quiz }: { quiz: Quiz }) {
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [docked, closeSettings])
   const [previewOpen, setPreviewOpen] = useState(false)
+  // The laptop's preview column; hidden, the list and the form share its room. The docked settings
+  // always keep it, as it shows what they change.
+  const [previewShown, setPreviewShown] = useState(true)
+  const previewColumn = previewShown || docked
   const [helpOpen, setHelpOpen] = useState(false)
   const [starting, setStarting] = useState(false)
   const [deleting, setDeleting] = useState(false)
@@ -632,14 +637,27 @@ function Editor({ quiz }: { quiz: Quiz }) {
               <KeyboardIcon aria-hidden="true" />
             </Button>
             <Button
-              variant={docked ? 'secondary' : 'outline'}
+              variant={previewColumn ? 'secondary' : 'ghost'}
+              size="icon"
+              className="hidden xl:inline-flex"
+              aria-label={t('editor.preview')}
+              aria-pressed={previewColumn}
+              disabled={docked}
+              title={t(previewColumn ? 'editor.hidePreview' : 'editor.showPreview')}
+              onClick={() => setPreviewShown((shown) => !shown)}
+            >
+              {previewColumn ? <EyeIcon aria-hidden="true" /> : <EyeOffIcon aria-hidden="true" />}
+            </Button>
+            <Button
+              variant={docked ? 'secondary' : 'ghost'}
+              size="icon"
+              aria-label={t('editor.settings')}
+              title={t('editor.settings')}
               aria-expanded={settingsOpen}
               ref={settingsToggle}
               onClick={() => setSettingsOpen((open) => !open)}
             >
               <Settings2Icon aria-hidden="true" />
-              <span className="hidden sm:inline">{t('editor.settings')}</span>
-              <span className="sr-only sm:hidden">{t('editor.settings')}</span>
             </Button>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -670,7 +688,11 @@ function Editor({ quiz }: { quiz: Quiz }) {
         <div
           className={cn(
             '@container/editor grid items-start gap-4 lg:grid-cols-[20rem_minmax(0,1fr)] xl:gap-0 xl:transition-[grid-template-columns] xl:duration-700 xl:ease-spring-soft',
-            docked ? 'xl:grid-cols-[0rem_minmax(0,1fr)_22rem_calc(100%-22rem)]' : 'xl:grid-cols-[21.5rem_minmax(0,1fr)_22rem_0rem]',
+            docked
+              ? 'xl:grid-cols-[0rem_minmax(0,1fr)_22rem_calc(100%-22rem)]'
+              : previewColumn
+                ? 'xl:grid-cols-[21.5rem_minmax(0,1fr)_22rem_0rem]'
+                : 'xl:grid-cols-[31.5rem_minmax(0,1fr)_0rem_0rem]',
           )}
         >
           <div className="hidden min-w-0 items-start justify-end self-stretch lg:flex xl:overflow-x-clip" inert={docked}>
@@ -678,6 +700,8 @@ function Editor({ quiz }: { quiz: Quiz }) {
               className={cn(
                 'sticky top-22 flex max-h-[calc(100dvh-11rem)] w-80 shrink-0 flex-col gap-3 overflow-y-auto rounded-2xl border bg-card p-3 shadow-soft xl:mr-6',
                 'transition-[translate,opacity] duration-500 ease-spring',
+                // Without the preview the list follows its widening column, so it never runs ahead and clips.
+                !previewColumn && 'xl:w-[calc(100%-1.5rem)]',
                 docked && '-translate-x-10 opacity-0',
               )}
             >
@@ -739,27 +763,29 @@ function Editor({ quiz }: { quiz: Quiz }) {
                   onNewGroup={groups.length < MAX_GROUPS ? () => newGroup(selected.id) : null}
                   onColor={(color) => setQuestions((l) => l.map((q) => (q.id === selected.id ? withTag(q, color) : q)))}
                 />
-                {/* "New group" starts one around this question alone and opens it to be named. */}
-                <SelectField
-                  label={t('editor.questionGroup')}
-                  value={selected.groupId ?? NO_GROUP}
-                  options={[
-                    { value: NO_GROUP, label: t('editor.noGroup') },
-                    ...groups.map((g, i) => ({ value: g.id, label: t('editor.groupOption', { n: i + 1, title: g.title }) })),
-                    ...(groups.length < MAX_GROUPS ? [{ value: NEW_GROUP, label: t('editor.newGroupOption') }] : []),
-                  ]}
-                  onChange={(groupId) =>
-                    groupId === NEW_GROUP
-                      ? newGroup(selected.id, true)
-                      : setLayout((l) => moveToGroup(l, selected.id, groupId === NO_GROUP ? null : groupId))
-                  }
-                />
                 <QuestionForm
                   question={selected}
                   onChange={(next) => setQuestions((l) => l.map((q) => (q.id === next.id ? next : q)))}
                   errors={visited.has(selected.id) ? errors : {}}
                   path={`questions.${selectedIndex}`}
                   symbols={draft.settings.answerSymbols}
+                  groupField={
+                    // "New group" starts one around this question alone and opens it to be named.
+                    <SelectField
+                      label={t('editor.questionGroup')}
+                      value={selected.groupId ?? NO_GROUP}
+                      options={[
+                        { value: NO_GROUP, label: t('editor.noGroup') },
+                        ...groups.map((g, i) => ({ value: g.id, label: t('editor.groupOption', { n: i + 1, title: g.title }) })),
+                        ...(groups.length < MAX_GROUPS ? [{ value: NEW_GROUP, label: t('editor.newGroupOption') }] : []),
+                      ]}
+                      onChange={(groupId) =>
+                        groupId === NEW_GROUP
+                          ? newGroup(selected.id, true)
+                          : setLayout((l) => moveToGroup(l, selected.id, groupId === NO_GROUP ? null : groupId))
+                      }
+                    />
+                  }
                 />
               </div>
             ) : (
@@ -777,10 +803,21 @@ function Editor({ quiz }: { quiz: Quiz }) {
             {previewOpen && <div className="animate-fade-up xl:hidden">{preview}</div>}
           </section>
 
-          <aside className="sticky top-22 hidden flex-col gap-2 pl-6 xl:flex">
-            <p className="text-center text-sm font-semibold text-muted-foreground">{t('editor.preview')}</p>
-            {/* Scaled so three panes fit a 1280 px laptop; the layout inside stays the phone's. */}
-            <div className="zoom-[0.82]">{preview}</div>
+          {/* The gap before the preview is a margin, not padding, so the closed column is really 0 wide. */}
+          <aside className="sticky top-22 hidden min-w-0 overflow-x-clip xl:block" inert={!previewColumn}>
+            <div
+              className={cn(
+                // Keeps the open column's width (22rem minus the gap), so closing fades and slides the
+                // phone out while the column narrows, instead of squeezing it. Out with a plain ease, as
+                // the spring's overshoot would end the fade almost at once.
+                'ml-6 flex w-82 flex-col gap-2 transition-[translate,opacity]',
+                previewColumn ? 'duration-500 ease-spring' : 'translate-x-8 opacity-0 duration-300 ease-out',
+              )}
+            >
+              <p className="text-center text-sm font-semibold text-muted-foreground">{t('editor.preview')}</p>
+              {/* Scaled so three panes fit a 1280 px laptop; the layout inside stays the phone's. */}
+              <div className="zoom-[0.82]">{preview}</div>
+            </div>
           </aside>
 
           {/* Mounted while wide even when closed, so it can animate out; inert keeps it out of reach then. */}
