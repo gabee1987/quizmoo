@@ -1271,6 +1271,43 @@
     "current": "Mostani verzió",
     "releasedOn": "Megjelent: {{date}}",
     "releases": {
+      "1_2_0": {
+        "title": "Körök",
+        "intro": "Oszd körökre a kvízt, mindegyiknek saját felvezetővel, szabályokkal és eredménytáblával, és készíts akár 200 kérdéses kvízeket.",
+        "sections": [
+          {
+            "title": "Körök a kvízeidben",
+            "items": [
+              "Rendezd körökbe a kérdéseket, mindegyiknek címmel, leírással, képpel és színnel. A körökön kívül is maradhatnak kérdések, például bemelegítésnek vagy ráadásnak.",
+              "Minden kör felvezetővel indul a kivetítőn és a telefonokon. Megvárja, amíg megnyomod az Indulhat a kör gombot, vagy pár másodperc után magától indul; a Várjunk megállítja a visszaszámlálást.",
+              "Az eredménytábla jöhet magától minden kör után, vagy csak akkor, amikor megmutatod. A helyes válaszokat a kör végén is felfedheted, nem csak kérdésenként.",
+              "Minden körnek lehet saját ideje, pontja és szabálya, például nincs gyorsasági bónusz a ráadás körben. A vezérlőd jelzi, ha egy körnek saját szabályai vannak.",
+              "A váróterem kiírja, hány kör jön, a kérdéseknél látszik a kör, az eredmények pedig körönként mutatják a kérdéseket."
+            ]
+          },
+          {
+            "title": "A szerkesztő",
+            "items": [
+              "Egy kör egy kártya a kérdéslistában: húzd be vagy ki a kérdéseket, mozgasd az egész kört, vagy csukd össze a köröket.",
+              "A kérdéseknek is adhatsz színt, hogy egy pillantással megtaláld őket. A színeket csak te látod.",
+              "A fenti szem gombbal elrejtheted a telefonos előnézetet, így több hely jut a listának és a kérdésnek.",
+              "A táblázatok és a Quizmoo fájlok megőrzik a köröket és a színeket; a sablonban egy példa kör is van."
+            ]
+          },
+          {
+            "title": "Nagyobb kvízek",
+            "items": [
+              "Egy kvízben most már 200 kérdés lehet, legfeljebb 50 körben, és egy hosszú játék az utolsó kérdésnél is ugyanolyan gyors, mint az elsőnél."
+            ]
+          },
+          {
+            "title": "A tehén",
+            "items": [
+              "A tehén néha grimaszol vagy mond valami butaságot, jeles napok körül pedig beöltözik az alkalomhoz."
+            ]
+          }
+        ]
+      },
       "1_1_0": {
         "title": "Az első nyilvános béta",
         "intro": "A Quizmoo már online is fut barátoknak és családnak. Ezt tudod játékvezetőként.",

@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 1.2.0 – 2026-10-25
+
+Rounds within a quiz, quizzes of up to 200 questions, and the cow's antics.
+
 ### Question groups (rounds)
 - A quiz can be split into rounds: each group has a title, info, a picture, an optional colour tag, and its own time and points for new questions ("Apply to N questions" sets them on the ones already in it). Questions outside groups may come before, between and after rounds, so a warm-up or a bonus question still works. A quiz now holds up to 200 questions in up to 50 groups. After updating, run `pnpm --filter @quizmoo/server db:migrate` (production deploys migrate on start).
 - In the editor a group is one card in the list, with its questions inside: drag questions in and out, drag a whole group, fold one group or all of them, start a group above a question, and delete a group with or without its questions (with Undo). Questions take colour tags too. The phone preview can be hidden from the top bar to give the list and the form more room.

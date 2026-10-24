@@ -1271,6 +1271,43 @@
     "current": "Current version",
     "releasedOn": "Released {{date}}",
     "releases": {
+      "1_2_0": {
+        "title": "Rounds",
+        "intro": "Split a quiz into rounds, each with its own intro, rules and standings, and make quizzes of up to 200 questions.",
+        "sections": [
+          {
+            "title": "Rounds in your quizzes",
+            "items": [
+              "Group questions into rounds, each with a title, info, a picture and a colour. Questions outside the rounds still work, for a warm-up or a bonus question.",
+              "Every round opens with an intro on the projector and the phones. It waits until you press Start round, or starts by itself after a few seconds; Hold stops the countdown.",
+              "The standings can follow every round by themselves, or come only when you show them. Answers can also be revealed at the end of a round instead of after each question.",
+              "Each round can have its own time, points and rules, such as no speed bonus in the bonus round. Your controls tell you when a round has rules of its own.",
+              "The lobby says how many rounds are coming, the question screens show the round, and the results group the questions by round."
+            ]
+          },
+          {
+            "title": "The editor",
+            "items": [
+              "A round is one card in the question list: drag questions in and out, move a whole round, or fold rounds away.",
+              "Give questions a colour too, to find them at a glance. Only you see the colours.",
+              "Hide the phone preview with the eye button at the top, for more room for the list and the question.",
+              "Spreadsheets and Quizmoo files keep the rounds and the colours; the template shows an example round."
+            ]
+          },
+          {
+            "title": "Bigger quizzes",
+            "items": [
+              "A quiz can now hold 200 questions in up to 50 rounds, and a long game stays as quick at the last question as at the first."
+            ]
+          },
+          {
+            "title": "The cow",
+            "items": [
+              "Now and then the cow pulls a face or says something silly, and around special days it dresses up for the occasion."
+            ]
+          }
+        ]
+      },
       "1_1_0": {
         "title": "The first public beta",
         "intro": "Quizmoo is online for friends and family. Here is what you can do as a host.",
