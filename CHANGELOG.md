@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 1.4.0 – 2026-10-25
+
+Questions switched off for an event without deleting them, and a handier editor for big quizzes.
+
 ### Questions switched off (phase 42)
 - A question can be switched off for one event without deleting it: "In the game" in the question's header, or the eye on its row in the list. It stays in the quiz (and in Quizmoo files), but new games leave it out. A group's switch turns all its questions off or on; a group whose questions are all off is skipped in the game, intro included.
 - Switched-off rows are dashed and faded with a crossed-out eye, a partly switched-off group shows how many are off, and a switched-off question or group says so above its form with "Switch on". Above the list, "4 of 19 questions switched off" offers "All on" (with Undo) for the next event.

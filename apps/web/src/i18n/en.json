@@ -1332,6 +1332,29 @@
     "current": "Current version",
     "releasedOn": "Released {{date}}",
     "releases": {
+      "1_4_0": {
+        "title": "Questions on and off",
+        "intro": "Leave questions out of a game without deleting them, and find your way around big quizzes faster.",
+        "sections": [
+          {
+            "title": "Switch questions off",
+            "items": [
+              "Every question has an In the game switch. Switch a question off and it stays in your quiz, but new games skip it: it is not shown, not counted and gives no points.",
+              "Switch a whole round off with its own switch, or with the eye on its card in the list. A round with every question off is skipped, intro included.",
+              "Switched-off questions are faded in the list. All on brings them all back for the next event, and Undo switches them off again."
+            ]
+          },
+          {
+            "title": "A handier editor",
+            "items": [
+              "Search the questions from the top of the list: by question, answer or round name, with or without accents.",
+              "New question and New group are in the top bar and at the top of the list, and the list's controls stay in view while you scroll.",
+              "The target button brings the selected question into view, and the selected card stands out more.",
+              "Set the time and points new questions start with, per quiz in its settings and for your new quizzes in My settings. The quiz title can be changed in the settings too."
+            ]
+          }
+        ]
+      },
       "1_3_0": {
         "title": "Shuffled questions",
         "intro": "Play the questions in a new order every game, and see bigger pictures on the phones.",

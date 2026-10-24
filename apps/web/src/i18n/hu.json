@@ -1332,6 +1332,29 @@
     "current": "Mostani verzió",
     "releasedOn": "Megjelent: {{date}}",
     "releases": {
+      "1_4_0": {
+        "title": "Ki- és bekapcsolható kérdések",
+        "intro": "Hagyj ki kérdéseket egy játékból törlés nélkül, és igazodj el gyorsabban a nagy kvízekben.",
+        "sections": [
+          {
+            "title": "Kérdések kikapcsolása",
+            "items": [
+              "Minden kérdésnek van Játékban kapcsolója. Ha kikapcsolod, a kérdés a kvízben marad, de az új játékok kihagyják: nem jelenik meg, nem számít bele a kérdések számába, és pontot sem ér.",
+              "Egy egész kört a saját kapcsolójával vagy a listában a kártyáján lévő szemmel kapcsolhatsz ki. Ha egy kör minden kérdése ki van kapcsolva, a kör a bevezetőjével együtt kimarad.",
+              "A kikapcsolt kérdések halványan látszanak a listában. A Mind be gombbal a következő eseményre mindet visszakapcsolhatod, a Visszavonással pedig újra kikapcsolod őket."
+            ]
+          },
+          {
+            "title": "Kényelmesebb szerkesztő",
+            "items": [
+              "Keress a kérdések között a lista tetején: kérdésre, válaszra vagy a kör nevére, ékezettel vagy anélkül.",
+              "Az Új kérdés és az Új csoport gomb a felső sávban és a lista tetején is ott van, a lista gombjai pedig görgetés közben is látszanak.",
+              "A célkereszt gomb a listában a kijelölt kérdéshez ugrik, és a kijelölt kártya jobban kiemelkedik.",
+              "Beállíthatod, mennyi idővel és ponttal induljanak az új kérdések: kvízenként a beállításokban, az új kvízeidhez pedig a Beállításaimban. A kvíz címét a beállításokban is átírhatod."
+            ]
+          }
+        ]
+      },
       "1_3_0": {
         "title": "Kevert kérdések",
         "intro": "Játékonként új sorrendben jöhetnek a kérdések, a telefonokon pedig nagyobbak a képek.",
