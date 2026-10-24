@@ -19,6 +19,7 @@ export function settingsLine(host: HostSnapshot, t: TFunction): string[] {
     host.settings.speedBonus ? t('host.create.speedBonus') : null,
     host.settings.streakBonus ? t('host.create.streakBonus') : null,
     answerChangesLabel(host.settings, t),
+    host.settings.shuffleQuestions ? t('host.create.shuffleQuestions') : null,
     host.settings.shuffleOptions ? t('host.create.shuffle') : null,
     host.settings.revealAnswers === 'atEnd' ? t('host.create.revealAnswersOptions.atEnd') : null,
     host.settings.revealAnswers === 'afterGroup' && (group || lobbyRounds) ?t('host.create.revealAnswersOptions.afterGroup') : null,

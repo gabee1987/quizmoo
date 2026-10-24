@@ -10,7 +10,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'
 import { tagStyle } from '@/lib/tags'
 import { SelectField } from '../../components/select-field'
-import { withImage, withTag } from './draft'
+import { SwitchRow } from '../host/game-settings-form'
+import { withImage, withKeepOrder, withTag } from './draft'
 import { ImageField } from './image-field'
 import { POINTS, TIME_LIMITS } from './question-form'
 import { TagPicker } from './tag-picker'
@@ -242,6 +243,16 @@ export function GroupForm({
             </span>
           </div>
           <ImageField label={t('editor.groupImage')} imageId={group.imageId} onChange={(imageId) => onChange(withImage(group, imageId))} pasteAnywhere />
+
+          <section className="flex flex-col border-t pt-4">
+            <h3 className="font-extrabold">{t('editor.groupOrder')}</h3>
+            <SwitchRow
+              label={t('editor.keepOrder')}
+              description={t('editor.keepOrderHelp')}
+              checked={group.keepOrder ?? false}
+              onChange={(keepOrder) => onChange(withKeepOrder(group, keepOrder))}
+            />
+          </section>
 
           <section className="flex flex-col gap-3 border-t pt-4">
             <div>

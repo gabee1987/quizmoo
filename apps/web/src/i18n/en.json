@@ -474,6 +474,8 @@
       "answerChangesLocked_one": "Answer changes until {{count}} s before the end",
       "answerChangesLocked_other": "Answer changes until {{count}} s before the end",
       "shuffle": "Shuffle answer options",
+      "shuffleQuestions": "Shuffle question order",
+      "shuffleQuestionsHelp": "Every game plays the questions in a new order. A round moves as one block with its questions, which are mixed too, unless the round keeps its order.",
       "submit": "Create game",
       "branding": {
         "title": "Branding",
@@ -998,6 +1000,22 @@
     "expandGroup": "Expand group {{n}}",
     "collapseAllGroups": "Collapse all groups",
     "expandAllGroups": "Expand all groups",
+    "collapseAll": "Collapse all",
+    "expandAll": "Expand all",
+    "shuffle": {
+      "button": "Shuffle",
+      "label": "Shuffle the questions",
+      "title": "Shuffle the questions?",
+      "body": "Every question gets a new place in this quiz. A group moves as one block, and its questions are mixed among themselves.",
+      "bodyLocked": "Inside groups with “Keep question order” the order stays as it is.",
+      "confirm": "Shuffle",
+      "done": "Questions shuffled",
+      "nothing": "Nothing to shuffle: add questions or unlock a group."
+    },
+    "groupOrder": "Question order",
+    "keepOrder": "Keep question order",
+    "keepOrderHelp": "When the questions are shuffled, in a game or with the Shuffle button, the group may move, but its questions keep this order.",
+    "orderKept": "Order kept",
     "dragGroup": "Reorder group {{n}}",
     "groupEndN": "End of group {{n}}",
     "questionGroup": "Group",
@@ -1271,6 +1289,28 @@
     "current": "Current version",
     "releasedOn": "Released {{date}}",
     "releases": {
+      "1_3_0": {
+        "title": "Shuffled questions",
+        "intro": "Play the questions in a new order every game, and see bigger pictures on the phones.",
+        "sections": [
+          {
+            "title": "Random question order",
+            "items": [
+              "Turn on Shuffle question order in a quiz's settings, or only for one game when you start it. Every game then plays the questions in a new order.",
+              "A round moves as one block with its questions, and its questions are mixed too. Switch on Keep question order in a round when its questions must stay in order.",
+              "The Shuffle button above the question list mixes the quiz for good. It asks first, and Undo puts the old order back."
+            ]
+          },
+          {
+            "title": "Bigger pictures on phones and the projector",
+            "items": [
+              "On phones the question number, the round, the timer and the settings button share one slim bar at the top, so the question's picture fills the width, with every answer still on screen.",
+              "On the projector the question, its picture and all the answers always fit on one screen.",
+              "When you pause, players see a big Paused sign in the middle of their screen, and nothing on it moves."
+            ]
+          }
+        ]
+      },
       "1_2_0": {
         "title": "Rounds",
         "intro": "Split a quiz into rounds, each with its own intro, rules and standings, and make quizzes of up to 200 questions.",

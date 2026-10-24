@@ -206,6 +206,8 @@ export const gameSettingsSchema = z
     answerLockSec: z.number().int().min(0).max(60).default(0),
     /** Shuffle answer options per game. */
     shuffleOptions: z.boolean().default(false),
+    /** Shuffle the question order per game, within each group (`shuffleQuestionOrder`). */
+    shuffleQuestions: z.boolean().default(false),
     /**
      * The host's teams for a game (team mode; ignored when only players create teams). Set in the new
      * game dialog; a quiz's saved names (from before teams were set per game) prefill it.
@@ -309,6 +311,8 @@ export const questionGroupSchema = z.object({
   timeLimitSec: baseQuestion.shape.timeLimitSec.unwrap().optional(),
   points: baseQuestion.shape.points.unwrap().optional(),
   color: tagColorSchema.optional(),
+  /** Its questions keep their order when the quiz's questions are shuffled (in a game or in the editor). */
+  keepOrder: z.boolean().optional(),
   settings: groupSettingsSchema.prefault({}),
 })
 export type QuestionGroup = z.infer<typeof questionGroupSchema>
