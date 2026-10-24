@@ -4,7 +4,7 @@ import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-
 import { CSS } from '@dnd-kit/utilities'
 import { useCallback, useState, type KeyboardEventHandler, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ArrowDownIcon, ArrowUpIcon, GripVerticalIcon, PlusIcon } from 'lucide-react'
+import { ArrowDownIcon, ArrowUpIcon, EyeOffIcon, GripVerticalIcon, PlusIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/cn'
 import { dragMove, useSortableAccessibility, useSortableSensors } from '@/lib/sortable'
@@ -170,7 +170,11 @@ function Card({
   return (
     <div
       style={tagStyle(question.color)}
-      className={cn('relative flex items-center gap-1 overflow-hidden rounded-xl border-2 bg-card pr-2 pl-1 hover:border-ring', className)}
+      className={cn(
+        'relative flex items-center gap-1 overflow-hidden rounded-xl border-2 pr-2 pl-1 hover:border-ring',
+        question.off ? 'border-dashed border-muted-foreground/35 bg-transparent' : 'bg-card',
+        className,
+      )}
     >
       {question.color && <span aria-hidden="true" className="absolute inset-y-0 left-0 w-1.5 bg-(--tag)" />}
       {handle ?? (
@@ -194,8 +198,14 @@ function Card({
         <span className="min-w-0 flex-1">
           <span className="block text-xs font-bold text-muted-foreground tabular-nums">
             {number + 1} · {t(`questionTypes.${question.type}`)} · {t('editor.seconds', { count: question.timeLimitSec })}
+            {question.off && (
+              <>
+                {' · '}
+                <EyeOffIcon className="inline size-3 align-[-0.1em]" aria-hidden="true" /> {t('editor.inGame.offBadge')}
+              </>
+            )}
           </span>
-          <span className="line-clamp-2 leading-snug font-bold wrap-break-word">
+          <span className={cn('line-clamp-2 leading-snug font-bold wrap-break-word', question.off && 'text-muted-foreground')}>
             {question.text || <span className="text-muted-foreground italic">{t('editor.untitledQuestion')}</span>}
           </span>
         </span>

@@ -1,4 +1,4 @@
-import type { Question, QuestionGroup, QuestionType, QuizInput, TagColor } from '@quizmoo/shared'
+import type { Question, QuestionDefaults, QuestionGroup, QuestionType, QuizInput, TagColor } from '@quizmoo/shared'
 
 /**
  * Short random id for new questions and options. getRandomValues works on plain
@@ -11,9 +11,15 @@ export function newId(): string {
 
 const emptyOptions = () => Array.from({ length: 4 }, () => ({ id: newId(), text: '' }))
 
-/** A fresh question of `type` with sensible defaults (20 s, 1000 points, first option correct). */
-export function newQuestion(type: QuestionType): Question {
-  const base = { id: newId(), text: '', timeLimitSec: 20, points: 1000 }
+const APP_DEFAULTS: QuestionDefaults = { timeLimitSec: 20, points: 1000 }
+
+/**
+ * A fresh question of `type` with the quiz's time and points (the app's 20 s and 1000 points without
+ * them) and its first option correct. A poll gives no points, and putting things in order gets at
+ * least 30 s.
+ */
+export function newQuestion(type: QuestionType, defaults: QuestionDefaults = APP_DEFAULTS): Question {
+  const base = { id: newId(), text: '', timeLimitSec: defaults.timeLimitSec, points: defaults.points }
   switch (type) {
     case 'single': {
       const options = emptyOptions()
@@ -32,7 +38,7 @@ export function newQuestion(type: QuestionType): Question {
     case 'poll':
       return { ...base, type, options: emptyOptions(), points: 0 }
     case 'order':
-      return { ...base, type, options: emptyOptions(), timeLimitSec: 30 }
+      return { ...base, type, options: emptyOptions(), timeLimitSec: Math.max(30, defaults.timeLimitSec) }
   }
 }
 
@@ -417,6 +423,60 @@ function withGroup(question: Question, groupId: string | undefined): Question {
 export function withTag<T extends { color?: TagColor | undefined }>(item: T, color: TagColor | undefined): T {
   const { color: _old, ...rest } = item
   return (color ? { ...rest, color } : rest) as T
+}
+
+const simple = (text: string) => text.normalize('NFD').replace(/\p{M}/gu, '').toLocaleLowerCase()
+
+/**
+ * The editor list's search: the questions whose text or options contain every word of `query`
+ * (ignoring case and accents), and the groups whose title or info does.
+ */
+export function searchLayout(layout: Pick<Layout, 'questions' | 'groups'>, query: string): { questions: Question[]; groups: QuestionGroup[] } {
+  const words = simple(query).split(/\s+/).filter(Boolean)
+  const matches = (...texts: string[]) => {
+    const haystack = simple(texts.join(' '))
+    return words.every((word) => haystack.includes(word))
+  }
+  return {
+    questions: layout.questions.filter((q) => matches(q.text, ...('options' in q ? q.options.map((o) => o.text) : []))),
+    groups: layout.groups.filter((g) => matches(g.title, g.info)),
+  }
+}
+
+/** Switches a question off or on; on is no field at all, like a question from before the switch. */
+export function withOff(question: Question, off: boolean): Question {
+  if (!!question.off === off) return question
+  const { off: _old, ...rest } = question
+  return (off ? { ...rest, off } : rest) as Question
+}
+
+/** Switches the questions `ids` (null: every question) off or on. */
+export function switchQuestions(questions: Question[], ids: ReadonlySet<string> | null, off: boolean): Question[] {
+  return questions.map((q) => (ids === null || ids.has(q.id) ? withOff(q, off) : q))
+}
+
+/** Whether a group's questions are all on, all off, or some of each. */
+export function groupSwitch(questions: Question[], groupId: string): 'on' | 'off' | 'mixed' {
+  const own = questions.filter((q) => q.groupId === groupId)
+  const off = own.filter((q) => q.off).length
+  return off === 0 ? 'on' : off === own.length ? 'off' : 'mixed'
+}
+
+/**
+ * Questions whose time limit or points differ from the quiz's default. Polls give no points, and a
+ * question in a group with its own value for `field` follows the group instead.
+ */
+export function differingFromDefault(layout: Pick<Layout, 'questions' | 'groups'>, defaults: QuestionDefaults, field: keyof QuestionDefaults): Question[] {
+  const ownValue = new Set(layout.groups.filter((g) => g[field] !== undefined).map((g) => g.id))
+  return layout.questions.filter(
+    (q) => q[field] !== defaults[field] && !(field === 'points' && q.type === 'poll') && !(q.groupId && ownValue.has(q.groupId)),
+  )
+}
+
+/** Gives every question that follows the quiz's defaults (`differingFromDefault`) its default time limit or points. */
+export function applyDefault(layout: Pick<Layout, 'questions' | 'groups'>, defaults: QuestionDefaults, field: keyof QuestionDefaults): Question[] {
+  const differing = new Set(differingFromDefault(layout, defaults, field))
+  return layout.questions.map((q) => (differing.has(q) ? { ...q, [field]: defaults[field] } : q))
 }
 
 /** Locks or unlocks a group's question order; unlocked is no field at all, like a group from before the lock. */

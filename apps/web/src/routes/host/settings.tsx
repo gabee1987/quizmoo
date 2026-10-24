@@ -1,7 +1,7 @@
 import { gameSettingsSchema, type HostSettings } from '@quizmoo/shared'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute, useBlocker } from '@tanstack/react-router'
-import { ImageIcon, MegaphoneIcon, RotateCcwIcon, SlidersHorizontalIcon, UserRoundIcon } from 'lucide-react'
+import { ImageIcon, MegaphoneIcon, RotateCcwIcon, SlidersHorizontalIcon, TimerIcon, UserRoundIcon } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
@@ -16,6 +16,7 @@ import { usePresence } from '@/lib/presence'
 import { toastError } from '@/lib/toast'
 import { ConfirmDialog } from '../../components/dialog'
 import { ImageField } from '../../features/editor/image-field'
+import { QuestionDefaultsFields } from '../../features/editor/question-defaults-fields'
 import { GameSettingsForm, allSections, sectionIcons, settingsError } from '../../features/host/game-settings-form'
 import { AccountPanel } from '../../features/settings/account-panel'
 import { hostSettingsQueryOptions, saveHostSettings } from '../../features/settings/host-settings'
@@ -71,7 +72,7 @@ function SettingsForm({ saved }: { saved: HostSettings }) {
   const dirty = !same(draft, saved)
   // A dot on each tab with unsaved changes: the bar below says something changed, the dot says where.
   const changed: Record<SettingsTab, boolean> = {
-    games: !same(draft.gameDefaults, saved.gameDefaults),
+    games: !same(draft.gameDefaults, saved.gameDefaults) || !same(draft.questionDefaults, saved.questionDefaults),
     messages: !same(draft.quickMessages, saved.quickMessages),
     branding: draft.logoImageId !== saved.logoImageId || draft.eventName !== saved.eventName,
     account: false,
@@ -126,7 +127,7 @@ function SettingsForm({ saved }: { saved: HostSettings }) {
         </TabsList>
 
         {/* origin-top: the panels are tall, and their squash and stretch would lift their top into the tabs from a centre origin. */}
-        <TabsContent value="games" className="origin-top">
+        <TabsContent value="games" className="flex origin-top flex-col gap-5">
           <SettingsSection icon={SlidersHorizontalIcon} title={t('settings.defaults.title')} help={t('settings.defaults.help')}>
             <div className="flex min-h-9 flex-wrap items-center justify-between gap-2">
               <p key={String(!!draft.gameDefaults)} className="animate-panel-swap text-sm font-semibold text-muted-foreground">
@@ -175,6 +176,9 @@ function SettingsForm({ saved }: { saved: HostSettings }) {
                 ))}
               </SmoothHeight>
             </Tabs>
+          </SettingsSection>
+          <SettingsSection icon={TimerIcon} title={t('settings.questionDefaults.title')} help={t('settings.questionDefaults.help')}>
+            <QuestionDefaultsFields value={draft.questionDefaults} onChange={(questionDefaults) => setDraft((d) => ({ ...d, questionDefaults }))} />
           </SettingsSection>
         </TabsContent>
 

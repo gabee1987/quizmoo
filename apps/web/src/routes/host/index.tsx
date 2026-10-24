@@ -139,14 +139,18 @@ function HostHome() {
                     <Row key={quiz.id} index={index}>
                       <RowText
                         title={quiz.title}
-                        detail={[t('host.questionCount', { count: quiz.questionCount }), t('host.updated', { date: date(quiz.updatedAt) })]}
+                        detail={[
+                          t('host.questionCount', { count: quiz.questionCount }),
+                          ...(quiz.offCount > 0 ? [t('host.offCount', { count: quiz.offCount })] : []),
+                          t('host.updated', { date: date(quiz.updatedAt) }),
+                        ]}
                       />
                       <Button asChild variant="ghost" size="icon-sm" aria-label={`${t('host.edit')}: ${quiz.title}`} title={t('host.edit')}>
                         <Link to="/host/quizzes/$quizId" params={{ quizId: quiz.id }}>
                           <PencilIcon aria-hidden="true" />
                         </Link>
                       </Button>
-                      <Button size="sm" disabled={quiz.questionCount === 0} onClick={() => setCreating(quiz)}>
+                      <Button size="sm" disabled={quiz.questionCount - quiz.offCount === 0} onClick={() => setCreating(quiz)}>
                         <PlayIcon aria-hidden="true" />
                         {t('host.play')}
                       </Button>
@@ -185,6 +189,7 @@ function HostHome() {
           quizSettings={creating.settings}
           quizBranding={creating.branding}
           rounds={creating.groupCount > 0}
+          offCount={creating.offCount}
           pending={play.isPending}
           onCreate={(settings, scheduledAt, branding, lockCode) =>
             play.mutate({ quizId: creating.id, settings, scheduledAt, branding, lockCode })

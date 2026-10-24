@@ -13,11 +13,12 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { InGameSwitch } from './in-game-switch'
 import { TagPicker } from './tag-picker'
 import { typeIcons } from './type-picker'
 
 /**
- * Header of the question being edited: its number and type, and the actions on it.
+ * Header of the question being edited: its number and type, its "In the game" switch, and the actions on it.
  * Move up and down are buttons (the accessible alternative to dragging; one row, so each step past a
  * group's header or end takes it into or out of that group); top, bottom and starting a group here are
  * in the menu.
@@ -32,6 +33,7 @@ export function QuestionToolbar({
   onDelete,
   onNewGroup,
   onColor,
+  onSwitch,
 }: {
   question: Question
   index: number
@@ -43,6 +45,8 @@ export function QuestionToolbar({
   /** Null when the quiz has as many groups as it may. */
   onNewGroup: (() => void) | null
   onColor: (color: TagColor | undefined) => void
+  /** "In the game" switched: off keeps the question, but new games leave it out. */
+  onSwitch: (on: boolean) => void
 }) {
   const { t } = useTranslation()
   const Icon = typeIcons[question.type]
@@ -57,6 +61,7 @@ export function QuestionToolbar({
         <span className="block text-lg font-black">{t('editor.questionNOfCount', { n: index + 1, count })}</span>
         <span className="block text-sm font-semibold text-muted-foreground">{t(`questionTypes.${question.type}`)}</span>
       </h2>
+      <InGameSwitch state={question.off ? 'off' : 'on'} onChange={onSwitch} />
       <div className="ml-auto flex items-center gap-0.5">
         <ToolButton label={t('editor.moveUp')} disabled={first} onClick={() => onMove('up')}>
           <ArrowUpIcon aria-hidden="true" />

@@ -5,8 +5,10 @@ import {
   quizBrandingSchema,
   quizFileSchema,
   quizImageIds,
+  questionDefaultsSchema,
   quizInputSchema,
   type Question,
+  type QuestionDefaults,
   type QuestionGroup,
   type QuizBranding,
   type QuizInput,
@@ -26,6 +28,12 @@ import { readHostSettings } from './me.js'
 export function parseQuizBranding(raw: unknown): QuizBranding {
   const parsed = quizBrandingSchema.safeParse(raw ?? {})
   return parsed.success ? parsed.data : quizBrandingSchema.parse({})
+}
+
+/** A quiz's stored question defaults read through the schema; an invalid value falls back to the app's. */
+function parseQuestionDefaults(raw: unknown): QuestionDefaults {
+  const parsed = questionDefaultsSchema.safeParse(raw ?? {})
+  return parsed.success ? parsed.data : questionDefaultsSchema.parse({})
 }
 
 /**
@@ -102,6 +110,7 @@ function toQuiz(row: QuizRow) {
     groups: row.groups,
     settings: gameSettingsSchema.parse(row.settings),
     branding: parseQuizBranding(row.branding),
+    questionDefaults: parseQuestionDefaults(row.questionDefaults),
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   }
@@ -154,6 +163,8 @@ export async function quizRoutes(app: FastifyInstance, { db }: { db: Db }) {
         id: quizzes.id,
         title: quizzes.title,
         questionCount: sql<number>`jsonb_array_length(${quizzes.questions})`.mapWith(Number),
+        /** Switched-off questions, which new games leave out. */
+        offCount: sql<number>`jsonb_array_length(jsonb_path_query_array(${quizzes.questions}, '$[*] ? (@.off == true)'))`.mapWith(Number),
         groupCount: sql<number>`jsonb_array_length(${quizzes.groups})`.mapWith(Number),
         updatedAt: quizzes.updatedAt,
         settings: quizzes.settings,
@@ -168,11 +179,15 @@ export async function quizRoutes(app: FastifyInstance, { db }: { db: Db }) {
     }
   })
 
-  /** A new quiz without settings of its own starts with the host's game defaults. */
+  /** A new quiz without settings or question defaults of its own starts with the host's. */
   async function withHostDefaults(body: unknown, userId: string): Promise<unknown> {
-    if (typeof body !== 'object' || body === null || 'settings' in body) return body
-    const { gameDefaults } = await readHostSettings(db, userId)
-    return gameDefaults ? { ...body, settings: gameDefaults } : body
+    if (typeof body !== 'object' || body === null || ('settings' in body && 'questionDefaults' in body)) return body
+    const { gameDefaults, questionDefaults } = await readHostSettings(db, userId)
+    return {
+      ...body,
+      ...(!('settings' in body) && gameDefaults && { settings: gameDefaults }),
+      ...(!('questionDefaults' in body) && { questionDefaults }),
+    }
   }
 
   app.post('/api/quizzes', auth, async (request, reply) => {
@@ -247,6 +262,7 @@ export async function quizRoutes(app: FastifyInstance, { db }: { db: Db }) {
           groups: row.groups,
           settings: { ...row.settings, ...body.settings },
           branding: parseQuizBranding(row.branding),
+          questionDefaults: parseQuestionDefaults(row.questionDefaults),
         },
         reply,
       )
@@ -300,6 +316,7 @@ export async function quizRoutes(app: FastifyInstance, { db }: { db: Db }) {
         ...withFreshGroupIds(row.questions, row.groups),
         settings: row.settings,
         branding: row.branding,
+        questionDefaults: row.questionDefaults,
       })
       .returning()
     return reply.code(201).send({ quiz: toQuiz(copy!) })

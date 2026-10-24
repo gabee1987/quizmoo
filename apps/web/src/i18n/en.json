@@ -167,6 +167,8 @@
     "empty": "No quizzes yet.",
     "questionCount_one": "{{count}} question",
     "questionCount_other": "{{count}} questions",
+    "offCount_one": "{{count}} switched off",
+    "offCount_other": "{{count}} switched off",
     "updated": "updated {{date}}",
     "play": "Play",
     "game": {
@@ -433,6 +435,8 @@
     },
     "create": {
       "title": "New game",
+      "skipped_one": "{{count}} switched-off question is skipped",
+      "skipped_other": "{{count}} switched-off questions are skipped",
       "mode": "Mode",
       "modes": {
         "classic": "Classic",
@@ -865,6 +869,45 @@
   "editor": {
     "title": "Quiz title",
     "description": "Description (optional)",
+    "newQuestion": "Question",
+    "newGroup": "Group",
+    "newQuestionTop": "New question",
+    "newGroupTop": "New group",
+    "titleSetting": "Title",
+    "jumpToSelected": "Show the selected one in the list",
+    "questionDefaults": "New questions",
+    "questionDefaultsHelp": "The time and points new questions start with. A group's own values still win inside the group.",
+    "inGame": {
+      "label": "In the game",
+      "someOn": "{{on}} of {{count}} on",
+      "offBadge": "Off",
+      "someOff_one": "{{count}} off",
+      "someOff_other": "{{count}} off",
+      "questionOff": "This question is switched off",
+      "questionOffHelp": "It stays in the quiz, but new games skip it. Switch it on for an event where it fits.",
+      "groupOff": "This group is switched off",
+      "groupOffHelp": "Its questions stay in the quiz, but new games skip the whole group, intro included.",
+      "switchOn": "Switch on",
+      "switchOnN": "Switch question {{n}} on",
+      "switchOffN": "Switch question {{n}} off",
+      "switchGroupOnN": "Switch group {{n}} on",
+      "switchGroupOffN": "Switch group {{n}} off",
+      "summary_one": "{{count}} of {{total}} questions switched off",
+      "summary_other": "{{count}} of {{total}} questions switched off",
+      "allOn": "All on",
+      "allOnDone_one": "{{count}} question switched back on.",
+      "allOnDone_other": "{{count}} questions switched back on.",
+      "playAllOff": "Every question is switched off. Switch at least one on."
+    },
+    "search": {
+      "label": "Search questions",
+      "placeholder": "Search…",
+      "clear": "Clear search",
+      "results": "Search results",
+      "count_one": "{{count}} match",
+      "count_other": "{{count}} matches",
+      "none": "Nothing matches “{{query}}”."
+    },
     "untitledQuiz": "New quiz",
     "gameSettings": "Game settings",
     "gameSettingsHelp": "Every game of this quiz starts with these settings. You can still change them when starting a game.",
@@ -1460,6 +1503,10 @@
       "important": "Important",
       "custom": "Other…",
       "customSeconds": "Seconds"
+    },
+    "questionDefaults": {
+      "title": "New questions",
+      "help": "The time and points new questions start with in your new quizzes. Each quiz can change them in its settings."
     },
     "defaults": {
       "title": "Game defaults",

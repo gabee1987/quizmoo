@@ -26,7 +26,29 @@ const baseQuestion = z.object({
   /** The group (round) the question belongs to; none for questions outside every group. */
   groupId: z.string().min(1).optional(),
   color: tagColorSchema.optional(),
+  /** Switched off: kept in the quiz, but new games leave it out (`playableQuiz`). Missing: on. */
+  off: z.boolean().optional(),
 })
+
+/** What new questions start with, set per quiz and as the host's default for new quizzes. */
+export const questionDefaultsSchema = z.object({
+  timeLimitSec: baseQuestion.shape.timeLimitSec,
+  points: baseQuestion.shape.points,
+})
+export type QuestionDefaults = z.infer<typeof questionDefaultsSchema>
+
+/**
+ * The questions a game plays: switched-off ones left out, and the groups left without a question
+ * with them (a group whose questions are all off is skipped, intro included).
+ */
+export function playableQuiz<Q extends { off?: boolean | undefined; groupId?: string | undefined }, G extends { id: string }>(
+  questions: Q[],
+  groups: G[],
+): { questions: Q[]; groups: G[] } {
+  const kept = questions.filter((q) => !q.off)
+  const used = new Set(kept.map((q) => q.groupId))
+  return { questions: kept, groups: groups.filter((g) => used.has(g.id)) }
+}
 
 export const singleChoiceQuestionSchema = baseQuestion.extend({
   type: z.literal('single'),
@@ -355,6 +377,7 @@ const quizShape = {
   /** Default settings for games of this quiz; the host can change them when starting a game. */
   settings: gameSettingsSchema.prefault({}),
   branding: quizBrandingSchema.prefault({}),
+  questionDefaults: questionDefaultsSchema.prefault({}),
 }
 
 export const quizSchema = z.object({ id: z.string().min(1), ...quizShape }).superRefine(checkGroups)

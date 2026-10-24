@@ -13,6 +13,7 @@ import { SelectField } from '../../components/select-field'
 import { SwitchRow } from '../host/game-settings-form'
 import { withImage, withKeepOrder, withTag } from './draft'
 import { ImageField } from './image-field'
+import { InGameSwitch, type SwitchState } from './in-game-switch'
 import { POINTS, TIME_LIMITS } from './question-form'
 import { TagPicker } from './tag-picker'
 import type { FieldErrors } from './validate'
@@ -110,6 +111,10 @@ export function GroupForm({
   onMove,
   onDelete,
   questions,
+  switchState,
+  onCount,
+  onSwitch,
+  offNotice,
 }: {
   group: QuestionGroup
   index: number
@@ -128,6 +133,13 @@ export function GroupForm({
   onDelete: () => void
   /** The "Questions" tab: the group's questions to reorder and open. */
   questions: ReactNode
+  /** Whether its questions are on, off or some of each, and how many are on. */
+  switchState: SwitchState
+  onCount: number
+  /** "In the game" for the whole group: turns all its questions on or off. */
+  onSwitch: (on: boolean) => void
+  /** Shown under the header while every question of the group is off. */
+  offNotice: ReactNode
 }) {
   const { t } = useTranslation()
   const titleId = useId()
@@ -167,6 +179,11 @@ export function GroupForm({
           <span className="block text-lg font-black">{t('editor.groupNOfCount', { n: index + 1, count })}</span>
           <span className="block text-sm font-semibold text-muted-foreground">{t('editor.questionCount', { count: questionCount })}</span>
         </h2>
+        <InGameSwitch
+          state={switchState}
+          detail={switchState === 'mixed' ? t('editor.inGame.someOn', { on: onCount, count: questionCount }) : undefined}
+          onChange={onSwitch}
+        />
         <div className="ml-auto flex items-center gap-0.5">
           <TagPicker value={group.color} onChange={(color) => onChange(withTag(group, color))} />
           {[
@@ -190,6 +207,7 @@ export function GroupForm({
         </div>
       </div>
       {ownError && <p className="text-sm font-semibold text-destructive">{t(ownError)}</p>}
+      {offNotice}
 
       <Tabs defaultValue="settings" className="gap-4">
         <TabsList className="h-auto! w-full gap-1 rounded-2xl p-1.5">

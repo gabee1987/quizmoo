@@ -14,13 +14,25 @@ import { CSS } from '@dnd-kit/utilities'
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEventHandler, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
-import { ChevronDownIcon, ChevronsDownUpIcon, ChevronsUpDownIcon, GripVerticalIcon, LayersIcon, LockIcon, ShuffleIcon, Trash2Icon } from 'lucide-react'
+import {
+  ChevronDownIcon,
+  ChevronsDownUpIcon,
+  ChevronsUpDownIcon,
+  EyeIcon,
+  EyeOffIcon,
+  GripVerticalIcon,
+  LayersIcon,
+  LockIcon,
+  ShuffleIcon,
+  Trash2Icon,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/cn'
 import { useFlipOnReorder } from '@/lib/flip'
 import { useSortableAccessibility, useSortableSensors } from '@/lib/sortable'
 import { tagColor, tagStyle } from '@/lib/tags'
-import { endId, itemId, listItems, placeQuestion, type Layout } from './draft'
+import { endId, groupSwitch, itemId, listItems, placeQuestion, type Layout } from './draft'
+import type { SwitchState } from './in-game-switch'
 import { typeIcons } from './type-picker'
 
 type Side = 'before' | 'after'
@@ -67,6 +79,14 @@ export function QuestionList({
   canShuffle,
   shuffles,
   onShuffle,
+  onSwitch,
+  jump,
+  header,
+  headerClassName,
+  toolClassName,
+  results,
+  bodyClassName,
+  footer,
 }: {
   layout: Layout
   selectedId: string | null
@@ -85,6 +105,20 @@ export function QuestionList({
   shuffles: number
   /** The Shuffle button: the caller asks first. */
   onShuffle: () => void
+  /** A row's eye button: the question, or every question of the group, `id` on or off. */
+  onSwitch: (id: string, on: boolean) => void
+  /** Raised to bring the selected row into view (its group opens first). */
+  jump: number
+  /** The caller's controls above the list, given the Shuffle and Collapse buttons to place; one sticky header. */
+  header: (tools: ReactNode) => ReactNode
+  headerClassName: string
+  /** The size of the Shuffle and Collapse buttons. */
+  toolClassName: string
+  /** Search results to show under the header instead of the sortable rows (null: the rows). */
+  results: ReactNode
+  /** The part under the header (the rows and `footer`): in the sidebar it is what scrolls. */
+  bodyClassName: string
+  footer: ReactNode
 }) {
   const { t } = useTranslation()
   const sensors = useSortableSensors()
@@ -108,7 +142,17 @@ export function QuestionList({
   const selectedGroup = layout.questions.find((q) => q.id === selectedId)?.groupId
   useEffect(() => {
     if (selectedGroup) setCollapsed((c) => (c.has(selectedGroup) ? new Set([...c].filter((id) => id !== selectedGroup)) : c))
-  }, [selectedId, selectedGroup])
+  }, [selectedId, selectedGroup, jump])
+  // After the group has opened (its rows grow for 300 ms), the selected row scrolls into the middle of the panel.
+  useEffect(() => {
+    if (jump === 0 || !selectedId) return
+    const timer = setTimeout(() => {
+      const row = listRef.current?.querySelector<HTMLElement>(`[data-row="${window.CSS.escape(selectedId)}"]`)
+      row?.scrollIntoView({ block: 'center', behavior: 'smooth' })
+    }, 320)
+    return () => clearTimeout(timer)
+    // Only a new jump scrolls; selecting by clicking a row leaves the list where it is.
+  }, [jump])
   // While a group is dragged, every group is one closed card: only headers and ungrouped questions show.
   const rendered = useMemo(
     () => (draggingGroup ? items.filter((i) => i.kind === 'group' || (i.kind === 'question' && !i.question.groupId)) : items),
@@ -188,40 +232,42 @@ export function QuestionList({
 
   return (
     <>
-      {(layout.questions.length > 1 || layout.groups.length > 0) && (
-        // One row, so the list starts higher; the labels are short enough for the narrow panel.
-        <div className="flex gap-2">
-          {layout.questions.length > 1 && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={onShuffle}
-              disabled={!canShuffle}
-              aria-label={t('editor.shuffle.label')}
-              title={canShuffle ? t('editor.shuffle.label') : t('editor.shuffle.nothing')}
-              className="flex-1"
-            >
-              {/* Keyed by the shuffle count, so the icon wiggles each time the rows are shuffled. */}
-              <ShuffleIcon key={shuffles} className={cn(shuffles > 0 && 'animate-wiggle')} aria-hidden="true" />
-              {t('editor.shuffle.button')}
-            </Button>
-          )}
-          {layout.groups.length > 0 && (
-            // Says what it will do, like each header's own arrow.
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCollapsed(allFolded ? new Set() : new Set(groupsById.keys()))}
-              aria-label={allFolded ? t('editor.expandAllGroups') : t('editor.collapseAllGroups')}
-              title={allFolded ? t('editor.expandAllGroups') : t('editor.collapseAllGroups')}
-              className="flex-1"
-            >
-              {allFolded ? <ChevronsUpDownIcon aria-hidden="true" /> : <ChevronsDownUpIcon aria-hidden="true" />}
-              {allFolded ? t('editor.expandAll') : t('editor.collapseAll')}
-            </Button>
-          )}
-        </div>
-      )}
+      {/* Icons only, in the header's action row: their names show on hover and to screen readers. */}
+      <div className={headerClassName}>
+        {header(
+          <>
+            {layout.questions.length > 1 && (
+              <Button
+                variant="outline"
+                size="icon-sm"
+                onClick={onShuffle}
+                disabled={!canShuffle}
+                aria-label={t('editor.shuffle.label')}
+                title={canShuffle ? t('editor.shuffle.label') : t('editor.shuffle.nothing')}
+                className={toolClassName}
+              >
+                {/* Keyed by the shuffle count, so the icon wiggles each time the rows are shuffled. */}
+                <ShuffleIcon key={shuffles} className={cn(shuffles > 0 && 'animate-wiggle')} aria-hidden="true" />
+              </Button>
+            )}
+            {layout.groups.length > 0 && (
+              // Says what it will do, like each header's own arrow.
+              <Button
+                variant="outline"
+                size="icon-sm"
+                onClick={() => setCollapsed(allFolded ? new Set() : new Set(groupsById.keys()))}
+                aria-label={allFolded ? t('editor.expandAllGroups') : t('editor.collapseAllGroups')}
+                title={allFolded ? t('editor.expandAllGroups') : t('editor.collapseAllGroups')}
+                className={toolClassName}
+              >
+                {allFolded ? <ChevronsUpDownIcon aria-hidden="true" /> : <ChevronsDownUpIcon aria-hidden="true" />}
+              </Button>
+            )}
+          </>,
+        )}
+      </div>
+      <div className={bodyClassName}>
+      {results ?? (
       <DndContext
         sensors={sensors}
         collisionDetection={collision}
@@ -263,6 +309,9 @@ export function QuestionList({
                     whole={draggingGroup}
                     onToggle={() => toggle(item.group.id)}
                     onSelect={() => onSelect(item.group.id)}
+                    switchState={groupSwitch(layout.questions, item.group.id)}
+                    offCount={layout.questions.filter((q) => q.groupId === item.group.id && q.off).length}
+                    onSwitch={(on) => onSwitch(item.group.id, on)}
                   />
                 )
               }
@@ -285,6 +334,7 @@ export function QuestionList({
                   selected={item.question.id === selectedId}
                   invalid={invalidIds.has(item.question.id)}
                   onSelect={() => onSelect(item.question.id)}
+                  onSwitch={(on) => onSwitch(item.question.id, on)}
                 />
               )
             })}
@@ -319,6 +369,9 @@ export function QuestionList({
         )}
         {trashRect && createPortal(<Trash rect={trashRect} over={overTrash} />, document.body)}
       </DndContext>
+      )}
+      {footer}
+      </div>
     </>
   )
 }
@@ -399,6 +452,9 @@ function GroupRow({
   whole,
   onToggle,
   onSelect,
+  switchState,
+  offCount,
+  onSwitch,
 }: {
   group: QuestionGroup
   index: number
@@ -409,6 +465,9 @@ function GroupRow({
   whole: boolean
   onToggle: () => void
   onSelect: () => void
+  switchState: SwitchState
+  offCount: number
+  onSwitch: (on: boolean) => void
 }) {
   const { t } = useTranslation()
   const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } = useSortable({ id: group.id })
@@ -436,6 +495,9 @@ function GroupRow({
           ghost={isDragging}
           onToggle={onToggle}
           onSelect={onSelect}
+          switchState={switchState}
+          offCount={offCount}
+          onSwitch={onSwitch}
           handle={
             <button
               ref={setActivatorNodeRef}
@@ -475,12 +537,20 @@ function GroupBody({
   ghost = false,
   onToggle,
   onSelect,
+  switchState = 'on',
+  offCount = 0,
+  onSwitch,
   handle,
   className,
 }: {
   group: QuestionGroup
   index: number
   questionCount: number
+  /** Whether its questions are on, off or some of each, and how many are off. */
+  switchState?: SwitchState
+  offCount?: number
+  /** The header's eye button: switches all its questions on or off. */
+  onSwitch?: ((on: boolean) => void) | undefined
   /** Also says how many questions it holds (the drag overlay; in the list the card's badge does). */
   showCount?: boolean
   selected: boolean
@@ -499,7 +569,7 @@ function GroupBody({
     <div
       style={{ ...tagStyle(group.color), ...frameStyle(group) }}
       className={cn(
-        'flex items-center gap-1 border-2 pr-1 transition-colors',
+        'group/row flex items-center gap-1 border-2 pr-1 transition-colors',
         // Closed, the contents slide down to the middle of the whole card (this top and the 24 px bottom
         // below), in step with the rows shrinking away.
         '*:transition-transform *:duration-300 *:ease-[cubic-bezier(0.22,1,0.36,1)]',
@@ -523,7 +593,7 @@ function GroupBody({
           shape === 'whole' ? 'min-h-14 py-1.5' : 'min-h-12',
         )}
       >
-        <span className="relative grid size-9 shrink-0 place-items-center rounded-lg bg-(--tag)/25 text-foreground">
+        <span className={cn('relative grid size-9 shrink-0 place-items-center rounded-lg bg-(--tag)/25 text-foreground', switchState === 'off' && 'opacity-55')}>
           <LayersIcon className="size-4" aria-hidden="true" />
           {invalid && (
             <span className="absolute -top-1 -right-1 size-3 rounded-full border-2 border-card bg-destructive">
@@ -539,17 +609,36 @@ function GroupBody({
                 <span className="sr-only">{t('editor.orderKept')} · </span>
               </span>
             )}
-            {t('editor.groupN', { n: index + 1 })}
+            <span className="whitespace-nowrap">{t('editor.groupN', { n: index + 1 })}</span>
             {/* In the list the card's badge shows the count; screen readers get it here. */}
             {showCount ? (
               <> · {t('editor.questionCount', { count: questionCount })}</>
             ) : (
               <span className="sr-only"> · {t('editor.questionCount', { count: questionCount })}</span>
             )}
+            {switchState === 'off' && <span className="sr-only"> · {t('editor.inGame.offBadge')}</span>}
+            {/* Some off: how many, as a small count (the questions' own rows show which). */}
+            {switchState === 'mixed' && (
+              <span
+                title={t('editor.inGame.someOff', { count: offCount })}
+                className="inline-flex shrink-0 items-center gap-0.5 rounded-full bg-card/80 px-1.5 py-px text-[0.6875rem] leading-4 font-extrabold text-muted-foreground"
+              >
+                <EyeOffIcon className="size-3" aria-hidden="true" />
+                {offCount}
+                <span className="sr-only"> {t('editor.inGame.someOff', { count: offCount })}</span>
+              </span>
+            )}
           </span>
-          <span className="line-clamp-2 text-sm leading-snug font-black wrap-break-word">{group.title}</span>
+          <span className={cn('line-clamp-2 text-sm leading-snug font-black wrap-break-word', switchState === 'off' && 'text-muted-foreground')}>{group.title}</span>
         </span>
       </button>
+      {onSwitch && (
+        <EyeToggle
+          off={switchState !== 'on'}
+          label={t(switchState === 'on' ? 'editor.inGame.switchGroupOffN' : 'editor.inGame.switchGroupOnN', { n: index + 1 })}
+          onClick={() => onSwitch(switchState !== 'on')}
+        />
+      )}
       <button
         type="button"
         onClick={onToggle}
@@ -601,6 +690,7 @@ function SortableRow({
   selected,
   invalid,
   onSelect,
+  onSwitch,
 }: {
   question: Question
   /** The group whose card the row sits in, and whether that group is selected (its card's border shows it). */
@@ -614,6 +704,7 @@ function SortableRow({
   selected: boolean
   invalid: boolean
   onSelect: () => void
+  onSwitch: (on: boolean) => void
 }) {
   const { t } = useTranslation()
   const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition } = useSortable({ id: question.id, disabled: hidden })
@@ -648,6 +739,7 @@ function SortableRow({
             grouped={!!frameGroup}
             ghost={ghostColor !== undefined ? { color: ghostColor ?? undefined } : undefined}
             onSelect={onSelect}
+            onSwitch={onSwitch}
             handle={
               <button
                 ref={setActivatorNodeRef}
@@ -667,6 +759,22 @@ function SortableRow({
   )
 }
 
+/** A question's row without dragging (the search results), naming its group when it has one. */
+export function QuestionRow({
+  group,
+  ...props
+}: {
+  question: Question
+  index: number
+  selected: boolean
+  invalid: boolean
+  group: QuestionGroup | undefined
+  onSelect: () => void
+  onSwitch: (on: boolean) => void
+}) {
+  return <RowBody {...props} groupTitle={group?.title} handle={<span className="w-1 shrink-0" />} />
+}
+
 /** A row's look, shared by the list and the drag overlay; a stripe on the left shows its colour tag. */
 function RowBody({
   question,
@@ -674,8 +782,10 @@ function RowBody({
   selected,
   invalid,
   grouped = false,
+  groupTitle,
   ghost,
   onSelect,
+  onSwitch,
   handle,
   className,
 }: {
@@ -683,36 +793,44 @@ function RowBody({
   index: number
   selected: boolean
   invalid: boolean
+  /** Shown after the type (the search results, where the group's card is not around the row). */
+  groupTitle?: string | undefined
   /** Inside a group's tinted card: the same card in the panel's own colour, so it stands out from the tint. */
   grouped?: boolean
   /** The dragged row's place: a dashed ghost card, in the landing group's colour. */
   ghost?: { color: TagColor | undefined } | undefined
   onSelect?: () => void
+  /** The row's eye button: switches the question on or off for new games. */
+  onSwitch?: ((on: boolean) => void) | undefined
   handle?: ReactNode
   className?: string
 }) {
   const { t } = useTranslation()
   const Icon = typeIcons[question.type]
+  const off = !!question.off
   return (
     <div
       style={tagStyle(ghost ? ghost.color : question.color)}
       className={cn(
         // Every question is a soft rounded card, in a group or not, so the rows read as cards on the panel.
-        'relative isolate flex items-center gap-1 overflow-hidden rounded-xl border-2 pr-2 transition-colors',
+        'group/row relative isolate flex items-center gap-1 overflow-hidden rounded-xl border-2 pr-1.5 transition-[border-color,background-color,box-shadow]',
         ghost
           ? 'border-dashed border-(--tag) bg-(--tag)/12 *:invisible'
-          : question.color
-            ? // Coloured like a group card: a tinted border and fill, on the card colour so a group's tint does not add to it.
-              ['bg-card', selected ? 'border-(--tag)' : 'border-(--tag)/40 hover:border-(--tag)/70']
-            : selected
-              ? 'border-primary bg-secondary'
-              : grouped
-                ? 'border-transparent bg-card hover:border-border'
-                : 'border-transparent bg-muted/70 hover:border-border',
+          : selected
+            ? // The selected card stands out whatever its colour: a primary border, a bar on its left and a primary tint.
+              'border-primary bg-[color-mix(in_srgb,var(--primary)_14%,var(--card))] shadow-[inset_5px_0_0_0_var(--primary)]'
+            : off
+              ? 'border-dashed border-muted-foreground/35 bg-transparent hover:border-muted-foreground/60'
+              : question.color
+                ? // Coloured like a group card: a tinted border and fill, on the card colour so a group's tint does not add to it.
+                  'border-(--tag)/40 bg-card hover:border-(--tag)/70'
+                : grouped
+                  ? 'border-transparent bg-card hover:border-border'
+                  : 'border-transparent bg-muted/70 hover:border-border',
         className,
       )}
     >
-      {question.color && !ghost && <span aria-hidden="true" className="absolute inset-0 -z-1 bg-(--tag)/10" />}
+      {question.color && !ghost && !selected && !off && <span aria-hidden="true" className="absolute inset-0 -z-1 bg-(--tag)/10" />}
       {handle ?? (
         <span className="flex h-12 w-7 shrink-0 items-center justify-center text-muted-foreground">
           <GripVerticalIcon className="size-4" aria-hidden="true" />
@@ -727,7 +845,8 @@ function RowBody({
         <span
           className={cn(
             'relative grid size-9 shrink-0 place-items-center rounded-lg',
-            question.color && !ghost ? 'bg-(--tag)/25 text-foreground' : selected ?'bg-primary text-primary-foreground' : 'bg-card text-muted-foreground',
+            off && 'opacity-55',
+            question.color && !ghost ? 'bg-(--tag)/25 text-foreground' : selected ? 'bg-primary text-primary-foreground' : 'bg-card text-muted-foreground',
           )}
         >
           <Icon className="size-4" aria-hidden="true" />
@@ -738,17 +857,46 @@ function RowBody({
           )}
         </span>
         <span className="min-w-0 flex-1">
-          <span className="block text-xs font-bold text-muted-foreground tabular-nums">
-            {index + 1} · {t(`questionTypes.${question.type}`)}
+          <span className={cn('flex items-center gap-1.5 text-xs font-bold tabular-nums', selected ? 'text-primary' : 'text-muted-foreground')}>
+            <span className="truncate">
+              {index + 1} · {t(`questionTypes.${question.type}`)}
+              {groupTitle && <> · {groupTitle}</>}
+            </span>
+            {/* The crossed-out eye on the right shows it; screen readers get it with the row's name. */}
+            {off && <span className="sr-only"> · {t('editor.inGame.offBadge')}</span>}
           </span>
-          <span className="line-clamp-2 text-sm leading-snug font-bold wrap-break-word">
+          <span className={cn('line-clamp-2 text-sm leading-snug font-bold wrap-break-word', off && 'text-muted-foreground')}>
             {question.text || <span className="text-muted-foreground italic">{t('editor.untitledQuestion')}</span>}
           </span>
         </span>
         {question.imageId && (
-          <img src={`/api/images/${question.imageId}`} alt="" className="h-9 w-12 shrink-0 rounded-md border bg-muted object-cover" />
+          <img src={`/api/images/${question.imageId}`} alt="" className={cn('h-9 w-12 shrink-0 rounded-md border bg-muted object-cover', off && 'opacity-50 grayscale')} />
         )}
       </button>
+      {onSwitch && <EyeToggle off={off} label={t(off ? 'editor.inGame.switchOnN' : 'editor.inGame.switchOffN', { n: index + 1 })} onClick={() => onSwitch(off)} />}
     </div>
+  )
+}
+
+/**
+ * A row's quick "In the game" switch. A switched-off row always shows it (crossed out); an on row shows
+ * it while hovered or focused, and faintly on touch screens, so the list stays calm.
+ */
+function EyeToggle({ off, label, onClick }: { off: boolean; label: string; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={label}
+      title={label}
+      className={cn(
+        'grid size-8 shrink-0 place-items-center rounded-full outline-none transition-[opacity,background-color,color] hover:bg-muted hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring',
+        off
+          ? 'text-muted-foreground'
+          : 'text-muted-foreground opacity-0 group-hover/row:opacity-100 group-focus-within/row:opacity-100 focus-visible:opacity-100 [@media(hover:none)]:opacity-60',
+      )}
+    >
+      {off ? <EyeOffIcon className="size-4" aria-hidden="true" /> : <EyeIcon className="size-4" aria-hidden="true" />}
+    </button>
   )
 }

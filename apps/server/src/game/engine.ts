@@ -5,6 +5,7 @@ import {
   defaultQuickMessages,
   fallbackAvatar,
   mergeLegacyQuickMessages,
+  playableQuiz,
   playersCreateTeams,
   shuffleQuestionOrder,
   streakBonusFor,
@@ -54,7 +55,8 @@ export interface TeamSeed {
 
 /**
  * New lobby. In team mode its teams are `teams` when given, else the host's `teamNames` (none when
- * only players make teams). With `shuffleQuestions` the question order is shuffled once here, each
+ * only players make teams). Switched-off questions are left out first (`playableQuiz`), groups left
+ * without a question with them. With `shuffleQuestions` the question order is shuffled once here, each
  * group moving as one block (`shuffleQuestionOrder`), and with `shuffleOptions` (the game's, or a group's for its
  * questions) the option order of choice questions; both are frozen into the game's quiz copy, which
  * every screen and the results read, and correctness is id-based, so nothing else changes. `random`
@@ -79,7 +81,7 @@ export function createGame(
   return {
     id,
     pin,
-    quiz: shuffleOptions(shuffleQuestions(withoutTags(quiz), settings, random), settings, random),
+    quiz: shuffleOptions(shuffleQuestions(withoutTags(withoutSwitchedOff(quiz)), settings, random), settings, random),
     settings,
     phase: 'lobby',
     questionIndex: -1,
@@ -867,6 +869,13 @@ function enterQuestion(state: GameState, index: number, now: number): GameState 
     pausedAt: null,
     reviewIndex: null,
   }
+}
+
+/** The quiz without its switched-off questions, and without the groups that leaves empty. */
+function withoutSwitchedOff(quiz: GameQuiz): GameQuiz {
+  if (!quiz.questions.some((q) => q.off)) return quiz
+  const playable = playableQuiz(quiz.questions, quiz.groups ?? [])
+  return { ...quiz, questions: playable.questions, ...(quiz.groups && { groups: playable.groups }) }
 }
 
 /** The quiz without its colour tags: they only help the host in the editor, so no screen gets them. */

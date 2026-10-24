@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+### Questions switched off (phase 42)
+- A question can be switched off for one event without deleting it: "In the game" in the question's header, or the eye on its row in the list. It stays in the quiz (and in Quizmoo files), but new games leave it out. A group's switch turns all its questions off or on; a group whose questions are all off is skipped in the game, intro included.
+- Switched-off rows are dashed and faded with a crossed-out eye, a partly switched-off group shows how many are off, and a switched-off question or group says so above its form with "Switch on". Above the list, "4 of 19 questions switched off" offers "All on" (with Undo) for the next event.
+- Play waits while every question is off. The quiz list and the host home page show "3 switched off", and the new game dialog says how many questions it skips.
+
+### Editor
+- A search field above the question list finds questions by their text or options and groups by title or info, ignoring case and accents; the matches show as a plain list (with each question's group) while it is in use.
+- "New question" and "New group" in the top bar, and the same two buttons at the top of the question list as well as at its end. Adding something scrolls the list to it.
+- The list's controls form one compact header that stays at the top of the sidebar (and the phone's list sheet) while the list scrolls: title, search, jump, the add buttons, Shuffle and Collapse as icons, and the switched-off line.
+- A button next to the search brings the selected question into view, opening its group; opening the list on a phone does the same. The selected card stands out: a primary border, a bar on its left and a primary tint.
+- The quiz's title can be changed in the General settings tab too.
+- Default time and points for new questions: per quiz in the General tab (with "Apply to N questions" for those that follow the quiz, leaving groups with their own values alone), and in My settings → Games for new quizzes. A group's own time and points still win inside it. After updating, run `pnpm --filter @quizmoo/server db:migrate` (production deploys migrate on start).
+
 ## 1.3.0 – 2026-10-25
 
 Random question order, and question screens that use the whole screen on phones and the projector.

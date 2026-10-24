@@ -30,7 +30,13 @@ import {
   stepGroup,
   stepQuestion,
   type Layout,
+  applyDefault,
+  differingFromDefault,
+  groupSwitch,
+  searchLayout,
+  switchQuestions,
   withKeepOrder,
+  withOff,
 } from './draft'
 
 const ids = (list: readonly { id: string }[]) => list.map((q) => q.id)
@@ -238,5 +244,66 @@ describe('withKeepOrder', () => {
     const locked = withKeepOrder(group, true)
     expect(locked.keepOrder).toBe(true)
     expect('keepOrder' in withKeepOrder(locked, false)).toBe(false)
+  })
+})
+
+describe('switched-off questions', () => {
+  it('switches questions off and on without leaving an empty field', () => {
+    const [a] = three()
+    const off = withOff(a!, true)
+    expect(off.off).toBe(true)
+    expect('off' in withOff(off, false)).toBe(false)
+    expect(withOff(a!, false)).toBe(a)
+    const list = switchQuestions(three(), new Set(['b']), true)
+    expect(list.map((q) => !!q.off)).toEqual([false, true, false])
+    expect(switchQuestions(list, null, false).some((q) => 'off' in q)).toBe(false)
+  })
+
+  it('tells whether a group is on, off or mixed', () => {
+    const list = three().map((q) => ({ ...q, groupId: 'g' }))
+    expect(groupSwitch(list, 'g')).toBe('on')
+    expect(groupSwitch(switchQuestions(list, new Set(['a']), true), 'g')).toBe('mixed')
+    expect(groupSwitch(switchQuestions(list, null, true), 'g')).toBe('off')
+  })
+})
+
+describe('question defaults', () => {
+  it('starts new questions with the quiz defaults, a poll without points and an order question with 30 s at least', () => {
+    const defaults = { timeLimitSec: 45, points: 500 }
+    expect(newQuestion('single', defaults)).toMatchObject({ timeLimitSec: 45, points: 500 })
+    expect(newQuestion('poll', defaults).points).toBe(0)
+    expect(newQuestion('order', { timeLimitSec: 10, points: 500 }).timeLimitSec).toBe(30)
+    expect(newQuestion('order', defaults).timeLimitSec).toBe(45)
+  })
+
+  it('applies a default to the questions that differ, leaving polls their points and groups their own values', () => {
+    const list = [
+      { ...newQuestion('single'), id: 'a' },
+      { ...newQuestion('poll'), id: 'b' },
+      { ...newQuestion('single', { timeLimitSec: 30, points: 700 }), id: 'c' },
+      { ...newQuestion('single'), id: 'd', groupId: 'g' },
+    ]
+    const groups: QuestionGroup[] = [{ id: 'g', title: 'G', info: '', points: 1000, settings: {} }]
+    const layout = { questions: list, groups }
+    const defaults = { timeLimitSec: 30, points: 700 }
+    expect(ids(differingFromDefault(layout, defaults, 'points'))).toEqual(['a'])
+    expect(ids(differingFromDefault(layout, defaults, 'timeLimitSec'))).toEqual(['a', 'b', 'd'])
+    const applied = applyDefault(layout, defaults, 'points')
+    expect(applied.map((q) => q.points)).toEqual([700, 0, 700, 1000])
+    expect(applied[2]).toBe(list[2])
+  })
+})
+
+describe('searchLayout', () => {
+  it('finds questions by text or option and groups by title, ignoring case and accents', () => {
+    const single = { ...newQuestion('single'), id: 'a', text: 'Melyik a főváros?' }
+    if (single.type !== 'single') throw new Error('type')
+    const withOption = { ...single, id: 'b', text: 'Folyó', options: single.options.map((o, i) => ({ ...o, text: i === 0 ? 'Duna' : 'Tisza' })) }
+    const group: QuestionGroup = { id: 'g', title: 'Földrajz kör', info: '', settings: {} }
+    const layout = { questions: [single, withOption], groups: [group] }
+    expect(ids(searchLayout(layout, 'FOVAROS').questions)).toEqual(['a'])
+    expect(ids(searchLayout(layout, 'duna').questions)).toEqual(['b'])
+    expect(ids(searchLayout(layout, 'foldrajz').groups)).toEqual(['g'])
+    expect(searchLayout(layout, 'melyik duna').questions).toEqual([])
   })
 })

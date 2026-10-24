@@ -7,6 +7,7 @@ import {
   ArrowUpDownIcon,
   CopyIcon,
   EllipsisVerticalIcon,
+  EyeOffIcon,
   FileDownIcon,
   FileSpreadsheetIcon,
   ListChecksIcon,
@@ -316,6 +317,12 @@ function QuizList() {
             </div>
             <div className="flex flex-wrap gap-1.5">
               <Badge variant="secondary">{t('host.questionCount', { count: quiz.questionCount })}</Badge>
+              {quiz.offCount > 0 && (
+                <Badge variant="outline" className="border-dashed text-muted-foreground">
+                  <EyeOffIcon aria-hidden="true" />
+                  {t('host.offCount', { count: quiz.offCount })}
+                </Badge>
+              )}
               <Badge variant="outline">{t(`host.create.modes.${quiz.settings.mode}`)}</Badge>
               <Badge variant="outline">
                 <span className="size-2.5 rounded-full" style={{ background: themeSwatches(quiz.settings.theme, quiz.settings.customTheme)[0] }} />
@@ -330,7 +337,12 @@ function QuizList() {
                     {t('host.edit')}
                   </Link>
                 </Button>
-                <Button className="flex-1" disabled={quiz.questionCount === 0} onClick={() => setCreating(quiz)}>
+                <Button
+                  className="flex-1"
+                  disabled={quiz.questionCount - quiz.offCount === 0}
+                  title={quiz.questionCount > 0 && quiz.offCount === quiz.questionCount ? t('editor.inGame.playAllOff') : undefined}
+                  onClick={() => setCreating(quiz)}
+                >
                   <PlayIcon aria-hidden="true" />
                   {t('host.play')}
                 </Button>
@@ -346,6 +358,7 @@ function QuizList() {
           quizSettings={creating.settings}
           quizBranding={creating.branding}
           rounds={creating.groupCount > 0}
+          offCount={creating.offCount}
           pending={play.isPending}
           onCreate={(settings, scheduledAt, branding, lockCode) =>
             play.mutate({ quizId: creating.id, settings, scheduledAt, branding, lockCode })

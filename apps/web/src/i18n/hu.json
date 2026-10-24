@@ -167,6 +167,8 @@
     "empty": "Még nincs egy kvíz sem. Készíts egyet!",
     "questionCount_one": "{{count}} kérdés",
     "questionCount_other": "{{count}} kérdés",
+    "offCount_one": "{{count}} kikapcsolva",
+    "offCount_other": "{{count}} kikapcsolva",
     "updated": "szerkesztve: {{date}}",
     "play": "Indítás",
     "game": {
@@ -433,6 +435,8 @@
     },
     "create": {
       "title": "Új játék",
+      "skipped_one": "{{count}} kikapcsolt kérdést kihagyunk",
+      "skipped_other": "{{count}} kikapcsolt kérdést kihagyunk",
       "mode": "Játékmód",
       "modes": {
         "classic": "Klasszikus",
@@ -865,6 +869,45 @@
   "editor": {
     "title": "Kvíz címe",
     "description": "Leírás (nem kötelező)",
+    "newQuestion": "Kérdés",
+    "newGroup": "Csoport",
+    "newQuestionTop": "Új kérdés",
+    "newGroupTop": "Új csoport",
+    "titleSetting": "Cím",
+    "jumpToSelected": "Mutasd a kijelöltet a listában",
+    "questionDefaults": "Új kérdések",
+    "questionDefaultsHelp": "Ennyi idővel és ponttal indulnak az új kérdések. Egy csoporton belül a csoport saját értékei számítanak.",
+    "inGame": {
+      "label": "Játékban",
+      "someOn": "{{count}}-ból {{on}} bekapcsolva",
+      "offBadge": "Kikapcsolva",
+      "someOff_one": "{{count}} kikapcsolva",
+      "someOff_other": "{{count}} kikapcsolva",
+      "questionOff": "Ez a kérdés ki van kapcsolva",
+      "questionOffHelp": "A kvízben marad, de az új játékok kihagyják. Kapcsold be, ha egy eseményen jól jön.",
+      "groupOff": "Ez a csoport ki van kapcsolva",
+      "groupOffHelp": "A kérdései a kvízben maradnak, de az új játékok az egész csoportot kihagyják, a bevezetőjével együtt.",
+      "switchOn": "Bekapcsolás",
+      "switchOnN": "A(z) {{n}}. kérdés bekapcsolása",
+      "switchOffN": "A(z) {{n}}. kérdés kikapcsolása",
+      "switchGroupOnN": "A(z) {{n}}. csoport bekapcsolása",
+      "switchGroupOffN": "A(z) {{n}}. csoport kikapcsolása",
+      "summary_one": "{{total}} kérdésből {{count}} kikapcsolva",
+      "summary_other": "{{total}} kérdésből {{count}} kikapcsolva",
+      "allOn": "Mind be",
+      "allOnDone_one": "{{count}} kérdést visszakapcsoltunk.",
+      "allOnDone_other": "{{count}} kérdést visszakapcsoltunk.",
+      "playAllOff": "Minden kérdés ki van kapcsolva. Kapcsolj be legalább egyet."
+    },
+    "search": {
+      "label": "Keresés a kérdések között",
+      "placeholder": "Keresés…",
+      "clear": "Keresés törlése",
+      "results": "Találatok",
+      "count_one": "{{count}} találat",
+      "count_other": "{{count}} találat",
+      "none": "Nincs találat erre: „{{query}}”."
+    },
     "untitledQuiz": "Új kvíz",
     "gameSettings": "Játékbeállítások",
     "gameSettingsHelp": "Ennek a kvíznek minden játéka ezekkel a beállításokkal indul. Indításkor még átállíthatod őket.",
@@ -1460,6 +1503,10 @@
       "important": "Fontos",
       "custom": "Más…",
       "customSeconds": "Másodperc"
+    },
+    "questionDefaults": {
+      "title": "Új kérdések",
+      "help": "Ennyi idővel és ponttal indulnak az új kérdések az új kvízeidben. Kvízenként a beállításokban átállíthatod."
     },
     "defaults": {
       "title": "Alap játékbeállítások",
