@@ -474,6 +474,8 @@
       "answerChangesLocked_one": "Válaszváltoztatás {{count}} mp-cel a vége előttig",
       "answerChangesLocked_other": "Válaszváltoztatás {{count}} mp-cel a vége előttig",
       "shuffle": "Keverd össze a válaszokat",
+      "shuffleQuestions": "Keverd össze a kérdéseket",
+      "shuffleQuestionsHelp": "Minden játék új sorrendben hozza a kérdéseket. Egy kör egyben mozog a kérdéseivel, és azok is keverednek, hacsak a kör nem tartja a sorrendjét.",
       "submit": "Játék létrehozása",
       "branding": {
         "title": "Arculat",
@@ -998,6 +1000,22 @@
     "expandGroup": "A(z) {{n}}. csoport kinyitása",
     "collapseAllGroups": "Minden csoport becsukása",
     "expandAllGroups": "Minden csoport kinyitása",
+    "collapseAll": "Mind becsukása",
+    "expandAll": "Mind kinyitása",
+    "shuffle": {
+      "button": "Keverés",
+      "label": "Kérdések összekeverése",
+      "title": "Összekevered a kérdéseket?",
+      "body": "Minden kérdés új helyre kerül ebben a kvízben. Egy csoport egyben mozog, a kérdései pedig egymás között keverednek.",
+      "bodyLocked": "A „Maradjon a sorrend” csoportokon belül nem változik a sorrend.",
+      "confirm": "Keverés",
+      "done": "Összekevertük a kérdéseket",
+      "nothing": "Nincs mit keverni: adj hozzá kérdéseket, vagy oldd fel egy csoport zárását."
+    },
+    "groupOrder": "Kérdések sorrendje",
+    "keepOrder": "Maradjon a sorrend",
+    "keepOrderHelp": "Ha a kérdések összekeverednek, játékban vagy a Keverés gombbal, a csoport máshová kerülhet, de a kérdései ebben a sorrendben maradnak.",
+    "orderKept": "Rögzített sorrend",
     "dragGroup": "A(z) {{n}}. csoport áthelyezése",
     "groupEndN": "A(z) {{n}}. csoport vége",
     "questionGroup": "Csoport",
@@ -1271,6 +1289,28 @@
     "current": "Mostani verzió",
     "releasedOn": "Megjelent: {{date}}",
     "releases": {
+      "1_3_0": {
+        "title": "Kevert kérdések",
+        "intro": "Játékonként új sorrendben jöhetnek a kérdések, a telefonokon pedig nagyobbak a képek.",
+        "sections": [
+          {
+            "title": "Véletlen kérdéssorrend",
+            "items": [
+              "Kapcsold be a Keverd össze a kérdéseket beállítást a kvíz beállításaiban, vagy csak egy játékra, amikor elindítod. Így minden játék új sorrendben hozza a kérdéseket.",
+              "Egy kör egyben mozog a kérdéseivel, és a kérdései is keverednek. Kapcsold be egy körben a Maradjon a sorrend kapcsolót, ha a kérdéseinek sorrendben kell jönniük.",
+              "A kérdéslista feletti Keverés gomb végleg összekeveri a kvízt. Előbb rákérdez, és a Visszavonással visszakapod a régi sorrendet."
+            ]
+          },
+          {
+            "title": "Nagyobb képek a telefonokon és a kivetítőn",
+            "items": [
+              "A telefonokon a kérdés sorszáma, a kör, az időzítő és a beállítások gomb egy keskeny sávban van felül, így a kérdés képe kitölti a szélességet, és közben minden válasz látszik.",
+              "A kivetítőn a kérdés, a képe és az összes válasz mindig elfér egy képernyőn.",
+              "Ha szünetet tartasz, a játékosok egy nagy Szünet jelzést látnak a képernyőjük közepén, és semmi nem mozdul el rajta."
+            ]
+          }
+        ]
+      },
       "1_2_0": {
         "title": "Körök",
         "intro": "Oszd körökre a kvízt, mindegyiknek saját felvezetővel, szabályokkal és eredménytáblával, és készíts akár 200 kérdéses kvízeket.",

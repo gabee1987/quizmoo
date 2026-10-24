@@ -14,7 +14,7 @@ import { CSS } from '@dnd-kit/utilities'
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEventHandler, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
-import { ChevronDownIcon, ChevronsDownUpIcon, ChevronsUpDownIcon, GripVerticalIcon, LayersIcon, Trash2Icon } from 'lucide-react'
+import { ChevronDownIcon, ChevronsDownUpIcon, ChevronsUpDownIcon, GripVerticalIcon, LayersIcon, LockIcon, ShuffleIcon, Trash2Icon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/cn'
 import { useFlipOnReorder } from '@/lib/flip'
@@ -64,6 +64,9 @@ export function QuestionList({
   onPlace,
   onPlaceGroup,
   onTrash,
+  canShuffle,
+  shuffles,
+  onShuffle,
 }: {
   layout: Layout
   selectedId: string | null
@@ -76,6 +79,12 @@ export function QuestionList({
   onPlaceGroup: (id: string, targetId: string, side: Side) => void
   /** A question or group was dropped on the trash. */
   onTrash: (id: string) => void
+  /** Whether the Shuffle button has anything to do (`canShuffleQuestions`). */
+  canShuffle: boolean
+  /** How often the questions were shuffled: each one wiggles the button's icon (the rows slide by themselves). */
+  shuffles: number
+  /** The Shuffle button: the caller asks first. */
+  onShuffle: () => void
 }) {
   const { t } = useTranslation()
   const sensors = useSortableSensors()
@@ -179,12 +188,39 @@ export function QuestionList({
 
   return (
     <>
-      {layout.groups.length > 0 && (
-        // Says what it will do, like each header's own arrow.
-        <Button variant="outline" size="sm" onClick={() => setCollapsed(allFolded ? new Set() : new Set(groupsById.keys()))} className="w-full">
-          {allFolded ? <ChevronsUpDownIcon aria-hidden="true" /> : <ChevronsDownUpIcon aria-hidden="true" />}
-          {allFolded ? t('editor.expandAllGroups') : t('editor.collapseAllGroups')}
-        </Button>
+      {(layout.questions.length > 1 || layout.groups.length > 0) && (
+        // One row, so the list starts higher; the labels are short enough for the narrow panel.
+        <div className="flex gap-2">
+          {layout.questions.length > 1 && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onShuffle}
+              disabled={!canShuffle}
+              aria-label={t('editor.shuffle.label')}
+              title={canShuffle ? t('editor.shuffle.label') : t('editor.shuffle.nothing')}
+              className="flex-1"
+            >
+              {/* Keyed by the shuffle count, so the icon wiggles each time the rows are shuffled. */}
+              <ShuffleIcon key={shuffles} className={cn(shuffles > 0 && 'animate-wiggle')} aria-hidden="true" />
+              {t('editor.shuffle.button')}
+            </Button>
+          )}
+          {layout.groups.length > 0 && (
+            // Says what it will do, like each header's own arrow.
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCollapsed(allFolded ? new Set() : new Set(groupsById.keys()))}
+              aria-label={allFolded ? t('editor.expandAllGroups') : t('editor.collapseAllGroups')}
+              title={allFolded ? t('editor.expandAllGroups') : t('editor.collapseAllGroups')}
+              className="flex-1"
+            >
+              {allFolded ? <ChevronsUpDownIcon aria-hidden="true" /> : <ChevronsDownUpIcon aria-hidden="true" />}
+              {allFolded ? t('editor.expandAll') : t('editor.collapseAll')}
+            </Button>
+          )}
+        </div>
       )}
       <DndContext
         sensors={sensors}
@@ -496,7 +532,13 @@ function GroupBody({
           )}
         </span>
         <span className="min-w-0 flex-1">
-          <span className="block text-xs font-extrabold text-foreground/75 tabular-nums">
+          <span className="flex items-center gap-1 text-xs font-extrabold text-foreground/75 tabular-nums">
+            {group.keepOrder && (
+              <span title={t('editor.orderKept')} className="inline-flex">
+                <LockIcon className="size-3" aria-hidden="true" />
+                <span className="sr-only">{t('editor.orderKept')} · </span>
+              </span>
+            )}
             {t('editor.groupN', { n: index + 1 })}
             {/* In the list the card's badge shows the count; screen readers get it here. */}
             {showCount ? (

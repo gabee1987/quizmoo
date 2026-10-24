@@ -72,9 +72,10 @@ function PlayPage() {
         <>
           {/*
             The host's message sticks to the top while the player scrolls (long questions, the
-            end-of-game review). Full width like a toast.
+            end-of-game review). Full width like a toast. Above the dimmed page of `PausedNote` (z-40), so
+            a message sent during a pause is read at full brightness.
           */}
-          <div className="sticky top-[max(0.75rem,env(safe-area-inset-top))] z-30">
+          <div className="sticky top-[max(0.75rem,env(safe-area-inset-top))] z-50">
             <PlayerMessage pin={pin} announcement={player.announcement} clockOffset={clockOffset} />
           </div>
           <NextRound snapshot={player} pin={pin} />

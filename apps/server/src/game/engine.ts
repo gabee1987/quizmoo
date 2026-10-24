@@ -6,6 +6,7 @@ import {
   fallbackAvatar,
   mergeLegacyQuickMessages,
   playersCreateTeams,
+  shuffleQuestionOrder,
   streakBonusFor,
   type Answer,
   type Avatar,
@@ -53,9 +54,11 @@ export interface TeamSeed {
 
 /**
  * New lobby. In team mode its teams are `teams` when given, else the host's `teamNames` (none when
- * only players make teams). With `shuffleOptions` (the game's, or a group's for its questions) the
- * option order of choice questions is shuffled once here and frozen into the game's quiz copy;
- * correctness is id-based, so nothing else changes. `random` is injectable for tests.
+ * only players make teams). With `shuffleQuestions` the question order is shuffled once here, each
+ * group moving as one block (`shuffleQuestionOrder`), and with `shuffleOptions` (the game's, or a group's for its
+ * questions) the option order of choice questions; both are frozen into the game's quiz copy, which
+ * every screen and the results read, and correctness is id-based, so nothing else changes. `random`
+ * is injectable for tests.
  */
 export function createGame(
   quiz: GameQuiz,
@@ -76,7 +79,7 @@ export function createGame(
   return {
     id,
     pin,
-    quiz: shuffleOptions(withoutTags(quiz), settings, random),
+    quiz: shuffleOptions(shuffleQuestions(withoutTags(quiz), settings, random), settings, random),
     settings,
     phase: 'lobby',
     questionIndex: -1,
@@ -874,6 +877,12 @@ function withoutTags(quiz: GameQuiz): GameQuiz {
     questions: quiz.questions.map((q) => strip(q) as Question),
     ...(quiz.groups && { groups: quiz.groups.map(strip) }),
   }
+}
+
+function shuffleQuestions(quiz: GameQuiz, settings: GameSettings, random: () => number): GameQuiz {
+  if (!settings.shuffleQuestions) return quiz
+  if (!quiz.groups) return { ...quiz, questions: shuffleQuestionOrder(quiz.questions, [], random).questions }
+  return { ...quiz, ...shuffleQuestionOrder(quiz.questions, quiz.groups, random) }
 }
 
 function shuffleOptions(quiz: GameQuiz, settings: GameSettings, random: () => number): GameQuiz {

@@ -58,6 +58,7 @@ export function fixtureSettings(overrides: Partial<GameSettings> = {}): GameSett
     answerChanges: false,
     answerLockSec: 0,
     shuffleOptions: false,
+    shuffleQuestions: false,
     groupIntroSec: 0,
     groupStandings: 'afterGroup',
     teamNames: [],

@@ -30,6 +30,7 @@ import {
   stepGroup,
   stepQuestion,
   type Layout,
+  withKeepOrder,
 } from './draft'
 
 const ids = (list: readonly { id: string }[]) => list.map((q) => q.id)
@@ -228,5 +229,14 @@ describe('groups in the draft', () => {
       'p 10 0',
     ])
     expect(differingQuestions(start, group('G'), 'points')).toEqual([])
+  })
+})
+
+describe('withKeepOrder', () => {
+  it('locks a group with the field and unlocks it by leaving the field out', () => {
+    const group: QuestionGroup = { id: 'g1', title: 'One', info: '', settings: {} }
+    const locked = withKeepOrder(group, true)
+    expect(locked.keepOrder).toBe(true)
+    expect('keepOrder' in withKeepOrder(locked, false)).toBe(false)
   })
 })

@@ -419,6 +419,12 @@ export function withTag<T extends { color?: TagColor | undefined }>(item: T, col
   return (color ? { ...rest, color } : rest) as T
 }
 
+/** Locks or unlocks a group's question order; unlocked is no field at all, like a group from before the lock. */
+export function withKeepOrder(group: QuestionGroup, keepOrder: boolean): QuestionGroup {
+  const { keepOrder: _old, ...rest } = group
+  return keepOrder ? { ...rest, keepOrder } : rest
+}
+
 /** Sets or removes an optional imageId without writing `undefined` (exactOptionalPropertyTypes). */
 export function withImage<T extends { imageId?: string | undefined }>(item: T, imageId: string | undefined): T {
   const { imageId: _old, ...rest } = item

@@ -1,6 +1,8 @@
 import {
   MAX_GROUPS,
   MAX_QUESTIONS,
+  canShuffleQuestions,
+  shuffleQuestionOrder,
   type GameSettings,
   type Question,
   type QuestionGroup,
@@ -111,6 +113,7 @@ const tabIcons: Record<SettingsTab, ComponentType<{ className?: string }>> = {
 }
 
 const UNDO_MS = 10_000
+const SHUFFLED_TOAST = 'questions-shuffled'
 /** The group picker's value for "No group" (Radix selects take no empty value). */
 const NO_GROUP = ':none'
 const NEW_GROUP = ':new'
@@ -195,6 +198,10 @@ function Editor({ quiz }: { quiz: Quiz }) {
   const [deleting, setDeleting] = useState(false)
   // The group with questions waiting for "keep them or delete them too".
   const [confirmGroup, setConfirmGroup] = useState<QuestionGroup | null>(null)
+  const [confirmShuffle, setConfirmShuffle] = useState(false)
+  const [shuffles, setShuffles] = useState(0)
+  // The last shuffle's result, while its Undo is offered.
+  const shuffled = useRef<Pick<QuizInput, 'questions' | 'groups'> | null>(null)
   // Set while the quiz is being deleted and after: no more saves, and leaving needs no confirmation.
   const deleted = useRef(false)
   // Field errors of a question show once the user has left it (or it came from the server),
@@ -397,6 +404,30 @@ function Editor({ quiz }: { quiz: Quiz }) {
       },
     })
   }
+  // A new order for good (groups move as blocks); Undo puts the old one back while nothing changed since.
+  const shuffle = () => {
+    setConfirmShuffle(false)
+    const before = { questions, groups }
+    const next = shuffleQuestionOrder(questions, groups)
+    shuffled.current = next
+    setDraft((d) => ({ ...d, ...next }))
+    setShuffles((n) => n + 1)
+    toast(t('editor.shuffle.done'), {
+      id: SHUFFLED_TOAST,
+      duration: UNDO_MS,
+      action: {
+        label: t('editor.undo'),
+        onClick: () => setDraft((d) => (d.questions === next.questions && d.groups === next.groups ? { ...d, ...before } : d)),
+      },
+    })
+  }
+  // An edit after the shuffle ends its Undo, which would take the edit back too.
+  useEffect(() => {
+    if (shuffled.current && (questions !== shuffled.current.questions || groups !== shuffled.current.groups)) {
+      shuffled.current = null
+      toast.dismiss(SHUFFLED_TOAST)
+    }
+  }, [questions, groups])
   const goToProblem = (problem: Problem) => {
     if (problem.groupIndex !== null) {
       const group = groups[problem.groupIndex]
@@ -476,7 +507,11 @@ function Editor({ quiz }: { quiz: Quiz }) {
         }}
         onPlace={(id, targetId, side) => setLayout((l) => placeQuestion(l, id, targetId, side))}
         onPlaceGroup={(id, targetId, side) => setLayout((l) => placeGroup(l, id, targetId, side))}
-        onTrash={(id) => (groups.some((g) => g.id === id) ? requestDeleteGroup(id) : deleteQuestion(id))}      />
+        onTrash={(id) => (groups.some((g) => g.id === id) ? requestDeleteGroup(id) : deleteQuestion(id))}
+        canShuffle={canShuffleQuestions(questions, groups)}
+        shuffles={shuffles}
+        onShuffle={() => setConfirmShuffle(true)}
+      />
       {/* An empty quiz shows the type picker in the middle already. */}
       {questions.length > 0 && questions.length < MAX_QUESTIONS && (
         <Button variant="secondary" onClick={() => setPicking(true)}>
@@ -953,6 +988,18 @@ function Editor({ quiz }: { quiz: Quiz }) {
             onCancel={() => setConfirmGroup(null)}
           >
             {t('editor.deleteGroupBody', { count: questions.filter((q) => q.groupId === confirmGroup.id).length })}
+          </ConfirmDialog>
+        )}
+
+        {confirmShuffle && (
+          <ConfirmDialog
+            title={t('editor.shuffle.title')}
+            confirmLabel={t('editor.shuffle.confirm')}
+            onConfirm={shuffle}
+            onCancel={() => setConfirmShuffle(false)}
+          >
+            <p>{t('editor.shuffle.body')}</p>
+            {groups.some((g) => g.keepOrder) && <p className="mt-2">{t('editor.shuffle.bodyLocked')}</p>}
           </ConfirmDialog>
         )}
 

@@ -290,6 +290,24 @@ describe('group rules', () => {
     expect(ids(5)).toEqual(['a', 'b'])
   })
 
+  it('shuffles groups as blocks and the questions inside them, keeping a locked group’s order', () => {
+    const order = (state: GameState) => state.quiz.questions.map((q) => q.id)
+    expect(order(game(groupedQuiz(), {}, () => 0))).toEqual(['q-single', 'q-multiple', 'q-truefalse', 'q-text', 'q-number', 'q-poll'])
+    // Blocks q-single, g1, g2 rotate to g1, g2, q-single; then each group is shuffled.
+    const shuffled = game(groupedQuiz(), { shuffleQuestions: true }, () => 0)
+    expect(order(shuffled)).toEqual(['q-truefalse', 'q-text', 'q-multiple', 'q-poll', 'q-number', 'q-single'])
+    expect(shuffled.quiz.groups!.map((g) => g.id)).toEqual(['g1', 'g2'])
+    const locked = groupedQuiz()
+    locked.groups![0]!.keepOrder = true
+    expect(order(game(locked, { shuffleQuestions: true }, () => 0)).slice(0, 3)).toEqual(['q-multiple', 'q-truefalse', 'q-text'])
+    // The game plays in its own order: round one's intro, then its shuffled first question.
+    let playing = startGame(shuffled, T0)
+    expect(playing.phase).toBe('intro')
+    playing = playTo(playing, 0)
+    expect(toPlayerSnapshot(playing, 'p1', T0).question?.id).toBe('q-truefalse')
+    roundTrip(shuffled)
+  })
+
   it('shows the standings after a skipped group end when they follow the group', () => {
     let state = playTo(startGame(game(groupedQuiz({ scoreboard: 'onDemand' })), T0), 3)
     expect(skipQuestion(state, T0).phase).toBe('scoreboard')
