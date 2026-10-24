@@ -39,6 +39,8 @@ interface Entry {
   /** Clears a host message that has a duration. */
   messageTimer: ReturnType<typeof setTimeout> | null
   saving: Promise<void>
+  /** A save is queued behind `saving` and has not started; it writes the latest state when it does. */
+  saveQueued?: boolean
   /**
    * Snapshot order. Seeded from the clock when the game is created or restored and raised by one
    * per transition, so it keeps increasing across restarts (far fewer transitions than milliseconds).
@@ -172,7 +174,15 @@ export class GameManager {
         this.log.error(error, 'game listener failed')
       }
     }
-    entry.saving = entry.saving.then(() => this.save(entry))
+    // At most one save waits: a large game saves for longer than 60 answers take to arrive, and a
+    // save per transition would fall ever further behind.
+    if (!entry.saveQueued) {
+      entry.saveQueued = true
+      entry.saving = entry.saving.then(() => {
+        entry.saveQueued = false
+        return this.save(entry)
+      })
+    }
     return next
   }
 

@@ -81,8 +81,12 @@ export function toPublicQuestion(question: Question): PublicQuestion {
 export function toHostSnapshot(state: GameState, now: number, { includeAnswers = false, seq = 0 } = {}): HostSnapshot {
   const base = baseSnapshot(state, now, 'screen', seq)
   const question = state.quiz.questions[state.questionIndex]
+  const stats = questionStats(state)
+  const hidden = !includeAnswers && base.answersHidden
   return {
     ...(includeAnswers ? base : conceal(state, base)),
+    // Only the host control lists them; the phones never get them (they grow with every question).
+    questionStats: hidden ? stats.map((q) => ({ ...q, correctCount: 0 })) : stats,
     // The question on the screens: a question shown again lists its own answers.
     currentAnswers: includeAnswers ? currentAnswers(state, base.questionIndex) : null,
     live: includeAnswers && state.phase === 'question' && question ? revealInfo(state, question) : null,
@@ -225,7 +229,6 @@ function conceal(state: GameState, base: GameSnapshotBase): GameSnapshotBase {
       rank: standings ? t.rank : 1,
       previousRank: standings ? t.rank : 1,
     })),
-    questionStats: base.questionStats.map((q) => ({ ...q, correctCount: 0 })),
   }
 }
 
@@ -271,7 +274,23 @@ export function isRevealed(state: GameState): boolean {
   return state.phase === 'reveal' || state.phase === 'scoreboard' || state.phase === 'finished'
 }
 
+/**
+ * One broadcast builds every phone's snapshot from the same state at the same time, so the shared
+ * part is built once per state, audience, time and seq (states are never changed in place).
+ */
+const baseCache = new WeakMap<GameState, Partial<Record<ResultsAudience, { key: string; base: GameSnapshotBase }>>>()
+
 function baseSnapshot(state: GameState, now: number, audience: ResultsAudience, seq: number): GameSnapshotBase {
+  const key = `${now}:${seq}`
+  const cached = baseCache.get(state) ?? {}
+  const hit = cached[audience]
+  if (hit?.key === key) return hit.base
+  const base = buildBaseSnapshot(state, now, audience, seq)
+  baseCache.set(state, { ...cached, [audience]: { key, base } })
+  return base
+}
+
+function buildBaseSnapshot(state: GameState, now: number, audience: ResultsAudience, seq: number): GameSnapshotBase {
   // A question shown again between questions is shown as its reveal.
   const reviewing =
     state.reviewIndex !== null &&
@@ -352,7 +371,6 @@ function baseSnapshot(state: GameState, now: number, audience: ResultsAudience, 
     teams: teamsPublic,
     reveal: revealed ? revealInfo(state, question) : null,
     awaitingGrading: reviewing ? false : state.awaitingGrading,
-    questionStats: questionStats(state),
     // Before and after the questions the game's own settings; in between the current question's rules.
     settings: phase === 'lobby' || phase === 'finished' ? state.settings : settingsAt(state, shownIndex),
     answersHidden: answersHidden(state, audience),

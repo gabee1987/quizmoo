@@ -5,6 +5,7 @@
  *   pnpm --filter @quizmoo/server exec tsx scripts/load-test.ts --players 60
  *
  * Options: --url (default http://localhost:3000), --players 60, --questions 5, --seconds 12,
+ * --groups 0 (splits the questions into that many rounds, each with an intro the host starts),
  * --flap 0.2 (share of players that drop and reconnect during each question), --keep (keep the
  * quiz and game afterwards). The host account needs no other setup: the script creates its own
  * quiz and deletes it (and the game) at the end.
@@ -31,6 +32,7 @@ const { values: args } = parseArgs({
     players: { type: 'string', default: '60' },
     questions: { type: 'string', default: '5' },
     seconds: { type: 'string', default: '12' },
+    groups: { type: 'string', default: '0' },
     flap: { type: 'string', default: '0.2' },
     'max-fanout': { type: 'string', default: '200' },
     keep: { type: 'boolean', default: false },
@@ -40,6 +42,7 @@ const url = args.url!.replace(/\/$/, '')
 const playerCount = Number(args.players)
 const questionCount = Number(args.questions)
 const seconds = Number(args.seconds)
+const groupCount = Number(args.groups)
 const flapShare = Number(args.flap)
 const maxFanout = Number(args['max-fanout'])
 const username = process.env.LOAD_TEST_USERNAME
@@ -73,8 +76,11 @@ async function api<T>(method: string, path: string, body?: unknown): Promise<T> 
 }
 
 await api('POST', '/api/auth/login', { username, password })
+const groupSize = groupCount > 0 ? Math.ceil(questionCount / groupCount) : 0
+const groups = Array.from({ length: groupCount }, (_, g) => ({ id: `load-g${g + 1}`, title: `Load round ${g + 1}`, info: 'Load test round.', settings: {} }))
 const questions = Array.from({ length: questionCount }, (_, i) => ({
   id: `load-q${i + 1}`,
+  ...(groupCount > 0 ? { groupId: groups[Math.floor(i / groupSize)]!.id } : {}),
   type: 'single' as const,
   text: `Load test question ${i + 1}`,
   timeLimitSec: seconds,
@@ -82,10 +88,10 @@ const questions = Array.from({ length: questionCount }, (_, i) => ({
   options: ['a', 'b', 'c', 'd'].map((id) => ({ id, text: `Option ${id.toUpperCase()}` })),
   correctOptionId: 'a',
 }))
-const { quiz } = await api<{ quiz: { id: string } }>('POST', '/api/quizzes', { title: 'Load test', questions })
+const { quiz } = await api<{ quiz: { id: string } }>('POST', '/api/quizzes', { title: 'Load test', groups, questions })
 const { pin } = await api<{ pin: string }>('POST', '/api/games', { quizId: quiz.id })
 const { gameId } = await api<{ gameId: string }>('GET', `/api/games/${pin}`)
-console.log(`Game ${pin}: ${playerCount} players, ${questionCount} questions of ${seconds} s, ${flapShare * 100}% flapping`)
+console.log(`Game ${pin}: ${playerCount} players, ${questionCount} questions of ${seconds} s in ${groupCount} groups, ${flapShare * 100}% flapping`)
 
 // ---- Clients ---------------------------------------------------------------------
 
@@ -98,6 +104,13 @@ const connect = (headers?: Record<string, string>): AppSocket =>
   })
 
 let reconnects = 0
+/** Largest snapshot (JSON bytes) per "phase:questionIndex", for the host and over all players. */
+const hostBytes = new Map<string, number>()
+const playerBytes = new Map<string, number>()
+const recordSize = (sizes: Map<string, number>, s: { phase: string; questionIndex: number }) => {
+  const key = `${s.phase}:${s.questionIndex}`
+  sizes.set(key, Math.max(sizes.get(key) ?? 0, Buffer.byteLength(JSON.stringify(s))))
+}
 const seqRegressions: string[] = []
 
 class Host {
@@ -106,7 +119,10 @@ class Host {
 
   constructor() {
     this.socket.on('connect', () => void this.socket.emitWithAck('host:attach', { pin }))
-    this.socket.on('game:host', (s) => (this.snapshot = s))
+    this.socket.on('game:host', (s) => {
+      this.snapshot = s
+      recordSize(hostBytes, s)
+    })
   }
 
   /** Retries until the server takes it (it may be restarting). */
@@ -162,6 +178,7 @@ class Player {
     // Snapshots must never go back in time, across reconnects too (equal is the direct emit on rejoin).
     if (this.snapshot && s.seq < this.snapshot.seq) seqRegressions.push(`${this.name}: ${this.snapshot.seq} then ${s.seq}`)
     this.snapshot = s
+    recordSize(playerBytes, s)
     const key = `${s.phase}:${s.questionIndex}`
     if (!this.arrivals.has(key)) this.arrivals.set(key, performance.now())
     const question = s.phase === 'question' ? s.question : null
@@ -238,8 +255,15 @@ async function announcements() {
   else console.log(`Both messages sent; all ${playerCount} players show the latest`)
 }
 
+const kb = (bytes: number) => Math.round(bytes / 102.4) / 10
+/** The host's Next through a round's intro, as on the host control. */
+async function throughIntro(sentAt: number): Promise<number> {
+  const s = await host.until((s) => s.phase !== 'lobby' && s.phase !== 'reveal' && s.phase !== 'scoreboard', 'the next question or intro')
+  return s.phase === 'intro' ? host.command({ type: 'next' }) : sentAt
+}
+
 const rows: Record<string, string | number>[] = []
-let sentAt = await host.command({ type: 'start' })
+let sentAt = await throughIntro(await host.command({ type: 'start' }))
 for (let index = 0; index < questionCount; index++) {
   const opened = await fanout(sentAt, `question:${index}`)
   const reveal = await host.until((s) => s.phase !== 'question' && s.questionIndex === index, `the end of question ${index + 1}`)
@@ -252,6 +276,8 @@ for (let index = 0; index < questionCount; index++) {
     'answer ack p95': percentile(players.flatMap((p) => p.answerMs), 95),
     'fan-out p50': percentile(opened, 50),
     'fan-out max': percentile(opened, 100),
+    'host KB': kb(Math.max(hostBytes.get(`question:${index}`) ?? 0, hostBytes.get(`reveal:${index}`) ?? 0)),
+    'player KB': kb(Math.max(playerBytes.get(`question:${index}`) ?? 0, playerBytes.get(`reveal:${index}`) ?? 0)),
   })
   for (const p of players) p.answerMs.length = 0
   if (Math.max(0, ...opened) > maxFanout) failures.push(`question ${index + 1}: fan-out ${Math.round(Math.max(...opened))} ms > ${maxFanout} ms`)
@@ -259,12 +285,20 @@ for (let index = 0; index < questionCount; index++) {
   if (reveal.phase === 'reveal' || reveal.phase === 'scoreboard') {
     await sleep(300)
     sentAt = await host.command({ type: 'next' })
+    if (index + 1 < questionCount) sentAt = await throughIntro(sentAt)
   }
 }
 const finished = await fanout(sentAt, `finished:${questionCount - 1}`)
 if (Math.max(0, ...finished) > maxFanout) failures.push(`finish: fan-out ${Math.round(Math.max(...finished))} ms > ${maxFanout} ms`)
 const final = await host.until((s) => s.phase === 'finished', 'the finished game')
-console.table(rows)
+// Long games: every tenth question and the last one.
+console.table(rows.length > 20 ? rows.filter((r, i) => (i + 1) % 10 === 0 || i === rows.length - 1 || i === 0) : rows)
+const column = (name: string) => rows.map((r) => Number(r[name]))
+console.log(
+  `Over all questions: answer ack p95 max ${Math.max(...column('answer ack p95'))} ms, fan-out max ${Math.max(...column('fan-out max'))} ms, ` +
+    `largest host snapshot ${Math.max(...column('host KB'))} KB, player ${Math.max(...column('player KB'))} KB, ` +
+    `finished player snapshot ${kb(playerBytes.get(`finished:${questionCount - 1}`) ?? 0)} KB`,
+)
 
 // ---- Checks ----------------------------------------------------------------------------
 

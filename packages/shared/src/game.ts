@@ -299,8 +299,6 @@ export interface GameSnapshotBase {
   reveal: RevealInfo | null
   /** A text question without accepted answers waits for the host to grade it. */
   awaitingGrading: boolean
-  /** Every question revealed so far, in order. */
-  questionStats: QuestionStat[]
   /**
    * The rules for the question on the screens (in the intro: the next one): the game's settings
    * with its group's overrides. `revealAnswers` is `afterGroup` only inside a group.
@@ -328,6 +326,8 @@ export interface GameSnapshotBase {
 
 /** What the host control and projector screens receive. */
 export interface HostSnapshot extends GameSnapshotBase {
+  /** Every question revealed so far, in order (on the public screen without correct counts while answers are hidden). */
+  questionStats: QuestionStat[]
   /** Answers to the current question. Host room only; null on the public screen. */
   currentAnswers: CurrentAnswer[] | null
   /**

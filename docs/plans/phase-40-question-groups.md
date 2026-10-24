@@ -194,14 +194,14 @@ Out:
 
 ## Done when
 
-- [ ] A quiz holds up to 200 questions and up to 50 groups; the editor, the spreadsheet and the Quizmoo file all keep groups.
-- [ ] A group's intro shows its title, info and picture on the projector and the phones, and moves on by the host's Next or after its seconds, with Hold working.
-- [ ] Standings follow a group when set so (quiz-wide or per group), and the host can always show or skip them.
-- [ ] Each override (scoring, answering, reveal and scoreboard, intro and group end) changes play only inside its group (engine tests).
-- [ ] A group's time and points go to new questions in it, and to all of them on request.
-- [ ] Quizzes and games from before this phase load and play unchanged.
-- [ ] The load test figures with 200 questions and 60 players are recorded, and the editor stays smooth with 200 questions.
-- [ ] `pnpm verify` and `pnpm e2e` pass; axe passes on the new screens in both modes.
+- [x] A quiz holds up to 200 questions and up to 50 groups; the editor, the spreadsheet and the Quizmoo file all keep groups.
+- [x] A group's intro shows its title, info and picture on the projector and the phones, and moves on by the host's Next or after its seconds, with Hold working.
+- [x] Standings follow a group when set so (quiz-wide or per group), and the host can always show or skip them.
+- [x] Each override (scoring, answering, reveal and scoreboard, intro and group end) changes play only inside its group (engine tests).
+- [x] A group's time and points go to new questions in it, and to all of them on request.
+- [x] Quizzes and games from before this phase load and play unchanged.
+- [x] The load test figures with 200 questions and 60 players are recorded, and the editor stays smooth with 200 questions.
+- [x] `pnpm verify` and `pnpm e2e` pass; axe passes on the new screens in both modes.
 
 ## Deviations
 
@@ -217,6 +217,44 @@ Out:
 - **Spreadsheet group end** (step 8): since ungrouped questions may follow a group, a `group-end` / `csoport-vége` row closes a group; without it a group runs to the next group row or the end of the file. A group row with problems names the title and info columns in its messages.
 - **Results CSV** (step 8): the player table has one column per question, so the groups are a first row above the question headers (only for quizzes with groups) instead of a column.
 - **The group end** is decided on the host's side (`primary-action.ts`), as the per-question scoreboard already was: the engine moves on only by the host's commands. After the walk through a round's answers, "Back to the game" comes before the standings.
+- **Snapshots** (step 9): `questionStats` moved from every snapshot to the host and projector snapshot (`HostSnapshot`), since phones never show it and it grew with every question; and the shared part of the snapshots is built once per broadcast (`baseSnapshot` caches it per state, audience, time and seq) instead of once per phone.
+- **Saving** (step 9): the game manager merges queued saves (at most one runs and one waits, writing the state current when it starts). In the first 200-question load test the saves of the growing state (1.7 MB at the end) fell minutes behind the game: deleting the finished game waited for about 12,000 queued saves, and a restart would have restored an old state.
+- **The projector's key hint** (step 10): axe on the host-attached projector's intro found the "Space" hint on its floating button at 4.06:1; it now sits on the button's darker edge colour.
+
+## Results
+
+Step 9, the engine alone (`toHostSnapshot` plus 60 `toPlayerSnapshot` and their JSON, the work of one broadcast after an answer), 200 questions in 4 groups, 60 players, median of 15:
+
+| Question | Phone snapshot before | after | Host snapshot | Broadcast before | after |
+|---|---|---|---|---|---|
+| 1 | 13.2 KB | 13.2 KB | 13.4 KB | 5.0 ms | 1.4 ms |
+| 50 | 23.2 KB | 13.6 KB | 23.3 KB | 17.0 ms | 1.9 ms |
+| 100 | 33.0 KB | 13.6 KB | 33.1 KB | 29.3 ms | 1.8 ms |
+| 200 | 53.0 KB | 13.7 KB | 53.2 KB | 54.4 ms | 2.4 ms |
+
+Without groups the figures were the same within 10 %: the growth came from the question count, not the groups. The finished game's phone snapshot is 106 KB (146 KB before), once per phone, since it carries the player's own review of every question.
+
+The load test over Socket.IO on the production build (`pnpm load-test --players 60 --questions 200 --groups 4 --seconds 5`, a fifth of the players dropping and coming back during each question), with the snapshot changes:
+
+| | Before merging saves | After |
+|---|---|---|
+| Answer acknowledgement, p95 (worst question) | 132 ms | 35 ms |
+| Fan-out, host command to the last phone (worst) | 46 ms | 24 ms |
+| Phone snapshot | 14.3 KB | 14.3 KB |
+| Host snapshot at question 200 | 55.3 KB | 55.2 KB |
+| Saved state after the game | minutes behind (the delete timed out) | current |
+
+Both runs passed every check (all 60 in the standings and connected, every answer recorded outside the drops, snapshot order never reversed).
+
+The editor with 200 questions in 4 groups (laptop, 1440 × 900, production build), frame times while scrolling the list with the wheel and dragging question 3 down over about ten rows:
+
+| | Scroll p95 / max | Drag p95 / max | Long tasks during the drag |
+|---|---|---|---|
+| 200 questions | 6 / 11 ms | 6 / 109 ms | 155 ms |
+| 200 questions, CPU slowed 4× | 12 / 17 ms | 68 / 543 ms | 3.1 s |
+| 20 questions, CPU slowed 4× | 6 / 12 ms | 11 / 120 ms | 0.2 s |
+
+Opening the editor with 200 questions takes about 250 ms. On a laptop the list scrolls and drags smoothly, so it stays non-virtualised. On a slow device a drag through 200 open rows stutters: the profile shows the browser's style and layout work and dnd-kit re-rendering every row on each move. Closing groups or the move buttons avoid it; virtualising the list is in the backlog.
 
 ## Verification command
 

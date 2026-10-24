@@ -99,7 +99,8 @@ function ScreenPage() {
           onClick={() => void emitAck('host:command', action.command)}
         >
           {t(action.label)}
-          <kbd className="rounded-md bg-primary-foreground/20 px-1.5 text-sm font-semibold">{t('screen.keyHint')}</kbd>
+          {/* Darker than the button, not lighter: a light wash took white text below 4.5:1. */}
+          <kbd className="rounded-md bg-primary-edge px-1.5 text-sm font-semibold">{t('screen.keyHint')}</kbd>
         </Button>
       )}
     </div>

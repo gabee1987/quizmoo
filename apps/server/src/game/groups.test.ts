@@ -101,7 +101,7 @@ describe('group intros', () => {
       revealed: false,
     })
     // The question before the intro is still in the review's list.
-    expect(snap.questionStats.map((q) => q.questionId)).toEqual(['q-single'])
+    expect(toHostSnapshot(state, T0 + 1_000).questionStats.map((q) => q.questionId)).toEqual(['q-single'])
 
     state = next(state, T0 + 2_000)
     expect(state).toMatchObject({ phase: 'question', questionIndex: 1, questionStartedAt: T0 + 2_000 })
