@@ -1,6 +1,6 @@
 import { lockCodeSchema, type BrandingChoice, type GameSettings, type QuizBranding } from '@quizmoo/shared'
 import { useQuery } from '@tanstack/react-query'
-import { CalendarClockIcon, PlayIcon, RotateCcwIcon } from 'lucide-react'
+import { CalendarClockIcon, EyeOffIcon, PlayIcon, RotateCcwIcon } from 'lucide-react'
 import { useId, useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
@@ -40,6 +40,7 @@ export function CreateGameDialog({
   onCreate,
   onCancel,
   rounds = false,
+  offCount = 0,
 }: {
   quizTitle: string
   quizSettings: GameSettings
@@ -58,6 +59,8 @@ export function CreateGameDialog({
   onCancel: () => void
   /** The quiz has groups: its rounds' settings show too. */
   rounds?: boolean
+  /** Switched-off questions: the game leaves them out, and the header says so. */
+  offCount?: number
 }) {
   const { t } = useTranslation()
   const startsAtId = useId()
@@ -107,6 +110,12 @@ export function CreateGameDialog({
             <DialogTitle className="shrink-0 text-lg md:text-xl">{t('host.create.title')}</DialogTitle>
             <DialogDescription className="min-w-0 truncate text-sm md:text-base md:whitespace-normal md:wrap-break-word">
               {quizTitle}
+              {offCount > 0 && (
+                <span className="text-muted-foreground">
+                  {' · '}
+                  <EyeOffIcon className="inline size-4 align-[-0.15em]" aria-hidden="true" /> {t('host.create.skipped', { count: offCount })}
+                </span>
+              )}
             </DialogDescription>
           </DialogHeader>
 

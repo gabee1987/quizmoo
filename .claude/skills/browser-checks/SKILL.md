@@ -12,7 +12,7 @@ UI changes are checked visually (AGENTS.md section 5). Unit tests do not show la
 The user's `dev:lan` usually holds :3000 and a Vite port, so checks run on a separate production build:
 
 1. `pnpm build`.
-2. From `apps/server`, with the variables from the root `.env` plus `NODE_ENV=production`, `PORT=3999`, `APP_ORIGIN=http://localhost:3999` and `BREVO_API_KEY=` (empty): `node dist/index.js` in the background. The empty key wins over the `.env` file and switches e-mail off; without it `signup.e2e.ts` sends a real sign-up e-mail to the user's admin address (happened in phase 32). Load the file with `node --env-file=../../.env dist/index.js` (variables already set win), not by sourcing it in Bash: values such as `MAIL_PROVIDER=Brevo (…)` are a Bash syntax error.
+2. From `apps/server`, with the variables from the root `.env` plus `NODE_ENV=production`, `PORT=3999`, `APP_ORIGIN=http://localhost:3999` and `BREVO_API_KEY=` (empty): `node dist/index.js` in the background. The empty key wins over the `.env` file and switches e-mail off; without it `signup.e2e.ts` sends a real sign-up e-mail to the user's admin address (happened in phase 32). Load the file with `node --env-file=../../.env dist/index.js` (variables already set win), not by sourcing it in Bash: values such as `MAIL_PROVIDER=Brevo (…)` are a Bash syntax error. A phase with a new migration also runs `pnpm --filter @quizmoo/server db:migrate` on the dev database (additive changes only), or the user's `dev:lan` fails on the new column.
 3. After every new web build, restart the :3999 process (it serves the built files it found at start).
 4. Stop it when done: `Get-NetTCPConnection -LocalPort 3999 -State Listen | % { Stop-Process -Id $_.OwningProcess -Force }`.
 

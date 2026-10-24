@@ -12,13 +12,14 @@ import {
 } from '@quizmoo/shared'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link, createFileRoute, useBlocker, useNavigate } from '@tanstack/react-router'
-import { useCallback, useEffect, useMemo, useRef, useState, type ComponentType } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type ComponentType, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   ArrowLeftIcon,
   DownloadIcon,
   EyeIcon,
   EyeOffIcon,
+  LocateFixedIcon,
   FileDownIcon,
   FileSpreadsheetIcon,
   FileTextIcon,
@@ -53,12 +54,15 @@ import {
   addGroup,
   addGroupAround,
   addQuestion as addToLayout,
+  applyDefault,
   applyToGroup,
+  differingFromDefault,
   differingQuestions,
   duplicateQuestion,
   forGroup,
   fromItems,
   groupMoves,
+  groupSwitch,
   listItems,
   moveToGroup,
   newId,
@@ -75,11 +79,15 @@ import {
   restoreQuestion,
   stepGroup,
   stepQuestion,
+  switchQuestions,
   withTag,
   type Layout,
 } from '../../features/editor/draft'
 import { GroupForm } from '../../features/editor/group-form'
 import { GroupQuestions } from '../../features/editor/group-questions'
+import { OffNotice } from '../../features/editor/in-game-switch'
+import { QuestionDefaultsFields } from '../../features/editor/question-defaults-fields'
+import { SearchField, SearchResults } from '../../features/editor/question-search'
 import { PhonePreview } from '../../features/editor/phone-preview'
 import { ProblemsMenu, listProblems, problemLabel, type Problem } from '../../features/editor/problems-menu'
 import { QuestionForm } from '../../features/editor/question-form'
@@ -161,6 +169,7 @@ function Editor({ quiz }: { quiz: Quiz }) {
     groups: quiz.groups,
     settings: quiz.settings,
     branding: quiz.branding,
+    questionDefaults: quiz.questionDefaults,
   })
   const [selectedId, setSelectedId] = useState<string | null>(quiz.questions[0]?.id ?? null)
   const [picking, setPicking] = useState(false)
@@ -208,6 +217,15 @@ function Editor({ quiz }: { quiz: Quiz }) {
   // so a brand-new question is not covered in "Required." before anything was typed.
   const [visited, setVisited] = useState<Set<string>>(() => new Set(quiz.questions.map((q) => q.id)))
   const [focusField, setFocusField] = useState<string | null>(null)
+  // The list's search; while it has text, the matches show instead of the sortable list.
+  const [query, setQuery] = useState('')
+  const searching = query.trim() !== ''
+  // Raised to scroll the list to the selected row (the jump button, and after adding something).
+  const [jump, setJump] = useState(0)
+  const jumpToSelected = () => {
+    setQuery('')
+    setJump((n) => n + 1)
+  }
 
   const questions = draft.questions
   const groups = draft.groups
@@ -309,15 +327,16 @@ function Editor({ quiz }: { quiz: Quiz }) {
 
   const picked = useRef(false)
   // A new question goes after the selected one, into its group, or at the end of the selected group,
-  // with that group's time and points.
+  // with the quiz's time and points, or that group's own. The list scrolls to it.
   const addQuestion = (type: QuestionType) => {
     picked.current = picking
-    const question = forGroup(newQuestion(type), selectedGroup ?? groups.find((g) => g.id === selected?.groupId))
+    const question = forGroup(newQuestion(type, draft.questionDefaults), selectedGroup ?? groups.find((g) => g.id === selected?.groupId))
     const next = addToLayout(layout, question, selectedId)
     setLayout(() => next)
     select(question.id)
     setPicking(false)
     setListOpen(false)
+    jumpToSelected()
     setFocusField(`questions.${next.questions.findIndex((q) => q.id === question.id)}.text`)
   }
   const moveSelected = (where: 'up' | 'down' | 'top' | 'bottom') => {
@@ -337,7 +356,24 @@ function Editor({ quiz }: { quiz: Quiz }) {
     setLayout(() => ({ ...placed, groups: placed.groups.map((g) => (g.id === group.id ? named : g)) }))
     select(group.id)
     setListOpen(false)
+    jumpToSelected()
     setFocusField(`groups.${index}.title`)
+  }
+  /** The question `id`, or every question of the group `id`, switched on or off for new games. */
+  const switchItem = (id: string, on: boolean) => {
+    const ids = groups.some((g) => g.id === id) ? questions.filter((q) => q.groupId === id).map((q) => q.id) : [id]
+    setQuestions((list) => switchQuestions(list, new Set(ids), !on))
+  }
+  const offIds = questions.filter((q) => q.off).map((q) => q.id)
+  // "Switch all on" after an event; Undo switches the same ones off again.
+  const switchAllOn = () => {
+    const wereOff = new Set(offIds)
+    setQuestions((list) => switchQuestions(list, null, false))
+    toast(t('editor.inGame.allOnDone', { count: wereOff.size }), {
+      id: 'all-on',
+      duration: UNDO_MS,
+      action: { label: t('editor.undo'), onClick: () => setQuestions((list) => switchQuestions(list, wereOff, true)) },
+    })
   }
   /** Deletes the group `id`, keeping its questions (ungrouped where they are) or deleting them too. */
   const deleteGroup = (id: string, withQuestions: boolean) => {
@@ -485,7 +521,9 @@ function Editor({ quiz }: { quiz: Quiz }) {
   const playBlocker =
     questions.length === 0
       ? t('editor.playNeedsQuestion')
-      : !valid
+      : offIds.length === questions.length
+        ? t('editor.inGame.playAllOff')
+        : !valid
         ? [t('editor.playNeedsFixes'), ...problems.slice(0, 3).map((p) => problemLabel(p, t))].join('\n')
         : status !== 'saved'
           ? t(`editor.status.${status}`)
@@ -495,38 +533,133 @@ function Editor({ quiz }: { quiz: Quiz }) {
     groups.length > 0
       ? t('editor.listSummary', { questions: t('editor.questionCount', { count: questions.length }), groups: t('editor.groupCount', { count: groups.length }) })
       : t('editor.questionCount', { count: questions.length })
-  const list = (
-    <div className="flex flex-col gap-3">
+  const canAddQuestion = questions.length < MAX_QUESTIONS
+  // An empty quiz shows the type picker in the middle already, so a group needs a question first.
+  const canAddGroup = questions.length > 0 && groups.length < MAX_GROUPS
+  const pickRow = (id: string) => {
+    select(id)
+    setListOpen(false)
+  }
+  /**
+   * The list with its controls in a header that stays at the top, so search, jump and adding are at
+   * hand however far down the list is. In the sidebar the header is fixed and only the part under it
+   * scrolls (its scrollbar starts below the header); in the phone's sheet, which scrolls as a whole,
+   * the header sticks. `inSidebar` adds the title (the sheet has its own) and uses the laptop's
+   * smaller controls (the sheet keeps finger-sized ones).
+   */
+  const renderList = (inSidebar: boolean) => {
+    const headerClass = inSidebar
+      ? 'flex shrink-0 flex-col gap-2 border-b px-3 pt-3 pb-2.5'
+      : 'sticky top-0 z-20 -mx-4 flex flex-col gap-2 border-b bg-background px-4 pt-1 pb-2.5'
+    // With a mouse the scrollbar keeps its own room on the right (14 px, the thumb in its middle), so
+    // the rows' right padding is the gutter itself and both sides look the same; touch screens have
+    // overlay scrollbars and get the left's padding.
+    const bodyClass = inSidebar
+      ? cn(
+          'flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto py-3 pl-3 pr-3 [scrollbar-gutter:stable]',
+          '[@media(hover:hover)_and_(pointer:fine)]:pr-0 [&::-webkit-scrollbar-track]:mb-3',
+        )
+      : 'flex flex-col gap-3 pt-3'
+    const header = (tools?: ReactNode) => (
+      <>
+        {inSidebar && <h2 className="px-1 text-sm font-extrabold">{listTitle}</h2>}
+        {listControls(inSidebar ? 'size-9' : 'size-10', tools)}
+      </>
+    )
+    return (
+      // Always the list, so its header (and the search field's focus) stays put; a search only swaps the rows.
       <QuestionList
-        layout={layout}
-        selectedId={selectedId}
-        invalidIds={invalidIds}
-        onSelect={(id) => {
-          select(id)
-          setListOpen(false)
-        }}
-        onPlace={(id, targetId, side) => setLayout((l) => placeQuestion(l, id, targetId, side))}
-        onPlaceGroup={(id, targetId, side) => setLayout((l) => placeGroup(l, id, targetId, side))}
-        onTrash={(id) => (groups.some((g) => g.id === id) ? requestDeleteGroup(id) : deleteQuestion(id))}
-        canShuffle={canShuffleQuestions(questions, groups)}
-        shuffles={shuffles}
-        onShuffle={() => setConfirmShuffle(true)}
-      />
-      {/* An empty quiz shows the type picker in the middle already. */}
-      {questions.length > 0 && questions.length < MAX_QUESTIONS && (
-        <Button variant="secondary" onClick={() => setPicking(true)}>
-          <PlusIcon aria-hidden="true" />
-          {t('editor.addQuestion')}
-        </Button>
-      )}
-      {questions.length > 0 && groups.length < MAX_GROUPS && (
-        <Button variant="outline" onClick={() => newGroup(null)}>
-          <LayersIcon aria-hidden="true" />
-          {t('editor.addGroup')}
-        </Button>
-      )}
-    </div>
-  )
+          layout={layout}
+          selectedId={selectedId}
+          invalidIds={invalidIds}
+          onSelect={pickRow}
+          onPlace={(id, targetId, side) => setLayout((l) => placeQuestion(l, id, targetId, side))}
+          onPlaceGroup={(id, targetId, side) => setLayout((l) => placeGroup(l, id, targetId, side))}
+          onTrash={(id) => (groups.some((g) => g.id === id) ? requestDeleteGroup(id) : deleteQuestion(id))}
+          canShuffle={canShuffleQuestions(questions, groups)}
+          shuffles={shuffles}
+          onShuffle={() => setConfirmShuffle(true)}
+          onSwitch={switchItem}
+          jump={jump}
+          header={header}
+          headerClassName={headerClass}
+          toolClassName={inSidebar ? 'size-9' : 'size-10'}
+          results={
+            searching ? (
+              <SearchResults layout={layout} query={query} selectedId={selectedId} invalidIds={invalidIds} onSelect={pickRow} onSwitch={switchItem} />
+            ) : null
+          }
+          bodyClassName={bodyClass}
+          footer={
+            !searching && (
+              <>
+                {questions.length > 0 && canAddQuestion && (
+                  <Button variant="secondary" onClick={() => setPicking(true)}>
+                    <PlusIcon aria-hidden="true" />
+                    {t('editor.addQuestion')}
+                  </Button>
+                )}
+                {canAddGroup && (
+                  <Button variant="outline" onClick={() => newGroup(null)}>
+                    <LayersIcon aria-hidden="true" />
+                    {t('editor.addGroup')}
+                  </Button>
+                )}
+              </>
+            )
+          }
+        />
+    )
+  }
+  /**
+   * Search and jump in one row, then one row of actions: the two add buttons (also here, so a long
+   * list need not be scrolled to its end) and the list's own `tools` (Shuffle, Collapse) as icons;
+   * a slim line when questions are switched off. `size` is the controls' height class.
+   */
+  const listControls = (size: string, tools?: ReactNode) =>
+    questions.length > 0 && (
+      <>
+        <div className="flex gap-1.5">
+          <div className="min-w-0 flex-1">
+            <SearchField value={query} onChange={setQuery} className={size === 'size-9' ? 'h-9' : 'h-10'} />
+          </div>
+          <Button
+            variant="outline"
+            size="icon-sm"
+            className={size}
+            disabled={!selectedId}
+            aria-label={t('editor.jumpToSelected')}
+            title={t('editor.jumpToSelected')}
+            onClick={jumpToSelected}
+          >
+            <LocateFixedIcon aria-hidden="true" />
+          </Button>
+        </div>
+        {!searching && (
+          <div className="flex gap-1.5">
+            <Button variant="secondary" size="sm" className={cn('min-w-0 flex-auto gap-1 px-2!', size === 'size-9' ? 'h-9' : 'h-10')} disabled={!canAddQuestion} onClick={() => setPicking(true)}>
+              <PlusIcon aria-hidden="true" />
+              <span className="truncate">{t('editor.newQuestion')}</span>
+            </Button>
+            <Button variant="outline" size="sm" className={cn('min-w-0 flex-auto gap-1 px-2!', size === 'size-9' ? 'h-9' : 'h-10')} disabled={!canAddGroup} onClick={() => newGroup(null)}>
+              <LayersIcon aria-hidden="true" />
+              <span className="truncate">{t('editor.newGroup')}</span>
+            </Button>
+            {tools}
+          </div>
+        )}
+        {offIds.length > 0 && !searching && (
+          <div className="flex items-center gap-1.5 rounded-lg border border-dashed border-muted-foreground/40 bg-muted/60 py-0.5 pr-0.5 pl-2 text-xs">
+            <EyeOffIcon className="size-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
+            <span className="min-w-0 flex-1 truncate font-bold">{t('editor.inGame.summary', { count: offIds.length, total: questions.length })}</span>
+            <Button variant="ghost" size="sm" className="h-7 gap-1 px-2! text-xs" onClick={switchAllOn}>
+              <EyeIcon className="size-3.5" aria-hidden="true" />
+              {t('editor.inGame.allOn')}
+            </Button>
+          </div>
+        )}
+      </>
+    )
   // One tab per group, as on My settings, so only one group's options show at a time.
   const settingsBody = (
     <Tabs value={settingsTab} onValueChange={(value) => setSettingsTab(value as SettingsTab)} className="@container gap-5">
@@ -551,6 +684,26 @@ function Editor({ quiz }: { quiz: Quiz }) {
         })}
       </TabsList>
       <TabsContent value="general" className="flex flex-col gap-6">
+        {/* The same title as the top bar's; the problems menu focuses that one (`data-field`). */}
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="quiz-title-setting" className="font-semibold">
+            {t('editor.titleSetting')}
+          </Label>
+          <Input
+            id="quiz-title-setting"
+            value={draft.title}
+            maxLength={120}
+            onChange={(e) => setDraft((d) => ({ ...d, title: e.target.value }))}
+            aria-invalid={errors.title ? true : undefined}
+            aria-describedby={errors.title ? 'quiz-title-setting-error' : undefined}
+            className="text-lg font-semibold"
+          />
+          {errors.title && (
+            <span id="quiz-title-setting-error" className="text-sm font-semibold text-destructive">
+              {t(errors.title)}
+            </span>
+          )}
+        </div>
         <div className="flex flex-col gap-2">
           <Label htmlFor="quiz-description" className="font-semibold">
             {t('editor.description')}
@@ -563,6 +716,21 @@ function Editor({ quiz }: { quiz: Quiz }) {
             onChange={(e) => setDraft((d) => ({ ...d, description: e.target.value }))}
           />
         </div>
+        <section className="flex flex-col gap-3 border-t pt-5">
+          <div>
+            <h3 className="font-extrabold">{t('editor.questionDefaults')}</h3>
+            <p className="text-sm text-muted-foreground">{t('editor.questionDefaultsHelp')}</p>
+          </div>
+          <QuestionDefaultsFields
+            value={draft.questionDefaults}
+            onChange={(questionDefaults) => setDraft((d) => ({ ...d, questionDefaults }))}
+            differing={{
+              timeLimitSec: differingFromDefault(layout, draft.questionDefaults, 'timeLimitSec').length,
+              points: differingFromDefault(layout, draft.questionDefaults, 'points').length,
+            }}
+            onApply={(field) => setDraft((d) => ({ ...d, questions: applyDefault(d, d.questionDefaults, field) }))}
+          />
+        </section>
         <div className="flex flex-col gap-2 border-t pt-5">
           <h3 className="font-extrabold">{t('editor.deleteQuiz')}</h3>
           <p className="text-sm text-muted-foreground">{t('editor.deleteQuizHelp')}</p>
@@ -647,6 +815,31 @@ function Editor({ quiz }: { quiz: Quiz }) {
             )}
           </div>
           <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
+            {/* From lg (labelled from xl, so the title keeps its room); phones and small tablets have the plus in the bottom bar. */}
+            <div className="hidden items-center gap-2 border-r pr-2 lg:flex">
+              <Button
+                variant="secondary"
+                className="max-xl:w-12 max-xl:px-0"
+                disabled={!canAddQuestion}
+                aria-label={t('editor.newQuestionTop')}
+                title={t('editor.newQuestionTop')}
+                onClick={() => setPicking(true)}
+              >
+                <PlusIcon aria-hidden="true" />
+                <span className="hidden xl:inline">{t('editor.newQuestion')}</span>
+              </Button>
+              <Button
+                variant="outline"
+                className="max-xl:w-12 max-xl:px-0"
+                disabled={!canAddGroup}
+                aria-label={t('editor.newGroupTop')}
+                title={t('editor.newGroupTop')}
+                onClick={() => newGroup(null)}
+              >
+                <LayersIcon aria-hidden="true" />
+                <span className="hidden xl:inline">{t('editor.newGroup')}</span>
+              </Button>
+            </div>
             <SaveIndicator status={status} onRetry={retry} />
             {problems.length > 0 && <ProblemsMenu problems={problems} onGo={goToProblem} />}
             <DropdownMenu>
@@ -733,15 +926,15 @@ function Editor({ quiz }: { quiz: Quiz }) {
           <div className="hidden min-w-0 items-start justify-end self-stretch lg:flex xl:overflow-x-clip" inert={docked}>
             <aside
               className={cn(
-                'sticky top-22 flex max-h-[calc(100dvh-11rem)] w-80 shrink-0 flex-col gap-3 overflow-y-auto rounded-2xl border bg-card p-3 shadow-soft xl:mr-6',
+                // Not scrolling itself: its list scrolls under the fixed header (`renderList`).
+                'sticky top-22 flex max-h-[calc(100dvh-11rem)] w-80 shrink-0 flex-col overflow-hidden rounded-2xl border bg-card shadow-soft xl:mr-6',
                 'transition-[translate,opacity] duration-500 ease-spring',
                 // Without the preview the list follows its widening column, so it never runs ahead and clips.
                 !previewColumn && 'xl:w-[calc(100%-1.5rem)]',
                 docked && '-translate-x-10 opacity-0',
               )}
             >
-              <h2 className="px-1 font-extrabold">{listTitle}</h2>
-              {list}
+              {renderList(true)}
             </aside>
           </div>
 
@@ -773,6 +966,12 @@ function Editor({ quiz }: { quiz: Quiz }) {
                   }
                   onMove={(where) => setLayout((l) => stepGroup(l, selectedGroup.id, where))}
                   onDelete={() => requestDeleteGroup(selectedGroup.id)}
+                  switchState={groupSwitch(questions, selectedGroup.id)}
+                  onCount={questions.filter((q) => q.groupId === selectedGroup.id && !q.off).length}
+                  onSwitch={(on) => switchItem(selectedGroup.id, on)}
+                  offNotice={
+                    groupSwitch(questions, selectedGroup.id) === 'off' && <OffNotice kind="group" onSwitchOn={() => switchItem(selectedGroup.id, true)} />
+                  }
                   questions={
                     <GroupQuestions
                       questions={questions.filter((q) => q.groupId === selectedGroup.id)}
@@ -797,7 +996,9 @@ function Editor({ quiz }: { quiz: Quiz }) {
                   onDelete={() => deleteQuestion(selected.id)}
                   onNewGroup={groups.length < MAX_GROUPS ? () => newGroup(selected.id) : null}
                   onColor={(color) => setQuestions((l) => l.map((q) => (q.id === selected.id ? withTag(q, color) : q)))}
+                  onSwitch={(on) => switchItem(selected.id, on)}
                 />
+                {selected.off && <OffNotice kind="question" onSwitchOn={() => switchItem(selected.id, true)} />}
                 <QuestionForm
                   question={selected}
                   onChange={(next) => setQuestions((l) => l.map((q) => (q.id === next.id ? next : q)))}
@@ -890,7 +1091,14 @@ function Editor({ quiz }: { quiz: Quiz }) {
         {/* Phones and tablets: the question list lives in a bottom sheet. */}
         {questions.length > 0 && (
           <div className="fixed inset-x-0 bottom-0 z-30 flex gap-2 border-t bg-card/95 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur lg:hidden">
-            <Button variant="secondary" className="flex-1" onClick={() => setListOpen(true)}>
+            <Button
+              variant="secondary"
+              className="flex-1"
+              onClick={() => {
+                setListOpen(true)
+                jumpToSelected()
+              }}
+            >
               <ListOrderedIcon aria-hidden="true" />
               {selectedGroup
                 ? t('editor.groupNOfCount', { n: selectedGroupIndex + 1, count: groups.length })
@@ -905,12 +1113,20 @@ function Editor({ quiz }: { quiz: Quiz }) {
           </div>
         )}
         <Sheet open={listOpen} onOpenChange={setListOpen}>
-          <SheetContent side="bottom" className="max-h-[85dvh] gap-0 rounded-t-3xl lg:hidden">
+          {/* Focus goes to the sheet itself, not its first field: the search would open the phone's keyboard. */}
+          <SheetContent
+            side="bottom"
+            className="max-h-[85dvh] gap-0 rounded-t-3xl lg:hidden"
+            onOpenAutoFocus={(e) => {
+              e.preventDefault()
+              ;(e.currentTarget as HTMLElement).focus()
+            }}
+          >
             <SheetHeader>
               <SheetTitle className="text-lg font-extrabold">{listTitle}</SheetTitle>
               <SheetDescription className="text-sm">{t('editor.listHelp')}</SheetDescription>
             </SheetHeader>
-            <div className="overflow-y-auto px-4 pb-[max(1rem,env(safe-area-inset-bottom))]">{list}</div>
+            <div className="overflow-y-auto px-4 pb-[max(1rem,env(safe-area-inset-bottom))]">{renderList(false)}</div>
           </SheetContent>
         </Sheet>
 
@@ -954,6 +1170,7 @@ function Editor({ quiz }: { quiz: Quiz }) {
             quizSettings={draft.settings}
             quizBranding={draft.branding}
             rounds={groups.length > 0}
+            offCount={offIds.length}
             pending={play.isPending}
             onCreate={(settings, scheduledAt, branding, lockCode) =>
               play.mutate({ quizId: quiz.id, settings, scheduledAt, branding, lockCode })

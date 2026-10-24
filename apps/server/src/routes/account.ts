@@ -80,6 +80,7 @@ export async function accountRoutes(
           groups: quizzes.groups,
           settings: quizzes.settings,
           branding: quizzes.branding,
+          questionDefaults: quizzes.questionDefaults,
           createdAt: quizzes.createdAt,
           updatedAt: quizzes.updatedAt,
         })

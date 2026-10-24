@@ -308,6 +308,23 @@ describe('group rules', () => {
     roundTrip(shuffled)
   })
 
+  it('leaves switched-off questions out, and a group whose questions are all off', () => {
+    const quiz = groupedQuiz()
+    const off = new Set(['q-single', 'q-text', 'q-number', 'q-poll'])
+    quiz.questions = quiz.questions.map((q) => (off.has(q.id) ? { ...q, off: true } : q))
+    const state = game(quiz, { shuffleQuestions: true }, () => 0)
+    expect(state.quiz.questions.map((q) => q.id).sort()).toEqual(['q-multiple', 'q-truefalse'])
+    expect(state.quiz.groups!.map((g) => g.id)).toEqual(['g1'])
+    // Round one's intro, then its two questions, then the end.
+    let playing = startGame(state, T0)
+    expect(playing.phase).toBe('intro')
+    expect(toHostSnapshot(playing, T0).questionCount).toBe(2)
+    playing = playTo(playing, 1)
+    roundTrip(playing)
+    // A quiz without anything switched off keeps its copy as it was.
+    expect(game(groupedQuiz()).quiz.questions).toHaveLength(6)
+  })
+
   it('shows the standings after a skipped group end when they follow the group', () => {
     let state = playTo(startGame(game(groupedQuiz({ scoreboard: 'onDemand' })), T0), 3)
     expect(skipQuestion(state, T0).phase).toBe('scoreboard')

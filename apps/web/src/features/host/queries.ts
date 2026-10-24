@@ -6,6 +6,8 @@ export interface QuizSummary {
   id: string
   title: string
   questionCount: number
+  /** Switched-off questions, which new games leave out. */
+  offCount: number
   groupCount: number
   updatedAt: string
   settings: GameSettings

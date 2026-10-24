@@ -244,7 +244,7 @@ Security controls, the dependency audit and the documented exceptions are record
 
 ## Deployment
 
-The app is a single Docker image. [docs/deploy.md](docs/deploy.md) covers:
+The app is a single Docker image. [DEPLOYMENT.md](DEPLOYMENT.md) walks through the Railway setup step by step, with the problems met during the first deployment and their fixes. [docs/deploy.md](docs/deploy.md) is the general hosting reference:
 
 - **Railway** (preferred): `railway.json` sets the build and the health check; migrations run automatically at start. Releases, rollback, backups and a restore drill are described step by step.
 - **Render** as an alternative.
@@ -281,6 +281,7 @@ scripts/           dev:lan helper and smoke test
 | Document | For |
 |---|---|
 | [docs/event-checklist.md](docs/event-checklist.md) | The host, on the day of an event |
+| [DEPLOYMENT.md](DEPLOYMENT.md) | The Railway walkthrough: first setup, releases, troubleshooting |
 | [docs/deploy.md](docs/deploy.md) | Hosting: Railway, Render, a laptop at the venue, environment variables, the first admin |
 | [docs/quiz-files.md](docs/quiz-files.md) | The spreadsheet and Quizmoo file formats |
 | [docs/security-notes.md](docs/security-notes.md) | Security controls, reviews, dependency audit |

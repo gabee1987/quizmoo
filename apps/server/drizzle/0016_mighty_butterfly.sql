@@ -1,0 +1,1 @@
+ALTER TABLE "quizzes" ADD COLUMN "question_defaults" jsonb DEFAULT '{}'::jsonb NOT NULL;

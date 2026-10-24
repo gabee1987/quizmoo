@@ -44,10 +44,11 @@ Finished plans are deleted once their branch is merged: `CHANGELOG.md` records w
 | 35 | Screen lock for the host's game screen | `feature/host-game-screen` | done |
 | 36 | E-mail to admins about new sign-ups | `feature/signup-emails` | done |
 | 37 | [Fixes in the patch notes, kept for every release](phase-37-patch-notes-fixes.md) | `feature/patch-notes-fixes` | planned |
-| 38 | Default time and points for new questions | `feature/question-defaults` | planned |
+| 38 | Default time and points for new questions (done in phase 42) | `feature/question-switch-and-editor` | done |
 | 39 | [Random question order, and a roomier phone question screen](phase-39-shuffle-questions.md) | `feature/shuffle-questions` | done |
 | 40 | [Question groups within a quiz, with intros, per-group rules, and 200 questions](phase-40-question-groups.md) | `feature/question-groups` | done |
 | 41 | Estimated game length, at the start and as time left during the game | `feature/game-length` | planned |
+| 42 | [Questions switched off, editor search and navigation, default time and points (includes 38)](phase-42-question-switch-and-editor.md) | `feature/question-switch-and-editor` | done |
 | later | [Hosting without an account](later-guest-hosting.md) | `feature/guest-hosting` | planned, after the MVP |
 
 ## Conventions every plan follows

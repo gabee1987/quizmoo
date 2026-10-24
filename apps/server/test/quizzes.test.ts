@@ -78,7 +78,16 @@ describeDb('quiz routes (database)', () => {
 
     const aliceList = (await req(alice, 'GET', '/api/quizzes')).json().quizzes
     expect(aliceList).toEqual([
-      { id: quiz.id, title: 'Test quiz', questionCount: 2, groupCount: 0, updatedAt: expect.any(String), settings: quiz.settings, branding: quiz.branding },
+      {
+        id: quiz.id,
+        title: 'Test quiz',
+        questionCount: 2,
+        offCount: 0,
+        groupCount: 0,
+        updatedAt: expect.any(String),
+        settings: quiz.settings,
+        branding: quiz.branding,
+      },
     ])
     expect((await req(bob, 'GET', '/api/quizzes')).json().quizzes).toEqual([])
   })
@@ -151,6 +160,29 @@ describeDb('quiz routes (database)', () => {
     expect(listed.settings).toMatchObject(settings)
     const copy = (await req(alice, 'POST', `/api/quizzes/${quiz.id}/duplicate`, {})).json().quiz
     expect(copy.settings).toMatchObject(settings)
+  })
+
+  it('keeps switched-off questions and counts them in the list', async () => {
+    const body = { ...quizBody, questions: [{ ...quizBody.questions[0], off: true }, quizBody.questions[1]] }
+    const quiz = (await req(alice, 'POST', '/api/quizzes', body)).json().quiz
+    expect(quiz.questions.map((q: { off?: boolean }) => q.off)).toEqual([true, undefined])
+    const listed = (await req(alice, 'GET', '/api/quizzes')).json().quizzes.find((q: { id: string }) => q.id === quiz.id)
+    expect(listed).toMatchObject({ questionCount: 2, offCount: 1 })
+  })
+
+  it('stores question defaults, starts new quizzes with the host’s, and copies them on duplicate', async () => {
+    const plain = (await req(alice, 'POST', '/api/quizzes', quizBody)).json().quiz
+    expect(plain.questionDefaults).toEqual({ timeLimitSec: 20, points: 1000 })
+    const settings = (await req(bob, 'GET', '/api/me/settings')).json().settings
+    expect((await req(bob, 'PUT', '/api/me/settings', { ...settings, questionDefaults: { timeLimitSec: 45, points: 500 } })).statusCode).toBe(200)
+    const bobs = (await req(bob, 'POST', '/api/quizzes', quizBody)).json().quiz
+    expect(bobs.questionDefaults).toEqual({ timeLimitSec: 45, points: 500 })
+    const own = { ...quizBody, questionDefaults: { timeLimitSec: 90, points: 2000 } }
+    const quiz = (await req(bob, 'POST', '/api/quizzes', own)).json().quiz
+    expect(quiz.questionDefaults).toEqual({ timeLimitSec: 90, points: 2000 })
+    const copy = (await req(bob, 'POST', `/api/quizzes/${quiz.id}/duplicate`, {})).json().quiz
+    expect(copy.questionDefaults).toEqual({ timeLimitSec: 90, points: 2000 })
+    expect((await req(bob, 'PUT', `/api/quizzes/${quiz.id}`, { ...own, questionDefaults: { timeLimitSec: 2, points: 0 } })).statusCode).toBe(400)
   })
 
   it('saves team mode without team names: teams are set up per game', async () => {
