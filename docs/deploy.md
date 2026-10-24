@@ -32,6 +32,8 @@ The seed script is idempotent: it creates the admin if missing and a sample quiz
 
 ## Railway (the hosted beta)
 
+The step-by-step walkthrough of the first setup, with the problems met on the way and their fixes, is in [DEPLOYMENT.md](../DEPLOYMENT.md).
+
 `main` is what runs: every push to `main` deploys. `railway.json` in the repository sets the Dockerfile build, the health check (`/api/health`, which also checks the database) and restarts on failure.
 
 ### First setup
