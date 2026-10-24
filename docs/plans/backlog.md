@@ -66,6 +66,8 @@ Collected while testing phases 9 to 12. Effort as above.
 - Legal pages (privacy notice, terms, cookies and storage, imprint), terms accepted at sign-up and recorded, "Download my data", a storage notice, and a security review with every finding fixed (phase 30).
 - The host's running-game screen: standings shown midgame (also with answers at the end), a Standings card with "Results so far", names in full, controls that stay in view, "Show answers" for any closed question, a chip and a preview of what everyone sees, a screen lock with a code or the password (phase 35), and closing a game at any point without the podium (phase 31).
 - Quiz files: questions written in a spreadsheet anywhere (template with a guide and examples) imported with a row-by-row problem report, and quizzes downloaded as a spreadsheet or a full Quizmoo file with settings and pictures (phase 27).
+- Question groups (rounds): intros on the projector and the phones, standings and answers after a round, per-round time, points and rules, groups in the editor, spreadsheets and Quizmoo files, colour tags, and 200 questions per quiz (phase 40).
+- Random question order per game (groups move as blocks, a group can keep its order), the editor's Shuffle button, and a slim top bar on phones that makes question pictures bigger (phase 39).
 
 ### Open
 
@@ -81,6 +83,5 @@ Collected while testing phases 9 to 12. Effort as above.
 | Fixes in the patch notes (phase 37) | Feature | S | Each release on the "What's new" page gets a "Fixed" section next to the news, and every future release keeps its notes there. From the 20 October 2026 notes. |
 | Help page and tutorial (phase 34) | Feature | L | A full help page on how the app works, plus an interactive first-run tutorial with hints on the host pages. To decide in the plan: which flows the tour covers, whether it can be replayed, whether players get hints too. From the 20 October 2026 notes. |
 | Default time and points (phase 38) | Feature | S | A My settings default for a new question's time limit and points, so they need not be set on every question. To decide: per host only, or also per quiz. From the 20 October 2026 notes. |
-| Random question order (phase 39) | Feature | S | A game setting that shuffles the question order per game, next to "Shuffle answer options". To decide: whether groups (phase 40) are shuffled within or as blocks. From the 20 October 2026 notes. |
-| Question groups (phase 40) | Feature | L | Group questions within a quiz (rounds or topics), with a title shown between groups on the projector and phones. To decide: per-group settings, a scoreboard after each group, editor layout. From the 20 October 2026 notes. |
+| Smoother drag with 200 questions | Improvement | M | On a slow device (CPU slowed 4×) dragging a question through 200 open rows stutters (frames up to 0.5 s); laptops are smooth. Virtualise the editor's list or keep rows from re-rendering on each move. Figures in phase 40's Results (25 October 2026). |
 | Sounds for key moments | Feature | M | Short playful sounds for important events and messages, switched on per quiz. Generated in the browser (Web Audio) to avoid licensed audio files; projector only, phones silent by default. Same as the "Sounds and music" item above. |

@@ -78,7 +78,7 @@ describeDb('quiz routes (database)', () => {
 
     const aliceList = (await req(alice, 'GET', '/api/quizzes')).json().quizzes
     expect(aliceList).toEqual([
-      { id: quiz.id, title: 'Test quiz', questionCount: 2, updatedAt: expect.any(String), settings: quiz.settings, branding: quiz.branding },
+      { id: quiz.id, title: 'Test quiz', questionCount: 2, groupCount: 0, updatedAt: expect.any(String), settings: quiz.settings, branding: quiz.branding },
     ])
     expect((await req(bob, 'GET', '/api/quizzes')).json().quizzes).toEqual([])
   })
@@ -263,6 +263,62 @@ describeDb('quiz routes (database)', () => {
     expect(copy.branding).toEqual(quiz.branding)
   })
 
+  describe('question groups', () => {
+    const grouped = {
+      title: 'Grouped',
+      questions: [
+        { ...quizBody.questions[1], text: 'Warm-up' },
+        { ...quizBody.questions[0], groupId: 'g1' },
+        { ...quizBody.questions[1], groupId: 'g2' },
+      ],
+      groups: [
+        { id: 'g1', title: 'Round 1', info: 'Easy ones', timeLimitSec: 10, points: 500, settings: { speedBonus: false } },
+        { id: 'g2', title: 'Round 2' },
+      ],
+    }
+
+    it('saves and reads groups with defaults, and counts them in the list', async () => {
+      const res = await req(alice, 'POST', '/api/quizzes', grouped)
+      expect(res.statusCode).toBe(201)
+      const quiz = res.json().quiz
+      expect(quiz.groups).toEqual([
+        { id: 'g1', title: 'Round 1', info: 'Easy ones', timeLimitSec: 10, points: 500, settings: { speedBonus: false } },
+        { id: 'g2', title: 'Round 2', info: '', settings: {} },
+      ])
+      expect(quiz.questions.map((q: { groupId?: string }) => q.groupId)).toEqual([undefined, 'g1', 'g2'])
+      expect((await req(alice, 'GET', `/api/quizzes/${quiz.id}`)).json().quiz.groups).toEqual(quiz.groups)
+      const listed = (await req(alice, 'GET', '/api/quizzes')).json().quizzes.find((q: { id: string }) => q.id === quiz.id)
+      expect(listed).toMatchObject({ questionCount: 3, groupCount: 2 })
+    })
+
+    it('refuses a question in an unknown group and an empty group', async () => {
+      const unknown = await req(alice, 'POST', '/api/quizzes', { ...grouped, groups: grouped.groups.slice(0, 1) })
+      expect(unknown.statusCode).toBe(400)
+      expect(unknown.json().issues.map((i: { path: string }) => i.path)).toEqual(['questions.2.groupId'])
+      const empty = await req(alice, 'POST', '/api/quizzes', { ...grouped, groups: [...grouped.groups, { id: 'g3', title: 'Round 3' }] })
+      expect(empty.json().issues.map((i: { path: string }) => i.path)).toEqual(['groups.2'])
+    })
+
+    it('duplicates with fresh group ids, the questions still in their groups', async () => {
+      const original = (await req(alice, 'POST', '/api/quizzes', grouped)).json().quiz
+      const copy = (await req(alice, 'POST', `/api/quizzes/${original.id}/duplicate`, {})).json().quiz
+      const ids = copy.groups.map((g: { id: string }) => g.id)
+      expect(ids).toHaveLength(2)
+      expect(ids).not.toContain('g1')
+      expect(copy.questions.map((q: { groupId?: string }) => q.groupId)).toEqual([undefined, ids[0], ids[1]])
+      expect(copy.groups[0]).toMatchObject({ title: 'Round 1', settings: { speedBonus: false } })
+    })
+
+    it('batch updates a grouped quiz and keeps its groups', async () => {
+      const quiz = (await req(alice, 'POST', '/api/quizzes', grouped)).json().quiz
+      const res = await req(alice, 'PATCH', '/api/quizzes/batch', { ids: [quiz.id], questions: { points: 200 } })
+      expect(res.json()).toEqual({ updated: 1 })
+      const after = (await req(alice, 'GET', `/api/quizzes/${quiz.id}`)).json().quiz
+      expect(after.groups).toEqual(quiz.groups)
+      expect(after.questions.map((q: { points: number }) => q.points)).toEqual([200, 200, 200])
+    })
+  })
+
   describe('import from a quiz file', () => {
     const file = (quiz: object, images: Record<string, string> = {}) => ({ format: 'quizmoo-quiz', version: 1, guide: ['ignored'], quiz, images })
     const count = async () => ({
@@ -283,10 +339,11 @@ describeDb('quiz routes (database)', () => {
           { ...quizBody.questions[0], imageId: 'old-1', options: [{ id: 'a', text: 'A', imageId: 'old-2' }, { id: 'b', text: 'B', imageId: 'old-1' }] },
           quizBody.questions[1],
         ],
+        groups: [{ id: 'g1', title: 'Round 1', imageId: 'old-2', settings: { streakBonus: true } }],
         settings: { theme: 'mint' },
         branding: { logoImageId: 'old-2' },
       }
-      const res = await req(bob, 'POST', '/api/quizzes/import', file(quiz, { 'old-1': png, 'old-2': png, unused: 'eA==' }))
+      const res = await req(bob, 'POST', '/api/quizzes/import', file({ ...quiz, questions: quiz.questions.map((q) => ({ ...q, groupId: 'g1' })) }, { 'old-1': png, 'old-2': png, unused: 'eA==' }))
       expect(res.statusCode).toBe(201)
       const created = res.json().quiz
       expect(created).toMatchObject({ title: 'Imported', settings: { theme: 'mint' } })
@@ -294,6 +351,7 @@ describeDb('quiz routes (database)', () => {
       expect(first).not.toBe('old-1')
       expect(created.questions[0].options[1].imageId).toBe(first)
       expect(created.branding.logoImageId).toBe(second)
+      expect(created.groups).toEqual([{ id: 'g1', title: 'Round 1', info: '', imageId: second, settings: { streakBonus: true } }])
 
       const stored = await db.select().from(images).where(eq(images.id, first))
       const bobId = (await db.select().from(users).where(eq(users.username, 'test_bob')))[0]!.id

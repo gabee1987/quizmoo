@@ -15,7 +15,7 @@ interface GameState {
   pin: string                       // 6 digits, unique among active games
   quiz: Quiz                        // frozen copy taken when the game was created
   settings: GameSettings
-  phase: GamePhase                  // 'lobby' | 'question' | 'reveal' | 'scoreboard' | 'finished'
+  phase: GamePhase                  // 'lobby' | 'intro' | 'question' | 'reveal' | 'scoreboard' | 'finished'
   questionIndex: number             // -1 in lobby
   players: Record<string, Player>
   teams: Record<string, Team>       // empty in classic mode
@@ -37,13 +37,17 @@ interface Team { id: string; name: string; score: number; answerMode?; captainId
 
 `GameState` must be JSON-serialisable as is: it is persisted to Postgres on every transition and restored on boot.
 
+## Groups (rounds)
+
+`quiz.groups` (games saved before phase 40 have none: read through `groupsOf`) and each question's optional `groupId`; a group is one run of questions with the same `groupId`. `groups.ts` has the helpers (`groupAt`, `groupBounds`, `startsGroup`, `endsGroup`) and `settingsAt(state, index)`, the game's settings with that question's group overrides: every rule that can differ per round reads it, never `state.settings` directly. Entering a group's first question goes to phase `intro` first, with `questionIndex` still on the question before (-1 before the first) and `introEndsAt` (null while it waits for the host); `next` opens the question, `introTimeUp` does when the time is up, and `pause` / `resume` hold and release a timed intro. With `revealAnswers: 'afterGroup'` a group's answers stay hidden until its walk (`showAnswers` at its end, recorded in `revealedGroups`). Standings at a group's end and the scoreboard after a question are the host's step (`primary-action.ts` on the web), not the engine's: `next` from a reveal always moves on. `createGame` strips the editor's colour tags from the game's copy.
+
 ## Commands
 
 Each command is `(state, input, now) => GameState` and returns a new object (no mutation). Invalid commands throw `EngineError` whose `code` is an i18n key (`errors.gameNotFound`, `errors.gameAlreadyStarted`, `errors.nameTaken`, `errors.gameFull`, `errors.notYourTurn`, `errors.questionClosed`, `errors.alreadyAnswered`, `errors.answerLocked`, `errors.invalidAnswer`, `errors.unknownTeam`, `errors.notCaptain`, `errors.invalidTransition`).
 
 | Command | Allowed in | Effect |
 |---|---|---|
-| `createGame(quiz, settings, pin, id, now)` | - | lobby state, teams created from `settings.teamNames` in team mode |
+| `createGame(quiz, settings, pin, id, now)` | - | lobby state, teams created from `settings.teamNames` in team mode; with `shuffleQuestions` the quiz copy's order comes from `shuffleQuestionOrder` (`packages/shared/src/question-order.ts`: groups move as blocks and are re-ordered in `groups` too, a group with `keepOrder` keeps its inner order), then `shuffleOptions`. Everything after reads the game's copy, so nothing else knows about the shuffle |
 | `joinPlayer({ id, name, teamId, newTeam?, solo?, token, avatar })` | lobby; with `settings.lateJoin` until finished (reconnect allowed any time via token) | adds player; name unique case-insensitively and allowed by `isNameAllowed` (`names.ts`, else `errors.nameNotAllowed`), max 60 players (`MAX_PLAYERS` in `packages/shared`); team mode requires a known `teamId`, `newTeam` or `solo` (`team-modes`); `avatar` from `avatars`, else `fallbackAvatar(id)`; a token rejoin keeps the stored name and avatar |
 | `schedule(at, now)` / `openJoining(now)` | lobby; `schedule` only with no players | `scheduledAt`: joining opens then (after `now`, at most `MAX_SCHEDULE_DAYS` = 30 ahead, else `errors.invalidSchedule`); `openJoining` moves it to `now` (kept, never cleared: the restore window counts from it); `joiningOpen(state, now)` tells; `joinPlayer(state, input, now)` refuses new players before it with `errors.gameNotOpenYet` (without `now` a scheduled game stays closed) |
 | `setNextGame(pin)` | finished | "Play again": `nextPin` points phones and the projector to the next round |
@@ -74,7 +78,7 @@ Each command is `(state, input, now) => GameState` and returns a new object (no 
 
 ## Snapshots
 
-`toHostSnapshot(state, now)` and `toPlayerSnapshot(state, playerId, now)` live in `snapshots.ts`. The question in the `question` phase is passed through `toPublicQuestion`, which strips every correct-answer field. `reveal` is filled in reveal, scoreboard and finished phases and includes the full question. `distribution` keys: option id, `'true'`/`'false'`, normalised text, or the number as a string.
+`toHostSnapshot(state, now)` and `toPlayerSnapshot(state, playerId, now)` live in `snapshots.ts`. The question in the `question` phase is passed through `toPublicQuestion`, which strips every correct-answer field. `reveal` is filled in reveal, scoreboard and finished phases and includes the full question. Keep phone snapshots from growing with the quiz (a quiz has up to 200 questions and every answer broadcasts to 60 phones): per-question lists such as `questionStats` go only in `HostSnapshot`. `baseSnapshot` caches the shared part per state, audience, time and seq, so a broadcast builds it once; that relies on states never being changed in place. Measure with 200 questions and 60 players (phase 40 Results) after adding to the snapshots. `distribution` keys: option id, `'true'`/`'false'`, normalised text, or the number as a string.
 
 ## Tests
 

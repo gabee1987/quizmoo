@@ -172,6 +172,7 @@
     "game": {
       "phase": {
         "lobby": "Várjuk a játékosokat",
+        "intro": "A kör bevezetője",
         "question": "Megy a kérdés",
         "reveal": "Kiderültek a válaszok",
         "scoreboard": "Eredménytábla",
@@ -205,6 +206,15 @@
       "showScoreboard": "Eredménytábla",
       "controls": "Játékvezérlés",
       "nextQuestion": "Következő kérdés",
+      "startRound": "Indulhat a kör",
+      "nextRound": "Következő kör",
+      "showRoundAnswers": "A kör megoldásai",
+      "holdIntro": "Várjunk",
+      "releaseIntro": "Mehet",
+      "introHeldHint": "Megállítva: a kör akkor indul, ha továbbengeded, vagy megnyomod az Indulhat a kör gombot.",
+      "introWaits": "A kör akkor indul, ha megnyomod az Indulhat a kör gombot.",
+      "roundRules": "A(z) {{round}}. kör szabályai",
+      "standingsOnDemand": "Állás a körök után, ha megmutatom",
       "finish": "Vége",
       "gradeFirst": "A folytatáshoz értékeld a lenti válaszokat.",
       "onlineCount_one": "{{count}} online",
@@ -303,6 +313,7 @@
     "shown": {
       "onScreen": {
         "reveal": "Most kint: a válaszok",
+        "answerHidden": "Most kint: lezárt kérdés, rejtett válaszok",
         "scoreboard": "Most kint: az állás e kérdés után",
         "shownAgain": "Most kint: újra ez a kérdés"
       },
@@ -319,6 +330,8 @@
       "phones": "Telefonok:",
       "projector": "Kivetítő:",
       "lobby": "váróterem",
+      "intro": "a(z) {{round}}. kör bevezetője",
+      "introHeld": "a(z) {{round}}. kör bevezetője, megállítva",
       "question": "{{index}}. kérdés",
       "paused": "{{index}}. kérdés, szünet",
       "answer": "a(z) {{index}}. kérdés megoldása",
@@ -388,6 +401,7 @@
     "standings": {
       "resultsSoFar": "Eddigi eredmények",
       "hiddenNote": "Ezeket a pontokat csak te látod. A játékosok és a kivetítő a végén látják, vagy amikor megmutatod az állást.",
+      "hiddenNoteRound": "Ezeket a pontokat csak te látod. A játékosok és a kivetítő a kör végén látják, vagy amikor megmutatod az állást.",
       "correct_one": "{{count}} helyes",
       "correct_other": "{{count}} helyes",
       "members_one": "{{count}} tag",
@@ -460,6 +474,8 @@
       "answerChangesLocked_one": "Válaszváltoztatás {{count}} mp-cel a vége előttig",
       "answerChangesLocked_other": "Válaszváltoztatás {{count}} mp-cel a vége előttig",
       "shuffle": "Keverd össze a válaszokat",
+      "shuffleQuestions": "Keverd össze a kérdéseket",
+      "shuffleQuestionsHelp": "Minden játék új sorrendben hozza a kérdéseket. Egy kör egyben mozog a kérdéseivel, és azok is keverednek, hacsak a kör nem tartja a sorrendjét.",
       "submit": "Játék létrehozása",
       "branding": {
         "title": "Arculat",
@@ -480,6 +496,7 @@
       "revealAnswers": "Helyes válaszok",
       "revealAnswersOptions": {
         "afterQuestion": "Minden kérdés után",
+        "afterGroup": "Minden kör végén",
         "atEnd": "Csak a játék végén"
       },
       "scoreboard": "Eredménytábla",
@@ -488,6 +505,16 @@
         "onDemand": "Amikor megmutatom"
       },
       "scoreboardAtEnd": "A pontokból kiderülnének a válaszok, ezért az állást csak akkor mutatjuk, ha te kéred, és akkor is csak az összpontszámot.",
+      "groupIntro": "A kör bevezetője",
+      "groupIntroHelp": "Minden kör a címével, leírásával és képével indul a kivetítőn és a telefonokon.",
+      "groupIntroWait": "Amíg el nem indítom a kört",
+      "groupIntroSeconds_one": "{{count}} másodpercig",
+      "groupIntroSeconds_other": "{{count}} másodpercig",
+      "groupStandings": "Állás a kör végén",
+      "groupStandingsOptions": {
+        "afterGroup": "Minden kör után",
+        "onDemand": "Amikor megmutatom"
+      },
       "answerStyle": "Válaszgombok a telefonokon",
       "answerStyleOptions": {
         "plain": "Egyszerű",
@@ -659,6 +686,13 @@
     "playerCount_other": "{{count}} játékos",
     "questionOf_one": "{{index}}. kérdés / {{count}}",
     "questionOf_other": "{{index}}. kérdés / {{count}}",
+    "roundOf_one": "{{index}}. kör / {{count}}",
+    "roundOf_other": "{{index}}. kör / {{count}}",
+    "roundQuestions_one": "{{count}} kérdés",
+    "roundQuestions_other": "{{count}} kérdés",
+    "questionRange": "{{first}}–{{last}}. kérdés",
+    "roundShort": "{{index}}. kör",
+    "introGetReady": "Készülj!",
     "secondsLeft_one": "Még {{count}} másodperc",
     "secondsLeft_other": "Még {{count}} másodperc",
     "pausedSecondsLeft_one": "Szünet, még {{count}} másodperc",
@@ -683,6 +717,8 @@
       "title": "A játékról",
       "questions_one": "{{count}} kérdés",
       "questions_other": "{{count}} kérdés",
+      "questionsInRounds_one": "{{questions}} kérdés {{count}} körben",
+      "questionsInRounds_other": "{{questions}} kérdés {{count}} körben",
       "classic": "Mindenki magáért játszik.",
       "teams": "Csapatokban játszotok, együtt gyűjtitek a pontot.",
       "teamsAndSolo": "Csapatok és egyéni játékosok versenyeznek egy rangsorban.",
@@ -692,6 +728,7 @@
       "answerChangesLocked_one": "A válaszod a vége előtt {{count}} mp-ig változtathatod.",
       "answerChangesLocked_other": "A válaszod a vége előtt {{count}} mp-ig változtathatod.",
       "answersAtEnd": "A helyes válaszok és a pontok a játék végén derülnek ki.",
+      "answersAtRoundEnd": "A helyes válaszok és a pontok minden kör végén derülnek ki.",
       "lateJoin": "Kezdés után is be lehet még szállni."
     },
     "answeredSoFar_one": "{{count}} játékosból {{answered}} válaszolt",
@@ -729,6 +766,7 @@
     "teamLeaderboard": "Csapatok",
     "answerKept": "Megvan a válaszod",
     "resultsAtEnd": "A helyes válaszok a játék végén derülnek ki.",
+    "resultsAtRoundEnd": "A helyes válaszok a kör végén derülnek ki.",
     "backToHome": "Vissza a kezdőlapra",
     "voted": "Szavaztál",
     "yourAnswers": "Válaszaid",
@@ -900,7 +938,11 @@
       "invalid": "Ez így nem jó.",
       "markCorrect": "Jelöld meg a helyes választ.",
       "duplicateOptions": "Két lehetőség nem lehet egyforma.",
-      "duplicateQuestions": "Ismétlődő kérdésazonosító; másold újra a kérdést."
+      "duplicateQuestions": "Ismétlődő kérdésazonosító; másold újra a kérdést.",
+      "duplicateGroups": "Ismétlődő csoportazonosító; add hozzá újra a csoportot.",
+      "unknownGroup": "Ennek a kérdésnek eltűnt a csoportja; tedd át egy csoportba.",
+      "groupOrder": "Egy csoport kérdései maradjanak együtt; tedd vissza ezt a kérdést a csoportjába.",
+      "emptyGroup": "Tegyél ebbe a csoportba egy kérdést, vagy töröld."
     },
     "sampleQuestion": "Melyik a Naprendszer legnagyobb bolygója?",
     "sampleOption1": "Jupiter",
@@ -931,6 +973,86 @@
     "moveToBottom": "A végére",
     "questionDuplicated": "Kérdés másolva",
     "questionDeleted": "A(z) {{n}}. kérdés törölve",
+    "groupN": "{{n}}. csoport",
+    "groupNOfCount": "{{n}}. csoport / {{count}}",
+    "groupDefaultTitle": "{{n}}. kör",
+    "addGroup": "Új csoport",
+    "groupFromHere": "Új csoport innen",
+    "groupTitle": "A csoport címe",
+    "groupInfo": "Leírás (nem kötelező)",
+    "groupInfoHelp": "A címet és a leírást a kivetítőn és a telefonokon látják a játékosok, a csoport első kérdése előtt.",
+    "groupImage": "A csoport képe",
+    "groupDefaults": "Idő és pontok",
+    "groupDefaultsHelp": "Az új kérdések ezzel indulnak ebben a csoportban. Bármelyik kérdésnél átállíthatod.",
+    "notSet": "Nincs megadva",
+    "applyToQuestions_one": "Beállítom {{count}} kérdésnél",
+    "applyToQuestions_other": "Beállítom {{count}} kérdésnél",
+    "groupRules": "A csoport szabályai",
+    "groupRulesHelp": "Ami „Mint a kvízben” maradt, az a kvíz beállításait követi.",
+    "sameAsQuiz": "Mint a kvízben ({{value}})",
+    "on": "Be",
+    "off": "Ki",
+    "moveGroupUp": "Csoport feljebb",
+    "moveGroupDown": "Csoport lejjebb",
+    "deleteGroup": "Csoport törlése",
+    "groupDeleted": "A(z) {{n}}. csoport törölve, a kérdései maradtak",
+    "collapseGroup": "A(z) {{n}}. csoport becsukása",
+    "expandGroup": "A(z) {{n}}. csoport kinyitása",
+    "collapseAllGroups": "Minden csoport becsukása",
+    "expandAllGroups": "Minden csoport kinyitása",
+    "collapseAll": "Mind becsukása",
+    "expandAll": "Mind kinyitása",
+    "shuffle": {
+      "button": "Keverés",
+      "label": "Kérdések összekeverése",
+      "title": "Összekevered a kérdéseket?",
+      "body": "Minden kérdés új helyre kerül ebben a kvízben. Egy csoport egyben mozog, a kérdései pedig egymás között keverednek.",
+      "bodyLocked": "A „Maradjon a sorrend” csoportokon belül nem változik a sorrend.",
+      "confirm": "Keverés",
+      "done": "Összekevertük a kérdéseket",
+      "nothing": "Nincs mit keverni: adj hozzá kérdéseket, vagy oldd fel egy csoport zárását."
+    },
+    "groupOrder": "Kérdések sorrendje",
+    "keepOrder": "Maradjon a sorrend",
+    "keepOrderHelp": "Ha a kérdések összekeverednek, játékban vagy a Keverés gombbal, a csoport máshová kerülhet, de a kérdései ebben a sorrendben maradnak.",
+    "orderKept": "Rögzített sorrend",
+    "dragGroup": "A(z) {{n}}. csoport áthelyezése",
+    "groupEndN": "A(z) {{n}}. csoport vége",
+    "questionGroup": "Csoport",
+    "noGroup": "Nincs csoportban",
+    "groupOption": "{{n}}. csoport: {{title}}",
+    "newGroupOption": "+ Új csoport",
+    "groupCount_one": "{{count}} csoport",
+    "groupCount_other": "{{count}} csoport",
+    "listSummary": "{{questions}} · {{groups}}",
+    "trash": "Kuka",
+    "dropToDelete": "Húzd ide a törléshez",
+    "releaseToDelete": "Engedd el a törléshez",
+    "tagColor": "Szín",
+    "tagColorOf": "Szín: {{color}}",
+    "tagNone": "Nincs szín",
+    "tagColors": {
+      "red": "Piros",
+      "orange": "Narancs",
+      "yellow": "Sárga",
+      "green": "Zöld",
+      "teal": "Türkiz",
+      "blue": "Kék",
+      "purple": "Lila",
+      "pink": "Rózsaszín"
+    },
+    "groupTabs": {
+      "settings": "Beállítások",
+      "questions": "Kérdések ({{count}})"
+    },
+    "groupNoQuestions": "Ebben a csoportban még nincs kérdés.",
+    "addQuestionToGroup": "Kérdés hozzáadása a csoporthoz",
+    "groupDeletedWithQuestions": "A(z) {{n}}. csoport és a kérdései törölve",
+    "deleteGroupTitle": "Törlöd a(z) „{{title}}” csoportot?",
+    "deleteGroupBody_one": "Ebben a csoportban {{count}} kérdés van. Megtartod csoport nélkül, vagy azt is törlöd?",
+    "deleteGroupBody_other": "Ebben a csoportban {{count}} kérdés van. Megtartod őket csoport nélkül, vagy azokat is törlöd?",
+    "deleteGroupKeepQuestions": "Kérdések maradnak",
+    "deleteGroupWithQuestions": "Törlés kérdésekkel",
     "undo": "Visszavonás",
     "deleteQuiz": "Kvíz törlése",
     "deleteQuizHelp": "A kvíz végleg törlődik. A már lejátszott játékok eredménye megmarad.",
@@ -1167,6 +1289,65 @@
     "current": "Mostani verzió",
     "releasedOn": "Megjelent: {{date}}",
     "releases": {
+      "1_3_0": {
+        "title": "Kevert kérdések",
+        "intro": "Játékonként új sorrendben jöhetnek a kérdések, a telefonokon pedig nagyobbak a képek.",
+        "sections": [
+          {
+            "title": "Véletlen kérdéssorrend",
+            "items": [
+              "Kapcsold be a Keverd össze a kérdéseket beállítást a kvíz beállításaiban, vagy csak egy játékra, amikor elindítod. Így minden játék új sorrendben hozza a kérdéseket.",
+              "Egy kör egyben mozog a kérdéseivel, és a kérdései is keverednek. Kapcsold be egy körben a Maradjon a sorrend kapcsolót, ha a kérdéseinek sorrendben kell jönniük.",
+              "A kérdéslista feletti Keverés gomb végleg összekeveri a kvízt. Előbb rákérdez, és a Visszavonással visszakapod a régi sorrendet."
+            ]
+          },
+          {
+            "title": "Nagyobb képek a telefonokon és a kivetítőn",
+            "items": [
+              "A telefonokon a kérdés sorszáma, a kör, az időzítő és a beállítások gomb egy keskeny sávban van felül, így a kérdés képe kitölti a szélességet, és közben minden válasz látszik.",
+              "A kivetítőn a kérdés, a képe és az összes válasz mindig elfér egy képernyőn.",
+              "Ha szünetet tartasz, a játékosok egy nagy Szünet jelzést látnak a képernyőjük közepén, és semmi nem mozdul el rajta."
+            ]
+          }
+        ]
+      },
+      "1_2_0": {
+        "title": "Körök",
+        "intro": "Oszd körökre a kvízt, mindegyiknek saját felvezetővel, szabályokkal és eredménytáblával, és készíts akár 200 kérdéses kvízeket.",
+        "sections": [
+          {
+            "title": "Körök a kvízeidben",
+            "items": [
+              "Rendezd körökbe a kérdéseket, mindegyiknek címmel, leírással, képpel és színnel. A körökön kívül is maradhatnak kérdések, például bemelegítésnek vagy ráadásnak.",
+              "Minden kör felvezetővel indul a kivetítőn és a telefonokon. Megvárja, amíg megnyomod az Indulhat a kör gombot, vagy pár másodperc után magától indul; a Várjunk megállítja a visszaszámlálást.",
+              "Az eredménytábla jöhet magától minden kör után, vagy csak akkor, amikor megmutatod. A helyes válaszokat a kör végén is felfedheted, nem csak kérdésenként.",
+              "Minden körnek lehet saját ideje, pontja és szabálya, például nincs gyorsasági bónusz a ráadás körben. A vezérlőd jelzi, ha egy körnek saját szabályai vannak.",
+              "A váróterem kiírja, hány kör jön, a kérdéseknél látszik a kör, az eredmények pedig körönként mutatják a kérdéseket."
+            ]
+          },
+          {
+            "title": "A szerkesztő",
+            "items": [
+              "Egy kör egy kártya a kérdéslistában: húzd be vagy ki a kérdéseket, mozgasd az egész kört, vagy csukd össze a köröket.",
+              "A kérdéseknek is adhatsz színt, hogy egy pillantással megtaláld őket. A színeket csak te látod.",
+              "A fenti szem gombbal elrejtheted a telefonos előnézetet, így több hely jut a listának és a kérdésnek.",
+              "A táblázatok és a Quizmoo fájlok megőrzik a köröket és a színeket; a sablonban egy példa kör is van."
+            ]
+          },
+          {
+            "title": "Nagyobb kvízek",
+            "items": [
+              "Egy kvízben most már 200 kérdés lehet, legfeljebb 50 körben, és egy hosszú játék az utolsó kérdésnél is ugyanolyan gyors, mint az elsőnél."
+            ]
+          },
+          {
+            "title": "A tehén",
+            "items": [
+              "A tehén néha grimaszol vagy mond valami butaságot, jeles napok körül pedig beöltözik az alkalomhoz."
+            ]
+          }
+        ]
+      },
       "1_1_0": {
         "title": "Az első nyilvános béta",
         "intro": "A Quizmoo már online is fut barátoknak és családnak. Ezt tudod játékvezetőként.",
@@ -1740,7 +1921,7 @@
   "quizFile": {
     "importTitle": "Importálj egy kvízt",
     "importHelp": "Írd meg a kérdéseket bárhol: Excelben, Google Táblázatokban vagy a telefonodon, aztán töltsd be ide. Egy Quizmoo-fájl is jó, amit valaki megosztott veled.",
-    "templateHelp": "Kezdd a sablonnal: minden oszlopot elmagyaráz, és minden kérdéstípusra van benne példa.",
+    "templateHelp": "Kezdd a sablonnal: minden oszlopot elmagyaráz, és minden kérdéstípusra meg egy csoportra is van benne példa.",
     "downloadTemplate": "Sablon letöltése",
     "templateName": "quizmoo-kerdes-sablon.csv",
     "chooseFile": "Válassz fájlt",
@@ -1754,6 +1935,7 @@
     "problemsInFile": "A fájlban lévő kvíz hibás:",
     "found_one": "1 kérdés, importálhatod.",
     "found_other": "{{count}} kérdés, importálhatod.",
+    "foundInGroups": "{{questions}}, {{groups}}, importálhatod.",
     "sheetNote": "A kvíz az alapértelmezett játékbeállításaidat kapja. Képet a szerkesztőben adhatsz hozzá.",
     "import": "Importálás",
     "imported_one": "1 kérdést importáltunk.",
@@ -1770,7 +1952,9 @@
       "correct": "helyes",
       "time": "idő",
       "points": "pont",
-      "tolerance": "tűrés"
+      "tolerance": "tűrés",
+      "color": "szín",
+      "emptyGroup": "csoport"
     },
     "problems": {
       "type": "ismeretlen kérdéstípus. Ezek közül válassz: {{words}}.",
@@ -1786,8 +1970,15 @@
       "time": "5–180 másodperc, vagy hagyd üresen.",
       "points": "egész szám 0 és 5000 között, vagy hagyd üresen.",
       "tolerance": "0 vagy nagyobb szám, vagy hagyd üresen.",
+      "color": "ismeretlen szín. Ezek közül válassz: {{colors}}, vagy hagyd üresen.",
       "empty": "Nincs kérdés a fájlban. Tölts ki legalább egy sort a fejléc alatt.",
-      "tooMany": "Egy kvízben legfeljebb 100 kérdés lehet. Vágd ketté a fájlt."
+      "tooMany": "Egy kvízben legfeljebb 200 kérdés lehet. Vágd ketté a fájlt.",
+      "group": {
+        "question": "írd be a csoport címét, legfeljebb 120 karakter.",
+        "answers": "a csoport leírása legfeljebb 500 karakter lehet."
+      },
+      "emptyGroup": "nincs alatta kérdés. Írj alá legalább egyet, vagy töröld a sort.",
+      "tooManyGroups": "Egy kvízben legfeljebb 50 csoport lehet."
     },
     "columns": {
       "type": "típus",
@@ -1801,7 +1992,8 @@
       "correct": "helyes",
       "time": "idő (mp)",
       "points": "pont",
-      "tolerance": "tűrés"
+      "tolerance": "tűrés",
+      "color": "szín"
     },
     "guide": [
       "QUIZMOO KÉRDÉSEK: soronként egy kérdés, a fejléc sor alatt. Mentsd CSV-ként (UTF-8), aztán a Quizmooban: Kvízek > Importálás.",
@@ -1815,7 +2007,9 @@
       "helyes, szöveg típusnál: az elfogadott válaszok | jellel elválasztva, pl. Jupiter | a Jupiter. A kis- és nagybetű meg az ékezet nem számít. Ha üres, a játék közben te döntöd el, mi jó.",
       "helyes, szám típusnál: a jó szám, pl. 1848 vagy 3,5. Szavazásnál és sorrendnél hagyd üresen.",
       "idő: ennyi másodperc van a válaszra, 5–180 (ha üres: 20). pont: 0–5000 (ha üres: 1000). tűrés, csak szám típusnál: ennyivel eltérő válasz is jó, pl. 10 (ha üres: pontosan kell).",
-      "Képet és játékbeállítást ebbe a fájlba nem tudsz tenni: importálás után a szerkesztőben add hozzá."
+      "szín: a kérdés vagy a csoport színe a szerkesztőben: piros, narancs, sárga, zöld, türkiz, kék, lila vagy rózsaszín (ha üres: nincs színe).",
+      "csoport: egy forduló kezdete. A kérdés oszlopba a címét írd (legfeljebb 120 karakter), a válasz 1-be a leírását, az időhöz és a ponthoz azt, amit az új kérdései kapnak a szerkesztőben. Az alatta lévő kérdések a következő csoportig vagy egy csoport-vége sorig tartoznak hozzá.",
+      "Képet, játékbeállítást és a csoportok saját szabályait ebbe a fájlba nem tudsz tenni: importálás után a szerkesztőben add hozzá."
     ],
     "templateNote": "A fejléc alatti sorok csak példák: írd át vagy töröld őket.",
     "jsonGuide": [
@@ -1823,6 +2017,8 @@
       "Ha kézzel írnál kérdéseket, inkább a táblázatsablont használd (Kvízek > Importálás > Sablon letöltése)."
     ],
     "examples": {
+      "group": "Ráadás kör",
+      "groupInfo": "Két könnyű kérdés a végére.",
       "single": "Mi Magyarország fővárosa?",
       "single1": "Bécs",
       "single2": "Budapest",

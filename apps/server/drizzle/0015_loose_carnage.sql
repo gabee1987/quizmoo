@@ -1,0 +1,1 @@
+ALTER TABLE "quizzes" ADD COLUMN "groups" jsonb DEFAULT '[]'::jsonb NOT NULL;

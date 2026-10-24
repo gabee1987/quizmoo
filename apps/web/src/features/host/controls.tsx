@@ -6,6 +6,7 @@ import {
   ListChecksIcon,
   MonitorIcon,
   PauseIcon,
+  PlayIcon,
   SkipForwardIcon,
   SmartphoneIcon,
   WifiOffIcon,
@@ -62,7 +63,9 @@ export function Controls({
       {text}
     </p>
   )
-  const secondary = alternative !== null || host.phase === 'question' || canShowAnswers || queue.length > 1
+  // A timed intro can be held, and released again.
+  const timedIntro = host.phase === 'intro' && host.introEndsAt !== null
+  const secondary = alternative !== null || host.phase === 'question' || timedIntro || canShowAnswers || queue.length > 1
   return (
     <div
       className={cn(
@@ -102,6 +105,7 @@ export function Controls({
             false,
           )}
         {host.phase === 'question' && host.pausedAt && hint(t('host.game.pausedHint'), 'warning')}
+        {host.phase === 'intro' && host.pausedAt && hint(t('host.game.introHeldHint'), 'warning')}
         {host.reviewing && hint(t('host.game.shownAgainHint', { index: host.questionIndex + 1 }), 'secondary')}
         {host.phase === 'reveal' && host.awaitingGrading && hint(t('host.game.gradeFirst'), 'warning', false)}
         {secondary && (
@@ -138,6 +142,12 @@ export function Controls({
               <Button variant="secondary" className="flex-1" onClick={() => setChoosing(true)}>
                 <ListChecksIcon aria-hidden="true" />
                 {t('host.showAnswers.open')}
+              </Button>
+            )}
+            {timedIntro && (
+              <Button variant="secondary" className="flex-1" onClick={() => onCommand({ type: host.pausedAt ? 'resume' : 'pause' })}>
+                {host.pausedAt ? <PlayIcon aria-hidden="true" /> : <PauseIcon aria-hidden="true" />}
+                {t(host.pausedAt ? 'host.game.releaseIntro' : 'host.game.holdIntro')}
               </Button>
             )}
             {host.phase === 'question' && (

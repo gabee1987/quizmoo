@@ -1,6 +1,7 @@
 import type { Answer, PlayerSnapshot } from '@quizmoo/shared'
 import { HashIcon, TimerIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { RoundChip } from '@/components/round-chip'
 import { cn } from '@/lib/cn'
 import { OptionSymbol } from '../../components/icons'
 import { optionFill, optionVars } from '../../components/option-colours'
@@ -102,6 +103,8 @@ export function MyAnswer({ snapshot, answer }: { snapshot: PlayerSnapshot; answe
           <HashIcon className="size-4" aria-hidden="true" />
           {t('play.questionOf', { index: snapshot.questionIndex + 1, count: snapshot.questionCount })}
         </span>
+        {/* The reveal shows its round on top. */}
+        {snapshot.phase === 'question' && <RoundChip group={snapshot.group} className="bg-muted py-1 font-semibold text-foreground" />}
       </div>
     </div>
   )

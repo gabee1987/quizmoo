@@ -77,6 +77,7 @@ export async function accountRoutes(
           title: quizzes.title,
           description: quizzes.description,
           questions: quizzes.questions,
+          groups: quizzes.groups,
           settings: quizzes.settings,
           branding: quizzes.branding,
           createdAt: quizzes.createdAt,

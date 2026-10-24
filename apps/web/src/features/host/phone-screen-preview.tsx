@@ -2,8 +2,10 @@ import type { HostSnapshot } from '@quizmoo/shared'
 import { useTranslation } from 'react-i18next'
 import { AnnouncementBanner } from '@/components/announcement-banner'
 import { Timer } from '@/components/timer'
+import { resultsWhen } from '@/lib/results-when'
 import { gameVars } from '@/lib/themes'
 import { reviewPosition } from '../play/review-position'
+import { PhoneRoundIntro } from '../play/round-intro'
 import { RankList, TeamRankList, standingsHeading } from '../play/scoreboard'
 import { CorrectAnswer } from '../questions/correct-answer'
 import { QuestionInput } from '../questions/question-input'
@@ -49,6 +51,8 @@ function PhoneBody({ host, clockOffset }: { host: HostSnapshot; clockOffset: num
   switch (host.phase) {
     case 'lobby':
       return card(t('host.seen.lobby'))
+    case 'intro':
+      return <PhoneRoundIntro snapshot={host} clockOffset={clockOffset} />
     case 'question': {
       const question = host.question
       if (!question || host.questionEndsAt === null) return null
@@ -63,7 +67,7 @@ function PhoneBody({ host, clockOffset }: { host: HostSnapshot; clockOffset: num
       )
     }
     case 'reveal': {
-      if (host.answersHidden && !host.reviewing) return card(t('play.answerKept'), t('play.resultsAtEnd'))
+      if (host.answersHidden && !host.reviewing) return card(t('play.answerKept'), t(resultsWhen(host.settings)))
       if (host.awaitingGrading && !host.reviewing) return card(t('play.awaitingGrading'))
       const reveal = host.reveal
       if (!reveal) return null

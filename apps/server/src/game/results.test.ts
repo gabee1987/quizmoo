@@ -1,6 +1,14 @@
 import type { Answer, GameSettings } from '@quizmoo/shared'
 import { describe, expect, it } from 'vitest'
-import { createGame, endGame, endQuestion, joinPlayer, next, startGame, submitAnswer } from './engine.js'
+import {
+  createGame,
+  endGame,
+  endQuestion,
+  joinPlayer,
+  next,
+  startGame,
+  submitAnswer,
+} from './engine.js'
 import { fixtureQuiz, fixtureSettings } from './fixtures.js'
 import { toCsv, toResults } from './results.js'
 import type { GameState } from './types.js'
@@ -17,11 +25,22 @@ function answer(state: GameState, playerId: string, value: Answer, at: number): 
  * Csilla silent. Q2 (multiple): Anna wrong, Csilla right. 1000 points each, no speed bonus.
  */
 function finishedGame(settings: Partial<GameSettings> = {}): GameState {
-  let state = createGame(fixtureQuiz(), fixtureSettings({ speedBonus: false, ...settings }), '123456', 'game-1', T0)
+  let state = createGame(
+    fixtureQuiz(),
+    fixtureSettings({ speedBonus: false, ...settings }),
+    '123456',
+    'game-1',
+    T0,
+  )
   const teams = Object.keys(state.teams)
   const names = ['Anna', 'Bence', 'Csilla']
   names.forEach((name, i) => {
-    state = joinPlayer(state, { id: `p${i + 1}`, name, teamId: teams.length ? teams[i % 2] : undefined, token: `t${i}` })
+    state = joinPlayer(state, {
+      id: `p${i + 1}`,
+      name,
+      teamId: teams.length ? teams[i % 2] : undefined,
+      token: `t${i}`,
+    })
   })
   state = startGame(state, T0)
   state = answer(state, 'p1', { type: 'single', optionId: 'a' }, T0 + 2000)
@@ -53,13 +72,20 @@ describe('toResults', () => {
 
   it('ranks players with points per question, null where they did not answer', () => {
     const results = toResults(finishedGame())
-    expect(results.players.map((p) => [p.name, p.rank, p.score, p.correctCount, p.points])).toEqual([
-      ['Anna', 1, 1000, 1, [1000, 0]],
-      ['Csilla', 1, 1000, 1, [null, 1000]],
-      ['Bence', 2, 0, 0, [0, null]],
-    ])
+    expect(results.players.map((p) => [p.name, p.rank, p.score, p.correctCount, p.points])).toEqual(
+      [
+        ['Anna', 1, 1000, 1, [1000, 0]],
+        ['Csilla', 1, 1000, 1, [null, 1000]],
+        ['Bence', 2, 0, 0, [0, null]],
+      ],
+    )
     expect(results.podium.map((p) => p.name)).toEqual(['Anna', 'Csilla', 'Bence'])
-    expect(results).toMatchObject({ gameId: 'game-1', pin: '123456', phase: 'finished', finishedAt: T0 + 60_000 })
+    expect(results).toMatchObject({
+      gameId: 'game-1',
+      pin: '123456',
+      phase: 'finished',
+      finishedAt: T0 + 60_000,
+    })
   })
 
   it('tells when the first question started from the answers, and null before any answer', () => {
@@ -80,6 +106,19 @@ describe('toResults', () => {
     expect(results.podium.map((p) => p.name)).toEqual(['Red', 'Blue'])
   })
 
+  it("lists the quiz's group titles, and none for a game saved before groups", () => {
+    const quiz = fixtureQuiz()
+    const grouped = {
+      ...quiz,
+      groups: [{ id: 'g1', title: 'Round one', info: 'Easy', settings: { speedBonus: false } }],
+    }
+    expect(
+      toResults(createGame(grouped, fixtureSettings(), '123456', 'game-1', T0)).groups,
+    ).toEqual([{ id: 'g1', title: 'Round one' }])
+    const { groups: _groups, ...old } = quiz
+    expect(toResults(createGame(old, fixtureSettings(), '123456', 'game-1', T0)).groups).toEqual([])
+  })
+
   it('leaves out the question still open in a running game', () => {
     let state = createGame(fixtureQuiz(), fixtureSettings(), '123456', 'game-1', T0)
     state = joinPlayer(state, { id: 'p1', name: 'Anna', token: 't' })
@@ -93,7 +132,9 @@ describe('toCsv', () => {
   it('starts with a BOM and a ;-separated header in the chosen language', () => {
     const csv = toCsv(toResults(finishedGame()), 'hu')
     const firstLine = csv.split('\r\n')[0]
-    expect(firstLine).toBe('﻿Helyezés;Név;Csapat;Összesen;1. Capital of Hungary?;2. Which are even?')
+    expect(firstLine).toBe(
+      '﻿Helyezés;Név;Csapat;Összesen;1. Capital of Hungary?;2. Which are even?',
+    )
     expect(Buffer.from(firstLine!, 'utf8').subarray(0, 3)).toEqual(Buffer.from([0xef, 0xbb, 0xbf]))
     expect(toCsv(toResults(finishedGame()), 'en').split('\r\n')[0]).toBe(
       '﻿Rank;Name;Team;Total;1. Capital of Hungary?;2. Which are even?',
@@ -101,18 +142,45 @@ describe('toCsv', () => {
   })
 
   it('writes one row per player with empty cells for missing answers', () => {
-    const lines = toCsv(toResults(finishedGame({ mode: 'team', teamNames: ['Red', 'Blue'] })), 'en').split('\r\n')
-    expect(lines.slice(1)).toEqual(['1;Anna;Red;1000;1000;0', '1;Csilla;Red;1000;;1000', '2;Bence;Blue;0;0;', ''])
+    const lines = toCsv(
+      toResults(finishedGame({ mode: 'team', teamNames: ['Red', 'Blue'] })),
+      'en',
+    ).split('\r\n')
+    expect(lines.slice(1)).toEqual([
+      '1;Anna;Red;1000;1000;0',
+      '1;Csilla;Red;1000;;1000',
+      '2;Bence;Blue;0;0;',
+      '',
+    ])
   })
 
   it('adds the answers of teams that answer as one, after the players', () => {
-    const results = toResults(finishedGame({ mode: 'team', teamNames: ['Red', 'Blue'], teamAnswer: 'majority' }))
+    const results = toResults(
+      finishedGame({ mode: 'team', teamNames: ['Red', 'Blue'], teamAnswer: 'majority' }),
+    )
     expect(results.questions[0]!.teamAnswers).toEqual([
-      { teamId: 'team-1', answer: { type: 'single', optionId: 'a' }, setBy: null, fallback: false, correct: true, points: 1000 },
-      { teamId: 'team-2', answer: { type: 'single', optionId: 'b' }, setBy: null, fallback: false, correct: false, points: 0 },
+      {
+        teamId: 'team-1',
+        answer: { type: 'single', optionId: 'a' },
+        setBy: null,
+        fallback: false,
+        correct: true,
+        points: 1000,
+      },
+      {
+        teamId: 'team-2',
+        answer: { type: 'single', optionId: 'b' },
+        setBy: null,
+        fallback: false,
+        correct: false,
+        points: 0,
+      },
     ])
     // Q2: Red's 1:1 tie goes to Anna's earlier, wrong vote; Blue did not vote.
-    expect(results.questions[1]!.teamAnswers.map((a) => a.answer)).toEqual([{ type: 'multiple', optionIds: ['a'] }, null])
+    expect(results.questions[1]!.teamAnswers.map((a) => a.answer)).toEqual([
+      { type: 'multiple', optionIds: ['a'] },
+      null,
+    ])
     expect(toCsv(results, 'en').split('\r\n').slice(1)).toEqual([
       '1;Anna;Red;1000;1000;0',
       '1;Csilla;Red;1000;1000;0',
@@ -122,6 +190,16 @@ describe('toCsv', () => {
       ';Red;;;Budapest;2',
       ';Blue;;;Debrecen;',
       '',
+    ])
+  })
+
+  it("names each question's group in a first row when the quiz has groups", () => {
+    const results = toResults(finishedGame())
+    results.groups = [{ id: 'g1', title: 'Round; two' }]
+    results.questions[1]!.question = { ...results.questions[1]!.question, groupId: 'g1' }
+    expect(toCsv(results, 'hu').split('\r\n').slice(0, 2)).toEqual([
+      '﻿;;;Csoport;;"Round; two"',
+      'Helyezés;Név;Csapat;Összesen;1. Capital of Hungary?;2. Which are even?',
     ])
   })
 

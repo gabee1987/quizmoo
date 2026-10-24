@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { z } from 'zod'
 import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/cn'
 import { AnnouncementBanner } from '../components/announcement-banner'
 import { ConnectionBar } from '../components/connection-bar'
 import { Spinner } from '../components/spinner'
@@ -13,6 +14,7 @@ import { ScreenLobby } from '../features/screen/lobby'
 import { ScreenPodium } from '../features/screen/podium'
 import { ScreenQuestion } from '../features/screen/question'
 import { ScreenReveal } from '../features/screen/reveal'
+import { ScreenRoundIntro } from '../features/screen/round-intro'
 import { ScreenScoreboard } from '../features/screen/scoreboard'
 import { apiFetch } from '../lib/api'
 import { meQueryOptions } from '../lib/auth'
@@ -86,7 +88,9 @@ function ScreenPage() {
   const action = isHost && !host.locked ? primaryAction(host) : null
 
   return (
-    <div className="flex min-h-[calc(100dvh-4rem)] flex-col px-4 py-4 lg:px-12">
+    // A question takes exactly the screen below the header (4rem) and above the page's bottom padding
+    // (1.5rem), so its answers are always in view.
+    <div className={cn('flex flex-col px-4 py-4 lg:px-12', host.phase === 'question' ? 'h-[calc(100dvh-5.5rem)]' : 'min-h-[calc(100dvh-4rem)]')}>
       <ConnectionBar status={status} since={since} />
       <AnnouncementBanner announcement={host.announcement} size="screen" clockOffset={clockOffset} />
       <ScreenPhase host={host} clockOffset={clockOffset} joinUrl={info.data?.joinUrl ?? null} />
@@ -98,7 +102,8 @@ function ScreenPage() {
           onClick={() => void emitAck('host:command', action.command)}
         >
           {t(action.label)}
-          <kbd className="rounded-md bg-primary-foreground/20 px-1.5 text-sm font-semibold">{t('screen.keyHint')}</kbd>
+          {/* Darker than the button, not lighter: a light wash took white text below 4.5:1. */}
+          <kbd className="rounded-md bg-primary-edge px-1.5 text-sm font-semibold">{t('screen.keyHint')}</kbd>
         </Button>
       )}
     </div>
@@ -109,6 +114,8 @@ function ScreenPhase({ host, clockOffset, joinUrl }: { host: HostSnapshot; clock
   switch (host.phase) {
     case 'lobby':
       return <ScreenLobby host={host} joinUrl={joinUrl} />
+    case 'intro':
+      return <ScreenRoundIntro host={host} clockOffset={clockOffset} />
     case 'question':
       return <ScreenQuestion host={host} clockOffset={clockOffset} />
     case 'reveal':

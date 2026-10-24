@@ -2,6 +2,33 @@
 
 ## Unreleased
 
+## 1.3.0 – 2026-10-25
+
+Random question order, and question screens that use the whole screen on phones and the projector.
+
+### Random question order
+- New game setting "Shuffle question order" (Game flow), saved with the quiz and changeable in the new game dialog: the server shuffles the questions once when the game is created. A group (round) moves as one block, like a single question, and its questions are shuffled among themselves. Screens, results and the CSV follow the game's order.
+- A group can keep its question order ("Keep question order" in its form, a lock on its card in the list): it still moves as a block, but its questions stay as they are. Quizmoo files keep the lock; spreadsheets do not.
+- The editor's question list has a Shuffle button next to "Collapse all": it asks first, the rows slide to their new places, and Undo puts the old order back for 10 s (until the next edit).
+
+### Question screens on phones and the projector
+- Phones: the settings button moved from its own strip at the bottom into a slim top bar, which also holds the question number, the round and the timer's ring during a question (the quiz title otherwise), with the timer's bar right under it. The question picture fills the page's width when the height allows and scales up in its own proportions; on a 390 × 844 phone with four answers a square picture grew from 178 to 353 px (122 to 302 px in a round), still without scrolling. A game page now fills the visible screen (`dvh`), so no empty strip stays at the bottom when the browser bar slides away.
+- Projector: one row with the question number, the round, the answers so far and the timer's ring, the bar under it; the picture as big as it fits above the answers' grid. A question always fits the screen (checked at 1920 × 1080 with a wide, a square and no picture).
+- "Paused" floats over the page instead of pushing the question down: a big pill in the middle of the dimmed phone screen (the settings button stays usable), a pill near the top of the projector.
+
+## 1.2.0 – 2026-10-25
+
+Rounds within a quiz, quizzes of up to 200 questions, and the cow's antics.
+
+### Question groups (rounds)
+- A quiz can be split into rounds: each group has a title, info, a picture, an optional colour tag, and its own time and points for new questions ("Apply to N questions" sets them on the ones already in it). Questions outside groups may come before, between and after rounds, so a warm-up or a bonus question still works. A quiz now holds up to 200 questions in up to 50 groups. After updating, run `pnpm --filter @quizmoo/server db:migrate` (production deploys migrate on start).
+- In the editor a group is one card in the list, with its questions inside: drag questions in and out, drag a whole group, fold one group or all of them, start a group above a question, and delete a group with or without its questions (with Undo). Questions take colour tags too. The phone preview can be hidden from the top bar to give the list and the form more room.
+- Every round opens with an intro on the projector and the phones ("Round 2 of 5", title, info, picture, question count). It waits for the host's "Start round" or starts by itself after 3–120 s; Hold and Release stop and resume the countdown.
+- The standings follow each round by themselves or only when the host shows them, and answers can be revealed at the end of each round: the host then walks through the round's answers before the standings. These, the intro and the scoring and answering rules can be set for the whole quiz and changed per round; the host's settings line names a round's own rules.
+- The lobbies say "24 questions in 4 rounds", question screens show the round as a chip, and the results page and its CSV group the questions by round.
+- Spreadsheets carry groups (`group` / `csoport` rows, closed by `group-end` / `csoport-vége`) and the colour tags in a new last column; older spreadsheets still import. Quizmoo files keep groups with their pictures and rules.
+- Large games: phones no longer receive the host's per-question statistics, each broadcast builds the shared part of the snapshots once, and the server merges queued saves of a game, so a 200-question game with 60 players keeps the same speed from the first question to the last and its saved state stays current.
+
 ### The cow's antics
 - The cow does something silly by itself now and then (every 30–60 s at random, the first time after 10–20 s): a wink, an eye roll, crossed eyes, its tongue, a sneeze ("Hapci!"), or a short line in a speech bubble. It does this on the join, login and sign-up pages, in the header logo (which is now the drawn cow, without the bubbles), and as a small waiting cow in the phone lobby, on the "Answer sent!" screen and in the projector lobby. Nothing plays while the tab is hidden or when the device asks for reduced motion.
 - For about a week around special days it dresses up and has its own lines: a party hat from 28 December to 3 January, heart eyes from 11 to 17 February, a fake nose and glasses with "fun facts" from 29 March to 4 April, bunny ears from the Thursday before to the Wednesday after Easter Sunday, a witch hat from 28 October to 3 November, a Santa hat from 3 to 9 December (Mikulás) and from 20 to 27 December. 1 April is always April Fools; otherwise Easter wins where the two weeks overlap. Development builds take `?cow=<season>` and `?cowAntics=fast` to try them.

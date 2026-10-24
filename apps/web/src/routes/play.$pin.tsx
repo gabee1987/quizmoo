@@ -13,6 +13,7 @@ import { NextRound } from '../features/play/next-round'
 import { Podium } from '../features/play/podium'
 import { Question } from '../features/play/question'
 import { Reveal } from '../features/play/reveal'
+import { PhoneRoundIntro } from '../features/play/round-intro'
 import { Scoreboard } from '../features/play/scoreboard'
 import { lostCaptaincy, movedTo, newCaptaincy, newTeammates, teamSeat, type TeamSeat } from '../features/play/team-moved'
 import { forgetPlayer, getStoredPlayer } from '../lib/player-storage'
@@ -71,9 +72,10 @@ function PlayPage() {
         <>
           {/*
             The host's message sticks to the top while the player scrolls (long questions, the
-            end-of-game review). Full width like a toast.
+            end-of-game review). Full width like a toast. Above the dimmed page of `PausedNote` (z-40), so
+            a message sent during a pause is read at full brightness.
           */}
-          <div className="sticky top-[max(0.75rem,env(safe-area-inset-top))] z-30">
+          <div className="sticky top-[max(0.75rem,env(safe-area-inset-top))] z-50">
             <PlayerMessage pin={pin} announcement={player.announcement} clockOffset={clockOffset} />
           </div>
           <NextRound snapshot={player} pin={pin} />
@@ -116,6 +118,8 @@ function PhaseView({ snapshot, clockOffset }: { snapshot: PlayerSnapshot; clockO
   switch (snapshot.phase) {
     case 'lobby':
       return <Lobby snapshot={snapshot} />
+    case 'intro':
+      return <PhoneRoundIntro key={snapshot.group?.id} snapshot={snapshot} clockOffset={clockOffset} />
     case 'question':
       return <Question key={snapshot.question?.id} snapshot={snapshot} clockOffset={clockOffset} />
     case 'reveal':

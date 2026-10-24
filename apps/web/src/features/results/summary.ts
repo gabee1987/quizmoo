@@ -26,6 +26,25 @@ export function splitPodium(podium: readonly PodiumPlace[]): { winners: PodiumPl
   return { winners: podium.filter((p) => p.rank === 1), others: podium.filter((p) => p.rank > 1) }
 }
 
+/** A run of questions in the same group (`group` null outside groups), with the group's number from 1. */
+export interface QuestionRun {
+  group: { id: string; title: string; number: number } | null
+  questions: ResultQuestion[]
+}
+
+/** The questions in runs by group, in order, for a heading over each group's questions. */
+export function questionRuns(results: Pick<GameResults, 'questions' | 'groups'>): QuestionRun[] {
+  const runs: QuestionRun[] = []
+  for (const question of results.questions) {
+    const at = results.groups.findIndex((g) => g.id === question.question.groupId)
+    const group = at < 0 ? null : { ...results.groups[at]!, number: at + 1 }
+    const last = runs.at(-1)
+    if (last && last.group?.id === group?.id) last.questions.push(question)
+    else runs.push({ group, questions: [question] })
+  }
+  return runs
+}
+
 /** Share of all players who got `question` right. */
 export function correctShare(question: ResultQuestion, playerCount: number): number {
   return playerCount > 0 ? question.correctCount / playerCount : 0

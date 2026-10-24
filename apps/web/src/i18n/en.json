@@ -172,6 +172,7 @@
     "game": {
       "phase": {
         "lobby": "Waiting for players",
+        "intro": "Round intro",
         "question": "Question running",
         "reveal": "Answers revealed",
         "scoreboard": "Scoreboard",
@@ -205,6 +206,15 @@
       "showScoreboard": "Show scoreboard",
       "controls": "Game controls",
       "nextQuestion": "Next question",
+      "startRound": "Start round",
+      "nextRound": "Next round",
+      "showRoundAnswers": "Show the round’s answers",
+      "holdIntro": "Hold",
+      "releaseIntro": "Release",
+      "introHeldHint": "On hold: the round starts when you release it or press Start round.",
+      "introWaits": "The round starts when you press Start round.",
+      "roundRules": "Round {{round}} rules",
+      "standingsOnDemand": "Standings after a round when I show them",
       "finish": "Finish",
       "gradeFirst": "Grade the answers below to continue.",
       "onlineCount_one": "{{count}} online",
@@ -303,6 +313,7 @@
     "shown": {
       "onScreen": {
         "reveal": "On the screens: answers revealed",
+        "answerHidden": "On the screens: question closed, answers hidden",
         "scoreboard": "On the screens: scoreboard after this question",
         "shownAgain": "On the screens: shown again"
       },
@@ -319,6 +330,8 @@
       "phones": "Phones:",
       "projector": "Projector:",
       "lobby": "lobby",
+      "intro": "intro of round {{round}}",
+      "introHeld": "intro of round {{round}}, on hold",
       "question": "question {{index}}",
       "paused": "question {{index}}, paused",
       "answer": "answer to question {{index}}",
@@ -388,6 +401,7 @@
     "standings": {
       "resultsSoFar": "Results so far",
       "hiddenNote": "Only you see these scores. The players and the projector see them at the end, or when you show the standings.",
+      "hiddenNoteRound": "Only you see these scores. The players and the projector see them at the end of the round, or when you show the standings.",
       "correct_one": "{{count}} correct",
       "correct_other": "{{count}} correct",
       "members_one": "{{count}} member",
@@ -460,6 +474,8 @@
       "answerChangesLocked_one": "Answer changes until {{count}} s before the end",
       "answerChangesLocked_other": "Answer changes until {{count}} s before the end",
       "shuffle": "Shuffle answer options",
+      "shuffleQuestions": "Shuffle question order",
+      "shuffleQuestionsHelp": "Every game plays the questions in a new order. A round moves as one block with its questions, which are mixed too, unless the round keeps its order.",
       "submit": "Create game",
       "branding": {
         "title": "Branding",
@@ -480,6 +496,7 @@
       "revealAnswers": "Correct answers",
       "revealAnswersOptions": {
         "afterQuestion": "After each question",
+        "afterGroup": "At the end of each round",
         "atEnd": "Only at the end"
       },
       "scoreboard": "Scoreboard",
@@ -488,6 +505,16 @@
         "onDemand": "When I show it"
       },
       "scoreboardAtEnd": "Scores would give the answers away, so the standings appear only when you show them, with totals only.",
+      "groupIntro": "Round intro",
+      "groupIntroHelp": "Each round opens with its title, info and picture on the projector and the phones.",
+      "groupIntroWait": "Until I start the round",
+      "groupIntroSeconds_one": "{{count}} second",
+      "groupIntroSeconds_other": "{{count}} seconds",
+      "groupStandings": "Standings after a round",
+      "groupStandingsOptions": {
+        "afterGroup": "After each round",
+        "onDemand": "When I show them"
+      },
       "answerStyle": "Answer buttons on phones",
       "answerStyleOptions": {
         "plain": "Plain",
@@ -659,6 +686,13 @@
     "playerCount_other": "{{count}} players",
     "questionOf_one": "Question {{index}} of {{count}}",
     "questionOf_other": "Question {{index}} of {{count}}",
+    "roundOf_one": "Round {{index}} of {{count}}",
+    "roundOf_other": "Round {{index}} of {{count}}",
+    "roundQuestions_one": "{{count}} question",
+    "roundQuestions_other": "{{count}} questions",
+    "questionRange": "Questions {{first}}–{{last}}",
+    "roundShort": "Round {{index}}",
+    "introGetReady": "Get ready!",
     "secondsLeft_one": "{{count}} second left",
     "secondsLeft_other": "{{count}} seconds left",
     "pausedSecondsLeft_one": "Paused, {{count}} second left",
@@ -683,6 +717,8 @@
       "title": "About the game",
       "questions_one": "{{count}} question",
       "questions_other": "{{count}} questions",
+      "questionsInRounds_one": "{{questions}} questions in {{count}} round",
+      "questionsInRounds_other": "{{questions}} questions in {{count}} rounds",
       "classic": "Everyone plays for themselves.",
       "teams": "Teams play together and score as a team.",
       "teamsAndSolo": "Teams and solo players compete in one ranking.",
@@ -692,6 +728,7 @@
       "answerChangesLocked_one": "You can change your answer until {{count}} second before the end.",
       "answerChangesLocked_other": "You can change your answer until {{count}} seconds before the end.",
       "answersAtEnd": "Correct answers and scores are revealed at the end.",
+      "answersAtRoundEnd": "Correct answers and scores are revealed at the end of each round.",
       "lateJoin": "Latecomers can still join after the start."
     },
     "answeredSoFar_one": "{{answered}} of {{count}} answered",
@@ -729,6 +766,7 @@
     "teamLeaderboard": "Teams",
     "answerKept": "Answer saved",
     "resultsAtEnd": "Correct answers are revealed at the end of the game.",
+    "resultsAtRoundEnd": "Correct answers are revealed at the end of the round.",
     "backToHome": "Back to home",
     "yourAnswers": "Your answers",
     "voted": "Voted",
@@ -900,7 +938,11 @@
       "invalid": "Invalid value.",
       "markCorrect": "Mark the correct option.",
       "duplicateOptions": "Options must be distinct.",
-      "duplicateQuestions": "Duplicate question ids; duplicate the question again."
+      "duplicateQuestions": "Duplicate question ids; duplicate the question again.",
+      "duplicateGroups": "Duplicate group ids; add the group again.",
+      "unknownGroup": "This question's group is gone; move it into a group.",
+      "groupOrder": "A group's questions must stay together; move this question back to its group.",
+      "emptyGroup": "Add a question to this group, or delete it."
     },
     "sampleQuestion": "Which is the largest planet in the Solar System?",
     "sampleOption1": "Jupiter",
@@ -931,6 +973,86 @@
     "moveToBottom": "Move to bottom",
     "questionDuplicated": "Question duplicated",
     "questionDeleted": "Question {{n}} deleted",
+    "groupN": "Group {{n}}",
+    "groupNOfCount": "Group {{n}} of {{count}}",
+    "groupDefaultTitle": "Round {{n}}",
+    "addGroup": "Add group",
+    "groupFromHere": "Start a group here",
+    "groupTitle": "Group title",
+    "groupInfo": "Info (optional)",
+    "groupInfoHelp": "Players see the title and the info on the projector and their phones before the group's first question.",
+    "groupImage": "Group picture",
+    "groupDefaults": "Time and points",
+    "groupDefaultsHelp": "New questions in this group start with these. Any question can still have its own.",
+    "notSet": "Not set",
+    "applyToQuestions_one": "Apply to {{count}} question",
+    "applyToQuestions_other": "Apply to {{count}} questions",
+    "groupRules": "Rules for this group",
+    "groupRulesHelp": "A rule left on “Same as the quiz” follows the quiz settings.",
+    "sameAsQuiz": "Same as the quiz ({{value}})",
+    "on": "On",
+    "off": "Off",
+    "moveGroupUp": "Move group up",
+    "moveGroupDown": "Move group down",
+    "deleteGroup": "Delete group",
+    "groupDeleted": "Group {{n}} deleted, its questions stay",
+    "collapseGroup": "Collapse group {{n}}",
+    "expandGroup": "Expand group {{n}}",
+    "collapseAllGroups": "Collapse all groups",
+    "expandAllGroups": "Expand all groups",
+    "collapseAll": "Collapse all",
+    "expandAll": "Expand all",
+    "shuffle": {
+      "button": "Shuffle",
+      "label": "Shuffle the questions",
+      "title": "Shuffle the questions?",
+      "body": "Every question gets a new place in this quiz. A group moves as one block, and its questions are mixed among themselves.",
+      "bodyLocked": "Inside groups with “Keep question order” the order stays as it is.",
+      "confirm": "Shuffle",
+      "done": "Questions shuffled",
+      "nothing": "Nothing to shuffle: add questions or unlock a group."
+    },
+    "groupOrder": "Question order",
+    "keepOrder": "Keep question order",
+    "keepOrderHelp": "When the questions are shuffled, in a game or with the Shuffle button, the group may move, but its questions keep this order.",
+    "orderKept": "Order kept",
+    "dragGroup": "Reorder group {{n}}",
+    "groupEndN": "End of group {{n}}",
+    "questionGroup": "Group",
+    "noGroup": "No group",
+    "groupOption": "Group {{n}}: {{title}}",
+    "newGroupOption": "+ New group",
+    "groupCount_one": "{{count}} group",
+    "groupCount_other": "{{count}} groups",
+    "listSummary": "{{questions}} · {{groups}}",
+    "trash": "Trash",
+    "dropToDelete": "Drop to delete",
+    "releaseToDelete": "Let go to delete",
+    "tagColor": "Colour",
+    "tagColorOf": "Colour: {{color}}",
+    "tagNone": "No colour",
+    "tagColors": {
+      "red": "Red",
+      "orange": "Orange",
+      "yellow": "Yellow",
+      "green": "Green",
+      "teal": "Teal",
+      "blue": "Blue",
+      "purple": "Purple",
+      "pink": "Pink"
+    },
+    "groupTabs": {
+      "settings": "Settings",
+      "questions": "Questions ({{count}})"
+    },
+    "groupNoQuestions": "No questions in this group yet.",
+    "addQuestionToGroup": "Add question to this group",
+    "groupDeletedWithQuestions": "Group {{n}} and its questions deleted",
+    "deleteGroupTitle": "Delete “{{title}}”?",
+    "deleteGroupBody_one": "This group has {{count}} question. Keep it without the group, or delete it too?",
+    "deleteGroupBody_other": "This group has {{count}} questions. Keep them without the group, or delete them too?",
+    "deleteGroupKeepQuestions": "Keep questions",
+    "deleteGroupWithQuestions": "Delete with questions",
     "undo": "Undo",
     "deleteQuiz": "Delete quiz",
     "deleteQuizHelp": "Deletes the quiz permanently. Results of games already played are kept.",
@@ -1167,6 +1289,65 @@
     "current": "Current version",
     "releasedOn": "Released {{date}}",
     "releases": {
+      "1_3_0": {
+        "title": "Shuffled questions",
+        "intro": "Play the questions in a new order every game, and see bigger pictures on the phones.",
+        "sections": [
+          {
+            "title": "Random question order",
+            "items": [
+              "Turn on Shuffle question order in a quiz's settings, or only for one game when you start it. Every game then plays the questions in a new order.",
+              "A round moves as one block with its questions, and its questions are mixed too. Switch on Keep question order in a round when its questions must stay in order.",
+              "The Shuffle button above the question list mixes the quiz for good. It asks first, and Undo puts the old order back."
+            ]
+          },
+          {
+            "title": "Bigger pictures on phones and the projector",
+            "items": [
+              "On phones the question number, the round, the timer and the settings button share one slim bar at the top, so the question's picture fills the width, with every answer still on screen.",
+              "On the projector the question, its picture and all the answers always fit on one screen.",
+              "When you pause, players see a big Paused sign in the middle of their screen, and nothing on it moves."
+            ]
+          }
+        ]
+      },
+      "1_2_0": {
+        "title": "Rounds",
+        "intro": "Split a quiz into rounds, each with its own intro, rules and standings, and make quizzes of up to 200 questions.",
+        "sections": [
+          {
+            "title": "Rounds in your quizzes",
+            "items": [
+              "Group questions into rounds, each with a title, info, a picture and a colour. Questions outside the rounds still work, for a warm-up or a bonus question.",
+              "Every round opens with an intro on the projector and the phones. It waits until you press Start round, or starts by itself after a few seconds; Hold stops the countdown.",
+              "The standings can follow every round by themselves, or come only when you show them. Answers can also be revealed at the end of a round instead of after each question.",
+              "Each round can have its own time, points and rules, such as no speed bonus in the bonus round. Your controls tell you when a round has rules of its own.",
+              "The lobby says how many rounds are coming, the question screens show the round, and the results group the questions by round."
+            ]
+          },
+          {
+            "title": "The editor",
+            "items": [
+              "A round is one card in the question list: drag questions in and out, move a whole round, or fold rounds away.",
+              "Give questions a colour too, to find them at a glance. Only you see the colours.",
+              "Hide the phone preview with the eye button at the top, for more room for the list and the question.",
+              "Spreadsheets and Quizmoo files keep the rounds and the colours; the template shows an example round."
+            ]
+          },
+          {
+            "title": "Bigger quizzes",
+            "items": [
+              "A quiz can now hold 200 questions in up to 50 rounds, and a long game stays as quick at the last question as at the first."
+            ]
+          },
+          {
+            "title": "The cow",
+            "items": [
+              "Now and then the cow pulls a face or says something silly, and around special days it dresses up for the occasion."
+            ]
+          }
+        ]
+      },
       "1_1_0": {
         "title": "The first public beta",
         "intro": "Quizmoo is online for friends and family. Here is what you can do as a host.",
@@ -1740,7 +1921,7 @@
   "quizFile": {
     "importTitle": "Import a quiz",
     "importHelp": "Write your questions anywhere: in Excel, Google Sheets or on your phone, then bring them in here. A Quizmoo file someone shared with you works too.",
-    "templateHelp": "Start from the template: it explains every column and has an example of each question type.",
+    "templateHelp": "Start from the template: it explains every column and has an example of each question type and of a group.",
     "downloadTemplate": "Download template",
     "templateName": "quizmoo-question-template.csv",
     "chooseFile": "Choose a file",
@@ -1754,6 +1935,7 @@
     "problemsInFile": "The quiz in this file has problems:",
     "found_one": "1 question, ready to import.",
     "found_other": "{{count}} questions, ready to import.",
+    "foundInGroups": "{{questions}} in {{groups}}, ready to import.",
     "sheetNote": "The quiz gets your default game settings. Add pictures in the editor.",
     "import": "Import",
     "imported_one": "Imported 1 question.",
@@ -1770,7 +1952,9 @@
       "correct": "correct",
       "time": "time",
       "points": "points",
-      "tolerance": "tolerance"
+      "tolerance": "tolerance",
+      "color": "colour",
+      "emptyGroup": "group"
     },
     "problems": {
       "type": "unknown question type. Use one of: {{words}}.",
@@ -1786,8 +1970,15 @@
       "time": "seconds from 5 to 180, or leave it empty.",
       "points": "a whole number from 0 to 5000, or leave it empty.",
       "tolerance": "a number of 0 or more, or leave it empty.",
+      "color": "unknown colour. Use one of: {{colors}}, or leave it empty.",
       "empty": "No questions in this file. Fill in at least one row below the header.",
-      "tooMany": "A quiz holds at most 100 questions. Split the file in two."
+      "tooMany": "A quiz holds at most 200 questions. Split the file in two.",
+      "group": {
+        "question": "write the group's title, at most 120 characters.",
+        "answers": "the group's info may be at most 500 characters."
+      },
+      "emptyGroup": "no questions below it. Add at least one, or delete the row.",
+      "tooManyGroups": "A quiz holds at most 50 groups."
     },
     "columns": {
       "type": "type",
@@ -1801,7 +1992,8 @@
       "correct": "correct",
       "time": "time (s)",
       "points": "points",
-      "tolerance": "tolerance"
+      "tolerance": "tolerance",
+      "color": "colour"
     },
     "guide": [
       "QUIZMOO QUESTIONS: one question per row, below the header row. Save as CSV (UTF-8), then import it in Quizmoo under Quizzes > Import.",
@@ -1815,7 +2007,9 @@
       "correct, for text: the accepted answers separated by |, e.g. Jupiter | planet Jupiter. Capitals and accents don't matter. Empty: you mark the answers right or wrong during the game.",
       "correct, for number: the right number, e.g. 1848 or 3.5. For poll and order leave it empty.",
       "time: seconds to answer, 5 to 180 (empty: 20). points: 0 to 5000 (empty: 1000). tolerance, for number only: answers this close also count, e.g. 10 (empty: exact).",
-      "Pictures and game settings can't go in this file: add them in the editor after importing."
+      "colour: the question's or group's colour in the editor: red, orange, yellow, green, teal, blue, purple or pink (empty: no colour).",
+      "group: starts a round. Write its title in the question column (at most 120 characters), its info in answer 1, and in time and points what its new questions get in the editor. The questions below it are in the group up to the next group or a group-end row.",
+      "Pictures, game settings and a group's own rules can't go in this file: add them in the editor after importing."
     ],
     "templateNote": "The rows below the header are examples: overwrite or delete them.",
     "jsonGuide": [
@@ -1823,6 +2017,8 @@
       "To write questions by hand, use the spreadsheet template instead (Quizzes > Import > Download template)."
     ],
     "examples": {
+      "group": "Bonus round",
+      "groupInfo": "Two easy ones to finish.",
       "single": "What is the capital of Hungary?",
       "single1": "Vienna",
       "single2": "Budapest",

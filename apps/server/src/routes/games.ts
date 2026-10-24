@@ -91,7 +91,7 @@ export async function gameRoutes(app: FastifyInstance, { db, manager, appOrigin,
       game = await manager.create({
         id: nanoid(12),
         // Frozen copy: later quiz edits do not affect a running game.
-        quiz: { id: quiz.id, title: quiz.title, description: quiz.description, questions: quiz.questions },
+        quiz: { id: quiz.id, title: quiz.title, description: quiz.description, questions: quiz.questions, groups: quiz.groups },
         settings,
         hostId: request.user!.id,
         quizId: quiz.id,

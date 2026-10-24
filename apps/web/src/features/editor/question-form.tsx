@@ -1,5 +1,5 @@
 import type { AnswerSymbols, Question } from '@quizmoo/shared'
-import { useId } from 'react'
+import { useId, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
@@ -21,6 +21,7 @@ export function QuestionForm({
   errors,
   path,
   symbols,
+  groupField,
 }: {
   question: Question
   onChange: (question: Question) => void
@@ -28,6 +29,8 @@ export function QuestionForm({
   path: string
   /** The quiz's answer symbols, shown next to the options as in the game. */
   symbols: AnswerSymbols
+  /** The question's group picker, right under the question text. */
+  groupField?: ReactNode
 }) {
   const { t } = useTranslation()
   const textId = useId()
@@ -60,6 +63,8 @@ export function QuestionForm({
           </span>
         )}
       </div>
+
+      {groupField}
 
       <ImageField
         label={t('editor.questionImage')}

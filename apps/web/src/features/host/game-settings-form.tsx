@@ -51,7 +51,21 @@ export function newGameSettings(quizSettings: GameSettings): GameSettings {
 
 /** The settings in each group of the form; a batch edit changes a group as a whole. */
 export const settingsSections = {
-  flow: ['mode', 'teamSetup', 'teamNames', 'soloPlayers', 'teamAnswer', 'teamsChoose', 'lateJoin', 'revealAnswers', 'scoreboard', 'finalResults'],
+  flow: [
+    'mode',
+    'teamSetup',
+    'teamNames',
+    'soloPlayers',
+    'teamAnswer',
+    'teamsChoose',
+    'lateJoin',
+    'shuffleQuestions',
+    'revealAnswers',
+    'scoreboard',
+    'groupIntroSec',
+    'groupStandings',
+    'finalResults',
+  ],
   look: ['theme', 'customTheme', 'answerPalette', 'customPalette', 'answerSymbols', 'answerStyle'],
   scoring: ['speedBonus', 'streakBonus', 'answerChanges', 'answerLockSec', 'shuffleOptions'],
 } as const satisfies Record<string, readonly (keyof GameSettings)[]>
@@ -72,6 +86,7 @@ export function sectionSummary(settings: GameSettings, section: SettingsSection,
       settings.mode === 'team' ? teamAnswerLabel(settings, t) : null,
       settings.mode === 'team' && settings.soloPlayers ? t('host.create.soloPlayers') : null,
       settings.lateJoin ? t('host.create.lateJoin') : null,
+      settings.shuffleQuestions ? t('host.create.shuffleQuestions') : null,
       `${t('host.create.revealAnswers')}: ${t(`host.create.revealAnswersOptions.${settings.revealAnswers}`)}`,
       settings.revealAnswers === 'afterQuestion'
         ? `${t('host.create.scoreboard')}: ${t(`host.create.scoreboardOptions.${settings.scoreboard}`)}`
@@ -130,18 +145,21 @@ export function withSection(settings: GameSettings, from: GameSettings, section:
 /**
  * Game settings. Used in the quiz editor (the quiz's defaults), My settings, when starting a game
  * (`newGame`: also who makes the teams and the host's team list) and, one group at a time
- * (`sections`), in the batch edit of several quizzes.
+ * (`sections`), in the batch edit of several quizzes. `rounds` (a quiz with groups) adds the rounds'
+ * settings: the intro, the standings after a round and answers at the end of each round.
  */
 export function GameSettingsForm({
   value,
   onChange,
   sections = allSections,
   newGame = false,
+  rounds = false,
 }: {
   value: GameSettings
   onChange: (settings: GameSettings) => void
   sections?: readonly SettingsSection[]
   newGame?: boolean
+  rounds?: boolean
 }) {
   const { t } = useTranslation()
   const set = (patch: Partial<GameSettings>) => onChange({ ...value, ...patch })
@@ -245,7 +263,10 @@ export function GameSettingsForm({
           <ChoiceCards
             legend={t('host.create.revealAnswers')}
             value={value.revealAnswers}
-            choices={choices(['afterQuestion', 'atEnd'] as const, (v) => t(`host.create.revealAnswersOptions.${v}`))}
+            choices={choices(
+              rounds || value.revealAnswers === 'afterGroup' ? (['afterQuestion', 'afterGroup', 'atEnd'] as const) : (['afterQuestion', 'atEnd'] as const),
+              (v) => t(`host.create.revealAnswersOptions.${v}`),
+            )}
             // Scores would give the answers away, so results at the end means a scoreboard only when the host shows it.
             onChange={(revealAnswers) => set(revealAnswers === 'atEnd' ? { revealAnswers, scoreboard: 'onDemand' } : { revealAnswers })}
           />
@@ -257,6 +278,28 @@ export function GameSettingsForm({
             disabled={value.revealAnswers === 'atEnd'}
             help={value.revealAnswers === 'atEnd' ? t('host.create.scoreboardAtEnd') : undefined}
           />
+          {rounds && (
+            <>
+              <ChoiceCards
+                legend={t('host.create.groupIntro')}
+                value={String(value.groupIntroSec)}
+                choices={[...new Set([0, 5, 10, 15, 30, value.groupIntroSec])]
+                  .sort((a, b) => a - b)
+                  .map((sec) => ({
+                    value: String(sec),
+                    label: sec === 0 ? t('host.create.groupIntroWait') : t('host.create.groupIntroSeconds', { count: sec }),
+                  }))}
+                onChange={(sec) => set({ groupIntroSec: Number(sec) })}
+                help={t('host.create.groupIntroHelp')}
+              />
+              <ChoiceCards
+                legend={t('host.create.groupStandings')}
+                value={value.groupStandings}
+                choices={choices(['afterGroup', 'onDemand'] as const, (v) => t(`host.create.groupStandingsOptions.${v}`))}
+                onChange={(groupStandings) => set({ groupStandings })}
+              />
+            </>
+          )}
           <ChoiceCards
             legend={t('host.create.finalResults')}
             value={value.finalResults}
@@ -269,6 +312,12 @@ export function GameSettingsForm({
             description={t('host.create.lateJoinHelp')}
             checked={value.lateJoin}
             onChange={(lateJoin) => set({ lateJoin })}
+          />
+          <SwitchRow
+            label={t('host.create.shuffleQuestions')}
+            description={t('host.create.shuffleQuestionsHelp')}
+            checked={value.shuffleQuestions}
+            onChange={(shuffleQuestions) => set({ shuffleQuestions })}
           />
         </>
       )}

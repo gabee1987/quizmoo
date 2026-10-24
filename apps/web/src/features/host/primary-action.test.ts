@@ -9,6 +9,8 @@ function reveal(settings: Partial<GameSettings>, questionIndex = 0): HostSnapsho
     questionIndex,
     questionCount: 3,
     players: [],
+    group: null,
+    groups: [],
     settings: {
       mode: 'classic',
       speedBonus: true,
@@ -56,6 +58,59 @@ describe('host actions after a question', () => {
     const shown = { ...reveal({}), reviewing: true } as HostSnapshot
     expect(labels(shown)).toEqual(['host.game.backToGame', null])
     expect(primaryAction(shown)?.command).toEqual({ type: 'closeQuestion' })
+  })
+})
+
+describe('host actions with groups', () => {
+  // Questions 0 and 1 are round one, 2 to 4 round two.
+  const groups = [
+    { id: 'g1', title: 'One', firstIndex: 0, questionCount: 2, ownRules: false },
+    { id: 'g2', title: 'Two', firstIndex: 2, questionCount: 3, ownRules: true },
+  ]
+  const inGroup = (settings: Partial<GameSettings>, questionIndex: number, revealed = false): HostSnapshot => {
+    const g = groups.find((x) => questionIndex >= x.firstIndex && questionIndex < x.firstIndex + x.questionCount)!
+    return {
+      ...reveal({ groupStandings: 'afterGroup', ...settings }, questionIndex),
+      questionCount: 5,
+      groups,
+      group: { ...g, info: '', imageId: null, index: groups.indexOf(g), count: 2, revealed },
+    } as HostSnapshot
+  }
+
+  it('starts a round from its intro', () => {
+    const intro = { ...inGroup({}, 0), phase: 'intro' } as HostSnapshot
+    expect(labels(intro)).toEqual(['host.game.startRound', null])
+    expect(primaryAction(intro)?.command).toEqual({ type: 'next' })
+  })
+
+  it('names the next step a round when the next question opens a group', () => {
+    expect(labels(inGroup({ scoreboard: 'onDemand', groupStandings: 'onDemand' }, 1))).toEqual([
+      'host.game.nextRound',
+      'host.game.showScoreboard',
+    ])
+    expect(labels(inGroup({ scoreboard: 'onDemand' }, 0))).toEqual(['host.game.nextQuestion', 'host.game.showScoreboard'])
+  })
+
+  it('shows the standings after a group when they follow it, even with the scoreboard on demand', () => {
+    expect(labels(inGroup({ scoreboard: 'onDemand' }, 1))).toEqual(['host.game.showScoreboard', 'host.game.nextRound'])
+    expect(labels(inGroup({ scoreboard: 'onDemand' }, 4))).toEqual(['host.game.showScoreboard', 'host.game.finish'])
+  })
+
+  it('walks through a held-back group’s answers first, then its standings', () => {
+    const end = inGroup({ revealAnswers: 'afterGroup' }, 4)
+    expect(labels(end)).toEqual(['host.game.showRoundAnswers', 'host.game.showScoreboard'])
+    expect(primaryAction(end)?.command).toEqual({ type: 'showAnswers', indexes: [2, 3, 4] })
+    // Standings on demand: the answers, or straight on.
+    expect(labels(inGroup({ revealAnswers: 'afterGroup', groupStandings: 'onDemand' }, 1))).toEqual([
+      'host.game.showRoundAnswers',
+      'host.game.nextRound',
+    ])
+    // Once shown, the standings follow.
+    expect(labels(inGroup({ revealAnswers: 'afterGroup' }, 4, true))).toEqual(['host.game.showScoreboard', 'host.game.finish'])
+  })
+
+  it('moves straight on inside a group whose answers wait for its end', () => {
+    expect(labels(inGroup({ revealAnswers: 'afterGroup' }, 2))).toEqual(['host.game.nextQuestion', 'host.game.showScoreboard'])
   })
 })
 

@@ -12,7 +12,11 @@ export interface ReleaseNotes {
 }
 
 /** Newest first. The first entry must be the app's version (`releases.test.ts` checks it). */
-export const releases: Release[] = [{ version: '1.1.0', date: '2026-10-21' }]
+export const releases: Release[] = [
+  { version: '1.3.0', date: '2026-10-25' },
+  { version: '1.2.0', date: '2026-10-25' },
+  { version: '1.1.0', date: '2026-10-21' },
+]
 
 /** i18next reads dots as nesting, so 1.1.0 is stored as `1_1_0`. */
 export const releaseKey = (version: string) => `whatsNew.releases.${version.replaceAll('.', '_')}`
