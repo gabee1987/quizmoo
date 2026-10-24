@@ -279,7 +279,7 @@ describe('review and grading data', () => {
     state = endQuestion(state)
     const snap = toHostSnapshot(state, T0)
     expect(snap.questionStats).toEqual([
-      { questionId: 'q-single', index: 0, text: 'Capital of Hungary?', type: 'single', answeredCount: 2, correctCount: 1, averageTimeMs: 3_000 },
+      { questionId: 'q-single', index: 0, text: 'Capital of Hungary?', type: 'single', groupId: null, answeredCount: 2, correctCount: 1, averageTimeMs: 3_000 },
     ])
     expect(snap.players.find((p) => p.id === 'p1')).toMatchObject({ correctCount: 1, roundPoints: 950 })
     expect(snap.players.find((p) => p.id === 'p3')).toMatchObject({ correctCount: 0, roundPoints: 0 })
@@ -287,6 +287,8 @@ describe('review and grading data', () => {
     const nextQ = toHostSnapshot(next(state, T0), T0)
     expect(nextQ.questionStats).toHaveLength(1)
     expect(nextQ.players.every((p) => p.roundPoints === 0)).toBe(true)
+    // Phones never show them, and with 200 questions they would be most of every phone's snapshot.
+    expect(toPlayerSnapshot(state, 'p1', T0)).not.toHaveProperty('questionStats')
   })
 
   it('exposes awaitingGrading and marks graded text keys correct', () => {
@@ -325,9 +327,10 @@ describe('results held back until the end', () => {
       expect(snap.question).toMatchObject({ id: 'q-single', text: 'Capital of Hungary?' })
       expect(snap.question).not.toHaveProperty('correctOptionId')
       expect(snap.players.every((p) => p.score === 0 && p.rank === 1 && p.correctCount === 0 && p.roundPoints === 0)).toBe(true)
-      expect(snap.questionStats.every((q) => q.correctCount === 0)).toBe(true)
       expect(JSON.stringify(snap)).not.toContain('correctOptionId')
     }
+    expect(screen.questionStats).toHaveLength(1)
+    expect(screen.questionStats.every((q) => q.correctCount === 0)).toBe(true)
     expect(player.me.score).toBe(0)
     expect(player.lastPoints).toBeNull()
     expect(player.lastCorrect).toBeNull()

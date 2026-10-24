@@ -174,6 +174,7 @@ describeDb('hardening before the public beta (database)', () => {
       image('img-cleanup-question'),
       image('img-cleanup-option'),
       image('img-cleanup-quiz-logo'),
+      image('img-cleanup-group'),
       image('img-cleanup-my-logo'),
       image('img-cleanup-game'),
       image('img-cleanup-unused'),
@@ -192,7 +193,14 @@ describeDb('hardening before the public beta (database)', () => {
       ...rest,
     ]
     await db.insert(quizzes).values([
-      { id: 'quiz-cleanup', ownerId: host.id, title: 'Q', questions, branding: { logoImageId: 'img-cleanup-quiz-logo' } },
+      {
+        id: 'quiz-cleanup',
+        ownerId: host.id,
+        title: 'Q',
+        questions: questions.map((q) => ({ ...q, groupId: 'g1' })),
+        groups: [{ id: 'g1', title: 'Round 1', info: '', imageId: 'img-cleanup-group', settings: {} }],
+        branding: { logoImageId: 'img-cleanup-quiz-logo' },
+      },
       // Another host's quiz naming the id keeps nothing alive: references count only within an account.
       { id: 'quiz-cleanup-other', ownerId: other.id, title: 'Q', questions: fixtureQuiz().questions, description: 'img-cleanup-named-by-other' },
     ])
@@ -210,7 +218,7 @@ describeDb('hardening before the public beta (database)', () => {
     await deleteUnusedImages(db, Date.now())
     const left = (await db.select({ id: images.id }).from(images).where(eq(images.ownerId, host.id))).map((r) => r.id).sort()
     expect(left).toEqual(
-      ['img-cleanup-fresh', 'img-cleanup-game', 'img-cleanup-my-logo', 'img-cleanup-option', 'img-cleanup-question', 'img-cleanup-quiz-logo'].sort(),
+      ['img-cleanup-fresh', 'img-cleanup-game', 'img-cleanup-group', 'img-cleanup-my-logo', 'img-cleanup-option', 'img-cleanup-question', 'img-cleanup-quiz-logo'].sort(),
     )
   })
 })

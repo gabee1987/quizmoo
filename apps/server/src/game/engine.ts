@@ -15,6 +15,7 @@ import {
   type QuickMessage,
   type TeamAnswerMode,
 } from '@quizmoo/shared'
+import { endsGroup, groupAt, groupBounds, groupOf, settingsAt, settingsFor, startsGroup } from './groups.js'
 import { isNameAllowed } from './names.js'
 import { isCorrect, pointsFor } from './scoring.js'
 import {
@@ -52,9 +53,9 @@ export interface TeamSeed {
 
 /**
  * New lobby. In team mode its teams are `teams` when given, else the host's `teamNames` (none when
- * only players make teams). With `settings.shuffleOptions` the option order of choice questions is
- * shuffled once here and frozen into the game's quiz copy; correctness is id-based,
- * so nothing else changes. `random` is injectable for tests.
+ * only players make teams). With `shuffleOptions` (the game's, or a group's for its questions) the
+ * option order of choice questions is shuffled once here and frozen into the game's quiz copy;
+ * correctness is id-based, so nothing else changes. `random` is injectable for tests.
  */
 export function createGame(
   quiz: GameQuiz,
@@ -75,7 +76,7 @@ export function createGame(
   return {
     id,
     pin,
-    quiz: settings.shuffleOptions ? shuffleOptions(quiz, random) : quiz,
+    quiz: shuffleOptions(withoutTags(quiz), settings, random),
     settings,
     phase: 'lobby',
     questionIndex: -1,
@@ -352,7 +353,7 @@ export function startGame(state: GameState, now: number): GameState {
   if (state.settings.mode === 'team' && Object.values(state.players).some((p) => p.teamId === null)) {
     throw new EngineError('errors.playersWithoutTeam')
   }
-  return openQuestion({ ...state, announcement: null }, 0, now)
+  return enterQuestion({ ...state, announcement: null }, 0, now)
 }
 
 export interface SubmitInput {
@@ -375,7 +376,7 @@ export function submitAnswer(state: GameState, input: SubmitInput, now: number):
   const suggestion = team !== undefined && needsConfirmation(state, team)
   const previous = player.answers[question.id]
   if (previous) {
-    if (!state.settings.answerChanges && !suggestion) throw new EngineError('errors.alreadyAnswered')
+    if (!settingsAt(state, state.questionIndex).answerChanges && !suggestion) throw new EngineError('errors.alreadyAnswered')
     // The same answer again (a retry, or a second tap) keeps its time.
     if (JSON.stringify(previous.answer) === JSON.stringify(input.answer)) return state
     if (suggestion && team.answers?.[question.id]) throw new EngineError('errors.answerLocked')
@@ -418,7 +419,7 @@ export function confirmTeamAnswer(state: GameState, input: SubmitInput, now: num
   const previous = team.answers?.[question.id]
   if (previous) {
     if (JSON.stringify(previous.answer) === JSON.stringify(input.answer)) return state
-    if (!state.settings.answerChanges) throw new EngineError('errors.alreadyAnswered')
+    if (!settingsAt(state, state.questionIndex).answerChanges) throw new EngineError('errors.alreadyAnswered')
     if (now > state.questionEndsAt - lockSec(state) * 1000) throw new EngineError('errors.answerLocked')
   }
   if (!answerFits(question, input.answer)) throw new EngineError('errors.invalidAnswer')
@@ -435,7 +436,8 @@ export function confirmTeamAnswer(state: GameState, input: SubmitInput, now: num
 
 /** Seconds before the end when changes stop; only with answer changes on. */
 function lockSec(state: GameState): number {
-  return state.settings.answerChanges ? state.settings.answerLockSec : 0
+  const rules = settingsAt(state, state.questionIndex)
+  return rules.answerChanges ? rules.answerLockSec : 0
 }
 
 /**
@@ -484,12 +486,22 @@ export function gradeText(state: GameState, correctPlayerIds: readonly string[])
   }
 }
 
-/** Next question (or finish after the last one), from the reveal or the scoreboard. */
+/**
+ * Next question (or finish after the last one), from the reveal or the scoreboard; the next
+ * question's group intro comes first when it opens a group. From the intro: its question.
+ */
 export function next(state: GameState, now: number): GameState {
+  if (state.phase === 'intro') return openQuestion({ ...state, announcement: null }, state.questionIndex + 1, now)
   if ((state.phase === 'reveal' && !state.awaitingGrading) || state.phase === 'scoreboard') {
     return advance({ ...state, announcement: null, reviewIndex: null }, now)
   }
   throw new EngineError('errors.invalidTransition')
+}
+
+/** A timed intro's time is up: its question opens. Unchanged when the intro is held, waits for the host or is over. */
+export function introTimeUp(state: GameState, now: number): GameState {
+  if (state.phase !== 'intro' || state.pausedAt || !state.introEndsAt || now < state.introEndsAt) return state
+  return openQuestion(state, state.questionIndex + 1, now)
 }
 
 /**
@@ -505,7 +517,7 @@ export function showScoreboard(state: GameState): GameState {
 
 /**
  * Discards all answers to the current question; nobody scores. Shows the scoreboard when it
- * follows every question, otherwise moves straight on.
+ * follows every question or this one ends a group with standings after it, otherwise moves straight on.
  */
 export function skipQuestion(state: GameState, now: number): GameState {
   if (state.phase !== 'question') throw new EngineError('errors.invalidTransition')
@@ -521,7 +533,9 @@ export function skipQuestion(state: GameState, now: number): GameState {
     teams[team.id] = { ...team, answers }
   }
   const skipped = { ...state, players, teams, pausedAt: null }
-  return scoreboardAfterEachQuestion(state) ? { ...skipped, phase: 'scoreboard' } : advance(skipped, now)
+  return scoreboardAfterEachQuestion(state) || standingsAfterGroup(state)
+    ? { ...skipped, phase: 'scoreboard' }
+    : advance(skipped, now)
 }
 
 export function extendTime(state: GameState, seconds: number): GameState {
@@ -531,7 +545,15 @@ export function extendTime(state: GameState, seconds: number): GameState {
 
 export function endGame(state: GameState, now: number): GameState {
   if (state.phase === 'finished') return state
-  return { ...state, phase: 'finished', finishedAt: now, awaitingGrading: false, pausedAt: null, reviewIndex: null }
+  return {
+    ...state,
+    phase: 'finished',
+    finishedAt: now,
+    awaitingGrading: false,
+    pausedAt: null,
+    reviewIndex: null,
+    introEndsAt: null,
+  }
 }
 
 /**
@@ -542,23 +564,31 @@ export function closeGame(state: GameState, now: number): GameState {
   return { ...endGame(state, now), released: { screen: true, players: true } }
 }
 
-/** Stops the running question's clock: no answers and no deadline until `resume`. */
+/**
+ * Stops the running question's clock: no answers and no deadline until `resume`. In a timed
+ * intro it holds the countdown, so the question waits.
+ */
 export function pause(state: GameState, now: number): GameState {
-  if (state.phase !== 'question' || state.questionEndsAt === null || state.pausedAt) {
+  const endsAt = state.phase === 'intro' ? (state.introEndsAt ?? null) : state.questionEndsAt
+  if ((state.phase !== 'question' && state.phase !== 'intro') || endsAt === null || state.pausedAt) {
     throw new EngineError('errors.invalidTransition')
   }
   // The deadline has passed and the timer is about to end the question: nothing left to stop.
-  if (now >= state.questionEndsAt) throw new EngineError('errors.questionClosed')
+  if (now >= endsAt) throw new EngineError('errors.questionClosed')
   return { ...state, pausedAt: now }
 }
 
 /**
  * Restarts the clock with the time it had: the start and the deadline move by the pause, so
  * answers after it are timed without the pause (answers before it keep their stored time).
+ * A held intro counts down its remaining seconds again.
  */
 export function resume(state: GameState, now: number): GameState {
-  if (state.phase !== 'question' || !state.pausedAt) throw new EngineError('errors.invalidTransition')
+  if ((state.phase !== 'question' && state.phase !== 'intro') || !state.pausedAt) {
+    throw new EngineError('errors.invalidTransition')
+  }
   const shift = Math.max(0, now - state.pausedAt)
+  if (state.phase === 'intro') return { ...state, pausedAt: null, introEndsAt: (state.introEndsAt ?? now) + shift }
   return {
     ...state,
     pausedAt: null,
@@ -587,16 +617,28 @@ export function showQuestion(state: GameState, index: number): GameState {
   if (!closedQuestion(state, index)) throw new EngineError('errors.invalidTransition')
   const reviewing = state.reviewIndex !== null && state.reviewIndex !== undefined
   const queue = reviewing && state.reviewQueue?.includes(index) ? state.reviewQueue : [index]
-  return { ...state, reviewIndex: index, reviewQueue: queue }
+  return withRevealedGroup({ ...state, reviewIndex: index, reviewQueue: queue }, queue)
 }
 
-/** "Show answers": the chosen closed questions go on the screens one at a time, from the first. */
+/**
+ * "Show answers": the chosen closed questions go on the screens one at a time, from the first.
+ * At the end of a group whose answers were held back, showing any of its questions reveals the group.
+ */
 export function showAnswers(state: GameState, indexes: readonly number[]): GameState {
   const queue = [...new Set(indexes)].sort((a, b) => a - b)
   if (queue.length === 0 || !queue.every((index) => closedQuestion(state, index))) {
     throw new EngineError('errors.invalidTransition')
   }
-  return { ...state, reviewIndex: queue[0]!, reviewQueue: queue }
+  return withRevealedGroup({ ...state, reviewIndex: queue[0]!, reviewQueue: queue }, queue)
+}
+
+/** After the current question closed its group, a shown question of that group ends holding its answers back. */
+function withRevealedGroup(state: GameState, indexes: readonly number[]): GameState {
+  const group = groupAt(state.quiz, state.questionIndex)
+  if (!group || !endsGroup(state.quiz, state.questionIndex) || state.revealedGroups?.includes(group.id)) return state
+  const { first, last } = groupBounds(state.quiz, group.id)
+  if (!indexes.some((index) => index >= first && index <= last)) return state
+  return { ...state, revealedGroups: [...(state.revealedGroups ?? []), group.id] }
 }
 
 /** Back from a question shown again to where the game was. */
@@ -701,11 +743,19 @@ export function setQuickMessageTime(state: GameState, id: string, durationSec: n
 /**
  * Correctness and scores are held back from an audience (players, or the public screen):
  * until the game is finished (`revealAnswers: 'atEnd'`), and after it until the host
- * releases them to that audience.
+ * releases them to that audience. Within a group that reveals at its end
+ * (`afterGroup`), from its first question until the host shows its answers.
  */
 export function answersHidden(state: GameState, audience: ResultsAudience): boolean {
   if (state.phase === 'finished') return resultsPendingFor(state, audience)
-  return state.settings.revealAnswers === 'atEnd'
+  if (state.settings.revealAnswers === 'atEnd') return true
+  const group = groupAt(state.quiz, state.questionIndex)
+  return (
+    group !== undefined &&
+    (state.phase === 'question' || state.phase === 'reveal' || state.phase === 'scoreboard') &&
+    settingsAt(state, state.questionIndex).revealAnswers === 'afterGroup' &&
+    !state.revealedGroups?.includes(group.id)
+  )
 }
 
 /** The game is over and its final results still wait for the host's release to `audience`. */
@@ -720,9 +770,9 @@ export function resultsPending(state: GameState): boolean {
 
 // ---- helpers ---------------------------------------------------------------
 
-/** Between questions: the reveal (not while grading) and the scoreboard. */
+/** Between questions: the reveal (not while grading), the scoreboard and a group's intro. */
 function betweenQuestions(state: GameState): boolean {
-  return (state.phase === 'reveal' && !state.awaitingGrading) || state.phase === 'scoreboard'
+  return (state.phase === 'reveal' && !state.awaitingGrading) || state.phase === 'scoreboard' || state.phase === 'intro'
 }
 
 function newTeam(id: string, name: string, settings: GameSettings): Team {
@@ -785,17 +835,50 @@ function withoutEmptyPlayerTeams(state: GameState): GameState {
 }
 
 function scoreboardAfterEachQuestion(state: GameState): boolean {
-  return state.settings.scoreboard === 'afterQuestion' && state.settings.revealAnswers === 'afterQuestion'
+  const rules = settingsAt(state, state.questionIndex)
+  return rules.scoreboard === 'afterQuestion' && rules.revealAnswers === 'afterQuestion'
+}
+
+/** The current question ends a group whose standings follow it. */
+function standingsAfterGroup(state: GameState): boolean {
+  return endsGroup(state.quiz, state.questionIndex) && settingsAt(state, state.questionIndex).groupStandings === 'afterGroup'
 }
 
 function advance(state: GameState, now: number): GameState {
   const index = state.questionIndex + 1
   if (index >= state.quiz.questions.length) return { ...state, phase: 'finished', finishedAt: now }
-  return openQuestion(state, index, now)
+  return enterQuestion(state, index, now)
 }
 
-function shuffleOptions(quiz: GameQuiz, random: () => number): GameQuiz {
+/** Opens question `index`, or first its group's intro when it is the group's first question. */
+function enterQuestion(state: GameState, index: number, now: number): GameState {
+  if (!startsGroup(state.quiz, index)) return openQuestion(state, index, now)
+  const seconds = settingsAt(state, index).groupIntroSec
+  return {
+    ...state,
+    phase: 'intro',
+    introEndsAt: seconds > 0 ? now + seconds * 1000 : null,
+    questionStartedAt: null,
+    questionEndsAt: null,
+    awaitingGrading: false,
+    pausedAt: null,
+    reviewIndex: null,
+  }
+}
+
+/** The quiz without its colour tags: they only help the host in the editor, so no screen gets them. */
+function withoutTags(quiz: GameQuiz): GameQuiz {
+  const strip = <T extends { color?: unknown }>({ color: _, ...rest }: T): Omit<T, 'color'> => rest
+  return {
+    ...quiz,
+    questions: quiz.questions.map((q) => strip(q) as Question),
+    ...(quiz.groups && { groups: quiz.groups.map(strip) }),
+  }
+}
+
+function shuffleOptions(quiz: GameQuiz, settings: GameSettings, random: () => number): GameQuiz {
   const questions = quiz.questions.map((question) => {
+    if (!settingsFor(settings, groupOf(quiz, question)).shuffleOptions) return question
     if (question.type !== 'single' && question.type !== 'multiple' && question.type !== 'poll') return question
     // Fisher-Yates on a copy.
     const options = [...question.options]
@@ -826,6 +909,7 @@ function openQuestion(state: GameState, index: number, now: number): GameState {
     awaitingGrading: false,
     pausedAt: null,
     reviewIndex: null,
+    introEndsAt: null,
   }
 }
 
@@ -916,6 +1000,7 @@ function scorePlayers(
   decide: (answer: Answer, playerId: string) => boolean | null,
 ): Record<string, Player> {
   const players: Record<string, Player> = {}
+  const rules = settingsAt(state, state.questionIndex)
   for (const player of Object.values(state.players)) {
     const record = player.answers[question.id]
     if (!record) {
@@ -924,11 +1009,11 @@ function scorePlayers(
     }
     const correct = question.type === 'poll' ? null : decide(record.answer, player.id)
     const streak = correct === true ? (player.streak ?? 0) + 1 : correct === false ? 0 : (player.streak ?? 0)
-    const bonus = correct === true && state.settings.streakBonus ? streakBonusFor(streak) : 0
+    const bonus = correct === true && rules.streakBonus ? streakBonusFor(streak) : 0
     const points =
       // The stored answer time, not `at - questionStartedAt`: a resume moves the start, and an
       // answer given before the pause keeps the time it took.
-      pointsFor(question.points, correct, record.timeMs, question.timeLimitSec * 1000, state.settings.speedBonus) + bonus
+      pointsFor(question.points, correct, record.timeMs, question.timeLimitSec * 1000, rules.speedBonus) + bonus
     players[player.id] = {
       ...player,
       streak,

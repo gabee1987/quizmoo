@@ -77,7 +77,7 @@ export function Standings({ host, gameId }: { host: HostSnapshot; gameId: string
       {host.answersHidden && host.phase !== 'finished' && (
         <p className="flex items-start gap-2 rounded-xl bg-muted px-3 py-2 text-sm font-semibold text-muted-foreground">
           <EyeOffIcon className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-          {t('host.standings.hiddenNote')}
+          {t(host.settings.revealAnswers === 'afterGroup' ? 'host.standings.hiddenNoteRound' : 'host.standings.hiddenNote')}
         </p>
       )}
       {host.mode === 'team' && teams.length > 0 && (

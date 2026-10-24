@@ -41,17 +41,31 @@ export function useFlip(container: RefObject<HTMLElement | null>) {
 /**
  * The same slide for a list reordered from outside (the editor's toolbar and shortcuts move the
  * selected question): positions are kept after each reorder, relative to the container so scrolling
- * does not matter, and a change of `order` slides the items. Their heights must not change in between. `skip` is set by a drag, which animates itself.
+ * does not matter, and a change of `order` slides the items. When the container's height changes
+ * meanwhile (rows growing or shrinking), the positions are measured again. `skip` is set by a drag,
+ * which animates itself.
  */
 export function useFlipOnReorder(container: RefObject<HTMLElement | null>, order: string, movedId: string | null, skip: RefObject<boolean>) {
   const last = useRef<{ order: string; tops: Map<string, number> } | null>(null)
+
+  // Rows that grow or shrink (a group opening) change the list's height: measure again, so the next
+  // reorder slides from where the rows really are.
+  useLayoutEffect(() => {
+    const root = container.current
+    if (!root) return
+    const observer = new ResizeObserver(() => {
+      if (last.current) last.current = { order: last.current.order, tops: measure(root) }
+    })
+    observer.observe(root)
+    return () => observer.disconnect()
+  }, [container])
 
   useLayoutEffect(() => {
     const root = container.current
     // Rows keep their height between reorders (the editor renders on every keystroke): measure only when the order changes.
     if (!root || last.current?.order === order) return
     const elements = [...root.querySelectorAll<HTMLElement>('[data-flip-id]')]
-    const top = (element: HTMLElement) => element.getBoundingClientRect().top - root.getBoundingClientRect().top
+    const top = (element: HTMLElement) => offsetTop(root, element)
     const previous = last.current
     if (previous && !skip.current && motionOk()) {
       for (const element of elements) {
@@ -62,6 +76,15 @@ export function useFlipOnReorder(container: RefObject<HTMLElement | null>, order
     skip.current = false
     last.current = { order, tops: new Map(elements.map((element) => [element.dataset.flipId!, top(element)])) }
   })
+}
+
+/** Every item's top in the container, from the layout: running slides and drag transforms do not count. */
+function measure(root: HTMLElement) {
+  return new Map([...root.querySelectorAll<HTMLElement>('[data-flip-id]')].map((element) => [element.dataset.flipId!, offsetTop(root, element)]))
+}
+
+function offsetTop(root: HTMLElement, element: HTMLElement) {
+  return element.offsetParent === root ? element.offsetTop : element.offsetTop - root.offsetTop
 }
 
 /** Slides an element from (dx, dy) back to its place, springy; a moved one is lifted above its neighbours. */

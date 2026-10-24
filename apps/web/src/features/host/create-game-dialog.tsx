@@ -39,6 +39,7 @@ export function CreateGameDialog({
   pending,
   onCreate,
   onCancel,
+  rounds = false,
 }: {
   quizTitle: string
   quizSettings: GameSettings
@@ -55,6 +56,8 @@ export function CreateGameDialog({
     lockCode: string | undefined,
   ) => void
   onCancel: () => void
+  /** The quiz has groups: its rounds' settings show too. */
+  rounds?: boolean
 }) {
   const { t } = useTranslation()
   const startsAtId = useId()
@@ -188,7 +191,7 @@ export function CreateGameDialog({
                     <BrandingFields value={branding} logoImageId={logoImageId} offInQuiz={!quizBranding.show} onChange={setBranding} />
                   </div>
                 )}
-                <GameSettingsForm value={settings} onChange={setSettings} sections={[section]} newGame />
+                <GameSettingsForm value={settings} onChange={setSettings} sections={[section]} newGame rounds={rounds} />
                 {section === 'flow' && (
                   <div className="flex max-w-sm flex-col gap-1 pt-8">
                     <TextField

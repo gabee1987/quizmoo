@@ -13,6 +13,7 @@ import { NextRound } from '../features/play/next-round'
 import { Podium } from '../features/play/podium'
 import { Question } from '../features/play/question'
 import { Reveal } from '../features/play/reveal'
+import { PhoneRoundIntro } from '../features/play/round-intro'
 import { Scoreboard } from '../features/play/scoreboard'
 import { lostCaptaincy, movedTo, newCaptaincy, newTeammates, teamSeat, type TeamSeat } from '../features/play/team-moved'
 import { forgetPlayer, getStoredPlayer } from '../lib/player-storage'
@@ -116,6 +117,8 @@ function PhaseView({ snapshot, clockOffset }: { snapshot: PlayerSnapshot; clockO
   switch (snapshot.phase) {
     case 'lobby':
       return <Lobby snapshot={snapshot} />
+    case 'intro':
+      return <PhoneRoundIntro key={snapshot.group?.id} snapshot={snapshot} clockOffset={clockOffset} />
     case 'question':
       return <Question key={snapshot.question?.id} snapshot={snapshot} clockOffset={clockOffset} />
     case 'reveal':

@@ -7,6 +7,7 @@ import type {
   GameSettings,
   OwnQuickMessage,
   Quiz,
+  QuestionGroup,
   QuickMessage,
   TeamAnswerMode,
 } from '@quizmoo/shared'
@@ -91,8 +92,11 @@ export interface Team {
   gains?: Record<string, number>
 }
 
-/** The quiz frozen into a game. Its default settings are not part of it: the game has its own. */
-export type GameQuiz = Omit<Quiz, 'settings' | 'branding'>
+/**
+ * The quiz frozen into a game. Its default settings are not part of it: the game has its own.
+ * `groups` is missing in games saved before groups existed; read it through `groupsOf`.
+ */
+export type GameQuiz = Omit<Quiz, 'settings' | 'branding' | 'groups'> & { groups?: QuestionGroup[] }
 
 /** Plain JSON-serialisable value: persisted on every transition and restored on boot. */
 export interface GameState {
@@ -121,6 +125,16 @@ export interface GameState {
   nextPin?: string | null
   /** Unix ms when the host paused the running question; null while it runs. Missing in games saved before it existed. */
   pausedAt?: number | null
+  /**
+   * The intro phase: unix ms when it opens question `questionIndex + 1` by itself; null while it waits
+   * for the host. A held intro keeps it and sets `pausedAt`. Missing in games saved before groups existed.
+   */
+  introEndsAt?: number | null
+  /**
+   * Groups whose answers were held back until their end (`revealAnswers: 'afterGroup'`) and which the
+   * host has shown since. Missing in games saved before groups existed.
+   */
+  revealedGroups?: string[]
   /** Index of a revealed question the host put back on the screens; null otherwise. Missing in games saved before it existed. */
   reviewIndex?: number | null
   /**

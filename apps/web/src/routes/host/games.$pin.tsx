@@ -20,6 +20,7 @@ import { MessageBox } from '../../features/host/message-box'
 import { PlayAgainButton } from '../../features/host/play-again-button'
 import { PlayerPanel } from '../../features/host/player-panel'
 import { ReviewPanel } from '../../features/host/review-panel'
+import { RoundIntro } from '../../features/host/round-intro'
 import { ScreenPreview } from '../../features/host/screen-preview'
 import { ShownQuestion } from '../../features/host/shown-question'
 import { Standings } from '../../features/host/standings'
@@ -165,9 +166,12 @@ function Header({ host, connected, onLock }: { host: HostSnapshot; connected: bo
         <p className="text-4xl font-black tracking-widest text-primary tabular-nums dark:text-foreground">{host.pin}</p>
         <p className="text-sm font-semibold">
           {t(`host.game.phase.${host.phase}`)}
+          {host.phase === 'intro' && host.group && ` · ${t('play.roundOf', { index: host.group.index + 1, count: host.group.count })}`}
           {host.phase !== 'lobby' &&
             host.phase !== 'finished' &&
+            host.phase !== 'intro' &&
             ` · ${t('play.questionOf', { index: host.questionIndex + 1, count: host.questionCount })}`}
+          {host.phase !== 'finished' && host.group && ` · ${host.group.title}`}
         </p>
         <p className="text-xs text-muted-foreground">{settings.join(' · ')}</p>
         <div className="mt-2 flex flex-wrap items-center gap-2">
@@ -220,6 +224,8 @@ function PhaseDetail({
     case 'lobby':
       // The lobby has its own layout (HostLobby).
       return null
+    case 'intro':
+      return <RoundIntro host={host} clockOffset={clockOffset} />
     case 'question':
       return <LiveQuestion host={host} clockOffset={clockOffset} />
     case 'reveal':

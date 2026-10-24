@@ -14,6 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { QuestionStats } from '../../features/results/question-stats'
 import { ResultsHero } from '../../features/results/results-hero'
 import { QuestionHighlights } from '../../features/results/results-summary'
+import { questionRuns } from '../../features/results/summary'
 import { WinnerCard } from '../../features/results/winner-card'
 import { apiFetch, errorCode } from '../../lib/api'
 
@@ -182,11 +183,35 @@ function ResultsPage() {
           {data.questions.length === 0 ? (
             <p className="text-muted-foreground">{t('results.noQuestions')}</p>
           ) : (
-            <ol className="grid gap-3 xl:grid-cols-2">
-              {data.questions.map((question) => (
-                <QuestionStats key={question.question.id} question={question} playerCount={data.players.length} teams={data.teams} />
-              ))}
-            </ol>
+            // One list per run of a group's questions, under the group's number and title.
+            <div className="flex flex-col gap-6">
+              {questionRuns(data).map((run) => {
+                const list = (
+                  <ol className="grid gap-3 xl:grid-cols-2">
+                    {run.questions.map((question) => (
+                      <QuestionStats key={question.question.id} question={question} playerCount={data.players.length} teams={data.teams} />
+                    ))}
+                  </ol>
+                )
+                if (!run.group) return <div key={run.questions[0]!.question.id}>{list}</div>
+                const first = run.questions[0]!.index + 1
+                const last = run.questions.at(-1)!.index + 1
+                return (
+                  <section key={run.group.id} aria-labelledby={`results-group-${run.group.id}`} className="flex flex-col gap-3">
+                    <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 px-1">
+                      <span className="text-sm font-bold text-muted-foreground">{t('play.roundShort', { index: run.group.number })}</span>
+                      <h3 id={`results-group-${run.group.id}`} className="text-lg font-extrabold">
+                        {run.group.title}
+                      </h3>
+                      <span className="text-sm text-muted-foreground tabular-nums">
+                        {first === last ? t('editor.questionN', { n: first }) : t('play.questionRange', { first, last })}
+                      </span>
+                    </div>
+                    {list}
+                  </section>
+                )
+              })}
+            </div>
           )}
         </TabsContent>
       </Tabs>

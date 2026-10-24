@@ -92,7 +92,7 @@ export function PinCard({ pin, className }: { pin: string; className?: string })
  */
 export function GameInfoCard({ snapshot, className }: { snapshot: PlayerSnapshot; className?: string }) {
   const { t } = useTranslation()
-  const items = gameInfo(snapshot.settings, snapshot.mode, snapshot.questionCount)
+  const items = gameInfo(snapshot.settings, snapshot.mode, snapshot.questionCount, snapshot.groupCount)
   return (
     <section
       aria-labelledby="game-info"

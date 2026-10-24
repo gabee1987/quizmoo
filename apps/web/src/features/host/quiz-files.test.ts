@@ -10,18 +10,20 @@ beforeAll(async () => {
 })
 
 describe('quiz files', () => {
-  it.each(['hu', 'en'] as const)('gives a template that imports as one question of every type (%s)', (language) => {
+  it.each(['hu', 'en'] as const)('gives a template that imports as one question of every type, the last two in a group (%s)', (language) => {
     const csv = templateCsv(i18n.t, language)
     const guide = i18n.t('quizFile.guide', { returnObjects: true, lng: language }) as string[]
     expect(csv).toContain(guide[2])
     expect(csv).toContain(i18n.t('quizFile.templateNote', { lng: language }))
-    const { questions, problems } = parseQuizCsv(csv)
+    const { questions, groups, problems } = parseQuizCsv(csv)
     expect(problems).toEqual([])
     expect(questions.map((q) => q.type)).toEqual(['single', 'multiple', 'truefalse', 'text', 'number', 'poll', 'order'])
+    expect(groups.map((g) => [g.title, g.color])).toEqual([[i18n.t('quizFile.examples.group', { lng: language }), 'green']])
+    expect(questions.map((q) => !!q.groupId)).toEqual([false, false, false, false, false, true, true])
   })
 
   it('writes an export without the template note', () => {
-    expect(quizCsv([], i18n.t, 'hu')).not.toContain(i18n.t('quizFile.templateNote'))
+    expect(quizCsv([], [], i18n.t, 'hu')).not.toContain(i18n.t('quizFile.templateNote'))
   })
 
   it('makes a safe file name from the title', () => {
@@ -32,7 +34,7 @@ describe('quiz files', () => {
   it('reads a spreadsheet into an import body titled after the file', async () => {
     const file = new File([templateCsv(i18n.t, 'hu')], 'karacsonyi_kviz.csv')
     const read = await readQuizFile(file, 'Untitled')
-    expect(read).toMatchObject({ kind: 'ready', title: 'karacsonyi kviz', questionCount: 7, fromSheet: true })
+    expect(read).toMatchObject({ kind: 'ready', title: 'karacsonyi kviz', questionCount: 7, groupCount: 1, fromSheet: true })
     expect(read.kind === 'ready' && read.body).toMatchObject({ format: 'quizmoo-quiz', version: 1, quiz: { title: 'karacsonyi kviz' } })
   })
 
@@ -44,7 +46,14 @@ describe('quiz files', () => {
       '2. sor, helyes: írd be a jó válasz oszlopának számát, pl. 2.',
     ])
     expect(csvProblemLabel({ row: 3, code: 'type' }, i18n.t, 'hu')).toBe(
-      '3. sor, típus: ismeretlen kérdéstípus. Ezek közül válassz: egy, több, igaz-hamis, szöveg, szám, szavazás, sorrend.',
+      '3. sor, típus: ismeretlen kérdéstípus. Ezek közül válassz: egy, több, igaz-hamis, szöveg, szám, szavazás, sorrend, csoport, csoport-vége.',
+    )
+    expect(csvProblemLabel({ row: 4, code: 'question', group: true }, i18n.t, 'hu')).toBe('4. sor, kérdés: írd be a csoport címét, legfeljebb 120 karakter.')
+    expect(csvProblemLabel({ row: 6, code: 'color', type: 'single' }, i18n.t, 'hu')).toBe(
+      '6. sor, szín: ismeretlen szín. Ezek közül válassz: piros, narancs, sárga, zöld, türkiz, kék, lila, rózsaszín, vagy hagyd üresen.',
+    )
+    expect(csvProblemLabel({ row: 5, code: 'emptyGroup', group: true }, i18n.t, 'hu')).toBe(
+      '5. sor, csoport: nincs alatta kérdés. Írj alá legalább egyet, vagy töröld a sort.',
     )
   })
 

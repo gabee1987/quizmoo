@@ -13,6 +13,7 @@ import { ScreenLobby } from '../features/screen/lobby'
 import { ScreenPodium } from '../features/screen/podium'
 import { ScreenQuestion } from '../features/screen/question'
 import { ScreenReveal } from '../features/screen/reveal'
+import { ScreenRoundIntro } from '../features/screen/round-intro'
 import { ScreenScoreboard } from '../features/screen/scoreboard'
 import { apiFetch } from '../lib/api'
 import { meQueryOptions } from '../lib/auth'
@@ -98,7 +99,8 @@ function ScreenPage() {
           onClick={() => void emitAck('host:command', action.command)}
         >
           {t(action.label)}
-          <kbd className="rounded-md bg-primary-foreground/20 px-1.5 text-sm font-semibold">{t('screen.keyHint')}</kbd>
+          {/* Darker than the button, not lighter: a light wash took white text below 4.5:1. */}
+          <kbd className="rounded-md bg-primary-edge px-1.5 text-sm font-semibold">{t('screen.keyHint')}</kbd>
         </Button>
       )}
     </div>
@@ -109,6 +111,8 @@ function ScreenPhase({ host, clockOffset, joinUrl }: { host: HostSnapshot; clock
   switch (host.phase) {
     case 'lobby':
       return <ScreenLobby host={host} joinUrl={joinUrl} />
+    case 'intro':
+      return <ScreenRoundIntro host={host} clockOffset={clockOffset} />
     case 'question':
       return <ScreenQuestion host={host} clockOffset={clockOffset} />
     case 'reveal':

@@ -3,15 +3,19 @@ import {
   MAX_QUIZ_FILE_BYTES,
   QUIZ_FILE_FORMAT,
   QUIZ_FILE_VERSION,
+  csvColorWords,
+  csvGroupWords,
   csvTypeWords,
   parseQuizCsv,
   questionTypes,
   questionsToCsv,
   quizFileSchema,
   quizImageIds,
+  tagColors,
   type CsvLanguage,
   type CsvProblem,
   type Question,
+  type QuestionGroup,
   type QuizInput,
 } from '@quizmoo/shared'
 import type { TFunction } from 'i18next'
@@ -25,10 +29,14 @@ import { downloadBlob } from '@/lib/download'
 
 export const csvLanguage = (language: string): CsvLanguage => (language.startsWith('hu') ? 'hu' : 'en')
 
-const columns = ['type', 'question', 'a1', 'a2', 'a3', 'a4', 'a5', 'a6', 'correct', 'time', 'points', 'tolerance'] as const
+const columns = ['type', 'question', 'a1', 'a2', 'a3', 'a4', 'a5', 'a6', 'correct', 'time', 'points', 'tolerance', 'color'] as const
 
-/** The type words a spreadsheet takes, for messages: "egy, több, igaz-hamis, …". */
-export const typeWords = (language: CsvLanguage) => questionTypes.map((type) => csvTypeWords[type][language]).join(', ')
+/** The colour words a spreadsheet takes, for messages: "piros, narancs, …". */
+export const colorWords = (language: CsvLanguage) => tagColors.map((color) => csvColorWords[color][language]).join(', ')
+
+/** The type words a spreadsheet takes, for messages: "egy, több, igaz-hamis, …, csoport, csoport-vége". */
+export const typeWords = (language: CsvLanguage) =>
+  [...questionTypes.map((type) => csvTypeWords[type][language]), csvGroupWords.group[language], csvGroupWords.end[language]].join(', ')
 
 function csvTexts(t: TFunction, language: CsvLanguage, note?: string) {
   const guide = t('quizFile.guide', { returnObjects: true, lng: language }) as string[]
@@ -50,11 +58,11 @@ export function fileName(title: string, extension: string): string {
   return `${base || 'quiz'}.${extension}`
 }
 
-export function quizCsv(questions: Question[], t: TFunction, language: CsvLanguage): string {
-  return questionsToCsv(questions, csvTexts(t, language))
+export function quizCsv(questions: Question[], groups: QuestionGroup[], t: TFunction, language: CsvLanguage): string {
+  return questionsToCsv(questions, csvTexts(t, language), groups)
 }
 
-/** The empty spreadsheet: the guide and one example per question type. */
+/** The empty spreadsheet: the guide, one example per question type and a group around the last two. */
 export function templateCsv(t: TFunction, language: CsvLanguage): string {
   const e = (key: string) => t(`quizFile.examples.${key}`, { lng: language })
   const options = (...keys: string[]) => keys.map((key, i) => ({ id: `o${i}`, text: e(key) }))
@@ -65,10 +73,11 @@ export function templateCsv(t: TFunction, language: CsvLanguage): string {
     { ...base, id: 'q3', type: 'truefalse', text: e('truefalse'), correct: true, timeLimitSec: 10, points: 500 },
     { ...base, id: 'q4', type: 'text', text: e('text'), acceptedAnswers: [e('text1'), e('text2')] },
     { ...base, id: 'q5', type: 'number', text: e('number'), correct: 1014, tolerance: 10 },
-    { ...base, id: 'q6', type: 'poll', text: e('poll'), options: options('poll1', 'poll2', 'poll3', 'poll4'), points: 0 },
-    { ...base, id: 'q7', type: 'order', text: e('order'), options: options('order1', 'order2', 'order3', 'order4'), timeLimitSec: 30 },
+    { ...base, id: 'q6', type: 'poll', text: e('poll'), options: options('poll1', 'poll2', 'poll3', 'poll4'), points: 0, groupId: 'g1' },
+    { ...base, id: 'q7', type: 'order', text: e('order'), options: options('order1', 'order2', 'order3', 'order4'), timeLimitSec: 30, groupId: 'g1' },
   ]
-  return questionsToCsv(examples, csvTexts(t, language, t('quizFile.templateNote', { lng: language })))
+  const groups: QuestionGroup[] = [{ id: 'g1', title: e('group'), info: e('groupInfo'), settings: {}, color: 'green' }]
+  return questionsToCsv(examples, csvTexts(t, language, t('quizFile.templateNote', { lng: language })), groups)
 }
 
 export function downloadCsv(content: string, name: string): void {
@@ -78,12 +87,12 @@ export function downloadCsv(content: string, name: string): void {
 /** Downloads a quiz as a spreadsheet (questions only) or as a full Quizmoo file. */
 export async function exportQuiz(quiz: QuizInput, kind: 'csv' | 'file', t: TFunction, language: string): Promise<void> {
   if (kind === 'file') return downloadQuizFile(quiz, t)
-  downloadCsv(quizCsv(quiz.questions, t, csvLanguage(language)), fileName(quiz.title, 'csv'))
+  downloadCsv(quizCsv(quiz.questions, quiz.groups, t, csvLanguage(language)), fileName(quiz.title, 'csv'))
 }
 
 /** The full Quizmoo file: the quiz's own fields (no ids or dates of this install), with its images as base64. */
-async function downloadQuizFile({ title, description, questions, settings, branding }: QuizInput, t: TFunction): Promise<void> {
-  const quiz = { title, description, questions, settings, branding }
+async function downloadQuizFile({ title, description, questions, groups, settings, branding }: QuizInput, t: TFunction): Promise<void> {
+  const quiz = { title, description, questions, groups, settings, branding }
   const images: Record<string, string> = {}
   for (const id of quizImageIds(quiz)) {
     const res = await fetch(`/api/images/${encodeURIComponent(id)}`)
@@ -105,7 +114,14 @@ function toBase64(blob: Blob): Promise<string> {
 
 /** What a chosen file holds: a body for the import route, the spreadsheet's problems, or not a quiz file at all. */
 export type ReadFile =
-  | { kind: 'ready'; body: { format: string; version: number; quiz: unknown; images?: Record<string, string> }; title: string; questionCount: number; fromSheet: boolean }
+  | {
+      kind: 'ready'
+      body: { format: string; version: number; quiz: unknown; images?: Record<string, string> }
+      title: string
+      questionCount: number
+      groupCount: number
+      fromSheet: boolean
+    }
   | { kind: 'problems'; problems: CsvProblem[] }
   | { kind: 'invalid'; reason: 'tooLarge' | 'notQuizFile' }
 
@@ -114,14 +130,15 @@ export async function readQuizFile(file: File, untitled: string): Promise<ReadFi
   if (file.size > (isJson ? MAX_QUIZ_FILE_BYTES : MAX_CSV_BYTES)) return { kind: 'invalid', reason: 'tooLarge' }
   const text = await file.text()
   if (isJson) return readJson(text)
-  const { questions, problems } = parseQuizCsv(text)
+  const { questions, groups, problems } = parseQuizCsv(text)
   if (problems.length > 0) return { kind: 'problems', problems }
   const title = file.name.replace(/\.(csv|txt|tsv)$/i, '').replace(/[-_]+/g, ' ').trim().slice(0, 120) || untitled
   return {
     kind: 'ready',
-    body: { format: QUIZ_FILE_FORMAT, version: QUIZ_FILE_VERSION, quiz: { title, questions } },
+    body: { format: QUIZ_FILE_FORMAT, version: QUIZ_FILE_VERSION, quiz: { title, questions, groups } },
     title,
     questionCount: questions.length,
+    groupCount: groups.length,
     fromSheet: true,
   }
 }
@@ -134,13 +151,14 @@ function readJson(text: string): ReadFile {
     return { kind: 'invalid', reason: 'notQuizFile' }
   }
   const file = quizFileSchema.safeParse(data)
-  const quiz = file.success ? (file.data.quiz as { title?: unknown; questions?: unknown }) : null
+  const quiz = file.success ? (file.data.quiz as { title?: unknown; questions?: unknown; groups?: unknown }) : null
   if (!file.success || typeof quiz !== 'object' || quiz === null) return { kind: 'invalid', reason: 'notQuizFile' }
   return {
     kind: 'ready',
     body: file.data,
     title: typeof quiz.title === 'string' ? quiz.title : '',
     questionCount: Array.isArray(quiz.questions) ? quiz.questions.length : 0,
+    groupCount: Array.isArray(quiz.groups) ? quiz.groups.length : 0,
     fromSheet: false,
   }
 }

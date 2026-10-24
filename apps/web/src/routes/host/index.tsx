@@ -184,6 +184,7 @@ function HostHome() {
           quizTitle={creating.title}
           quizSettings={creating.settings}
           quizBranding={creating.branding}
+          rounds={creating.groupCount > 0}
           pending={play.isPending}
           onCreate={(settings, scheduledAt, branding, lockCode) =>
             play.mutate({ quizId: creating.id, settings, scheduledAt, branding, lockCode })

@@ -29,7 +29,7 @@ test('host downloads and imports quizzes as files', async ({ page }) => {
   const editorQuiz = async () => {
     await expect(page).toHaveURL(/\/host\/quizzes\/[\w-]+$/)
     const id = page.url().split('/').pop()!
-    return ((await (await page.request.get(`/api/quizzes/${id}`)).json()) as { quiz: { title: string; questions: { type: string; imageId?: string }[] } }).quiz
+    return ((await (await page.request.get(`/api/quizzes/${id}`)).json()) as { quiz: { title: string; questions: { type: string; imageId?: string; groupId?: string }[]; groups: { id: string }[] } }).quiz
   }
 
   try {
@@ -75,19 +75,21 @@ test('host downloads and imports quizzes as files', async ({ page }) => {
       expect(Object.keys(json.images)).toEqual([json.quiz.questions[0]!.imageId])
     })
 
-    await test.step('import the template: one question of every type', async () => {
+    await test.step('import the template: one question of every type, the last two in a group', async () => {
       await page.getByRole('button', { name: 'Import' }).click()
       const dialog = page.getByRole('dialog', { name: 'Import a quiz' })
       const template = await downloaded(page, () => dialog.getByRole('button', { name: 'Download template' }).click())
       expect(template.name).toBe('quizmoo-question-template.csv')
       await dialog.locator('input[type="file"]').setInputFiles({ name: `${prefix} sheet.csv`, mimeType: 'text/csv', buffer: Buffer.from(template.text) })
-      await expect(dialog.getByText('7 questions, ready to import.')).toBeVisible()
+      await expect(dialog.getByText('7 questions in 1 group, ready to import.')).toBeVisible()
       await expect(dialog.getByLabel('Quiz title')).toHaveValue(`${prefix} sheet`)
       await dialog.getByRole('button', { name: 'Import' }).click()
       await expect(page.getByText('Imported 7 questions.')).toBeVisible()
       const quiz = await editorQuiz()
       expect(quiz.title).toBe(`${prefix} sheet`)
       expect(quiz.questions.map((q) => q.type)).toEqual(['single', 'multiple', 'truefalse', 'text', 'number', 'poll', 'order'])
+      expect(quiz.groups).toHaveLength(1)
+      expect(quiz.questions.filter((q) => q.groupId === quiz.groups[0]!.id)).toHaveLength(2)
     })
 
     await test.step('a broken spreadsheet names the row and column, and nothing is imported', async () => {
@@ -96,7 +98,7 @@ test('host downloads and imports quizzes as files', async ({ page }) => {
       const dialog = page.getByRole('dialog', { name: 'Import a quiz' })
       const broken = sheet.text.replace(',2,20,1000,', ',7,20,1000,')
       await dialog.locator('input[type="file"]').setInputFiles({ name: 'broken.csv', mimeType: 'text/csv', buffer: Buffer.from(broken) })
-      await expect(dialog.getByText(/^Row 14, correct: write the number/)).toBeVisible()
+      await expect(dialog.getByText(/^Row 16, correct: write the number/)).toBeVisible()
       await expect(dialog.getByRole('button', { name: 'Import' })).toBeDisabled()
       await page.keyboard.press('Escape')
     })

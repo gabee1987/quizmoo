@@ -12,12 +12,20 @@ export const optionSchema = z.object({
 })
 export type Option = z.infer<typeof optionSchema>
 
+/** Colour tags the host may give questions and groups to find them in the editor; no game screen shows them. */
+export const tagColors = ['red', 'orange', 'yellow', 'green', 'teal', 'blue', 'purple', 'pink'] as const
+export const tagColorSchema = z.enum(tagColors)
+export type TagColor = z.infer<typeof tagColorSchema>
+
 const baseQuestion = z.object({
   id: z.string().min(1),
   text: z.string().trim().min(1).max(500),
   imageId: z.string().optional(),
   timeLimitSec: z.number().int().min(5).max(180).default(20),
   points: z.number().int().min(0).max(5000).default(1000),
+  /** The group (round) the question belongs to; none for questions outside every group. */
+  groupId: z.string().min(1).optional(),
+  color: tagColorSchema.optional(),
 })
 
 export const singleChoiceQuestionSchema = baseQuestion.extend({
@@ -213,10 +221,17 @@ export const gameSettingsSchema = z
     teamAnswer: teamAnswerModeSchema.default('captain'),
     /** Each team's captain may pick the team's answer mode in the lobby. */
     teamsChoose: z.boolean().default(true),
-    /** When correct answers, right/wrong and scores reach players and the projector: after each question or only at the end. */
-    revealAnswers: z.enum(['afterQuestion', 'atEnd']).default('afterQuestion'),
+    /**
+     * When correct answers, right/wrong and scores reach players and the projector: after each question,
+     * after each group's last question (questions outside a group: after each question), or only at the end.
+     */
+    revealAnswers: z.enum(['afterQuestion', 'afterGroup', 'atEnd']).default('afterQuestion'),
     /** Scoreboard after every question, or only when the host asks for it (and at the end). */
     scoreboard: z.enum(['afterQuestion', 'onDemand']).default('afterQuestion'),
+    /** A group's intro screen moves on after this many seconds; 0 waits for the host. */
+    groupIntroSec: z.number().int().min(0).max(120).default(0),
+    /** Standings after each group's last question, or only when the host asks for them. */
+    groupStandings: z.enum(['afterGroup', 'onDemand']).default('afterGroup'),
     /** Answer buttons on phones: neutral cards with a coloured symbol badge, or fully coloured like the projector. */
     answerStyle: z.enum(['plain', 'colourful']).default('colourful'),
     /** Colours of the answer options on phones (when colourful), the projector and the result bars. */
@@ -265,19 +280,82 @@ export const quizBrandingSchema = z.object({
 })
 export type QuizBranding = z.infer<typeof quizBrandingSchema>
 
-export const MAX_QUESTIONS = 100
+export const MAX_QUESTIONS = 200
+export const MAX_GROUPS = 50
 
-export const quizSchema = z.object({
+const game = gameSettingsSchema.shape
+/** The game settings a group may set for its own questions; a missing one is the game's (no defaults here). */
+export const groupSettingsSchema = z.object({
+  speedBonus: game.speedBonus.unwrap().optional(),
+  streakBonus: game.streakBonus.unwrap().optional(),
+  answerChanges: game.answerChanges.unwrap().optional(),
+  answerLockSec: game.answerLockSec.unwrap().optional(),
+  shuffleOptions: game.shuffleOptions.unwrap().optional(),
+  // "Only at the end of the game" is for the whole game, never one group.
+  revealAnswers: z.enum(['afterQuestion', 'afterGroup']).optional(),
+  scoreboard: game.scoreboard.unwrap().optional(),
+  groupIntroSec: game.groupIntroSec.unwrap().optional(),
+  groupStandings: game.groupStandings.unwrap().optional(),
+})
+export type GroupSettings = z.infer<typeof groupSettingsSchema>
+
+/** A group (round) of questions: an intro screen before its first question, and its own rules. */
+export const questionGroupSchema = z.object({
   id: z.string().min(1),
+  title: z.string().trim().min(1).max(120),
+  info: z.string().trim().max(500).default(''),
+  imageId: z.string().optional(),
+  /** What new questions in the group start with; the editor can apply them to the group's questions. */
+  timeLimitSec: baseQuestion.shape.timeLimitSec.unwrap().optional(),
+  points: baseQuestion.shape.points.unwrap().optional(),
+  color: tagColorSchema.optional(),
+  settings: groupSettingsSchema.prefault({}),
+})
+export type QuestionGroup = z.infer<typeof questionGroupSchema>
+
+/**
+ * Groups and the questions in them: every group is known and holds at least one question, a group's
+ * questions are together and in the order of `groups`. Ungrouped questions may come before, between and
+ * after groups.
+ */
+function checkGroups(quiz: { questions: Question[]; groups: QuestionGroup[] }, ctx: z.RefinementCtx) {
+  const issue = (path: (string | number)[], message: string) => ctx.addIssue({ code: 'custom', path, message })
+  const position = new Map(quiz.groups.map((group, g) => [group.id, g]))
+  if (position.size !== quiz.groups.length) issue(['groups'], 'editor.errors.duplicateGroups')
+  const used = new Set<string>()
+  let current = -1
+  let previous: string | undefined
+  quiz.questions.forEach((question, i) => {
+    const id = question.groupId
+    const before = previous
+    previous = id
+    if (id === undefined || id === before) return
+    const at = position.get(id)
+    if (at === undefined) return issue(['questions', i, 'groupId'], 'editor.errors.unknownGroup')
+    // A group starts here: it must not have started before, nor come before the last one in `groups`.
+    const split = used.has(id)
+    used.add(id)
+    if (split || at < current) return issue(['questions', i, 'groupId'], 'editor.errors.groupOrder')
+    current = at
+  })
+  quiz.groups.forEach((group, g) => {
+    if (!used.has(group.id)) issue(['groups', g], 'editor.errors.emptyGroup')
+  })
+}
+
+const quizShape = {
   title: z.string().trim().min(1).max(120),
   description: z.string().trim().max(500).default(''),
   questions: z.array(questionSchema).max(MAX_QUESTIONS).superRefine(checkQuestions),
+  groups: z.array(questionGroupSchema).max(MAX_GROUPS).default([]),
   /** Default settings for games of this quiz; the host can change them when starting a game. */
   settings: gameSettingsSchema.prefault({}),
   branding: quizBrandingSchema.prefault({}),
-})
+}
+
+export const quizSchema = z.object({ id: z.string().min(1), ...quizShape }).superRefine(checkGroups)
 export type Quiz = z.infer<typeof quizSchema>
 
 /** Payload accepted by the editor when creating or updating a quiz (id assigned server-side). */
-export const quizInputSchema = quizSchema.omit({ id: true })
+export const quizInputSchema = z.object(quizShape).superRefine(checkGroups)
 export type QuizInput = z.infer<typeof quizInputSchema>

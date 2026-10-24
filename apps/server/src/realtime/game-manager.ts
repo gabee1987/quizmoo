@@ -6,6 +6,7 @@ import {
   endQuestion,
   expireAnnouncement,
   hostLocked,
+  introTimeUp,
   resultsPending,
   schedule,
   type GameQuiz,
@@ -38,6 +39,8 @@ interface Entry {
   /** Clears a host message that has a duration. */
   messageTimer: ReturnType<typeof setTimeout> | null
   saving: Promise<void>
+  /** A save is queued behind `saving` and has not started; it writes the latest state when it does. */
+  saveQueued?: boolean
   /**
    * Snapshot order. Seeded from the clock when the game is created or restored and raised by one
    * per transition, so it keeps increasing across restarts (far fewer transitions than milliseconds).
@@ -171,7 +174,15 @@ export class GameManager {
         this.log.error(error, 'game listener failed')
       }
     }
-    entry.saving = entry.saving.then(() => this.save(entry))
+    // At most one save waits: a large game saves for longer than 60 answers take to arrive, and a
+    // save per transition would fall ever further behind.
+    if (!entry.saveQueued) {
+      entry.saveQueued = true
+      entry.saving = entry.saving.then(() => {
+        entry.saveQueued = false
+        return this.save(entry)
+      })
+    }
     return next
   }
 
@@ -264,6 +275,10 @@ export class GameManager {
     // A paused question has no deadline until it resumes.
     if (state.phase === 'question' && state.questionEndsAt !== null && !state.pausedAt) {
       entry.timer = setTimeout(() => this.onDeadline(pin), Math.max(0, state.questionEndsAt - this.now()))
+    } else if (state.phase === 'intro' && state.introEndsAt && !state.pausedAt) {
+      // A timed intro opens its question by itself; a held one, or one waiting for the host, does not.
+      const endsAt = state.introEndsAt
+      entry.timer = setTimeout(() => this.onIntroEnd(pin), Math.max(0, endsAt - this.now()))
     } else if (state.phase === 'finished' && state.finishedAt !== null) {
       // Kept longer while its results wait for the host, so a late release still reaches everyone.
       const ttl = resultsPending(state) ? PENDING_RELEASE_TTL_MS : FINISHED_TTL_MS
@@ -284,6 +299,19 @@ export class GameManager {
       this.apply(pin, endQuestion)
     } catch (error) {
       this.log.error(error, 'ending question on timer failed')
+    }
+  }
+
+  private onIntroEnd(pin: string) {
+    const entry = this.games.get(pin)
+    if (!entry) return
+    const { state } = entry.game
+    if (state.phase !== 'intro' || !state.introEndsAt || state.pausedAt) return
+    if (this.now() < state.introEndsAt) return this.schedule(pin, entry)
+    try {
+      this.apply(pin, introTimeUp)
+    } catch (error) {
+      this.log.error(error, 'opening a question after its intro failed')
     }
   }
 

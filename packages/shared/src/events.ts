@@ -2,7 +2,7 @@ import { z } from 'zod'
 import { MAX_PLAYERS, announcementDurationSchema, announcementTextSchema, answerSchema, avatarSchema, scheduledAtSchema } from './game.js'
 import type { HostSnapshot, PlayerSnapshot } from './game.js'
 import { lockCodeSchema, ownQuickMessageSchema } from './host.js'
-import { teamAnswerModes, teamNameSchema } from './quiz.js'
+import { MAX_QUESTIONS, teamAnswerModes, teamNameSchema } from './quiz.js'
 
 // ---- Client -> server payloads (validated with zod on the server) --------
 
@@ -111,7 +111,7 @@ export const hostCommandSchema = z.discriminatedUnion('type', [
   /** Between questions: puts a revealed question (by index) back on every screen, read only. */
   z.object({ type: z.literal('showQuestion'), index: z.number().int().min(0) }),
   /** Between questions: the answers of the chosen closed questions, on every screen one at a time. */
-  z.object({ type: z.literal('showAnswers'), indexes: z.array(z.number().int().min(0)).min(1).max(200) }),
+  z.object({ type: z.literal('showAnswers'), indexes: z.array(z.number().int().min(0)).min(1).max(MAX_QUESTIONS) }),
   /** Back from a question shown again to where the game was. */
   z.object({ type: z.literal('closeQuestion') }),
   /**

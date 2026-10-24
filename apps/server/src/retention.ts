@@ -69,7 +69,7 @@ export async function deleteUnusedImages(db: Db, now: number): Promise<number> {
     .where(
       and(
         lt(images.createdAt, cutoff),
-        sql`not exists (select 1 from ${quizzes} q where q.owner_id = ${images.ownerId} and (strpos(q.questions::text, ${images.id}) > 0 or strpos(q.branding::text, ${images.id}) > 0))`,
+        sql`not exists (select 1 from ${quizzes} q where q.owner_id = ${images.ownerId} and (strpos(q.questions::text, ${images.id}) > 0 or strpos(q.groups::text, ${images.id}) > 0 or strpos(q.branding::text, ${images.id}) > 0))`,
         sql`not exists (select 1 from ${hostSettings} s where s.user_id = ${images.ownerId} and strpos(s.settings::text, ${images.id}) > 0)`,
         sql`not exists (select 1 from ${games} g where g.host_id = ${images.ownerId} and strpos(g.state::text, ${images.id}) > 0)`,
       ),

@@ -28,7 +28,13 @@ export function ShownQuestion({ host }: { host: HostSnapshot }) {
   const fastest = answers.find((a) => a.correct === true) ?? null
   const answered = new Set(answers.map((a) => a.playerId))
   const missing = host.players.filter((p) => !answered.has(p.id))
-  const onScreen = host.reviewing ? 'shownAgain' : host.phase === 'scoreboard' ? 'scoreboard' : 'reveal'
+  const onScreen = host.reviewing
+    ? 'shownAgain'
+    : host.phase === 'scoreboard'
+      ? 'scoreboard'
+      : host.answersHidden
+        ? 'answerHidden'
+        : 'reveal'
 
   const figures: { icon: LucideIcon; label: string; value: string; detail?: string | undefined; wide?: boolean }[] = [
     {
