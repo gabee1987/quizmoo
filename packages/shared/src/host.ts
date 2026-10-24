@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { announcementDurationSchema, announcementTextSchema } from './game.js'
-import { eventNameSchema, gameSettingsSchema } from './quiz.js'
+import { eventNameSchema, gameSettingsSchema, questionDefaultsSchema } from './quiz.js'
 
 /** The app's own quick messages, translated on the host's screen. Every host list starts with them. */
 export const builtInMessages = ['getReady', 'shortBreak', 'lastQuestion'] as const
@@ -61,6 +61,8 @@ export const hostSettingsSchema = z.object({
   quickMessages: quickMessagesSchema.default(defaultQuickMessages),
   /** New quizzes start with these game settings; null means the app's defaults. */
   gameDefaults: gameSettingsSchema.nullable().default(null),
+  /** New quizzes start with this time limit and these points for their new questions. */
+  questionDefaults: questionDefaultsSchema.prefault({}),
   /** The host's logo (an uploaded image of their own) for the projector and the phones' lobby. */
   logoImageId: z.string().min(1).max(32).nullable().default(null),
   /** The event name the new game dialog starts with: the last one the host used. */

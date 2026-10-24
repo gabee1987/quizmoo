@@ -10,6 +10,7 @@ describe('hostSettingsSchema', () => {
         { id: 'lastQuestion', builtIn: 'lastQuestion', durationSec: null },
       ],
       gameDefaults: null,
+      questionDefaults: { timeLimitSec: 20, points: 1000 },
       logoImageId: null,
       eventName: '',
     })

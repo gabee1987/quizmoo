@@ -68,6 +68,7 @@ describeDb('host settings (database)', () => {
     expect(await settingsOf(first)).toEqual({
       quickMessages: [{ id: 'm1', text: 'Pizza is here!', durationSec: 30 }, builtIns[0]],
       gameDefaults: null,
+      questionDefaults: { timeLimitSec: 20, points: 1000 },
       logoImageId: null,
       eventName: '',
     })

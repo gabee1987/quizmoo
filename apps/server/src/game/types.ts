@@ -93,10 +93,11 @@ export interface Team {
 }
 
 /**
- * The quiz frozen into a game. Its default settings are not part of it: the game has its own.
- * `groups` is missing in games saved before groups existed; read it through `groupsOf`.
+ * The quiz frozen into a game. Its default settings and question defaults are not part of it: the
+ * game has its own settings. `groups` is missing in games saved before groups existed; read it
+ * through `groupsOf`.
  */
-export type GameQuiz = Omit<Quiz, 'settings' | 'branding' | 'groups'> & { groups?: QuestionGroup[] }
+export type GameQuiz = Omit<Quiz, 'settings' | 'branding' | 'groups' | 'questionDefaults'> & { groups?: QuestionGroup[] }
 
 /** Plain JSON-serialisable value: persisted on every transition and restored on boot. */
 export interface GameState {

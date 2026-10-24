@@ -167,6 +167,8 @@
     "empty": "Még nincs egy kvíz sem. Készíts egyet!",
     "questionCount_one": "{{count}} kérdés",
     "questionCount_other": "{{count}} kérdés",
+    "offCount_one": "{{count}} kikapcsolva",
+    "offCount_other": "{{count}} kikapcsolva",
     "updated": "szerkesztve: {{date}}",
     "play": "Indítás",
     "game": {
@@ -433,6 +435,8 @@
     },
     "create": {
       "title": "Új játék",
+      "skipped_one": "{{count}} kikapcsolt kérdést kihagyunk",
+      "skipped_other": "{{count}} kikapcsolt kérdést kihagyunk",
       "mode": "Játékmód",
       "modes": {
         "classic": "Klasszikus",
@@ -865,6 +869,45 @@
   "editor": {
     "title": "Kvíz címe",
     "description": "Leírás (nem kötelező)",
+    "newQuestion": "Kérdés",
+    "newGroup": "Csoport",
+    "newQuestionTop": "Új kérdés",
+    "newGroupTop": "Új csoport",
+    "titleSetting": "Cím",
+    "jumpToSelected": "Mutasd a kijelöltet a listában",
+    "questionDefaults": "Új kérdések",
+    "questionDefaultsHelp": "Ennyi idővel és ponttal indulnak az új kérdések. Egy csoporton belül a csoport saját értékei számítanak.",
+    "inGame": {
+      "label": "Játékban",
+      "someOn": "{{count}}-ból {{on}} bekapcsolva",
+      "offBadge": "Kikapcsolva",
+      "someOff_one": "{{count}} kikapcsolva",
+      "someOff_other": "{{count}} kikapcsolva",
+      "questionOff": "Ez a kérdés ki van kapcsolva",
+      "questionOffHelp": "A kvízben marad, de az új játékok kihagyják. Kapcsold be, ha egy eseményen jól jön.",
+      "groupOff": "Ez a csoport ki van kapcsolva",
+      "groupOffHelp": "A kérdései a kvízben maradnak, de az új játékok az egész csoportot kihagyják, a bevezetőjével együtt.",
+      "switchOn": "Bekapcsolás",
+      "switchOnN": "A(z) {{n}}. kérdés bekapcsolása",
+      "switchOffN": "A(z) {{n}}. kérdés kikapcsolása",
+      "switchGroupOnN": "A(z) {{n}}. csoport bekapcsolása",
+      "switchGroupOffN": "A(z) {{n}}. csoport kikapcsolása",
+      "summary_one": "{{total}} kérdésből {{count}} kikapcsolva",
+      "summary_other": "{{total}} kérdésből {{count}} kikapcsolva",
+      "allOn": "Mind be",
+      "allOnDone_one": "{{count}} kérdést visszakapcsoltunk.",
+      "allOnDone_other": "{{count}} kérdést visszakapcsoltunk.",
+      "playAllOff": "Minden kérdés ki van kapcsolva. Kapcsolj be legalább egyet."
+    },
+    "search": {
+      "label": "Keresés a kérdések között",
+      "placeholder": "Keresés…",
+      "clear": "Keresés törlése",
+      "results": "Találatok",
+      "count_one": "{{count}} találat",
+      "count_other": "{{count}} találat",
+      "none": "Nincs találat erre: „{{query}}”."
+    },
     "untitledQuiz": "Új kvíz",
     "gameSettings": "Játékbeállítások",
     "gameSettingsHelp": "Ennek a kvíznek minden játéka ezekkel a beállításokkal indul. Indításkor még átállíthatod őket.",
@@ -1289,6 +1332,29 @@
     "current": "Mostani verzió",
     "releasedOn": "Megjelent: {{date}}",
     "releases": {
+      "1_4_0": {
+        "title": "Ki- és bekapcsolható kérdések",
+        "intro": "Hagyj ki kérdéseket egy játékból törlés nélkül, és igazodj el gyorsabban a nagy kvízekben.",
+        "sections": [
+          {
+            "title": "Kérdések kikapcsolása",
+            "items": [
+              "Minden kérdésnek van Játékban kapcsolója. Ha kikapcsolod, a kérdés a kvízben marad, de az új játékok kihagyják: nem jelenik meg, nem számít bele a kérdések számába, és pontot sem ér.",
+              "Egy egész kört a saját kapcsolójával vagy a listában a kártyáján lévő szemmel kapcsolhatsz ki. Ha egy kör minden kérdése ki van kapcsolva, a kör a bevezetőjével együtt kimarad.",
+              "A kikapcsolt kérdések halványan látszanak a listában. A Mind be gombbal a következő eseményre mindet visszakapcsolhatod, a Visszavonással pedig újra kikapcsolod őket."
+            ]
+          },
+          {
+            "title": "Kényelmesebb szerkesztő",
+            "items": [
+              "Keress a kérdések között a lista tetején: kérdésre, válaszra vagy a kör nevére, ékezettel vagy anélkül.",
+              "Az Új kérdés és az Új csoport gomb a felső sávban és a lista tetején is ott van, a lista gombjai pedig görgetés közben is látszanak.",
+              "A célkereszt gomb a listában a kijelölt kérdéshez ugrik, és a kijelölt kártya jobban kiemelkedik.",
+              "Beállíthatod, mennyi idővel és ponttal induljanak az új kérdések: kvízenként a beállításokban, az új kvízeidhez pedig a Beállításaimban. A kvíz címét a beállításokban is átírhatod."
+            ]
+          }
+        ]
+      },
       "1_3_0": {
         "title": "Kevert kérdések",
         "intro": "Játékonként új sorrendben jöhetnek a kérdések, a telefonokon pedig nagyobbak a képek.",
@@ -1460,6 +1526,10 @@
       "important": "Fontos",
       "custom": "Más…",
       "customSeconds": "Másodperc"
+    },
+    "questionDefaults": {
+      "title": "Új kérdések",
+      "help": "Ennyi idővel és ponttal indulnak az új kérdések az új kvízeidben. Kvízenként a beállításokban átállíthatod."
     },
     "defaults": {
       "title": "Alap játékbeállítások",
