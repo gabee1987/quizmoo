@@ -22,7 +22,7 @@ import { groupAt, groupBounds, groupsOf, settingsAt } from './groups.js'
 import { normalise } from './normalise.js'
 import { displayOrder } from './order.js'
 import { answersHidden, hostLocked, quickMessagesOf, resultsPendingFor } from './engine.js'
-import { denseRank } from './scoring.js'
+import { denseRank, isCorrect } from './scoring.js'
 import {
   answersAsOne,
   captainOf,
@@ -499,6 +499,8 @@ function questionStats(state: GameState): QuestionStat[] {
 function currentAnswers(state: GameState, index: number): CurrentAnswer[] {
   const question = state.quiz.questions[index]
   if (!question) return []
+  // While it runs nothing is scored yet: the host's board shows the verdict so far.
+  const running = state.phase === 'question' && index === state.questionIndex
   return Object.values(state.players)
     .flatMap((player) => {
       const record = player.answers[question.id]
@@ -510,7 +512,7 @@ function currentAnswers(state: GameState, index: number): CurrentAnswer[] {
           teamId: player.teamId,
           answer: record.answer,
           key: distributionKeys(record.answer).join(','),
-          correct: record.correct,
+          correct: running ? isCorrect(question, record.answer) : record.correct,
           points: record.points,
           timeMs: record.timeMs,
         },

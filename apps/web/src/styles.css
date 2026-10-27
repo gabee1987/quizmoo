@@ -704,7 +704,8 @@
   }
 }
 @media (min-width: 1024px) {
-  body:has([data-host-sidebar]) .toaster[data-x-position='center'] {
+  /* Not while the game page's sidebar is slid away. */
+  body:has([data-host-sidebar]):not(:has([data-sidebar-closed])) .toaster[data-x-position='center'] {
     --width: min(48rem, calc(100vw - 2rem - 272px)) !important;
     left: calc(50% + 136px) !important;
   }

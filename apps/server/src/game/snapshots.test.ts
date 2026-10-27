@@ -245,9 +245,31 @@ describe('review and grading data', () => {
     expect(toHostSnapshot(state, T0).currentAnswers).toBeNull()
     const answers = toHostSnapshot(state, T0, { includeAnswers: true }).currentAnswers!
     expect(answers).toEqual([
-      { playerId: 'p1', name: 'Anna', teamId: null, answer: { type: 'single', optionId: 'b' }, key: 'b', correct: null, points: 0, timeMs: 3_000 },
+      { playerId: 'p1', name: 'Anna', teamId: null, answer: { type: 'single', optionId: 'b' }, key: 'b', correct: false, points: 0, timeMs: 3_000 },
     ])
     expect(toHostSnapshot(state, T0).settings).toEqual(fixtureSettings())
+  })
+
+  it('gives live answers the verdict so far while the question runs, with no points yet', () => {
+    const verdicts = (state: GameState) =>
+      toHostSnapshot(state, T0, { includeAnswers: true }).currentAnswers!.map((a) => [a.playerId, a.correct, a.points])
+    let single = answerSingle(answerSingle(atQuestion(0), 'p1', 'a', T0 + 1_000), 'p2', 'b', T0 + 2_000)
+    expect(verdicts(single)).toEqual([
+      ['p1', true, 0],
+      ['p2', false, 0],
+    ])
+    let num = atQuestion(4)
+    num = submitAnswer(num, { playerId: 'p1', questionId: 'q-number', answer: { type: 'number', value: 1850 } }, T0 + 1_000)
+    num = submitAnswer(num, { playerId: 'p2', questionId: 'q-number', answer: { type: 'number', value: 1900 } }, T0 + 2_000)
+    expect(verdicts(num).map(([, correct]) => correct)).toEqual([true, false])
+    const poll = atQuestion(5)
+    const pollId = poll.quiz.questions[5]!.id
+    const optionId = (poll.quiz.questions[5] as { options: { id: string }[] }).options[0]!.id
+    const polled = submitAnswer(poll, { playerId: 'p1', questionId: pollId, answer: { type: 'poll', optionId } }, T0 + 1_000)
+    expect(verdicts(polled).map(([, correct]) => correct)).toEqual([null])
+    // Once ended, the stored score counts.
+    single = endQuestion(single)
+    expect(verdicts(single)[0]![2]).toBeGreaterThan(0)
   })
 
   it('gives the host room a live count with the full question while a question runs, and nobody else', () => {

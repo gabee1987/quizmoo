@@ -182,8 +182,6 @@
       },
       "answered_one": "{{answered}} of {{count}} answered",
       "answered_other": "{{answered}} of {{count}} answered",
-      "notAnswered_one": "{{count}} player has not answered yet:",
-      "notAnswered_other": "{{count}} players have not answered yet:",
       "start": "Start",
       "endQuestion": "End question",
       "extend": "+30 s",
@@ -319,13 +317,48 @@
         "scoreboard": "On the screens: scoreboard after this question",
         "shownAgain": "On the screens: shown again"
       },
-      "answered": "Answered",
-      "right": "Right",
       "averageTime": "Average time",
       "fastest": "Fastest right",
-      "seconds": "{{seconds}} s",
-      "noAnswer_one": "{{count}} player did not answer:",
-      "noAnswer_other": "{{count}} players did not answer:"
+      "seconds": "{{seconds}} s"
+    },
+    "board": {
+      "title": "Players",
+      "view": "View",
+      "showAs": "Show as",
+      "tiles": "Tiles",
+      "list": "List",
+      "order": "Order",
+      "sort": {
+        "name": "Name",
+        "rank": "Rank",
+        "answer": "Answer time",
+        "waiting": "Missing answers first"
+      },
+      "hideAnswers": "Hide answers",
+      "showAnswers": "Show answers",
+      "panels": "Side panels",
+      "showSidebar": "Show the menu",
+      "hideSidebar": "Hide the menu",
+      "answered": "Answered",
+      "waiting": "No answer yet",
+      "noAnswer": "No answer",
+      "right": "Right",
+      "wrong": "Wrong",
+      "rightCount_one": "{{count}} right",
+      "rightCount_other": "{{count}} right",
+      "wrongCount_one": "{{count}} wrong",
+      "wrongCount_other": "{{count}} wrong",
+      "missingCount_one": "{{count}} did not answer",
+      "missingCount_other": "{{count}} did not answer",
+      "teamAnswer": "Team answer: {{answer}}",
+      "counts": "Answers per option"
+    },
+    "panels": {
+      "standings": "Standings",
+      "message": "Message",
+      "players": "Players",
+      "questions": "Questions",
+      "preview": "Preview"
     },
     "seen": {
       "everyone": "Phones and projector:",
@@ -413,7 +446,6 @@
       "showFewer": "Show fewer"
     },
     "review": {
-      "title": "Review",
       "standings": "Standings",
       "questions": "Questions so far",
       "noQuestionsYet": "No question has been revealed yet.",
@@ -423,9 +455,7 @@
       "correctOf_other": "{{correct}} of {{count}} correct ({{percent}})",
       "averageTime": "average {{seconds}} s",
       "showAgain": "Show again",
-      "showAgainLabel": "Show question {{index}} on the screens again",
-      "currentAnswers_one": "Answers to this question ({{count}})",
-      "currentAnswers_other": "Answers to this question ({{count}})"
+      "showAgainLabel": "Show question {{index}} on the screens again"
     },
     "grading": {
       "title": "Grade the answers",
@@ -1332,6 +1362,29 @@
     "current": "Current version",
     "releasedOn": "Released {{date}}",
     "releases": {
+      "1_5_0": {
+        "title": "The live board",
+        "intro": "See at a glance who has answered and what while your game runs, without scrolling.",
+        "sections": [
+          {
+            "title": "Everyone on one screen",
+            "items": [
+              "The running game fills your laptop screen: the question with its timer and answers per option at the top, the controls on the right, and every player in the middle.",
+              "Each player has a tile that fills in as their answer arrives: its colour, how fast, and right or wrong at once. Players still thinking have an hourglass, offline players are faded.",
+              "After the question the same tiles show who was right, the points and how the ranks moved. In team games the players are grouped by team, with the team's answer.",
+              "The tiles grow or shrink to fit: big for a family game, compact for a full room of 60."
+            ]
+          },
+          {
+            "title": "Your way",
+            "items": [
+              "View switches between tiles and a list, and sorts by name, rank, answer time or the missing answers first.",
+              "Hide answers shows only who has answered, for when players can see your screen.",
+              "Standings, messages, players, questions and the preview are tabs next to the board. Hide them for more room, and open the menu from the top bar when you need it."
+            ]
+          }
+        ]
+      },
       "1_4_0": {
         "title": "Questions on and off",
         "intro": "Leave questions out of a game without deleting them, and find your way around big quizzes faster.",
@@ -1957,6 +2010,7 @@
         "mode": "Light, dark or system look. Until you change it or clear your browser data.",
         "notice": "That you have seen the storage notice, so it does not come back.",
         "hostToasts": "Whether the host page shows short notes about players joining and leaving.",
+        "hostBoard": "How the host's game page shows the players: tiles or list, the order, hidden answers, the side panels and the menu.",
         "appCache": "The app's own files (code, fonts, pictures), so it starts quickly and can be installed. No personal data."
       },
       "removeTitle": "Removing them",

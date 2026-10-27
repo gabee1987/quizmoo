@@ -74,16 +74,17 @@ test('a phone survives going offline; host messages reach phones and the project
     const banner = (p: Page) => p.getByRole('status', { name: 'Message from the host' })
 
     await test.step('a host message reaches the phone and the projector, also after a reload', async () => {
+      await page.getByRole('tab', { name: 'Message' }).click()
       await page.getByRole('button', { name: 'Short break', exact: true }).click()
       await expect(banner(phone)).toHaveText('Short break')
       await expect(banner(projector)).toHaveText('Short break')
       await phone.reload()
       await expect(banner(phone)).toHaveText('Short break')
 
-      await page.getByLabel('Message', { exact: true }).fill('Prizes at the bar')
+      await page.getByRole('textbox', { name: 'Message', exact: true }).fill('Prizes at the bar')
       await page.getByRole('button', { name: 'Send', exact: true }).click()
       await expect(banner(phone)).toHaveText('Prizes at the bar')
-      await expect(page.getByLabel('Message', { exact: true })).toHaveValue('')
+      await expect(page.getByRole('textbox', { name: 'Message', exact: true })).toHaveValue('')
     })
 
     await test.step('Clear removes it everywhere', async () => {
@@ -93,7 +94,7 @@ test('a phone survives going offline; host messages reach phones and the project
     })
 
     await test.step('the player hides a message on their phone, but not an important one', async () => {
-      await page.getByLabel('Message', { exact: true }).fill('Drinks at the bar')
+      await page.getByRole('textbox', { name: 'Message', exact: true }).fill('Drinks at the bar')
       await page.getByRole('button', { name: 'Send', exact: true }).click()
       await expect(banner(phone)).toHaveText('Drinks at the bar')
       await phone.getByRole('button', { name: 'Hide this message' }).click()
@@ -101,7 +102,7 @@ test('a phone survives going offline; host messages reach phones and the project
       await expect(banner(projector)).toHaveText('Drinks at the bar')
 
       await page.getByRole('switch', { name: 'Important' }).click()
-      await page.getByLabel('Message', { exact: true }).fill('Fire drill at 3 pm')
+      await page.getByRole('textbox', { name: 'Message', exact: true }).fill('Fire drill at 3 pm')
       await page.getByRole('button', { name: 'Send', exact: true }).click()
       await expect(banner(phone)).toHaveText('Fire drill at 3 pm')
       await expect(phone.getByRole('button', { name: 'Hide this message' })).toHaveCount(0)

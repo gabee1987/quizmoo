@@ -22,9 +22,9 @@ import { screenStatus, type SeenStatus } from './screen-status'
 import { ShowAnswersDialog } from './show-answers-dialog'
 
 /**
- * Phase-aware primary button plus the secondary actions of the current phase, in a bar that stays
- * in view while the question scrolls: at the top of the main column on laptops, at the bottom
- * above the tab bar on phones (within thumb reach). "End game" is not in the bar (`EndGameButton`).
+ * Phase-aware primary button plus the secondary actions of the current phase, always in view: at
+ * the top of the right rail on laptops, stuck to the bottom on phones (within thumb reach).
+ * "End game" is not in the bar (`EndGameButton`, in the top bar).
  */
 export function Controls({
   host,
@@ -34,7 +34,8 @@ export function Controls({
   host: HostSnapshot
   /** Resolves true when the server accepted the command. */
   send: (command: HostCommand) => Promise<boolean>
-  placement: 'top' | 'bottom'
+  /** `rail`: at the top of the laptop's right rail, which never scrolls, so the bar need not stick. */
+  placement: 'rail' | 'bottom'
 }) {
   const { t } = useTranslation()
   const [choosing, setChoosing] = useState(false)
@@ -69,10 +70,10 @@ export function Controls({
   return (
     <div
       className={cn(
-        'sticky z-30 isolate',
-        placement === 'top' ? 'top-3' : 'bottom-[calc(4rem+env(safe-area-inset-bottom)+0.5rem)]',
-        // A halo of the page colour keeps what scrolls under the bar apart from it.
-        'before:absolute before:-inset-x-3 before:-inset-y-3 before:-z-10 before:rounded-[2.5rem] before:bg-background/85 before:blur-xl',
+        'isolate shrink-0',
+        placement === 'bottom' &&
+          // A halo of the page colour keeps what scrolls under the bar apart from it.
+          'sticky bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-30 before:absolute before:-inset-x-3 before:-inset-y-3 before:-z-10 before:rounded-[2.5rem] before:bg-background/85 before:blur-xl',
       )}
     >
       <div
@@ -82,7 +83,7 @@ export function Controls({
       >
         <SeenChip host={host} />
         {primary && (
-          <Button size={placement === 'top' ? 'xl' : 'lg'} className="w-full" onClick={() => onCommand(primary.command)}>
+          <Button size={placement === 'rail' ? 'xl' : 'lg'} className="w-full" onClick={() => onCommand(primary.command)}>
             {t(primary.label)}
           </Button>
         )}
@@ -241,7 +242,7 @@ export function EndGameButton({
   )
   return (
     <>
-      <Button variant="outline" className="self-start" onClick={() => setOpen(true)}>
+      <Button variant="outline" size="sm" onClick={() => setOpen(true)}>
         {t('host.game.end')}
       </Button>
       <Dialog open={open} onOpenChange={setOpen}>

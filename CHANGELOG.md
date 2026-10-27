@@ -2,6 +2,28 @@
 
 ## Unreleased
 
+## 1.5.0 – 2026-10-27
+
+The host's live board: who answered what, at a glance, without scrolling.
+
+### The host's live board (phase 43)
+- The running game's host page is one board that fills a laptop window without scrolling: a top bar (way back, PIN, where the game is, connections, lock, projector, end game), the question strip (question, timer, answers per option, correct answer), the player board, and a rail with the controls and the panels. The host sidebar is hidden while a game runs.
+- Every player has a tile that fills in as their answer comes in:
+  - waiting, then the answer in its option's colour and symbol;
+  - how fast, and right or wrong at once (the server sends the verdict while the question runs).
+  
+  Offline players are faded with a mark, and players who left say so. In team mode the tiles are grouped per team, with the team's answer and whether the captain confirmed it.
+- Between questions the same tiles show the results: green or red, the points and the rank change, with "3 right · 1 wrong · 2 did not answer" above them and the average and fastest time in the strip.
+- The tiles take the largest size that fits: big for a family game, one line each for a full room (60 players fit at 1280 × 800).
+- Per-device options:
+  - tiles or list;
+  - order by name, rank, answer time or missing answers first;
+  - "Hide answers" (answered or not only, for when players can see the laptop);
+  - side panels on or off.
+- A button in the top bar slides the host menu back in, and away again (remembered on the device).
+- In the Message tab the shown message uses the panel's full width, with Clear under it. The preview opens on the phone's screen first. In the Players tab each player's name gets the card's full width, with the team and the actions under it.
+- The panels are tabs next to the board: Standings, Message (with a dot while a message shows), Players (remove, captain, move, team modes), Questions (show one again) and Preview.
+
 ## 1.4.0 – 2026-10-25
 
 Questions switched off for an event without deleting them, and a handier editor for big quizzes.

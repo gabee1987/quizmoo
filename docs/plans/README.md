@@ -49,6 +49,7 @@ Finished plans are deleted once their branch is merged: `CHANGELOG.md` records w
 | 40 | [Question groups within a quiz, with intros, per-group rules, and 200 questions](phase-40-question-groups.md) | `feature/question-groups` | done |
 | 41 | Estimated game length, at the start and as time left during the game | `feature/game-length` | planned |
 | 42 | [Questions switched off, editor search and navigation, default time and points (includes 38)](phase-42-question-switch-and-editor.md) | `feature/question-switch-and-editor` | done |
+| 43 | [The host's live board: who answered what, at a glance, without scrolling](phase-43-host-live-board.md) | `feature/host-live-view` | done |
 | later | [Hosting without an account](later-guest-hosting.md) | `feature/guest-hosting` | planned, after the MVP |
 
 ## Conventions every plan follows

@@ -121,8 +121,7 @@ test('streaks, ordering, avatars, nicknames and play again', async ({ browser, p
 
       // The host sees the question live: the correct order, the count and who is still missing.
       await expect(page.getByText('1 of 2 answered')).toBeVisible()
-      await expect(page.getByText('1 player has not answered yet:')).toBeVisible()
-      await expect(page.getByRole('listitem').filter({ hasText: 'Player Blue' }).first()).toBeVisible()
+      await expect(page.getByRole('listitem').filter({ hasText: 'Player Blue' }).getByText('No answer yet')).toBeVisible()
       await expect(page.getByText('Correct order')).toBeVisible()
 
       // Blue drags the first item to the end by its text, not the handle.

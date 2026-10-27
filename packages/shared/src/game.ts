@@ -191,6 +191,10 @@ export interface CurrentAnswer {
   answer: Answer
   /** Distribution key: option id, 'true'/'false', normalised text or the number. */
   key: string
+  /**
+   * Scored once the question ends; while it runs, the verdict so far (host only). Null for polls
+   * and for text the host grades.
+   */
   correct: boolean | null
   points: number
   timeMs: number
