@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 1.5.0 – 2026-10-27
+
+The host's live board: who answered what, at a glance, without scrolling.
+
 ### The host's live board (phase 43)
 - The running game's host page is one board that fills a laptop window without scrolling: a top bar (way back, PIN, where the game is, connections, lock, projector, end game), the question strip (question, timer, answers per option, correct answer), the player board, and a rail with the controls and the panels. The host sidebar is hidden while a game runs.
 - Every player has a tile that fills in as their answer comes in:

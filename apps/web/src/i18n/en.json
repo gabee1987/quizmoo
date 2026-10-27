@@ -1362,6 +1362,29 @@
     "current": "Current version",
     "releasedOn": "Released {{date}}",
     "releases": {
+      "1_5_0": {
+        "title": "The live board",
+        "intro": "See at a glance who has answered and what while your game runs, without scrolling.",
+        "sections": [
+          {
+            "title": "Everyone on one screen",
+            "items": [
+              "The running game fills your laptop screen: the question with its timer and answers per option at the top, the controls on the right, and every player in the middle.",
+              "Each player has a tile that fills in as their answer arrives: its colour, how fast, and right or wrong at once. Players still thinking have an hourglass, offline players are faded.",
+              "After the question the same tiles show who was right, the points and how the ranks moved. In team games the players are grouped by team, with the team's answer.",
+              "The tiles grow or shrink to fit: big for a family game, compact for a full room of 60."
+            ]
+          },
+          {
+            "title": "Your way",
+            "items": [
+              "View switches between tiles and a list, and sorts by name, rank, answer time or the missing answers first.",
+              "Hide answers shows only who has answered, for when players can see your screen.",
+              "Standings, messages, players, questions and the preview are tabs next to the board. Hide them for more room, and open the menu from the top bar when you need it."
+            ]
+          }
+        ]
+      },
       "1_4_0": {
         "title": "Questions on and off",
         "intro": "Leave questions out of a game without deleting them, and find your way around big quizzes faster.",

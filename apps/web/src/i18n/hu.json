@@ -1362,6 +1362,29 @@
     "current": "Mostani verzió",
     "releasedOn": "Megjelent: {{date}}",
     "releases": {
+      "1_5_0": {
+        "title": "Élő tábla",
+        "intro": "Egy pillantással látod, ki mit válaszolt a futó játékban, görgetés nélkül.",
+        "sections": [
+          {
+            "title": "Mindenki egy képernyőn",
+            "items": [
+              "A futó játék kitölti a laptopod képernyőjét: felül a kérdés az időzítővel és a válaszokkal opciónként, jobbra a vezérlők, középen az összes játékos.",
+              "Minden játékosnak van egy csempéje, ami azonnal kitöltődik, ahogy megjön a válasza: a színe, mennyi idő alatt jött, és hogy jó-e. Aki még gondolkodik, homokórát kap, aki offline, halványan látszik.",
+              "A kérdés után ugyanezek a csempék mutatják, ki talált, hány pontot kapott, és merre mozdult a helyezése. Csapatjátékban a játékosok csapatonként vannak, a csapat válaszával.",
+              "A csempék a helyhez igazodnak: nagyok egy családi játékban, kicsik egy 60 fős teremben."
+            ]
+          },
+          {
+            "title": "Ahogy neked tetszik",
+            "items": [
+              "A Nézet menüben választhatsz csempék és lista között, és sorba rendezheted név, helyezés, válaszidő szerint, vagy előre véve, akik még nem válaszoltak.",
+              "A Válaszok elrejtésével csak az látszik, ki válaszolt már, ha a játékosok is látják a képernyődet.",
+              "Az állás, az üzenetek, a játékosok, a kérdések és az előnézet fülek a tábla mellett. Elrejtheted őket, hogy több hely legyen, a menüt pedig a felső sávból nyithatod meg, amikor kell."
+            ]
+          }
+        ]
+      },
       "1_4_0": {
         "title": "Ki- és bekapcsolható kérdések",
         "intro": "Hagyj ki kérdéseket egy játékból törlés nélkül, és igazodj el gyorsabban a nagy kvízekben.",
