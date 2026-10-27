@@ -182,8 +182,6 @@
       },
       "answered_one": "{{answered}} of {{count}} answered",
       "answered_other": "{{answered}} of {{count}} answered",
-      "notAnswered_one": "{{count}} player has not answered yet:",
-      "notAnswered_other": "{{count}} players have not answered yet:",
       "start": "Start",
       "endQuestion": "End question",
       "extend": "+30 s",
@@ -319,13 +317,48 @@
         "scoreboard": "On the screens: scoreboard after this question",
         "shownAgain": "On the screens: shown again"
       },
-      "answered": "Answered",
-      "right": "Right",
       "averageTime": "Average time",
       "fastest": "Fastest right",
-      "seconds": "{{seconds}} s",
-      "noAnswer_one": "{{count}} player did not answer:",
-      "noAnswer_other": "{{count}} players did not answer:"
+      "seconds": "{{seconds}} s"
+    },
+    "board": {
+      "title": "Players",
+      "view": "View",
+      "showAs": "Show as",
+      "tiles": "Tiles",
+      "list": "List",
+      "order": "Order",
+      "sort": {
+        "name": "Name",
+        "rank": "Rank",
+        "answer": "Answer time",
+        "waiting": "Missing answers first"
+      },
+      "hideAnswers": "Hide answers",
+      "showAnswers": "Show answers",
+      "panels": "Side panels",
+      "showSidebar": "Show the menu",
+      "hideSidebar": "Hide the menu",
+      "answered": "Answered",
+      "waiting": "No answer yet",
+      "noAnswer": "No answer",
+      "right": "Right",
+      "wrong": "Wrong",
+      "rightCount_one": "{{count}} right",
+      "rightCount_other": "{{count}} right",
+      "wrongCount_one": "{{count}} wrong",
+      "wrongCount_other": "{{count}} wrong",
+      "missingCount_one": "{{count}} did not answer",
+      "missingCount_other": "{{count}} did not answer",
+      "teamAnswer": "Team answer: {{answer}}",
+      "counts": "Answers per option"
+    },
+    "panels": {
+      "standings": "Standings",
+      "message": "Message",
+      "players": "Players",
+      "questions": "Questions",
+      "preview": "Preview"
     },
     "seen": {
       "everyone": "Phones and projector:",
@@ -413,7 +446,6 @@
       "showFewer": "Show fewer"
     },
     "review": {
-      "title": "Review",
       "standings": "Standings",
       "questions": "Questions so far",
       "noQuestionsYet": "No question has been revealed yet.",
@@ -423,9 +455,7 @@
       "correctOf_other": "{{correct}} of {{count}} correct ({{percent}})",
       "averageTime": "average {{seconds}} s",
       "showAgain": "Show again",
-      "showAgainLabel": "Show question {{index}} on the screens again",
-      "currentAnswers_one": "Answers to this question ({{count}})",
-      "currentAnswers_other": "Answers to this question ({{count}})"
+      "showAgainLabel": "Show question {{index}} on the screens again"
     },
     "grading": {
       "title": "Grade the answers",
@@ -1957,6 +1987,7 @@
         "mode": "Light, dark or system look. Until you change it or clear your browser data.",
         "notice": "That you have seen the storage notice, so it does not come back.",
         "hostToasts": "Whether the host page shows short notes about players joining and leaving.",
+        "hostBoard": "How the host's game page shows the players: tiles or list, the order, hidden answers, the side panels and the menu.",
         "appCache": "The app's own files (code, fonts, pictures), so it starts quickly and can be installed. No personal data."
       },
       "removeTitle": "Removing them",

@@ -182,8 +182,6 @@
       },
       "answered_one": "{{count}} játékosból {{answered}} válaszolt",
       "answered_other": "{{count}} játékosból {{answered}} válaszolt",
-      "notAnswered_one": "{{count}} játékos még nem válaszolt:",
-      "notAnswered_other": "{{count}} játékos még nem válaszolt:",
       "start": "Start",
       "endQuestion": "Lezárom a kérdést",
       "extend": "+30 mp",
@@ -319,13 +317,48 @@
         "scoreboard": "Most kint: az állás e kérdés után",
         "shownAgain": "Most kint: újra ez a kérdés"
       },
-      "answered": "Válaszolt",
-      "right": "Helyes",
       "averageTime": "Átlagos idő",
       "fastest": "Leggyorsabb helyes",
-      "seconds": "{{seconds}} mp",
-      "noAnswer_one": "{{count}} játékos nem válaszolt:",
-      "noAnswer_other": "{{count}} játékos nem válaszolt:"
+      "seconds": "{{seconds}} mp"
+    },
+    "board": {
+      "title": "Játékosok",
+      "view": "Nézet",
+      "showAs": "Megjelenítés",
+      "tiles": "Csempék",
+      "list": "Lista",
+      "order": "Sorrend",
+      "sort": {
+        "name": "Név",
+        "rank": "Helyezés",
+        "answer": "Válaszidő",
+        "waiting": "Akik még nem válaszoltak"
+      },
+      "hideAnswers": "Válaszok elrejtése",
+      "showAnswers": "Válaszok mutatása",
+      "panels": "Oldalsó panelek",
+      "showSidebar": "Menü megjelenítése",
+      "hideSidebar": "Menü elrejtése",
+      "answered": "Válaszolt",
+      "waiting": "Még nem válaszolt",
+      "noAnswer": "Nem válaszolt",
+      "right": "Helyes",
+      "wrong": "Hibás",
+      "rightCount_one": "{{count}} helyes",
+      "rightCount_other": "{{count}} helyes",
+      "wrongCount_one": "{{count}} hibás",
+      "wrongCount_other": "{{count}} hibás",
+      "missingCount_one": "{{count}} nem válaszolt",
+      "missingCount_other": "{{count}} nem válaszolt",
+      "teamAnswer": "Csapat válasza: {{answer}}",
+      "counts": "Válaszok opciónként"
+    },
+    "panels": {
+      "standings": "Állás",
+      "message": "Üzenet",
+      "players": "Játékosok",
+      "questions": "Kérdések",
+      "preview": "Előnézet"
     },
     "seen": {
       "everyone": "Telefonok és kivetítő:",
@@ -413,7 +446,6 @@
       "showFewer": "Kevesebb"
     },
     "review": {
-      "title": "Áttekintés",
       "standings": "Állás",
       "questions": "Eddigi kérdések",
       "noQuestionsYet": "Még egy kérdés válasza sem derült ki.",
@@ -423,9 +455,7 @@
       "correctOf_other": "{{count}} válaszból {{correct}} helyes ({{percent}})",
       "averageTime": "átlagosan {{seconds}} mp",
       "showAgain": "Mutasd újra",
-      "showAgainLabel": "Mutasd újra a(z) {{index}}. kérdést a kijelzőkön",
-      "currentAnswers_one": "Válaszok erre a kérdésre ({{count}})",
-      "currentAnswers_other": "Válaszok erre a kérdésre ({{count}})"
+      "showAgainLabel": "Mutasd újra a(z) {{index}}. kérdést a kijelzőkön"
     },
     "grading": {
       "title": "Értékeld a válaszokat",
@@ -1957,6 +1987,7 @@
         "mode": "Világos, sötét vagy rendszer szerinti megjelenés. Amíg át nem állítod, vagy nem törlöd a böngészőadatokat.",
         "notice": "Hogy már láttad a tárolásról szóló tájékoztatót, így nem jön elő újra.",
         "hostToasts": "Hogy a játékvezetői oldal mutasson-e rövid értesítést a csatlakozó és távozó játékosokról.",
+        "hostBoard": "Hogyan mutassa a játékvezetői oldal a játékosokat: csempék vagy lista, sorrend, rejtett válaszok, oldalsó panelek és a menü.",
         "appCache": "Az alkalmazás saját fájljai (kód, betűk, képek), hogy gyorsan induljon és telepíthető legyen. Személyes adat nincs benne."
       },
       "removeTitle": "Törlésük",

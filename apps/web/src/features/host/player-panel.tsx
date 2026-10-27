@@ -56,55 +56,61 @@ export function PlayerPanel({
         {host.players.map((player) => {
           const offline = offlineFor(player)
           return (
-            <li key={player.id} className="flex items-center gap-3 rounded-xl border bg-card px-3 py-2">
-              <span
-                role="img"
-                aria-label={player.connected ? t('host.game.online') : t('host.game.offline')}
-                className={`size-3 shrink-0 rounded-full ${player.connected ? 'bg-success' : 'bg-muted-foreground/40'}`}
-              />
-              <PlayerAvatar avatar={player.avatar} size="md" />
-              <span className="min-w-0 flex-1">
-                <span className="block font-semibold wrap-break-word">{player.name}</span>
-                {player.teamId && <span className="block text-xs text-muted-foreground wrap-break-word">{teamName(player.teamId)}</span>}
-                {offline && <span className="block text-xs font-semibold text-muted-foreground tabular-nums">{offline}</span>}
-              </span>
-              <span className="font-bold tabular-nums">{player.score}</span>
-              {teams &&
-                player.teamId &&
-                !teamOf(player.teamId)?.solo &&
-                (captainOf(player.teamId) === player.id ? (
-                  <span className="grid size-10 place-items-center text-warning">
-                    <CrownIcon className="size-4" aria-label={t('play.team.captain')} />
-                  </span>
-                ) : (
+            // Two lines, so the name keeps the card's width in the narrow rail: who, then what the host can do.
+            <li key={player.id} className="flex flex-col gap-1 rounded-xl border bg-card px-3 py-2">
+              <div className="flex items-center gap-3">
+                <span
+                  role="img"
+                  aria-label={player.connected ? t('host.game.online') : t('host.game.offline')}
+                  className={`size-3 shrink-0 rounded-full ${player.connected ? 'bg-success' : 'bg-muted-foreground/40'}`}
+                />
+                <PlayerAvatar avatar={player.avatar} size="md" />
+                <span className="min-w-0 flex-1 font-semibold wrap-break-word">{player.name}</span>
+                <span className="font-bold tabular-nums">{player.score}</span>
+              </div>
+              {/* Under the name: past the dot, the avatar and their gaps. */}
+              <div className="flex flex-wrap items-center gap-x-1 gap-y-0.5 pl-[4.5rem]">
+                <span className="min-w-0 flex-1 text-xs text-muted-foreground">
+                  {player.teamId && <span className="block wrap-break-word">{teamName(player.teamId)}</span>}
+                  {offline && <span className="block font-semibold tabular-nums">{offline}</span>}
+                </span>
+                {teams &&
+                  player.teamId &&
+                  !teamOf(player.teamId)?.solo &&
+                  (captainOf(player.teamId) === player.id ? (
+                    <span className="grid size-10 place-items-center text-warning">
+                      <CrownIcon className="size-4" aria-label={t('play.team.captain')} />
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      aria-label={t('host.game.makeCaptain', { name: player.name })}
+                      className="grid size-10 place-items-center rounded-full text-muted-foreground/60 outline-none hover:bg-warning/15 hover:text-warning focus-visible:ring-[3px] focus-visible:ring-ring"
+                      onClick={() => onCaptain(player.id)}
+                    >
+                      <CrownIcon className="size-4" aria-hidden="true" />
+                    </button>
+                  ))}
+                {teams && betweenQuestions && (
+                  <MovePlayerMenu
+                    player={player}
+                    teams={host.teams}
+                    solo={host.settings.soloPlayers ? Boolean(teamOf(player.teamId)?.solo) : null}
+                    onMove={onMove}
+                  />
+                )}
+                {host.phase !== 'finished' && (
                   <button
                     type="button"
-                    aria-label={t('host.game.makeCaptain', { name: player.name })}
-                    className="grid size-10 place-items-center rounded-full text-muted-foreground/60 outline-none hover:bg-warning/15 hover:text-warning focus-visible:ring-[3px] focus-visible:ring-ring"
-                    onClick={() => onCaptain(player.id)}
+                    className="min-h-10 rounded-lg px-2 text-sm font-semibold text-destructive underline underline-offset-4 outline-none hover:bg-destructive/10 focus-visible:ring-[3px] focus-visible:ring-ring"
+                    onClick={() => {
+                      if (window.confirm(t('host.game.confirmKick', { name: player.name }))) onKick(player.id)
+                    }}
                   >
-                    <CrownIcon className="size-4" aria-hidden="true" />
+                    {t('host.game.kick')}
                   </button>
-                ))}
-              {teams && betweenQuestions && (
-                <MovePlayerMenu
-                  player={player}
-                  teams={host.teams}
-                  solo={host.settings.soloPlayers ? Boolean(teamOf(player.teamId)?.solo) : null}
-                  onMove={onMove}
-                />
-              )}
-              {host.phase !== 'finished' && (
-                <button
-                  type="button"
-                  className="min-h-10 rounded-lg px-2 text-sm font-semibold text-destructive underline underline-offset-4 outline-none hover:bg-destructive/10 focus-visible:ring-[3px] focus-visible:ring-ring"
-                  onClick={() => {
-                    if (window.confirm(t('host.game.confirmKick', { name: player.name }))) onKick(player.id)
-                  }}
-                >
-                  {t('host.game.kick')}
-                </button>
-              )}
+                )}
+              </div>
             </li>
           )
         })}

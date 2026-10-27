@@ -114,13 +114,14 @@ test('standings midgame with answers held until the end, controls in view', asyn
       await expect(controls.getByRole('status').first()).toContainText('answer to question 1')
     })
 
-    await test.step('the preview shows the projector live and what the phones show', async () => {
+    await test.step('the preview shows what the phones show first, and the projector live', async () => {
+      await page.getByRole('tab', { name: 'Preview' }).click()
       const preview = page.getByRole('region', { name: 'What everyone sees' })
-      await expect(preview.frameLocator('iframe[title="Live preview of the projector"]').getByText('Correct answer')).toBeVisible()
-      await preview.getByRole('tab', { name: 'Phone' }).click()
       const phonePanel = preview.getByRole('tabpanel', { name: 'Phone' })
       await expect(phonePanel.getByText('Correct answer')).toBeVisible()
       await expect(phonePanel.getByText('Each phone also shows whether its player was right.')).toBeVisible()
+      await preview.getByRole('tab', { name: 'Projector' }).click()
+      await expect(preview.frameLocator('iframe[title="Live preview of the projector"]').getByText('Correct answer')).toBeVisible()
     })
 
     await test.step('locking the screen hides every host page until the password unlocks it', async () => {

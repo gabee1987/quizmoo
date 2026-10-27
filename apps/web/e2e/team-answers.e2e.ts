@@ -137,6 +137,7 @@ test('teams choose: the captain decides, a majority vote, and the fallback', asy
 
     await test.step('on the scoreboard the host switches Blue to everyone counts', async () => {
       await page.getByRole('button', { name: 'Show scoreboard', exact: true }).click()
+      await page.getByRole('tab', { name: 'Players' }).click()
       await page.getByRole('combobox', { name: 'Answer mode of Blue' }).click()
       await page.getByRole('option', { name: 'Everyone counts', exact: true }).click()
       await page.getByRole('button', { name: 'Next question', exact: true }).click()
