@@ -1,5 +1,6 @@
 import type { HostSnapshot } from '@quizmoo/shared'
 import { useTranslation } from 'react-i18next'
+import { BetweenQuestions } from '@/components/between-questions'
 import { RoundChip } from '@/components/round-chip'
 import { resultsWhen } from '@/lib/results-when'
 import { reviewPosition } from '../play/review-position'
@@ -21,23 +22,27 @@ export function ScreenReveal({ host }: { host: HostSnapshot }) {
       : null,
   ].filter((stat): stat is string => stat !== null)
   return (
-    <RevealLayout
-      question={reveal.question}
-      reveal={reveal}
-      symbols={host.settings.answerSymbols}
-      awaitingGrading={host.awaitingGrading}
-      heading={
-        <span className="flex min-w-0 flex-wrap items-center gap-x-5 gap-y-2">
-          <span>
-            {t('play.questionOf', { index: host.questionIndex + 1, count: host.questionCount })}
-            {host.reviewing && ` · ${t('play.shownAgain')}`}
-            {reviewPosition(host)}
+    <div className="flex flex-1 flex-col gap-8">
+      <RevealLayout
+        question={reveal.question}
+        reveal={reveal}
+        symbols={host.settings.answerSymbols}
+        awaitingGrading={host.awaitingGrading}
+        heading={
+          <span className="flex min-w-0 flex-wrap items-center gap-x-5 gap-y-2">
+            <span>
+              {t('play.questionOf', { index: host.questionIndex + 1, count: host.questionCount })}
+              {host.reviewing && ` · ${t('play.shownAgain')}`}
+              {reviewPosition(host)}
+            </span>
+            <RoundChip group={host.group} size="screen" />
           </span>
-          <RoundChip group={host.group} size="screen" />
-        </span>
-      }
-      stats={stats}
-    />
+        }
+        stats={stats}
+      />
+      {/* A question shown again is a look back, not the time between questions. */}
+      {!host.reviewing && <BetweenQuestions snapshot={host} size="screen" leaders />}
+    </div>
   )
 }
 
@@ -59,6 +64,8 @@ function AnswersHidden({ host }: { host: HostSnapshot }) {
         {t('play.answeredSoFar', { answered: host.answeredCount, count: host.players.length })}
       </p>
       <p className="text-3xl text-muted-foreground">{t(resultsWhen(host.settings))}</p>
+      {/* No top 3 here: results are held back. */}
+      <BetweenQuestions snapshot={host} size="screen" className="mt-auto" />
     </div>
   )
 }

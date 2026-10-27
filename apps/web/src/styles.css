@@ -704,7 +704,8 @@
   }
 }
 @media (min-width: 1024px) {
-  body:has([data-host-sidebar]) .toaster[data-x-position='center'] {
+  /* Not while the game page's sidebar is slid away. */
+  body:has([data-host-sidebar]):not(:has([data-sidebar-closed])) .toaster[data-x-position='center'] {
     --width: min(48rem, calc(100vw - 2rem - 272px)) !important;
     left: calc(50% + 136px) !important;
   }
@@ -1035,6 +1036,11 @@
   transform-origin: 50% 100%;
   animation: hero-jump 0.8s ease-out both;
 }
+/* The app menu's small cow: the hero's jump, scaled to a logo in a top bar. */
+.logo-hop {
+  transform-origin: 50% 100%;
+  animation: logo-hop 0.6s ease-out both;
+}
 .hero-bubble {
   transform-origin: 0 100%;
   animation: hero-bubble 2.6s ease-out both;
@@ -1086,6 +1092,24 @@
   }
   78% {
     transform: scale(0.96, 1.04) rotate(3deg);
+  }
+  100% {
+    transform: none;
+  }
+}
+@keyframes logo-hop {
+  15% {
+    transform: translateY(2px) scale(1.1, 0.85);
+  }
+  40% {
+    transform: translateY(-8px) scale(0.92, 1.1) rotate(-8deg);
+    animation-timing-function: ease-in;
+  }
+  62% {
+    transform: translateY(0) scale(1.08, 0.9);
+  }
+  80% {
+    transform: scale(0.97, 1.03) rotate(4deg);
   }
   100% {
     transform: none;

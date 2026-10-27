@@ -497,6 +497,7 @@ export function gradeText(state: GameState, correctPlayerIds: readonly string[])
  */
 export function next(state: GameState, now: number): GameState {
   if (state.phase === 'intro') return openQuestion({ ...state, announcement: null }, state.questionIndex + 1, now)
+  if (state.phase === 'countdown') return startQuestion(state, state.questionIndex, now)
   if ((state.phase === 'reveal' && !state.awaitingGrading) || state.phase === 'scoreboard') {
     return advance({ ...state, announcement: null, reviewIndex: null }, now)
   }
@@ -507,6 +508,54 @@ export function next(state: GameState, now: number): GameState {
 export function introTimeUp(state: GameState, now: number): GameState {
   if (state.phase !== 'intro' || state.pausedAt || !state.introEndsAt || now < state.introEndsAt) return state
   return openQuestion(state, state.questionIndex + 1, now)
+}
+
+/** The countdown is over: its question opens. Unchanged outside the countdown or before its end. */
+export function countdownTimeUp(state: GameState, now: number): GameState {
+  if (state.phase !== 'countdown' || !state.countdownEndsAt || now < state.countdownEndsAt) return state
+  return startQuestion(state, state.questionIndex, now)
+}
+
+/**
+ * Between questions (reveal, not while grading, or scoreboard): the question `questionId`, not
+ * played yet, plays next; the others keep their order. Played in the middle of the current round it
+ * joins that round for this game, so a round stays in one piece; otherwise it keeps its round only
+ * where it opens it (or is all that is left of it) and plays on its own elsewhere. The groups follow
+ * the new order.
+ */
+/**
+ * The round question `from` belongs to once moved to `slot` (playNext): the current round when the
+ * slot is inside it; otherwise its own, if it lands in front of its round or is the round's last
+ * question left; otherwise none (it plays on its own).
+ */
+export function groupIfPicked(questions: readonly Question[], slot: number, from: number): string | undefined {
+  const rest = questions.filter((_, i) => i !== from)
+  const current = rest[slot - 1]?.groupId
+  const after = rest[slot]?.groupId
+  const own = questions[from]?.groupId
+  if (current !== undefined && current === after) return current
+  if (own !== undefined && (after === own || !rest.some((q) => q.groupId === own))) return own
+  return undefined
+}
+
+export function playNext(state: GameState, questionId: string): GameState {
+  if (!((state.phase === 'reveal' && !state.awaitingGrading) || state.phase === 'scoreboard')) {
+    throw new EngineError('errors.invalidTransition')
+  }
+  const questions = [...state.quiz.questions]
+  const from = questions.findIndex((q) => q.id === questionId)
+  const slot = state.questionIndex + 1
+  if (from < slot) throw new EngineError('errors.invalidInput')
+  if (from === slot) return state
+  const groupId = groupIfPicked(questions, slot, from)
+  const [picked] = questions.splice(from, 1)
+  const { groupId: _, ...rest } = picked!
+  questions.splice(slot, 0, (groupId === undefined ? rest : { ...rest, groupId }) as Question)
+  const groups = state.quiz.groups
+  if (!groups) return { ...state, quiz: { ...state.quiz, questions } }
+  const order = [...new Set(questions.flatMap((q) => (q.groupId === undefined ? [] : [q.groupId])))]
+  const byId = new Map(groups.map((g) => [g.id, g]))
+  return { ...state, quiz: { ...state.quiz, questions, groups: order.flatMap((id) => byId.get(id) ?? []) } }
 }
 
 /**
@@ -558,6 +607,7 @@ export function endGame(state: GameState, now: number): GameState {
     pausedAt: null,
     reviewIndex: null,
     introEndsAt: null,
+    countdownEndsAt: null,
   }
 }
 
@@ -915,7 +965,26 @@ export function currentQuestion(state: GameState): Question {
   return question
 }
 
+/** Opens question `index`, after the countdown when the game has one. */
 function openQuestion(state: GameState, index: number, now: number): GameState {
+  if (!state.quiz.questions[index]) throw new EngineError('errors.invalidTransition')
+  const seconds = state.settings.countdownSec ?? 0
+  if (seconds === 0) return startQuestion(state, index, now)
+  return {
+    ...state,
+    phase: 'countdown',
+    questionIndex: index,
+    countdownEndsAt: now + seconds * 1000,
+    questionStartedAt: null,
+    questionEndsAt: null,
+    awaitingGrading: false,
+    pausedAt: null,
+    reviewIndex: null,
+    introEndsAt: null,
+  }
+}
+
+function startQuestion(state: GameState, index: number, now: number): GameState {
   const question = state.quiz.questions[index]
   if (!question) throw new EngineError('errors.invalidTransition')
   return {
@@ -928,6 +997,7 @@ function openQuestion(state: GameState, index: number, now: number): GameState {
     pausedAt: null,
     reviewIndex: null,
     introEndsAt: null,
+    countdownEndsAt: null,
   }
 }
 

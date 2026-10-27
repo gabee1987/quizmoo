@@ -1,5 +1,4 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { Link, useNavigate, useRouterState } from '@tanstack/react-router'
+import { Link, useRouterState } from '@tanstack/react-router'
 import {
   DicesIcon,
   ExternalLinkIcon,
@@ -26,10 +25,10 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { LegalLinks } from '@/components/legal-links'
-import { apiFetch } from '@/lib/api'
 import type { User } from '@/lib/auth'
 import { cn } from '@/lib/cn'
 import { useSiteInfo } from '@/lib/site'
+import { useLogout } from '@/lib/use-logout'
 import { useUnseenRelease } from '../features/whats-new/use-release-seen'
 
 type To = '/host' | '/host/quizzes' | '/host/games' | '/host/users' | '/host/nicknames'
@@ -47,15 +46,7 @@ interface Item {
  */
 export function HostNav({ user }: { user: User }) {
   const { t } = useTranslation()
-  const navigate = useNavigate()
-  const queryClient = useQueryClient()
-  const logout = useMutation({
-    mutationFn: () => apiFetch<void>('/api/auth/logout', { method: 'POST' }),
-    onSettled: () => {
-      queryClient.clear()
-      void navigate({ to: '/login' })
-    },
-  })
+  const logout = useLogout()
   const main: Item[] = [
     { to: '/host', label: t('nav.home'), icon: HouseIcon, exact: true },
     { to: '/host/quizzes', label: t('nav.quizzes'), icon: LayoutGridIcon, exact: false },
@@ -238,7 +229,7 @@ function TabIcon({ icon: Icon, dot = false }: { icon: ComponentType<{ className?
 }
 
 /** "What's new" has notes the host has not opened yet. */
-function UnseenDot({ className }: { className?: string }) {
+export function UnseenDot({ className }: { className?: string }) {
   const { t } = useTranslation()
   return (
     <span className={cn('size-2.5 shrink-0 animate-pop rounded-full bg-primary', className)}>

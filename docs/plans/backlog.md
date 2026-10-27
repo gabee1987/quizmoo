@@ -68,7 +68,9 @@ Collected while testing phases 9 to 12. Effort as above.
 - Quiz files: questions written in a spreadsheet anywhere (template with a guide and examples) imported with a row-by-row problem report, and quizzes downloaded as a spreadsheet or a full Quizmoo file with settings and pictures (phase 27).
 - Question groups (rounds): intros on the projector and the phones, standings and answers after a round, per-round time, points and rules, groups in the editor, spreadsheets and Quizmoo files, colour tags, and 200 questions per quiz (phase 40).
 - Random question order per game (groups move as blocks, a group can keep its order), the editor's Shuffle button, and a slim top bar on phones that makes question pictures bigger (phase 39).
+- The host's live board: the running game on one screen without scrolling, a tile per player filled in live with the answer, time and verdict, results on the same tiles between questions, tiles or list, sort orders, hidden answers, and the panels as tabs (phase 43, from the first family game, October 2026).
 - Questions and groups switched off without deleting them, search in the editor's list, add buttons in the top bar and at the top of the list, jump to the selected question with a clearer selected card, the title in the General tab, and default time and points for new questions (phases 42 and 38).
+- Any upcoming question played next between questions (with search and a sticky "plays next" in the Questions tab), the estimated game length everywhere a game starts or runs, the projector and phones between questions (progress, what's next, top 3) and an optional 3-2-1 countdown, each part a setting; quick messages from the top bar and the host seeing their own message (phases 44 and 41).
 
 ### Open
 
@@ -80,7 +82,7 @@ Collected while testing phases 9 to 12. Effort as above.
 | Lock joining | Feature | S | A host switch that closes the lobby to new players (bots or latecomers), found in the phase 30 security review. |
 | Rooms with their own admin | Feature | L | Each room (workspace) has an admin; only its members see and edit its quizzes and games. Today every quiz and game belongs to one host account. Needs a rooms table, membership and roles, permission checks on every route and socket attach, migration of existing quizzes. |
 | Play-through preview in the editor | Feature | M | The host plays the quiz on a phone-like frame (question, answer, reveal) without starting a game. Reuses the phone screens with a local fake snapshot; no server state. |
-| Host live dashboard and hints | Feature | L | One coherent view of the running game: answers in, who is stuck or offline, per-question stats, standings. Hints or messages to selected players (host-to-player messages were out of scope in phase 12). |
+| Hints to selected players | Feature | M | Messages or hints to chosen players instead of everyone (host-to-player messages were out of scope in phase 12). The live view of the running game itself was done in phase 43; a tile on the board could be where the host picks the players. |
 | Fixes in the patch notes (phase 37) | Feature | S | Each release on the "What's new" page gets a "Fixed" section next to the news, and every future release keeps its notes there. From the 20 October 2026 notes. |
 | Help page and tutorial (phase 34) | Feature | L | A full help page on how the app works, plus an interactive first-run tutorial with hints on the host pages. To decide in the plan: which flows the tour covers, whether it can be replayed, whether players get hints too. From the 20 October 2026 notes; asked again on 24 October 2026: a full tutorial with interactive hints and help, plus a dedicated help page with everything about how the app works. |
 | Smoother drag with 200 questions | Improvement | M | On a slow device (CPU slowed 4×) dragging a question through 200 open rows stutters (frames up to 0.5 s); laptops are smooth. Virtualise the editor's list or keep rows from re-rendering on each move. Figures in phase 40's Results (25 October 2026). |
@@ -97,3 +99,10 @@ Collected while testing the Railway deployment. The help page and tutorial (phas
 | Tooltips in the app's own look on desktop | Improvement | M | About 60 places use the browser's native `title` tooltip. Replace them with the `Tooltip` primitive styled like the rest of the app (delay, arrow, theme colours, also on keyboard focus), shown only on devices with a mouse. |
 | A PIN remembered after a page refresh | Fix | S | The join page keeps the last PIN after a refresh even when that game is not running yet (it stays in the address as `?pin=`). After a refresh the page should start empty, or check the PIN and drop it when no game answers; the QR join link (`/?pin=…`) must keep working. |
 | Leaving the host pages through the logo | Fix | S | Clicking the logo (home) while logged in goes to the player join page and does not log the host out. The expected behaviour is still open: the user's note says the logo "does not log me out". |
+
+### From the first family game (27 October 2026)
+
+| Task | Kind | Effort | Notes |
+|---|---|---|---|
+| Picture details in the editor | Improvement | S | Show more about a question's picture in the editor: its size in pixels, file size and format (uploads are stored as WebP, at most 1280 px on the long edge), so the host knows what the phones and the projector will get. To decide: whether the original upload's size is kept as well. |
+| Typo tolerance for typed answers | Feature | M | Accept small spelling mistakes in text answers ("jaoan" counts as "japan"). Built into the scoring code (edit distance after the existing normalising), no third-party service. To decide in the plan: how many mistakes per answer length, whether numbers and very short answers stay exact, a per-question or per-quiz switch, and whether the host and the review show that a near miss was accepted. |

@@ -5,6 +5,7 @@ import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   ArrowUpDownIcon,
+  ClockIcon,
   CopyIcon,
   EllipsisVerticalIcon,
   EyeOffIcon,
@@ -37,6 +38,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton'
 import { quizzesQueryOptions, type QuizSummary } from '@/features/host/queries'
 import { useNewQuiz, useStartGame } from '@/features/host/quiz-actions'
+import { quizMinutes } from '@/lib/game-length'
 import { stagger } from '@/lib/motion'
 import { themeSwatches } from '@/lib/themes'
 import { toastError } from '@/lib/toast'
@@ -317,6 +319,12 @@ function QuizList() {
             </div>
             <div className="flex flex-wrap gap-1.5">
               <Badge variant="secondary">{t('host.questionCount', { count: quiz.questionCount })}</Badge>
+              {quiz.questionCount > quiz.offCount && (
+                <Badge variant="secondary" title={t('common.lengthEstimate')}>
+                  <ClockIcon aria-hidden="true" />
+                  {t('common.aboutMin', { count: quizMinutes(quiz.length, quiz.settings) })}
+                </Badge>
+              )}
               {quiz.offCount > 0 && (
                 <Badge variant="outline" className="border-dashed text-muted-foreground">
                   <EyeOffIcon aria-hidden="true" />
@@ -359,6 +367,7 @@ function QuizList() {
           quizBranding={creating.branding}
           rounds={creating.groupCount > 0}
           offCount={creating.offCount}
+          length={creating.length}
           pending={play.isPending}
           onCreate={(settings, scheduledAt, branding, lockCode) =>
             play.mutate({ quizId: creating.id, settings, scheduledAt, branding, lockCode })

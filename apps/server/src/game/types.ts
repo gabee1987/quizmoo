@@ -131,6 +131,8 @@ export interface GameState {
    * for the host. A held intro keeps it and sets `pausedAt`. Missing in games saved before groups existed.
    */
   introEndsAt?: number | null
+  /** The countdown phase: unix ms when it opens question `questionIndex`. Missing in games saved before it existed. */
+  countdownEndsAt?: number | null
   /**
    * Groups whose answers were held back until their end (`revealAnswers: 'afterGroup'`) and which the
    * host has shown since. Missing in games saved before groups existed.

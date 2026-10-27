@@ -1,5 +1,6 @@
 import type { HostSnapshot } from '@quizmoo/shared'
 import type { TFunction } from 'i18next'
+import { lengthMinutes } from '@/lib/game-length'
 import { answerChangesLabel, teamAnswerLabel } from './game-settings-form'
 
 /**
@@ -11,7 +12,8 @@ export function settingsLine(host: HostSnapshot, t: TFunction): string[] {
   const ownRules = group !== null && host.groups.some((outline) => outline.id === group.id && outline.ownRules)
   const lobbyRounds = host.phase === 'lobby' && host.groups.length > 0
   return [
-    lobbyRounds ? t('play.info.questionsInRounds', { questions: host.questionCount, count: host.groups.length }) : null,
+    host.phase === 'lobby' && host.estimatedLeftSec > 0 ? t('common.aboutMin', { count: lengthMinutes(host.estimatedLeftSec) }) : null,
+    lobbyRounds ?t('play.info.questionsInRounds', { questions: host.questionCount, count: host.groups.length }) : null,
     ownRules ? t('host.game.roundRules', { round: group.index + 1 }) : null,
     t(`host.create.modes.${host.settings.mode}`),
     host.settings.mode === 'team' ? teamAnswerLabel(host.settings, t) : null,
@@ -27,7 +29,10 @@ export function settingsLine(host: HostSnapshot, t: TFunction): string[] {
     host.settings.revealAnswers === 'afterQuestion' && host.settings.scoreboard === 'onDemand'
       ? t('host.create.scoreboardOptions.onDemand')
       : null,
-    host.settings.answerStyle === 'colourful' ? t('host.create.answerStyleOptions.colourful') : null,
+    host.settings.countdownSec > 0
+      ? `${t('host.create.countdown')}: ${t('host.create.countdownSeconds', { count: host.settings.countdownSec })}`
+      : null,
+    host.settings.answerStyle === 'colourful' ?t('host.create.answerStyleOptions.colourful') : null,
     host.settings.finalResults === 'onRelease' ? t('host.create.finalResultsOptions.onRelease') : null,
   ].filter((label): label is string => label !== null)
 }

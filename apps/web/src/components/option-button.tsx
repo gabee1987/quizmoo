@@ -3,6 +3,7 @@ import { Loader2Icon } from 'lucide-react'
 import type { ButtonHTMLAttributes } from 'react'
 import { cn } from '@/lib/cn'
 import { CheckIcon, OptionSymbol } from './icons'
+import { hoverBridge } from './ui/button'
 import { optionFill, optionVars } from './option-colours'
 import { PickStack, type PickPlayer } from './pick-stack'
 
@@ -69,9 +70,11 @@ export function OptionButton({
       {...props}
       style={{ ...optionVars(index), ...(picks === undefined && style) }}
       className={cn(
-        'flex items-center gap-3 rounded-2xl text-left font-bold transition-[transform,box-shadow,filter] duration-150 ease-out outline-none select-none focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-default motion-reduce:transition-none',
+        'relative flex items-center gap-3 rounded-2xl text-left font-bold transition-[transform,box-shadow,filter] duration-150 ease-out outline-none select-none focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-default motion-reduce:transition-none',
         size,
         look,
+        // Not while disabled: nothing lifts then.
+        !props.disabled && hoverBridge,
         dimmed && 'opacity-40',
         picks === undefined && className,
       )}

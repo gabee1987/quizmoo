@@ -1,16 +1,17 @@
 import type { PlayerSnapshot, TeamPublic } from '@quizmoo/shared'
-import { CheckIcon, CopyIcon, UserIcon, UsersIcon } from 'lucide-react'
+import { CheckIcon, ClockIcon, CopyIcon, UserIcon, UsersIcon } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { copyText } from '@/lib/clipboard'
 import { cn } from '@/lib/cn'
+import { lengthMinutes } from '@/lib/game-length'
 import { PlayerAvatar } from '../../components/player-avatar'
 import { WaitingCow } from '../../components/waiting-cow'
 import { WaitingDots } from '../../components/waiting-dots'
 import { stagger } from '../../lib/motion'
-import { gameInfo } from './lobby-info'
+import { gameInfo, type InfoLine } from './lobby-info'
 
 // The waiting screen's parts. Each fills the width it is given: the phone and desktop layouts in
 // lobby.tsx decide how wide and where.
@@ -92,7 +93,12 @@ export function PinCard({ pin, className }: { pin: string; className?: string })
  */
 export function GameInfoCard({ snapshot, className }: { snapshot: PlayerSnapshot; className?: string }) {
   const { t } = useTranslation()
-  const items = gameInfo(snapshot.settings, snapshot.mode, snapshot.questionCount, snapshot.groupCount)
+  const items: InfoLine[] = [
+    ...(snapshot.estimatedLeftSec > 0
+      ? [{ icon: ClockIcon, text: 'play.info.length', values: { count: lengthMinutes(snapshot.estimatedLeftSec) } }]
+      : []),
+    ...gameInfo(snapshot.settings, snapshot.mode, snapshot.questionCount, snapshot.groupCount),
+  ]
   return (
     <section
       aria-labelledby="game-info"

@@ -256,6 +256,19 @@ export const gameSettingsSchema = z
     groupIntroSec: z.number().int().min(0).max(120).default(0),
     /** Standings after each group's last question, or only when the host asks for them. */
     groupStandings: z.enum(['afterGroup', 'onDemand']).default('afterGroup'),
+    /** A 3-2-1 countdown on every screen before each question opens; 0 opens it at once. */
+    countdownSec: z.union([z.literal(0), z.literal(3), z.literal(5)]).default(0),
+    /** What the projector shows between questions (the phones the first two, compactly). Leaders never while results are held back. */
+    betweenQuestions: z
+      .object({
+        /** How far the game (and the round) is, and the time left. */
+        progress: z.boolean().default(true),
+        /** The next question's number, type, time and points, never its text. */
+        next: z.boolean().default(true),
+        /** The top 3 so far. */
+        leaders: z.boolean().default(true),
+      })
+      .prefault({}),
     /** Answer buttons on phones: neutral cards with a coloured symbol badge, or fully coloured like the projector. */
     answerStyle: z.enum(['plain', 'colourful']).default('colourful'),
     /** Colours of the answer options on phones (when colourful), the projector and the result bars. */

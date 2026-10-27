@@ -10,6 +10,8 @@ import {
   ToggleRightIcon,
   type LucideIcon,
 } from 'lucide-react'
+import { hoverBridge } from '@/components/ui/button'
+import { cn } from '@/lib/cn'
 import { stagger } from '@/lib/motion'
 
 export const typeIcons: Record<QuestionType, LucideIcon> = {
@@ -35,7 +37,10 @@ export function TypePicker({ onPick }: { onPick: (type: QuestionType) => void })
           <button
             type="button"
             onClick={() => onPick(type)}
-            className="group flex min-h-20 w-full items-center gap-4 rounded-2xl border-2 bg-card p-4 text-left shadow-soft transition-[transform,border-color] outline-none hover:-translate-y-0.5 hover:border-primary focus-visible:ring-[3px] focus-visible:ring-ring active:translate-y-0"
+            className={cn(
+              'group relative flex min-h-20 w-full items-center gap-4 rounded-2xl border-2 bg-card p-4 text-left shadow-soft transition-[transform,border-color] outline-none hover:-translate-y-0.5 hover:border-primary focus-visible:ring-[3px] focus-visible:ring-ring active:translate-y-0',
+              hoverBridge,
+            )}
           >
             <span className="grid size-12 shrink-0 place-items-center rounded-xl bg-secondary text-secondary-foreground transition-transform group-hover:scale-110 group-hover:-rotate-6">
               <Icon className="size-6" aria-hidden="true" />

@@ -27,10 +27,10 @@ export function ScreenPreview({ host, clockOffset, defaultOpen }: { host: HostSn
         </Button>
       </div>
       {open && (
-        <Tabs defaultValue="projector" className="flex flex-col gap-3">
+        <Tabs defaultValue="phone" className="flex flex-col gap-3">
           <TabsList className="self-start">
-            <TabsTrigger value="projector">{t('host.preview.projector')}</TabsTrigger>
             <TabsTrigger value="phone">{t('host.preview.phone')}</TabsTrigger>
+            <TabsTrigger value="projector">{t('host.preview.projector')}</TabsTrigger>
           </TabsList>
           <TabsContent value="projector">
             <ScaledFrame src={`/screen/${host.pin}?preview=1`} width={1920} height={1080} title={t('host.preview.projectorFrame')} />

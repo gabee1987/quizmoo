@@ -2,6 +2,45 @@
 
 ## Unreleased
 
+## 1.6.0 – 2026-10-27
+
+The host decides the order, everyone knows how long the game takes, and there is something to look at between questions.
+
+### Game flow (phase 44, includes 41)
+- Between questions (in the reveal, not while grading, and on the scoreboard) the host can make any question still to come the next one: "Play next" in the Questions tab. The rest keep their order, and results list the questions in the order played. A question picked inside the round under way joins it; picked elsewhere, it keeps its round when it lands in front of it or is the round's last one left, otherwise it plays on its own and the round still opens with its intro later. The button says so beforehand ("joins the round …", "leaves the round …").
+- The Questions tab has a header that stays in view: a search over both lists (text, round, type or number, ignoring case and accents) and the question that plays next, which pops when the pick changes. "Still to come" and "Questions so far" fold, remembered on the device; a played question is only in the second list.
+- Estimated length ("about 25 min"): the time limits plus 20 s per question, 15 s for a round intro that waits for the host, 10 s for a scoreboard the settings show, plus the countdown. Shown in the quiz lists, the editor's top bar, the new game dialog (redone as the settings change), the three lobbies, and during the game as "about N min left" in the host's top bar, on the projector's question screen and on the phones' "Answer sent!" and waiting screens. The quiz list response carries what the estimate needs (time limits, rounds, switched-off questions) instead of the questions.
+- Between questions the projector shows cards along the bottom: progress (questions done, round, time left), what's next (number, type, time and points, never the text) and the top 3 (never while results are held back; on the scoreboard only progress and what's next, in a side column). Phones show progress and what's next in one compact card on their waiting screens. Each part is a setting under Look.
+- An optional 3-2-1 countdown before every question (off, 3 s or 5 s, under Game flow): a big number on the projector and the phones with the next question's number, type and round, the ring in the host's strip, and "Start now" to skip it. It cannot be paused.
+
+### Host page
+- Quick message in the game's top bar: each of the game's quick messages opens its times to the right (its own first, then until cleared, 10, 30 and 60 s); one click sends it, important ones stay important. A dot on the button says a message is showing.
+- The host sees the message on their own game page, as the phones and the projector show it; its × clears it on every screen (no swipe there, so a stray one cannot clear it for the room).
+- The phones' result screen after a question shows which question it was (number and text) above the result.
+- The app bar is folded into the running game's and the editor's top bars: the cow opens the language, the look, the host's pages and Log out, and hops when pressed. The side panels toggle works again, and buttons no longer flicker when the pointer rests on their bottom edge.
+
+## 1.5.0 – 2026-10-27
+
+The host's live board: who answered what, at a glance, without scrolling.
+
+### The host's live board (phase 43)
+- The running game's host page is one board that fills a laptop window without scrolling: a top bar (way back, PIN, where the game is, connections, lock, projector, end game), the question strip (question, timer, answers per option, correct answer), the player board, and a rail with the controls and the panels. The host sidebar is hidden while a game runs.
+- Every player has a tile that fills in as their answer comes in:
+  - waiting, then the answer in its option's colour and symbol;
+  - how fast, and right or wrong at once (the server sends the verdict while the question runs).
+  
+  Offline players are faded with a mark, and players who left say so. In team mode the tiles are grouped per team, with the team's answer and whether the captain confirmed it.
+- Between questions the same tiles show the results: green or red, the points and the rank change, with "3 right · 1 wrong · 2 did not answer" above them and the average and fastest time in the strip.
+- The tiles take the largest size that fits: big for a family game, one line each for a full room (60 players fit at 1280 × 800).
+- Per-device options:
+  - tiles or list;
+  - order by name, rank, answer time or missing answers first;
+  - "Hide answers" (answered or not only, for when players can see the laptop);
+  - side panels on or off.
+- A button in the top bar slides the host menu back in, and away again (remembered on the device).
+- In the Message tab the shown message uses the panel's full width, with Clear under it. The preview opens on the phone's screen first. In the Players tab each player's name gets the card's full width, with the team and the actions under it.
+- The panels are tabs next to the board: Standings, Message (with a dot while a message shows), Players (remove, captain, move, team modes), Questions (show one again) and Preview.
+
 ## 1.4.0 – 2026-10-25
 
 Questions switched off for an event without deleting them, and a handier editor for big quizzes.

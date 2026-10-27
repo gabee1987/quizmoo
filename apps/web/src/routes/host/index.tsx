@@ -26,6 +26,7 @@ import { dashboardGames } from '@/features/host/dashboard'
 import { gameSummaryQueryOptions, quizzesQueryOptions, type QuizSummary } from '@/features/host/queries'
 import { useNewQuiz, useStartGame } from '@/features/host/quiz-actions'
 import { cn } from '@/lib/cn'
+import { quizMinutes } from '@/lib/game-length'
 import { stagger } from '@/lib/motion'
 
 export const Route = createFileRoute('/host/')({
@@ -142,6 +143,7 @@ function HostHome() {
                         detail={[
                           t('host.questionCount', { count: quiz.questionCount }),
                           ...(quiz.offCount > 0 ? [t('host.offCount', { count: quiz.offCount })] : []),
+                          ...(quiz.questionCount > quiz.offCount ? [t('common.aboutMin', { count: quizMinutes(quiz.length, quiz.settings) })] : []),
                           t('host.updated', { date: date(quiz.updatedAt) }),
                         ]}
                       />
@@ -190,6 +192,7 @@ function HostHome() {
           quizBranding={creating.branding}
           rounds={creating.groupCount > 0}
           offCount={creating.offCount}
+          length={creating.length}
           pending={play.isPending}
           onCreate={(settings, scheduledAt, branding, lockCode) =>
             play.mutate({ quizId: creating.id, settings, scheduledAt, branding, lockCode })

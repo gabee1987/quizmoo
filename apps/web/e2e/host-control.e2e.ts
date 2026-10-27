@@ -79,6 +79,7 @@ test('pause and resume, a message that clears itself, showing a question again',
     const banner = (p: Page) => p.getByRole('status', { name: 'Message from the host' })
 
     await test.step('a 10 s message disappears by itself', async () => {
+      await page.getByRole('tab', { name: 'Message' }).click()
       await hostButton('10 s').click()
       await hostButton('Short break').click()
       await expect(banner(phone)).toHaveText('Short break')
@@ -93,7 +94,9 @@ test('pause and resume, a message that clears itself, showing a question again',
       await hostButton('Next question').click()
       await phone.getByRole('button', { name: 'False', exact: true }).click()
       await hostButton('Show scoreboard').click()
-      await page.getByText('Questions so far').click()
+      await page.getByRole('tab', { name: 'Questions' }).click()
+      // The played questions are folded until opened.
+      await page.getByRole('button', { name: /Questions so far/ }).click()
       await page.getByRole('button', { name: 'Show question 1 on the screens again' }).click()
       await expect(phone.getByText('Question 1 of 2 · shown again')).toBeVisible()
       await expect(projector.getByText('Question 1 of 2 · shown again')).toBeVisible()
