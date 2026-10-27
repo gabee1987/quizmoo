@@ -17,8 +17,12 @@ export const MAX_SCHEDULE_DAYS = 30
 /** When joining opens: a unix ms time, at most `MAX_SCHEDULE_DAYS` ahead (checked against the clock by the engine). */
 export const scheduledAtSchema = z.number().int().positive()
 
-/** `intro`: a group's intro screen before its first question (`questionIndex` is still the question before it). */
-export const gamePhases =['lobby', 'intro', 'question', 'reveal', 'scoreboard', 'finished'] as const
+/**
+ * `intro`: a group's intro screen before its first question (`questionIndex` is still the question before it).
+ * `countdown`: the 3-2-1 before a question opens (`countdownSec`); `questionIndex` is already that question,
+ * whose text nobody gets until it opens.
+ */
+export const gamePhases =['lobby', 'intro', 'countdown', 'question', 'reveal', 'scoreboard', 'finished'] as const
 export type GamePhase = (typeof gamePhases)[number]
 
 // ---- Answers --------------------------------------------------------------
@@ -217,6 +221,26 @@ export interface GroupPublic {
   revealed: boolean
 }
 
+/** What the screens may tell about a question before it opens: nothing that gives the answer away. */
+export interface NextQuestion {
+  /** 0-based position in the game. */
+  index: number
+  type: QuestionType
+  timeLimitSec: number
+  points: number
+  /** Its round's title; null outside rounds (and for a question pulled out of its round). */
+  groupTitle: string | null
+}
+
+/** A question still to come, in the host's "Play next" list. */
+export interface UpcomingQuestion {
+  index: number
+  id: string
+  text: string
+  type: QuestionType
+  groupTitle: string | null
+}
+
 /** One group in the host's lists: where its questions are. */
 export interface GroupOutline {
   id: string
@@ -278,6 +302,15 @@ export interface GameSnapshotBase {
   pausedAt: number | null
   /** Unix ms when a timed intro opens its question by itself. Null outside the intro and while it waits for the host. */
   introEndsAt: number | null
+  /** Unix ms when the countdown opens its question. Null outside the countdown. */
+  countdownEndsAt: number | null
+  /** Roughly how many seconds the rest of the game takes (`estimateGameSec`), at this snapshot's time. */
+  estimatedLeftSec: number
+  /**
+   * The question after the one on the screens (in the intro and the countdown: the one about to open), without
+   * its text; null after the last one.
+   */
+  nextQuestion: NextQuestion | null
   /** The group of the question on the screens (in the intro: of the next one); null outside groups. */
   group: GroupPublic | null
   /** Groups in the quiz (0 without groups), for the lobbies' "24 questions in 4 rounds". */
@@ -350,6 +383,8 @@ export interface HostSnapshot extends GameSnapshotBase {
   quickMessages: QuickMessage[] | null
   /** The quiz's groups in order; empty without groups. */
   groups: GroupOutline[]
+  /** Questions still to come, in order, for "Play next". Host room only; empty on the public screen. */
+  upcoming: UpcomingQuestion[]
   /** The host locked their screens: the host room then receives this public snapshot only. */
   locked: boolean
   /** The game has its own lock code. Host room only; false on the public screen. */

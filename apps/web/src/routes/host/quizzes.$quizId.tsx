@@ -35,6 +35,7 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { FormAlert } from '@/components/form-alert'
+import { AppMenu } from '@/components/app-menu'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
@@ -782,11 +783,12 @@ function Editor({ quiz }: { quiz: Quiz }) {
   return (
     <TooltipProvider delayDuration={200}>
       {/* data-palette colours the option badges in the editor like the answers in the game. */}
-      <div data-palette={draft.settings.answerPalette} style={paletteVars(draft.settings)} className="mx-auto flex w-full max-w-[100rem] flex-col gap-4 pb-20 lg:pb-0">
+      <div data-palette={draft.settings.answerPalette} style={paletteVars(draft.settings)} className="mx-auto flex w-full max-w-[100rem] flex-col gap-4 pt-3 pb-20 lg:pb-0">
         {/* Sticky from sm: on phones the bar wraps to two rows and the bottom bar already holds the navigation.
             No background of its own: the page behind has a gradient wash a solid strip would not match. */}
         <div className="z-30 sm:sticky sm:top-2">
         <header className="flex flex-wrap items-center gap-2 rounded-2xl border bg-card/95 p-2 shadow-soft backdrop-blur">
+          <AppMenu />
           <Button asChild variant="ghost" size="icon" aria-label={t('host.game.backToQuizzes')} title={t('host.game.backToQuizzes')}>
             <Link to="/host/quizzes">
               <ArrowLeftIcon aria-hidden="true" />

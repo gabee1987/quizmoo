@@ -57,6 +57,8 @@ Browser storage: every `localStorage` / `sessionStorage` key is `quizmoo.<name>`
 - **Scroll boxes**: a box with `overflow-y-auto` that holds `sr-only` text needs `relative`: `sr-only` is absolutely positioned, and without a positioned ancestor inside the box the labels further down escape its clipping and make the whole page scroll (phase 43's board).
 - **Imports**: `@/` points to `src/` (shadcn requires it). New code imports primitives and app components with `@/components/...`; existing relative imports may stay.
 - **Errors**: a failed request where no field is at fault calls `toastError(error)` from `lib/toast.ts` (e.g. `useMutation({ onError: toastError })`); errors tied to a form use `FormAlert` or the field's own error.
+- **Use the width**: a wide card never piles its content on the left with the right side empty. Give secondary content (counts, figures, actions) a column of its own once the card is wide (container query, as in the host's `QuestionStrip`), and look at the 1920 px screenshot for unused space, not only for overflow.
+- **App bar**: the editor and a running game's page (not its lobby, not the lock screen) have no `AppHeader` (`__root.tsx`); their own top bar starts with `AppMenu` (the cow: language, look, Home, My settings, What's new, Log out). Logging out anywhere goes through `useLogout`.
 - Tailwind utility classes only. No CSS modules.
 - Function components, hooks for logic, no class components, no default exports except route files.
 - Files kebab-case, components PascalCase. One component per file unless a tiny private helper.

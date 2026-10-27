@@ -98,3 +98,10 @@ Collected while testing the Railway deployment. The help page and tutorial (phas
 | Tooltips in the app's own look on desktop | Improvement | M | About 60 places use the browser's native `title` tooltip. Replace them with the `Tooltip` primitive styled like the rest of the app (delay, arrow, theme colours, also on keyboard focus), shown only on devices with a mouse. |
 | A PIN remembered after a page refresh | Fix | S | The join page keeps the last PIN after a refresh even when that game is not running yet (it stays in the address as `?pin=`). After a refresh the page should start empty, or check the PIN and drop it when no game answers; the QR join link (`/?pin=…`) must keep working. |
 | Leaving the host pages through the logo | Fix | S | Clicking the logo (home) while logged in goes to the player join page and does not log the host out. The expected behaviour is still open: the user's note says the logo "does not log me out". |
+
+### From the first family game (27 October 2026)
+
+| Task | Kind | Effort | Notes |
+|---|---|---|---|
+| Picture details in the editor | Improvement | S | Show more about a question's picture in the editor: its size in pixels, file size and format (uploads are stored as WebP, at most 1280 px on the long edge), so the host knows what the phones and the projector will get. To decide: whether the original upload's size is kept as well. |
+| Typo tolerance for typed answers | Feature | M | Accept small spelling mistakes in text answers ("jaoan" counts as "japan"). Built into the scoring code (edit distance after the existing normalising), no third-party service. To decide in the plan: how many mistakes per answer length, whether numbers and very short answers stay exact, a per-question or per-quiz switch, and whether the host and the review show that a near miss was accepted. |

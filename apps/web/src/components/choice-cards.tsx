@@ -1,6 +1,7 @@
 import { useId, useRef, type ReactNode } from 'react'
 import { cn } from '@/lib/cn'
 import { Collapse } from '@/components/collapse'
+import { hoverBridge } from '@/components/ui/button'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 
 export interface Choice<T extends string> {
@@ -48,8 +49,9 @@ export function ChoiceCards<T extends string>({
             htmlFor={`${id}-${choice.value}`}
             data-squish
             className={cn(
-              'group/choice flex min-h-12 cursor-pointer items-center gap-3 rounded-xl border-2 bg-card px-3 py-2 transition-[border-color,background-color,transform,box-shadow] duration-200',
+              'group/choice relative flex min-h-12 cursor-pointer items-center gap-3 rounded-xl border-2 bg-card px-3 py-2 transition-[border-color,background-color,transform,box-shadow] duration-200',
               'hover:-translate-y-0.5 hover:border-ring/60 hover:shadow-soft has-data-[state=checked]:border-primary has-data-[state=checked]:bg-secondary',
+              hoverBridge,
               disabled && 'cursor-not-allowed opacity-60',
             )}
           >

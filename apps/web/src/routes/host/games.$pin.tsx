@@ -4,6 +4,7 @@ import { Link, createFileRoute } from '@tanstack/react-router'
 import { ArrowLeftIcon, LockIcon, MonitorIcon, PanelLeftCloseIcon, PanelLeftOpenIcon, TrophyIcon } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { AppMenu } from '@/components/app-menu'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/cn'
 import { useGameTheme } from '@/lib/themes'
@@ -120,8 +121,8 @@ function HostGamePage() {
   const controls = <Controls host={host} send={send} placement={wide ? 'rail' : 'bottom'} />
   const grading = host.phase === 'reveal' && host.awaitingGrading
   return (
-    // The window below the app header (4rem) and the page's bottom padding (1.5rem).
-    <div className="flex w-full flex-col gap-3 lg:h-[calc(100dvh-5.5rem)] lg:min-h-0">
+    // The whole window but the page's bottom padding (1.5rem); the app bar is folded into the top bar.
+    <div className="flex w-full flex-col gap-3 pt-3 lg:h-[calc(100dvh-1.5rem)] lg:min-h-0">
       <ConnectionBar status={status} since={since} />
       <TopBar
         host={host}
@@ -191,6 +192,7 @@ function TopBar({
   return (
     <header className="flex shrink-0 flex-wrap items-center gap-x-3 gap-y-2 rounded-2xl border bg-card p-2 shadow-soft sm:px-3">
       <div className="flex items-center gap-1">
+        <AppMenu />
         {/* Laptops: the host menu back next to the game, or away again. */}
         <Button
           variant="ghost"

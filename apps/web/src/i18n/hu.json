@@ -1,6 +1,7 @@
 {
   "app": {
     "name": "Quizmoo",
+    "menu": "Quizmoo menü",
     "language": "Nyelv",
     "settings": "Beállítások",
     "mode": "Megjelenés",

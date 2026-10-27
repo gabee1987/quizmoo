@@ -57,7 +57,7 @@ export function QuestionStrip({ host, clockOffset }: { host: HostSnapshot; clock
       : null
 
   return (
-    <Strip imageId={question.imageId} timer={timer}>
+    <Strip imageId={question.imageId} timer={timer} side={info && showAnswers ? <Counts info={info} host={host} /> : null}>
       <div className="flex flex-wrap items-center gap-1.5">
         {!running && (
           <span className="inline-flex items-center gap-1.5 rounded-full bg-primary px-2.5 py-0.5 text-xs font-bold text-primary-foreground">
@@ -74,7 +74,6 @@ export function QuestionStrip({ host, clockOffset }: { host: HostSnapshot; clock
       <h2 id="strip-title" className="line-clamp-3 text-xl leading-snug font-extrabold wrap-break-word xl:text-2xl">
         {question.text}
       </h2>
-      {info && showAnswers && <Counts info={info} host={host} />}
       {!running && <Figures host={host} />}
     </Strip>
   )
@@ -87,12 +86,29 @@ interface StripTimer {
   pausedAt: number | null
 }
 
-/** The strip's card: the content, the picture and the ring with the seconds beside it, the shrinking bar along its bottom. */
-function Strip({ imageId, timer, children }: { imageId: string | null | undefined; timer: StripTimer | null; children: ReactNode }) {
+/**
+ * The strip's card: the content, then `side` (the answers so far), the picture and the ring with the
+ * seconds, the shrinking bar along its bottom. Once the card is wide enough `side` gets a column of its
+ * own beside the question, so the width is used instead of stacking everything on the left.
+ */
+function Strip({
+  imageId,
+  timer,
+  side = null,
+  children,
+}: {
+  imageId: string | null | undefined
+  timer: StripTimer | null
+  side?: ReactNode
+  children: ReactNode
+}) {
   const content = (ring: ReactNode, bar: ReactNode) => (
-    <section aria-labelledby="strip-title" className="flex shrink-0 flex-col overflow-hidden rounded-2xl border bg-card shadow-soft">
+    <section aria-labelledby="strip-title" className="@container flex shrink-0 flex-col overflow-hidden rounded-2xl border bg-card shadow-soft">
       <div className="flex gap-4 p-3 sm:px-4">
-        <div className="flex min-w-0 flex-1 flex-col gap-1.5">{children}</div>
+        <div className="flex min-w-0 flex-1 flex-col gap-3 @3xl:flex-row @3xl:items-center @3xl:gap-6">
+          <div className="flex min-w-0 flex-1 flex-col gap-1.5">{children}</div>
+          {side && <div className="min-w-0 @3xl:w-[45%] @3xl:shrink-0">{side}</div>}
+        </div>
         {imageId && (
           <img src={`/api/images/${imageId}`} alt="" className="hidden max-h-24 max-w-36 shrink-0 self-start rounded-xl object-contain shadow-soft sm:block" />
         )}
@@ -110,9 +126,9 @@ function TimedStrip({ timer, content }: { timer: StripTimer; content: (ring: Rea
 }
 
 /**
- * The answers per option (or the most common free answers) as small chips, the correct ones
- * marked; the correct answer itself as well for free answers, whose right answers may not be
- * among the given ones yet.
+ * The answers per option (or the most common free answers) as small bars, each filled by its share
+ * of the answers, the correct ones marked; two columns from four bars. The correct answer itself as
+ * well for free answers, whose right answers may not be among the given ones yet.
  */
 function Counts({ info, host }: { info: RevealInfo; host: HostSnapshot }) {
   const { t } = useTranslation()
@@ -123,6 +139,7 @@ function Counts({ info, host }: { info: RevealInfo; host: HostSnapshot }) {
     other: t('screen.other'),
   })
   const free = info.question.type === 'text' || info.question.type === 'number' || info.question.type === 'order'
+  const total = Math.max(1, buckets.reduce((sum, bucket) => sum + bucket.count, 0))
   return (
     <div className="flex flex-col gap-1.5">
       {free && (
@@ -131,29 +148,40 @@ function Counts({ info, host }: { info: RevealInfo; host: HostSnapshot }) {
         </div>
       )}
       {buckets.length > 0 && (
-        <ul className="flex flex-wrap gap-1.5" aria-label={t('host.board.counts')}>
-          {buckets.map((bucket) => (
-            <li
-              key={bucket.key}
-              className={cn(
-                'flex max-w-60 min-w-0 items-center gap-1.5 rounded-lg border py-0.5 pr-2 pl-0.5 text-sm',
-                bucket.correct && info.question.type !== 'order' ? 'border-success border-2 font-semibold' : 'bg-muted/40',
-              )}
-            >
-              {bucket.index !== null ? (
-                <span style={optionVars(bucket.index)} className={cn('grid size-6 shrink-0 place-items-center rounded-md', optionFill)}>
-                  <OptionSymbol symbols={symbols} index={bucket.index} className="size-3.5" />
-                </span>
-              ) : (
-                <span className="w-1" />
-              )}
-              <span className="truncate">{bucket.label}</span>
-              <span className="font-black tabular-nums">{bucket.count}</span>
-              {bucket.correct && info.question.type !== 'order' && (
-                <CheckIcon className="size-4 shrink-0 text-success" aria-label={t('play.correct')} />
-              )}
-            </li>
-          ))}
+        <ul className={cn('grid gap-1.5', buckets.length > 3 && 'sm:grid-cols-2')} aria-label={t('host.board.counts')}>
+          {buckets.map((bucket) => {
+            const correct = bucket.correct && info.question.type !== 'order'
+            return (
+              <li
+                key={bucket.key}
+                style={bucket.index !== null ? optionVars(bucket.index) : undefined}
+                className={cn(
+                  'relative flex min-w-0 items-center gap-1.5 overflow-hidden rounded-lg border bg-muted/40 py-0.5 pr-2 pl-0.5 text-sm',
+                  correct && 'border-2 border-success font-semibold',
+                )}
+              >
+                {/* The share of the answers, in the option's colour (the theme's for free answers). */}
+                <span
+                  aria-hidden="true"
+                  className={cn(
+                    'absolute inset-y-0 left-0 transition-[width] duration-500 ease-spring-soft motion-reduce:transition-none',
+                    bucket.index !== null ? 'bg-[color-mix(in_srgb,var(--option)_22%,transparent)]' : 'bg-primary/15',
+                  )}
+                  style={{ width: `${(bucket.count / total) * 100}%` }}
+                />
+                {bucket.index !== null ? (
+                  <span className={cn('relative grid size-6 shrink-0 place-items-center rounded-md', optionFill)}>
+                    <OptionSymbol symbols={symbols} index={bucket.index} className="size-3.5" />
+                  </span>
+                ) : (
+                  <span className="w-1" />
+                )}
+                <span className="relative min-w-0 flex-1 truncate">{bucket.label}</span>
+                {correct && <CheckIcon className="relative size-4 shrink-0 text-success" aria-label={t('play.correct')} />}
+                <span className="relative font-black tabular-nums">{bucket.count}</span>
+              </li>
+            )
+          })}
         </ul>
       )}
     </div>

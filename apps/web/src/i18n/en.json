@@ -1,6 +1,7 @@
 {
   "app": {
     "name": "Quizmoo",
+    "menu": "Quizmoo menu",
     "language": "Language",
     "settings": "Settings",
     "mode": "Appearance",

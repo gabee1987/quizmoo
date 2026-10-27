@@ -1,6 +1,7 @@
 import { gameSettingsSchema, type GameBranding, type GameSettings, type QuickMessage } from '@quizmoo/shared'
 import {
   EngineError,
+  countdownTimeUp,
   createGame,
   endGame,
   endQuestion,
@@ -279,6 +280,9 @@ export class GameManager {
       // A timed intro opens its question by itself; a held one, or one waiting for the host, does not.
       const endsAt = state.introEndsAt
       entry.timer = setTimeout(() => this.onIntroEnd(pin), Math.max(0, endsAt - this.now()))
+    } else if (state.phase === 'countdown' && state.countdownEndsAt) {
+      const endsAt = state.countdownEndsAt
+      entry.timer = setTimeout(() => this.onCountdownEnd(pin), Math.max(0, endsAt - this.now()))
     } else if (state.phase === 'finished' && state.finishedAt !== null) {
       // Kept longer while its results wait for the host, so a late release still reaches everyone.
       const ttl = resultsPending(state) ? PENDING_RELEASE_TTL_MS : FINISHED_TTL_MS
@@ -312,6 +316,19 @@ export class GameManager {
       this.apply(pin, introTimeUp)
     } catch (error) {
       this.log.error(error, 'opening a question after its intro failed')
+    }
+  }
+
+  private onCountdownEnd(pin: string) {
+    const entry = this.games.get(pin)
+    if (!entry) return
+    const { state } = entry.game
+    if (state.phase !== 'countdown' || !state.countdownEndsAt) return
+    if (this.now() < state.countdownEndsAt) return this.schedule(pin, entry)
+    try {
+      this.apply(pin, countdownTimeUp)
+    } catch (error) {
+      this.log.error(error, 'opening a question after its countdown failed')
     }
   }
 
