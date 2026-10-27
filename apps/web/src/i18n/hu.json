@@ -279,6 +279,8 @@
         "importantHelp": "A játékosok nem húzhatják el",
         "importantShown": "fontos",
         "importantPreset": "Mindig fontosként megy ki",
+        "quick": "Gyors üzenet",
+        "noQuick": "Ebben a játékban nincs gyors üzenet. A Beállításaimban adhatsz hozzá.",
         "presets": {
           "getReady": "Készüljetek!",
           "shortBreak": "Egy kis szünet",

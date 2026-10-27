@@ -4,6 +4,7 @@ import { Link, createFileRoute } from '@tanstack/react-router'
 import { ArrowLeftIcon, LockIcon, MonitorIcon, PanelLeftCloseIcon, PanelLeftOpenIcon, TrophyIcon } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { AnnouncementBanner } from '@/components/announcement-banner'
 import { AppMenu } from '@/components/app-menu'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/cn'
@@ -22,6 +23,7 @@ import { LockDialog } from '../../features/host/lock-dialog'
 import { PlayAgainButton } from '../../features/host/play-again-button'
 import { PlayerBoard } from '../../features/host/player-board'
 import { QuestionStrip } from '../../features/host/question-strip'
+import { QuickMessageMenu } from '../../features/host/quick-message-menu'
 import { RoundTripBadge } from '../../features/host/round-trip-badge'
 import { settingsLine } from '../../features/host/settings-line'
 import { RankList } from '../../features/play/scoreboard'
@@ -131,6 +133,8 @@ function HostGamePage() {
         connected={status === 'connected'}
         onLock={() => (host.hasLockCode ? void lock({ type: 'lock' }) : setLocking(true))}
       />
+      {/* The message as the phones and the projector show it; cleared from the quick menu or the Message tab. */}
+      <AnnouncementBanner announcement={host.announcement} clockOffset={clockOffset} className="-mb-3 shrink-0" />
       <div
         className={cn(
           // One row that takes the height left (not the content's), so the board and the panels scroll inside.
@@ -252,6 +256,7 @@ function TopBar({
       <span className="hidden h-8 w-px bg-border lg:block" aria-hidden="true" />
       {/* Icons only until there is room for the labels. */}
       <div className="ml-auto flex items-center gap-2 lg:ml-0">
+        {host.phase !== 'finished' && <QuickMessageMenu announcement={host.announcement} quickMessages={host.quickMessages} onCommand={send} />}
         {/* Locks every host page of the account until the lock code or the password is typed. */}
         <Button variant="secondary" size="sm" onClick={onLock} title={t('host.lock.button')}>
           <LockIcon aria-hidden="true" />

@@ -279,6 +279,8 @@
         "importantHelp": "Players can't swipe it away",
         "importantShown": "important",
         "importantPreset": "Always sent as important",
+        "quick": "Quick message",
+        "noQuick": "No quick messages in this game. Add them in My settings.",
         "presets": {
           "getReady": "Get ready!",
           "shortBreak": "Short break",

@@ -60,7 +60,8 @@ function HostLayout() {
           inert={!sidebar}
           data-sidebar-closed={sidebar ? undefined : ''}
           className={cn(
-            'hidden overflow-x-clip transition-[width,margin-right,opacity,visibility] duration-700 ease-spring-soft lg:flex lg:justify-end lg:self-start',
+            // pt-3: the game page has no app bar above it, so the menu starts level with the top bar.
+            'hidden overflow-x-clip pt-3 transition-[width,margin-right,opacity,visibility] duration-700 ease-spring-soft lg:flex lg:justify-end lg:self-start',
             sidebar ? 'lg:mr-8 lg:w-60' : 'invisible opacity-0 lg:mr-0 lg:w-0',
           )}
         >

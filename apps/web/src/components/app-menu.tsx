@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { ChevronDownIcon, HouseIcon, LogOutIcon, SettingsIcon, SparklesIcon } from 'lucide-react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   DropdownMenu,
@@ -15,6 +16,7 @@ import {
 import { useUnseenRelease } from '@/features/whats-new/use-release-seen'
 import { languages, setLanguage } from '@/i18n'
 import { meQueryOptions } from '@/lib/auth'
+import { cn } from '@/lib/cn'
 import { modes, setMode, useMode, type Mode } from '@/lib/mode'
 import { useLogout } from '@/lib/use-logout'
 import { LogoMark } from './app-header'
@@ -30,6 +32,7 @@ export function AppMenu() {
   const user = useQuery(meQueryOptions).data
   const unseen = useUnseenRelease()
   const logout = useLogout()
+  const [hops, setHops] = useState(0)
   // Language and look change in place, so the host sees the effect with the menu still open.
   const stayOpen = (event: Event) => event.preventDefault()
   return (
@@ -37,10 +40,18 @@ export function AppMenu() {
       <DropdownMenuTrigger
         aria-label={t('app.menu')}
         title={t('app.menu')}
-        className="relative flex items-center gap-0.5 rounded-xl p-0.5 outline-none focus-visible:ring-[3px] focus-visible:ring-ring"
+        data-no-squish
+        onPointerDown={() => setHops((n) => n + 1)}
+        className="group relative flex items-center gap-1 rounded-xl py-1 pr-1.5 pl-1 transition-colors duration-200 outline-none hover:bg-muted focus-visible:ring-[3px] focus-visible:ring-ring data-[state=open]:bg-muted"
       >
-        <LogoMark />
-        <ChevronDownIcon className="size-4 text-muted-foreground" aria-hidden="true" />
+        {/* Keyed by the presses, so every one replays the hop. */}
+        <span key={hops} className={cn('block', hops > 0 && 'logo-hop')}>
+          <LogoMark />
+        </span>
+        <ChevronDownIcon
+          className="size-4 text-muted-foreground transition-transform duration-300 ease-spring group-hover:text-foreground group-data-[state=open]:rotate-180"
+          aria-hidden="true"
+        />
         {unseen && <UnseenDot className="absolute -top-0.5 -right-0.5" />}
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="min-w-56">
