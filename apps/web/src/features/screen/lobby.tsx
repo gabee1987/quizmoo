@@ -2,6 +2,7 @@ import type { HostSnapshot, PlayerPublic } from '@quizmoo/shared'
 import { useTranslation } from 'react-i18next'
 import { BrandingMark } from '@/components/branding-mark'
 import { WaitingCow } from '@/components/waiting-cow'
+import { lengthMinutes } from '@/lib/game-length'
 import { PlayerAvatar } from '../../components/player-avatar'
 import { QrCode } from '../../components/qr-code'
 
@@ -16,9 +17,14 @@ export function ScreenLobby({ host, joinUrl }: { host: HostSnapshot; joinUrl: st
         {host.branding && <BrandingMark branding={host.branding} size="lobby" />}
         <div>
           <p className="text-3xl font-semibold text-muted-foreground wrap-break-word">{host.quizTitle}</p>
-          {host.groupCount > 0 && (
+          {(host.groupCount > 0 || host.estimatedLeftSec > 0) && (
             <p className="text-2xl text-muted-foreground">
-              {t('play.info.questionsInRounds', { questions: host.questionCount, count: host.groupCount })}
+              {[
+                host.groupCount > 0 ? t('play.info.questionsInRounds', { questions: host.questionCount, count: host.groupCount }) : null,
+                host.estimatedLeftSec > 0 ? t('common.aboutMin', { count: lengthMinutes(host.estimatedLeftSec) }) : null,
+              ]
+                .filter(Boolean)
+                .join(' · ')}
             </p>
           )}
         </div>

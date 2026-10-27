@@ -1,5 +1,6 @@
 import type { PlayerPublic, PlayerSnapshot, TeamPublic } from '@quizmoo/shared'
 import { useTranslation } from 'react-i18next'
+import { BetweenQuestions } from '@/components/between-questions'
 import { cn } from '@/lib/cn'
 import { CountUp } from '../../components/count-up'
 import { PlayerAvatar } from '../../components/player-avatar'
@@ -95,6 +96,7 @@ export function Scoreboard({ snapshot }: { snapshot: PlayerSnapshot }) {
       )}
       <h2 className="text-xl font-extrabold">{t('play.leaderboard')}</h2>
       <RankList players={snapshot.players} meId={snapshot.me.id} limit={5} />
+      <BetweenQuestions snapshot={snapshot} size="phone" />
     </div>
   )
 }

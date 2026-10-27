@@ -16,6 +16,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type ComponentType, 
 import { useTranslation } from 'react-i18next'
 import {
   ArrowLeftIcon,
+  ClockIcon,
   DownloadIcon,
   EyeIcon,
   EyeOffIcon,
@@ -46,6 +47,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/lib/cn'
+import { quizMinutes } from '@/lib/game-length'
 import { toastError } from '@/lib/toast'
 import { useMediaQuery } from '@/lib/use-media-query'
 import { ConfirmDialog } from '../../components/dialog'
@@ -842,6 +844,16 @@ function Editor({ quiz }: { quiz: Quiz }) {
                 <span className="hidden xl:inline">{t('editor.newGroup')}</span>
               </Button>
             </div>
+            {/* Follows every edit: a question's time, switching one off, the settings. */}
+            {questions.some((q) => !q.off) && (
+              <span
+                className="hidden items-center gap-1.5 rounded-full bg-muted px-2.5 py-1 text-sm font-semibold whitespace-nowrap text-muted-foreground sm:inline-flex"
+                title={t('common.lengthEstimate')}
+              >
+                <ClockIcon className="size-4" aria-hidden="true" />
+                {t('common.aboutMin', { count: quizMinutes({ questions, groups }, draft.settings) })}
+              </span>
+            )}
             <SaveIndicator status={status} onRetry={retry} />
             {problems.length > 0 && <ProblemsMenu problems={problems} onGo={goToProblem} />}
             <DropdownMenu>
@@ -1173,6 +1185,7 @@ function Editor({ quiz }: { quiz: Quiz }) {
             quizBranding={draft.branding}
             rounds={groups.length > 0}
             offCount={offIds.length}
+            length={{ questions: draft.questions, groups }}
             pending={play.isPending}
             onCreate={(settings, scheduledAt, branding, lockCode) =>
               play.mutate({ quizId: quiz.id, settings, scheduledAt, branding, lockCode })

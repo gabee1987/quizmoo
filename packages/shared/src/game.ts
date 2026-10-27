@@ -239,6 +239,8 @@ export interface UpcomingQuestion {
   text: string
   type: QuestionType
   groupTitle: string | null
+  /** Picked to play next, it would leave its round (and play on its own) or join the round under way. */
+  ifPicked: { change: 'leaves' | 'joins'; round: string } | null
 }
 
 /** One group in the host's lists: where its questions are. */

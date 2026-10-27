@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { FitImage } from '@/components/fit-image'
 import { TimerBar, TimerRing, useTimer } from '@/components/timer'
 import { answerProgress } from '@/lib/answer-progress'
+import { lengthMinutes } from '@/lib/game-length'
 import { PausedNote } from '../../components/paused-note'
 import { RoundChip } from '../../components/round-chip'
 import { QuestionInput } from '../questions/question-input'
@@ -23,6 +24,9 @@ export function ScreenQuestion({ host, clockOffset }: { host: HostSnapshot; cloc
     <>
       <span className="shrink-0">{t('play.questionOf', { index: host.questionIndex + 1, count: host.questionCount })}</span>
       <RoundChip group={host.group} size="screen" />
+      {host.settings.betweenQuestions.progress && host.estimatedLeftSec > 0 && (
+        <span className="shrink-0 text-muted-foreground">{t('common.aboutMinLeft', { count: lengthMinutes(host.estimatedLeftSec) })}</span>
+      )}
       {/* Keyed by the count so it pops with every answer. */}
       <span key={progress.answered} className="ml-auto shrink-0 animate-pop rounded-full bg-secondary px-5 py-1 text-secondary-foreground">
         {t(progress.teams ? 'host.game.teamsAnswered' : 'host.game.answered', { answered: progress.answered, count: progress.count })}

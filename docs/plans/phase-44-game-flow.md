@@ -81,3 +81,12 @@ Out of scope:
 6. Results held back until the end: no leaders on the projector.
 7. Countdown 3 s: 3-2-1 on the projector and phones, then the question; pausing during it holds it.
 8. Phones show the compact card on the waiting screens and "about N min left" next to the question number.
+
+## Deviations
+
+- **A pick inside the round under way joins that round.** The plan only said a question pulled out of its round loses its `groupId`. Picked while the next slot is inside the current round, it now joins the current round, so rounds stay contiguous; it keeps its own round when it lands in front of it or is that round's last question left. The Questions tab says beforehand which of these happens ("joins the round …", "leaves the round …"), from the same engine function (`groupIfPicked`).
+- **No pause during the countdown.** The countdown is at most 5 s; "Start now" skips it instead. Pause stays a question-only command.
+- **The quiz list carries the estimate's inputs, not `estimatedSec`.** `length: { questions: [{ timeLimitSec, groupId, off }], groups: [{ id, settings }] }`, so the new game dialog can redo the estimate for the game's own settings (a single figure could not follow the countdown or scoreboard switches).
+- **The phone's question bar has no estimate.** It has no room next to the question number, the round and the timer; the phones show "about N min left" on "Answer sent!" and in the waiting card instead.
+- **Where the between-questions parts show on the projector.** Under the normal reveal too (with the top 3), under the held-back reveal (without), and beside the scoreboard as a side column with progress and what's next only (the scoreboard is the leaders already).
+- **Added on the way, at the user's request:** the Questions tab's search, folding lists and sticky "plays next" header; the Quick message menu in the game's top bar with per-message times; the host's own copy of the message; the app bar folded into the game's and the editor's top bars (with the side panels and hover-edge fixes).

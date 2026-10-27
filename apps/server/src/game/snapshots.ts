@@ -24,7 +24,7 @@ import {
 import { groupAt, groupBounds, groupsOf, settingsAt } from './groups.js'
 import { normalise } from './normalise.js'
 import { displayOrder } from './order.js'
-import { answersHidden, hostLocked, quickMessagesOf, resultsPendingFor } from './engine.js'
+import { answersHidden, groupIfPicked, hostLocked, quickMessagesOf, resultsPendingFor } from './engine.js'
 import { denseRank, isCorrect } from './scoring.js'
 import {
   answersAsOne,
@@ -420,13 +420,25 @@ function nextQuestion(state: GameState): NextQuestion | null {
 /** The questions still to come, for the host's "Play next". */
 function upcoming(state: GameState): UpcomingQuestion[] {
   const from = state.phase === 'countdown' ? state.questionIndex + 1 : nextIndex(state)
-  return state.quiz.questions.slice(from).map((question, i) => ({
-    index: from + i,
-    id: question.id,
-    text: question.text,
-    type: question.type,
-    groupTitle: groupAt(state.quiz, from + i)?.title ?? null,
-  }))
+  const { questions } = state.quiz
+  const title = (id: string | undefined) => state.quiz.groups?.find((g) => g.id === id)?.title ?? ''
+  return questions.slice(from).map((question, i) => {
+    // What picking it would do to rounds (the first one is next already).
+    const round = i === 0 ? question.groupId : groupIfPicked(questions, from, from + i)
+    return {
+      index: from + i,
+      id: question.id,
+      text: question.text,
+      type: question.type,
+      groupTitle: groupAt(state.quiz, from + i)?.title ?? null,
+      ifPicked:
+        round !== undefined && round !== question.groupId
+          ? { change: 'joins' as const, round: title(round) }
+          : question.groupId !== undefined && round === undefined
+            ? { change: 'leaves' as const, round: title(question.groupId) }
+            : null,
+    }
+  })
 }
 
 /** The group of question `index`, with where it sits in the quiz. */

@@ -1,5 +1,6 @@
 import type { HostSnapshot, PlayerPublic } from '@quizmoo/shared'
 import { useTranslation } from 'react-i18next'
+import { BetweenQuestions } from '@/components/between-questions'
 import { cn } from '@/lib/cn'
 import { CountUp } from '../../components/count-up'
 import { PlayerAvatar } from '../../components/player-avatar'
@@ -20,9 +21,13 @@ export function ScreenScoreboard({ host: snapshot }: { host: HostSnapshot }) {
       }
     : snapshot
   return (
-    <div className="flex flex-1 flex-col gap-6">
-      <h1 className="animate-fade-up text-5xl font-black">{t('play.leaderboard')}</h1>
-      {host.mode === 'team' ? <TeamBoard host={host} /> : <PlayerRows players={host.players.slice(0, 10)} />}
+    // The standings are the leaders already: beside them only progress and what's next, in their own column.
+    <div className="flex flex-1 flex-col gap-8 xl:flex-row">
+      <div className="flex min-w-0 flex-1 flex-col gap-6">
+        <h1 className="animate-fade-up text-5xl font-black">{t('play.leaderboard')}</h1>
+        {host.mode === 'team' ? <TeamBoard host={host} /> : <PlayerRows players={host.players.slice(0, 10)} />}
+      </div>
+      <BetweenQuestions snapshot={host} size="screen" className="xl:w-120 xl:shrink-0 xl:content-start xl:pt-20" />
     </div>
   )
 }

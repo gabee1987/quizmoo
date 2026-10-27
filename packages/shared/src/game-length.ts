@@ -9,6 +9,11 @@ export const SCOREBOARD_SEC = 10
 
 type LengthQuestion = Pick<Question, 'timeLimitSec' | 'groupId' | 'off'>
 type LengthGroup = { id: string; settings?: GroupSettings | undefined }
+/** What the estimate needs of a quiz besides its settings (the quiz list carries this, not the questions). */
+export interface GameLength {
+  questions: LengthQuestion[]
+  groups: LengthGroup[]
+}
 export type LengthSettings = Pick<
   GameSettings,
   'revealAnswers' | 'scoreboard' | 'groupIntroSec' | 'groupStandings' | 'countdownSec'

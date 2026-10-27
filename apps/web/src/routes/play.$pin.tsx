@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { AnnouncementBanner } from '../components/announcement-banner'
+import { Countdown } from '../components/between-questions'
 import { ConnectionBar } from '../components/connection-bar'
 import { Button } from '../components/ui/button'
 import { Spinner } from '../components/spinner'
@@ -120,6 +121,8 @@ function PhaseView({ snapshot, clockOffset }: { snapshot: PlayerSnapshot; clockO
       return <Lobby snapshot={snapshot} />
     case 'intro':
       return <PhoneRoundIntro key={snapshot.group?.id} snapshot={snapshot} clockOffset={clockOffset} />
+    case 'countdown':
+      return <Countdown key={snapshot.questionIndex} snapshot={snapshot} clockOffset={clockOffset} size="phone" />
     case 'question':
       return <Question key={snapshot.question?.id} snapshot={snapshot} clockOffset={clockOffset} />
     case 'reveal':

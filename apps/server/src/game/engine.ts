@@ -523,6 +523,21 @@ export function countdownTimeUp(state: GameState, now: number): GameState {
  * where it opens it (or is all that is left of it) and plays on its own elsewhere. The groups follow
  * the new order.
  */
+/**
+ * The round question `from` belongs to once moved to `slot` (playNext): the current round when the
+ * slot is inside it; otherwise its own, if it lands in front of its round or is the round's last
+ * question left; otherwise none (it plays on its own).
+ */
+export function groupIfPicked(questions: readonly Question[], slot: number, from: number): string | undefined {
+  const rest = questions.filter((_, i) => i !== from)
+  const current = rest[slot - 1]?.groupId
+  const after = rest[slot]?.groupId
+  const own = questions[from]?.groupId
+  if (current !== undefined && current === after) return current
+  if (own !== undefined && (after === own || !rest.some((q) => q.groupId === own))) return own
+  return undefined
+}
+
 export function playNext(state: GameState, questionId: string): GameState {
   if (!((state.phase === 'reveal' && !state.awaitingGrading) || state.phase === 'scoreboard')) {
     throw new EngineError('errors.invalidTransition')
@@ -532,13 +547,8 @@ export function playNext(state: GameState, questionId: string): GameState {
   const slot = state.questionIndex + 1
   if (from < slot) throw new EngineError('errors.invalidInput')
   if (from === slot) return state
+  const groupId = groupIfPicked(questions, slot, from)
   const [picked] = questions.splice(from, 1)
-  const current = questions[slot - 1]?.groupId
-  const after = questions[slot]?.groupId
-  const own = picked!.groupId
-  let groupId: string | undefined
-  if (current !== undefined && current === after) groupId = current
-  else if (own !== undefined && (after === own || !questions.some((q) => q.groupId === own))) groupId = own
   const { groupId: _, ...rest } = picked!
   questions.splice(slot, 0, (groupId === undefined ? rest : { ...rest, groupId }) as Question)
   const groups = state.quiz.groups

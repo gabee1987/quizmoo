@@ -87,6 +87,7 @@ describeDb('quiz routes (database)', () => {
         updatedAt: expect.any(String),
         settings: quiz.settings,
         branding: quiz.branding,
+        length: { questions: [{ timeLimitSec: 20 }, { timeLimitSec: quiz.questions[1].timeLimitSec }], groups: [] },
       },
     ])
     expect((await req(bob, 'GET', '/api/quizzes')).json().quizzes).toEqual([])
@@ -168,6 +169,8 @@ describeDb('quiz routes (database)', () => {
     expect(quiz.questions.map((q: { off?: boolean }) => q.off)).toEqual([true, undefined])
     const listed = (await req(alice, 'GET', '/api/quizzes')).json().quizzes.find((q: { id: string }) => q.id === quiz.id)
     expect(listed).toMatchObject({ questionCount: 2, offCount: 1 })
+    // The length estimate's basis keeps the switch, so the estimate leaves the question out.
+    expect(listed.length.questions.map((q: { off?: boolean }) => q.off)).toEqual([true, undefined])
   })
 
   it('stores question defaults, starts new quizzes with the host’s, and copies them on duplicate', async () => {

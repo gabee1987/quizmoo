@@ -1,5 +1,5 @@
 import type { Announcement, HostCommand, QuickMessage } from '@quizmoo/shared'
-import { ChevronDownIcon, MegaphoneIcon, TimerIcon, TriangleAlertIcon, XIcon } from 'lucide-react'
+import { ChevronDownIcon, MegaphoneIcon, TimerIcon, TriangleAlertIcon } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
@@ -18,8 +18,8 @@ import { MESSAGE_DURATIONS, messageText } from '../settings/host-settings'
 
 /**
  * The top bar's shortcut to the message panel: each quick message opens its times beside it (its own
- * first), and picking one sends it with its importance; the message on show can be cleared.
- * Free text and custom times stay in the panel.
+ * first), and picking one sends it with its importance. The message on show is cleared with the ×
+ * on its bubble on the page. Free text and custom times stay in the panel.
  */
 export function QuickMessageMenu({
   announcement,
@@ -58,18 +58,6 @@ export function QuickMessageMenu({
       </DropdownMenuTrigger>
       {/* Narrow enough on a phone that the times (11 rem) still fit beside it. */}
       <DropdownMenuContent align="end" className="max-w-[min(20rem,calc(100vw-12.5rem))] sm:min-w-60">
-        {announcement && (
-          <>
-            <DropdownMenuLabel className="font-normal text-muted-foreground">
-              {t('host.game.message.showing')}: <span className="font-bold wrap-break-word text-foreground">{announcement.text}</span>
-            </DropdownMenuLabel>
-            <DropdownMenuItem disabled={sending} onSelect={() => void send({ type: 'clearAnnouncement' })}>
-              <XIcon aria-hidden="true" />
-              {t('host.game.message.clear')}
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-          </>
-        )}
         <DropdownMenuLabel>{t('host.game.message.title')}</DropdownMenuLabel>
         {quick.length === 0 && <p className="px-2 py-1.5 text-sm text-muted-foreground">{t('host.game.message.noQuick')}</p>}
         {quick.map((message) => {

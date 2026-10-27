@@ -120,6 +120,11 @@
     }
   },
   "common": {
+    "aboutMin_one": "kb. {{count}} perc",
+    "aboutMin_other": "kb. {{count}} perc",
+    "aboutMinLeft_one": "még kb. {{count}} perc",
+    "aboutMinLeft_other": "még kb. {{count}} perc",
+    "lengthEstimate": "Becsült hossz: a kérdések ideje, plusz kérdésenként kb. 20 mp a válaszokra és a beszélgetésre",
     "loading": "Egy pillanat…",
     "next": "Tovább",
     "cancel": "Mégse",
@@ -176,6 +181,7 @@
       "phase": {
         "lobby": "Várjuk a játékosokat",
         "intro": "A kör bevezetője",
+        "countdown": "Visszaszámlálás",
         "question": "Megy a kérdés",
         "reveal": "Kiderültek a válaszok",
         "scoreboard": "Eredménytábla",
@@ -185,6 +191,7 @@
       "answered_other": "{{count}} játékosból {{answered}} válaszolt",
       "start": "Start",
       "endQuestion": "Lezárom a kérdést",
+      "startNow": "Indítsd most",
       "extend": "+30 mp",
       "pause": "Szünet",
       "resume": "Folytatás",
@@ -280,6 +287,7 @@
         "importantShown": "fontos",
         "importantPreset": "Mindig fontosként megy ki",
         "quick": "Gyors üzenet",
+        "clearEverywhere": "Töröld az üzenetet minden képernyőről",
         "noQuick": "Ebben a játékban nincs gyors üzenet. A Beállításaimban adhatsz hozzá.",
         "presets": {
           "getReady": "Készüljetek!",
@@ -370,6 +378,7 @@
       "lobby": "váróterem",
       "intro": "a(z) {{round}}. kör bevezetője",
       "introHeld": "a(z) {{round}}. kör bevezetője, megállítva",
+      "countdown": "visszaszámlálás a(z) {{index}}. kérdésig",
       "question": "{{index}}. kérdés",
       "paused": "{{index}}. kérdés, szünet",
       "answer": "a(z) {{index}}. kérdés megoldása",
@@ -469,7 +478,9 @@
       "clearSearch": "Keresés törlése",
       "nextUp": "Ez jön",
       "noneLeft": "Nincs több kérdés, ez az utolsó.",
-      "noMatches": "Nincs ilyen kérdés."
+      "noMatches": "Nincs ilyen kérdés.",
+      "joinsRound": "Ha most jön, bekerül ebbe a körbe: „{{round}}”",
+      "leavesRound": "Ha most jön, kikerül a(z) „{{round}}” körből, és külön megy"
     },
     "grading": {
       "title": "Értékeld a válaszokat",
@@ -562,6 +573,22 @@
       "groupStandingsOptions": {
         "afterGroup": "Minden kör után",
         "onDemand": "Amikor megmutatom"
+      },
+      "countdown": "Visszaszámlálás a kérdések előtt",
+      "countdownHelp": "Nagy 3-2-1 a kivetítőn és a telefonokon minden kérdés előtt, a következő kérdés számával és típusával.",
+      "countdownOff": "Nincs",
+      "countdownSeconds_one": "{{count}} mp",
+      "countdownSeconds_other": "{{count}} mp",
+      "betweenQuestions": "Két kérdés között",
+      "betweenQuestionsHelp": "Ezt mutatja a kivetítő, amíg a játékosok a következő kérdésre várnak; a telefonok kicsiben a haladást és a következő kérdést.",
+      "betweenQuestionsNone": "semmi extra",
+      "betweenQuestionsOptions": {
+        "progress": "Haladás",
+        "progressHelp": "Hol tart a kvíz és a kör, és nagyjából mennyi van még hátra",
+        "next": "Mi jön",
+        "nextHelp": "A következő kérdés száma, típusa, ideje és pontja, a szövege soha",
+        "leaders": "Top 3",
+        "leadersHelp": "Az éllovasok; soha, amíg az eredményeket visszatartod"
       },
       "answerStyle": "Válaszgombok a telefonokon",
       "answerStyleOptions": {
@@ -678,11 +705,11 @@
       "apply_other": "Mentés {{count}} kvízre",
       "groups": {
         "look": "Megjelenés",
-        "lookHelp": "Téma, válaszszínek, jelek és stílus",
+        "lookHelp": "Téma, válaszszínek, jelek és stílus, a képernyő két kérdés között",
         "scoring": "Pontozás",
         "scoringHelp": "Gyorsasági bónusz, sorozatbónusz, válaszlehetőségek keverése",
         "flow": "Játékmenet",
-        "flowHelp": "Játékmód és csapatok, a helyes válaszok és az eredménytábla megjelenítése, végeredmény",
+        "flowHelp": "Játékmód és csapatok, a helyes válaszok és az eredménytábla megjelenítése, visszaszámlálás, végeredmény",
         "questions": "Minden kérdés",
         "questionsHelp": "Az összes kérdés ideje és pontja"
       },
@@ -763,6 +790,8 @@
     "copyFailed": "Nem sikerült másolni. Jelöld ki a PIN-t, és másold ki kézzel.",
     "info": {
       "title": "A játékról",
+      "length_one": "Nagyjából {{count}} perc lesz",
+      "length_other": "Nagyjából {{count}} perc lesz",
       "questions_one": "{{count}} kérdés",
       "questions_other": "{{count}} kérdés",
       "questionsInRounds_one": "{{questions}} kérdés {{count}} körben",
@@ -885,6 +914,15 @@
     "pause": "Szünet",
     "resume": "Folytatás",
     "paused": "Szünet"
+  },
+  "between": {
+    "progress": "Haladás",
+    "questionsDone": "{{done}} / {{count}} kérdés",
+    "next": "Következik",
+    "question": "{{index}}. kérdés",
+    "finalNext": "Jön a végeredmény",
+    "leaders": "Top 3",
+    "opensIn": "A visszaszámlálás után indul"
   },
   "connection": {
     "connecting": "Kapcsolódás…",
@@ -1376,6 +1414,42 @@
     "current": "Mostani verzió",
     "releasedOn": "Megjelent: {{date}}",
     "releases": {
+      "1_6_0": {
+        "title": "A te sorrended",
+        "intro": "Válaszd ki, melyik kérdés jöjjön, tudd, meddig tart a játék, és adj mindenkinek valami nézni valót két kérdés között.",
+        "sections": [
+          {
+            "title": "Bármelyik kérdés jöhet",
+            "items": [
+              "Két kérdés között nyisd meg a Kérdések fület, és nyomd meg az „Ez jöjjön” gombot bármelyik hátralévő kérdésen. A többi sorrendje marad.",
+              "A fül tetején mindig látod, mi jön, gépelés közben keres, a lejátszott és a hátralévő listát pedig össze tudod csukni. Azt is előre jelzi, ha egy kérdés kikerülne a köréből, vagy bekerülne a folyamatban lévőbe."
+            ]
+          },
+          {
+            "title": "Meddig tart",
+            "items": [
+              "A kvízeid, a szerkesztő és az új játék ablaka megmutatja, nagyjából meddig tart egy játék, az ablak pedig újraszámolja, ahogy a beállításokat módosítod.",
+              "A váróterek is kiírják, játék közben pedig te, a kivetítő és a telefonok is látjátok, nagyjából mennyi van még hátra."
+            ]
+          },
+          {
+            "title": "Két kérdés között",
+            "items": [
+              "A kivetítő mutatja, hol tart a kvíz, milyen kérdés jön (a szövegét soha) és a top 3-at; a telefonok kicsiben a haladást és a következő kérdést. Mindegyiket kikapcsolhatod a Megjelenésnél.",
+              "3-2-1 visszaszámlálás minden kérdés előtt a kivetítőn és a telefonokon: a Játékmenetnél kapcsolhatod be. Az „Indítsd most” átugorja."
+            ]
+          },
+          {
+            "title": "Üzenetek és a felső sáv",
+            "items": [
+              "A játék felső sávjában a Gyors üzenettel egy kattintással kiküldheted az üzeneteid egyikét: vidd fölé az egeret, és válaszd ki, meddig maradjon kint.",
+              "Az üzenetet a saját oldaladon is látod, ugyanúgy, mint a játékosok; az × minden képernyőről törli.",
+              "Minden kérdés után a telefonok az eredmény fölött megmutatják, melyik kérdés volt.",
+              "A futó játékban és a szerkesztőben az alkalmazás sávja beolvadt az oldal saját felső sávjába: a tehén nyitja a nyelvet, a megjelenést és az oldalaidat."
+            ]
+          }
+        ]
+      },
       "1_5_0": {
         "title": "Élő tábla",
         "intro": "Egy pillantással látod, ki mit válaszolt a futó játékban, görgetés nélkül.",

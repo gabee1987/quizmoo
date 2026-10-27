@@ -1,6 +1,7 @@
 import {
   MAX_QUIZ_FILE_BYTES,
   gameSettingsSchema,
+  type GameLength,
   mapQuizImages,
   quizBrandingSchema,
   quizFileSchema,
@@ -169,13 +170,22 @@ export async function quizRoutes(app: FastifyInstance, { db }: { db: Db }) {
         updatedAt: quizzes.updatedAt,
         settings: quizzes.settings,
         branding: quizzes.branding,
+        // Only what the length estimate needs, not the questions themselves.
+        timing: sql<GameLength['questions']>`coalesce((select jsonb_agg(jsonb_strip_nulls(jsonb_build_object('timeLimitSec', q->'timeLimitSec', 'groupId', q->'groupId', 'off', q->'off'))) from jsonb_array_elements(${quizzes.questions}) q), '[]'::jsonb)`,
+        groupTiming: sql<GameLength['groups']>`coalesce((select jsonb_agg(jsonb_build_object('id', g->'id', 'settings', g->'settings')) from jsonb_array_elements(${quizzes.groups}) g), '[]'::jsonb)`,
       })
       .from(quizzes)
       .where(eq(quizzes.ownerId, request.user!.id))
       .orderBy(desc(quizzes.updatedAt))
-    // The list carries the settings and branding so the new-game dialog can start from them.
+    // The list carries the settings and branding so the new-game dialog can start from them, and
+    // what the length estimate needs, so the dialog can redo it for the game's own settings.
     return {
-      quizzes: rows.map((row) => ({ ...row, settings: gameSettingsSchema.parse(row.settings), branding: parseQuizBranding(row.branding) })),
+      quizzes: rows.map(({ timing, groupTiming, ...row }) => ({
+        ...row,
+        settings: gameSettingsSchema.parse(row.settings),
+        branding: parseQuizBranding(row.branding),
+        length: { questions: timing, groups: groupTiming } satisfies GameLength,
+      })),
     }
   })
 

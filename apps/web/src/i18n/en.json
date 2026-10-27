@@ -120,6 +120,11 @@
     }
   },
   "common": {
+    "aboutMin_one": "about {{count}} min",
+    "aboutMin_other": "about {{count}} min",
+    "aboutMinLeft_one": "about {{count}} min left",
+    "aboutMinLeft_other": "about {{count}} min left",
+    "lengthEstimate": "Estimated length: the time limits plus about 20 s per question for the answers and talking",
     "loading": "Loading…",
     "next": "Next",
     "cancel": "Cancel",
@@ -176,6 +181,7 @@
       "phase": {
         "lobby": "Waiting for players",
         "intro": "Round intro",
+        "countdown": "Countdown",
         "question": "Question running",
         "reveal": "Answers revealed",
         "scoreboard": "Scoreboard",
@@ -185,6 +191,7 @@
       "answered_other": "{{answered}} of {{count}} answered",
       "start": "Start",
       "endQuestion": "End question",
+      "startNow": "Start now",
       "extend": "+30 s",
       "pause": "Pause",
       "resume": "Resume",
@@ -280,6 +287,7 @@
         "importantShown": "important",
         "importantPreset": "Always sent as important",
         "quick": "Quick message",
+        "clearEverywhere": "Clear the message on every screen",
         "noQuick": "No quick messages in this game. Add them in My settings.",
         "presets": {
           "getReady": "Get ready!",
@@ -370,6 +378,7 @@
       "lobby": "lobby",
       "intro": "intro of round {{round}}",
       "introHeld": "intro of round {{round}}, on hold",
+      "countdown": "countdown to question {{index}}",
       "question": "question {{index}}",
       "paused": "question {{index}}, paused",
       "answer": "answer to question {{index}}",
@@ -469,7 +478,9 @@
       "clearSearch": "Clear the search",
       "nextUp": "Plays next",
       "noneLeft": "No more questions: this is the last one.",
-      "noMatches": "No question matches."
+      "noMatches": "No question matches.",
+      "joinsRound": "Played next, it joins the round “{{round}}”",
+      "leavesRound": "Played next, it leaves the round “{{round}}” and plays on its own"
     },
     "grading": {
       "title": "Grade the answers",
@@ -562,6 +573,22 @@
       "groupStandingsOptions": {
         "afterGroup": "After each round",
         "onDemand": "When I show them"
+      },
+      "countdown": "Countdown before each question",
+      "countdownHelp": "A big 3-2-1 on the projector and the phones before every question, with the next question's number and type.",
+      "countdownOff": "Off",
+      "countdownSeconds_one": "{{count}} s",
+      "countdownSeconds_other": "{{count}} s",
+      "betweenQuestions": "Between questions",
+      "betweenQuestionsHelp": "What the projector shows while players wait for the next question; phones show progress and what's next in small.",
+      "betweenQuestionsNone": "nothing extra",
+      "betweenQuestionsOptions": {
+        "progress": "Progress",
+        "progressHelp": "Where the quiz and the round are, and about how long is left",
+        "next": "What's next",
+        "nextHelp": "The next question's number, type, time and points, never its text",
+        "leaders": "Top 3",
+        "leadersHelp": "The current leaders; never while results are held back"
       },
       "answerStyle": "Answer buttons on phones",
       "answerStyleOptions": {
@@ -678,11 +705,11 @@
       "apply_other": "Apply to {{count}} quizzes",
       "groups": {
         "look": "Look",
-        "lookHelp": "Theme, answer colours, symbols and style",
+        "lookHelp": "Theme, answer colours, symbols and style, the screen between questions",
         "scoring": "Scoring",
         "scoringHelp": "Speed bonus, streak bonus, shuffled options",
         "flow": "Game flow",
-        "flowHelp": "Mode and teams, when answers and the scoreboard show, final results",
+        "flowHelp": "Mode and teams, when answers and the scoreboard show, the countdown, final results",
         "questions": "Every question",
         "questionsHelp": "Time limit and points of all questions"
       },
@@ -763,6 +790,8 @@
     "copyFailed": "Could not copy. Select the PIN and copy it yourself.",
     "info": {
       "title": "About the game",
+      "length_one": "Takes about {{count}} minute",
+      "length_other": "Takes about {{count}} minutes",
       "questions_one": "{{count}} question",
       "questions_other": "{{count}} questions",
       "questionsInRounds_one": "{{questions}} questions in {{count}} round",
@@ -885,6 +914,15 @@
     "pause": "Pause",
     "resume": "Resume",
     "paused": "Paused"
+  },
+  "between": {
+    "progress": "Progress",
+    "questionsDone": "{{done}} / {{count}} questions",
+    "next": "Next up",
+    "question": "Question {{index}}",
+    "finalNext": "Final results next",
+    "leaders": "Top 3",
+    "opensIn": "Opens after the countdown"
   },
   "connection": {
     "connecting": "Connecting…",
@@ -1376,6 +1414,42 @@
     "current": "Current version",
     "releasedOn": "Released {{date}}",
     "releases": {
+      "1_6_0": {
+        "title": "Your game, your order",
+        "intro": "Pick which question comes next, know how long the game takes, and give everyone something to look at between questions.",
+        "sections": [
+          {
+            "title": "Any question next",
+            "items": [
+              "Between questions, open the Questions tab and press \"Play next\" on any question still to come. The rest keep their order.",
+              "The tab shows what plays next at the top, finds questions as you type, and folds the played and upcoming lists. It also tells you before you pick when a question would leave its round or join the one under way."
+            ]
+          },
+          {
+            "title": "How long it takes",
+            "items": [
+              "Your quizzes, the editor and the new game dialog say roughly how long a game takes, and the dialog redoes it as you change the settings.",
+              "The lobbies say it too, and during the game the host, the projector and the phones see about how much is left."
+            ]
+          },
+          {
+            "title": "Between questions",
+            "items": [
+              "The projector shows how far the quiz is, what kind of question comes next (never its text) and the top 3; phones show progress and what's next in small. Switch each part off under Look.",
+              "A 3-2-1 countdown before every question, on the projector and the phones: switch it on under Game flow. \"Start now\" skips it."
+            ]
+          },
+          {
+            "title": "Messages and the top bar",
+            "items": [
+              "Quick message in the game's top bar sends one of your messages at once: hover it and pick how long it stays.",
+              "You see the message on your own page too, just like the players; its × clears it on every screen.",
+              "After each question the phones show which question it was above the result.",
+              "In the running game and the editor the app bar is folded into the page's own top bar: the cow opens the language, the look and your pages."
+            ]
+          }
+        ]
+      },
       "1_5_0": {
         "title": "The live board",
         "intro": "See at a glance who has answered and what while your game runs, without scrolling.",

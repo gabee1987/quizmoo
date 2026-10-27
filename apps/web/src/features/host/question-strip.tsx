@@ -44,6 +44,26 @@ export function QuestionStrip({ host, clockOffset }: { host: HostSnapshot; clock
     )
   }
 
+  // The 3-2-1 before a question: what is coming and the ring counting it down ("Start now" skips it).
+  if (host.phase === 'countdown' && host.countdownEndsAt !== null) {
+    const next = host.nextQuestion
+    const timer = { endsAt: host.countdownEndsAt, totalMs: host.settings.countdownSec * 1000, clockOffset, pausedAt: null }
+    return (
+      <Strip imageId={null} timer={timer}>
+        <div className="flex flex-wrap items-center gap-1.5">
+          <Badge variant="secondary">{t('play.questionOf', { index: host.questionIndex + 1, count: host.questionCount })}</Badge>
+          {host.group && <Badge variant="outline">{host.group.title}</Badge>}
+          {next && <Badge variant="outline">{t(`questionTypes.${next.type}`)}</Badge>}
+          {next && <Badge variant="outline">{t('editor.seconds', { count: next.timeLimitSec })}</Badge>}
+        </div>
+        <h2 id="strip-title" className="text-2xl font-extrabold">
+          {t('host.game.phase.countdown')}
+        </h2>
+        <p className="text-sm text-muted-foreground">{t('between.opensIn')}</p>
+      </Strip>
+    )
+  }
+
   const running = host.phase === 'question'
   const info = running ? host.live : host.reveal
   const question = info?.question ?? host.question

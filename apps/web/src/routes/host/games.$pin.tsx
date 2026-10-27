@@ -8,6 +8,7 @@ import { AnnouncementBanner } from '@/components/announcement-banner'
 import { AppMenu } from '@/components/app-menu'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/cn'
+import { lengthMinutes } from '@/lib/game-length'
 import { useGameTheme } from '@/lib/themes'
 import { useMediaQuery } from '@/lib/use-media-query'
 import { ConnectionBar } from '../../components/connection-bar'
@@ -133,8 +134,15 @@ function HostGamePage() {
         connected={status === 'connected'}
         onLock={() => (host.hasLockCode ? void lock({ type: 'lock' }) : setLocking(true))}
       />
-      {/* The message as the phones and the projector show it; cleared from the quick menu or the Message tab. */}
-      <AnnouncementBanner announcement={host.announcement} clockOffset={clockOffset} className="-mb-3 shrink-0" />
+      {/* The message as the phones and the projector show it; its × clears it on every screen. */}
+      <AnnouncementBanner
+        announcement={host.announcement}
+        clockOffset={clockOffset}
+        onDismiss={() => void send({ type: 'clearAnnouncement' })}
+        dismissLabel={t('host.game.message.clearEverywhere')}
+        swipe={false}
+        className="-mb-3 shrink-0"
+      />
       <div
         className={cn(
           // One row that takes the height left (not the content's), so the board and the panels scroll inside.
@@ -240,6 +248,12 @@ function TopBar({
             <span className="tabular-nums">
               <span aria-hidden="true">· </span>
               {t('play.questionOf', { index: host.questionIndex + 1, count: host.questionCount })}
+            </span>
+          )}
+          {host.phase !== 'finished' && host.estimatedLeftSec > 0 && (
+            <span className="tabular-nums" title={t('common.lengthEstimate')}>
+              <span aria-hidden="true">· </span>
+              {t('common.aboutMinLeft', { count: lengthMinutes(host.estimatedLeftSec) })}
             </span>
           )}
         </p>

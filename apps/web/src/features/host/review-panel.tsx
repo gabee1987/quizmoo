@@ -1,5 +1,5 @@
 import type { HostSnapshot } from '@quizmoo/shared'
-import { ChevronDownIcon, ListStartIcon, LoaderCircleIcon, MonitorUpIcon, SearchIcon, XIcon } from 'lucide-react'
+import { ChevronDownIcon, InfoIcon, ListStartIcon, LoaderCircleIcon, MonitorUpIcon, SearchIcon, XIcon } from 'lucide-react'
 import { useEffect, useId, useRef, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Badge } from '@/components/ui/badge'
@@ -155,6 +155,15 @@ export function ReviewPanel({
                       {t(`questionTypes.${question.type}`)}
                       {question.groupTitle && ` · ${question.groupTitle}`}
                     </span>
+                    {/* What a pick would do to rounds, said before the click. */}
+                    {canPick && !isNext && question.ifPicked && (
+                      <span className="flex items-center gap-1 text-xs font-semibold text-warning-foreground dark:text-warning">
+                        <InfoIcon className="size-3.5 shrink-0" aria-hidden="true" />
+                        {t(question.ifPicked.change === 'joins' ? 'host.review.joinsRound' : 'host.review.leavesRound', {
+                          round: question.ifPicked.round,
+                        })}
+                      </span>
+                    )}
                   </div>
                   {isNext ? (
                     <Badge key="next" className="shrink-0 animate-pop">

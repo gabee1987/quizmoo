@@ -71,6 +71,20 @@ describe('gameSettingsSchema', () => {
     expect(gameSettingsSchema.safeParse({ customPalette: ['#f00', '#00ff00', '#0000ff', '#123456', '#abcdef', '#000000'] }).success).toBe(false)
   })
 
+  it('gives settings saved before phase 44 no countdown and every part between questions', () => {
+    expect(gameSettingsSchema.parse({ theme: 'mint' })).toMatchObject({
+      countdownSec: 0,
+      betweenQuestions: { progress: true, next: true, leaders: true },
+    })
+    expect(gameSettingsSchema.parse({ betweenQuestions: { leaders: false } }).betweenQuestions).toEqual({ progress: true, next: true, leaders: false })
+  })
+
+  it('takes a 3 or 5 second countdown and nothing else', () => {
+    expect(gameSettingsSchema.parse({ countdownSec: 5 }).countdownSec).toBe(5)
+    expect(gameSettingsSchema.safeParse({ countdownSec: 4 }).success).toBe(false)
+    expect(gameSettingsSchema.safeParse({ countdownSec: 10 }).success).toBe(false)
+  })
+
   it('rejects an unknown theme, palette or symbol set', () => {
     expect(gameSettingsSchema.safeParse({ theme: 'lava' }).success).toBe(false)
     expect(gameSettingsSchema.safeParse({ answerPalette: 'rainbow' }).success).toBe(false)

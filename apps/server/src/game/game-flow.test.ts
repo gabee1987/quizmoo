@@ -114,6 +114,23 @@ describe('playNext', () => {
     expect(reordered.quiz.groups!.map((g) => g.id)).toEqual(['g2', 'g1'])
   })
 
+  it("tells the host beforehand when a pick would join the round under way or leave its own", () => {
+    const ifPicked = (state: GameState) => toHostSnapshot(state, T0, { includeAnswers: true }).upcoming.map((q) => [q.id, q.ifPicked])
+    // After q-multiple, inside round one: q-text stays where it is, q-number would join round one.
+    expect(ifPicked(revealOf(game(groupedQuiz()), 1))).toEqual([
+      ['q-truefalse', null],
+      ['q-text', null],
+      ['q-number', { change: 'joins', round: 'Round one' }],
+      ['q-poll', { change: 'joins', round: 'Round one' }],
+    ])
+    // Between rounds, before a question of no round: round two's questions would play on their own.
+    expect(ifPicked(revealOf(game(groupedQuiz(['', 'g1', 'g1', '', 'g2', 'g2'])), 2))).toEqual([
+      ['q-text', null],
+      ['q-number', { change: 'leaves', round: 'Round two' }],
+      ['q-poll', { change: 'leaves', round: 'Round two' }],
+    ])
+  })
+
   it('keeps the state JSON-serialisable and the results in the order played', () => {
     const state = playNext(revealOf(plain(), 0), 'q-poll')
     expect(JSON.parse(JSON.stringify(state))).toEqual(state)
