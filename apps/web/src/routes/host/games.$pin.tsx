@@ -4,8 +4,11 @@ import { Link, createFileRoute } from '@tanstack/react-router'
 import { ArrowLeftIcon, LockIcon, MonitorIcon, PanelLeftCloseIcon, PanelLeftOpenIcon, TrophyIcon } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { AnnouncementBanner } from '@/components/announcement-banner'
+import { AppMenu } from '@/components/app-menu'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/cn'
+import { lengthMinutes } from '@/lib/game-length'
 import { useGameTheme } from '@/lib/themes'
 import { useMediaQuery } from '@/lib/use-media-query'
 import { ConnectionBar } from '../../components/connection-bar'
@@ -21,6 +24,7 @@ import { LockDialog } from '../../features/host/lock-dialog'
 import { PlayAgainButton } from '../../features/host/play-again-button'
 import { PlayerBoard } from '../../features/host/player-board'
 import { QuestionStrip } from '../../features/host/question-strip'
+import { QuickMessageMenu } from '../../features/host/quick-message-menu'
 import { RoundTripBadge } from '../../features/host/round-trip-badge'
 import { settingsLine } from '../../features/host/settings-line'
 import { RankList } from '../../features/play/scoreboard'
@@ -120,8 +124,8 @@ function HostGamePage() {
   const controls = <Controls host={host} send={send} placement={wide ? 'rail' : 'bottom'} />
   const grading = host.phase === 'reveal' && host.awaitingGrading
   return (
-    // The window below the app header (4rem) and the page's bottom padding (1.5rem).
-    <div className="flex w-full flex-col gap-3 lg:h-[calc(100dvh-5.5rem)] lg:min-h-0">
+    // The whole window but the page's bottom padding (1.5rem); the app bar is folded into the top bar.
+    <div className="flex w-full flex-col gap-3 pt-3 lg:h-[calc(100dvh-1.5rem)] lg:min-h-0">
       <ConnectionBar status={status} since={since} />
       <TopBar
         host={host}
@@ -129,6 +133,15 @@ function HostGamePage() {
         send={send}
         connected={status === 'connected'}
         onLock={() => (host.hasLockCode ? void lock({ type: 'lock' }) : setLocking(true))}
+      />
+      {/* The message as the phones and the projector show it; its × clears it on every screen. */}
+      <AnnouncementBanner
+        announcement={host.announcement}
+        clockOffset={clockOffset}
+        onDismiss={() => void send({ type: 'clearAnnouncement' })}
+        dismissLabel={t('host.game.message.clearEverywhere')}
+        swipe={false}
+        className="-mb-3 shrink-0"
       />
       <div
         className={cn(
@@ -191,6 +204,7 @@ function TopBar({
   return (
     <header className="flex shrink-0 flex-wrap items-center gap-x-3 gap-y-2 rounded-2xl border bg-card p-2 shadow-soft sm:px-3">
       <div className="flex items-center gap-1">
+        <AppMenu />
         {/* Laptops: the host menu back next to the game, or away again. */}
         <Button
           variant="ghost"
@@ -236,6 +250,12 @@ function TopBar({
               {t('play.questionOf', { index: host.questionIndex + 1, count: host.questionCount })}
             </span>
           )}
+          {host.phase !== 'finished' && host.estimatedLeftSec > 0 && (
+            <span className="tabular-nums" title={t('common.lengthEstimate')}>
+              <span aria-hidden="true">· </span>
+              {t('common.aboutMinLeft', { count: lengthMinutes(host.estimatedLeftSec) })}
+            </span>
+          )}
         </p>
       </div>
       <div className="flex items-center gap-1.5">
@@ -250,6 +270,7 @@ function TopBar({
       <span className="hidden h-8 w-px bg-border lg:block" aria-hidden="true" />
       {/* Icons only until there is room for the labels. */}
       <div className="ml-auto flex items-center gap-2 lg:ml-0">
+        {host.phase !== 'finished' && <QuickMessageMenu announcement={host.announcement} quickMessages={host.quickMessages} onCommand={send} />}
         {/* Locks every host page of the account until the lock code or the password is typed. */}
         <Button variant="secondary" size="sm" onClick={onLock} title={t('host.lock.button')}>
           <LockIcon aria-hidden="true" />

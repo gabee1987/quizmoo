@@ -15,7 +15,7 @@ interface GameState {
   pin: string                       // 6 digits, unique among active games
   quiz: Quiz                        // frozen copy taken when the game was created
   settings: GameSettings
-  phase: GamePhase                  // 'lobby' | 'intro' | 'question' | 'reveal' | 'scoreboard' | 'finished'
+  phase: GamePhase                  // 'lobby' | 'intro' | 'countdown' | 'question' | 'reveal' | 'scoreboard' | 'finished'
   questionIndex: number             // -1 in lobby
   players: Record<string, Player>
   teams: Record<string, Team>       // empty in classic mode
@@ -71,6 +71,8 @@ Each command is `(state, input, now) => GameState` and returns a new object (no 
 | `skipQuestion()` | question | discards answers of the current question, goes to scoreboard |
 | `extendTime(seconds)` | question | pushes `questionEndsAt` |
 | `endGame()` | any | finished, sets `finishedAt` |
+| `playNext(questionId)` | reveal (not grading) or scoreboard | moves a question still to come to `questionIndex + 1` in the game's quiz copy; its round from `groupIfPicked` (joins the round under way, keeps its own in front of it or as its last one, otherwise none); groups reordered by first appearance. The host snapshot's `upcoming[].ifPicked` uses the same function |
+| countdown | opening a question with `settings.countdownSec > 0` | phase `countdown` with `countdownEndsAt`, `questionIndex` already the upcoming one and `question` null; `countdownTimeUp` or `next()` ("Start now") opens it; no pause |
 | `closeGame()` | any | `endGame` with both audiences released (no podium waits); the realtime layer sends everyone away and drops the game from memory |
 | `lockHost(codeHash?)` / `unlockHost()` / `hostLocked(state)` | any | screen lock: `lock: { codeHash, locked }` (`codeHash` an argon2 hash of the game's lock code, kept unless a new one is given, never in a snapshot); host snapshots carry `locked` and, in the host room, `hasLockCode`. The realtime layer locks all of a host's games together and checks codes |
 

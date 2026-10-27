@@ -1,4 +1,5 @@
 import {
+  estimateGameSec,
   fallbackAvatar,
   type Answer,
   type BrandingPublic,
@@ -7,6 +8,7 @@ import {
   type GroupOutline,
   type GroupPublic,
   type HostSnapshot,
+  type NextQuestion,
   type PlayerPublic,
   type PlayerQuestionResult,
   type PlayerSnapshot,
@@ -17,11 +19,12 @@ import {
   type TeamAnswerPublic,
   type TeamLive,
   type TeamPublic,
+  type UpcomingQuestion,
 } from '@quizmoo/shared'
 import { groupAt, groupBounds, groupsOf, settingsAt } from './groups.js'
 import { normalise } from './normalise.js'
 import { displayOrder } from './order.js'
-import { answersHidden, hostLocked, quickMessagesOf, resultsPendingFor } from './engine.js'
+import { answersHidden, groupIfPicked, hostLocked, quickMessagesOf, resultsPendingFor } from './engine.js'
 import { denseRank, isCorrect } from './scoring.js'
 import {
   answersAsOne,
@@ -94,6 +97,7 @@ export function toHostSnapshot(state: GameState, now: number, { includeAnswers =
     teamAnswers: includeAnswers ? teamAnswers(state, base.questionIndex) : null,
     quickMessages: includeAnswers ? quickMessagesOf(state) : null,
     groups: groupOutlines(state),
+    upcoming: includeAnswers ? upcoming(state) : [],
     locked: hostLocked(state),
     hasLockCode: includeAnswers && !!state.lock?.codeHash,
   }
@@ -361,6 +365,9 @@ function buildBaseSnapshot(state: GameState, now: number, audience: ResultsAudie
     questionEndsAt: inQuestion ? state.questionEndsAt : null,
     pausedAt: inQuestion || intro ? (state.pausedAt ?? null) : null,
     introEndsAt: intro ? (state.introEndsAt ?? null) : null,
+    countdownEndsAt: phase === 'countdown' ? (state.countdownEndsAt ?? null) : null,
+    estimatedLeftSec: estimatedLeftSec(state),
+    nextQuestion: nextQuestion(state),
     group: groupPublic(state, shownIndex),
     groupCount: groupsOf(state.quiz).length,
     reviewing,
@@ -380,6 +387,58 @@ function buildBaseSnapshot(state: GameState, now: number, audience: ResultsAudie
     scheduledAt: state.scheduledAt ?? null,
     branding: brandingFor(state, audience),
   }
+}
+
+/** The index of the first question not opened yet: in the countdown the one about to open. */
+function nextIndex(state: GameState): number {
+  if (state.phase === 'lobby') return 0
+  if (state.phase === 'countdown') return state.questionIndex
+  if (state.phase === 'finished') return state.quiz.questions.length
+  return state.questionIndex + 1
+}
+
+/** The rest of the game, the running question (or the one counting down) included in full. */
+function estimatedLeftSec(state: GameState): number {
+  const from = state.phase === 'question' ? state.questionIndex : nextIndex(state)
+  return estimateGameSec(state.quiz.questions, groupsOf(state.quiz), state.settings, from)
+}
+
+/** The next question's outline for every screen: no text, nothing about its answer. */
+function nextQuestion(state: GameState): NextQuestion | null {
+  const index = nextIndex(state)
+  const question = state.quiz.questions[index]
+  if (!question) return null
+  return {
+    index,
+    type: question.type,
+    timeLimitSec: question.timeLimitSec,
+    points: question.points,
+    groupTitle: groupAt(state.quiz, index)?.title ?? null,
+  }
+}
+
+/** The questions still to come, for the host's "Play next". */
+function upcoming(state: GameState): UpcomingQuestion[] {
+  const from = state.phase === 'countdown' ? state.questionIndex + 1 : nextIndex(state)
+  const { questions } = state.quiz
+  const title = (id: string | undefined) => state.quiz.groups?.find((g) => g.id === id)?.title ?? ''
+  return questions.slice(from).map((question, i) => {
+    // What picking it would do to rounds (the first one is next already).
+    const round = i === 0 ? question.groupId : groupIfPicked(questions, from, from + i)
+    return {
+      index: from + i,
+      id: question.id,
+      text: question.text,
+      type: question.type,
+      groupTitle: groupAt(state.quiz, from + i)?.title ?? null,
+      ifPicked:
+        round !== undefined && round !== question.groupId
+          ? { change: 'joins' as const, round: title(round) }
+          : question.groupId !== undefined && round === undefined
+            ? { change: 'leaves' as const, round: title(question.groupId) }
+            : null,
+    }
+  })
 }
 
 /** The group of question `index`, with where it sits in the quiz. */

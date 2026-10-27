@@ -114,6 +114,8 @@ export const hostCommandSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('showAnswers'), indexes: z.array(z.number().int().min(0)).min(1).max(MAX_QUESTIONS) }),
   /** Back from a question shown again to where the game was. */
   z.object({ type: z.literal('closeQuestion') }),
+  /** Between questions: a question still to come (by id) plays next; the rest keep their order. */
+  z.object({ type: z.literal('playNext'), questionId: z.string().min(1).max(64) }),
   /**
    * Screen lock: locks every game of the host until `POST /api/me/unlock`. `code` sets this game's
    * lock code; without it the game's own code, the host's default code or the password unlocks.

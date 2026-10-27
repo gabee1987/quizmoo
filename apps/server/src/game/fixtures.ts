@@ -61,6 +61,8 @@ export function fixtureSettings(overrides: Partial<GameSettings> = {}): GameSett
     shuffleQuestions: false,
     groupIntroSec: 0,
     groupStandings: 'afterGroup',
+    countdownSec: 0,
+    betweenQuestions: { progress: true, next: true, leaders: true },
     teamNames: [],
     teamSetup: 'host',
     soloPlayers: false,

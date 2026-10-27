@@ -1,5 +1,6 @@
 import type { PlayerSnapshot, TeamLive } from '@quizmoo/shared'
 import { useTranslation } from 'react-i18next'
+import { BetweenQuestions } from '@/components/between-questions'
 import { RoundChip } from '@/components/round-chip'
 import { cn } from '@/lib/cn'
 import { resultsWhen } from '@/lib/results-when'
@@ -46,6 +47,18 @@ export function Reveal({ snapshot }: { snapshot: PlayerSnapshot }) {
           {t('play.questionOf', { index: snapshot.questionIndex + 1, count: snapshot.questionCount })} · {t('play.shownAgain')}
           {reviewPosition(snapshot)}
         </p>
+      )}
+      {/* Which question this was, so the result reads on its own. */}
+      {question && (
+        <div className="flex w-full animate-fade-up flex-col gap-0.5">
+          {/* The answer's chips below carry the number when they show. */}
+          {!snapshot.reviewing && !showMine && (
+            <p className="text-sm font-semibold text-muted-foreground">
+              {t('play.questionOf', { index: snapshot.questionIndex + 1, count: snapshot.questionCount })}
+            </p>
+          )}
+          <p className="line-clamp-3 text-lg leading-snug font-extrabold wrap-break-word">{question.text}</p>
+        </div>
       )}
       <div className={cn('relative flex w-full animate-pop flex-col items-center gap-3 rounded-3xl px-4 py-8 shadow-soft', tone)}>
         {correct === true && <Sparkles />}
@@ -99,6 +112,7 @@ export function Reveal({ snapshot }: { snapshot: PlayerSnapshot }) {
           <RankArrow previous={snapshot.me.previousRank} rank={snapshot.me.rank} />
         </p>
       )}
+      {!snapshot.reviewing && <BetweenQuestions snapshot={snapshot} size="phone" className="animate-fade-up" />}
     </div>
   )
 }
@@ -143,6 +157,16 @@ function AnswerKept({ snapshot }: { snapshot: PlayerSnapshot }) {
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-5 text-center">
       <RoundChip group={snapshot.group} />
+      {snapshot.question && (
+        <div className="flex w-full animate-fade-up flex-col gap-0.5">
+          {!snapshot.myAnswer && (
+            <p className="text-sm font-semibold text-muted-foreground">
+              {t('play.questionOf', { index: snapshot.questionIndex + 1, count: snapshot.questionCount })}
+            </p>
+          )}
+          <p className="line-clamp-3 text-lg leading-snug font-extrabold wrap-break-word">{snapshot.question.text}</p>
+        </div>
+      )}
       <div className="flex w-full animate-pop flex-col items-center gap-2 rounded-3xl border bg-card px-4 py-8 shadow-soft">
         <h1 className="text-3xl font-black">{answered ? t('play.answerKept') : t('play.noAnswer')}</h1>
       </div>
@@ -150,6 +174,7 @@ function AnswerKept({ snapshot }: { snapshot: PlayerSnapshot }) {
       {snapshot.myAnswer && !snapshot.teamResult && <MyAnswer snapshot={snapshot} answer={snapshot.myAnswer} />}
       {snapshot.teamResult && <TeamResult snapshot={snapshot} team={snapshot.teamResult} />}
       <p className="font-semibold text-muted-foreground">{t(resultsWhen(snapshot.settings))}</p>
+      <BetweenQuestions snapshot={snapshot} size="phone" />
     </div>
   )
 }

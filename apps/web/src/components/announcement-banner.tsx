@@ -20,6 +20,8 @@ export function AnnouncementBanner({
   flush = false,
   clockOffset = 0,
   onDismiss,
+  dismissLabel,
+  swipe = true,
   className,
 }: {
   announcement: Announcement | null
@@ -28,6 +30,10 @@ export function AnnouncementBanner({
   flush?: boolean
   /** The player may hide it: a swipe left or right, or the close button. Then it leaves like a cleared one. */
   onDismiss?: (() => void) | undefined
+  /** The close button's name when it does more than hide it here (the host's clears it for everyone). */
+  dismissLabel?: string | undefined
+  /** Swiping away too; off for the host, where a stray swipe would clear it on every screen. */
+  swipe?: boolean
   /** Server minus local clock, for the time bar of a message that clears itself. */
   clockOffset?: number
   className?: string
@@ -126,7 +132,7 @@ export function AnnouncementBanner({
           <SwipeAway
             key={shown.id}
             onSwipe={
-              onDismiss && !leaving
+              onDismiss && swipe && !leaving
                 ? () => {
                     setSwiped(true)
                     onDismiss()
@@ -152,7 +158,8 @@ export function AnnouncementBanner({
               {closable.current && (
                 <button
                   type="button"
-                  aria-label={t('connection.dismissAnnouncement')}
+                  aria-label={dismissLabel ?? t('connection.dismissAnnouncement')}
+                  title={dismissLabel}
                   disabled={leaving || !onDismiss}
                   onClick={onDismiss}
                   className="-my-2 -mr-2 grid size-11 shrink-0 place-items-center rounded-full outline-none hover:bg-foreground/10 focus-visible:ring-[3px] focus-visible:ring-ring"

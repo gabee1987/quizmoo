@@ -14,6 +14,9 @@ const boardOptionsSchema = z.object({
   panels: z.boolean().catch(true),
   /** The host sidebar next to a running game (laptops); hidden by default to give the board the width. */
   sidebar: z.boolean().catch(false),
+  /** The Questions tab's two lists: the ones still to come open, the played ones folded. */
+  upcomingOpen: z.boolean().catch(true),
+  playedOpen: z.boolean().catch(false),
 })
 export type BoardOptions = z.infer<typeof boardOptionsSchema>
 

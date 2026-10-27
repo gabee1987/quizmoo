@@ -1,6 +1,6 @@
-import { lockCodeSchema, type BrandingChoice, type GameSettings, type QuizBranding } from '@quizmoo/shared'
+import { lockCodeSchema, type BrandingChoice, type GameLength, type GameSettings, type QuizBranding } from '@quizmoo/shared'
 import { useQuery } from '@tanstack/react-query'
-import { CalendarClockIcon, EyeOffIcon, PlayIcon, RotateCcwIcon } from 'lucide-react'
+import { CalendarClockIcon, ClockIcon, EyeOffIcon, PlayIcon, RotateCcwIcon } from 'lucide-react'
 import { useId, useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
@@ -10,6 +10,7 @@ import { TextField } from '@/components/text-field'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { cn } from '@/lib/cn'
+import { quizMinutes } from '@/lib/game-length'
 import { defaultStart, latestStart, scheduleError } from '@/lib/schedule'
 import { hostSettingsQueryOptions } from '../settings/host-settings'
 import { BrandingFields } from './branding-fields'
@@ -41,6 +42,7 @@ export function CreateGameDialog({
   onCancel,
   rounds = false,
   offCount = 0,
+  length,
 }: {
   quizTitle: string
   quizSettings: GameSettings
@@ -61,6 +63,8 @@ export function CreateGameDialog({
   rounds?: boolean
   /** Switched-off questions: the game leaves them out, and the header says so. */
   offCount?: number
+  /** What the length estimate needs; the header then says roughly how long this game takes. */
+  length?: GameLength | undefined
 }) {
   const { t } = useTranslation()
   const startsAtId = useId()
@@ -110,6 +114,13 @@ export function CreateGameDialog({
             <DialogTitle className="shrink-0 text-lg md:text-xl">{t('host.create.title')}</DialogTitle>
             <DialogDescription className="min-w-0 truncate text-sm md:text-base md:whitespace-normal md:wrap-break-word">
               {quizTitle}
+              {/* Follows the settings: a countdown or a scoreboard after every question makes the game longer. */}
+              {length && (
+                <span className="text-muted-foreground" title={t('common.lengthEstimate')}>
+                  {' · '}
+                  <ClockIcon className="inline size-4 align-[-0.15em]" aria-hidden="true" /> {t('common.aboutMin', { count: quizMinutes(length, settings) })}
+                </span>
+              )}
               {offCount > 0 && (
                 <span className="text-muted-foreground">
                   {' · '}

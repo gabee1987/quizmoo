@@ -1,4 +1,4 @@
-import type { GameSettings, GameSummary, QuizBranding } from '@quizmoo/shared'
+import type { GameLength, GameSettings, GameSummary, QuizBranding } from '@quizmoo/shared'
 import { queryOptions } from '@tanstack/react-query'
 import { apiFetch } from '@/lib/api'
 
@@ -12,6 +12,8 @@ export interface QuizSummary {
   updatedAt: string
   settings: GameSettings
   branding: QuizBranding
+  /** What the length estimate needs, for any settings. */
+  length: GameLength
 }
 
 /** The host's quizzes, most recently edited first. */

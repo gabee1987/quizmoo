@@ -58,7 +58,8 @@ export function GamePanels({
           )
         })}
       </TabsList>
-      <div className="relative -mx-1 min-h-0 flex-1 overflow-y-auto px-1 pb-1">
+      {/* Scrolls only beside the board (laptops); on a phone the page scrolls, so a sticky header sticks to the window. */}
+      <div className="relative -mx-1 min-h-0 flex-1 px-1 pb-1 lg:overflow-y-auto">
         <TabsContent value="standings">
           <Standings host={host} gameId={gameId} />
         </TabsContent>
@@ -75,8 +76,12 @@ export function GamePanels({
             onMove={(playerId, teamId) => void send({ type: 'movePlayer', playerId, teamId })}
           />
         </TabsContent>
-        <TabsContent value="questions">
-          <ReviewPanel host={host} onShowQuestion={(index) => void send({ type: 'showQuestion', index })} />
+        <TabsContent value="questions" className="flex flex-col gap-3">
+          <ReviewPanel
+            host={host}
+            onShowQuestion={(index) => void send({ type: 'showQuestion', index })}
+            onPlayNext={(questionId) => send({ type: 'playNext', questionId })}
+          />
         </TabsContent>
         <TabsContent value="preview">
           <ScreenPreview host={host} clockOffset={clockOffset} defaultOpen />

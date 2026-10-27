@@ -95,6 +95,8 @@ test('pause and resume, a message that clears itself, showing a question again',
       await phone.getByRole('button', { name: 'False', exact: true }).click()
       await hostButton('Show scoreboard').click()
       await page.getByRole('tab', { name: 'Questions' }).click()
+      // The played questions are folded until opened.
+      await page.getByRole('button', { name: /Questions so far/ }).click()
       await page.getByRole('button', { name: 'Show question 1 on the screens again' }).click()
       await expect(phone.getByText('Question 1 of 2 · shown again')).toBeVisible()
       await expect(projector.getByText('Question 1 of 2 · shown again')).toBeVisible()

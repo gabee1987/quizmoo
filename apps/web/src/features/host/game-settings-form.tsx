@@ -62,11 +62,12 @@ export const settingsSections = {
     'shuffleQuestions',
     'revealAnswers',
     'scoreboard',
+    'countdownSec',
     'groupIntroSec',
     'groupStandings',
     'finalResults',
   ],
-  look: ['theme', 'customTheme', 'answerPalette', 'customPalette', 'answerSymbols', 'answerStyle'],
+  look: ['theme', 'customTheme', 'answerPalette', 'customPalette', 'answerSymbols', 'answerStyle', 'betweenQuestions'],
   scoring: ['speedBonus', 'streakBonus', 'answerChanges', 'answerLockSec', 'shuffleOptions'],
 } as const satisfies Record<string, readonly (keyof GameSettings)[]>
 export type SettingsSection = keyof typeof settingsSections
@@ -77,6 +78,9 @@ export const sectionIcons: Record<SettingsSection, ComponentType<{ className?: s
   look: PaletteIcon,
   scoring: TrophyIcon,
 }
+
+/** The parts of the projector's screen between questions, each switchable. */
+const betweenParts = ['progress', 'next', 'leaders'] as const
 
 /** Short descriptions of one group's settings, e.g. ["Classic", "Answers: after each question", ...]. */
 export function sectionSummary(settings: GameSettings, section: SettingsSection, t: TFunction): string[] {
@@ -91,6 +95,7 @@ export function sectionSummary(settings: GameSettings, section: SettingsSection,
       settings.revealAnswers === 'afterQuestion'
         ? `${t('host.create.scoreboard')}: ${t(`host.create.scoreboardOptions.${settings.scoreboard}`)}`
         : null,
+      settings.countdownSec > 0 ? `${t('host.create.countdown')}: ${t('host.create.countdownSeconds', { count: settings.countdownSec })}` : null,
       `${t('host.create.finalResults')}: ${t(`host.create.finalResultsOptions.${settings.finalResults}`)}`,
     ],
     look: [
@@ -100,6 +105,15 @@ export function sectionSummary(settings: GameSettings, section: SettingsSection,
         ? `${t('host.create.answerPalette')}: ${t(`host.create.answerPaletteOptions.${settings.answerPalette}`)}`
         : null,
       settings.answerSymbols !== 'shapes' ? t(`host.create.answerSymbolsOptions.${settings.answerSymbols}`) : null,
+      // Only when some part is off: all on is the usual case.
+      betweenParts.every((part) => settings.betweenQuestions[part])
+        ? null
+        : `${t('host.create.betweenQuestions')}: ${
+            betweenParts
+              .filter((part) => settings.betweenQuestions[part])
+              .map((part) => t(`host.create.betweenQuestionsOptions.${part}`))
+              .join(', ') || t('host.create.betweenQuestionsNone')
+          }`,
     ],
     scoring: [
       settings.speedBonus ? t('host.create.speedBonus') : null,
@@ -278,6 +292,16 @@ export function GameSettingsForm({
             disabled={value.revealAnswers === 'atEnd'}
             help={value.revealAnswers === 'atEnd' ? t('host.create.scoreboardAtEnd') : undefined}
           />
+          <ChoiceCards
+            legend={t('host.create.countdown')}
+            value={String(value.countdownSec)}
+            choices={([0, 3, 5] as const).map((sec) => ({
+              value: String(sec),
+              label: sec === 0 ? t('host.create.countdownOff') : t('host.create.countdownSeconds', { count: sec }),
+            }))}
+            onChange={(sec) => set({ countdownSec: Number(sec) as GameSettings['countdownSec'] })}
+            help={t('host.create.countdownHelp')}
+          />
           {rounds && (
             <>
               <ChoiceCards
@@ -358,6 +382,19 @@ export function GameSettingsForm({
             onChange={(answerStyle) => set({ answerStyle })}
             help={t('host.create.answerStyleHelp')}
           />
+          <fieldset className="flex flex-col">
+            <legend className="font-bold">{t('host.create.betweenQuestions')}</legend>
+            <p className="text-sm text-muted-foreground">{t('host.create.betweenQuestionsHelp')}</p>
+            {betweenParts.map((part) => (
+              <SwitchRow
+                key={part}
+                label={t(`host.create.betweenQuestionsOptions.${part}`)}
+                description={t(`host.create.betweenQuestionsOptions.${part}Help`)}
+                checked={value.betweenQuestions[part]}
+                onChange={(on) => set({ betweenQuestions: { ...value.betweenQuestions, [part]: on } })}
+              />
+            ))}
+          </fieldset>
         </>
       )}
       {show('scoring') && (

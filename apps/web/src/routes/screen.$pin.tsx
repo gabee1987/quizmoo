@@ -7,6 +7,7 @@ import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/cn'
 import { AnnouncementBanner } from '../components/announcement-banner'
+import { Countdown } from '../components/between-questions'
 import { ConnectionBar } from '../components/connection-bar'
 import { Spinner } from '../components/spinner'
 import { primaryAction } from '../features/host/primary-action'
@@ -116,6 +117,8 @@ function ScreenPhase({ host, clockOffset, joinUrl }: { host: HostSnapshot; clock
       return <ScreenLobby host={host} joinUrl={joinUrl} />
     case 'intro':
       return <ScreenRoundIntro host={host} clockOffset={clockOffset} />
+    case 'countdown':
+      return <Countdown snapshot={host} clockOffset={clockOffset} size="screen" />
     case 'question':
       return <ScreenQuestion host={host} clockOffset={clockOffset} />
     case 'reveal':

@@ -25,6 +25,7 @@ import {
   clearAnnouncement,
   closeGame,
   closeQuestion,
+  playNext,
   confirmTeamAnswer,
   createTeam,
   disconnectPlayer,
@@ -451,6 +452,8 @@ function runHostCommand(state: GameState, command: HostCommand, now: number): Ga
       return showAnswers(state, command.indexes)
     case 'closeQuestion':
       return closeQuestion(state)
+    case 'playNext':
+      return playNext(state, command.questionId)
     case 'schedule':
       return schedule(state, command.at, now)
     case 'openJoining':

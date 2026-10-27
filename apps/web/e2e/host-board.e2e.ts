@@ -117,7 +117,11 @@ test('the board shows who answered what, live, and the results, without the page
     await test.step('the side panels can be switched off', async () => {
       await expect(page.getByRole('region', { name: 'Standings' })).toBeVisible()
       await board.getByRole('button', { name: 'View' }).click()
-      await page.getByRole('menuitemcheckbox', { name: 'Side panels' }).click()
+      const panelsItem = page.getByRole('menuitemcheckbox', { name: 'Side panels' })
+      // The menu shows the stored choice: on by default.
+      await expect(panelsItem).toHaveAttribute('aria-checked', 'true')
+      await panelsItem.click()
+      await expect(panelsItem).toHaveAttribute('aria-checked', 'false')
       await page.keyboard.press('Escape')
       await expect(page.getByRole('region', { name: 'Standings' })).toHaveCount(0)
       await board.getByRole('button', { name: 'View' }).click()

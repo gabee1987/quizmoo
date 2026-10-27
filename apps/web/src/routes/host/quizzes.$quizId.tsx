@@ -16,6 +16,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type ComponentType, 
 import { useTranslation } from 'react-i18next'
 import {
   ArrowLeftIcon,
+  ClockIcon,
   DownloadIcon,
   EyeIcon,
   EyeOffIcon,
@@ -35,6 +36,7 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { FormAlert } from '@/components/form-alert'
+import { AppMenu } from '@/components/app-menu'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
@@ -45,6 +47,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/lib/cn'
+import { quizMinutes } from '@/lib/game-length'
 import { toastError } from '@/lib/toast'
 import { useMediaQuery } from '@/lib/use-media-query'
 import { ConfirmDialog } from '../../components/dialog'
@@ -782,11 +785,12 @@ function Editor({ quiz }: { quiz: Quiz }) {
   return (
     <TooltipProvider delayDuration={200}>
       {/* data-palette colours the option badges in the editor like the answers in the game. */}
-      <div data-palette={draft.settings.answerPalette} style={paletteVars(draft.settings)} className="mx-auto flex w-full max-w-[100rem] flex-col gap-4 pb-20 lg:pb-0">
+      <div data-palette={draft.settings.answerPalette} style={paletteVars(draft.settings)} className="mx-auto flex w-full max-w-[100rem] flex-col gap-4 pt-3 pb-20 lg:pb-0">
         {/* Sticky from sm: on phones the bar wraps to two rows and the bottom bar already holds the navigation.
             No background of its own: the page behind has a gradient wash a solid strip would not match. */}
         <div className="z-30 sm:sticky sm:top-2">
         <header className="flex flex-wrap items-center gap-2 rounded-2xl border bg-card/95 p-2 shadow-soft backdrop-blur">
+          <AppMenu />
           <Button asChild variant="ghost" size="icon" aria-label={t('host.game.backToQuizzes')} title={t('host.game.backToQuizzes')}>
             <Link to="/host/quizzes">
               <ArrowLeftIcon aria-hidden="true" />
@@ -840,6 +844,16 @@ function Editor({ quiz }: { quiz: Quiz }) {
                 <span className="hidden xl:inline">{t('editor.newGroup')}</span>
               </Button>
             </div>
+            {/* Follows every edit: a question's time, switching one off, the settings. */}
+            {questions.some((q) => !q.off) && (
+              <span
+                className="hidden items-center gap-1.5 rounded-full bg-muted px-2.5 py-1 text-sm font-semibold whitespace-nowrap text-muted-foreground sm:inline-flex"
+                title={t('common.lengthEstimate')}
+              >
+                <ClockIcon className="size-4" aria-hidden="true" />
+                {t('common.aboutMin', { count: quizMinutes({ questions, groups }, draft.settings) })}
+              </span>
+            )}
             <SaveIndicator status={status} onRetry={retry} />
             {problems.length > 0 && <ProblemsMenu problems={problems} onGo={goToProblem} />}
             <DropdownMenu>
@@ -1171,6 +1185,7 @@ function Editor({ quiz }: { quiz: Quiz }) {
             quizBranding={draft.branding}
             rounds={groups.length > 0}
             offCount={offIds.length}
+            length={{ questions: draft.questions, groups }}
             pending={play.isPending}
             onCreate={(settings, scheduledAt, branding, lockCode) =>
               play.mutate({ quizId: quiz.id, settings, scheduledAt, branding, lockCode })

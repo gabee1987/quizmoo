@@ -13,6 +13,7 @@ export interface ReleaseNotes {
 
 /** Newest first. The first entry must be the app's version (`releases.test.ts` checks it). */
 export const releases: Release[] = [
+  { version: '1.6.0', date: '2026-10-27' },
   { version: '1.5.0', date: '2026-10-27' },
   { version: '1.4.0', date: '2026-10-25' },
   { version: '1.3.0', date: '2026-10-25' },
