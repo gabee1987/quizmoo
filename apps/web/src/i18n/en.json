@@ -458,7 +458,18 @@
       "correctOf_other": "{{correct}} of {{count}} correct ({{percent}})",
       "averageTime": "average {{seconds}} s",
       "showAgain": "Show again",
-      "showAgainLabel": "Show question {{index}} on the screens again"
+      "showAgainLabel": "Show question {{index}} on the screens again",
+      "upcoming": "Still to come",
+      "pickHelp": "Pick any of them to play next; the rest keep their order.",
+      "pickWhen": "Between questions you can pick which one plays next.",
+      "upNext": "Next",
+      "playNext": "Play next",
+      "playNextLabel": "Play question {{index}} next",
+      "search": "Search questions",
+      "clearSearch": "Clear the search",
+      "nextUp": "Plays next",
+      "noneLeft": "No more questions: this is the last one.",
+      "noMatches": "No question matches."
     },
     "grading": {
       "title": "Grade the answers",

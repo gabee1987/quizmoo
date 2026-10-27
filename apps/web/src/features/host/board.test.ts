@@ -102,7 +102,7 @@ describe('fitTileSize', () => {
 
 describe('parseBoardOptions', () => {
   it('falls back to the defaults field by field', () => {
-    const defaults = { view: 'tiles', sort: 'name', hideAnswers: false, panels: true, sidebar: false }
+    const defaults = { view: 'tiles', sort: 'name', hideAnswers: false, panels: true, sidebar: false, upcomingOpen: true, playedOpen: false }
     expect(parseBoardOptions(null)).toEqual(defaults)
     expect(parseBoardOptions('not json')).toEqual(defaults)
     expect(parseBoardOptions('{"view":"list","sort":"nope","hideAnswers":true}')).toEqual({ ...defaults, view: 'list', hideAnswers: true })

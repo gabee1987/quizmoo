@@ -458,7 +458,18 @@
       "correctOf_other": "{{count}} válaszból {{correct}} helyes ({{percent}})",
       "averageTime": "átlagosan {{seconds}} mp",
       "showAgain": "Mutasd újra",
-      "showAgainLabel": "Mutasd újra a(z) {{index}}. kérdést a kijelzőkön"
+      "showAgainLabel": "Mutasd újra a(z) {{index}}. kérdést a kijelzőkön",
+      "upcoming": "Még hátravan",
+      "pickHelp": "Bármelyiket választhatod következőnek, a többi sorrendje marad.",
+      "pickWhen": "Két kérdés között kiválaszthatod, melyik jöjjön.",
+      "upNext": "Ez jön",
+      "playNext": "Ez jöjjön",
+      "playNextLabel": "A(z) {{index}}. kérdés jöjjön most",
+      "search": "Keress a kérdések között",
+      "clearSearch": "Keresés törlése",
+      "nextUp": "Ez jön",
+      "noneLeft": "Nincs több kérdés, ez az utolsó.",
+      "noMatches": "Nincs ilyen kérdés."
     },
     "grading": {
       "title": "Értékeld a válaszokat",
