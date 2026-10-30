@@ -54,8 +54,8 @@ Finished plans are deleted once their branch is merged: `CHANGELOG.md` records w
 | 45 | [Lock joining](phase-45-lock-joining.md) | `feature/answers-and-editor` | done |
 | 46 | [Picture details in the editor](phase-46-picture-details.md) | `feature/answers-and-editor` | done |
 | 47 | [Typo tolerance for typed answers](phase-47-typo-tolerance.md) | `feature/answers-and-editor` | done |
-| 48 | [Smoother drag with 200 questions](phase-48-smoother-drag.md) | `feature/answers-and-editor` | planned |
-| 49 | [Play-through preview in the editor](phase-49-play-through-preview.md) | `feature/answers-and-editor` | planned |
+| 48 | [Smoother drag with 200 questions](phase-48-smoother-drag.md) | `feature/editor-drag-and-preview` | planned |
+| 49 | [Play-through preview in the editor](phase-49-play-through-preview.md) | `feature/editor-drag-and-preview` | planned |
 | later | [Hosting without an account](later-guest-hosting.md) | `feature/guest-hosting` | planned, after the MVP |
 
 ## Conventions every plan follows

@@ -1433,6 +1433,34 @@
     "current": "Mostani verzió",
     "releasedOn": "Megjelent: {{date}}",
     "releases": {
+      "1_7_0": {
+        "title": "Kis elírás belefér",
+        "intro": "Az első családi játék tanulságai: elírt válaszok, ami beesik az ajtón, és képek, amikről tudod, mit kapnak a telefonok.",
+        "sections": [
+          {
+            "title": "Elírás, de jó",
+            "items": [
+              "Ha elgépelik a választ, az is jó: a „tokio” is jó a „Tokyo”-ra. 4 betűtől egy hiba fér bele, 8-tól kettő, 12-től három, 18-tól négy; a számoknak pontosnak kell lenniük. Ugyanannyi pontot ér, mint a pontos válasz.",
+              "Az „Apró elírás is jó” a Pontozás csoportban van, és alapból be van kapcsolva; ha kikapcsolod, csak a pontos válasz számít.",
+              "A játékos telefonja „Kis elírás, de elfogadjuk” üzenetet mutat a „Helyes!” alatt, te pedig az élő táblán, a kérdés válaszainál és az eredmények között „Elírás, de jó” címkét látsz."
+            ]
+          },
+          {
+            "title": "Csatlakozás lezárása",
+            "items": [
+              "A váróteremben a „Csatlakozás lezárása” kapcsolóval lezárhatod a játékot az új játékosok előtt, és újra meg is nyithatod. Késői csatlakozásnál játék közben a felső sávban is megteheted.",
+              "Aki már bent van, mindig visszajöhet; az új telefonok és a kivetítő azt látják, hogy a csatlakozás lezárva."
+            ]
+          },
+          {
+            "title": "Képek a szerkesztőben",
+            "items": [
+              "Minden kép egy kártyán jelenik meg: nagyobb előnézet, mellette a mérete pixelben, a fájlmérete és a formátuma, vagyis amit a telefonok és a kivetítő kapnak, a Kép cseréje és a Kép eltávolítása pedig rendes gombok.",
+              "A válaszlehetőségek kis képeinél ugyanezt akkor látod, ha föléjük viszed az egeret."
+            ]
+          }
+        ]
+      },
       "1_6_0": {
         "title": "A te sorrended",
         "intro": "Válaszd ki, melyik kérdés jöjjön, tudd, meddig tart a játék, és adj mindenkinek valami nézni valót két kérdés között.",

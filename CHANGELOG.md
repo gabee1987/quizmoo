@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 1.7.0 – 2026-10-30
+
 ### Typo tolerance for typed answers (phase 47)
 - New game setting "Accept small typos" (Scoring group, on by default, for the whole quiz): a typed answer still counts with one mistake from 4 characters, two from 8, three from 12 and four from 18 (a missing, extra or wrong character, or two neighbours swapped), measured after the usual normalising. Digits stay exact ("Apollo 12" never counts for "Apollo 11", "12" never for "13"). A near miss scores like an exact answer.
 - The phone's reveal says "Close enough" under Correct and shows what was typed next to the right spelling, and the end-of-game review notes it; the host's board, the shown question's counts and the results page tag it "Typo accepted". Summaries say "Exact spelling" when the setting is off.

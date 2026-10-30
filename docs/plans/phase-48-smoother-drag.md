@@ -1,6 +1,6 @@
 # Phase 48: Smoother drag with 200 questions
 
-**Branch:** `feature/answers-and-editor`
+**Branch:** `feature/editor-drag-and-preview` (moved off `feature/answers-and-editor` on 30 October 2026)
 
 ## Goal
 

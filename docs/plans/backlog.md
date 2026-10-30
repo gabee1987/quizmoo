@@ -100,4 +100,13 @@ Collected while testing the Railway deployment. The help page and tutorial (phas
 
 ### From the first family game (27 October 2026)
 
-Picture details and typo tolerance are planned as phases 46 and 47; lock joining, the play-through preview and smoother drag as phases 45, 49 and 48.
+Lock joining, picture details and typo tolerance were done in phases 45 to 47 (release 1.7.0). The play-through preview and smoother drag (phases 49 and 48) moved to their own branch, `feature/editor-drag-and-preview`.
+
+### The end of a game (30 October 2026)
+
+To be implemented together on one branch after `feature/answers-and-editor` closes, each with a phase plan first.
+
+| Task | Kind | Effort | Notes |
+|---|---|---|---|
+| The phone's end-of-game screens, step by step | Improvement | L | Today the phone's last screen piles the podium, the rank and every answer into one long scroll that is hard to get through with many questions. Split it into pages the player steps through with a Next button: 1) the standings with brief info, redesigned to be consistent, nice and engaging; 2) the answers as a collapsible list, closed by default; 3) useful or interesting facts about the game; 4) the player's own detailed statistics for the game. To decide in the plan: which facts and figures, going back, swiping, what a team member sees, results held for release. |
+| The projector's end of the game | Improvement | L | The podium and standings become joyful, game-like and rewarding: proper leaderboards, animations, an achievement feel. The end screen is split into pages like the phone's, designed for the projector. The host has full control over which page shows, and an automatic mode runs them by itself; today's automatic loop through the answers becomes optional. To decide in the plan: the pages, the host's controls (top bar or a panel), timing of the automatic mode, reduced motion. |
