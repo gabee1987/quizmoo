@@ -51,6 +51,11 @@ Finished plans are deleted once their branch is merged: `CHANGELOG.md` records w
 | 42 | [Questions switched off, editor search and navigation, default time and points (includes 38)](phase-42-question-switch-and-editor.md) | `feature/question-switch-and-editor` | done |
 | 43 | [The host's live board: who answered what, at a glance, without scrolling](phase-43-host-live-board.md) | `feature/host-live-view` | done |
 | 44 | [Jump to a question, estimated game length, a livelier screen between questions (includes 41)](phase-44-game-flow.md) | `feature/game-flow` | done |
+| 45 | [Lock joining](phase-45-lock-joining.md) | `feature/answers-and-editor` | done |
+| 46 | [Picture details in the editor](phase-46-picture-details.md) | `feature/answers-and-editor` | done |
+| 47 | [Typo tolerance for typed answers](phase-47-typo-tolerance.md) | `feature/answers-and-editor` | done |
+| 48 | [Smoother drag with 200 questions](phase-48-smoother-drag.md) | `feature/editor-drag-and-preview` | planned |
+| 49 | [Play-through preview in the editor](phase-49-play-through-preview.md) | `feature/editor-drag-and-preview` | planned |
 | later | [Hosting without an account](later-guest-hosting.md) | `feature/guest-hosting` | planned, after the MVP |
 
 ## Conventions every plan follows

@@ -19,7 +19,7 @@ import {
 } from '@quizmoo/shared'
 import { endsGroup, groupAt, groupBounds, groupOf, settingsAt, settingsFor, startsGroup } from './groups.js'
 import { isNameAllowed } from './names.js'
-import { isCorrect, pointsFor } from './scoring.js'
+import { isCorrect, isNearMiss, pointsFor } from './scoring.js'
 import {
   answersAsOne,
   captainOf,
@@ -127,6 +127,7 @@ export function joinPlayer(state: GameState, input: JoinInput, now?: number): Ga
     throw new EngineError('errors.gameAlreadyStarted')
   }
   if (!joiningOpen(state, now)) throw new EngineError('errors.gameNotOpenYet')
+  if (state.joinLocked) throw new EngineError('errors.joiningLocked')
   const name = input.name.trim()
   if (!isNameAllowed(name)) throw new EngineError('errors.nameNotAllowed')
   const key = nameKey(name)
@@ -349,6 +350,13 @@ export function openJoining(state: GameState, now: number): GameState {
   return { ...state, scheduledAt: now }
 }
 
+/** The host closes (or opens again) the game to new players; players already in can always come back. */
+export function setJoinLocked(state: GameState, locked: boolean): GameState {
+  if (state.phase === 'finished') throw new EngineError('errors.invalidTransition')
+  if ((state.joinLocked ?? false) === locked) return state
+  return { ...state, joinLocked: locked }
+}
+
 export function startGame(state: GameState, now: number): GameState {
   if (state.phase !== 'lobby') throw new EngineError('errors.gameAlreadyStarted')
   if (Object.keys(state.players).length === 0 || state.quiz.questions.length === 0) {
@@ -467,7 +475,8 @@ export function endQuestion(state: GameState): GameState {
   const question = currentQuestion(state)
   const awaitingGrading = question.type === 'text' && question.acceptedAnswers.length === 0
   const resolved = resolveTeamAnswers(state, question.id)
-  const players = scorePlayers(resolved, question, (answer) => isCorrect(question, answer))
+  const typos = state.settings.typoTolerance === true
+  const players = scorePlayers(resolved, question, (answer) => isCorrect(question, answer, typos))
   const teams = awaitingGrading ? resolved.teams : addTeamGains(resolved.teams, players, question.id)
   return { ...resolved, phase: 'reveal', players, teams, awaitingGrading, pausedAt: null }
 }
@@ -1098,6 +1107,8 @@ function scorePlayers(
     const correct = question.type === 'poll' ? null : decide(record.answer, player.id)
     const streak = correct === true ? (player.streak ?? 0) + 1 : correct === false ? 0 : (player.streak ?? 0)
     const bonus = correct === true && rules.streakBonus ? streakBonusFor(streak) : 0
+    // Host grading has no accepted answers, so it never makes a near miss.
+    const nearMiss = correct === true && isNearMiss(question, record.answer, state.settings.typoTolerance === true)
     const points =
       // The stored answer time, not `at - questionStartedAt`: a resume moves the start, and an
       // answer given before the pause keeps the time it took.
@@ -1106,7 +1117,7 @@ function scorePlayers(
       ...player,
       streak,
       score: player.score + points,
-      answers: { ...player.answers, [question.id]: { ...record, correct, points, bonus } },
+      answers: { ...player.answers, [question.id]: { ...record, correct, points, bonus, ...(nearMiss && { nearMiss }) } },
     }
   }
   return players
@@ -1129,7 +1140,16 @@ function addTeamGains(
     const scored = members[0]?.answers[questionId]
     const answers =
       record && scored
-        ? { ...team.answers, [questionId]: { ...record, points: scored.points, bonus: scored.bonus ?? 0, correct: scored.correct } }
+        ? {
+            ...team.answers,
+            [questionId]: {
+              ...record,
+              points: scored.points,
+              bonus: scored.bonus ?? 0,
+              correct: scored.correct,
+              ...(scored.nearMiss && { nearMiss: true }),
+            },
+          }
         : team.answers
     result[team.id] = {
       ...team,

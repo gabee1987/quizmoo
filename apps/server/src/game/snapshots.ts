@@ -25,7 +25,7 @@ import { groupAt, groupBounds, groupsOf, settingsAt } from './groups.js'
 import { normalise } from './normalise.js'
 import { displayOrder } from './order.js'
 import { answersHidden, groupIfPicked, hostLocked, quickMessagesOf, resultsPendingFor } from './engine.js'
-import { denseRank, isCorrect } from './scoring.js'
+import { denseRank, isCorrect, isNearMiss } from './scoring.js'
 import {
   answersAsOne,
   captainOf,
@@ -199,6 +199,7 @@ export function toPlayerSnapshot(state: GameState, playerId: string, now: number
     lastPoints: base.reveal && !base.answersHidden ? (record?.points ?? 0) : null,
     lastBonus: base.reveal && !base.answersHidden ? (record?.bonus ?? 0) : null,
     lastCorrect: base.reveal ? (record?.correct ?? null) : null,
+    lastNearMiss: Boolean(base.reveal) && record?.correct === true && record.nearMiss === true,
     myResults: state.phase === 'finished' && !base.answersHidden ? playerResults(state, player) : null,
   }
 }
@@ -247,6 +248,7 @@ function playerResults(state: GameState, player: Player): PlayerQuestionResult[]
       question,
       answer: record?.answer ?? null,
       correct: record?.correct ?? null,
+      nearMiss: record?.correct === true && record.nearMiss === true,
       points: record?.points ?? 0,
       teamAnswer: Boolean(teamRecord),
       fallback: teamRecord?.fallback ?? false,
@@ -385,6 +387,7 @@ function buildBaseSnapshot(state: GameState, now: number, audience: ResultsAudie
     announcement: state.announcement ?? null,
     nextPin: state.nextPin ?? null,
     scheduledAt: state.scheduledAt ?? null,
+    joinLocked: state.joinLocked ?? false,
     branding: brandingFor(state, audience),
   }
 }
@@ -502,6 +505,7 @@ export function revealInfo(state: GameState, question: Question): RevealInfo {
   const answeredCount = players.filter((p) => p.answers[question.id]).length
   const correctCount = players.filter((p) => p.answers[question.id]?.correct === true).length
   const correctKeys = new Set<string>(staticCorrectKeys(question))
+  const nearKeys = new Set<string>()
   // The bars count a one-answer team's answer once.
   for (const record of countedAnswers(state, question)) {
     // Ordering: per item, how many players put it in its right place.
@@ -513,9 +517,10 @@ export function revealInfo(state: GameState, question: Question): RevealInfo {
     // Number answers within tolerance and host-graded text are correct per answer, not per key list.
     if (record.correct === true && (question.type === 'number' || question.type === 'text')) {
       for (const key of keys) correctKeys.add(key)
+      if (record.nearMiss) for (const key of keys) nearKeys.add(key)
     }
   }
-  return { question, distribution, correctCount, answeredCount, correctKeys: [...correctKeys] }
+  return { question, distribution, correctCount, answeredCount, correctKeys: [...correctKeys], nearKeys: [...nearKeys] }
 }
 
 function staticCorrectKeys(question: Question): string[] {
@@ -560,6 +565,7 @@ function currentAnswers(state: GameState, index: number): CurrentAnswer[] {
   if (!question) return []
   // While it runs nothing is scored yet: the host's board shows the verdict so far.
   const running = state.phase === 'question' && index === state.questionIndex
+  const typos = state.settings.typoTolerance === true
   return Object.values(state.players)
     .flatMap((player) => {
       const record = player.answers[question.id]
@@ -571,7 +577,8 @@ function currentAnswers(state: GameState, index: number): CurrentAnswer[] {
           teamId: player.teamId,
           answer: record.answer,
           key: distributionKeys(record.answer).join(','),
-          correct: running ? isCorrect(question, record.answer) : record.correct,
+          correct: running ? isCorrect(question, record.answer, typos) : record.correct,
+          nearMiss: running ? isNearMiss(question, record.answer, typos) : record.correct === true && record.nearMiss === true,
           points: record.points,
           timeMs: record.timeMs,
         },

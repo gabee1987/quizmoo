@@ -171,6 +171,8 @@ export interface RevealInfo {
   answeredCount: number
   /** Distribution keys that count as correct (empty for polls and ungraded text). */
   correctKeys: string[]
+  /** The correct keys that only counted thanks to the typo allowance (text). */
+  nearKeys: string[]
 }
 
 /** How one revealed question went, for the review panel. */
@@ -200,6 +202,8 @@ export interface CurrentAnswer {
    * and for text the host grades.
    */
   correct: boolean | null
+  /** Correct thanks to the typo allowance (text); while the question runs, the verdict so far. */
+  nearMiss: boolean
   points: number
   timeMs: number
 }
@@ -331,6 +335,8 @@ export interface GameSnapshotBase {
    * null for a game that was never scheduled. Joining is refused while `serverNow < scheduledAt`.
    */
   scheduledAt: number | null
+  /** The host closed the game to new players. */
+  joinLocked: boolean
   answeredCount: number
   players: PlayerPublic[]
   teams: TeamPublic[]
@@ -416,6 +422,8 @@ export interface PlayerSnapshot extends GameSnapshotBase {
   lastBonus: number | null
   /** Whether that answer was correct; null for polls, ungraded text, or no answer. */
   lastCorrect: boolean | null
+  /** That correct answer only counted thanks to the typo allowance ("Close enough"). */
+  lastNearMiss: boolean
   /** Every question with this player's answer, once the game is finished; otherwise null. */
   myResults: PlayerQuestionResult[] | null
 }
@@ -426,6 +434,8 @@ export interface PlayerQuestionResult {
   question: Question
   answer: Answer | null
   correct: boolean | null
+  /** Correct thanks to the typo allowance. */
+  nearMiss: boolean
   points: number
   /** The answer was the player's team's one answer (captain decides or majority vote, more than one member). */
   teamAnswer: boolean
@@ -449,6 +459,8 @@ export const gamePublicInfoSchema = z.object({
   joinUrl: z.string(),
   /** A scheduled game's opening time (unix ms); null when it was never scheduled. */
   scheduledAt: z.number().nullable(),
+  /** The host closed the game to new players; a player with a token for it can still come back. */
+  joinLocked: z.boolean(),
   /** Server time of the answer, so the page can tell whether joining is open without trusting the phone's clock. */
   serverNow: z.number(),
 })

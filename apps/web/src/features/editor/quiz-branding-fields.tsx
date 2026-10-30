@@ -25,6 +25,7 @@ export function QuizBrandingFields({ value, onChange }: { value: QuizBranding; o
         <div className="flex flex-col gap-2">
           <p className="font-semibold">{t('editor.branding.logo')}</p>
           <ImageField
+            showLabel={false}
             imageId={value.logoImageId ?? undefined}
             label={t('editor.branding.logo')}
             onChange={(logoImageId) => set({ logoImageId: logoImageId ?? null })}

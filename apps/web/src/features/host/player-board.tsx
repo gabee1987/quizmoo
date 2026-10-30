@@ -2,6 +2,7 @@ import type { HostSnapshot, TeamAnswerPublic } from '@quizmoo/shared'
 import { CheckCircle2Icon, EyeIcon, EyeOffIcon, HourglassIcon, SlidersHorizontalIcon, WifiOffIcon } from 'lucide-react'
 import { useEffect, useLayoutEffect, useRef, useState, type RefObject } from 'react'
 import { useTranslation } from 'react-i18next'
+import { TypoTag } from '@/components/typo-tag'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -403,7 +404,10 @@ function EntryAnswer({ host, entry, view }: { host: HostSnapshot; entry: BoardEn
   return (
     <>
       {view.showAnswer ? (
-        <AnswerChip answer={entry.answer.answer} question={view.question} symbols={host.settings.answerSymbols} />
+        <>
+          <AnswerChip answer={entry.answer.answer} question={view.question} symbols={host.settings.answerSymbols} />
+          {entry.answer.nearMiss && <TypoTag />}
+        </>
       ) : (
         <span className="inline-flex items-center gap-1 font-semibold text-foreground">
           <CheckCircle2Icon className="size-3.5 text-primary" aria-hidden="true" />

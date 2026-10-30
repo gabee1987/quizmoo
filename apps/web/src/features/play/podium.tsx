@@ -88,7 +88,7 @@ function MyResults({ results, symbols }: { results: PlayerQuestionResult[]; symb
       <h2 className="text-center text-xl font-extrabold">{t('play.yourAnswers')}</h2>
       <ol className="flex flex-col gap-4">
         {results.map((result, index) => {
-          const { question, answer, points, teamAnswer, fallback } = result
+          const { question, answer, points, teamAnswer, fallback, nearMiss } = result
           const outcome = outcomeOf(result)
           const look = outcomeLook[outcome]
           return (
@@ -133,6 +133,7 @@ function MyResults({ results, symbols }: { results: PlayerQuestionResult[]; symb
                       {answer ? formatAnswer(answer, question, t, i18n.language) : t('play.noAnswer')}
                     </p>
                     {fallback && <p className="text-sm font-semibold text-muted-foreground">{t('play.team.fallback')}</p>}
+                    {nearMiss && <p className="text-sm font-semibold text-muted-foreground">{t('play.closeEnough')}</p>}
                   </div>
                   {/* Left-aligned here; the reveal centres it. */}
                   <div className="[&>div]:items-start [&>div]:text-left [&_ul]:justify-start">

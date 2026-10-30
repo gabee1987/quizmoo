@@ -20,6 +20,7 @@ export function settingsLine(host: HostSnapshot, t: TFunction): string[] {
     host.settings.mode === 'team' && host.settings.soloPlayers ? t('host.create.soloPlayers') : null,
     host.settings.speedBonus ? t('host.create.speedBonus') : null,
     host.settings.streakBonus ? t('host.create.streakBonus') : null,
+    host.settings.typoTolerance ? null : t('host.create.exactSpelling'),
     answerChangesLabel(host.settings, t),
     host.settings.shuffleQuestions ? t('host.create.shuffleQuestions') : null,
     host.settings.shuffleOptions ? t('host.create.shuffle') : null,

@@ -1,13 +1,40 @@
 import { useEffect, useId, useRef, useState, type ClipboardEvent, type DragEvent } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ImageUpIcon } from 'lucide-react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import type { TFunction } from 'i18next'
+import { ImageUpIcon, Trash2Icon } from 'lucide-react'
 import { toast } from 'sonner'
+import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { cn } from '@/lib/cn'
-import { apiUpload, errorCode } from '../../lib/api'
+import { apiFetch, apiUpload, errorCode } from '../../lib/api'
 
 const MAX_BYTES = 5 * 1024 * 1024
 const ACCEPT = ['image/jpeg', 'image/png', 'image/webp']
+const FORMATS: Record<string, string> = { 'image/webp': 'WebP', 'image/jpeg': 'JPEG', 'image/png': 'PNG' }
+
+interface ImageInfo {
+  width: number
+  height: number
+  bytes: number
+  mime: string
+}
+
+/** Pixel size, file size and format in the page's language, and all three in one line ("1280 × 720 px · 84 kB · WebP"). */
+function imageDetails(info: ImageInfo, language: string, t: TFunction) {
+  const mb = info.bytes >= 1024 * 1024
+  const size = new Intl.NumberFormat(language, {
+    style: 'unit',
+    unit: mb ? 'megabyte' : 'kilobyte',
+    maximumFractionDigits: mb ? 1 : 0,
+  }).format(mb ? info.bytes / 1024 / 1024 : Math.max(1, Math.round(info.bytes / 1024)))
+  const parts = {
+    pixels: t('editor.imagePixelsValue', { width: info.width, height: info.height }),
+    size,
+    format: FORMATS[info.mime] ?? info.mime.replace('image/', '').toUpperCase(),
+  }
+  return { ...parts, line: t('editor.imageDetails', { ...parts }) }
+}
 
 /** The image in a paste, unless the clipboard also holds text (then the paste belongs to a text field). */
 function pastedImage(data: DataTransfer | null): File | null {
@@ -27,15 +54,28 @@ export function ImageField({
   label,
   compact = false,
   pasteAnywhere = false,
+  showLabel = true,
 }: {
   imageId: string | undefined
   onChange: (imageId: string | undefined) => void
   label: string
   compact?: boolean
   pasteAnywhere?: boolean
+  /** The label as the picture card's heading; off where the page already shows it above the field. */
+  showLabel?: boolean
 }) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const id = useId()
+  const queryClient = useQueryClient()
+  // Ids never change their bytes, so the details are fetched once; another host's image (a copied quiz) gives none.
+  const info = useQuery({
+    queryKey: ['imageInfo', imageId],
+    queryFn: () => apiFetch<ImageInfo>(`/api/images/${imageId}/info`),
+    enabled: !!imageId,
+    staleTime: Infinity,
+    retry: false,
+  }).data
+  const details = info ? imageDetails(info, i18n.language, t) : undefined
   const [progress, setProgress] = useState<number | null>(null)
   const [dragOver, setDragOver] = useState(false)
   const onChangeRef = useRef(onChange)
@@ -48,8 +88,9 @@ export function ImageField({
     try {
       const body = new FormData()
       body.append('file', file)
-      const res = await apiUpload<{ id: string }>('/api/images', body, setProgress)
-      onChangeRef.current(res.id)
+      const { id: imageId, ...info } = await apiUpload<{ id: string } & ImageInfo>('/api/images', body, setProgress)
+      queryClient.setQueryData(['imageInfo', imageId], info)
+      onChangeRef.current(imageId)
     } catch (err) {
       toast.error(t(errorCode(err)))
     } finally {
@@ -113,13 +154,64 @@ export function ImageField({
     <Progress value={Math.round(progress * 100)} aria-label={t('editor.uploading')} className={compact ? 'w-16' : 'w-36'} />
   )
 
+  if (imageId && !compact) {
+    const stats = details && [
+      { label: t('editor.imagePixels'), value: details.pixels },
+      { label: t('editor.imageFileSize'), value: details.size },
+      { label: t('editor.imageFormat'), value: details.format },
+    ]
+    return (
+      <div
+        {...dropProps}
+        className={cn('flex flex-col gap-4 rounded-2xl border p-3 sm:flex-row', dragOver && 'border-primary ring-[3px] ring-ring')}
+      >
+        <img
+          src={`/api/images/${imageId}`}
+          alt={label}
+          className="aspect-video w-full shrink-0 self-start rounded-xl border bg-muted object-contain sm:w-64"
+        />
+        <div className="flex min-w-0 flex-1 flex-col gap-3">
+          <div>
+            {showLabel && <p className="font-extrabold">{label}</p>}
+            <p className="text-sm text-muted-foreground">{t('editor.imageDetailsHelp')}</p>
+          </div>
+          {stats && (
+            <dl className="flex flex-wrap gap-2">
+              {stats.map((s) => (
+                <div key={s.label} className="flex-auto rounded-xl bg-muted px-3 py-2 whitespace-nowrap">
+                  <dt className="text-xs font-semibold text-muted-foreground">{s.label}</dt>
+                  <dd className="font-bold tabular-nums">{s.value}</dd>
+                </div>
+              ))}
+            </dl>
+          )}
+          <div className="mt-auto flex flex-wrap items-center gap-2">
+            {fileInput}
+            <Button asChild variant="secondary" size="sm">
+              <label htmlFor={id} className="cursor-pointer peer-focus-visible:ring-[3px] peer-focus-visible:ring-ring">
+                <ImageUpIcon aria-hidden="true" />
+                {t('editor.replaceImage')}
+              </label>
+            </Button>
+            <Button variant="ghost" size="sm" className="text-destructive hover:bg-destructive/10" onClick={() => onChange(undefined)}>
+              <Trash2Icon aria-hidden="true" />
+              {t('editor.removeImage')}
+            </Button>
+            {bar}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   if (imageId) {
     return (
       <div {...dropProps} className={cn('flex flex-wrap items-center gap-2 rounded-xl', dragOver && 'ring-[3px] ring-ring')}>
         <img
           src={`/api/images/${imageId}`}
           alt={label}
-          className={cn('rounded-xl border bg-muted object-contain', compact ? 'h-12 w-16' : 'h-24 w-36')}
+          title={details?.line}
+          className="h-12 w-16 rounded-xl border bg-muted object-contain"
         />
         {bar}
         {fileInput}

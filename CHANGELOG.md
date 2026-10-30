@@ -2,6 +2,22 @@
 
 ## Unreleased
 
+## 1.7.0 – 2026-10-30
+
+### Typo tolerance for typed answers (phase 47)
+- New game setting "Accept small typos" (Scoring group, on by default, for the whole quiz): a typed answer still counts with one mistake from 4 characters, two from 8, three from 12 and four from 18 (a missing, extra or wrong character, or two neighbours swapped), measured after the usual normalising. Digits stay exact ("Apollo 12" never counts for "Apollo 11", "12" never for "13"). A near miss scores like an exact answer.
+- The phone's reveal says "Close enough" under Correct and shows what was typed next to the right spelling, and the end-of-game review notes it; the host's board, the shown question's counts and the results page tag it "Typo accepted". Summaries say "Exact spelling" when the setting is off.
+- Answer records carry `nearMiss`; snapshots add `CurrentAnswer.nearMiss`, `PlayerSnapshot.lastNearMiss`, `PlayerQuestionResult.nearMiss` and `RevealInfo.nearKeys`. Games saved before the setting existed keep exact matching.
+
+### Picture details in the editor (phase 46)
+- A question's, group's or logo picture is now a card: a larger 16:9 preview, beside it what phones and the projector get (size in pixels, file size, format) and Replace and Remove as buttons; it stacks on phones. Option pictures show the details as a tooltip on the thumbnail.
+- New owner-only route `GET /api/images/:id/info` (`{ width, height, bytes, mime }`, 404 for another host's image); the upload response carries the same fields, so a fresh upload shows them at once.
+
+### Lock joining (phase 45)
+- The host can close a game to new players and open it again: a "Lock joining" switch in the lobby's join card, and a door button in the running game's top bar when late joining is on. Players already in can always come back.
+- While locked, the join page shows "Joining is closed" instead of the name form (a phone that already played in the game keeps the form) and notices an unlock within 10 s; the projector's lobby replaces its QR code and link with a "Joining is closed" card; the host's own QR code fades under a "Joining closed" badge. A refused join gets `errors.joiningLocked`.
+- The lock is game state, so a server restart keeps it.
+
 ## 1.6.0 – 2026-10-27
 
 The host decides the order, everyone knows how long the game takes, and there is something to look at between questions.

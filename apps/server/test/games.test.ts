@@ -3,7 +3,7 @@ import { createUser } from '../src/auth/users.js'
 import type { Db } from '../src/db/index.js'
 import { images, quizzes } from '../src/db/schema.js'
 import { fixtureQuiz } from '../src/game/fixtures.js'
-import { endGame, joinPlayer, toHostSnapshot, toPlayerSnapshot } from '../src/game/index.js'
+import { endGame, joinPlayer, setJoinLocked, toHostSnapshot, toPlayerSnapshot } from '../src/game/index.js'
 import { buildTestApp, sessionCookie } from './helpers/app.js'
 import { describeDb, withTestDb } from './helpers/test-db.js'
 
@@ -126,11 +126,15 @@ describeDb('game routes (database)', () => {
       solo: false,
       joinUrl: `http://localhost:3000/?pin=${pin}`,
       scheduledAt: null,
+      joinLocked: false,
       serverNow: expect.any(Number),
     })
     built.manager.apply(pin, (state) => joinPlayer(state, { id: 'p1', name: 'Anna', teamId: 'team-2', token: 'tok-1' }))
     const counted = (await built.app.inject({ method: 'GET', url: `/api/games/${pin}/public` })).json()
     expect(counted.teams[1]).toEqual({ id: 'team-2', name: 'Blue', memberCount: 1 })
+    // The host closed joining: the join page is told before anyone types a name.
+    built.manager.apply(pin, (state) => setJoinLocked(state, true))
+    expect((await built.app.inject({ method: 'GET', url: `/api/games/${pin}/public` })).json().joinLocked).toBe(true)
 
     // Playing alone: offered, and a solo player's own entry is no team to join.
     const solo = (await create(alice, { quizId: 'quiz-test_alice', settings: { ...settings, soloPlayers: true } })).json()

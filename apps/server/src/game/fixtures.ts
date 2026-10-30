@@ -55,6 +55,7 @@ export function fixtureSettings(overrides: Partial<GameSettings> = {}): GameSett
     mode: 'classic',
     speedBonus: true,
     streakBonus: false,
+    typoTolerance: true,
     answerChanges: false,
     answerLockSec: 0,
     shuffleOptions: false,

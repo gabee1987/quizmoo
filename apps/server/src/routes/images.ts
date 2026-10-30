@@ -1,4 +1,4 @@
-import { count, eq } from 'drizzle-orm'
+import { count, eq, sql } from 'drizzle-orm'
 import type { FastifyInstance } from 'fastify'
 import { nanoid } from 'nanoid'
 import sharp, { type OutputInfo } from 'sharp'
@@ -77,7 +77,26 @@ export async function imageRoutes(app: FastifyInstance, { db }: { db: Db }) {
 
     const row = imageRow(request.user!.id, output)
     await db.insert(images).values(row)
-    return reply.code(201).send({ id: row.id, width: row.width, height: row.height })
+    return reply.code(201).send({ id: row.id, width: row.width, height: row.height, bytes: row.data.length, mime: row.mime })
+  })
+
+  // What the editor shows under a picture: the stored size, not the original upload's.
+  app.get<{ Params: { id: string } }>('/api/images/:id/info', { preHandler: requireSession(db) }, async (request, reply) => {
+    const row = (
+      await db
+        .select({
+          ownerId: images.ownerId,
+          width: images.width,
+          height: images.height,
+          mime: images.mime,
+          bytes: sql<number>`octet_length(${images.data})`.mapWith(Number),
+        })
+        .from(images)
+        .where(eq(images.id, request.params.id))
+    )[0]
+    // Another host's image looks the same as a missing one.
+    if (!row || row.ownerId !== request.user!.id) return reply.code(404).send({ error: 'errors.notFound' })
+    return { width: row.width, height: row.height, bytes: row.bytes, mime: row.mime }
   })
 
   // Public: players and the projector load question images without logging in.

@@ -68,8 +68,9 @@ Error shape everywhere: `{ error: '<i18n key>' }`. Status codes: 400 invalid inp
 | `DELETE /api/nicknames/:language` | admin | back to the built-in list |
 | `GET /api/games/:pin/nickname?lang=` | - | `{ name, avatar }`: a name from the list nobody in that game has yet, with `avatarForNickname` (built-in avatar, else a keyword, else null) |
 | `PATCH /api/quizzes/batch` | owner of all | `{ ids, settings?, questions?: { timeLimitSec?, points? } }` -> `{ updated }`; merged per quiz and fully validated, all or nothing |
-| `POST /api/images` | session | multipart, returns `{ id }` |
+| `POST /api/images` | session | multipart, returns `{ id, width, height, bytes, mime }` |
 | `GET /api/images/:id` | - | image bytes, long cache headers |
+| `GET /api/images/:id/info` | owner | `{ width, height, bytes, mime }` of the stored image (the editor's details line); 404 for another host's |
 | `POST /api/games` | session | `{ quizId, settings, scheduledAt?, branding? }` -> creates lobby (scheduled: joining opens then; `400 errors.invalidSchedule`), returns `{ pin }`. The host's quick messages and, with `branding.show` and a logo or event name, the branding are copied into the game; the event name used is merged into the host settings |
 | `GET /api/games/:pin/public` | - | join page info: title, mode, phase, teams, join URL, `scheduledAt`, `serverNow` |
 | `GET /api/games?cursor=&limit=&q=&state=&from=&to=` | session | one page of own games (`gameHistoryQuerySchema`): `{ games, nextCursor }`, newest `started_at` first, 30 by default; `q` (3+ characters) matches the folded title and player names (`matchedPlayers` lists the names that matched) or, for digits, the start of the PIN; a malformed cursor is 400 |

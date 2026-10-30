@@ -222,6 +222,11 @@ export const gameSettingsSchema = z
     speedBonus: z.boolean().default(true),
     /** Correct answers in a row earn extra points: +100 from the second, up to +500. */
     streakBonus: z.boolean().default(false),
+    /**
+     * Typed answers with small typos still count (a near miss): up to 3 characters none, 4 to 7 one,
+     * 8 to 11 two, 12 to 17 three, 18 or more four; the digits in an answer stay exact. For the whole game, never one group.
+     */
+    typoTolerance: z.boolean().default(true),
     /** Players may change their answer while the question runs; the last one counts, with its time. */
     answerChanges: z.boolean().default(false),
     /** Changes stop this many seconds before the end (0: until the time is up). First answers are still taken. */

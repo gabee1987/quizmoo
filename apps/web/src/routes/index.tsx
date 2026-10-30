@@ -8,6 +8,7 @@ import {
   DicesIcon,
   Gamepad2Icon,
   Loader2Icon,
+  LockIcon,
   LogOutIcon,
   PlayIcon,
   PresentationIcon,
@@ -75,8 +76,10 @@ function JoinPage() {
     retry: false,
     // Waiting for a scheduled game: notice when the host opens it early or moves the time.
     // A team game: teams other players create (and their member counts) show up while choosing.
+    // Joining locked: notice when the host opens it again.
     refetchInterval: (query) => {
       const data = query.state.data
+      if (data?.joinLocked) return 10_000
       if (data?.scheduledAt && data.scheduledAt > data.serverNow) return 30_000
       return data?.mode === 'team' ? 5_000 : false
     },
@@ -87,6 +90,8 @@ function JoinPage() {
   // fill in their details; they are kept in this browser, and the PIN in the address, so a reload keeps both.
   const open = useTimeReached(game?.scheduledAt ?? null, game ? game.serverNow - info.dataUpdatedAt : 0)
   const waiting = !!game && game.scheduledAt !== null && !open
+  // The host closed joining. A phone that already played in this game keeps the form: it comes back as that player.
+  const locked = !!game?.joinLocked && !getStoredPlayer(pin)
   useEffect(() => {
     if (waiting && searchPin !== pin) {
       void navigate({ to: '/', search: { pin: Number(pin) }, replace: true, resetScroll: false })
@@ -272,7 +277,18 @@ function JoinPage() {
                     ))}
                 </div>
                 {/* Name, avatar and team come once the PIN has found a game: they belong to that game. */}
-                {game ? (
+                {game && locked ? (
+                  <div role="status" className="flex animate-pop flex-col items-center gap-3 rounded-2xl bg-secondary p-4 text-center text-secondary-foreground">
+                    <p className="font-bold wrap-break-word">{game.quizTitle}</p>
+                    <LockIcon className="size-10 text-primary dark:text-ring" aria-hidden="true" />
+                    <p className="text-xl font-black text-balance">{t('join.locked')}</p>
+                    <p className="text-sm">{t('join.lockedHelp')}</p>
+                    <Button type="button" variant="ghost" onClick={leave}>
+                      <LogOutIcon aria-hidden="true" />
+                      {t('join.leave')}
+                    </Button>
+                  </div>
+                ) : game ? (
                   <div className="flex animate-pop flex-col gap-5">
                     {waiting && game.scheduledAt !== null ? (
                       <div role="status" className="flex flex-col items-center gap-3 rounded-2xl bg-secondary p-4 text-center text-secondary-foreground">
