@@ -171,6 +171,8 @@ export interface RevealInfo {
   answeredCount: number
   /** Distribution keys that count as correct (empty for polls and ungraded text). */
   correctKeys: string[]
+  /** The correct keys that only counted thanks to the typo allowance (text). */
+  nearKeys: string[]
 }
 
 /** How one revealed question went, for the review panel. */
@@ -200,6 +202,8 @@ export interface CurrentAnswer {
    * and for text the host grades.
    */
   correct: boolean | null
+  /** Correct thanks to the typo allowance (text); while the question runs, the verdict so far. */
+  nearMiss: boolean
   points: number
   timeMs: number
 }
@@ -418,6 +422,8 @@ export interface PlayerSnapshot extends GameSnapshotBase {
   lastBonus: number | null
   /** Whether that answer was correct; null for polls, ungraded text, or no answer. */
   lastCorrect: boolean | null
+  /** That correct answer only counted thanks to the typo allowance ("Close enough"). */
+  lastNearMiss: boolean
   /** Every question with this player's answer, once the game is finished; otherwise null. */
   myResults: PlayerQuestionResult[] | null
 }
@@ -428,6 +434,8 @@ export interface PlayerQuestionResult {
   question: Question
   answer: Answer | null
   correct: boolean | null
+  /** Correct thanks to the typo allowance. */
+  nearMiss: boolean
   points: number
   /** The answer was the player's team's one answer (captain decides or majority vote, more than one member). */
   teamAnswer: boolean

@@ -25,6 +25,8 @@ export interface PlayerAnswerRecord {
   bonus?: number
   /** null for polls and for host-graded text until `gradeText`. */
   correct: boolean | null
+  /** Correct only thanks to the typo allowance. Missing when not (and in games saved before it existed). */
+  nearMiss?: boolean
 }
 
 export interface Player {
@@ -65,6 +67,7 @@ export interface TeamAnswerRecord {
   points: number
   bonus?: number
   correct: boolean | null
+  nearMiss?: boolean
 }
 
 export interface Team {

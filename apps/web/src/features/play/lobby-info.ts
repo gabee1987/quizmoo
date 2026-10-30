@@ -17,8 +17,7 @@ export function gameInfo(settings: GameSettings, mode: PlayerSnapshot['mode'], q
       : { icon: ListOrderedIcon, text: 'play.info.questions', values: { count: questionCount } },
     { icon: UsersIcon, text: mode === 'team' ? (settings.soloPlayers ? 'play.info.teamsAndSolo' : 'play.info.teams') : 'play.info.classic' },
     settings.speedBonus && { icon: ZapIcon, text: 'play.info.speedBonus' },
-    settings.streakBonus && { icon: FlameIcon, text: 'play.info.streakBonus' },
-    settings.answerChanges &&
+    settings.streakBonus && { icon: FlameIcon, text: 'play.info.streakBonus' },    settings.answerChanges &&
       (settings.answerLockSec > 0
         ? { icon: PencilIcon, text: 'play.info.answerChangesLocked', values: { count: settings.answerLockSec } }
         : { icon: PencilIcon, text: 'play.info.answerChanges' }),

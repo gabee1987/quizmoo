@@ -2,11 +2,59 @@ import type { Answer, Question } from '@quizmoo/shared'
 import { normalise } from './normalise.js'
 
 /**
+ * Edit distance with neighbour swaps (optimal string alignment): a missing, extra or wrong
+ * character, or two neighbours swapped, is one mistake each.
+ */
+export function typoDistance(a: string, b: string): number {
+  const x = Array.from(a)
+  const y = Array.from(b)
+  // d[i][j]: distance between the first i characters of x and the first j of y.
+  const d = Array.from({ length: x.length + 1 }, (_, i) => Array.from({ length: y.length + 1 }, (_, j) => (i === 0 ? j : j === 0 ? i : 0)))
+  for (let i = 1; i <= x.length; i++) {
+    for (let j = 1; j <= y.length; j++) {
+      const cost = x[i - 1] === y[j - 1] ? 0 : 1
+      let best = Math.min(d[i - 1]![j]! + 1, d[i]![j - 1]! + 1, d[i - 1]![j - 1]! + cost)
+      if (i > 1 && j > 1 && x[i - 1] === y[j - 2] && x[i - 2] === y[j - 1]) best = Math.min(best, d[i - 2]![j - 2]! + 1)
+      d[i]![j] = best
+    }
+  }
+  return d[x.length]![y.length]!
+}
+
+/** Mistakes allowed for an accepted answer of this many characters: up to 3 none, 4 to 7 one, 8 or more two. */
+export function typosAllowed(length: number): number {
+  return length >= 8 ? 2 : length >= 4 ? 1 : 0
+}
+
+const digits = (value: string) => value.replace(/\D/g, '')
+
+/**
+ * How a typed answer matches the accepted ones after normalising: exactly, as a near miss within
+ * the typo allowance (with `typos` on), or not at all. An exact match to any accepted answer wins
+ * over a near miss of another. Numbers in an answer stay exact: its digits must be the same.
+ */
+export function textMatch(accepted: readonly string[], value: string, typos: boolean): 'exact' | 'near' | 'none' {
+  const given = normalise(value)
+  const targets = accepted.map(normalise)
+  if (targets.includes(given)) return 'exact'
+  if (!typos) return 'none'
+  const near = targets.some(
+    (target) => digits(target) === digits(given) && typoDistance(target, given) <= typosAllowed(Array.from(target).length),
+  )
+  return near ? 'near' : 'none'
+}
+
+/** A correct text answer that only counted thanks to the typo allowance. */
+export function isNearMiss(question: Question, answer: Answer, typos: boolean): boolean {
+  return question.type === 'text' && answer.type === 'text' && textMatch(question.acceptedAnswers, answer.value, typos) === 'near'
+}
+
+/**
  * Whether `answer` is correct for `question`. `null` means "not graded":
  * polls always, and text questions without accepted answers (host grades).
- * An answer of the wrong type is never correct.
+ * An answer of the wrong type is never correct. `typos`: the game accepts small typos in text answers.
  */
-export function isCorrect(question: Question, answer: Answer): boolean | null {
+export function isCorrect(question: Question, answer: Answer, typos = false): boolean | null {
   switch (question.type) {
     case 'single':
       return answer.type === 'single' && answer.optionId === question.correctOptionId
@@ -21,8 +69,7 @@ export function isCorrect(question: Question, answer: Answer): boolean | null {
     case 'text': {
       if (question.acceptedAnswers.length === 0) return null
       if (answer.type !== 'text') return false
-      const given = normalise(answer.value)
-      return question.acceptedAnswers.some((a) => normalise(a) === given)
+      return textMatch(question.acceptedAnswers, answer.value, typos) !== 'none'
     }
     case 'number':
       return answer.type === 'number' && Math.abs(answer.value - question.correct) <= question.tolerance

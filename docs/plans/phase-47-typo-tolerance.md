@@ -45,3 +45,17 @@ Out of scope: tolerance for numbers, per-question switches, phonetic matching.
 ## Verification command
 
 `pnpm verify`
+
+## Results
+
+- `scoring.test.ts`: the distance (swap, missing, extra, wrong character) and `textMatch` table: "jaoan" and "jpaan" for "Japan", short answers exact, two mistakes from 8 characters, "13"/"12" and "1849"/"1489" refused, "apolo 11" taken and "apollo 12" refused, exact beats near; off takes only exact answers.
+- `play-features.test.ts`: a near miss gets the full points and `nearMiss`, the host's answers and `nearKeys` mark it (also while the question runs), the phone's `lastNearMiss` and review carry it; with the setting off it is wrong.
+- Screenshots on the production build (light, dark, Hungarian): the phone's reveal ("Close enough", the typed answer above the right spelling), the host's board and counts ("Typo accepted"), the results page's bars, the review card and the switch in My settings. No console errors.
+
+## Deviations
+
+- "Numbers stay exact" became "the digits in an answer stay exact": the digits of the typed answer must equal the accepted answer's, so "Apolo 11" counts but "Apollo 12" does not, and pure numbers stay exact.
+- The setting is game-wide only; groups cannot override it (decided: quiz-wide).
+- Summaries and the host's settings line show "Exact spelling" only when it is off, since on is the usual case. The phones' lobby "About the game" does not mention it: it would show in every game, also without typed questions.
+- The projector's bars mark a near miss as correct but carry no tag; the full-room board's one-line tiles (many players) show no tag either, the regular tiles and rows do.
+- Games saved before this phase keep exact matching (their settings lack the flag).

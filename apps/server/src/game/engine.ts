@@ -19,7 +19,7 @@ import {
 } from '@quizmoo/shared'
 import { endsGroup, groupAt, groupBounds, groupOf, settingsAt, settingsFor, startsGroup } from './groups.js'
 import { isNameAllowed } from './names.js'
-import { isCorrect, pointsFor } from './scoring.js'
+import { isCorrect, isNearMiss, pointsFor } from './scoring.js'
 import {
   answersAsOne,
   captainOf,
@@ -475,7 +475,8 @@ export function endQuestion(state: GameState): GameState {
   const question = currentQuestion(state)
   const awaitingGrading = question.type === 'text' && question.acceptedAnswers.length === 0
   const resolved = resolveTeamAnswers(state, question.id)
-  const players = scorePlayers(resolved, question, (answer) => isCorrect(question, answer))
+  const typos = state.settings.typoTolerance === true
+  const players = scorePlayers(resolved, question, (answer) => isCorrect(question, answer, typos))
   const teams = awaitingGrading ? resolved.teams : addTeamGains(resolved.teams, players, question.id)
   return { ...resolved, phase: 'reveal', players, teams, awaitingGrading, pausedAt: null }
 }
@@ -1106,6 +1107,8 @@ function scorePlayers(
     const correct = question.type === 'poll' ? null : decide(record.answer, player.id)
     const streak = correct === true ? (player.streak ?? 0) + 1 : correct === false ? 0 : (player.streak ?? 0)
     const bonus = correct === true && rules.streakBonus ? streakBonusFor(streak) : 0
+    // Host grading has no accepted answers, so it never makes a near miss.
+    const nearMiss = correct === true && isNearMiss(question, record.answer, state.settings.typoTolerance === true)
     const points =
       // The stored answer time, not `at - questionStartedAt`: a resume moves the start, and an
       // answer given before the pause keeps the time it took.
@@ -1114,7 +1117,7 @@ function scorePlayers(
       ...player,
       streak,
       score: player.score + points,
-      answers: { ...player.answers, [question.id]: { ...record, correct, points, bonus } },
+      answers: { ...player.answers, [question.id]: { ...record, correct, points, bonus, ...(nearMiss && { nearMiss }) } },
     }
   }
   return players
@@ -1137,7 +1140,16 @@ function addTeamGains(
     const scored = members[0]?.answers[questionId]
     const answers =
       record && scored
-        ? { ...team.answers, [questionId]: { ...record, points: scored.points, bonus: scored.bonus ?? 0, correct: scored.correct } }
+        ? {
+            ...team.answers,
+            [questionId]: {
+              ...record,
+              points: scored.points,
+              bonus: scored.bonus ?? 0,
+              correct: scored.correct,
+              ...(scored.nearMiss && { nearMiss: true }),
+            },
+          }
         : team.answers
     result[team.id] = {
       ...team,

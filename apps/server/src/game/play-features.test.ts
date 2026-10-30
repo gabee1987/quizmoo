@@ -214,3 +214,39 @@ describe('play again', () => {
     expect(toHostSnapshot(finished, T0).nextPin).toBe('654321')
   })
 })
+
+describe('typo tolerance', () => {
+  const capital: Question = { ...base, id: 'q-capital', type: 'text', text: 'Capital of Japan?', acceptedAnswers: ['Tokyo', 'Japan'] }
+  const typed = (value: string): Answer => ({ type: 'text', value })
+
+  it('scores a near miss like an exact answer and marks it for the host and the player', () => {
+    const state = play(game([capital], {}, 3), { p1: typed('jaoan'), p2: typed('Tokyo'), p3: typed('Osaka') })
+    expect(state.players.p1!.answers['q-capital']).toMatchObject({ correct: true, nearMiss: true, points: 1000 })
+    expect(state.players.p2!.answers['q-capital']).toMatchObject({ correct: true, points: 1000 })
+    expect(state.players.p2!.answers['q-capital']!.nearMiss).toBeUndefined()
+    expect(state.players.p3!.answers['q-capital']!.correct).toBe(false)
+
+    const host = toHostSnapshot(state, T0, { includeAnswers: true })
+    expect(host.currentAnswers!.map((a) => [a.playerId, a.correct, a.nearMiss])).toEqual([
+      ['p1', true, true],
+      ['p2', true, false],
+      ['p3', false, false],
+    ])
+    expect(host.reveal!.nearKeys).toEqual(['jaoan'])
+    expect(host.reveal!.correctKeys).toEqual(expect.arrayContaining(['tokyo', 'japan', 'jaoan']))
+    expect([toPlayerSnapshot(state, 'p1', T0).lastNearMiss, toPlayerSnapshot(state, 'p2', T0).lastNearMiss]).toEqual([true, false])
+    expect(toPlayerSnapshot(endGame(state, T0), 'p1', T0).myResults![0]).toMatchObject({ correct: true, nearMiss: true })
+  })
+
+  it('shows the verdict so far to the host while the question runs', () => {
+    const quiz = game([capital])
+    const running = submitAnswer(quiz, { playerId: 'p1', questionId: 'q-capital', answer: typed('tokio') }, T0 + 1000)
+    expect(toHostSnapshot(running, T0, { includeAnswers: true }).currentAnswers![0]).toMatchObject({ correct: true, nearMiss: true })
+  })
+
+  it('takes only exact answers when the setting is off', () => {
+    const state = play(game([capital], { typoTolerance: false }), { p1: typed('jaoan'), p2: typed('japan') })
+    expect([state.players.p1!.answers['q-capital']!.correct, state.players.p2!.answers['q-capital']!.correct]).toEqual([false, true])
+    expect(toHostSnapshot(state, T0).reveal!.nearKeys).toEqual([])
+  })
+})

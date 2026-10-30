@@ -1,7 +1,7 @@
 import type { Answer, Question } from '@quizmoo/shared'
 import { describe, expect, it } from 'vitest'
 import { fixtureQuiz } from './fixtures.js'
-import { denseRank, isCorrect, pointsFor } from './scoring.js'
+import { denseRank, isCorrect, pointsFor, textMatch, typoDistance } from './scoring.js'
 
 function question(id: string): Question {
   const q = fixtureQuiz().questions.find((x) => x.id === id)
@@ -87,5 +87,58 @@ describe('denseRank', () => {
 
   it('returns an empty list for no items', () => {
     expect(denseRank([])).toEqual([])
+  })
+})
+
+describe('typoDistance', () => {
+  it.each([
+    ['japan', 'japan', 0],
+    ['japan', 'jaoan', 1],
+    ['japan', 'japn', 1],
+    ['japan', 'jappan', 1],
+    ['japan', 'jpaan', 1],
+    ['abcd', 'badc', 2],
+    ['', 'abc', 3],
+  ])('%j to %j is %i', (a, b, expected) => {
+    expect(typoDistance(a, b)).toBe(expected)
+  })
+})
+
+describe('textMatch', () => {
+  it.each([
+    [['Japan'], ' JAPAN ', 'exact'],
+    [['Győr'], 'Györ', 'exact'],
+    [['Japan'], 'jaoan', 'near'],
+    [['Japan'], 'jpaan', 'near'],
+    [['Japan'], 'jaoon', 'none'],
+    [['Róma'], 'roam', 'near'],
+    [['Fiat'], 'fiet', 'near'],
+    [['Pécs'], 'pecz', 'near'],
+    [['Kiss'], 'kis', 'near'],
+    [['Ulm'], 'ulm', 'exact'],
+    [['Ulm'], 'olm', 'none'],
+    [['Ulm'], 'ul', 'none'],
+    [['Budapest'], 'budapets', 'near'],
+    [['Budapest'], 'bdapset', 'near'],
+    [['Budapest'], 'bdapst', 'near'],
+    [['Budapest'], 'bdpst', 'none'],
+    [['Sevenoaks'], 'sevenoak', 'near'],
+    [['13'], '12', 'none'],
+    [['1849'], '1489', 'none'],
+    [['Apollo 11'], 'apolo 11', 'near'],
+    [['Apollo 11'], 'apollo 12', 'none'],
+    [['Paris', 'Parys'], 'parys', 'exact'],
+  ] as const)('%j with %j is %s', (accepted, value, expected) => {
+    expect(textMatch(accepted, value, true)).toBe(expected)
+  })
+
+  it('accepts only exact answers when typos are off', () => {
+    expect(textMatch(['Japan'], 'jaoan', false)).toBe('none')
+    expect(textMatch(['Japan'], 'japan', false)).toBe('exact')
+  })
+
+  it('makes isCorrect take a near miss only when typos are on', () => {
+    expect(isCorrect(question('q-text'), { type: 'text', value: 'Gyorr' }, true)).toBe(true)
+    expect(isCorrect(question('q-text'), { type: 'text', value: 'Gyorr' })).toBe(false)
   })
 })

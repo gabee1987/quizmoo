@@ -135,7 +135,8 @@
     "delete": "Delete",
     "removeItem": "Remove {{name}}",
     "close": "Close",
-    "actions": "Actions"
+    "actions": "Actions",
+    "typoAccepted": "Typo accepted"
   },
   "auth": {
     "title": "Host login",
@@ -529,6 +530,9 @@
       "speedBonusHelp": "Faster correct answers earn more points.",
       "streakBonus": "Streak bonus",
       "streakBonusHelp": "Correct answers in a row earn extra points: +100 from the second, up to +500.",
+      "typoTolerance": "Accept small typos",
+      "typoToleranceHelp": "Typed answers still count with a slip: one mistake from 4 letters, two from 8. Numbers must be exact.",
+      "exactSpelling": "Exact spelling",
       "answerChanges": "Change answers",
       "answerChangesHelp": "Players can change their answer while the question runs. The last one counts, with its time.",
       "answerLock": "Changes allowed until",
@@ -822,6 +826,7 @@
     "changeSecondsLeft_other": "You can change it for {{count}} more seconds",
     "correct": "Correct!",
     "wrong": "Not this time",
+    "closeEnough": "Close enough",
     "noAnswer": "No answer",
     "thanksForVoting": "Thanks for voting!",
     "awaitingGrading": "The host is checking the answers…",

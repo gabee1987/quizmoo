@@ -24,7 +24,7 @@ Let `P` = question points, `T` = time limit in ms, `t` = the answer's stored `ti
 | single | `optionId === correctOptionId` |
 | multiple | set of `optionIds` equals set of `correctOptionIds` (all or nothing) |
 | truefalse | `value === correct` |
-| text | `normalise(value)` equals `normalise(a)` for some accepted answer; with no accepted answers, `correct` stays `null` until `gradeText` |
+| text | `textMatch` (`scoring.ts`): `normalise(value)` equals `normalise(a)` for some accepted answer, or with `settings.typoTolerance` is within `typosAllowed(length of a)` (up to 3 characters 0, 4 to 7 one, 8+ two) by `typoDistance` (optimal string alignment) with the same digits; such a near miss is stored as `nearMiss` and scores like an exact answer; with no accepted answers, `correct` stays `null` until `gradeText` |
 | number | `abs(value - correct) <= tolerance` |
 | order | `optionIds` equals the stored option order exactly (all or nothing); the answer must be a permutation of the options |
 

@@ -53,7 +53,7 @@ Finished plans are deleted once their branch is merged: `CHANGELOG.md` records w
 | 44 | [Jump to a question, estimated game length, a livelier screen between questions (includes 41)](phase-44-game-flow.md) | `feature/game-flow` | done |
 | 45 | [Lock joining](phase-45-lock-joining.md) | `feature/answers-and-editor` | done |
 | 46 | [Picture details in the editor](phase-46-picture-details.md) | `feature/answers-and-editor` | done |
-| 47 | [Typo tolerance for typed answers](phase-47-typo-tolerance.md) | `feature/answers-and-editor` | planned |
+| 47 | [Typo tolerance for typed answers](phase-47-typo-tolerance.md) | `feature/answers-and-editor` | done |
 | 48 | [Smoother drag with 200 questions](phase-48-smoother-drag.md) | `feature/answers-and-editor` | planned |
 | 49 | [Play-through preview in the editor](phase-49-play-through-preview.md) | `feature/answers-and-editor` | planned |
 | later | [Hosting without an account](later-guest-hosting.md) | `feature/guest-hosting` | planned, after the MVP |

@@ -245,7 +245,7 @@ describe('review and grading data', () => {
     expect(toHostSnapshot(state, T0).currentAnswers).toBeNull()
     const answers = toHostSnapshot(state, T0, { includeAnswers: true }).currentAnswers!
     expect(answers).toEqual([
-      { playerId: 'p1', name: 'Anna', teamId: null, answer: { type: 'single', optionId: 'b' }, key: 'b', correct: false, points: 0, timeMs: 3_000 },
+      { playerId: 'p1', name: 'Anna', teamId: null, answer: { type: 'single', optionId: 'b' }, key: 'b', correct: false, nearMiss: false, points: 0, timeMs: 3_000 },
     ])
     expect(toHostSnapshot(state, T0).settings).toEqual(fixtureSettings())
   })

@@ -135,7 +135,8 @@
     "delete": "Törlés",
     "removeItem": "{{name}} törlése",
     "close": "Bezárás",
-    "actions": "Műveletek"
+    "actions": "Műveletek",
+    "typoAccepted": "Elírás, de jó"
   },
   "auth": {
     "title": "Lépj be!",
@@ -529,6 +530,9 @@
       "speedBonusHelp": "Aki gyorsabban válaszol jól, több pontot kap.",
       "streakBonus": "Sorozatbónusz",
       "streakBonusHelp": "Egymás utáni jó válaszokért extra pont jár: a másodiktól +100, legfeljebb +500.",
+      "typoTolerance": "Apró elírás is jó",
+      "typoToleranceHelp": "A beírt válasz elírással is jó: 4 betűtől egy, 8 betűtől két hiba fér bele. A számoknak pontosnak kell lenniük.",
+      "exactSpelling": "Pontos helyesírás",
       "answerChanges": "Változtathatnak a válaszukon",
       "answerChangesHelp": "Amíg fut a kérdés, a játékosok megváltoztathatják a válaszukat. Az utolsó számít, annak az idejével.",
       "answerLock": "Meddig változtathatnak?",
@@ -822,6 +826,7 @@
     "changeSecondsLeft_other": "Még {{count}} másodpercig változtathatsz",
     "correct": "Helyes!",
     "wrong": "Most nem jött össze",
+    "closeEnough": "Kis elírás, de elfogadjuk",
     "noAnswer": "Nem válaszoltál",
     "thanksForVoting": "Köszi a szavazatot!",
     "awaitingGrading": "A játékvezető épp nézi a válaszokat…",
