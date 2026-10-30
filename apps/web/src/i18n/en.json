@@ -1433,14 +1433,26 @@
     "current": "Current version",
     "releasedOn": "Released {{date}}",
     "releases": {
+      "1_7_1": {
+        "title": "Clearer release notes",
+        "intro": "A small update to this page.",
+        "sections": [
+          {
+            "title": "Fixed",
+            "items": [
+              "The notes of earlier versions are reworded so they describe the changes more clearly."
+            ]
+          }
+        ]
+      },
       "1_7_0": {
-        "title": "Close enough counts",
-        "intro": "Lessons from the first family game: typed answers with a slip, a door you can close, and pictures that tell you what the phones get.",
+        "title": "Typo tolerance and lock joining",
+        "intro": "Typed answers with small typos now count, you can close a game to new players, and the editor shows the details of every picture.",
         "sections": [
           {
             "title": "Typos accepted",
             "items": [
-              "Typed answers with a small slip now count: \"tokio\" is right for \"Tokyo\". One mistake is allowed from 4 letters, two from 8, three from 12 and four from 18; numbers must be exact. A near miss scores the same as an exact answer.",
+              "Typed answers with small typos now count: \"tokio\" is right for \"Tokyo\". One mistake is allowed from 4 letters, two from 8, three from 12 and four from 18; numbers must be exact. A near miss scores the same as an exact answer.",
               "\"Accept small typos\" is in the Scoring group and is on by default; switch it off and only exact answers count.",
               "The player's phone says \"Close enough\" under Correct, and you see \"Typo accepted\" on the live board, next to the question's answers and on the results page."
             ]
@@ -1455,27 +1467,27 @@
           {
             "title": "Pictures in the editor",
             "items": [
-              "Every picture is now a card: a bigger preview, its size in pixels, its file size and its format next to it (what the phones and the projector get), and Replace image and Remove image as proper buttons.",
+              "Every picture is now a card: a bigger preview, its size in pixels, its file size and its format next to it (what the phones and the projector get), and Replace image and Remove image as buttons.",
               "Hover an option's small picture to see the same details."
             ]
           }
         ]
       },
       "1_6_0": {
-        "title": "Your game, your order",
-        "intro": "Pick which question comes next, know how long the game takes, and give everyone something to look at between questions.",
+        "title": "Next question, game length and screens between questions",
+        "intro": "Choose which question comes next, see how long a game takes, and show the progress and the next question between questions.",
         "sections": [
           {
-            "title": "Any question next",
+            "title": "Choose the next question",
             "items": [
               "Between questions, open the Questions tab and press \"Play next\" on any question still to come. The rest keep their order.",
               "The tab shows what plays next at the top, finds questions as you type, and folds the played and upcoming lists. It also tells you before you pick when a question would leave its round or join the one under way."
             ]
           },
           {
-            "title": "How long it takes",
+            "title": "Game length",
             "items": [
-              "Your quizzes, the editor and the new game dialog say roughly how long a game takes, and the dialog redoes it as you change the settings.",
+              "Your quizzes, the editor and the new game dialog show roughly how long a game takes, and the dialog updates it as you change the settings.",
               "The lobbies say it too, and during the game the host, the projector and the phones see about how much is left."
             ]
           },
@@ -1492,7 +1504,7 @@
               "Quick message in the game's top bar sends one of your messages at once: hover it and pick how long it stays.",
               "You see the message on your own page too, just like the players; its × clears it on every screen.",
               "After each question the phones show which question it was above the result.",
-              "In the running game and the editor the app bar is folded into the page's own top bar: the cow opens the language, the look and your pages."
+              "In the running game and the editor the app bar is part of the page's own top bar: the Quizmoo logo opens the language, the look and your pages."
             ]
           }
         ]
@@ -1511,7 +1523,7 @@
             ]
           },
           {
-            "title": "Your way",
+            "title": "Views and options",
             "items": [
               "View switches between tiles and a list, and sorts by name, rank, answer time or the missing answers first.",
               "Hide answers shows only who has answered, for when players can see your screen.",
@@ -1533,7 +1545,7 @@
             ]
           },
           {
-            "title": "A handier editor",
+            "title": "Editor improvements",
             "items": [
               "Search the questions from the top of the list: by question, answer or round name, with or without accents.",
               "New question and New group are in the top bar and at the top of the list, and the list's controls stay in view while you scroll.",
@@ -1595,9 +1607,9 @@
             ]
           },
           {
-            "title": "The cow",
+            "title": "Animated logo",
             "items": [
-              "Now and then the cow pulls a face or says something silly, and around special days it dresses up for the occasion."
+              "The cow in the Quizmoo logo now changes its expression or shows a short line from time to time, and has a seasonal look on special days."
             ]
           }
         ]
@@ -1644,7 +1656,7 @@
             "items": [
               "My settings: quick messages, your usual game settings, branding, password and screen lock code.",
               "Download all your data or delete your account at any time.",
-              "Friends can ask for a host account on the home page; an admin approves it."
+              "You can request a host account on the home page; an admin approves it."
             ]
           },
           {

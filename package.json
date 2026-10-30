@@ -1,6 +1,6 @@
 {
   "name": "quizmoo",
-  "version": "1.7.0",
+  "version": "1.7.1",
   "private": true,
   "packageManager": "pnpm@12.9.1",
   "engines": { "node": ">=22" },

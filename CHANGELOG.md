@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 1.7.1 – 2026-10-30
+
+### Fixed
+- The release notes on the What's new page are reworded in plain, descriptive language in both languages: the 1.7.0 and 1.6.0 titles and intros, section headings in 1.6.0, 1.5.0, 1.4.0 and 1.2.0 (the animated logo), and smaller wording in 1.7.0 and 1.1.0.
+
 ## 1.7.0 – 2026-10-30
 
 ### Typo tolerance for typed answers (phase 47)
