@@ -55,7 +55,9 @@
     "scheduled": "Starts {{date}}",
     "scheduledHelp": "Fill in your details meanwhile. Keep this page open: you can join here when it starts.",
     "leave": "Leave",
-    "opensAtStart": "Joining opens at the start"
+    "opensAtStart": "Joining opens at the start",
+    "locked": "Joining is closed",
+    "lockedHelp": "The host closed this game to new players. Keep this page open: if they open it again, you can join here."
   },
   "home": {
     "tagline": "Think. Quiz. Outsmart the herd!",
@@ -133,7 +135,8 @@
     "delete": "Delete",
     "removeItem": "Remove {{name}}",
     "close": "Close",
-    "actions": "Actions"
+    "actions": "Actions",
+    "typoAccepted": "Typo accepted"
   },
   "auth": {
     "title": "Host login",
@@ -319,7 +322,11 @@
       "teamSuggesting": "Suggesting ({{picked}} of {{count}})",
       "teamFallback": "Majority, not confirmed",
       "copyLink": "Copy link",
-      "linkCopied": "Link copied."
+      "linkCopied": "Link copied.",
+      "lockJoining": "Lock joining",
+      "joiningLocked": "Joining closed",
+      "joiningLockedHelp": "New players can't join. Players already in can still come back.",
+      "joiningOpenHelp": "Anyone with the PIN or the QR code can join."
     },
     "shown": {
       "onScreen": {
@@ -523,6 +530,9 @@
       "speedBonusHelp": "Faster correct answers earn more points.",
       "streakBonus": "Streak bonus",
       "streakBonusHelp": "Correct answers in a row earn extra points: +100 from the second, up to +500.",
+      "typoTolerance": "Accept small typos",
+      "typoToleranceHelp": "Typed answers still count with a slip: one mistake from 4 letters, two from 8, three from 12, four from 18. Numbers must be exact.",
+      "exactSpelling": "Exact spelling",
       "answerChanges": "Change answers",
       "answerChangesHelp": "Players can change their answer while the question runs. The last one counts, with its time.",
       "answerLock": "Changes allowed until",
@@ -816,6 +826,7 @@
     "changeSecondsLeft_other": "You can change it for {{count}} more seconds",
     "correct": "Correct!",
     "wrong": "Not this time",
+    "closeEnough": "Close enough",
     "noAnswer": "No answer",
     "thanksForVoting": "Thanks for voting!",
     "awaitingGrading": "The host is checking the answers…",
@@ -901,6 +912,7 @@
   },
   "screen": {
     "joinAt": "Join at",
+    "joiningClosed": "Joining is closed",
     "pin": "Game PIN",
     "answerOnPhone": "Type your answer on your phone",
     "other": "Other",
@@ -1014,6 +1026,12 @@
     "addImage": "Add an image",
     "addImageShort": "Add image",
     "removeImage": "Remove image",
+    "imageDetails": "{{pixels}} · {{size}} · {{format}}",
+    "imagePixelsValue": "{{width}} × {{height}} px",
+    "imagePixels": "Size",
+    "imageFileSize": "File size",
+    "imageFormat": "Format",
+    "imageDetailsHelp": "What phones and the projector get: pictures are stored at up to 1280 px.",
     "options": "Options",
     "optionsMarkOne": "Options: mark the correct one",
     "optionsMarkAll": "Options: mark every correct one",
@@ -1390,6 +1408,7 @@
     "answerNotSent": "Your answer was not sent. Tap again.",
     "notCaptain": "Only your team's captain can do that.",
     "gameNotOpenYet": "This game has not opened yet. Come back at the start time.",
+    "joiningLocked": "The host closed this game to new players.",
     "invalidSchedule": "Pick a time in the future, at most 30 days ahead.",
     "quickMessagesFull": "Your message list is full. Remove one in My settings first."
   },
@@ -1414,6 +1433,34 @@
     "current": "Current version",
     "releasedOn": "Released {{date}}",
     "releases": {
+      "1_7_0": {
+        "title": "Close enough counts",
+        "intro": "Lessons from the first family game: typed answers with a slip, a door you can close, and pictures that tell you what the phones get.",
+        "sections": [
+          {
+            "title": "Typos accepted",
+            "items": [
+              "Typed answers with a small slip now count: \"tokio\" is right for \"Tokyo\". One mistake is allowed from 4 letters, two from 8, three from 12 and four from 18; numbers must be exact. A near miss scores the same as an exact answer.",
+              "\"Accept small typos\" is in the Scoring group and is on by default; switch it off and only exact answers count.",
+              "The player's phone says \"Close enough\" under Correct, and you see \"Typo accepted\" on the live board, next to the question's answers and on the results page."
+            ]
+          },
+          {
+            "title": "Lock joining",
+            "items": [
+              "Close the game to new players with the \"Lock joining\" switch in the lobby, and open it again whenever you like. With late joining on, the running game's top bar has the same switch.",
+              "Players already in can always come back; new phones and the projector see that joining is closed."
+            ]
+          },
+          {
+            "title": "Pictures in the editor",
+            "items": [
+              "Every picture is now a card: a bigger preview, its size in pixels, its file size and its format next to it (what the phones and the projector get), and Replace image and Remove image as proper buttons.",
+              "Hover an option's small picture to see the same details."
+            ]
+          }
+        ]
+      },
       "1_6_0": {
         "title": "Your game, your order",
         "intro": "Pick which question comes next, know how long the game takes, and give everyone something to look at between questions.",

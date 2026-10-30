@@ -68,7 +68,7 @@ export const settingsSections = {
     'finalResults',
   ],
   look: ['theme', 'customTheme', 'answerPalette', 'customPalette', 'answerSymbols', 'answerStyle', 'betweenQuestions'],
-  scoring: ['speedBonus', 'streakBonus', 'answerChanges', 'answerLockSec', 'shuffleOptions'],
+  scoring: ['speedBonus', 'streakBonus', 'typoTolerance', 'answerChanges', 'answerLockSec', 'shuffleOptions'],
 } as const satisfies Record<string, readonly (keyof GameSettings)[]>
 export type SettingsSection = keyof typeof settingsSections
 export const allSections = Object.keys(settingsSections) as SettingsSection[]
@@ -118,6 +118,8 @@ export function sectionSummary(settings: GameSettings, section: SettingsSection,
     scoring: [
       settings.speedBonus ? t('host.create.speedBonus') : null,
       settings.streakBonus ? t('host.create.streakBonus') : null,
+      // On is the usual case: only the strict spelling is worth a chip.
+      settings.typoTolerance ? null : t('host.create.exactSpelling'),
       answerChangesLabel(settings, t),
       settings.shuffleOptions ? t('host.create.shuffle') : null,
     ],
@@ -410,6 +412,12 @@ export function GameSettingsForm({
             description={t('host.create.streakBonusHelp')}
             checked={value.streakBonus}
             onChange={(streakBonus) => set({ streakBonus })}
+          />
+          <SwitchRow
+            label={t('host.create.typoTolerance')}
+            description={t('host.create.typoToleranceHelp')}
+            checked={value.typoTolerance}
+            onChange={(typoTolerance) => set({ typoTolerance })}
           />
           <SwitchRow
             label={t('host.create.answerChanges')}

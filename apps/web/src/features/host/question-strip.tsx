@@ -2,6 +2,7 @@ import type { HostSnapshot, RevealInfo } from '@quizmoo/shared'
 import { ClockIcon, MonitorIcon, ZapIcon } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import { TypoTag } from '@/components/typo-tag'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/cn'
 import { CheckIcon, OptionSymbol } from '../../components/icons'
@@ -197,6 +198,7 @@ function Counts({ info, host }: { info: RevealInfo; host: HostSnapshot }) {
                   <span className="w-1" />
                 )}
                 <span className="relative min-w-0 flex-1 truncate">{bucket.label}</span>
+                {info.nearKeys.includes(bucket.key) && <TypoTag className="relative" />}
                 {correct && <CheckIcon className="relative size-4 shrink-0 text-success" aria-label={t('play.correct')} />}
                 <span className="relative font-black tabular-nums">{bucket.count}</span>
               </li>

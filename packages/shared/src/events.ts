@@ -125,6 +125,8 @@ export const hostCommandSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('schedule'), at: scheduledAtSchema }),
   /** A scheduled game: open joining now instead of at the scheduled time. */
   z.object({ type: z.literal('openJoining') }),
+  /** Closes the game to new players, or opens it again; players already in can always come back. */
+  z.object({ type: z.literal('lockJoining'), locked: z.boolean() }),
 ])
 export type HostCommand = z.infer<typeof hostCommandSchema>
 

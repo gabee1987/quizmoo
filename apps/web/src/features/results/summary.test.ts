@@ -14,6 +14,7 @@ function question(q: Question, index: number, correctCount: number, answeredCoun
     correctCount,
     answeredCount,
     correctKeys: q.type === 'poll' ? [] : ['true'],
+    nearKeys: [],
     averageTimeMs,
     teamAnswers: [],
   }

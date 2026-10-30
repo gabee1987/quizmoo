@@ -51,7 +51,7 @@ export function QuestionStats({
           <img src={`/api/images/${question.question.imageId}`} alt="" className="size-20 shrink-0 rounded-xl object-cover" />
         )}
       </div>
-      <DistributionBars reveal={question} />
+      <DistributionBars reveal={question} markTypos />
       <p className="text-sm text-muted-foreground">{figures.join(' · ')}</p>
       {/* Teams that answered as one: what each team answered. */}
       <TeamAnswerList entries={question.teamAnswers} teams={teams} question={question.question} />

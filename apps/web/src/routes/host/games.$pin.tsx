@@ -1,7 +1,7 @@
 import type { GameHostInfo, HostCommand, HostSnapshot } from '@quizmoo/shared'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link, createFileRoute } from '@tanstack/react-router'
-import { ArrowLeftIcon, LockIcon, MonitorIcon, PanelLeftCloseIcon, PanelLeftOpenIcon, TrophyIcon } from 'lucide-react'
+import { ArrowLeftIcon, DoorClosedIcon, DoorOpenIcon, LockIcon, MonitorIcon, PanelLeftCloseIcon, PanelLeftOpenIcon, TrophyIcon } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AnnouncementBanner } from '@/components/announcement-banner'
@@ -271,6 +271,20 @@ function TopBar({
       {/* Icons only until there is room for the labels. */}
       <div className="ml-auto flex items-center gap-2 lg:ml-0">
         {host.phase !== 'finished' && <QuickMessageMenu announcement={host.announcement} quickMessages={host.quickMessages} onCommand={send} />}
+        {/* Late joining: the door stays open after the start until the host closes it. */}
+        {host.phase !== 'finished' && host.settings.lateJoin && (
+          <Button
+            variant={host.joinLocked ? 'default' : 'secondary'}
+            size="sm"
+            aria-pressed={host.joinLocked}
+            title={t(host.joinLocked ? 'host.game.joiningLockedHelp' : 'host.game.joiningOpenHelp')}
+            onClick={() => void send({ type: 'lockJoining', locked: !host.joinLocked })}
+          >
+            {host.joinLocked ? <DoorClosedIcon aria-hidden="true" /> : <DoorOpenIcon aria-hidden="true" />}
+            {/* The fourth labelled button would wrap the bar at 1440 px: its label shows on wider screens only. */}
+            <span className="max-2xl:sr-only">{t('host.game.lockJoining')}</span>
+          </Button>
+        )}
         {/* Locks every host page of the account until the lock code or the password is typed. */}
         <Button variant="secondary" size="sm" onClick={onLock} title={t('host.lock.button')}>
           <LockIcon aria-hidden="true" />

@@ -198,6 +198,7 @@ function SettingsForm({ saved }: { saved: HostSettings }) {
             <div className="flex flex-col gap-2">
               <p className="font-semibold">{t('settings.branding.logo')}</p>
               <ImageField
+                showLabel={false}
                 imageId={draft.logoImageId ?? undefined}
                 label={t('settings.branding.logo')}
                 onChange={(logoImageId) => setDraft((d) => ({ ...d, logoImageId: logoImageId ?? null }))}

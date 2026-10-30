@@ -28,8 +28,9 @@ export function Reveal({ snapshot }: { snapshot: PlayerSnapshot }) {
   const correct = snapshot.lastCorrect
   // One answer counted for a team of one in a one-answer mode: the card names it already.
   const teamLine = Boolean(question && snapshot.myAnswer && !snapshot.teamResult && (myTeamMode(snapshot) === 'majority' || myTeamMode(snapshot) === 'captain'))
-  // What the player picked, when it is not simply the correct answer shown below (teams get their summary instead).
-  const showMine = snapshot.myAnswer && !snapshot.teamResult && !teamLine && correct !== true
+  // What the player picked, when it is not simply the correct answer shown below (teams get their summary instead);
+  // a near miss shows what was typed next to the right spelling.
+  const showMine = snapshot.myAnswer && !snapshot.teamResult && !teamLine && (correct !== true || snapshot.lastNearMiss)
 
   let tone = 'border bg-card'
   let title = t('play.noAnswer')
@@ -73,6 +74,11 @@ export function Reveal({ snapshot }: { snapshot: PlayerSnapshot }) {
           </span>
         )}
         <h1 className="text-3xl font-black">{title}</h1>
+        {correct === true && snapshot.lastNearMiss && (
+          <p className="animate-pop rounded-full bg-success-foreground/20 px-4 py-1 font-bold" style={stagger(1, 0, 450)}>
+            {t('play.closeEnough')}
+          </p>
+        )}
         {/* One answer for the whole team: say which one counted (a team of more than one gets the summary below). */}
         {teamLine && question && snapshot.myAnswer && (
           <p className="font-bold wrap-break-word">

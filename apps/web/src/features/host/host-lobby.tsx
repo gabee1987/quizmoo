@@ -1,16 +1,18 @@
 import type { HostCommand, HostSnapshot } from '@quizmoo/shared'
 import { useNavigate } from '@tanstack/react-router'
-import { CopyIcon, MonitorIcon, PlayIcon } from 'lucide-react'
+import { CopyIcon, LockIcon, MonitorIcon, PlayIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { QrCode } from '@/components/qr-code'
 import { Button } from '@/components/ui/button'
 import { useTimeReached } from '@/lib/clock'
+import { cn } from '@/lib/cn'
 import { openProjector } from '@/lib/projector'
 import { HostToastsToggle } from './host-toasts'
 import { LobbyPlayers, teamActions } from './lobby-players'
 import { MessageBox } from './message-box'
 import { RoundTripBadge } from './round-trip-badge'
+import { SwitchRow } from './game-settings-form'
 import { ScheduledCard } from './scheduled-card'
 import { settingsLine } from './settings-line'
 
@@ -44,7 +46,7 @@ export function HostLobby({
   }
   return (
     <div className="mx-auto grid w-full max-w-6xl gap-6 lg:grid-cols-2 lg:items-start">
-      <JoinStage host={host} joinUrl={joinUrl} connected={connected} />
+      <JoinStage host={host} joinUrl={joinUrl} connected={connected} send={send} />
       <div className="flex min-w-0 flex-col gap-6">
         {!open && host.scheduledAt !== null && (
           <ScheduledCard
@@ -80,7 +82,17 @@ export function HostLobby({
   )
 }
 
-function JoinStage({ host, joinUrl, connected }: { host: HostSnapshot; joinUrl: string | null; connected: boolean }) {
+function JoinStage({
+  host,
+  joinUrl,
+  connected,
+  send,
+}: {
+  host: HostSnapshot
+  joinUrl: string | null
+  connected: boolean
+  send: (command: HostCommand) => Promise<boolean>
+}) {
   const { t } = useTranslation()
   return (
     <section className="@container flex min-w-0 flex-col gap-4 rounded-3xl border bg-card p-5 shadow-soft lg:sticky lg:top-4">
@@ -100,7 +112,18 @@ function JoinStage({ host, joinUrl, connected }: { host: HostSnapshot; joinUrl: 
         </div>
       </div>
       <div className="flex flex-col items-center gap-5 @lg:flex-row @lg:items-center">
-        {joinUrl && <QrCode value={joinUrl} className="w-full max-w-52 shrink-0 shadow-soft @lg:max-w-64" />}
+        {/* Locked: the code stays for the host to read, faded, with the lock on top. */}
+        {joinUrl && (
+          <div className="relative w-full max-w-52 shrink-0 @lg:max-w-64">
+            <QrCode value={joinUrl} className={cn('w-full shadow-soft transition-opacity', host.joinLocked && 'opacity-25')} />
+            {host.joinLocked && (
+              <span className="absolute inset-0 m-auto flex h-fit w-fit animate-pop items-center gap-2 rounded-full bg-foreground px-4 py-2 font-bold text-background shadow-soft">
+                <LockIcon className="size-4" aria-hidden="true" />
+                {t('host.game.joiningLocked')}
+              </span>
+            )}
+          </div>
+        )}
         <div className="flex min-w-0 flex-1 flex-col items-center gap-3 text-center @lg:items-start @lg:text-left">
           <div>
             <p className="text-sm font-bold text-muted-foreground">{t('screen.pin')}</p>
@@ -145,6 +168,14 @@ function JoinStage({ host, joinUrl, connected }: { host: HostSnapshot; joinUrl: 
             </a>
           </Button>
         </div>
+      </div>
+      <div className="border-t pt-1">
+        <SwitchRow
+          label={t('host.game.lockJoining')}
+          description={t(host.joinLocked ? 'host.game.joiningLockedHelp' : 'host.game.joiningOpenHelp')}
+          checked={host.joinLocked}
+          onChange={(locked) => void send({ type: 'lockJoining', locked })}
+        />
       </div>
     </section>
   )

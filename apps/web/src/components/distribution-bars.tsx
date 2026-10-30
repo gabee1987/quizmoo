@@ -6,6 +6,7 @@ import { stagger } from '../lib/motion'
 import { CountUp } from './count-up'
 import { CheckIcon, OptionSymbol } from './icons'
 import { optionFill, optionVars } from './option-colours'
+import { TypoTag } from './typo-tag'
 
 /**
  * Horizontal answer bars for the reveal, growing from zero one after another with their counts
@@ -15,10 +16,13 @@ export function DistributionBars({
   reveal,
   symbols = 'shapes',
   large = false,
+  markTypos = false,
 }: {
   reveal: RevealInfo
   symbols?: AnswerSymbols | undefined
   large?: boolean
+  /** Tag the answers that only counted thanks to the typo allowance (the host's views, not the projector). */
+  markTypos?: boolean
 }) {
   const { t } = useTranslation()
   const buckets = toBuckets(reveal.question, reveal.distribution, reveal.correctKeys, {
@@ -47,6 +51,7 @@ export function DistributionBars({
               </span>
             )}
             <span className={large ? 'line-clamp-2 wrap-break-word' : 'truncate'}>{bucket.label}</span>
+            {markTypos && reveal.nearKeys.includes(bucket.key) && <TypoTag />}
           </span>
           <span className="flex flex-1 items-center gap-3">
             <span

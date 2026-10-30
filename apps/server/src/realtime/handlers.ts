@@ -51,6 +51,7 @@ import {
   resume,
   schedule,
   setCaptain,
+  setJoinLocked,
   setTeamMode,
   showAnswers,
   showQuestion,
@@ -458,6 +459,8 @@ function runHostCommand(state: GameState, command: HostCommand, now: number): Ga
       return schedule(state, command.at, now)
     case 'openJoining':
       return openJoining(state, now)
+    case 'lockJoining':
+      return setJoinLocked(state, command.locked)
     case 'lock':
       return lockHost(state)
   }
