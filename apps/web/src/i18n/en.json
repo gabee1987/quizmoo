@@ -531,7 +531,7 @@
       "streakBonus": "Streak bonus",
       "streakBonusHelp": "Correct answers in a row earn extra points: +100 from the second, up to +500.",
       "typoTolerance": "Accept small typos",
-      "typoToleranceHelp": "Typed answers still count with a slip: one mistake from 4 letters, two from 8. Numbers must be exact.",
+      "typoToleranceHelp": "Typed answers still count with a slip: one mistake from 4 letters, two from 8, three from 12, four from 18. Numbers must be exact.",
       "exactSpelling": "Exact spelling",
       "answerChanges": "Change answers",
       "answerChangesHelp": "Players can change their answer while the question runs. The last one counts, with its time.",

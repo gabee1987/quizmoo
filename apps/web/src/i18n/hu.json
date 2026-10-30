@@ -531,7 +531,7 @@
       "streakBonus": "Sorozatbónusz",
       "streakBonusHelp": "Egymás utáni jó válaszokért extra pont jár: a másodiktól +100, legfeljebb +500.",
       "typoTolerance": "Apró elírás is jó",
-      "typoToleranceHelp": "A beírt válasz elírással is jó: 4 betűtől egy, 8 betűtől két hiba fér bele. A számoknak pontosnak kell lenniük.",
+      "typoToleranceHelp": "A beírt válasz elírással is jó: 4 betűtől egy, 8-tól kettő, 12-től három, 18-tól négy hiba fér bele. A számoknak pontosnak kell lenniük.",
       "exactSpelling": "Pontos helyesírás",
       "answerChanges": "Változtathatnak a válaszukon",
       "answerChangesHelp": "Amíg fut a kérdés, a játékosok megváltoztathatják a válaszukat. Az utolsó számít, annak az idejével.",

@@ -21,9 +21,9 @@ export function typoDistance(a: string, b: string): number {
   return d[x.length]![y.length]!
 }
 
-/** Mistakes allowed for an accepted answer of this many characters: up to 3 none, 4 to 7 one, 8 or more two. */
+/** Mistakes allowed for an accepted answer of this many characters: up to 3 none, 4 to 7 one, 8 to 11 two, 12 to 17 three, 18 or more four. */
 export function typosAllowed(length: number): number {
-  return length >= 8 ? 2 : length >= 4 ? 1 : 0
+  return length >= 18 ? 4 : length >= 12 ? 3 : length >= 8 ? 2 : length >= 4 ? 1 : 0
 }
 
 const digits = (value: string) => value.replace(/\D/g, '')

@@ -224,7 +224,7 @@ export const gameSettingsSchema = z
     streakBonus: z.boolean().default(false),
     /**
      * Typed answers with small typos still count (a near miss): up to 3 characters none, 4 to 7 one,
-     * 8 or more two; the digits in an answer stay exact. For the whole game, never one group.
+     * 8 to 11 two, 12 to 17 three, 18 or more four; the digits in an answer stay exact. For the whole game, never one group.
      */
     typoTolerance: z.boolean().default(true),
     /** Players may change their answer while the question runs; the last one counts, with its time. */

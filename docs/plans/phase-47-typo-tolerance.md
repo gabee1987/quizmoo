@@ -59,3 +59,4 @@ Out of scope: tolerance for numbers, per-question switches, phonetic matching.
 - Summaries and the host's settings line show "Exact spelling" only when it is off, since on is the usual case. The phones' lobby "About the game" does not mention it: it would show in every game, also without typed questions.
 - The projector's bars mark a near miss as correct but carry no tag; the full-room board's one-line tiles (many players) show no tag either, the regular tiles and rows do.
 - Games saved before this phase keep exact matching (their settings lack the flag).
+- After the user's review, longer answers allow more: three mistakes from 12 characters, four from 18.
