@@ -1433,14 +1433,26 @@
     "current": "Mostani verzió",
     "releasedOn": "Megjelent: {{date}}",
     "releases": {
-      "1_7_0": {
-        "title": "Kis elírás belefér",
-        "intro": "Az első családi játék tanulságai: elírt válaszok, ami beesik az ajtón, és képek, amikről tudod, mit kapnak a telefonok.",
+      "1_7_1": {
+        "title": "Érthetőbb újdonságok",
+        "intro": "Kisebb frissítés ezen az oldalon.",
         "sections": [
           {
-            "title": "Elírás, de jó",
+            "title": "Javítva",
             "items": [
-              "Ha elgépelik a választ, az is jó: a „tokio” is jó a „Tokyo”-ra. 4 betűtől egy hiba fér bele, 8-tól kettő, 12-től három, 18-tól négy; a számoknak pontosnak kell lenniük. Ugyanannyi pontot ér, mint a pontos válasz.",
+              "Átfogalmaztuk a korábbi verziók leírását, hogy érthetőbben mutassák be a változásokat."
+            ]
+          }
+        ]
+      },
+      "1_7_0": {
+        "title": "Elírások elfogadása és a csatlakozás lezárása",
+        "intro": "Az apró elírással beírt válaszok is számítanak, a játékot lezárhatod az új játékosok előtt, a szerkesztő pedig minden kép adatait megmutatja.",
+        "sections": [
+          {
+            "title": "Elfogadott elírások",
+            "items": [
+              "Az apró elírással beírt válasz is helyesnek számít: a „tokio” is jó a „Tokyo”-ra. 4 betűtől egy hiba fér bele, 8-tól kettő, 12-től három, 18-tól négy; a számoknak pontosnak kell lenniük. Ugyanannyi pontot ér, mint a pontos válasz.",
               "Az „Apró elírás is jó” a Pontozás csoportban van, és alapból be van kapcsolva; ha kikapcsolod, csak a pontos válasz számít.",
               "A játékos telefonja „Kis elírás, de elfogadjuk” üzenetet mutat a „Helyes!” alatt, te pedig az élő táblán, a kérdés válaszainál és az eredmények között „Elírás, de jó” címkét látsz."
             ]
@@ -1455,25 +1467,25 @@
           {
             "title": "Képek a szerkesztőben",
             "items": [
-              "Minden kép egy kártyán jelenik meg: nagyobb előnézet, mellette a mérete pixelben, a fájlmérete és a formátuma, vagyis amit a telefonok és a kivetítő kapnak, a Kép cseréje és a Kép eltávolítása pedig rendes gombok.",
+              "Minden kép egy kártyán jelenik meg: nagyobb előnézet, mellette a mérete pixelben, a fájlmérete és a formátuma, vagyis amit a telefonok és a kivetítő kapnak, a Kép cseréje és a Kép eltávolítása pedig gombként érhető el.",
               "A válaszlehetőségek kis képeinél ugyanezt akkor látod, ha föléjük viszed az egeret."
             ]
           }
         ]
       },
       "1_6_0": {
-        "title": "A te sorrended",
-        "intro": "Válaszd ki, melyik kérdés jöjjön, tudd, meddig tart a játék, és adj mindenkinek valami nézni valót két kérdés között.",
+        "title": "Következő kérdés, játékidő és képernyő a kérdések között",
+        "intro": "Kiválaszthatod, melyik kérdés jöjjön, látod, meddig tart a játék, és a kérdések között megjelenik a haladás és a következő kérdés.",
         "sections": [
           {
-            "title": "Bármelyik kérdés jöhet",
+            "title": "A következő kérdés kiválasztása",
             "items": [
               "Két kérdés között nyisd meg a Kérdések fület, és nyomd meg az „Ez jöjjön” gombot bármelyik hátralévő kérdésen. A többi sorrendje marad.",
               "A fül tetején mindig látod, mi jön, gépelés közben keres, a lejátszott és a hátralévő listát pedig össze tudod csukni. Azt is előre jelzi, ha egy kérdés kikerülne a köréből, vagy bekerülne a folyamatban lévőbe."
             ]
           },
           {
-            "title": "Meddig tart",
+            "title": "A játék hossza",
             "items": [
               "A kvízeid, a szerkesztő és az új játék ablaka megmutatja, nagyjából meddig tart egy játék, az ablak pedig újraszámolja, ahogy a beállításokat módosítod.",
               "A váróterek is kiírják, játék közben pedig te, a kivetítő és a telefonok is látjátok, nagyjából mennyi van még hátra."
@@ -1492,7 +1504,7 @@
               "A játék felső sávjában a Gyors üzenettel egy kattintással kiküldheted az üzeneteid egyikét: vidd fölé az egeret, és válaszd ki, meddig maradjon kint.",
               "Az üzenetet a saját oldaladon is látod, ugyanúgy, mint a játékosok; az × minden képernyőről törli.",
               "Minden kérdés után a telefonok az eredmény fölött megmutatják, melyik kérdés volt.",
-              "A futó játékban és a szerkesztőben az alkalmazás sávja beolvadt az oldal saját felső sávjába: a tehén nyitja a nyelvet, a megjelenést és az oldalaidat."
+              "A futó játékban és a szerkesztőben az alkalmazás sávja az oldal saját felső sávjának része lett: a Quizmoo logó nyitja a nyelvet, a megjelenést és az oldalaidat."
             ]
           }
         ]
@@ -1511,7 +1523,7 @@
             ]
           },
           {
-            "title": "Ahogy neked tetszik",
+            "title": "Nézetek és beállítások",
             "items": [
               "A Nézet menüben választhatsz csempék és lista között, és sorba rendezheted név, helyezés, válaszidő szerint, vagy előre véve, akik még nem válaszoltak.",
               "A Válaszok elrejtésével csak az látszik, ki válaszolt már, ha a játékosok is látják a képernyődet.",
@@ -1533,7 +1545,7 @@
             ]
           },
           {
-            "title": "Kényelmesebb szerkesztő",
+            "title": "A szerkesztő fejlesztései",
             "items": [
               "Keress a kérdések között a lista tetején: kérdésre, válaszra vagy a kör nevére, ékezettel vagy anélkül.",
               "Az Új kérdés és az Új csoport gomb a felső sávban és a lista tetején is ott van, a lista gombjai pedig görgetés közben is látszanak.",
@@ -1595,9 +1607,9 @@
             ]
           },
           {
-            "title": "A tehén",
+            "title": "Animált logó",
             "items": [
-              "A tehén néha grimaszol vagy mond valami butaságot, jeles napok körül pedig beöltözik az alkalomhoz."
+              "A Quizmoo logójában a tehén időnként arckifejezést vált vagy egy rövid szöveget mutat, jeles napokon pedig ünnepi megjelenést kap."
             ]
           }
         ]
@@ -1644,7 +1656,7 @@
             "items": [
               "Beállításaim: gyorsüzenetek, a megszokott játékbeállításaid, arculat, jelszó és zárkód.",
               "Bármikor letöltheted minden adatodat, vagy törölheted a fiókodat.",
-              "A barátaid a kezdőlapon kérhetnek játékvezetői fiókot; egy admin hagyja jóvá."
+              "A kezdőlapon játékvezetői fiókot kérhetsz; egy admin hagyja jóvá."
             ]
           },
           {
