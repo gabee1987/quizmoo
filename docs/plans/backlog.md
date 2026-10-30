@@ -72,6 +72,7 @@ Collected while testing phases 9 to 12. Effort as above.
 - Questions and groups switched off without deleting them, search in the editor's list, add buttons in the top bar and at the top of the list, jump to the selected question with a clearer selected card, the title in the General tab, and default time and points for new questions (phases 42 and 38).
 - Any upcoming question played next between questions (with search and a sticky "plays next" in the Questions tab), the estimated game length everywhere a game starts or runs, the projector and phones between questions (progress, what's next, top 3) and an optional 3-2-1 countdown, each part a setting; quick messages from the top bar and the host seeing their own message (phases 44 and 41).
 - Lock joining in the lobby and, with late joining, during the game; the join page and the projector say joining is closed (phase 45).
+- Picture details in the editor: stored pixel size, file size and format under each picture (phase 46).
 
 ### Open
 

@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Picture details in the editor (phase 46)
+- A question's, group's or logo picture is now a card: a larger 16:9 preview, beside it what phones and the projector get (size in pixels, file size, format) and Replace and Remove as buttons; it stacks on phones. Option pictures show the details as a tooltip on the thumbnail.
+- New owner-only route `GET /api/images/:id/info` (`{ width, height, bytes, mime }`, 404 for another host's image); the upload response carries the same fields, so a fresh upload shows them at once.
+
 ### Lock joining (phase 45)
 - The host can close a game to new players and open it again: a "Lock joining" switch in the lobby's join card, and a door button in the running game's top bar when late joining is on. Players already in can always come back.
 - While locked, the join page shows "Joining is closed" instead of the name form (a phone that already played in the game keeps the form) and notices an unlock within 10 s; the projector's lobby replaces its QR code and link with a "Joining is closed" card; the host's own QR code fades under a "Joining closed" badge. A refused join gets `errors.joiningLocked`.

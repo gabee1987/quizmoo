@@ -33,3 +33,13 @@ Out of scope: keeping the original, re-encoding, cropping.
 ## Verification command
 
 `pnpm verify`
+
+## Results
+
+- Image route test: the upload returns `width`, `height`, `bytes` and `mime`; `/info` gives the same to the owner, and the byte count matches what `GET /api/images/:id` serves; another host gets 404, no session 401, an unknown id 404.
+- Screenshots of the editor at 1440 on the production build (light, dark, Hungarian): "1280 × 720 px · 2 kB · WebP" under the question picture, the same as the option thumbnail's tooltip, no console errors.
+
+## Deviations
+
+- The details show for every full-size picture field (question, group, quiz and account logo), not only questions; option pictures get them as a tooltip, since their row has no room.
+- After the user's review the line became a card that uses the field's width: a 16:9 preview, the label and a note, three stat boxes (size, file size, format), and Replace / Remove as buttons. The logo fields hide the card's label (`showLabel={false}`), since their page shows it above.

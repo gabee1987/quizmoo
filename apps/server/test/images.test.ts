@@ -90,6 +90,30 @@ describeDb('images (database)', () => {
     expect(res.json()).toEqual({ error: 'errors.fileTooLarge' })
   })
 
+  it('gives the stored size, file size and format to the owner only', async () => {
+    const png = await sharp({ create: { width: 2000, height: 1000, channels: 3, background: '#4f46e5' } }).png().toBuffer()
+    const res = await upload('photo.png', 'image/png', png)
+    const { id, bytes } = res.json()
+    expect(res.json()).toMatchObject({ width: 1280, height: 640, mime: 'image/webp' })
+    expect(bytes).toBeGreaterThan(0)
+
+    const info = await built.app.inject({ method: 'GET', url: `/api/images/${id}/info`, headers: { cookie } })
+    expect(info.statusCode).toBe(200)
+    expect(info.json()).toEqual({ width: 1280, height: 640, bytes, mime: 'image/webp' })
+    const get = await built.app.inject({ method: 'GET', url: `/api/images/${id}` })
+    expect(get.rawPayload.length).toBe(bytes)
+
+    await createUser(db, 'other_host', 'test-password-123')
+    const other = sessionCookie(
+      await built.app.inject({ method: 'POST', url: '/api/auth/login', payload: { username: 'other_host', password: 'test-password-123' } }),
+    )
+    const foreign = await built.app.inject({ method: 'GET', url: `/api/images/${id}/info`, headers: { cookie: other } })
+    expect(foreign.statusCode).toBe(404)
+    expect(foreign.json()).toEqual({ error: 'errors.notFound' })
+    expect((await built.app.inject({ method: 'GET', url: `/api/images/${id}/info` })).statusCode).toBe(401)
+    expect((await built.app.inject({ method: 'GET', url: '/api/images/nope/info', headers: { cookie } })).statusCode).toBe(404)
+  })
+
   it('requires a session to upload and answers 404 for unknown ids', async () => {
     const png = await sharp({ create: { width: 10, height: 10, channels: 3, background: 'red' } }).png().toBuffer()
     expect((await upload('a.png', 'image/png', png, false)).statusCode).toBe(401)
