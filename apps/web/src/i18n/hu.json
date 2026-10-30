@@ -55,7 +55,9 @@
     "scheduled": "Ekkor kezdünk: {{date}}",
     "scheduledHelp": "Addig is töltsd ki az adataidat. Hagyd nyitva ezt az oldalt: amikor kezdünk, itt tudsz beszállni.",
     "leave": "Kilépés",
-    "opensAtStart": "Kezdéskor tudsz beszállni"
+    "opensAtStart": "Kezdéskor tudsz beszállni",
+    "locked": "Lezárták a csatlakozást",
+    "lockedHelp": "A játékvezető lezárta a játékot az új játékosok előtt. Hagyd nyitva ezt az oldalt: ha újra megnyitja, itt be tudsz szállni."
   },
   "home": {
     "tagline": "Gondolkodj. Válaszolj. Győzd le a csordát!",
@@ -319,7 +321,11 @@
       "teamSuggesting": "Javaslatok ({{picked}}/{{count}})",
       "teamFallback": "Többség, nem véglegesítették",
       "copyLink": "Link másolása",
-      "linkCopied": "Kimásoltuk a linket."
+      "linkCopied": "Kimásoltuk a linket.",
+      "lockJoining": "Csatlakozás lezárása",
+      "joiningLocked": "Csatlakozás lezárva",
+      "joiningLockedHelp": "Új játékos nem tud beszállni. Aki már bent van, vissza tud jönni.",
+      "joiningOpenHelp": "Bárki beszállhat a PIN-nel vagy a QR-kóddal."
     },
     "shown": {
       "onScreen": {
@@ -901,6 +907,7 @@
   },
   "screen": {
     "joinAt": "Csatlakozz itt",
+    "joiningClosed": "A csatlakozás lezárva",
     "pin": "PIN-kód",
     "answerOnPhone": "Írd be a válaszod a telefonodon",
     "other": "Egyéb",
@@ -1390,6 +1397,7 @@
     "answerNotSent": "A válaszod nem ment el. Koppints újra.",
     "notCaptain": "Ezt csak a csapatkapitány teheti meg.",
     "gameNotOpenYet": "Ez a játék még nem kezdődött el. Nézz vissza a megadott időpontban.",
+    "joiningLocked": "A játékvezető lezárta a játékot az új játékosok előtt.",
     "invalidSchedule": "Válassz egy jövőbeli időpontot, legfeljebb 30 napon belül.",
     "quickMessagesFull": "Megtelt az üzenetlistád. Előbb törölj egyet a Beállításaimban."
   },

@@ -612,6 +612,21 @@ describeDb('sockets (database)', () => {
     expect(await command(hostSocket, { type: 'schedule', at: later })).toEqual({ error: 'errors.gameAlreadyStarted' })
   })
 
+  it('locks joining: new players are refused, a known token comes back, unlocking lets them in', async () => {
+    const pin = await newGame()
+    const hostSocket = await host(pin)
+    const anna = await player(pin, 'Anna')
+    const locked = nextSnapshot<HostSnapshot>(hostSocket, 'game:host', (s) => s.joinLocked)
+    expect(await command(hostSocket, { type: 'lockJoining', locked: true })).toEqual({ ok: true })
+    await locked
+    const late = await connect()
+    expect(await late.emitWithAck('player:join', { pin, name: 'Bea' })).toEqual({ error: 'errors.joiningLocked' })
+    const back = await connect()
+    expect(await back.emitWithAck('player:join', { pin, name: 'Anna', token: anna.ack.token })).toMatchObject({ token: anna.ack.token })
+    expect(await command(hostSocket, { type: 'lockJoining', locked: false })).toEqual({ ok: true })
+    expect((await player(pin, 'Bea')).ack.token).toEqual(expect.any(String))
+  })
+
   it("copies the host's quick messages into a new game, which keeps its own copy through a restart", async () => {
     const save = (payload: object) =>
       built.app.inject({ method: 'PUT', url: '/api/me/settings', headers: { cookie: hostCookie }, payload })

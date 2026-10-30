@@ -385,6 +385,7 @@ function buildBaseSnapshot(state: GameState, now: number, audience: ResultsAudie
     announcement: state.announcement ?? null,
     nextPin: state.nextPin ?? null,
     scheduledAt: state.scheduledAt ?? null,
+    joinLocked: state.joinLocked ?? false,
     branding: brandingFor(state, audience),
   }
 }

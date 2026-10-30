@@ -16,6 +16,7 @@ import {
   next,
   reconnectPlayer,
   releaseResults,
+  setJoinLocked,
   resultsPending,
   resultsPendingFor,
   showScoreboard,
@@ -147,6 +148,24 @@ describe('lobby commands', () => {
 
   it('ignores teamId in classic mode', () => {
     expect(join(newGame(), 1, 'team-1').players.p1!.teamId).toBeNull()
+  })
+
+  it('refuses new players while joining is locked, lets known tokens back in, and opens again', () => {
+    let state = setJoinLocked(withPlayers(1), true)
+    expect(state.joinLocked).toBe(true)
+    expectCode(() => join(state, 2), 'errors.joiningLocked')
+    state = disconnectPlayer(state, 'p1', T0)
+    expect(joinPlayer(state, { id: 'other', name: 'Whatever', token: 'tok-1' }).players.p1!.connected).toBe(true)
+    expect(setJoinLocked(state, true)).toBe(state)
+    state = setJoinLocked(state, false)
+    expect(Object.keys(join(state, 2).players)).toEqual(['p1', 'p2'])
+  })
+
+  it('keeps a late-join game locked after the start, and refuses the lock once finished', () => {
+    const state = setJoinLocked(startGame(withPlayers(1, { lateJoin: true }), T0), true)
+    expectCode(() => join(state, 2), 'errors.joiningLocked')
+    expect(Object.keys(join(setJoinLocked(state, false), 2).players)).toEqual(['p1', 'p2'])
+    expectCode(() => setJoinLocked(endGame(state, T0), false), 'errors.invalidTransition')
   })
 
   it('rejects a new join after start but lets a known token back in', () => {

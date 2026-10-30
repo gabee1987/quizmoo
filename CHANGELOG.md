@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Lock joining (phase 45)
+- The host can close a game to new players and open it again: a "Lock joining" switch in the lobby's join card, and a door button in the running game's top bar when late joining is on. Players already in can always come back.
+- While locked, the join page shows "Joining is closed" instead of the name form (a phone that already played in the game keeps the form) and notices an unlock within 10 s; the projector's lobby replaces its QR code and link with a "Joining is closed" card; the host's own QR code fades under a "Joining closed" badge. A refused join gets `errors.joiningLocked`.
+- The lock is game state, so a server restart keeps it.
+
 ## 1.6.0 – 2026-10-27
 
 The host decides the order, everyone knows how long the game takes, and there is something to look at between questions.

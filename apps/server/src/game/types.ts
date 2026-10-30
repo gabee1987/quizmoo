@@ -150,6 +150,8 @@ export interface GameState {
    * kept afterwards, as the restore window counts from it. Null or missing for a game never scheduled.
    */
   scheduledAt?: number | null
+  /** The host closed the game to new players (token rejoins still work). Missing in games saved before it existed. */
+  joinLocked?: boolean
   /**
    * The message box's quick messages, copied from the host's settings at creation. Missing in games
    * saved before they existed; `{ hidden, own }` in games saved before built-in and own were one list.

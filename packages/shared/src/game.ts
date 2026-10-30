@@ -331,6 +331,8 @@ export interface GameSnapshotBase {
    * null for a game that was never scheduled. Joining is refused while `serverNow < scheduledAt`.
    */
   scheduledAt: number | null
+  /** The host closed the game to new players. */
+  joinLocked: boolean
   answeredCount: number
   players: PlayerPublic[]
   teams: TeamPublic[]
@@ -449,6 +451,8 @@ export const gamePublicInfoSchema = z.object({
   joinUrl: z.string(),
   /** A scheduled game's opening time (unix ms); null when it was never scheduled. */
   scheduledAt: z.number().nullable(),
+  /** The host closed the game to new players; a player with a token for it can still come back. */
+  joinLocked: z.boolean(),
   /** Server time of the answer, so the page can tell whether joining is open without trusting the phone's clock. */
   serverNow: z.number(),
 })

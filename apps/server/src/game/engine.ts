@@ -127,6 +127,7 @@ export function joinPlayer(state: GameState, input: JoinInput, now?: number): Ga
     throw new EngineError('errors.gameAlreadyStarted')
   }
   if (!joiningOpen(state, now)) throw new EngineError('errors.gameNotOpenYet')
+  if (state.joinLocked) throw new EngineError('errors.joiningLocked')
   const name = input.name.trim()
   if (!isNameAllowed(name)) throw new EngineError('errors.nameNotAllowed')
   const key = nameKey(name)
@@ -347,6 +348,13 @@ export function openJoining(state: GameState, now: number): GameState {
   if (state.phase !== 'lobby') throw new EngineError('errors.gameAlreadyStarted')
   if (joiningOpen(state, now)) return state
   return { ...state, scheduledAt: now }
+}
+
+/** The host closes (or opens again) the game to new players; players already in can always come back. */
+export function setJoinLocked(state: GameState, locked: boolean): GameState {
+  if (state.phase === 'finished') throw new EngineError('errors.invalidTransition')
+  if ((state.joinLocked ?? false) === locked) return state
+  return { ...state, joinLocked: locked }
 }
 
 export function startGame(state: GameState, now: number): GameState {

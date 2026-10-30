@@ -1,4 +1,5 @@
 import type { HostSnapshot, PlayerPublic } from '@quizmoo/shared'
+import { LockIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { BrandingMark } from '@/components/branding-mark'
 import { WaitingCow } from '@/components/waiting-cow'
@@ -12,7 +13,15 @@ export function ScreenLobby({ host, joinUrl }: { host: HostSnapshot; joinUrl: st
   const soloIds = new Set(host.teams.filter((team) => team.solo).map((team) => team.id))
   return (
     <div className="grid flex-1 items-center gap-10 lg:grid-cols-[auto_1fr]">
-      {joinUrl && <QrCode value={joinUrl} className="mx-auto w-[min(60vh,80vw)] animate-pop" />}
+      {/* Locked: no code to scan, the room sees that joining is closed. */}
+      {host.joinLocked ? (
+        <div className="mx-auto grid aspect-square w-[min(60vh,80vw)] animate-pop place-content-center justify-items-center gap-6 rounded-3xl border-4 border-dashed bg-card text-center shadow-soft">
+          <LockIcon className="size-32 text-muted-foreground" aria-hidden="true" />
+          <p className="px-8 text-5xl font-black text-balance">{t('screen.joiningClosed')}</p>
+        </div>
+      ) : (
+        joinUrl && <QrCode value={joinUrl} className="mx-auto w-[min(60vh,80vw)] animate-pop" />
+      )}
       <div className="flex flex-col gap-6">
         {host.branding && <BrandingMark branding={host.branding} size="lobby" />}
         <div>
@@ -28,10 +37,12 @@ export function ScreenLobby({ host, joinUrl }: { host: HostSnapshot; joinUrl: st
             </p>
           )}
         </div>
-        <div className="animate-fade-up">
-          <p className="text-3xl">{t('screen.joinAt')}</p>
-          <p className="text-4xl font-bold break-all">{joinUrl}</p>
-        </div>
+        {!host.joinLocked && (
+          <div className="animate-fade-up">
+            <p className="text-3xl">{t('screen.joinAt')}</p>
+            <p className="text-4xl font-bold break-all">{joinUrl}</p>
+          </div>
+        )}
         <div className="flex items-end gap-8">
           <div className="glow-border flex w-fit animate-pop flex-col rounded-3xl bg-card px-8 py-4 shadow-soft">
             <p className="text-3xl">{t('screen.pin')}</p>

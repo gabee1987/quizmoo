@@ -55,7 +55,9 @@
     "scheduled": "Starts {{date}}",
     "scheduledHelp": "Fill in your details meanwhile. Keep this page open: you can join here when it starts.",
     "leave": "Leave",
-    "opensAtStart": "Joining opens at the start"
+    "opensAtStart": "Joining opens at the start",
+    "locked": "Joining is closed",
+    "lockedHelp": "The host closed this game to new players. Keep this page open: if they open it again, you can join here."
   },
   "home": {
     "tagline": "Think. Quiz. Outsmart the herd!",
@@ -319,7 +321,11 @@
       "teamSuggesting": "Suggesting ({{picked}} of {{count}})",
       "teamFallback": "Majority, not confirmed",
       "copyLink": "Copy link",
-      "linkCopied": "Link copied."
+      "linkCopied": "Link copied.",
+      "lockJoining": "Lock joining",
+      "joiningLocked": "Joining closed",
+      "joiningLockedHelp": "New players can't join. Players already in can still come back.",
+      "joiningOpenHelp": "Anyone with the PIN or the QR code can join."
     },
     "shown": {
       "onScreen": {
@@ -901,6 +907,7 @@
   },
   "screen": {
     "joinAt": "Join at",
+    "joiningClosed": "Joining is closed",
     "pin": "Game PIN",
     "answerOnPhone": "Type your answer on your phone",
     "other": "Other",
@@ -1390,6 +1397,7 @@
     "answerNotSent": "Your answer was not sent. Tap again.",
     "notCaptain": "Only your team's captain can do that.",
     "gameNotOpenYet": "This game has not opened yet. Come back at the start time.",
+    "joiningLocked": "The host closed this game to new players.",
     "invalidSchedule": "Pick a time in the future, at most 30 days ahead.",
     "quickMessagesFull": "Your message list is full. Remove one in My settings first."
   },

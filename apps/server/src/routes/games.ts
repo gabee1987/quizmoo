@@ -177,6 +177,7 @@ export async function gameRoutes(app: FastifyInstance, { db, manager, appOrigin,
       solo: state.settings.mode === 'team' && state.settings.soloPlayers,
       joinUrl: `${appOrigin}/?pin=${state.pin}`,
       scheduledAt: state.scheduledAt ?? null,
+      joinLocked: state.joinLocked ?? false,
       serverNow: Date.now(),
     }
     return info
