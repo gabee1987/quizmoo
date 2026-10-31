@@ -131,7 +131,7 @@ describeDb('host settings (database)', () => {
     expect(own.settings).toMatchObject({ theme: 'mint', answerPalette: 'vivid' })
     // A host without defaults gets the app's.
     const other = (await req(second, 'POST', '/api/quizzes', { title: 'New', questions: [] })).json().quiz
-    expect(other.settings).toMatchObject({ theme: 'classic' })
+    expect(other.settings).toMatchObject({ theme: 'seasonal' })
   })
 
   it("takes the host's own image as the logo, never another host's", async () => {

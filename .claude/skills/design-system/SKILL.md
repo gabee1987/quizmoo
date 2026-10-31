@@ -21,6 +21,8 @@ description: The Quizmoo look: shadcn primitives, semantic colour tokens, light 
 
 Nunito (self-hosted via `@fontsource-variable/nunito`, never a font CDN), headings `font-black`/`font-extrabold`, 12 to 24 px radii (`rounded-xl` to `rounded-2xl`), `shadow-soft` on cards, solid buttons with a darker bottom edge that sink when pressed. Cards that carry a status get a visible identity: a solid tinted header and border, not a faint transparent wash.
 
+**Seasonal decorations** (`features/season/`: `drawings.tsx` floating pieces, `scenes.tsx` edge strips and corners, `particles.tsx` falling pieces; the cow's costumes in `cow-logo.tsx`) use fixed festive colours with the ink outline, like the cow. Edge strips repeat one tile through an SVG `<pattern>` in a wide viewBox with `preserveAspectRatio="xMidYMin slice"`, so they scale with the strip's height. In a tile, fill closed shapes without a stroke and stroke only the open edge path (a closed outline shows as a seam at every tile edge), and make the tile width a whole multiple of anything repeated inside it. Snow and ice colours come from `--season-drift`, `--season-drift-shade` and `--season-ice` (dimmer in dark mode, so light text over them stays readable).
+
 ## Accessibility
 
 Every interactive element shows a focus ring (`focus-visible:ring-[3px] focus-visible:ring-ring`); text meets 4.5:1 in both modes (`e2e/a11y.e2e.ts` runs axe in both modes); `prefers-reduced-motion` ends all CSS animations and transitions immediately (global rule in `styles.css`).

@@ -100,7 +100,9 @@
 }
 
 /* Game themes: chosen per quiz. Only the hues, the surface tint and the chroma change (lib/themes.ts mirrors them). */
-[data-theme='classic'] {
+/* Seasonal resolves to a season or Classic before it reaches the page (lib/season.ts); this is only the fallback. */
+[data-theme='classic'],
+[data-theme='seasonal'] {
   --hue: 277;
   --hue-accent: 330;
   --tint: 0.012;
@@ -178,6 +180,62 @@
   --hue: 277;
   --hue-accent: 330;
   --tint: 0.012;
+  --chroma: 1;
+}
+
+/* Seasons (phase 50): the app's look on special days (features/season/calendar.ts), same rules as the themes. */
+[data-theme='newYear'] {
+  --hue: 268;
+  --hue-accent: 85;
+  --tint: 0.018;
+  --chroma: 1;
+}
+[data-theme='carnival'] {
+  --hue: 325;
+  --hue-accent: 95;
+  --tint: 0.018;
+  --chroma: 1;
+}
+[data-theme='valentine'] {
+  --hue: 5;
+  --hue-accent: 335;
+  --tint: 0.018;
+  --chroma: 1;
+}
+[data-theme='womensDay'] {
+  --hue: 300;
+  --hue-accent: 145;
+  --tint: 0.016;
+  --chroma: 1;
+}
+[data-theme='aprilFools'] {
+  --hue: 195;
+  --hue-accent: 55;
+  --tint: 0.016;
+  --chroma: 1;
+}
+[data-theme='easter'] {
+  --hue: 235;
+  --hue-accent: 95;
+  --tint: 0.018;
+  --chroma: 0.9;
+}
+[data-theme='halloween'] {
+  --hue: 295;
+  --hue-accent: 55;
+  --tint: 0.02;
+  --chroma: 1;
+}
+[data-theme='stNicholas'] {
+  --hue: 22;
+  --hue-accent: 85;
+  --tint: 0.016;
+  --chroma: 1;
+}
+[data-theme='christmas'] {
+  --hue: 150;
+  --hue-accent: 25;
+  --tint: 0.016;
   --chroma: 1;
 }
 
@@ -1062,6 +1120,121 @@
 }
 .floating-shape {
   animation: float-about 8s ease-in-out infinite alternate;
+}
+
+/* Season decorations (phase 50, features/season/season-decor.tsx). Transforms only. */
+:root {
+  --season-snow: oklch(0.86 0.05 240);
+  --season-web: oklch(0.55 0.05 295 / 0.55);
+  --season-drift: oklch(0.995 0.005 240);
+  --season-drift-shade: oklch(0.9 0.04 240);
+  --season-ice: oklch(0.88 0.07 230);
+}
+:root[data-mode='dark'] {
+  --season-snow: oklch(0.97 0.01 240);
+  --season-web: oklch(0.92 0.02 295 / 0.45);
+  /* Dimmer snow at night, so it does not glare behind light text. */
+  --season-drift: oklch(0.78 0.03 250);
+  --season-drift-shade: oklch(0.66 0.05 255);
+  --season-ice: oklch(0.72 0.07 230);
+}
+.season-float {
+  animation: float-about 8s ease-in-out infinite alternate;
+}
+/*
+ * Season switch: the new look spreads out in a circle from the button pressed (lib/season.ts sets
+ * --reveal-x/-y/-r and data-season-switch for the length of the view transition). A one-off 0.8 s
+ * clip-path animation, so not limited to transform and opacity.
+ */
+:root[data-season-switch]::view-transition-old(root),
+:root[data-season-switch]::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+:root[data-season-switch]::view-transition-new(root) {
+  animation: season-reveal 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes season-reveal {
+  from {
+    clip-path: circle(0 at var(--reveal-x) var(--reveal-y));
+  }
+  to {
+    clip-path: circle(var(--reveal-r) at var(--reveal-x) var(--reveal-y));
+  }
+}
+/* Swings from the top of its thread (`--hang` above the piece). */
+.season-sway {
+  transform-origin: 50% calc(-1 * var(--hang));
+  animation: season-sway 5s ease-in-out infinite alternate;
+}
+/* A spider going up and down its thread. */
+.season-dangle {
+  animation: season-dangle 6s ease-in-out infinite alternate;
+}
+.season-fall {
+  animation: season-fall 12s linear infinite;
+}
+.season-rise {
+  animation: season-rise 12s linear infinite;
+}
+/* Leaves, petals and paper: falling with a sway and tumbling over as they go. */
+.season-flutter {
+  animation: season-flutter 12s linear infinite;
+}
+@keyframes season-flutter {
+  from {
+    transform: translate(0, 0) rotate(0deg) rotateX(0deg);
+  }
+  25% {
+    transform: translate(2.5rem, 27vh) rotate(70deg) rotateX(160deg);
+  }
+  50% {
+    transform: translate(-1rem, 55vh) rotate(150deg) rotateX(320deg);
+  }
+  75% {
+    transform: translate(2rem, 82vh) rotate(230deg) rotateX(480deg);
+  }
+  to {
+    transform: translate(0, 110vh) rotate(300deg) rotateX(640deg);
+  }
+}
+@keyframes season-sway {
+  from {
+    transform: rotate(-5deg);
+  }
+  to {
+    transform: rotate(5deg);
+  }
+}
+@keyframes season-dangle {
+  from {
+    transform: translateY(-1.5rem);
+  }
+  to {
+    transform: translateY(1.5rem);
+  }
+}
+@keyframes season-fall {
+  from {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate(2.5rem, 55vh) rotate(200deg);
+  }
+  to {
+    transform: translate(0, 110vh) rotate(400deg);
+  }
+}
+@keyframes season-rise {
+  from {
+    transform: translate(0, 0) scale(0.8);
+  }
+  50% {
+    transform: translate(-2rem, -55vh) scale(1);
+  }
+  to {
+    transform: translate(0, -110vh) scale(0.8);
+  }
 }
 @keyframes hero-bob {
   0%,

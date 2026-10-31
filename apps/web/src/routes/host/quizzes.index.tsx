@@ -40,6 +40,7 @@ import { quizzesQueryOptions, type QuizSummary } from '@/features/host/queries'
 import { useNewQuiz, useStartGame } from '@/features/host/quiz-actions'
 import { quizMinutes } from '@/lib/game-length'
 import { stagger } from '@/lib/motion'
+import { useSeasonalLook } from '@/lib/season'
 import { themeSwatches } from '@/lib/themes'
 import { toastError } from '@/lib/toast'
 import { cn } from '@/lib/cn'
@@ -56,6 +57,7 @@ export const Route = createFileRoute('/host/quizzes/')({
 
 function QuizList() {
   const { t, i18n } = useTranslation()
+  const { season } = useSeasonalLook()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const quizzes = useQuery(quizzesQueryOptions)
@@ -333,7 +335,12 @@ function QuizList() {
               )}
               <Badge variant="outline">{t(`host.create.modes.${quiz.settings.mode}`)}</Badge>
               <Badge variant="outline">
-                <span className="size-2.5 rounded-full" style={{ background: themeSwatches(quiz.settings.theme, quiz.settings.customTheme)[0] }} />
+                <span
+                  className="size-2.5 rounded-full"
+                  style={{
+                    background: themeSwatches(quiz.settings.theme === 'seasonal' ? (season ?? 'seasonal') : quiz.settings.theme, quiz.settings.customTheme)[0],
+                  }}
+                />
                 {t(`host.create.themeOptions.${quiz.settings.theme}`)}
               </Badge>
             </div>

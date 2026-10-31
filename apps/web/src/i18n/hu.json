@@ -13,6 +13,31 @@
     "languages": {
       "hu": "Magyar",
       "en": "English"
+    },
+    "seasonalLook": "Ünnepi megjelenés ({{season}})"
+  },
+  "season": {
+    "names": {
+      "newYear": "Újév",
+      "carnival": "Farsang",
+      "valentine": "Valentin-nap",
+      "womensDay": "Nőnap",
+      "aprilFools": "Bolondok napja",
+      "easter": "Húsvét",
+      "halloween": "Halloween",
+      "stNicholas": "Mikulás",
+      "christmas": "Karácsony"
+    },
+    "greeting": {
+      "newYear": "Boldog új évet!",
+      "carnival": "Vidám farsangot!",
+      "valentine": "Boldog Valentin-napot!",
+      "womensDay": "Boldog nőnapot!",
+      "aprilFools": "Boldog bolondok napját!",
+      "easter": "Kellemes húsvétot!",
+      "halloween": "Boldog halloweent!",
+      "stNicholas": "Boldog Mikulást!",
+      "christmas": "Kellemes ünnepeket!"
     }
   },
   "join": {
@@ -99,6 +124,16 @@
         "line2": "Leszel a Valentinom?",
         "line3": "Szeretlek, mint fű a harmatot."
       },
+      "carnival": {
+        "line1": "Ki lehet a maszk alatt? Igen, a tehén.",
+        "line2": "Hagyok helyet a fánknak.",
+        "line3": "Hess, tél! Múú!"
+      },
+      "womensDay": {
+        "line1": "Boldog nőnapot!",
+        "line2": "Hoztam tulipánt. Csak egyet rágtam meg.",
+        "line3": "Virágot mindenkinek, aki összetartja a csapatot!"
+      },
       "aprilFools": {
         "line1": "Tudtad? A tehenek kedden repülnek.",
         "line2": "Tudtad? A tej a Holdról jön.",
@@ -113,6 +148,11 @@
         "line1": "Bú! Vagyis… múú!",
         "line2": "Csokit vagy csínyt?",
         "line3": "Boszorkány vagyok. Tehénboszorkány."
+      },
+      "stNicholas": {
+        "line1": "Kipucoltad a csizmád? Én mind a négyet.",
+        "line2": "Jó voltam. Többnyire.",
+        "line3": "Jön a Múkulás!"
       },
       "christmas": {
         "line1": "Boldog karácsonyt!",
@@ -613,8 +653,9 @@
       },
       "finalResultsHelp": "A játék után a kivetítő és a telefonok várnak. A dobogót a kivetítőn, az eredményt a telefonokon külön teheted közzé.",
       "theme": "Téma",
-      "themeHelp": "Színek a telefonokon, a kivetítőn és a vezérlőn. A világos vagy sötét módot mindenki a saját eszközén választja. A Grafit, a Sötétkék, a Petrol, a Kő és a Bordó visszafogottabb, hivatalos eseményekre.",
+      "themeHelp": "Színek a telefonokon, a kivetítőn és a vezérlőn. Az Ünnepi a naptárt követi: halloweenkor, karácsonykor és más ünnepeken saját színeket és díszeket kap, máskor olyan, mint a Klasszikus. A világos vagy sötét módot mindenki a saját eszközén választja. A Grafit, a Sötétkék, a Petrol, a Kő és a Bordó visszafogottabb, hivatalos eseményekre.",
       "themeOptions": {
+        "seasonal": "Ünnepi",
         "classic": "Klasszikus",
         "arcade": "Játékterem",
         "sunset": "Naplemente",
@@ -629,6 +670,16 @@
         "bordeaux": "Bordó",
         "custom": "Saját színek"
       },
+      "seasonalNow": "Most: {{season}}",
+      "seasonalLook": "Ünnepi megjelenés itt",
+      "seasonalLookHelp": "Ünnepek idején (halloween, karácsony és a többi) a bejelölt képernyők az ünnep színeit és díszeit mutatják a téma helyett.",
+      "seasonalScreens": {
+        "host": "Vezérlő",
+        "screen": "Kivetítő",
+        "phones": "Telefonok"
+      },
+      "seasonalChip": "Ünnepi megjelenés: {{screens}}",
+      "seasonalNowhere": "sehol",
       "answerPalette": "Válaszok színei",
       "answerPaletteHelp": "A válaszgombok és az eredménysávok színei a telefonokon és a kivetítőn, a témától függetlenül. A Tompa és a Céges a nyugodtabb.",
       "answerPaletteOptions": {
@@ -1689,6 +1740,25 @@
       "saved": "Elmentettük a zárkódot",
       "removed": "Töröltük a zárkódot"
     },
+    "seasonPreview": {
+      "title": "Ünnepek",
+      "help": "Minden ünnep a dátumaival. Válassz egyet, és ezen az eszközön megnézheted a színeit, díszeit és tehenét, a dátumtól függetlenül (csak ezen az eszközön; a Dátum szerint visszaállítja). A ceruzával mindenkinek módosíthatod egy ünnep dátumait.",
+      "byDate": "Dátum szerint",
+      "none": "Ma nincs ünnep",
+      "changed": "Módosított dátum",
+      "off": "Kikapcsolva",
+      "edit": "{{season}}: dátumok módosítása",
+      "dialogTitle": "{{season}}: dátumok",
+      "dialogHelp": "Minden eszközön érvényes, a következő oldalbetöltéstől. Ahol két ünnep átfedi egymást, az nyer, amelyiknek a főnapja közelebb van.",
+      "mainDay": "Főnap: {{day}}",
+      "before": "Ennyi nappal előtte kezdődik",
+      "after": "Ennyi nappal utána ér véget",
+      "daysRange": "0 és {{max}} nap között",
+      "runs": "Időszak: {{range}}",
+      "show": "Legyen ünnepi megjelenés",
+      "showHelp": "Kikapcsolva egyik eszköz sem mutatja, amíg vissza nem kapcsolod.",
+      "reset": "Vissza az alap dátumokra"
+    },
     "signupEmail": {
       "title": "Értesítés regisztrációkról",
       "help": "Ha valaki házigazdának regisztrál, e-mailt küldünk erre a címre egy linkkel a Felhasználók oldalra, ahol jóváhagyod vagy elutasítod. Az e-mailben csak az áll, hányan várnak, az nem, hogy kik. Legfeljebb 15 percenként egy e-mail.",
@@ -2155,6 +2225,8 @@
         "picksOpen": "Hogy nyitva vannak-e a csapatod tippjei. Amíg be nem zárod a lapot.",
         "lang": "A nyelved. Amíg át nem állítod, vagy nem törlöd a böngészőadatokat.",
         "mode": "Világos, sötét vagy rendszer szerinti megjelenés. Amíg át nem állítod, vagy nem törlöd a böngészőadatokat.",
+        "seasonal": "Hogy ezen az eszközön kikapcsoltad az ünnepi megjelenést. Amíg vissza nem kapcsolod, vagy nem törlöd a böngészőadatokat.",
+        "seasonPreview": "Csak adminisztrátoroknak: az ünnep, amelyet ezen az eszközön előnézetben látsz. Amíg a Dátum szerintet nem választod, vagy nem törlöd a böngészőadatokat.",
         "notice": "Hogy már láttad a tárolásról szóló tájékoztatót, így nem jön elő újra.",
         "hostToasts": "Hogy a játékvezetői oldal mutasson-e rövid értesítést a csatlakozó és távozó játékosokról.",
         "hostBoard": "Hogyan mutassa a játékvezetői oldal a játékosokat: csempék vagy lista, sorrend, rejtett válaszok, oldalsó panelek és a menü.",

@@ -1,70 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import {
-  antics,
-  easterSunday,
-  EVERYDAY_LINES,
-  nextDelayMs,
-  parseOverrides,
-  pickAntic,
-  pickLine,
-  SEASON_LINES,
-  seasonFor,
-  seasons,
-} from './antics'
+import { antics, EVERYDAY_LINES, nextDelayMs, parseFastAntics, pickAntic, pickLine, SEASON_LINES } from './antics'
+import { seasons } from '@/features/season/calendar'
 import en from '../../i18n/en.json'
 import hu from '../../i18n/hu.json'
 
-const day = (year: number, month: number, date: number) => new Date(year, month - 1, date, 12)
 const fixed = (value: number) => () => value
-
-describe('seasonFor', () => {
-  // Each season's first and last day (2027: Easter on 28 March, clear of the April Fools week).
-  it.each([
-    [day(2026, 12, 28), 'newYear'],
-    [day(2027, 1, 3), 'newYear'],
-    [day(2027, 2, 11), 'valentine'],
-    [day(2027, 2, 17), 'valentine'],
-    [day(2027, 3, 25), 'easter'],
-    [day(2027, 3, 31), 'easter'],
-    [day(2027, 4, 1), 'aprilFools'],
-    [day(2027, 4, 4), 'aprilFools'],
-    [day(2026, 10, 28), 'halloween'],
-    [day(2026, 11, 3), 'halloween'],
-    [day(2026, 12, 3), 'christmas'],
-    [day(2026, 12, 9), 'christmas'],
-    [day(2026, 12, 20), 'christmas'],
-    [day(2026, 12, 27), 'christmas'],
-  ])('%s is %s', (date, season) => {
-    expect(seasonFor(date)).toBe(season)
-  })
-
-  // The day before and after each season.
-  it.each([day(2026, 12, 19), day(2027, 1, 4), day(2027, 2, 10), day(2027, 2, 18), day(2027, 3, 24), day(2027, 4, 5),
-    day(2026, 10, 27), day(2026, 11, 4), day(2026, 12, 2), day(2026, 12, 10)])('%s is an ordinary day', (date) => {
-    expect(seasonFor(date)).toBeNull()
-  })
-
-  it('keeps 1 April for April Fools, and gives Easter the rest of an overlapping week', () => {
-    // 2026: Easter on 5 April, its week 2 to 8 April.
-    expect(seasonFor(day(2026, 3, 29))).toBe('aprilFools')
-    expect(seasonFor(day(2026, 4, 1))).toBe('aprilFools')
-    expect(seasonFor(day(2026, 4, 2))).toBe('easter')
-    expect(seasonFor(day(2026, 4, 8))).toBe('easter')
-    expect(seasonFor(day(2026, 4, 9))).toBeNull()
-  })
-})
-
-describe('easterSunday', () => {
-  it.each([
-    [2024, 3, 31],
-    [2026, 4, 5],
-    [2027, 3, 28],
-    [2030, 4, 21],
-  ])('%i: %i/%i', (year, month, date) => {
-    const easter = easterSunday(year)
-    expect([easter.getMonth() + 1, easter.getDate()]).toEqual([month, date])
-  })
-})
 
 describe('pickAntic', () => {
   it('never repeats the previous antic', () => {
@@ -123,12 +63,9 @@ describe('pickLine', () => {
   })
 })
 
-describe('parseOverrides', () => {
-  it('reads a known season and the fast mode', () => {
-    expect(parseOverrides('?cow=easter&cowAntics=fast')).toEqual({ season: 'easter', fast: true })
-  })
-
-  it('ignores anything else', () => {
-    expect(parseOverrides('?cow=birthday&cowAntics=slow')).toEqual({ season: null, fast: false })
+describe('parseFastAntics', () => {
+  it('reads the fast mode and ignores anything else', () => {
+    expect(parseFastAntics('?cowAntics=fast')).toBe(true)
+    expect(parseFastAntics('?cowAntics=slow')).toBe(false)
   })
 })

@@ -8,14 +8,19 @@ import {
   type GameSettings,
   type GameTheme,
 } from '@quizmoo/shared'
-import { useEffect, type CSSProperties } from 'react'
+import type { CSSProperties } from 'react'
+import type { Season } from '@/features/season/calendar'
 
 export { answerPalettes, answerSymbols, gameThemes }
 
 type ThemeColours = { hue: number; accent: number; chroma: number }
 
-/** Theme hues and chroma, mirroring the [data-theme] blocks in styles.css. Used for the picker's swatches. */
-const hues: Record<Exclude<GameTheme, 'custom'>, ThemeColours> = {
+/**
+ * Theme and season hues and chroma, mirroring the [data-theme] blocks in styles.css. Used for the
+ * picker's swatches. Seasonal is Classic until a season is known (`useScreenLook`).
+ */
+const hues: Record<Exclude<GameTheme, 'custom'> | Season, ThemeColours> = {
+  seasonal: { hue: 277, accent: 330, chroma: 1 },
   classic: { hue: 277, accent: 330, chroma: 1 },
   arcade: { hue: 305, accent: 195, chroma: 1 },
   sunset: { hue: 35, accent: 350, chroma: 1 },
@@ -28,16 +33,25 @@ const hues: Record<Exclude<GameTheme, 'custom'>, ThemeColours> = {
   petrol: { hue: 215, accent: 185, chroma: 0.5 },
   stone: { hue: 65, accent: 40, chroma: 0.28 },
   bordeaux: { hue: 12, accent: 350, chroma: 0.5 },
+  newYear: { hue: 268, accent: 85, chroma: 1 },
+  carnival: { hue: 325, accent: 95, chroma: 1 },
+  valentine: { hue: 5, accent: 335, chroma: 1 },
+  womensDay: { hue: 300, accent: 145, chroma: 1 },
+  aprilFools: { hue: 195, accent: 55, chroma: 1 },
+  easter: { hue: 235, accent: 95, chroma: 0.9 },
+  halloween: { hue: 295, accent: 55, chroma: 1 },
+  stNicholas: { hue: 22, accent: 85, chroma: 1 },
+  christmas: { hue: 150, accent: 25, chroma: 1 },
 }
 
 const defaultCustom: CustomTheme = { hue: 277, accent: 330, chroma: 1 }
 
-function coloursOf(theme: GameTheme, custom: CustomTheme | undefined): ThemeColours {
+function coloursOf(theme: GameTheme | Season, custom: CustomTheme | undefined): ThemeColours {
   return theme === 'custom' ? (custom ?? defaultCustom) : hues[theme]
 }
 
 /** Primary, accent and surface colours of a theme, for a small preview. */
-export function themeSwatches(theme: GameTheme, custom?: CustomTheme): [string, string, string] {
+export function themeSwatches(theme: GameTheme | Season, custom?: CustomTheme): [string, string, string] {
   const { hue, accent, chroma } = coloursOf(theme, custom)
   return [`oklch(0.55 ${0.22 * chroma} ${hue})`, `oklch(0.7 ${0.16 * chroma} ${accent})`, `oklch(0.27 ${0.08 * chroma} ${hue})`]
 }
@@ -46,7 +60,7 @@ export function themeSwatches(theme: GameTheme, custom?: CustomTheme): [string, 
  * The custom theme's variables for an element that carries `data-theme="custom"` (the same ones the
  * [data-theme] blocks in styles.css set for the built-in themes). Undefined for every other theme.
  */
-export function themeVars(settings: Pick<GameSettings, 'theme'> & { customTheme?: CustomTheme | undefined }): CSSProperties | undefined {
+export function themeVars(settings: { theme: GameTheme | Season; customTheme?: CustomTheme | undefined }): CSSProperties | undefined {
   if (settings.theme !== 'custom') return undefined
   const { hue, accent, chroma } = settings.customTheme ?? defaultCustom
   return {
@@ -94,7 +108,9 @@ export function paletteVars(
   ) as CSSProperties
 }
 
-type ThemeSettings = Pick<GameSettings, 'theme' | 'answerPalette'> & {
+/** `theme` may be a season: what a screen shows (`useScreenLook`), not what the quiz says. */
+type ThemeSettings = Pick<GameSettings, 'answerPalette'> & {
+  theme: GameTheme | Season
   customTheme?: CustomTheme | undefined
   customPalette?: CustomPalette | undefined
 }
@@ -103,34 +119,4 @@ type ThemeSettings = Pick<GameSettings, 'theme' | 'answerPalette'> & {
 export function gameVars(settings: ThemeSettings): CSSProperties | undefined {
   const vars = { ...themeVars(settings), ...paletteVars(settings) }
   return Object.keys(vars).length > 0 ? vars : undefined
-}
-
-/**
- * Applies a game's theme and answer palette to the whole document while a game view is open. On
- * <html> rather than a wrapper so dialogs and toasts (rendered in portals under <body>) follow it too.
- */
-export function useGameTheme(settings: ThemeSettings | undefined) {
-  const theme = settings?.theme
-  const palette = settings?.answerPalette
-  // Serialised, so a new snapshot with the same colours does not rerun the effect.
-  const custom = JSON.stringify([
-    theme === 'custom' ? (settings?.customTheme ?? defaultCustom) : null,
-    palette === 'custom' ? (settings?.customPalette ?? defaultCustomPalette) : null,
-  ])
-  useEffect(() => {
-    const root = document.documentElement
-    root.dataset.theme = theme ?? 'classic'
-    root.dataset.palette = palette ?? 'vivid'
-    const [customTheme, customPalette] = JSON.parse(custom) as [CustomTheme | null, CustomPalette | null]
-    const vars = Object.entries({
-      ...(customTheme && themeVars({ theme: 'custom', customTheme })),
-      ...(customPalette && paletteVars({ answerPalette: 'custom', customPalette })),
-    })
-    for (const [name, value] of vars) root.style.setProperty(name, String(value))
-    return () => {
-      delete root.dataset.theme
-      delete root.dataset.palette
-      for (const [name] of vars) root.style.removeProperty(name)
-    }
-  }, [theme, palette, custom])
 }

@@ -1,4 +1,7 @@
 import { describe, expect, it } from 'vitest'
+import { gameThemes } from '@quizmoo/shared'
+import { seasons } from '@/features/season/calendar'
+import { readFileSync } from 'node:fs'
 import { gameVars, paletteVars, textOn, themeSwatches, themeVars } from './themes'
 
 describe('custom theme', () => {
@@ -41,6 +44,18 @@ describe('custom answer palette', () => {
   it('leaves the built-in palettes to the stylesheet', () => {
     expect(paletteVars({ answerPalette: 'vivid', customPalette: colours })).toBeUndefined()
     expect(gameVars({ theme: 'mint', answerPalette: 'neon' })).toBeUndefined()
+  })
+
+  it('mirrors the hues and chroma of every theme and season in the stylesheet', () => {
+    const css = readFileSync(new URL('../styles.css', import.meta.url), 'utf8')
+    const themes = [...gameThemes.filter((theme) => theme !== 'custom' && theme !== 'seasonal'), ...seasons]
+    for (const theme of themes) {
+      const block = new RegExp(`\\[data-theme='${theme}'\\][^{]*\\{([^}]*)\\}`).exec(css)?.[1] ?? ''
+      const value = (name: string) => Number(new RegExp(`--${name}: ([\\d.]+);`).exec(block)?.[1])
+      const [primary, accent] = themeSwatches(theme)
+      expect(primary, theme).toBe(`oklch(0.55 ${0.22 * value('chroma')} ${value('hue')})`)
+      expect(accent, theme).toBe(`oklch(0.7 ${0.16 * value('chroma')} ${value('hue-accent')})`)
+    }
   })
 
   it('combines a custom theme and a custom palette', () => {

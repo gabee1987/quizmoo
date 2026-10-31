@@ -9,7 +9,7 @@ import { AppMenu } from '@/components/app-menu'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/cn'
 import { lengthMinutes } from '@/lib/game-length'
-import { useGameTheme } from '@/lib/themes'
+import { useGameTheme } from '@/lib/season'
 import { useMediaQuery } from '@/lib/use-media-query'
 import { ConnectionBar } from '../../components/connection-bar'
 import { PlayerAvatar } from '../../components/player-avatar'
@@ -53,7 +53,7 @@ function HostGamePage() {
   const { panels } = useBoardOptions()
   const queryClient = useQueryClient()
   const [locking, setLocking] = useState(false)
-  useGameTheme(host?.settings)
+  useGameTheme(host?.settings, 'host')
   useHostToasts(host)
   const info = useQuery({
     queryKey: ['game', pin],

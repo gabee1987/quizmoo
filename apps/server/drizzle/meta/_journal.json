@@ -120,6 +120,20 @@
       "when": 1792855611913,
       "tag": "0016_mighty_butterfly",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1793365464522,
+      "tag": "0017_seasonal_theme",
+      "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1793434208743,
+      "tag": "0018_season_windows",
+      "breakpoints": true
     }
   ]
 }

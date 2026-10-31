@@ -26,6 +26,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
 import { PlayerAvatar } from '@/components/player-avatar'
+import { useSeasonalLook } from '@/lib/season'
 import { paletteVars, textOn, themeSwatches, themeVars } from '@/lib/themes'
 
 /**
@@ -67,7 +68,7 @@ export const settingsSections = {
     'groupStandings',
     'finalResults',
   ],
-  look: ['theme', 'customTheme', 'answerPalette', 'customPalette', 'answerSymbols', 'answerStyle', 'betweenQuestions'],
+  look: ['theme', 'customTheme', 'seasonalLook', 'answerPalette', 'customPalette', 'answerSymbols', 'answerStyle', 'betweenQuestions'],
   scoring: ['speedBonus', 'streakBonus', 'typoTolerance', 'answerChanges', 'answerLockSec', 'shuffleOptions'],
 } as const satisfies Record<string, readonly (keyof GameSettings)[]>
 export type SettingsSection = keyof typeof settingsSections
@@ -81,6 +82,8 @@ export const sectionIcons: Record<SettingsSection, ComponentType<{ className?: s
 
 /** The parts of the projector's screen between questions, each switchable. */
 const betweenParts = ['progress', 'next', 'leaders'] as const
+/** The game screens that can still take the season's look when the quiz has another theme. */
+const seasonalScreens = ['host', 'screen', 'phones'] as const
 
 /** Short descriptions of one group's settings, e.g. ["Classic", "Answers: after each question", ...]. */
 export function sectionSummary(settings: GameSettings, section: SettingsSection, t: TFunction): string[] {
@@ -100,6 +103,16 @@ export function sectionSummary(settings: GameSettings, section: SettingsSection,
     ],
     look: [
       `${t('host.create.theme')}: ${t(`host.create.themeOptions.${settings.theme}`)}`,
+      // Seasonal shows the season everywhere; another theme names the screens that still do.
+      settings.theme === 'seasonal'
+        ? null
+        : t('host.create.seasonalChip', {
+            screens:
+              seasonalScreens
+                .filter((screen) => settings.seasonalLook[screen])
+                .map((screen) => t(`host.create.seasonalScreens.${screen}`))
+                .join(', ') || t('host.create.seasonalNowhere'),
+          }),
       t(`host.create.answerStyleOptions.${settings.answerStyle}`),
       settings.answerPalette !== 'vivid'
         ? `${t('host.create.answerPalette')}: ${t(`host.create.answerPaletteOptions.${settings.answerPalette}`)}`
@@ -180,6 +193,7 @@ export function GameSettingsForm({
   const { t } = useTranslation()
   const set = (patch: Partial<GameSettings>) => onChange({ ...value, ...patch })
   const show = (section: SettingsSection) => sections.includes(section)
+  const { season } = useSeasonalLook()
 
   function setTeamSetup(teamSetup: GameSettings['teamSetup']) {
     // The host's list starts with two teams to rename; players' teams need none.
@@ -263,7 +277,9 @@ export function GameSettingsForm({
           choices={gameThemes.map((theme) => ({
             value: theme,
             label: t(`host.create.themeOptions.${theme}`),
-            adornment: <ThemeSwatch colours={themeSwatches(theme, value.customTheme)} />,
+            // Seasonal shows today's season, if there is one.
+            ...(theme === 'seasonal' && season && { description: t('host.create.seasonalNow', { season: t(`season.names.${season}`) }) }),
+            adornment: <ThemeSwatch colours={themeSwatches(theme === 'seasonal' ? (season ?? theme) : theme, value.customTheme)} />,
           }))}
           onChange={(theme) => set({ theme })}
           help={t('host.create.themeHelp')}
@@ -272,6 +288,22 @@ export function GameSettingsForm({
       {show('look') && (
         <Collapse open={value.theme === 'custom'} className="-mt-6" innerClassName="pt-6">
           <CustomThemePicker value={value.customTheme} onChange={(customTheme) => set({ customTheme })} />
+        </Collapse>
+      )}
+      {show('look') && (
+        <Collapse open={value.theme !== 'seasonal'} className="-mt-6" innerClassName="pt-6">
+          <fieldset className="flex flex-col">
+            <legend className="font-bold">{t('host.create.seasonalLook')}</legend>
+            <p className="text-sm text-muted-foreground">{t('host.create.seasonalLookHelp')}</p>
+            {seasonalScreens.map((screen) => (
+              <SwitchRow
+                key={screen}
+                label={t(`host.create.seasonalScreens.${screen}`)}
+                checked={value.seasonalLook[screen]}
+                onChange={(on) => set({ seasonalLook: { ...value.seasonalLook, [screen]: on } })}
+              />
+            ))}
+          </fieldset>
         </Collapse>
       )}
       {show('flow') && (

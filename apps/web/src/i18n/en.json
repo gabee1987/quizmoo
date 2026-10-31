@@ -13,6 +13,31 @@
     "languages": {
       "hu": "Magyar",
       "en": "English"
+    },
+    "seasonalLook": "Seasonal look ({{season}})"
+  },
+  "season": {
+    "names": {
+      "newYear": "New Year",
+      "carnival": "Carnival",
+      "valentine": "Valentine’s Day",
+      "womensDay": "Women’s Day",
+      "aprilFools": "April Fools’ Day",
+      "easter": "Easter",
+      "halloween": "Halloween",
+      "stNicholas": "St Nicholas’ Day",
+      "christmas": "Christmas"
+    },
+    "greeting": {
+      "newYear": "Happy New Year!",
+      "carnival": "Happy carnival!",
+      "valentine": "Happy Valentine’s Day!",
+      "womensDay": "Happy Women’s Day!",
+      "aprilFools": "Happy April Fools’ Day!",
+      "easter": "Happy Easter!",
+      "halloween": "Happy Halloween!",
+      "stNicholas": "Happy St Nicholas’ Day!",
+      "christmas": "Happy holidays!"
     }
   },
   "join": {
@@ -99,6 +124,16 @@
         "line2": "Be my valen-cow?",
         "line3": "I love you a cow-tillion."
       },
+      "carnival": {
+        "line1": "Guess who’s under the mask. Yes, the cow.",
+        "line2": "Saving room for doughnuts.",
+        "line3": "Shoo, winter! Moo!"
+      },
+      "womensDay": {
+        "line1": "Happy Women’s Day!",
+        "line2": "I brought tulips. Only nibbled one.",
+        "line3": "Flowers for everyone who keeps this place running!"
+      },
       "aprilFools": {
         "line1": "Fun fact: cows can fly. On Tuesdays.",
         "line2": "Fun fact: milk comes from the moon.",
@@ -113,6 +148,11 @@
         "line1": "Boo! I mean… moo!",
         "line2": "Trick or treat?",
         "line3": "I’m a witch. A cow witch."
+      },
+      "stNicholas": {
+        "line1": "Boots polished? I did all four.",
+        "line2": "I’ve been good. Mostly.",
+        "line3": "Hoping for hay in my boots."
       },
       "christmas": {
         "line1": "Merry Christmas!",
@@ -613,8 +653,9 @@
       },
       "finalResultsHelp": "After the game, the projector and the phones wait. You show the podium on the projector and the results on the phones separately.",
       "theme": "Theme",
-      "themeHelp": "Colours on the phones, the projector and the host control. Light or dark mode is each device's own choice. Graphite, Navy, Petrol, Stone and Bordeaux are subdued, for formal events.",
+      "themeHelp": "Colours on the phones, the projector and the host control. Seasonal follows the calendar: Halloween, Christmas and other special days get their own colours and decorations, other days look like Classic. Light or dark mode is each device's own choice. Graphite, Navy, Petrol, Stone and Bordeaux are subdued, for formal events.",
       "themeOptions": {
+        "seasonal": "Seasonal",
         "classic": "Classic",
         "arcade": "Arcade",
         "sunset": "Sunset",
@@ -629,6 +670,16 @@
         "bordeaux": "Bordeaux",
         "custom": "Custom"
       },
+      "seasonalNow": "Now: {{season}}",
+      "seasonalLook": "Seasonal look on",
+      "seasonalLookHelp": "During a season (Halloween, Christmas and other special days), the ticked screens show its colours and decorations instead of this theme.",
+      "seasonalScreens": {
+        "host": "Host control",
+        "screen": "Projector",
+        "phones": "Phones"
+      },
+      "seasonalChip": "Seasonal look: {{screens}}",
+      "seasonalNowhere": "nowhere",
       "answerPalette": "Answer colours",
       "answerPaletteHelp": "The answer buttons and the result bars on the phones and the projector, independent of the theme. Muted and Corporate are the calmer sets.",
       "answerPaletteOptions": {
@@ -1689,6 +1740,25 @@
       "saved": "Lock code saved",
       "removed": "Lock code removed"
     },
+    "seasonPreview": {
+      "title": "Seasons",
+      "help": "Each season with its dates. Pick one to see its colours, decorations and cow on this device, whatever the date (only on this device; By date goes back). The pencil changes a season's dates for everyone.",
+      "byDate": "By date",
+      "none": "No season today",
+      "changed": "Changed dates",
+      "off": "Switched off",
+      "edit": "Change the dates of {{season}}",
+      "dialogTitle": "{{season}}: dates",
+      "dialogHelp": "Applies on every device, from its next page load. Where two seasons overlap, the one whose main day is closer wins.",
+      "mainDay": "Main day: {{day}}",
+      "before": "Starts days before",
+      "after": "Ends days after",
+      "daysRange": "0 to {{max}} days",
+      "runs": "Runs {{range}}",
+      "show": "Show this season",
+      "showHelp": "Off: no device shows its look until you switch it back on.",
+      "reset": "Back to the built-in dates"
+    },
     "signupEmail": {
       "title": "Sign-up e-mails",
       "help": "When someone signs up as a host, we e-mail this address with a link to the Users page, where you approve or reject them. The e-mail says only how many are waiting, never who. At most one e-mail every 15 minutes.",
@@ -2155,6 +2225,8 @@
         "picksOpen": "Whether your team's picks are open. Until you close the tab.",
         "lang": "Your language. Until you change it or clear your browser data.",
         "mode": "Light, dark or system look. Until you change it or clear your browser data.",
+        "seasonal": "That you switched the seasonal look off on this device. Until you switch it back on or clear your browser data.",
+        "seasonPreview": "Admins only: the season you preview on this device. Until you pick By date or clear your browser data.",
         "notice": "That you have seen the storage notice, so it does not come back.",
         "hostToasts": "Whether the host page shows short notes about players joining and leaving.",
         "hostBoard": "How the host's game page shows the players: tiles or list, the order, hidden answers, the side panels and the menu.",

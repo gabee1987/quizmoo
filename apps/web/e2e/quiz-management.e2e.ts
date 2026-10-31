@@ -76,7 +76,7 @@ test('host batch edits and batch deletes quizzes, and deletes one from the edito
         expect(quiz.questions.map((q) => [q.timeLimitSec, q.points])).toEqual([[45, 1000]])
       }
       const untouched = await stored(ids[2]!)
-      expect(untouched.settings.theme).toBe('classic')
+      expect(untouched.settings.theme).toBe('seasonal')
       expect(untouched.questions[0]!.timeLimitSec).toBe(20)
       await expect(card(1).getByText('Navy')).toBeVisible()
     })

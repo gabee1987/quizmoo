@@ -5,6 +5,7 @@ import { languages, setLanguage } from '@/i18n'
 import { cn } from '@/lib/cn'
 import { CowLogo } from './cow-logo'
 import { ModeToggle } from './mode-toggle'
+import { SeasonToggle } from './season-greeting'
 
 /** Compact header: logo mark (a link home), language and colour mode. Without `brand` (the home pages show a big one) only the settings. */
 export function AppHeader({ brand = true }: { brand?: boolean }) {
@@ -22,6 +23,7 @@ export function AppHeader({ brand = true }: { brand?: boolean }) {
       )}
       <span className="flex items-center gap-1">
         <LanguageSwitch />
+        <SeasonToggle />
         <ModeToggle />
       </span>
     </header>

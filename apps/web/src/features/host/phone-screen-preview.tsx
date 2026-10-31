@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { AnnouncementBanner } from '@/components/announcement-banner'
 import { Timer } from '@/components/timer'
 import { resultsWhen } from '@/lib/results-when'
+import { useScreenLook } from '@/lib/season'
 import { gameVars } from '@/lib/themes'
 import { reviewPosition } from '../play/review-position'
 import { PhoneRoundIntro } from '../play/round-intro'
@@ -17,10 +18,12 @@ import { QuestionInput } from '../questions/question-input'
  */
 export function PhoneScreenPreview({ host, clockOffset }: { host: HostSnapshot; clockOffset: number }) {
   const { settings } = host
+  // The phones' own look, which can differ from the host's (`seasonalLook`).
+  const { theme } = useScreenLook(settings, 'phones')
   return (
     <div
-      data-theme={settings.theme}
-      style={gameVars(settings)}
+      data-theme={theme}
+      style={gameVars({ ...settings, theme })}
       data-palette={settings.answerPalette}
       className="mx-auto w-[375px] max-w-full rounded-[2.5rem] border-8 border-foreground/85 bg-background p-4 text-foreground shadow-soft"
     >

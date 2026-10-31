@@ -24,6 +24,7 @@ import { imageRoutes } from './routes/images.js'
 import { meRoutes } from './routes/me.js'
 import { quizRoutes } from './routes/quizzes.js'
 import { nicknameRoutes } from './routes/nicknames.js'
+import { seasonRoutes } from './routes/seasons.js'
 import { resultRoutes } from './routes/results.js'
 import { userRoutes } from './routes/users.js'
 import { createSignupNotifier } from './signup-notify.js'
@@ -163,6 +164,7 @@ export async function buildApp(config: Config, { db, manager, webDist: webDistOv
     keep: { max: config.MAX_GAMES_PER_HOST, days: config.RESULTS_RETENTION_DAYS },
   })
   await app.register(nicknameRoutes, { db, manager, pinGuard })
+  await app.register(seasonRoutes, { db })
 
   const webDist =
     webDistOverride ??

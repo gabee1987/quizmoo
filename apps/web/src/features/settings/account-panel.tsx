@@ -8,6 +8,7 @@ import {
   MailIcon,
   MonitorIcon,
   MoonIcon,
+  PartyPopperIcon,
   SmartphoneIcon,
   SunIcon,
   Trash2Icon,
@@ -30,6 +31,7 @@ import { timeAgo } from '../users/format'
 import { LockCodeForm } from './lock-code-form'
 import { PasswordForm } from './password-form'
 import { SettingsSection } from './settings-section'
+import { SeasonPreview } from './season-preview'
 import { SignupEmailForm } from './signup-email-form'
 
 export interface Account {
@@ -141,6 +143,12 @@ export function AccountPanel() {
       {account.data?.role === 'admin' && (
         <SettingsSection icon={MailIcon} title={t('settings.signupEmail.title')} help={t('settings.signupEmail.help')}>
           <SignupEmailForm />
+        </SettingsSection>
+      )}
+
+      {account.data?.role === 'admin' && (
+        <SettingsSection icon={PartyPopperIcon} title={t('settings.seasonPreview.title')} help={t('settings.seasonPreview.help')}>
+          <SeasonPreview />
         </SettingsSection>
       )}
 
