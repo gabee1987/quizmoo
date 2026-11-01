@@ -1484,6 +1484,34 @@
     "current": "Mostani verzió",
     "releasedOn": "Megjelent: {{date}}",
     "releases": {
+      "1_8_0": {
+        "title": "Ünnepi megjelenés",
+        "intro": "Az év különleges napjain a Quizmoo felveszi az ünnep hangulatát: saját színek, díszek és beöltözött tehén minden oldalon és a játékaidban is.",
+        "sections": [
+          {
+            "title": "Kilenc ünnep",
+            "items": [
+              "Újév, farsang, Valentin-nap, nőnap, bolondok napja, húsvét, halloween, Mikulás és karácsony, mindegyik nagyjából egy hétig a napja körül.",
+              "Minden ünnepnek saját színei vannak világos és sötét módban, díszek a képernyő szélén (pókháló, égősor és hó, zászlófüzér, virágok és még sok más), hulló levelek, hópelyhek, szívek vagy konfetti, a csatlakozó- és a belépőoldalon pedig egy rövid jókívánság.",
+              "A tehén minden ünnepre beöltözik: halloweenkor Drakula, karácsonykor rénszarvas, Mikuláskor Mikulás, bolondok napján udvari bolond, és így tovább."
+            ]
+          },
+          {
+            "title": "A játékaidban",
+            "items": [
+              "Az új „Ünnepi” téma az alapértelmezett: ünnepek idején a vezérlő, a kivetítő és a telefonok az ünnep megjelenését mutatják, máskor a Klasszikust. A Klasszikus témájú kvízek mostantól Ünnepiek; a más témájú kvízek megtartják a témájukat.",
+              "Ha más témát választasz, a Megjelenés csoportban beállíthatod, melyik képernyőn legyen mégis ünnepi: a vezérlőn, a kivetítőn vagy a telefonokon."
+            ]
+          },
+          {
+            "title": "Te döntesz",
+            "items": [
+              "Nem kéred? A színmód melletti ünnepi gombbal kikapcsolhatod az ünnepi megjelenést az eszközödön, telefonon pedig a játék menüjében.",
+              "Az adminok a Beállításaim, Fiók alatt minden ünnepet a dátumaival együtt látnak: bármelyiket kipróbálhatják a saját eszközükön, módosíthatják a dátumait, vagy mindenkinél kikapcsolhatják."
+            ]
+          }
+        ]
+      },
       "1_7_1": {
         "title": "Érthetőbb újdonságok",
         "intro": "Kisebb frissítés ezen az oldalon.",

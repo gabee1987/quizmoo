@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## 1.8.0 – 2026-10-31
+
+### Seasonal themes (phase 50)
+- Nine seasons by the device's local date (`features/season/calendar.ts`): New Year, Carnival, Valentine's Day, Women's Day, April Fools' Day, Easter, Halloween, St Nicholas' Day and Christmas. Where two windows overlap, the season whose main day is closer wins. Halloween now ends on 31 October, for the cow too.
+- Each season has its own theme (hue, accent, tint and chroma only, so both colour modes keep their contrast; Halloween's surfaces also lean towards black), decorations along the edges (`season-decor.tsx`, `scenes.tsx`, `particles.tsx`: hanging pieces, repeating SVG strips, corner pieces and falling particles drawn per season, transform-only animations, a separate chunk loaded only during a season), a greeting pill on the join and login pages, and a costume for the cow in the logo.
+- New theme `seasonal`, the default: the season's look on every game screen, Classic outside the seasons. With another theme, `seasonalLook: { host, screen, phones }` in the Look group decides which game screens still take the season (host control by default). Migration 0017 moves quizzes and host game defaults from `classic` to `seasonal`; other themes and stored games are unchanged.
+- A per-device switch (`quizmoo.seasonal`): a button next to the colour mode, and switches in the game menu and the app menu, shown only during a season. The new look spreads out in a circle from the button (View Transitions, skipped under reduced motion).
+- Admins see every season with its running or next dates under My settings, Account; picking one previews it on that device (`quizmoo.seasonPreview`). The pencil changes the days before and after a season's main day (0 to 31) or switches the season off for every device: table `season_windows` (migration 0018), public `GET /api/seasons`, admin-only `PUT` and `DELETE /api/seasons/:season`. Devices load the changes at start and keep the built-in dates when the server cannot be reached.
+
 ## 1.7.1 – 2026-10-30
 
 ### Fixed

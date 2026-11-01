@@ -1,6 +1,6 @@
 # Phase 51: The cow for every season
 
-**Branch:** `feature/seasonal-themes`
+**Branch:** `feature/seasonal-cow`
 
 ## Goal
 

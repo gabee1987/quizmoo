@@ -225,6 +225,35 @@
   --hue-accent: 55;
   --tint: 0.02;
   --chroma: 1;
+  /*
+   * The one theme that sets lightness: Halloween's surfaces lean towards black (a smoky grey in
+   * light mode, near black in dark mode). Text and button tokens are untouched, so contrast only
+   * rises in dark mode and stays above 4.5:1 in light mode (axe in e2e/a11y.e2e.ts).
+   */
+  --background: oklch(0.915 0.012 295);
+  --surface-wash: linear-gradient(180deg, oklch(0.87 0.025 295) 0%, var(--background) 22rem);
+  --muted: oklch(0.9 0.016 295);
+  --secondary: oklch(0.89 0.03 295);
+  --border: oklch(0.83 0.02 295);
+  --input: oklch(0.8 0.025 295);
+  --blob-1: oklch(0.62 0.13 295 / 0.35);
+  --blob-2: oklch(0.75 0.15 55 / 0.4);
+  --blob-3: oklch(0.3 0.03 295 / 0.12);
+}
+:root[data-mode='dark'][data-theme='halloween'],
+:root[data-mode='dark'] [data-theme='halloween'] {
+  --background: oklch(0.14 0.025 295);
+  --surface-wash: linear-gradient(180deg, oklch(0.19 0.05 295) 0%, var(--background) 22rem);
+  --card: oklch(0.2 0.04 295);
+  --popover: oklch(0.22 0.045 295);
+  --secondary: oklch(0.28 0.05 295);
+  --secondary-edge: oklch(0.18 0.04 295);
+  --muted: oklch(0.23 0.035 295);
+  --border: oklch(0.3 0.045 295);
+  --input: oklch(0.36 0.05 295);
+  --blob-1: oklch(0.4 0.14 295 / 0.3);
+  --blob-2: oklch(0.5 0.14 55 / 0.25);
+  --blob-3: oklch(0.05 0 0 / 0.5);
 }
 [data-theme='stNicholas'] {
   --hue: 22;

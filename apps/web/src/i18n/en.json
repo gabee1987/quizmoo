@@ -1484,6 +1484,34 @@
     "current": "Current version",
     "releasedOn": "Released {{date}}",
     "releases": {
+      "1_8_0": {
+        "title": "Seasonal themes",
+        "intro": "On special days of the year Quizmoo takes on the season's look: its own colours, decorations and a dressed-up cow, on every page and in your games.",
+        "sections": [
+          {
+            "title": "Nine seasons",
+            "items": [
+              "New Year, Carnival, Valentine's Day, Women's Day, April Fools' Day, Easter, Halloween, St Nicholas' Day and Christmas, each for about a week around its day.",
+              "Each season has its own colours in light and dark mode, decorations along the edges of the screen (cobwebs, lights and snow, bunting, flowers and more), falling leaves, snowflakes, hearts or confetti, and a short greeting on the join and login pages.",
+              "The cow dresses up for every season: Dracula at Halloween, a reindeer at Christmas, Mikulás on St Nicholas' Day, a jester on April Fools' Day, and more."
+            ]
+          },
+          {
+            "title": "In your games",
+            "items": [
+              "The new \"Seasonal\" theme is the default: during a season the host control, the projector and the phones show the season's look, and Classic at other times. Quizzes that used Classic now use Seasonal; quizzes on any other theme keep their theme.",
+              "With another theme you choose under Look which screens still show the season: the host control, the projector or the phones."
+            ]
+          },
+          {
+            "title": "Your choice",
+            "items": [
+              "Don't want it? The season button next to the colour mode switches the seasonal look off on your device, and in the game menu on phones.",
+              "Admins find every season with its dates under My settings, Account: preview any season on their own device, change its dates, or switch it off for everyone."
+            ]
+          }
+        ]
+      },
       "1_7_1": {
         "title": "Clearer release notes",
         "intro": "A small update to this page.",

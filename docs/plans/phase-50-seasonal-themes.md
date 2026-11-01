@@ -88,11 +88,20 @@ Out of scope (phase 51): new cow costumes, more cow lines, seasonal confetti.
 
 - **Season dates for admins** (asked 31 October 2026): every card under My settings, Account shows the season's running or next window ("Oct 24 – 31", with the year when not this year's; Easter and carnival computed). The pencil opens a dialog: days before and after the main day (0 to 31), a live range, "Show this season" (off: no device shows it) and "Back to the built-in dates". Saved on the server (`season_windows`, migration 0018; `GET /api/seasons` public, `PUT` and `DELETE /api/seasons/:season` admin only); every device loads the changes at start (`lib/season.ts`), with the built-in dates until they arrive or when the server cannot be reached. The cards also got a minimum width, so a long name no longer runs into the border.
 
-## Where the work stands (31 October 2026)
+## Results (31 October 2026)
 
-- The user's dev database needs `pnpm --filter @quizmoo/server db:migrate` (migrations 0017 and 0018); until then `/api/seasons` answers 500 there and the built-in dates hold.
-- Still to do before the branch is done: phase 51 (lines, confetti), docs, skills, patch notes, `pnpm verify` with the database tests and the e2e run on the production build.
-- The browser checks and the e2e run use a separate database, `quizmoo_p50` (with the migration and a seeded test admin), so the user's dev data was not migrated. Drop it when the branch is done.
+- `$env:TEST_DATABASE_URL="postgres://quizmoo:quizmoo@localhost:5432/quizmoo"; pnpm verify`: typecheck, tests (shared 51, web 344, server 581) and build pass.
+- The e2e suite (30 tests) passes on the production build on :3999 (on 31 October, so with Halloween active); `a11y.e2e.ts` passes again in both modes after Halloween's darker surfaces.
+- Screenshots of all nine seasons in both modes at 390, 1440 and 1920 (via the admin preview), the game screens, the cow contact sheet and the admin season dates end to end; no console errors.
+- Idle cost on the phone profile: see "Done after the first round".
+- Released as 1.8.0. Migrations 0017 and 0018 run at server start in production.
+
+## Deviations
+
+- The cow's costumes, planned for phase 51, were done here (a whole character per season). Phase 51 keeps the lines and the confetti, on its own branch `feature/seasonal-cow`.
+- Added at the user's request: scene pieces and drawn particles per season, season dates admins can change or switch off (`season_windows`, `/api/seasons`), and the season switch's circle reveal.
+- Halloween's surfaces lean towards black in both modes (asked 31 October 2026): the one theme that sets lightness, for its surface tokens only.
+- Besides the `?season=` development override, admins can preview any season under My settings, Account, which also works in the production build.
 
 ## Manual test list (draft)
 
