@@ -117,47 +117,74 @@
       "newYear": {
         "line1": "Boldog új évet!",
         "line2": "Újévi fogadalmam: több kvíz.",
-        "line3": "Pezsgő helyett tejet kérek!"
+        "line3": "Pezsgő helyett tejet kérek!",
+        "line4": "Új év, új legelő!",
+        "line5": "A tűzijátékot az istállóból nézem.",
+        "line6": "Idén végre megtanulok fütyülni."
       },
       "valentine": {
         "line1": "Te vagy a tehén-kedvencem!",
         "line2": "Leszel a Valentinom?",
-        "line3": "Szeretlek, mint fű a harmatot."
+        "line3": "Szeretlek, mint fű a harmatot.",
+        "line4": "Neked tettem félre a legszebb lóherét.",
+        "line5": "Rajzoltam egy szívet a fűbe.",
+        "line6": "Egy turmix, két szívószál?"
       },
       "carnival": {
         "line1": "Ki lehet a maszk alatt? Igen, a tehén.",
         "line2": "Hagyok helyet a fánknak.",
-        "line3": "Hess, tél! Múú!"
+        "line3": "Hess, tél! Múú!",
+        "line4": "A jelmezem: egy másik tehén.",
+        "line5": "Busómaszk? A szarvam eleve megvan.",
+        "line6": "Három fánkig számoltam. Aztán abbahagytam."
       },
       "womensDay": {
         "line1": "Boldog nőnapot!",
         "line2": "Hoztam tulipánt. Csak egyet rágtam meg.",
-        "line3": "Virágot mindenkinek, aki összetartja a csapatot!"
+        "line3": "Virágot mindenkinek, aki összetartja a csapatot!",
+        "line4": "Köszönjük, hogy vagytok!",
+        "line5": "Egy szál virág, egy nagy múú.",
+        "line6": "Ma én hozom a kávét. Tejjel, persze."
       },
       "aprilFools": {
         "line1": "Tudtad? A tehenek kedden repülnek.",
         "line2": "Tudtad? A tej a Holdról jön.",
-        "line3": "Tudtad? Valójában ló vagyok."
+        "line3": "Tudtad? Valójában ló vagyok.",
+        "line4": "Tudtad? Ebben a kvízben minden válasz a B.",
+        "line5": "Tudtad? A kakaó a barna tehenektől jön.",
+        "line6": "Tudtad? Ezt a játékot egy tehén csinálta. Várj, ez igaz."
       },
       "easter": {
         "line1": "Kellemes húsvétot!",
         "line2": "Ma én vagyok a nyuszi.",
-        "line3": "Találtál már tojást?"
+        "line3": "Találtál már tojást?",
+        "line4": "Elrejtettem a tojásokat. Hogy hova, már nem tudom.",
+        "line5": "Nem nőtt meg a fülem egy kicsit?",
+        "line6": "Locsolni jöttem, de csak tejem van."
       },
       "halloween": {
         "line1": "Bú! Vagyis… múú!",
         "line2": "Csokit vagy csínyt?",
-        "line3": "Boszorkány vagyok. Tehénboszorkány."
+        "line3": "Boszorkány vagyok. Tehénboszorkány.",
+        "line4": "Múúúhahaha!",
+        "line5": "Ne félj, csak egy tehén vagyok. Valószínűleg.",
+        "line6": "A tök a barátom. A tökös pite is."
       },
       "stNicholas": {
         "line1": "Kipucoltad a csizmád? Én mind a négyet.",
         "line2": "Jó voltam. Többnyire.",
-        "line3": "Jön a Múkulás!"
+        "line3": "Jön a Múkulás!",
+        "line4": "Virgács? Nekem? Biztos tévedés.",
+        "line5": "Négy csizma, négyszer annyi csoki. Ugye?",
+        "line6": "Kedves Mikulás! Nagyon jó tehén voltam."
       },
       "christmas": {
         "line1": "Boldog karácsonyt!",
         "line2": "Ho-ho-hóó… múú!",
-        "line3": "Jó voltál idén?"
+        "line3": "Jó voltál idén?",
+        "line4": "Csengőm már van, csak szánkóm nincs.",
+        "line5": "A rénszarvasok nem vettek be a csapatba.",
+        "line6": "Bejglit kérek. Mákosat."
       }
     }
   },
@@ -1493,7 +1520,8 @@
             "items": [
               "Újév, farsang, Valentin-nap, nőnap, bolondok napja, húsvét, halloween, Mikulás és karácsony, mindegyik nagyjából egy hétig a napja körül.",
               "Minden ünnepnek saját színei vannak világos és sötét módban, díszek a képernyő szélén (pókháló, égősor és hó, zászlófüzér, virágok és még sok más), hulló levelek, hópelyhek, szívek vagy konfetti, a csatlakozó- és a belépőoldalon pedig egy rövid jókívánság.",
-              "A tehén minden ünnepre beöltözik: halloweenkor Drakula, karácsonykor rénszarvas, Mikuláskor Mikulás, bolondok napján udvari bolond, és így tovább."
+              "A tehén minden ünnepre beöltözik: halloweenkor Drakula, karácsonykor rénszarvas, Mikuláskor Mikulás, bolondok napján udvari bolond, és így tovább. Minden ünnepre hat új mondata is van.",
+              "A dobogón a konfetti egy része az ünnep formáit veszi fel: tök és denevér, szív, húsvéti tojás, karácsonyfa és csillag."
             ]
           },
           {

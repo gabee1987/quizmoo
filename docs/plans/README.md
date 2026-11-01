@@ -57,7 +57,7 @@ Finished plans are deleted once their branch is merged: `CHANGELOG.md` records w
 | 48 | [Smoother drag with 200 questions](phase-48-smoother-drag.md) | `feature/editor-drag-and-preview` | planned |
 | 49 | [Play-through preview in the editor](phase-49-play-through-preview.md) | `feature/editor-drag-and-preview` | planned |
 | 50 | [Seasonal themes: colours, decorations and switches for nine seasons](phase-50-seasonal-themes.md) | `feature/seasonal-themes` | done |
-| 51 | [The cow for every season: lines and confetti](phase-51-seasonal-cow.md) | `feature/seasonal-cow` | planned |
+| 51 | [The cow for every season: lines and confetti](phase-51-seasonal-cow.md) | `feature/seasonal-themes` | done |
 | later | [Hosting without an account](later-guest-hosting.md) | `feature/guest-hosting` | planned, after the MVP |
 
 ## Conventions every plan follows

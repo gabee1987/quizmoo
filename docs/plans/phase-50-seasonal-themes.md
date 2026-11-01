@@ -98,9 +98,9 @@ Out of scope (phase 51): new cow costumes, more cow lines, seasonal confetti.
 
 ## Deviations
 
-- The cow's costumes, planned for phase 51, were done here (a whole character per season). Phase 51 keeps the lines and the confetti, on its own branch `feature/seasonal-cow`.
+- The cow's costumes, planned for phase 51, were done here (a whole character per season). Phase 51 keeps the lines and the confetti, on the same branch.
 - Added at the user's request: scene pieces and drawn particles per season, season dates admins can change or switch off (`season_windows`, `/api/seasons`), and the season switch's circle reveal.
-- Halloween's surfaces lean towards black in both modes (asked 31 October 2026): the one theme that sets lightness, for its surface tokens only.
+- Halloween's surfaces lean towards black in both modes (asked 31 October 2026), and its buttons and accents are pumpkin orange (asked 1 November 2026): the one theme that sets its own surface and primary tokens.
 - Besides the `?season=` development override, admins can preview any season under My settings, Account, which also works in the production build.
 
 ## Manual test list (draft)

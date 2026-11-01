@@ -74,7 +74,7 @@ Collected while testing phases 9 to 12. Effort as above.
 - Lock joining in the lobby and, with late joining, during the game; the join page and the projector say joining is closed (phase 45).
 - Picture details in the editor: stored pixel size, file size and format under each picture (phase 46).
 - Typo tolerance for typed answers: "Accept small typos", near misses marked for host and player (phase 47).
-- Seasonal themes: nine seasons with their own colours, decorations, cow costumes and greeting; the Seasonal theme as the default, a per-device switch, and season dates admins can change (phase 50).
+- Seasonal themes: nine seasons with their own colours, decorations, cow costumes and greeting; the Seasonal theme as the default, a per-device switch, and season dates admins can change (phase 50); six season lines for the cow and seasonal podium confetti (phase 51).
 
 ### Open
 
@@ -87,7 +87,7 @@ Collected while testing phases 9 to 12. Effort as above.
 | Fixes in the patch notes (phase 37) | Feature | S | Each release on the "What's new" page gets a "Fixed" section next to the news, and every future release keeps its notes there. From the 20 October 2026 notes. |
 | Help page and tutorial (phase 34) | Feature | L | A full help page on how the app works, plus an interactive first-run tutorial with hints on the host pages. To decide in the plan: which flows the tour covers, whether it can be replayed, whether players get hints too. From the 20 October 2026 notes; asked again on 24 October 2026: a full tutorial with interactive hints and help, plus a dedicated help page with everything about how the app works. |
 | Sounds for key moments | Feature | M | Short playful sounds for important events and messages, switched on per quiz. Generated in the browser (Web Audio) to avoid licensed audio files; projector only, phones silent by default. Same as the "Sounds and music" item above. |
-| Seasonal themes | Feature | M | The cow logo already changes on special days (phase 32: Christmas, Halloween and others). Each season gets a full theme as well: its own colours, flourishes and background on the app's pages and game screens, switched on by date. Anyone can switch it off and keep their usual theme (a per-device setting next to the colour mode; to decide in the plan whether hosts can also switch it off for their games). Requested 30 October 2026. Phase 50 done (1.8.0); the cow's season lines and confetti are phase 51. |
+| Seasonal themes | Feature | M | The cow logo already changes on special days (phase 32: Christmas, Halloween and others). Each season gets a full theme as well: its own colours, flourishes and background on the app's pages and game screens, switched on by date. Anyone can switch it off and keep their usual theme (a per-device setting next to the colour mode; to decide in the plan whether hosts can also switch it off for their games). Requested 30 October 2026. Phases 50 and 51 done (1.8.0). |
 
 ### From the first production test (24 October 2026)
 

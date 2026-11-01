@@ -39,7 +39,7 @@ const hues: Record<Exclude<GameTheme, 'custom'> | Season, ThemeColours> = {
   womensDay: { hue: 300, accent: 145, chroma: 1 },
   aprilFools: { hue: 195, accent: 55, chroma: 1 },
   easter: { hue: 235, accent: 95, chroma: 0.9 },
-  halloween: { hue: 295, accent: 55, chroma: 1 },
+  halloween: { hue: 50, accent: 55, chroma: 1 },
   stNicholas: { hue: 22, accent: 85, chroma: 1 },
   christmas: { hue: 150, accent: 25, chroma: 1 },
 }

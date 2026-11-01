@@ -117,47 +117,74 @@
       "newYear": {
         "line1": "Happy New Year!",
         "line2": "My resolution: more quizzes.",
-        "line3": "Moo-ve over, last year!"
+        "line3": "Moo-ve over, last year!",
+        "line4": "New year, new pasture!",
+        "line5": "Watching the fireworks from the barn.",
+        "line6": "This year I’ll finally learn to whistle."
       },
       "valentine": {
         "line1": "You’re udderly lovely!",
         "line2": "Be my valen-cow?",
-        "line3": "I love you a cow-tillion."
+        "line3": "I love you a cow-tillion.",
+        "line4": "I saved you the best clover.",
+        "line5": "I drew a heart in the grass.",
+        "line6": "One milkshake, two straws?"
       },
       "carnival": {
         "line1": "Guess who’s under the mask. Yes, the cow.",
         "line2": "Saving room for doughnuts.",
-        "line3": "Shoo, winter! Moo!"
+        "line3": "Shoo, winter! Moo!",
+        "line4": "My costume: a different cow.",
+        "line5": "Fake horns? Mine are real.",
+        "line6": "I counted three doughnuts. Then I stopped counting."
       },
       "womensDay": {
         "line1": "Happy Women’s Day!",
         "line2": "I brought tulips. Only nibbled one.",
-        "line3": "Flowers for everyone who keeps this place running!"
+        "line3": "Flowers for everyone who keeps this place running!",
+        "line4": "Thank you for everything you do!",
+        "line5": "One flower, one big moo.",
+        "line6": "Today I’m bringing the coffee. With milk, obviously."
       },
       "aprilFools": {
         "line1": "Fun fact: cows can fly. On Tuesdays.",
         "line2": "Fun fact: milk comes from the moon.",
-        "line3": "Fun fact: I’m actually a horse."
+        "line3": "Fun fact: I’m actually a horse.",
+        "line4": "Fun fact: every answer in this quiz is B.",
+        "line5": "Fun fact: chocolate milk comes from brown cows.",
+        "line6": "Fun fact: a cow made this game. Wait, that one’s true."
       },
       "easter": {
         "line1": "Happy Easter!",
         "line2": "I’m the Easter bunny now.",
-        "line3": "Found any eggs yet?"
+        "line3": "Found any eggs yet?",
+        "line4": "I hid the eggs. Where? No idea.",
+        "line5": "Do my ears look longer to you?",
+        "line6": "Chocolate eggs beat grass. Just saying."
       },
       "halloween": {
         "line1": "Boo! I mean… moo!",
         "line2": "Trick or treat?",
-        "line3": "I’m a witch. A cow witch."
+        "line3": "I’m a witch. A cow witch.",
+        "line4": "Moo-ha-ha-ha!",
+        "line5": "Don’t worry, I’m just a cow. Probably.",
+        "line6": "Pumpkins are my friends. So is pumpkin pie."
       },
       "stNicholas": {
         "line1": "Boots polished? I did all four.",
         "line2": "I’ve been good. Mostly.",
-        "line3": "Hoping for hay in my boots."
+        "line3": "Hoping for hay in my boots.",
+        "line4": "A switch? For me? Must be a mistake.",
+        "line5": "Four boots means four times the treats, right?",
+        "line6": "Dear St Nicholas, I’ve been a very good cow."
       },
       "christmas": {
         "line1": "Merry Christmas!",
         "line2": "Ho ho hooo… moo!",
-        "line3": "Have you been good this year?"
+        "line3": "Have you been good this year?",
+        "line4": "I’ve got the bell, just need the sleigh.",
+        "line5": "The reindeer wouldn’t let me on the team.",
+        "line6": "A mince pie for me? Or three?"
       }
     }
   },
@@ -1493,7 +1520,8 @@
             "items": [
               "New Year, Carnival, Valentine's Day, Women's Day, April Fools' Day, Easter, Halloween, St Nicholas' Day and Christmas, each for about a week around its day.",
               "Each season has its own colours in light and dark mode, decorations along the edges of the screen (cobwebs, lights and snow, bunting, flowers and more), falling leaves, snowflakes, hearts or confetti, and a short greeting on the join and login pages.",
-              "The cow dresses up for every season: Dracula at Halloween, a reindeer at Christmas, Mikulás on St Nicholas' Day, a jester on April Fools' Day, and more."
+              "The cow dresses up for every season: Dracula at Halloween, a reindeer at Christmas, Mikulás on St Nicholas' Day, a jester on April Fools' Day, and more. It also has six new things to say in each season.",
+              "On the podium, part of the confetti takes the season's shapes: pumpkins and bats, hearts, Easter eggs, Christmas trees and stars."
             ]
           },
           {

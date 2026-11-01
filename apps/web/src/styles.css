@@ -221,15 +221,21 @@
   --chroma: 0.9;
 }
 [data-theme='halloween'] {
-  --hue: 295;
+  --hue: 50;
   --hue-accent: 55;
   --tint: 0.02;
   --chroma: 1;
   /*
-   * The one theme that sets lightness: Halloween's surfaces lean towards black (a smoky grey in
-   * light mode, near black in dark mode). Text and button tokens are untouched, so contrast only
-   * rises in dark mode and stays above 4.5:1 in light mode (axe in e2e/a11y.e2e.ts).
+   * The one theme that sets lightness: pumpkin orange buttons on purple surfaces that lean towards
+   * black (a smoky grey in light mode, near black in dark mode). Light mode needs a burnt orange to
+   * keep 4.5:1 for white button text and for primary text on the grey; dark mode has room for a
+   * bright pumpkin with dark text (axe in e2e/a11y.e2e.ts).
    */
+  --primary: oklch(0.52 0.15 48);
+  --primary-edge: oklch(0.4 0.12 42);
+  --ring: oklch(0.55 0.16 48);
+  --secondary-foreground: oklch(0.3 0.12 295);
+  --secondary-edge: oklch(0.8 0.05 295);
   --background: oklch(0.915 0.012 295);
   --surface-wash: linear-gradient(180deg, oklch(0.87 0.025 295) 0%, var(--background) 22rem);
   --muted: oklch(0.9 0.016 295);
@@ -242,6 +248,11 @@
 }
 :root[data-mode='dark'][data-theme='halloween'],
 :root[data-mode='dark'] [data-theme='halloween'] {
+  --primary: oklch(0.75 0.17 55);
+  --primary-foreground: oklch(0.17 0.03 295);
+  /* Light enough for the dark text on the projector's key hint, which sits on the edge colour. */
+  --primary-edge: oklch(0.62 0.16 48);
+  --ring: oklch(0.75 0.17 55);
   --background: oklch(0.14 0.025 295);
   --surface-wash: linear-gradient(180deg, oklch(0.19 0.05 295) 0%, var(--background) 22rem);
   --card: oklch(0.2 0.04 295);

@@ -8,6 +8,7 @@ import { CountUp } from '../../components/count-up'
 import { PlayerAvatar } from '../../components/player-avatar'
 import { celebrate } from '../../lib/confetti'
 import { stagger } from '../../lib/motion'
+import { useActiveSeason } from '../../lib/season'
 
 interface Place {
   id: string
@@ -80,13 +81,14 @@ export function PodiumStage({
   // Display order 2nd, 1st, 3rd so the winner stands in the middle.
   const order = [places[1], places[0], places[2]].filter((p): p is Place => p !== undefined)
   const winner = places[0]?.id
+  const season = useActiveSeason()
 
   // Confetti as the winner's pillar finishes rising (skipped under reduced motion by celebrate()).
   useEffect(() => {
     if (!withConfetti || !winner) return
-    const timer = setTimeout(() => void celebrate(), STEP_MS * 2 + 600)
+    const timer = setTimeout(() => void celebrate(season), STEP_MS * 2 + 600)
     return () => clearTimeout(timer)
-  }, [withConfetti, winner])
+  }, [withConfetti, winner, season])
 
   return (
     <div className={cn('flex w-full items-end justify-center', compact ? 'gap-3' : 'flex-1 gap-6')}>

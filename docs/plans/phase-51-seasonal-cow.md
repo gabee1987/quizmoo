@@ -1,6 +1,6 @@
 # Phase 51: The cow for every season
 
-**Branch:** `feature/seasonal-cow`
+**Branch:** `feature/seasonal-themes`
 
 ## Goal
 
@@ -41,3 +41,15 @@ The cow has more to say in each of the nine seasons of phase 50, and the podium'
 
 1. Tap the cow on the join page a few times during a season: the season's lines alternate with the everyday ones.
 2. Finish a game during a season: the podium's confetti includes the season's shapes.
+
+## Results (1 November 2026)
+
+- Every season has six lines in both languages; `antics.test.ts` checks that every line key exists in both dictionaries.
+- The podium's confetti mixes in the season's shapes on the phones and the projector (screenshots for Halloween in both modes, Christmas and Valentine's Day), stays as before without a season, and is skipped under reduced motion.
+- `pnpm verify` passes; the e2e suite (30 tests) passes on the production build with Halloween active.
+- Released together with phase 50 as 1.8.0.
+
+## Deviations
+
+- Done on the phase 50 branch, `feature/seasonal-themes`, at the user's request, and released in the same version.
+- Halloween's buttons and accents are pumpkin orange (asked 1 November 2026): the theme's hue is orange, its surfaces stay purple, and its primary tokens are set by hand so both modes keep 4.5:1 (a burnt orange with white text in light mode, a bright pumpkin with dark text in dark mode).

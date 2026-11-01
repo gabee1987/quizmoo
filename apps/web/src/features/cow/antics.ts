@@ -14,7 +14,7 @@ export const ANTIC_MS = 2800
 
 /** Everyday lines (`cow.lines.lineN`) and lines per season (`cow.seasons.<season>.lineN`). */
 export const EVERYDAY_LINES = 8
-export const SEASON_LINES = 3
+export const SEASON_LINES = 6
 
 type Random = () => number
 
