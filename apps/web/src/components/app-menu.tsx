@@ -21,6 +21,7 @@ import { modes, setMode, useMode, type Mode } from '@/lib/mode'
 import { useLogout } from '@/lib/use-logout'
 import { LogoMark } from './app-header'
 import { UnseenDot } from './host-nav'
+import { SeasonMenuItem } from './season-greeting'
 
 /**
  * The app bar folded into a page's own top bar (the running game, the editor), so those pages get its
@@ -79,6 +80,7 @@ export function AppMenu() {
             </DropdownMenuRadioItem>
           ))}
         </DropdownMenuRadioGroup>
+        <SeasonMenuItem onSelect={stayOpen} />
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
           <Link to="/host">

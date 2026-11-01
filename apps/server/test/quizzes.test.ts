@@ -142,7 +142,7 @@ describeDb('quiz routes (database)', () => {
       answerStyle: 'colourful',
       answerPalette: 'vivid',
       answerSymbols: 'shapes',
-      theme: 'classic',
+      theme: 'seasonal',
     })
 
     const settings = {

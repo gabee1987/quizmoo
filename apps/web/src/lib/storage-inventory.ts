@@ -22,6 +22,8 @@ export const storedItems: readonly StoredItem[] = [
   { name: 'quizmoo.picksOpen.<PIN>', kind: 'sessionStorage', who: 'players', id: 'picksOpen' },
   { name: 'quizmoo.lang', kind: 'localStorage', who: 'everyone', id: 'lang' },
   { name: 'quizmoo.mode', kind: 'localStorage', who: 'everyone', id: 'mode' },
+  { name: 'quizmoo.seasonal', kind: 'localStorage', who: 'everyone', id: 'seasonal' },
+  { name: 'quizmoo.seasonPreview', kind: 'localStorage', who: 'hosts', id: 'seasonPreview' },
   { name: 'quizmoo.storageNotice', kind: 'localStorage', who: 'everyone', id: 'notice' },
   { name: 'quizmoo.hostToasts', kind: 'localStorage', who: 'hosts', id: 'hostToasts' },
   { name: 'quizmoo.hostBoard', kind: 'localStorage', who: 'hosts', id: 'hostBoard' },

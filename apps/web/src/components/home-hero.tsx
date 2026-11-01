@@ -4,6 +4,7 @@ import { useCowAntics } from '@/features/cow/use-cow-antics'
 import { stagger } from '@/lib/motion'
 import { CowBubble } from './cow-bubble'
 import { CowLogo } from './cow-logo'
+import { SeasonGreeting } from './season-greeting'
 
 /** Speech lines the cow cycles through, one per tap. */
 export const MOO_LINES = 4
@@ -85,6 +86,7 @@ export function HomeHero({ tagline, titleRef }: { tagline: string; titleRef?: Re
       <p className="max-w-xs text-lg font-bold text-balance text-muted-foreground lg:max-w-sm lg:text-xl">
         {tagline}
       </p>
+      <SeasonGreeting />
     </div>
   )
 }

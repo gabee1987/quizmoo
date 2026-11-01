@@ -66,6 +66,9 @@ Error shape everywhere: `{ error: '<i18n key>' }`. Status codes: 400 invalid inp
 | `POST /api/nicknames/check` | admin | `{ names }` -> `{ results: [{ avatar, allowed }] }` for names being added, before saving |
 | `PUT /api/nicknames/:language` | admin | `{ names }` (1–500 player names, each passing the name filter) -> saved without duplicates |
 | `DELETE /api/nicknames/:language` | admin | back to the built-in list |
+| `GET /api/seasons` | - | `{ windows }`: the seasons whose dates an admin changed (`seasonWindowsSchema`); every device reads it at start and decides its season with the web calendar |
+| `PUT /api/seasons/:season` | admin | `{ before, after, off }` (days 0–31) -> `{ windows }` |
+| `DELETE /api/seasons/:season` | admin | back to the built-in dates -> `{ windows }` |
 | `GET /api/games/:pin/nickname?lang=` | - | `{ name, avatar }`: a name from the list nobody in that game has yet, with `avatarForNickname` (built-in avatar, else a keyword, else null) |
 | `PATCH /api/quizzes/batch` | owner of all | `{ ids, settings?, questions?: { timeLimitSec?, points? } }` -> `{ updated }`; merged per quiz and fully validated, all or nothing |
 | `POST /api/images` | session | multipart, returns `{ id, width, height, bytes, mime }` |

@@ -13,6 +13,31 @@
     "languages": {
       "hu": "Magyar",
       "en": "English"
+    },
+    "seasonalLook": "Seasonal look ({{season}})"
+  },
+  "season": {
+    "names": {
+      "newYear": "New Year",
+      "carnival": "Carnival",
+      "valentine": "Valentine’s Day",
+      "womensDay": "Women’s Day",
+      "aprilFools": "April Fools’ Day",
+      "easter": "Easter",
+      "halloween": "Halloween",
+      "stNicholas": "St Nicholas’ Day",
+      "christmas": "Christmas"
+    },
+    "greeting": {
+      "newYear": "Happy New Year!",
+      "carnival": "Happy carnival!",
+      "valentine": "Happy Valentine’s Day!",
+      "womensDay": "Happy Women’s Day!",
+      "aprilFools": "Happy April Fools’ Day!",
+      "easter": "Happy Easter!",
+      "halloween": "Happy Halloween!",
+      "stNicholas": "Happy St Nicholas’ Day!",
+      "christmas": "Happy holidays!"
     }
   },
   "join": {
@@ -92,32 +117,74 @@
       "newYear": {
         "line1": "Happy New Year!",
         "line2": "My resolution: more quizzes.",
-        "line3": "Moo-ve over, last year!"
+        "line3": "Moo-ve over, last year!",
+        "line4": "New year, new pasture!",
+        "line5": "Watching the fireworks from the barn.",
+        "line6": "This year I’ll finally learn to whistle."
       },
       "valentine": {
         "line1": "You’re udderly lovely!",
         "line2": "Be my valen-cow?",
-        "line3": "I love you a cow-tillion."
+        "line3": "I love you a cow-tillion.",
+        "line4": "I saved you the best clover.",
+        "line5": "I drew a heart in the grass.",
+        "line6": "One milkshake, two straws?"
+      },
+      "carnival": {
+        "line1": "Guess who’s under the mask. Yes, the cow.",
+        "line2": "Saving room for doughnuts.",
+        "line3": "Shoo, winter! Moo!",
+        "line4": "My costume: a different cow.",
+        "line5": "Fake horns? Mine are real.",
+        "line6": "I counted three doughnuts. Then I stopped counting."
+      },
+      "womensDay": {
+        "line1": "Happy Women’s Day!",
+        "line2": "I brought tulips. Only nibbled one.",
+        "line3": "Flowers for everyone who keeps this place running!",
+        "line4": "Thank you for everything you do!",
+        "line5": "One flower, one big moo.",
+        "line6": "Today I’m bringing the coffee. With milk, obviously."
       },
       "aprilFools": {
         "line1": "Fun fact: cows can fly. On Tuesdays.",
         "line2": "Fun fact: milk comes from the moon.",
-        "line3": "Fun fact: I’m actually a horse."
+        "line3": "Fun fact: I’m actually a horse.",
+        "line4": "Fun fact: every answer in this quiz is B.",
+        "line5": "Fun fact: chocolate milk comes from brown cows.",
+        "line6": "Fun fact: a cow made this game. Wait, that one’s true."
       },
       "easter": {
         "line1": "Happy Easter!",
         "line2": "I’m the Easter bunny now.",
-        "line3": "Found any eggs yet?"
+        "line3": "Found any eggs yet?",
+        "line4": "I hid the eggs. Where? No idea.",
+        "line5": "Do my ears look longer to you?",
+        "line6": "Chocolate eggs beat grass. Just saying."
       },
       "halloween": {
         "line1": "Boo! I mean… moo!",
         "line2": "Trick or treat?",
-        "line3": "I’m a witch. A cow witch."
+        "line3": "I’m a witch. A cow witch.",
+        "line4": "Moo-ha-ha-ha!",
+        "line5": "Don’t worry, I’m just a cow. Probably.",
+        "line6": "Pumpkins are my friends. So is pumpkin pie."
+      },
+      "stNicholas": {
+        "line1": "Boots polished? I did all four.",
+        "line2": "I’ve been good. Mostly.",
+        "line3": "Hoping for hay in my boots.",
+        "line4": "A switch? For me? Must be a mistake.",
+        "line5": "Four boots means four times the treats, right?",
+        "line6": "Dear St Nicholas, I’ve been a very good cow."
       },
       "christmas": {
         "line1": "Merry Christmas!",
         "line2": "Ho ho hooo… moo!",
-        "line3": "Have you been good this year?"
+        "line3": "Have you been good this year?",
+        "line4": "I’ve got the bell, just need the sleigh.",
+        "line5": "The reindeer wouldn’t let me on the team.",
+        "line6": "A mince pie for me? Or three?"
       }
     }
   },
@@ -613,8 +680,9 @@
       },
       "finalResultsHelp": "After the game, the projector and the phones wait. You show the podium on the projector and the results on the phones separately.",
       "theme": "Theme",
-      "themeHelp": "Colours on the phones, the projector and the host control. Light or dark mode is each device's own choice. Graphite, Navy, Petrol, Stone and Bordeaux are subdued, for formal events.",
+      "themeHelp": "Colours on the phones, the projector and the host control. Seasonal follows the calendar: Halloween, Christmas and other special days get their own colours and decorations, other days look like Classic. Light or dark mode is each device's own choice. Graphite, Navy, Petrol, Stone and Bordeaux are subdued, for formal events.",
       "themeOptions": {
+        "seasonal": "Seasonal",
         "classic": "Classic",
         "arcade": "Arcade",
         "sunset": "Sunset",
@@ -629,6 +697,16 @@
         "bordeaux": "Bordeaux",
         "custom": "Custom"
       },
+      "seasonalNow": "Now: {{season}}",
+      "seasonalLook": "Seasonal look on",
+      "seasonalLookHelp": "During a season (Halloween, Christmas and other special days), the ticked screens show its colours and decorations instead of this theme.",
+      "seasonalScreens": {
+        "host": "Host control",
+        "screen": "Projector",
+        "phones": "Phones"
+      },
+      "seasonalChip": "Seasonal look: {{screens}}",
+      "seasonalNowhere": "nowhere",
       "answerPalette": "Answer colours",
       "answerPaletteHelp": "The answer buttons and the result bars on the phones and the projector, independent of the theme. Muted and Corporate are the calmer sets.",
       "answerPaletteOptions": {
@@ -1433,6 +1511,35 @@
     "current": "Current version",
     "releasedOn": "Released {{date}}",
     "releases": {
+      "1_8_0": {
+        "title": "Seasonal themes",
+        "intro": "On special days of the year Quizmoo takes on the season's look: its own colours, decorations and a dressed-up cow, on every page and in your games.",
+        "sections": [
+          {
+            "title": "Nine seasons",
+            "items": [
+              "New Year, Carnival, Valentine's Day, Women's Day, April Fools' Day, Easter, Halloween, St Nicholas' Day and Christmas, each for about a week around its day.",
+              "Each season has its own colours in light and dark mode, decorations along the edges of the screen (cobwebs, lights and snow, bunting, flowers and more), falling leaves, snowflakes, hearts or confetti, and a short greeting on the join and login pages.",
+              "The cow dresses up for every season: Dracula at Halloween, a reindeer at Christmas, Mikulás on St Nicholas' Day, a jester on April Fools' Day, and more. It also has six new things to say in each season.",
+              "On the podium, part of the confetti takes the season's shapes: pumpkins and bats, hearts, Easter eggs, Christmas trees and stars."
+            ]
+          },
+          {
+            "title": "In your games",
+            "items": [
+              "The new \"Seasonal\" theme is the default: during a season the host control, the projector and the phones show the season's look, and Classic at other times. Quizzes that used Classic now use Seasonal; quizzes on any other theme keep their theme.",
+              "With another theme you choose under Look which screens still show the season: the host control, the projector or the phones."
+            ]
+          },
+          {
+            "title": "Your choice",
+            "items": [
+              "Don't want it? The season button next to the colour mode switches the seasonal look off on your device, and in the game menu on phones.",
+              "Admins find every season with its dates under My settings, Account: preview any season on their own device, change its dates, or switch it off for everyone."
+            ]
+          }
+        ]
+      },
       "1_7_1": {
         "title": "Clearer release notes",
         "intro": "A small update to this page.",
@@ -1688,6 +1795,25 @@
       "remove": "Remove code",
       "saved": "Lock code saved",
       "removed": "Lock code removed"
+    },
+    "seasonPreview": {
+      "title": "Seasons",
+      "help": "Each season with its dates. Pick one to see its colours, decorations and cow on this device, whatever the date (only on this device; By date goes back). The pencil changes a season's dates for everyone.",
+      "byDate": "By date",
+      "none": "No season today",
+      "changed": "Changed dates",
+      "off": "Switched off",
+      "edit": "Change the dates of {{season}}",
+      "dialogTitle": "{{season}}: dates",
+      "dialogHelp": "Applies on every device, from its next page load. Where two seasons overlap, the one whose main day is closer wins.",
+      "mainDay": "Main day: {{day}}",
+      "before": "Starts days before",
+      "after": "Ends days after",
+      "daysRange": "0 to {{max}} days",
+      "runs": "Runs {{range}}",
+      "show": "Show this season",
+      "showHelp": "Off: no device shows its look until you switch it back on.",
+      "reset": "Back to the built-in dates"
     },
     "signupEmail": {
       "title": "Sign-up e-mails",
@@ -2155,6 +2281,8 @@
         "picksOpen": "Whether your team's picks are open. Until you close the tab.",
         "lang": "Your language. Until you change it or clear your browser data.",
         "mode": "Light, dark or system look. Until you change it or clear your browser data.",
+        "seasonal": "That you switched the seasonal look off on this device. Until you switch it back on or clear your browser data.",
+        "seasonPreview": "Admins only: the season you preview on this device. Until you pick By date or clear your browser data.",
         "notice": "That you have seen the storage notice, so it does not come back.",
         "hostToasts": "Whether the host page shows short notes about players joining and leaving.",
         "hostBoard": "How the host's game page shows the players: tiles or list, the order, hidden answers, the side panels and the menu.",

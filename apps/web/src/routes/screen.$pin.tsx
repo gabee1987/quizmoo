@@ -20,7 +20,7 @@ import { ScreenScoreboard } from '../features/screen/scoreboard'
 import { apiFetch } from '../lib/api'
 import { meQueryOptions } from '../lib/auth'
 import { closeSession, emitAck, startSession, useGameStore } from '../lib/socket'
-import { useGameTheme } from '../lib/themes'
+import { useGameTheme } from '../lib/season'
 
 export const Route = createFileRoute('/screen/$pin')({
   // `preview`: the host's live preview (an inert frame on the host control) sees what a public
@@ -39,7 +39,7 @@ function ScreenPage() {
   const preview = Route.useSearch().preview !== undefined
   const navigate = useNavigate()
   const { status, since, host, clockOffset, closed } = useGameStore()
-  useGameTheme(host?.settings)
+  useGameTheme(host?.settings, 'screen')
   const me = useQuery({ ...meQueryOptions, throwOnError: false })
   const info = useQuery({
     queryKey: ['gamePublic', pin],

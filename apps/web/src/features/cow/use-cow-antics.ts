@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useMotionOk } from '@/lib/motion'
-import { ANTIC_MS, type Antic, currentSeason, fastAntics, nextDelayMs, pickAntic, pickLine } from './antics'
+import { useActiveSeason } from '@/lib/season'
+import { ANTIC_MS, type Antic, fastAntics, nextDelayMs, pickAntic, pickLine } from './antics'
 
 interface Playing {
   antic: Antic | null
@@ -17,7 +18,8 @@ interface Playing {
  */
 export function useCowAntics({ bubble }: { bubble: boolean }) {
   const motionOk = useMotionOk()
-  const season = useMemo(currentSeason, [])
+  // The season this page shows: none where the game keeps its own theme or the device switched it off.
+  const season = useActiveSeason()
   const [playing, setPlaying] = useState<Playing>({ antic: null, line: null, count: 0 })
   const [round, setRound] = useState(0)
 
