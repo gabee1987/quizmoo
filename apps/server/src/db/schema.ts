@@ -122,6 +122,16 @@ export const nicknameLists = pgTable('nickname_lists', {
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 })
 
+// The dates of a season with its own look, changed by an admin: days before and after its main
+// day, or the season left out. A season without a row keeps its built-in dates (web calendar).
+export const seasonWindows = pgTable('season_windows', {
+  season: text('season').primaryKey(),
+  before: integer('before').notNull(),
+  after: integer('after').notNull(),
+  off: boolean('off').notNull().default(false),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
 // A host's own settings (quick messages, game defaults), one row per host account. Stored as sent and
 // read through `hostSettingsSchema`. Deleted with the account.
 export const hostSettings = pgTable('host_settings', {

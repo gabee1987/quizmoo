@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { ConfirmDialog } from '@/components/dialog'
 import { PlayerAvatar } from '@/components/player-avatar'
+import { SeasonMenuItem } from '@/components/season-greeting'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -133,6 +134,7 @@ export function GameMenu() {
               </DropdownMenuRadioItem>
             ))}
           </DropdownMenuRadioGroup>
+          <SeasonMenuItem className={touchRadio} />
           {snapshot && snapshot.phase !== 'finished' && (
             <>
               <DropdownMenuSeparator />

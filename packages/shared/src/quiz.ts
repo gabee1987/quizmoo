@@ -160,10 +160,12 @@ export function playersCreateTeams(setup: TeamSetup): boolean {
 
 /**
  * Visual themes for the phones, projector and host control. Hues only; light and dark mode stay the device's choice.
- * The first seven are playful, the next five (graphite to bordeaux) are subdued for formal company events,
+ * `seasonal` is the season's theme during a season (see `seasonalLook`) and looks like Classic on other days.
+ * The next seven are playful, the next five (graphite to bordeaux) are subdued for formal company events,
  * and `custom` takes the host's own colours from `customTheme`.
  */
 export const gameThemes = [
+  'seasonal',
   'classic',
   'arcade',
   'sunset',
@@ -285,9 +287,17 @@ export const gameSettingsSchema = z
     /** Final results (podium, ranks, answer review) on phones and the projector: as soon as the game ends, or when the host releases them. */
     finalResults: z.enum(['immediately', 'onRelease']).default('immediately'),
     /** Colour theme of the game views. */
-    theme: z.enum(gameThemes).default('classic'),
+    theme: z.enum(gameThemes).default('seasonal'),
     /** The colours of the custom theme; kept when another theme is picked, so switching back restores them. */
     customTheme: customThemeSchema.default({ hue: 277, accent: 330, chroma: 1 }),
+    /** With a theme other than Seasonal: the game screens that still take the season's look during a season. */
+    seasonalLook: z
+      .object({
+        host: z.boolean().default(true),
+        screen: z.boolean().default(false),
+        phones: z.boolean().default(false),
+      })
+      .prefault({}),
   })
 export type GameSettings = z.infer<typeof gameSettingsSchema>
 

@@ -78,6 +78,7 @@ export function fixtureSettings(overrides: Partial<GameSettings> = {}): GameSett
     finalResults: 'immediately',
     theme: 'classic',
     customTheme: { hue: 277, accent: 330, chroma: 1 },
+    seasonalLook: { host: true, screen: false, phones: false },
     customPalette: [...defaultCustomPalette],
     ...overrides,
   }

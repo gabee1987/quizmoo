@@ -2,6 +2,7 @@ import type { GameSettings, Question } from '@quizmoo/shared'
 import type { TFunction } from 'i18next'
 import type { ComponentProps } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useScreenLook } from '@/lib/season'
 import { gameVars } from '@/lib/themes'
 import { RoundIntroCard } from '../play/round-intro'
 import { QuestionInput } from '../questions/question-input'
@@ -48,14 +49,16 @@ export function PhonePreview({
   intro?: { group: ComponentProps<typeof RoundIntroCard>['group'] & { id: string }; introSec: number } | null
 }) {
   const { t } = useTranslation()
+  // What the phones will show today: the season's theme, or the quiz's own.
+  const { theme } = useScreenLook(settings, 'phones')
   if (intro) {
     return (
       <div
-        data-theme={settings.theme}
-        style={gameVars(settings)}
+        data-theme={theme}
+        style={gameVars({ ...settings, theme })}
         className="mx-auto w-[375px] max-w-full rounded-[2.5rem] border-8 border-foreground/85 bg-background p-4 text-foreground shadow-soft"
       >
-        <div key={`${intro.group.id}-${settings.theme}`} className="pointer-events-none flex h-[600px] flex-col" inert>
+        <div key={`${intro.group.id}-${theme}`} className="pointer-events-none flex h-[600px] flex-col" inert>
           <RoundIntroCard group={intro.group} countdown={intro.introSec > 0 && <StillTimer seconds={intro.introSec} />} />
         </div>
       </div>
@@ -64,14 +67,14 @@ export function PhonePreview({
   const shown = question ?? sampleQuestion(t)
   return (
     <div
-      data-theme={settings.theme}
-      style={gameVars(settings)}
+      data-theme={theme}
+      style={gameVars({ ...settings, theme })}
       data-palette={settings.answerPalette}
       className="mx-auto w-[375px] max-w-full rounded-[2.5rem] border-8 border-foreground/85 bg-background p-4 text-foreground shadow-soft"
     >
       {/* Inert: a preview, not a playable question. Re-keyed so the entrance animations replay on changes. */}
       <div
-        key={`${shown.id}-${settings.answerStyle}-${settings.answerSymbols}-${settings.answerPalette}-${settings.theme}-${JSON.stringify(settings.customTheme)}-${settings.customPalette.join()}`}
+        key={`${shown.id}-${settings.answerStyle}-${settings.answerSymbols}-${settings.answerPalette}-${theme}-${JSON.stringify(settings.customTheme)}-${settings.customPalette.join()}`}
         className="pointer-events-none flex min-h-[600px] flex-col gap-4"
         inert
       >

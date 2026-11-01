@@ -2,7 +2,7 @@ import { gameSettingsSchema } from '@quizmoo/shared'
 import { describe, expect, it } from 'vitest'
 
 describe('gameSettingsSchema', () => {
-  it('gives settings saved before the theme existed the classic theme', () => {
+  it('gives settings saved before the theme existed the seasonal theme', () => {
     const saved = {
       mode: 'classic',
       speedBonus: true,
@@ -13,7 +13,7 @@ describe('gameSettingsSchema', () => {
       answerStyle: 'plain',
       finalResults: 'immediately',
     }
-    expect(gameSettingsSchema.parse(saved).theme).toBe('classic')
+    expect(gameSettingsSchema.parse(saved).theme).toBe('seasonal')
   })
 
   it('gives settings saved before answer palettes existed the vivid palette and shapes, keeping their answer style', () => {

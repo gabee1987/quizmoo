@@ -1,4 +1,5 @@
 import type { CSSProperties } from 'react'
+import { useActiveSeason } from '@/lib/season'
 import { optionVars } from './option-colours'
 import { ShapeIcon } from './icons'
 
@@ -17,6 +18,8 @@ const shapes = [
  * frame on the main thread; reduced motion leaves them still.
  */
 export function FloatingShapes() {
+  // During a season its decorations take their place (`SeasonLayer` in the root layout).
+  if (useActiveSeason()) return null
   return (
     <div aria-hidden="true" data-palette="candy" className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
       {shapes.map((s, index) => (

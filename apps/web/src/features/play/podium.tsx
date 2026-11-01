@@ -8,6 +8,7 @@ import { CheckIcon, CrossIcon } from '../../components/icons'
 import { celebrate } from '../../lib/confetti'
 import { stagger } from '../../lib/motion'
 import { forgetPlayer } from '../../lib/player-storage'
+import { useActiveSeason } from '../../lib/season'
 import { CorrectAnswer } from '../questions/correct-answer'
 import { formatAnswer } from '../questions/format-answer'
 import { PodiumStage } from '../screen/podium'
@@ -17,10 +18,12 @@ export function Podium({ snapshot }: { snapshot: PlayerSnapshot }) {
   const myTeam = snapshot.teams.find((team) => team.id === snapshot.me.teamId)
   const onPodium = !snapshot.resultsPending && (snapshot.mode === 'team' ? (myTeam?.rank ?? 99) : snapshot.me.rank) <= 3
 
+  const season = useActiveSeason()
+
   // Confetti for the top three once the results are in (the podium stage below celebrates nobody on phones).
   useEffect(() => {
-    if (onPodium) void celebrate()
-  }, [onPodium])
+    if (onPodium) void celebrate(season)
+  }, [onPodium, season])
 
   if (snapshot.resultsPending) {
     return (

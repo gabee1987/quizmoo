@@ -18,7 +18,7 @@ import { PhoneRoundIntro } from '../features/play/round-intro'
 import { Scoreboard } from '../features/play/scoreboard'
 import { lostCaptaincy, movedTo, newCaptaincy, newTeammates, teamSeat, type TeamSeat } from '../features/play/team-moved'
 import { forgetPlayer, getStoredPlayer } from '../lib/player-storage'
-import { useGameTheme } from '../lib/themes'
+import { useGameTheme } from '../lib/season'
 import { closeSession, emitAck, startSession, useGameStore } from '../lib/socket'
 
 export const Route = createFileRoute('/play/$pin')({
@@ -30,7 +30,7 @@ function PlayPage() {
   const { pin } = Route.useParams()
   const navigate = useNavigate()
   const { status, since, player, clockOffset, closed } = useGameStore()
-  useGameTheme(player?.settings)
+  useGameTheme(player?.settings, 'phones')
   useTeamToasts(player)
 
   useEffect(() => {
