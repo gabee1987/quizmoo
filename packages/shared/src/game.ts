@@ -424,8 +424,33 @@ export interface MyEndFacts {
   rankAfter: number[]
 }
 
+/** The projector's pages at the end of a game, in order. */
+export const endShowPages = ['podium', 'leaderboard', 'awards', 'facts', 'recap'] as const
+export type EndShowPage = (typeof endShowPages)[number]
+/** The pages Back, Next and automatic mode go round; the recap only opens when the host shows it. */
+export const endLoopPages = ['podium', 'leaderboard', 'awards', 'facts'] as const satisfies readonly EndShowPage[]
+/** The projector's leaderboard shows this many rows at a time... */
+export const LEADERBOARD_ROWS = 12
+/** ...each set for this long; automatic mode keeps a long leaderboard up for all of its sets. */
+export const LEADERBOARD_SET_MS = 6_000
+
+/** The projector's end of the game: the page on it, and whether it moves on by itself. */
+export interface EndShow {
+  page: EndShowPage
+  /** The asked question the recap shows. */
+  recapIndex: number
+  /** Automatic mode: the next page (in the recap, the next question) comes at `pageEndsAt`. */
+  auto: boolean
+  /** Unix ms when automatic mode moves on; null while it is off. */
+  pageEndsAt: number | null
+}
+
 /** What the host control and projector screens receive. */
 export interface HostSnapshot extends GameSnapshotBase {
+  /** A finished game whose results the projector shows: its end pages, with the number of recap questions; otherwise null. */
+  endShow: (EndShow & { recapCount: number }) | null
+  /** The recap page's question with its answers; null on other pages. */
+  recap: RevealInfo | null
   /** Every question revealed so far, in order (on the public screen without correct counts while answers are hidden). */
   questionStats: QuestionStat[]
   /** Answers to the current question. Host room only; null on the public screen. */
@@ -593,6 +618,8 @@ export interface GameResults {
    * the game is live and can still be released (`POST /api/games/:gameId/release`).
    */
   pendingRelease: { screen: boolean; players: boolean }
+  /** The game is still in the server's memory, so its projector (`/screen/<pin>`) can show it. */
+  live: boolean
 }
 
 /** One row of `GET /api/games`: the host's game history. */

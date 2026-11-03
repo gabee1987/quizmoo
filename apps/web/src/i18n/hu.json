@@ -268,7 +268,21 @@
       "pausedHint": "Szünet: az óra áll, és senki sem válaszolhat, amíg nem folytatod.",
       "shownAgainHint": "A(z) {{index}}. kérdés újra kint van a kijelzőkön. A pontok nem változnak.",
       "backToGame": "Vissza a játékhoz",
-      "podiumOnProjector": "A dobogó a kivetítőn van.",
+      "podiumOnProjector": "Az eredmény a kivetítőn van.",
+      "endShow": {
+        "title": "A kivetítőn",
+        "back": "Vissza",
+        "next": "Tovább",
+        "auto": "Automatikus",
+        "autoHelp": "Kb. 10 másodpercenként új oldal, az utolsó után elölről.",
+        "previousQuestion": "Előző kérdés",
+        "nextQuestion": "Következő kérdés",
+        "recapTitle": "Kérdések újra",
+        "recapHelp": "Minden kérdés a válaszokkal a kivetítőn, egyenként. Automatikus módban kb. 8 másodpercenként jön a következő, a végén vissza az eredményhez.",
+        "recapShow": "Mutasd a kérdéseket",
+        "recapClose": "Vissza az eredményhez",
+        "recapAt": "{{index}}. kérdés / {{count}}"
+      },
       "openProjector": "Kivetítő megnyitása",
       "skip": "Kihagyás",
       "end": "Játék vége",
@@ -462,6 +476,10 @@
       "standings": "állás",
       "standingsTotals": "állás, csak összpontszám",
       "podium": "dobogó",
+      "leaderboard": "ranglista",
+      "awards": "díjak",
+      "facts": "érdekességek",
+      "recap": "visszanézzük a(z) {{index}}. kérdést",
       "waitingResults": "az eredményre várnak"
     },
     "showAnswers": {
@@ -1056,12 +1074,36 @@
     "correctCount_other": "{{count}} válaszból {{correct}} helyes",
     "qrCode": "QR-kód a csatlakozáshoz",
     "runnersUp": "A többiek",
-    "previous": "Előző",
-    "next": "Következő",
     "keyHint": "Szóköz",
-    "pause": "Szünet",
-    "resume": "Folytatás",
-    "paused": "Szünet"
+    "end": {
+      "pagesLabel": "A játék vége",
+      "pages": {
+        "podium": "Dobogó",
+        "leaderboard": "Ranglista",
+        "awards": "Díjak",
+        "facts": "Érdekességek",
+        "recap": "Kérdések"
+      },
+      "drumRoll": "És a győztes…",
+      "leaderboardTitle": "Végeredmény",
+      "rows": "{{from}}–{{to}} / {{count}}",
+      "right_one": "{{count}} jó",
+      "right_other": "{{count}} jó",
+      "members_one": "{{count}} játékos",
+      "members_other": "{{count}} játékos",
+      "noAwards": "Most nincs díj: azokat jó válaszokkal lehet nyerni.",
+      "recapEyebrow": "Visszanézünk",
+      "recapHeading": "{{index}}. kérdés / {{count}}",
+      "gotItRight": "{{percent}}% találta el",
+      "verdict": {
+        "easy": "Ez könnyű volt!",
+        "most": "A többség tudta!",
+        "tricky": "Ez fogós volt!",
+        "hard": "Igazi fejtörő!",
+        "poll": "Ezt gondolja a társaság"
+      },
+      "autoLeft": "Hamarosan lapozunk"
+    }
   },
   "between": {
     "progress": "Haladás",
@@ -2084,7 +2126,6 @@
     "backToGames": "Vissza a játékokhoz",
     "running": "A játék még tart. Ez az eddigi eredmény.",
     "exportCsv": "CSV exportálása",
-    "showOnScreen": "Mutasd a kivetítőn",
     "podium": "Dobogó",
     "questions": "Kérdések",
     "noQuestions": "Még egy kérdés sem zárult le.",
@@ -2115,7 +2156,6 @@
     "members": "Tagok",
     "sortedAscending": "növekvő sorrend",
     "sortedDescending": "csökkenő sorrend",
-    "screenHint": "Szóköz vagy → tovább, ← vissza, P szünet",
     "teamAnswers": "A csapatok válaszai",
     "noTeamAnswer": "Nem válaszolt",
     "length": "Játékidő: {{length}}",

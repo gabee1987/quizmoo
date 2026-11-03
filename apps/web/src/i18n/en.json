@@ -268,7 +268,21 @@
       "pausedHint": "Paused: the clock has stopped and nobody can answer until you resume.",
       "shownAgainHint": "Question {{index}} is on the screens again. Nothing changes in the scores.",
       "backToGame": "Back to the game",
-      "podiumOnProjector": "The podium is on the projector.",
+      "podiumOnProjector": "The results are on the projector.",
+      "endShow": {
+        "title": "On the projector",
+        "back": "Back",
+        "next": "Next",
+        "auto": "Automatic",
+        "autoHelp": "A new page about every 10 seconds, starting again after the last one.",
+        "previousQuestion": "Previous question",
+        "nextQuestion": "Next question",
+        "recapTitle": "Question recap",
+        "recapHelp": "Every question with its answers on the projector, one at a time. Automatic mode shows a new one about every 8 seconds, then goes back to the results.",
+        "recapShow": "Show the questions",
+        "recapClose": "Back to the results",
+        "recapAt": "Question {{index}} of {{count}}"
+      },
       "openProjector": "Open projector",
       "skip": "Skip",
       "end": "End game",
@@ -462,6 +476,10 @@
       "standings": "standings",
       "standingsTotals": "standings, totals only",
       "podium": "podium",
+      "leaderboard": "leaderboard",
+      "awards": "awards",
+      "facts": "game facts",
+      "recap": "recap of question {{index}}",
       "waitingResults": "waiting for the results"
     },
     "showAnswers": {
@@ -1056,12 +1074,36 @@
     "correctCount_other": "{{correct}} of {{count}} answered correctly",
     "qrCode": "QR code to join the game",
     "runnersUp": "Runners-up",
-    "previous": "Previous",
-    "next": "Next",
     "keyHint": "Space",
-    "pause": "Pause",
-    "resume": "Resume",
-    "paused": "Paused"
+    "end": {
+      "pagesLabel": "End of the game",
+      "pages": {
+        "podium": "Podium",
+        "leaderboard": "Leaderboard",
+        "awards": "Awards",
+        "facts": "Game facts",
+        "recap": "Recap"
+      },
+      "drumRoll": "And the winner is…",
+      "leaderboardTitle": "Final standings",
+      "rows": "{{from}}–{{to}} of {{count}}",
+      "right_one": "{{count}} right",
+      "right_other": "{{count}} right",
+      "members_one": "{{count}} player",
+      "members_other": "{{count}} players",
+      "noAwards": "No awards this time: they go to right answers.",
+      "recapEyebrow": "Let's look back",
+      "recapHeading": "Question {{index}} of {{count}}",
+      "gotItRight": "{{percent}}% of you got it right",
+      "verdict": {
+        "easy": "Easy peasy!",
+        "most": "Most of you knew it!",
+        "tricky": "A tricky one!",
+        "hard": "A real brain-teaser!",
+        "poll": "What the room thinks"
+      },
+      "autoLeft": "Next page soon"
+    }
   },
   "between": {
     "progress": "Progress",
@@ -2084,7 +2126,6 @@
     "backToGames": "Back to games",
     "running": "This game is still running. These are the results so far.",
     "exportCsv": "Export CSV",
-    "showOnScreen": "Show on screen",
     "podium": "Podium",
     "questions": "Questions",
     "noQuestions": "No question has been revealed yet.",
@@ -2115,7 +2156,6 @@
     "members": "Members",
     "sortedAscending": "sorted ascending",
     "sortedDescending": "sorted descending",
-    "screenHint": "Space or → next, ← back, P pause",
     "teamAnswers": "Team answers",
     "noTeamAnswer": "No answer",
     "length": "Played for {{length}}",

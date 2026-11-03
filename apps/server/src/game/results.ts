@@ -92,6 +92,8 @@ export function toResults(state: GameState): GameResults {
     questions,
     groups: groupsOf(state.quiz).map(({ id, title }) => ({ id, title })),
     pendingRelease: { screen: resultsPendingFor(state, 'screen'), players: resultsPendingFor(state, 'players') },
+    // Only the realtime layer knows; the results route sets it.
+    live: false,
   }
 }
 

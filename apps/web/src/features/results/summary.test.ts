@@ -46,6 +46,7 @@ function results(questions: ResultQuestion[], players = 4): GameResults {
     questions,
     groups: [],
     pendingRelease: { screen: false, players: false },
+    live: false,
   }
 }
 

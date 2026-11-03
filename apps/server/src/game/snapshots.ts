@@ -23,6 +23,7 @@ import {
   type UpcomingQuestion,
 } from '@quizmoo/shared'
 import { endFacts, myEndFacts } from './end-facts.js'
+import { endShowOf, recapCount } from './end-show.js'
 import { groupAt, groupBounds, groupsOf, settingsAt } from './groups.js'
 import { normalise } from './normalise.js'
 import { answersHidden, groupIfPicked, hostLocked, quickMessagesOf, resultsPendingFor } from './engine.js'
@@ -59,6 +60,9 @@ export function toHostSnapshot(state: GameState, now: number, { includeAnswers =
   const question = state.quiz.questions[state.questionIndex]
   const stats = questionStats(state)
   const hidden = !includeAnswers && base.answersHidden
+  // The host room too: the end pages wait until the projector shows the results.
+  const show = state.phase === 'finished' && !resultsPendingFor(state, 'screen') ? endShowOf(state) : null
+  const recapQuestion = show?.page === 'recap' ? state.quiz.questions[show.recapIndex] : undefined
   return {
     ...(includeAnswers ? base : conceal(state, base)),
     // Only the host control lists them; the phones never get them (they grow with every question).
@@ -73,6 +77,8 @@ export function toHostSnapshot(state: GameState, now: number, { includeAnswers =
     upcoming: includeAnswers ? upcoming(state) : [],
     locked: hostLocked(state),
     hasLockCode: includeAnswers && !!state.lock?.codeHash,
+    endShow: show && { ...show, recapCount: recapCount(state) },
+    recap: recapQuestion ? revealInfo(state, recapQuestion) : null,
   }
 }
 

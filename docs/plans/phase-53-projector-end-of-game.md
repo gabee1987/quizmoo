@@ -82,3 +82,18 @@ Out of scope: phones following the projector, sounds, a host-chosen page order.
 6. Reload the projector: it comes back on the same page.
 7. With a host-attached projector, Space and the arrow keys move the pages.
 8. Hold the results: the panel appears only after "Show podium".
+
+## Results (3 November 2026)
+
+Checked on the production build (:3999) with a scratchpad script (`shots-p53.cjs`: bots play on sockets, the host socket and the host page move the pages, a public projector at 1920 × 1080 is shot): light and dark, 6 and 30 players, solo and team, English and Hungarian, and the Christmas look. Every page fits 1080 without scrolling and has no sideways scroll; axe (WCAG 2.1 AA) finds nothing on any page in either mode; the podium sequence was shot frame by frame (drum roll, crown landing, confetti). The host panel was shot at 1440 and 390. The projector follows the panel's buttons and Back/Next, a host-attached projector's Space and arrow keys, a reload keeps the page, and automatic mode moved on after 9.9 s. Unit tests: `end-show.test.ts` (10), a realtime test of the page timer with a restart, and a `screen-status.test.ts` case. `host-control.e2e.ts` steps through the pages from the host and switches automatic mode on.
+
+## Deviations
+
+- The commands are `endPage`, `endPageStep` and `endAuto`.
+- The recap is not one of the steps (the user, 3 November 2026: the results pages and the facts go round, the question list is something the host chooses to show). Back, Next and automatic mode go round podium, leaderboard, awards and facts; "Show the questions" opens the recap, where Back and Next move between questions and automatic mode plays them through, then returns to the podium. There is no "Include the recap" switch.
+- The snapshot carries only the recap's current question (`recap`), not every question's distribution: the projector shows one at a time, and the per-question average time comes from `questionStats`, already in the snapshot.
+- A long leaderboard turns over every 6 s on the projector itself; automatic mode keeps it up for all its sets (12 rows each, at least 10 s).
+- Awards are revealed one after another and stay up, rather than one card replacing the other, so a late look still sees all of them.
+- "Restarted server keeps the page" holds for the games a restart brings back. As before, a finished game whose results are released to everyone is not restored after a restart, so its projector stops (see Known gaps in the delivery report).
+- The e2e check is a new step in `host-control.e2e.ts` (a game that already ends with a projector open) rather than a new spec.
+- The separate results slideshow is removed, not kept (the user, 3 November 2026: only one projector screen, and the host decides when the results are shown). `/screen/results/$gameId`, its "Show on screen" button on the results page, `ScreenSummary` and `useSlideshow` are gone. A past game whose game is no longer in memory has no projector view; its results stay on the results page.

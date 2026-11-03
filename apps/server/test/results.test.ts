@@ -65,7 +65,7 @@ describeDb('results routes and retention (database)', () => {
     const { pin, gameId } = await playedGame({ settings: { finalResults: 'onRelease' } })
     const release = (audience: string, cookie = alice) =>
       built.app.inject({ method: 'POST', url: `/api/games/${gameId}/release`, headers: { cookie }, payload: { audience } })
-    expect((await get(`/api/games/${gameId}/results`)).json().pendingRelease).toEqual({ screen: true, players: true })
+    expect((await get(`/api/games/${gameId}/results`)).json()).toMatchObject({ pendingRelease: { screen: true, players: true }, live: true })
 
     expect((await release('players', bob)).statusCode).toBe(403)
     expect((await release('everyone')).statusCode).toBe(400)
@@ -76,7 +76,7 @@ describeDb('results routes and retention (database)', () => {
 
     // Gone from memory (e.g. 12 hours later): nothing can be released any more.
     await built.manager.discard(gameId)
-    expect((await get(`/api/games/${gameId}/results`)).json().pendingRelease).toEqual({ screen: false, players: false })
+    expect((await get(`/api/games/${gameId}/results`)).json()).toMatchObject({ pendingRelease: { screen: false, players: false }, live: false })
     expect((await release('screen')).json()).toEqual({ error: 'errors.invalidTransition' })
   })
 

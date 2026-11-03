@@ -1,5 +1,13 @@
 import { z } from 'zod'
-import { MAX_PLAYERS, announcementDurationSchema, announcementTextSchema, answerSchema, avatarSchema, scheduledAtSchema } from './game.js'
+import {
+  MAX_PLAYERS,
+  announcementDurationSchema,
+  announcementTextSchema,
+  answerSchema,
+  avatarSchema,
+  endShowPages,
+  scheduledAtSchema,
+} from './game.js'
 import type { HostSnapshot, PlayerSnapshot } from './game.js'
 import { lockCodeSchema, ownQuickMessageSchema } from './host.js'
 import { MAX_QUESTIONS, teamAnswerModes, teamNameSchema } from './quiz.js'
@@ -127,6 +135,12 @@ export const hostCommandSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('openJoining') }),
   /** Closes the game to new players, or opens it again; players already in can always come back. */
   z.object({ type: z.literal('lockJoining'), locked: z.boolean() }),
+  /** The end of the game, once the projector shows the results: puts a page on it. */
+  z.object({ type: z.literal('endPage'), page: z.enum(endShowPages) }),
+  /** The end of the game: the next or previous page (in the recap, the next or previous question). */
+  z.object({ type: z.literal('endPageStep'), step: z.union([z.literal(1), z.literal(-1)]) }),
+  /** The end of the game: automatic mode on or off. */
+  z.object({ type: z.literal('endAuto'), auto: z.boolean() }),
 ])
 export type HostCommand = z.infer<typeof hostCommandSchema>
 
