@@ -1,6 +1,21 @@
 # Changelog
 
-## Unreleased
+## 1.9.0 – 2026-11-03
+
+### Smoother drag with 200 questions (phase 48)
+- The sortable lists' sensor options are module constants (`lib/sortable.ts`). `useSensor` memoises on its options object, so new options on every render gave every sortable item new listeners and rendered every row again on each move of a drag.
+- The editor's question list and a group's Questions tab render each row's contents in a memoised component (`RowContent`); during a drag only the rows' outer `li` follows dnd-kit. The question list passes id-taking row handlers that stay the same between renders.
+- While a question or group is dragged near the edge of the editor's list, only the panel the list scrolls in (the sidebar, the sheet) scrolls; the page around it stays put (`autoScroll.canScroll`), so the rows no longer slide under the pointer and move the drop target.
+- Tighter question cards in the editor's list, so the text gets more room: the question's number in a column at the card's left edge, which shows the grip while the card is hovered (the whole card drags); a slightly bigger type icon, which is also the eye switch (it shows the eye while the card is hovered, always on touch screens) instead of a column of its own beside the text and picture. Group headers follow the same pattern: the grip in the left column while hovered, and the group icon as the eye switch for all its questions.
+- "Group" in the list's header adds the new, empty group just above the selected question (above its group when it is in one; `addEmptyGroup`), instead of at the end of the list. A default name already in use moves on to the next free number.
+- The "switched off" summary is a chip beside the list's title (in the phone's sheet, beside the sheet's title) instead of a line of its own, so switching the first question off no longer pushes the list down.
+- Dragging question 1 to question 150 in a 200-question quiz with the CPU slowed 4× (median of 5): long tasks 13.1 s → 0.87 s, 95th percentile frame 90 → 30 ms, frames over 100 ms 24 → 3, longest frame 651 → 411 ms (the drop). Without slowing: longest frame 50 ms.
+
+### Play-through preview in the editor (phase 49)
+- "Try it" above the editor's phone preview plays the quiz on the preview from the selected question (or the selected group's first question): answer on the phone frame, see the real reveal screen with right or wrong, the points and the correct answer, then Next. A bar above the frame shows the question number and the score; Stop goes back to the normal preview. The timer runs but never closes the question; a late answer counts as given at the end of the time. Nothing is saved and no game is created.
+- The play-through follows the game's rules: switched-off questions are skipped, a group's own rules apply (speed bonus, streak bonus), typed answers get the quiz's typo tolerance. Results always show, also when the game holds them back. A text question without accepted answers says "No grading in the preview"; polls thank for the vote as in a game.
+- Editing the question being played plays it again from the start and takes back its points; deleting it or switching it off stops the play-through.
+- The scoring rules (`normalise`, typo matching, `isCorrect`, `pointsFor`, `displayOrder`, `toPublicQuestion`, `settingsFor`) moved from the server's game engine to `packages/shared/src/scoring.ts`, so the preview counts exactly as a game; the server re-exports them unchanged. The preview's state and its reveal snapshot are pure functions in `features/editor/preview-play.ts`.
 
 ## 1.8.0 – 2026-11-01
 

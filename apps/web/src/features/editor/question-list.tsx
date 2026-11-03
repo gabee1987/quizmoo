@@ -6,12 +6,13 @@ import {
   closestCenter,
   useDroppable,
   type CollisionDetection,
+  type DraggableAttributes,
   type DragOverEvent,
   type UniqueIdentifier,
 } from '@dnd-kit/core'
 import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEventHandler, type ReactNode } from 'react'
+import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEventHandler, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import {
@@ -54,6 +55,37 @@ const GROW = 'grid-template-rows 300ms cubic-bezier(0.22, 1, 0.36, 1)'
  * questions' rows carry the sides between them. Closed, the rows shrink to nothing and the bottom
  * slides up to the header.
  */
+/**
+ * A row's left column, down the card's whole height: the drag handle, which a question shows as its
+ * number until the row is hovered (the whole card drags, so the grip is only a hint).
+ */
+const gripClass =
+  'group/grip flex w-7 shrink-0 cursor-grab items-center justify-center self-stretch rounded-l-[10px] text-muted-foreground outline-none focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:ring-inset active:cursor-grabbing'
+
+/**
+ * A question's place in the quiz; with `grip`, the grip takes its place while the row is hovered or the
+ * handle has keyboard focus. Touch screens, which do not hover, keep the number.
+ */
+function NumberOrGrip({ n, selected, grip }: { n: number; selected: boolean; grip: boolean }) {
+  return (
+    <>
+      <span
+        className={cn(
+          'text-xs font-extrabold tabular-nums',
+          selected ? 'text-primary' : 'text-muted-foreground',
+          grip && 'group-hover/row:hidden group-focus-visible/grip:hidden',
+        )}
+      >
+        {n}
+      </span>
+      {grip && <GripVerticalIcon className="hidden size-4 group-hover/row:block group-focus-visible/grip:block" aria-hidden="true" />}
+    </>
+  )
+}
+
+/** A group header's icon, in the group's colour. */
+const groupIconBox = 'relative grid size-8 shrink-0 place-items-center rounded-lg bg-(--tag)/25 text-foreground'
+
 const frame = (selected: boolean) => cn('bg-(--frame)/10', selected ? 'border-(--frame)' : 'border-(--frame)/40')
 const frameStyle = (group: QuestionGroup) => ({ '--frame': tagColor(group.color) }) as CSSProperties
 
@@ -122,6 +154,14 @@ export function QuestionList({
 }) {
   const { t } = useTranslation()
   const sensors = useSortableSensors()
+  // The rows' handlers stay the same between renders (the caller's change with every render of the
+  // editor), so a drag does not render every row's contents again.
+  const handlers = useRef({ onSelect, onSwitch })
+  useLayoutEffect(() => {
+    handlers.current = { onSelect, onSwitch }
+  })
+  const selectRow = useCallback((id: string) => handlers.current.onSelect(id), [])
+  const switchRow = useCallback((id: string, on: boolean) => handlers.current.onSwitch(id, on), [])
   const [collapsed, setCollapsed] = useState<ReadonlySet<string>>(new Set())
   const [activeId, setActiveId] = useState<string | null>(null)
   const [target, setTarget] = useState<Target | null>(null)
@@ -179,6 +219,10 @@ export function QuestionList({
   const listRef = useRef<HTMLOListElement>(null)
   const dragged = useRef(false)
   useFlipOnReorder(listRef, rendered.map(itemId).join(), selectedId, dragged)
+  // Near an edge during a drag only the panel the list scrolls in follows the pointer: if the page
+  // around it scrolled too, the rows would slide under the pointer and move the drop target.
+  const panel = useRef<HTMLElement | undefined>(undefined)
+  const autoScroll = useMemo(() => ({ canScroll: (element: Element) => !panel.current || element === panel.current }), [])
 
   // The group a dragged question would land in (its own until it moves): the ghost waits in its card.
   const landing = useMemo(() => {
@@ -273,8 +317,10 @@ export function QuestionList({
         collisionDetection={collision}
         measuring={{ droppable: { strategy: MeasuringStrategy.Always } }}
         accessibility={accessibility}
+        autoScroll={autoScroll}
         onDragStart={({ active, activatorEvent }) => {
           setActiveId(String(active.id))
+          panel.current = listRef.current ? scrollPanel(listRef.current) : undefined
           const event = activatorEvent as MouseEvent | TouchEvent | KeyboardEvent
           startX.current = 'clientX' in event ? event.clientX : 'touches' in event ? (event.touches[0]?.clientX ?? null) : null
           if (startX.current !== null && listRef.current) setTrashRect(trashPlace(listRef.current))
@@ -333,8 +379,8 @@ export function QuestionList({
                   index={numbers.get(item.question.id)!}
                   selected={item.question.id === selectedId}
                   invalid={invalidIds.has(item.question.id)}
-                  onSelect={() => onSelect(item.question.id)}
-                  onSwitch={(on) => onSwitch(item.question.id, on)}
+                  onSelect={selectRow}
+                  onSwitch={switchRow}
                 />
               )
             })}
@@ -382,17 +428,18 @@ export function QuestionList({
  * left edge instead.
  */
 function trashPlace(list: HTMLElement) {
-  let panel: HTMLElement = list
-  for (let node = list.parentElement; node && node !== document.body; node = node.parentElement) {
-    const overflow = getComputedStyle(node).overflowY
-    if (overflow === 'auto' || overflow === 'scroll') {
-      panel = node
-      break
-    }
-  }
-  const area = panel.getBoundingClientRect()
+  const area = (scrollPanel(list) ?? list).getBoundingClientRect()
   const top = Math.max(area.top, 8)
   return { top, left: Math.max(8, area.left - TRASH_WIDTH - 8), height: Math.min(area.bottom, window.innerHeight - 8) - top }
+}
+
+/** The nearest element the list scrolls in (the sidebar's body, the sheet), if any below the page. */
+function scrollPanel(list: HTMLElement): HTMLElement | undefined {
+  for (let node = list.parentElement; node && node !== document.body; node = node.parentElement) {
+    const overflow = getComputedStyle(node).overflowY
+    if (overflow === 'auto' || overflow === 'scroll') return node
+  }
+  return undefined
 }
 
 /** Drop target for deleting: its own panel left of the list while a row is dragged with a pointer. */
@@ -505,9 +552,9 @@ function GroupRow({
               {...attributes}
               onKeyDown={onKeyDown as KeyboardEventHandler | undefined}
               aria-label={t('editor.dragGroup', { n: index + 1 })}
-              className="flex h-12 w-7 shrink-0 cursor-grab items-center justify-center rounded-lg text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring active:cursor-grabbing"
+              className={gripClass}
             >
-              <GripVerticalIcon className="size-4" aria-hidden="true" />
+              <GripVerticalIcon className="hidden size-4 group-hover/row:block group-focus-visible/grip:block [@media(hover:none)]:block" aria-hidden="true" />
             </button>
           }
         />
@@ -578,67 +625,71 @@ function GroupBody({
         className,
       )}
     >
-      {handle ?? (
-        <span className="flex h-12 w-7 shrink-0 items-center justify-center text-muted-foreground">
-          <GripVerticalIcon className="size-4" aria-hidden="true" />
-        </span>
-      )}
-      <button
-        type="button"
-        onClick={onSelect}
-        aria-current={selected ? 'true' : undefined}
-        // As the card's top, the bottom piece below adds the rest of its height.
-        className={cn(
-          'flex min-w-0 flex-1 items-center gap-2.5 rounded-lg text-left outline-none focus-visible:ring-[3px] focus-visible:ring-ring',
-          shape === 'whole' ? 'min-h-14 py-1.5' : 'min-h-12',
+      {/* The left column, as on the questions' cards: the grip while the header is hovered. */}
+      {handle ?? <span className="w-7 shrink-0 self-stretch" />}
+      {/* A click anywhere here selects the group; its title is the button, for the keyboard and screen
+          readers (a click on it reaches this handler too). As the card's top, the bottom piece below
+          adds the rest of its height. */}
+      <div onClick={onSelect} className={cn('flex min-w-0 flex-1 cursor-pointer items-center gap-2', shape === 'whole' ? 'min-h-14 py-1.5' : 'min-h-12')}>
+        {onSwitch ? (
+          // The icon is also the "In the game" switch for all its questions, like a question's type icon.
+          <button
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation()
+              onSwitch(switchState !== 'on')
+            }}
+            aria-label={t(switchState === 'on' ? 'editor.inGame.switchGroupOffN' : 'editor.inGame.switchGroupOnN', { n: index + 1 })}
+            title={t(switchState === 'on' ? 'editor.inGame.switchGroupOffN' : 'editor.inGame.switchGroupOnN', { n: index + 1 })}
+            className={cn(groupIconBox, 'group/eye outline-none hover:bg-muted focus-visible:ring-[3px] focus-visible:ring-ring')}
+          >
+            <LayersIcon className={cn('size-4 group-hover/row:hidden group-focus-visible/eye:hidden [@media(hover:none)]:hidden', switchState === 'off' && 'opacity-55')} aria-hidden="true" />
+            {switchState === 'on' ? (
+              <EyeIcon className="hidden size-4 group-hover/row:block group-focus-visible/eye:block [@media(hover:none)]:block" aria-hidden="true" />
+            ) : (
+              <EyeOffIcon className="hidden size-4 group-hover/row:block group-focus-visible/eye:block [@media(hover:none)]:block" aria-hidden="true" />
+            )}
+            {invalid && <span aria-hidden="true" className="absolute -top-1 -right-1 size-3 rounded-full border-2 border-card bg-destructive" />}
+          </button>
+        ) : (
+          <span aria-hidden="true" className={groupIconBox}>
+            <LayersIcon className={cn('size-4', switchState === 'off' && 'opacity-55')} />
+            {invalid && <span className="absolute -top-1 -right-1 size-3 rounded-full border-2 border-card bg-destructive" />}
+          </span>
         )}
-      >
-        <span className={cn('relative grid size-9 shrink-0 place-items-center rounded-lg bg-(--tag)/25 text-foreground', switchState === 'off' && 'opacity-55')}>
-          <LayersIcon className="size-4" aria-hidden="true" />
-          {invalid && (
-            <span className="absolute -top-1 -right-1 size-3 rounded-full border-2 border-card bg-destructive">
-              <span className="sr-only">{t('editor.needsFixing')}</span>
-            </span>
-          )}
-        </span>
-        <span className="min-w-0 flex-1">
-          <span className="flex items-center gap-1 text-xs font-extrabold text-foreground/75 tabular-nums">
+        <span className="flex min-w-0 flex-1 flex-col">
+          <span aria-hidden="true" className="flex items-center gap-1 text-xs leading-5 font-extrabold text-foreground/75 tabular-nums">
             {group.keepOrder && (
               <span title={t('editor.orderKept')} className="inline-flex">
-                <LockIcon className="size-3" aria-hidden="true" />
-                <span className="sr-only">{t('editor.orderKept')} · </span>
+                <LockIcon className="size-3" />
               </span>
             )}
             <span className="whitespace-nowrap">{t('editor.groupN', { n: index + 1 })}</span>
-            {/* In the list the card's badge shows the count; screen readers get it here. */}
-            {showCount ? (
-              <> · {t('editor.questionCount', { count: questionCount })}</>
-            ) : (
-              <span className="sr-only"> · {t('editor.questionCount', { count: questionCount })}</span>
-            )}
-            {switchState === 'off' && <span className="sr-only"> · {t('editor.inGame.offBadge')}</span>}
+            {/* In the list the card's badge shows the count. */}
+            {showCount && <> · {t('editor.questionCount', { count: questionCount })}</>}
             {/* Some off: how many, as a small count (the questions' own rows show which). */}
             {switchState === 'mixed' && (
               <span
                 title={t('editor.inGame.someOff', { count: offCount })}
                 className="inline-flex shrink-0 items-center gap-0.5 rounded-full bg-card/80 px-1.5 py-px text-[0.6875rem] leading-4 font-extrabold text-muted-foreground"
               >
-                <EyeOffIcon className="size-3" aria-hidden="true" />
+                <EyeOffIcon className="size-3" />
                 {offCount}
-                <span className="sr-only"> {t('editor.inGame.someOff', { count: offCount })}</span>
               </span>
             )}
           </span>
-          <span className={cn('line-clamp-2 text-sm leading-snug font-black wrap-break-word', switchState === 'off' && 'text-muted-foreground')}>{group.title}</span>
+          <button type="button" aria-current={selected ? 'true' : undefined} className="block rounded-md text-left outline-none focus-visible:ring-[3px] focus-visible:ring-ring">
+            <span className="sr-only">
+              {group.keepOrder && <>{t('editor.orderKept')} · </>}
+              {t('editor.groupN', { n: index + 1 })} · {t('editor.questionCount', { count: questionCount })}
+              {switchState === 'off' && <> · {t('editor.inGame.offBadge')}</>}
+              {switchState === 'mixed' && <> · {t('editor.inGame.someOff', { count: offCount })}</>}
+              {invalid && <> · {t('editor.needsFixing')}</>} ·{' '}
+            </span>
+            <span className={cn('line-clamp-2 text-sm leading-snug font-black wrap-break-word', switchState === 'off' && 'text-muted-foreground')}>{group.title}</span>
+          </button>
         </span>
-      </button>
-      {onSwitch && (
-        <EyeToggle
-          off={switchState !== 'on'}
-          label={t(switchState === 'on' ? 'editor.inGame.switchGroupOffN' : 'editor.inGame.switchGroupOnN', { n: index + 1 })}
-          onClick={() => onSwitch(switchState !== 'on')}
-        />
-      )}
+      </div>
       <button
         type="button"
         onClick={onToggle}
@@ -703,10 +754,10 @@ function SortableRow({
   index: number
   selected: boolean
   invalid: boolean
-  onSelect: () => void
-  onSwitch: (on: boolean) => void
+  /** Stable across renders (they take the question's id), so the row's contents can skip a render. */
+  onSelect: (id: string) => void
+  onSwitch: (id: string, on: boolean) => void
 }) {
-  const { t } = useTranslation()
   const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition } = useSortable({ id: question.id, disabled: hidden })
   // Mouse and touch drag the whole row; the keyboard drags from the handle, so Space on the row's
   // select button still selects.
@@ -727,37 +778,87 @@ function SortableRow({
       className={cn('grid touch-manipulation', hidden ? 'grid-rows-[0fr]' : 'grid-rows-[1fr]')}
       {...pointerListeners}
     >
-      {/* Inside a group's card the row keeps the card's sides, so the card stays whole; the question is
-          centred in it, a little narrower than outside. */}
-      <div className="flex min-h-0 flex-col justify-end overflow-hidden">
-        <div className={cn('py-0.75', frameGroup && ['border-x-2 px-1', frame(frameSelected)])}>
-          <RowBody
-            question={question}
-            index={index}
-            selected={selected}
-            invalid={invalid}
-            grouped={!!frameGroup}
-            ghost={ghostColor !== undefined ? { color: ghostColor ?? undefined } : undefined}
-            onSelect={onSelect}
-            onSwitch={onSwitch}
-            handle={
-              <button
-                ref={setActivatorNodeRef}
-                type="button"
-                {...attributes}
-                onKeyDown={onKeyDown as KeyboardEventHandler | undefined}
-                aria-label={t('editor.dragQuestion', { n: index + 1 })}
-                className="flex h-12 w-7 shrink-0 cursor-grab items-center justify-center rounded-lg text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring active:cursor-grabbing"
-              >
-                <GripVerticalIcon className="size-4" aria-hidden="true" />
-              </button>
-            }
-          />
-        </div>
-      </div>
+      <RowContent
+        question={question}
+        frameGroup={frameGroup}
+        frameSelected={frameSelected}
+        ghostColor={ghostColor}
+        index={index}
+        selected={selected}
+        invalid={invalid}
+        onSelect={onSelect}
+        onSwitch={onSwitch}
+        handleRef={setActivatorNodeRef}
+        handleAttributes={attributes}
+        onHandleKeyDown={onKeyDown as KeyboardEventHandler | undefined}
+      />
     </li>
   )
 }
+
+/**
+ * A sortable row's contents. dnd-kit renders every sortable row again on each move of a drag; only the
+ * row's `li` (its transform) changes then, so the contents keep their last render (phase 48).
+ */
+const RowContent = memo(function RowContent({
+  question,
+  frameGroup,
+  frameSelected,
+  ghostColor,
+  index,
+  selected,
+  invalid,
+  onSelect,
+  onSwitch,
+  handleRef,
+  handleAttributes,
+  onHandleKeyDown,
+}: {
+  question: Question
+  frameGroup: QuestionGroup | undefined
+  frameSelected: boolean
+  ghostColor: TagColor | null | undefined
+  index: number
+  selected: boolean
+  invalid: boolean
+  onSelect: (id: string) => void
+  onSwitch: (id: string, on: boolean) => void
+  handleRef: (element: HTMLElement | null) => void
+  handleAttributes: DraggableAttributes
+  onHandleKeyDown: KeyboardEventHandler | undefined
+}) {
+  const { t } = useTranslation()
+  return (
+    // Inside a group's card the row keeps the card's sides, so the card stays whole; the question is
+    // centred in it, a little narrower than outside.
+    <div className="flex min-h-0 flex-col justify-end overflow-hidden">
+      <div className={cn('py-0.75', frameGroup && ['border-x-2 px-1', frame(frameSelected)])}>
+        <RowBody
+          question={question}
+          index={index}
+          selected={selected}
+          invalid={invalid}
+          grouped={!!frameGroup}
+          ghost={ghostColor !== undefined ? { color: ghostColor ?? undefined } : undefined}
+          onSelect={() => onSelect(question.id)}
+          onSwitch={(on) => onSwitch(question.id, on)}
+          handle={
+            <button
+              ref={handleRef}
+              type="button"
+              {...handleAttributes}
+              onKeyDown={onHandleKeyDown}
+              aria-label={t('editor.dragQuestion', { n: index + 1 })}
+              className={gripClass}
+            >
+              <NumberOrGrip n={index + 1} selected={selected} grip />
+            </button>
+          }
+        />
+      </div>
+    </div>
+  )
+})
 
 /** A question's row without dragging (the search results), naming its group when it has one. */
 export function QuestionRow({
@@ -772,7 +873,7 @@ export function QuestionRow({
   onSelect: () => void
   onSwitch: (on: boolean) => void
 }) {
-  return <RowBody {...props} groupTitle={group?.title} handle={<span className="w-1 shrink-0" />} />
+  return <RowBody {...props} groupTitle={group?.title} />
 }
 
 /** A row's look, shared by the list and the drag overlay; a stripe on the left shows its colour tag. */
@@ -808,12 +909,16 @@ function RowBody({
   const { t } = useTranslation()
   const Icon = typeIcons[question.type]
   const off = !!question.off
+  const typeBox = cn(
+    'relative grid size-8 shrink-0 place-items-center rounded-lg',
+    question.color && !ghost ? 'bg-(--tag)/25 text-foreground' : selected ? 'bg-primary text-primary-foreground' : 'bg-card text-muted-foreground',
+  )
   return (
     <div
       style={tagStyle(ghost ? ghost.color : question.color)}
       className={cn(
         // Every question is a soft rounded card, in a group or not, so the rows read as cards on the panel.
-        'group/row relative isolate flex items-center gap-1 overflow-hidden rounded-xl border-2 pr-1.5 transition-[border-color,background-color,box-shadow]',
+        'group/row relative isolate flex items-center gap-1 overflow-hidden rounded-xl border-2 pr-1 transition-[border-color,background-color,box-shadow]',
         ghost
           ? 'border-dashed border-(--tag) bg-(--tag)/12 *:invisible'
           : selected
@@ -832,71 +937,62 @@ function RowBody({
     >
       {question.color && !ghost && !selected && !off && <span aria-hidden="true" className="absolute inset-0 -z-1 bg-(--tag)/10" />}
       {handle ?? (
-        <span className="flex h-12 w-7 shrink-0 items-center justify-center text-muted-foreground">
-          <GripVerticalIcon className="size-4" aria-hidden="true" />
+        <span className="flex w-7 shrink-0 items-center justify-center self-stretch">
+          <NumberOrGrip n={index + 1} selected={selected} grip={false} />
         </span>
       )}
-      <button
-        type="button"
-        onClick={onSelect}
-        aria-current={selected ? 'true' : undefined}
-        className="flex min-h-14 min-w-0 flex-1 items-center gap-2.5 rounded-lg py-1.5 text-left outline-none focus-visible:ring-[3px] focus-visible:ring-ring"
-      >
-        <span
-          className={cn(
-            'relative grid size-9 shrink-0 place-items-center rounded-lg',
-            off && 'opacity-55',
-            question.color && !ghost ? 'bg-(--tag)/25 text-foreground' : selected ? 'bg-primary text-primary-foreground' : 'bg-card text-muted-foreground',
-          )}
-        >
-          <Icon className="size-4" aria-hidden="true" />
-          {invalid && (
-            <span className="absolute -top-1 -right-1 size-3 rounded-full border-2 border-card bg-destructive">
-              <span className="sr-only">{t('editor.needsFixing')}</span>
-            </span>
-          )}
-        </span>
-        <span className="min-w-0 flex-1">
-          <span className={cn('flex items-center gap-1.5 text-xs font-bold tabular-nums', selected ? 'text-primary' : 'text-muted-foreground')}>
-            <span className="truncate">
+      {/* A click anywhere here selects the question; its text is the button, for the keyboard and screen
+          readers (a click on it reaches this handler too). */}
+      <div onClick={onSelect} className="flex min-h-12 min-w-0 flex-1 cursor-pointer items-center gap-2 py-1">
+        {onSwitch ? (
+          // The type icon is also the "In the game" switch: while the row is hovered (or the switch has
+          // keyboard focus) it shows the eye; touch screens, which do not hover, always show the eye.
+          <button
+            type="button"
+            // Not a click on the row: switching a question off does not select it.
+            onClick={(event) => {
+              event.stopPropagation()
+              onSwitch(off)
+            }}
+            aria-label={t(off ? 'editor.inGame.switchOnN' : 'editor.inGame.switchOffN', { n: index + 1 })}
+            title={t(off ? 'editor.inGame.switchOnN' : 'editor.inGame.switchOffN', { n: index + 1 })}
+            className={cn(typeBox, 'group/eye outline-none hover:bg-muted hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring')}
+          >
+            <Icon className={cn('size-4 group-hover/row:hidden group-focus-visible/eye:hidden [@media(hover:none)]:hidden', off && 'opacity-55')} aria-hidden="true" />
+            {off ? (
+              <EyeOffIcon className="hidden size-4 group-hover/row:block group-focus-visible/eye:block [@media(hover:none)]:block" aria-hidden="true" />
+            ) : (
+              <EyeIcon className="hidden size-4 group-hover/row:block group-focus-visible/eye:block [@media(hover:none)]:block" aria-hidden="true" />
+            )}
+            {invalid && <span aria-hidden="true" className="absolute -top-1 -right-1 size-3 rounded-full border-2 border-card bg-destructive" />}
+          </button>
+        ) : (
+          <span aria-hidden="true" className={typeBox}>
+            <Icon className={cn('size-4', off && 'opacity-55')} />
+            {invalid && <span className="absolute -top-1 -right-1 size-3 rounded-full border-2 border-card bg-destructive" />}
+          </span>
+        )}
+        <span className="flex min-w-0 flex-1 flex-col">
+          <span aria-hidden="true" className={cn('truncate text-xs leading-5 font-bold', selected ? 'text-primary' : 'text-muted-foreground')}>
+            {t(`questionTypes.${question.type}`)}
+            {groupTitle && <> · {groupTitle}</>}
+          </span>
+          <button type="button" aria-current={selected ? 'true' : undefined} className="block rounded-md text-left outline-none focus-visible:ring-[3px] focus-visible:ring-ring">
+            <span className="sr-only">
               {index + 1} · {t(`questionTypes.${question.type}`)}
               {groupTitle && <> · {groupTitle}</>}
+              {off && <> · {t('editor.inGame.offBadge')}</>}
+              {invalid && <> · {t('editor.needsFixing')}</>} ·{' '}
             </span>
-            {/* The crossed-out eye on the right shows it; screen readers get it with the row's name. */}
-            {off && <span className="sr-only"> · {t('editor.inGame.offBadge')}</span>}
-          </span>
-          <span className={cn('line-clamp-2 text-sm leading-snug font-bold wrap-break-word', off && 'text-muted-foreground')}>
-            {question.text || <span className="text-muted-foreground italic">{t('editor.untitledQuestion')}</span>}
-          </span>
+            <span className={cn('line-clamp-2 text-sm leading-snug font-bold wrap-break-word', off && 'text-muted-foreground')}>
+              {question.text || <span className="text-muted-foreground italic">{t('editor.untitledQuestion')}</span>}
+            </span>
+          </button>
         </span>
         {question.imageId && (
           <img src={`/api/images/${question.imageId}`} alt="" className={cn('h-9 w-12 shrink-0 rounded-md border bg-muted object-cover', off && 'opacity-50 grayscale')} />
         )}
-      </button>
-      {onSwitch && <EyeToggle off={off} label={t(off ? 'editor.inGame.switchOnN' : 'editor.inGame.switchOffN', { n: index + 1 })} onClick={() => onSwitch(off)} />}
+      </div>
     </div>
-  )
-}
-
-/**
- * A row's quick "In the game" switch. A switched-off row always shows it (crossed out); an on row shows
- * it while hovered or focused, and faintly on touch screens, so the list stays calm.
- */
-function EyeToggle({ off, label, onClick }: { off: boolean; label: string; onClick: () => void }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-label={label}
-      title={label}
-      className={cn(
-        'grid size-8 shrink-0 place-items-center rounded-full outline-none transition-[opacity,background-color,color] hover:bg-muted hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring',
-        off
-          ? 'text-muted-foreground'
-          : 'text-muted-foreground opacity-0 group-hover/row:opacity-100 group-focus-within/row:opacity-100 focus-visible:opacity-100 [@media(hover:none)]:opacity-60',
-      )}
-    >
-      {off ? <EyeOffIcon className="size-4" aria-hidden="true" /> : <EyeIcon className="size-4" aria-hidden="true" />}
-    </button>
   )
 }

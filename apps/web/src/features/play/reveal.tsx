@@ -16,7 +16,8 @@ import { usePicksOpen } from './picks-open'
 import { TeamPicksPanel } from './team-picks-panel'
 import { TeamSummary } from './team-summary'
 
-export function Reveal({ snapshot }: { snapshot: PlayerSnapshot }) {
+/** `ungradedTitle`: the editor's preview, where nobody grades a typed answer. */
+export function Reveal({ snapshot, ungradedTitle }: { snapshot: PlayerSnapshot; ungradedTitle?: string | undefined }) {
   const { t, i18n } = useTranslation()
   const points = useCountUp(snapshot.lastPoints ?? 0, 900, 350)
   // A question the host shows ("Show answers") has its answer even while the rest is held back.
@@ -37,7 +38,7 @@ export function Reveal({ snapshot }: { snapshot: PlayerSnapshot }) {
   if (isPoll) title = answered ? t('play.thanksForVoting') : t('play.noAnswer')
   else if (correct === true) [tone, title] = ['bg-success text-success-foreground', t('play.correct')]
   else if (correct === false) [tone, title] = ['bg-destructive text-destructive-foreground', t('play.wrong')]
-  else if (answered) title = t('play.awaitingGrading')
+  else if (answered) title = ungradedTitle ?? t('play.awaitingGrading')
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-5 text-center">

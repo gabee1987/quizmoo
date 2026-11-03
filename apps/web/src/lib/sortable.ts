@@ -13,17 +13,20 @@ import { sortableKeyboardCoordinates } from '@dnd-kit/sortable'
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
+// Sensor options live outside the hooks: `useSensor` memoises on the options object, and new options
+// on each render give every sortable item new listeners, so each one renders again (phase 48).
+const mouse = { activationConstraint: { distance: 4 } }
+const touchHold = { activationConstraint: { delay: 250, tolerance: 5 } }
+const touchMove = { activationConstraint: { distance: 6 } }
+const keyboard = { coordinateGetter: sortableKeyboardCoordinates }
+
 /**
  * Sensors for every sortable list: a mouse drag starts after 4 px (so clicks still click),
  * a touch drag after a 250 ms press that moves less than 5 px (so a swipe still scrolls),
  * and the keyboard drags with Space, the arrows and Space again.
  */
 export function useSortableSensors() {
-  return useSensors(
-    useSensor(MouseSensor, { activationConstraint: { distance: 4 } }),
-    useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 5 } }),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
-  )
+  return useSensors(useSensor(MouseSensor, mouse), useSensor(TouchSensor, touchHold), useSensor(KeyboardSensor, keyboard))
 }
 
 /**
@@ -32,11 +35,7 @@ export function useSortableSensors() {
  * so a swipe on them drags instead of scrolling the page.
  */
 export function useInstantSortableSensors() {
-  return useSensors(
-    useSensor(MouseSensor, { activationConstraint: { distance: 4 } }),
-    useSensor(TouchSensor, { activationConstraint: { distance: 6 } }),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
-  )
+  return useSensors(useSensor(MouseSensor, mouse), useSensor(TouchSensor, touchMove), useSensor(KeyboardSensor, keyboard))
 }
 
 /** Translated screen reader texts for a sortable list of `ids`; `name(id)` says what an item is ("Question 3"). */
