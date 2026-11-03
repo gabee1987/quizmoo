@@ -1619,6 +1619,32 @@
     "current": "Current version",
     "releasedOn": "Released {{date}}",
     "releases": {
+      "1_10_0": {
+        "title": "A real finale on the projector and on every phone",
+        "intro": "The end of the game is now a show: a podium with a drum roll, the leaderboard, awards and game facts on the projector, and four pages of results on every phone.",
+        "sections": [
+          {
+            "title": "On the projector",
+            "items": [
+              "The podium builds up place by place, with a drum roll before the winner, the crown landing and confetti.",
+              "Then the leaderboard with everyone (or every team), the awards (Fastest finger, On a roll, Know-it-all, Climber) and the game in numbers: questions, players, share right, game length, the hardest and easiest question.",
+              "You decide what is on the projector: pick a page in the Podium card on the host page, or use the arrows, the page names and the Automatic button on the projector itself if you opened it from the host page. Space and the arrow keys work too.",
+              "Automatic shows a new page about every 10 seconds and starts again after the last one.",
+              "\"Show the questions\" goes through every question with its answers, one at a time, only when you want it. Each shows the right answer, how many got it right and a word about it, from \"Easy peasy!\" to \"A real brain-teaser!\".",
+              "There is one projector screen now: the separate results slideshow is gone. \"Open projector\" on the results page opens the game's projector while the game is still available (about an hour after it ends)."
+            ]
+          },
+          {
+            "title": "On the phones",
+            "items": [
+              "The last screen is four pages instead of one long list: Standings, Answers, Facts and My stats. Players move between them with the buttons, a swipe or the arrow keys.",
+              "Standings shows the player's place in a big card and the players just above and below them.",
+              "Answers lists every question, closed until tapped, with how many were right on top.",
+              "Facts shows the game's figures and awards, with \"That's you!\" on the player's own. My stats shows their best streak, answer times, their place after each question and the points per question."
+            ]
+          }
+        ]
+      },
       "1_9_0": {
         "title": "Try your quiz in the editor, and a tidier question list",
         "intro": "Play your quiz on the editor's phone preview before the event, and work faster in the list of questions, even with 200 of them.",

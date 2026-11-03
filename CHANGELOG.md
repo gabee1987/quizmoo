@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.10.0 – 2026-11-03
 
 ### The phone's end-of-game screens, step by step (phase 52)
 - The phone's last screen is four pages instead of one long scroll: Standings, Answers, Facts and My stats. The player moves between them with the step pills at the top, Back and Next at the bottom (Next names the page it opens), a sideways swipe or the arrow keys. The page is kept in the address (`?page=`), so a refresh stays on it. "Back to home" is on the last page; "Join the next round" stays on top of every page.

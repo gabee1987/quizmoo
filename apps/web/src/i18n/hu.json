@@ -1619,6 +1619,32 @@
     "current": "Mostani verzió",
     "releasedOn": "Megjelent: {{date}}",
     "releases": {
+      "1_10_0": {
+        "title": "Igazi finálé a kivetítőn és minden telefonon",
+        "intro": "A játék vége most már egy kis show: dobogó dobpergéssel, ranglista, díjak és érdekességek a kivetítőn, és négy oldalnyi eredmény minden telefonon.",
+        "sections": [
+          {
+            "title": "A kivetítőn",
+            "items": [
+              "A dobogó helyezésről helyezésre épül fel: a győztes előtt dobpergés, aztán leszáll a korona, és jön a konfetti.",
+              "Utána a ranglista mindenkivel (vagy minden csapattal), a díjak (Villámkéz, Megállíthatatlan, Mindentudó, Nagy feltörő) és a játék számokban: kérdések, játékosok, a jó válaszok aránya, a játékidő, a legnehezebb és a legkönnyebb kérdés.",
+              "Te döntöd el, mi van a kivetítőn: válassz oldalt a vezérlő Dobogó kártyáján, vagy használd a nyilakat, az oldalneveket és az Automatikus gombot magán a kivetítőn, ha a vezérlőből nyitottad meg. A szóköz és a nyílbillentyűk is működnek.",
+              "Az Automatikus kb. 10 másodpercenként lapoz, az utolsó oldal után elölről kezdi.",
+              "A „Mutasd a kérdéseket” egyenként végigmegy a kérdéseken a válaszokkal, de csak ha szeretnéd. Mindegyiknél ott a helyes válasz, hányan találták el, és egy szó róla, az „Ez könnyű volt!”-tól az „Igazi fejtörő!”-ig.",
+              "Mostantól egy kivetítő van: a külön eredmény-diavetítés megszűnt. Az eredményoldal „Kivetítő megnyitása” gombja a játék kivetítőjét nyitja meg, amíg a játék még elérhető (a vége után kb. egy óráig)."
+            ]
+          },
+          {
+            "title": "A telefonokon",
+            "items": [
+              "Az utolsó képernyő egy hosszú lista helyett négy oldal: Helyezések, Válaszok, Érdekességek és Statisztikám. A gombokkal, húzással vagy a nyílbillentyűkkel lehet lapozni.",
+              "A Helyezések nagy kártyán mutatja a játékos helyét, és a közvetlenül előtte és mögötte állókat.",
+              "A Válaszok minden kérdést felsorol, koppintásra nyílnak, felül pedig ott, hány lett jó.",
+              "Az Érdekességek a játék számait és a díjakat mutatja, a saját díjon „Ez te vagy!” felirattal. A Statisztikám a legjobb sorozatot, a válaszidőket, a helyezést minden kérdés után és a kérdésenkénti pontokat."
+            ]
+          }
+        ]
+      },
       "1_9_0": {
         "title": "Kvíz kipróbálása a szerkesztőben és rendezettebb kérdéslista",
         "intro": "Játszd végig a kvízt a szerkesztő telefonos előnézetében még a rendezvény előtt, és dolgozz gyorsabban a kérdéslistában, akár 200 kérdéssel is.",
