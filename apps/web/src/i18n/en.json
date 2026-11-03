@@ -1519,6 +1519,31 @@
     "current": "Current version",
     "releasedOn": "Released {{date}}",
     "releases": {
+      "1_9_0": {
+        "title": "Try your quiz in the editor, and a tidier question list",
+        "intro": "Play your quiz on the editor's phone preview before the event, and work faster in the list of questions, even with 200 of them.",
+        "sections": [
+          {
+            "title": "Try your quiz",
+            "items": [
+              "\"Try it\" above the phone preview plays the quiz from the selected question: answer on the preview, see whether it was right, the points and the correct answer, then go on with Next. Stop takes you back to the editor's preview.",
+              "It counts as a game would: speed and streak bonus, small typos in typed answers, and each group's own rules. Switched-off questions are skipped.",
+              "Change the question while you are on it and it starts again with your change. Nothing is saved and no game is started."
+            ]
+          },
+          {
+            "title": "The list of questions",
+            "items": [
+              "Dragging questions stays smooth in long quizzes, and the page no longer scrolls along when you drag towards the bottom of the list.",
+              "Each card shows its number on the left, which turns into the grip when you point at the card. You can still drag the card from anywhere.",
+              "The question type's icon turns into the eye when you point at it: click it to switch the question off or on. Group headers work the same way for all their questions.",
+              "Cards are tighter, so the question text has more room.",
+              "The number of switched-off questions shows next to the list's title with \"All on\", so switching a question off no longer moves the list.",
+              "\"Group\" in the list adds the new group above the selected question instead of at the end of the list, with a name not used yet."
+            ]
+          }
+        ]
+      },
       "1_8_0": {
         "title": "Seasonal themes",
         "intro": "On special days of the year Quizmoo takes on the season's look: its own colours, decorations and a dressed-up cow, on every page and in your games.",

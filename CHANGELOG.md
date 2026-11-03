@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.9.0 – 2026-11-03
 
 ### Smoother drag with 200 questions (phase 48)
 - The sortable lists' sensor options are module constants (`lib/sortable.ts`). `useSensor` memoises on its options object, so new options on every render gave every sortable item new listeners and rendered every row again on each move of a drag.

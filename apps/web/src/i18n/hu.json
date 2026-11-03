@@ -1519,6 +1519,31 @@
     "current": "Mostani verzió",
     "releasedOn": "Megjelent: {{date}}",
     "releases": {
+      "1_9_0": {
+        "title": "Kvíz kipróbálása a szerkesztőben és rendezettebb kérdéslista",
+        "intro": "Játszd végig a kvízt a szerkesztő telefonos előnézetében még a rendezvény előtt, és dolgozz gyorsabban a kérdéslistában, akár 200 kérdéssel is.",
+        "sections": [
+          {
+            "title": "Próbáld ki a kvízt",
+            "items": [
+              "A telefonos előnézet fölötti „Kipróbálás” a kijelölt kérdéstől játssza a kvízt: válaszolj az előnézetben, nézd meg, jó volt-e, hány pontot ért és mi a helyes válasz, majd menj tovább a Tovább gombbal. A Leállítás visszavisz a szerkesztő előnézetéhez.",
+              "Úgy számol, mint egy játék: gyorsasági és sorozatbónusz, apró elírások a beírt válaszokban, és minden csoport saját szabályai. A kikapcsolt kérdéseket kihagyja.",
+              "Ha közben módosítod a kérdést, az elölről indul a változtatással. Semmi nem mentődik, és nem indul játék."
+            ]
+          },
+          {
+            "title": "A kérdéslista",
+            "items": [
+              "A kérdések húzása hosszú kvízekben is gördülékeny, és az oldal már nem görgeti magát, amikor a lista alja felé húzol.",
+              "Minden kártya bal szélén ott a sorszáma, ami fogantyúvá változik, amikor a kártya fölé viszed az egeret. A kártyát továbbra is bárhol megfoghatod.",
+              "A kérdéstípus ikonja szemmé változik, ha fölé viszed az egeret: kattints rá a kérdés ki- vagy bekapcsolásához. A csoportok fejléce ugyanígy működik az összes kérdésükre.",
+              "A kártyák szűkebbek, így több hely jut a kérdés szövegének.",
+              "A kikapcsolt kérdések száma a lista címe mellett látszik a „Mind be” gombbal, így egy kérdés kikapcsolása már nem tolja le a listát.",
+              "A listában a „Csoport” az új csoportot a kijelölt kérdés fölé teszi, nem a lista végére, és olyan nevet ad neki, ami még nem foglalt."
+            ]
+          }
+        ]
+      },
       "1_8_0": {
         "title": "Ünnepi megjelenés",
         "intro": "Az év különleges napjain a Quizmoo felveszi az ünnep hangulatát: saját színek, díszek és beöltözött tehén minden oldalon és a játékaidban is.",
