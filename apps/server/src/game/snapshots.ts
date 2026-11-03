@@ -22,6 +22,7 @@ import {
   type TeamPublic,
   type UpcomingQuestion,
 } from '@quizmoo/shared'
+import { endFacts, myEndFacts } from './end-facts.js'
 import { groupAt, groupBounds, groupsOf, settingsAt } from './groups.js'
 import { normalise } from './normalise.js'
 import { answersHidden, groupIfPicked, hostLocked, quickMessagesOf, resultsPendingFor } from './engine.js'
@@ -173,6 +174,7 @@ export function toPlayerSnapshot(state: GameState, playerId: string, now: number
     lastCorrect: base.reveal ? (record?.correct ?? null) : null,
     lastNearMiss: Boolean(base.reveal) && record?.correct === true && record.nearMiss === true,
     myResults: state.phase === 'finished' && !base.answersHidden ? playerResults(state, player) : null,
+    myFacts: state.phase === 'finished' && !base.answersHidden ? myEndFacts(state, player) : null,
   }
 }
 
@@ -361,6 +363,7 @@ function buildBaseSnapshot(state: GameState, now: number, audience: ResultsAudie
     scheduledAt: state.scheduledAt ?? null,
     joinLocked: state.joinLocked ?? false,
     branding: brandingFor(state, audience),
+    endFacts: phase === 'finished' && !answersHidden(state, audience) ? endFacts(state) : null,
   }
 }
 

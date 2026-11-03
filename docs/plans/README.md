@@ -58,6 +58,8 @@ Finished plans are deleted once their branch is merged: `CHANGELOG.md` records w
 | 49 | [Play-through preview in the editor](phase-49-play-through-preview.md) | `feature/editor-drag-and-preview` | done |
 | 50 | [Seasonal themes: colours, decorations and switches for nine seasons](phase-50-seasonal-themes.md) | `feature/seasonal-themes` | done |
 | 51 | [The cow for every season: lines and confetti](phase-51-seasonal-cow.md) | `feature/seasonal-themes` | done |
+| 52 | [The phone's end-of-game screens, step by step](phase-52-phone-end-of-game.md) | `feature/end-of-game` | done |
+| 53 | [The projector's end of the game](phase-53-projector-end-of-game.md) | `feature/end-of-game` | planned |
 | later | [Hosting without an account](later-guest-hosting.md) | `feature/guest-hosting` | planned, after the MVP |
 
 ## Conventions every plan follows

@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+### The phone's end-of-game screens, step by step (phase 52)
+- The phone's last screen is four pages instead of one long scroll: Standings, Answers, Facts and My stats. The player moves between them with the step pills at the top, Back and Next at the bottom (Next names the page it opens), a sideways swipe or the arrow keys. The page is kept in the address (`?page=`), so a refresh stays on it. "Back to home" is on the last page; "Join the next round" stays on top of every page.
+- Standings: the player's place in a big card (in team mode the team's, with the player's own rank and points under it), the podium, and the ranks just above and below the player (`aroundOf`).
+- Answers: the question cards as before, but closed until tapped, with "4 of 5 right" on top. The points chip inside the result stamp now takes the stamp's colours inverted, which fixes its contrast in light mode.
+- Facts: questions, players, the share right on average and the game length, the hardest and easiest question with a bar, the awards (Fastest finger, On a roll, Know-it-all, Climber; "That's you!" on the player's own) and the gap between first and second place.
+- My stats: right answers, best streak, average time, fastest right answer, the rank after each question as a line, and points per question as bars.
+- The figures come with the snapshots: once the game is finished and the results are released to that audience, every snapshot carries `endFacts` (the room's figures and awards) and a player's own carries `myFacts` (answer times, best streak, rank after each question). Both are derived from the stored answers by `game/end-facts.ts`; nothing new is stored. While results are held, both are null.
+
 ## 1.9.0 – 2026-11-03
 
 ### Smoother drag with 200 questions (phase 48)

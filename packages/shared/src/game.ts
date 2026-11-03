@@ -367,6 +367,61 @@ export interface GameSnapshotBase {
   nextPin: string | null
   /** The host's logo and event name for this game; null without branding (and on phones unless it is shown there too). */
   branding: BrandingPublic | null
+  /** Figures and awards of a finished game whose results this audience may see; otherwise null. */
+  endFacts: EndFacts | null
+}
+
+/** A question in the end-of-game facts, with the share (0 to 1) of all players who got it right. */
+export interface EndFactQuestion {
+  index: number
+  text: string
+  correctShare: number
+}
+
+/** A player's award: `value` is the award's figure (ms, a count or places); `questionIndex` where it happened, if anywhere. */
+export interface EndAward {
+  playerId: string
+  value: number
+  questionIndex: number | null
+}
+
+/** Figures for the whole room at the end of a game, derived from the answers. */
+export interface EndFacts {
+  /** Questions with a right answer (polls and ungraded text left out). */
+  questionCount: number
+  playerCount: number
+  /** Mean share of all players who were right, over the scored questions; null without any. */
+  averageCorrectShare: number | null
+  /** From the first question's start to the end; null when nobody answered. */
+  lengthMs: number | null
+  /** Fewest players right (the earlier one on a tie); null with fewer than two scored questions or when all went the same. */
+  hardest: EndFactQuestion | null
+  /** Most players right (the earlier one on a tie); null with fewer than two scored questions or when all went the same. */
+  easiest: EndFactQuestion | null
+  awards: {
+    /** The fastest right answer, in ms. */
+    fastest: EndAward | null
+    /** The longest run of right answers. */
+    longestStreak: EndAward | null
+    /** The most right answers. */
+    mostCorrect: EndAward | null
+    /** The most places gained from the first scored question to the end. */
+    biggestClimb: EndAward | null
+  }
+  /** Points between first and second place (teams in team mode); null with fewer than two. */
+  closestFinish: number | null
+}
+
+/** One player's own figures at the end of a game; indexes follow `myResults`. */
+export interface MyEndFacts {
+  /** Answer time in ms per asked question; null where the player did not answer. */
+  answerTimes: (number | null)[]
+  bestStreak: number
+  averageTimeMs: number | null
+  /** The player's fastest right answer. */
+  fastest: { index: number; timeMs: number } | null
+  /** The player's rank among the players after each asked question. */
+  rankAfter: number[]
 }
 
 /** What the host control and projector screens receive. */
@@ -426,6 +481,8 @@ export interface PlayerSnapshot extends GameSnapshotBase {
   lastNearMiss: boolean
   /** Every question with this player's answer, once the game is finished; otherwise null. */
   myResults: PlayerQuestionResult[] | null
+  /** The player's own end-of-game figures, with `myResults`; otherwise null. */
+  myFacts: MyEndFacts | null
 }
 
 /** One question of the player's end-of-game review. */

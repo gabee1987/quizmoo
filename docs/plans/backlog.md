@@ -77,6 +77,7 @@ Collected while testing phases 9 to 12. Effort as above.
 - Seasonal themes: nine seasons with their own colours, decorations, cow costumes and greeting; the Seasonal theme as the default, a per-device switch, and season dates admins can change (phase 50); six season lines for the cow and seasonal podium confetti (phase 51).
 - Smoother drag with 200 questions: the rows no longer render again on each move of a drag (phase 48).
 - Play-through preview in the editor: "Try it" plays the quiz on the phone preview with the real reveal screen, nothing saved (phase 49).
+- The phone's end of the game in four pages (standings, answers, facts with awards, the player's own stats), stepped through with buttons, swipes or arrow keys (phase 52).
 
 ### Open
 
