@@ -5,7 +5,7 @@ description: Quizmoo scoring rules: points and speed bonus, streak bonus, correc
 
 # Scoring
 
-Scoring is part of the pure engine (`apps/server/src/game`, see `game-engine`). The web app never scores; it shows what the snapshot says.
+Scoring is part of the pure engine (`apps/server/src/game`, see `game-engine`). The rules themselves (`normalise`, typo matching, `isCorrect`, `pointsFor`, `displayOrder`, `toPublicQuestion`, `settingsFor`) live in `packages/shared/src/scoring.ts` and the server files re-export them; change them there. In games the web app never scores, it shows what the snapshot says; the only web caller is the editor's play-through preview (`features/editor/preview-play.ts`), which nothing saves.
 
 ## Points
 

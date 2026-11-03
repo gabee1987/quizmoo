@@ -40,3 +40,15 @@ Out of scope: teams, the projector view, the podium, sounds.
 ## Verification command
 
 `pnpm verify`
+
+## Results (3 November 2026)
+
+Checked on the production build (:3999) at 1920 and 1440, light and dark (scratchpad script `shots-p49.cjs`): one question of each type answered on the preview (single right, multiple wrong, true/false right, text with a typo counted as "Close enough", text without accepted answers, number wrong, poll, ordering), the switched-off question skipped (question 3 of 8), an edit to the question being played shown at once, "End of the quiz" after the last one, Stop back to the preview, no game created and no page errors. New e2e spec `preview-play.e2e.ts`; unit tests in `features/editor/preview-play.test.ts` (10).
+
+## Deviations
+
+- The scoring rules were not copied into the web app: they moved from `apps/server/src/game` to `packages/shared/src/scoring.ts`, and the server files re-export them, so a game and the preview cannot count differently. `toPublicQuestion` (the ordering question's shuffled items) and `settingsFor` (a group's own rules) moved with them.
+- The button is "Try it" ("Kipróbálás"), not "Play": the editor's top bar already has Play, which starts a game. It sits above the phone frame, so it is in the same place at `xl` and in the preview behind the toggle below `xl`.
+- Polls show the game's own "Thanks for voting!"; only a text question without accepted answers says "No grading in the preview" (the game would wait for the host there).
+- Next also works before answering: the question is then revealed with no answer, as when the time runs out in a game.
+- The play-through plays the questions a game would play (switched-off ones left out) and skips round intros. When a group is selected, it starts from the group's first question.

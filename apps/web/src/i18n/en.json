@@ -1171,6 +1171,14 @@
     "sampleOption3": "Venus",
     "sampleOption4": "Saturn",
     "previewSample": "A sample question to preview the settings.",
+    "playThrough": {
+      "start": "Try it",
+      "startHelp": "Play the quiz on the preview from this question. Nothing is saved.",
+      "stop": "Stop",
+      "status": "Question {{index}} of {{count}} · {{score}} points",
+      "ended": "End of the quiz",
+      "noGrading": "No grading in the preview"
+    },
     "addImageHint": "Drop, paste or choose a file. JPG, PNG or WebP, max 5 MB.",
     "replaceImage": "Replace image",
     "uploading": "Uploading…",

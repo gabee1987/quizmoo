@@ -1,6 +1,7 @@
 import {
   estimateGameSec,
   fallbackAvatar,
+  toPublicQuestion,
   type Answer,
   type BrandingPublic,
   type CurrentAnswer,
@@ -23,7 +24,6 @@ import {
 } from '@quizmoo/shared'
 import { groupAt, groupBounds, groupsOf, settingsAt } from './groups.js'
 import { normalise } from './normalise.js'
-import { displayOrder } from './order.js'
 import { answersHidden, groupIfPicked, hostLocked, quickMessagesOf, resultsPendingFor } from './engine.js'
 import { denseRank, isCorrect, isNearMiss } from './scoring.js'
 import {
@@ -43,36 +43,8 @@ import {
 } from './team-answers.js'
 import { EngineError, type GameState, type Player, type ResultsAudience, type Team } from './types.js'
 
-/** Strips every correct-answer field. Built per type so a new field is never leaked by accident. */
-export function toPublicQuestion(question: Question): PublicQuestion {
-  switch (question.type) {
-    case 'single': {
-      const { correctOptionId: _, ...rest } = question
-      return rest
-    }
-    case 'multiple': {
-      const { correctOptionIds: _, ...rest } = question
-      return rest
-    }
-    case 'truefalse': {
-      const { correct: _, ...rest } = question
-      return rest
-    }
-    case 'text': {
-      const { acceptedAnswers: _, ...rest } = question
-      return rest
-    }
-    case 'number': {
-      const { correct: _, tolerance: _t, ...rest } = question
-      return rest
-    }
-    case 'poll':
-      return { ...question }
-    case 'order':
-      // The stored order is the answer: players get the items shuffled.
-      return { ...question, options: displayOrder(question.id, question.options) }
-  }
-}
+// Strips every correct-answer field; shared with the editor's play-through preview.
+export { toPublicQuestion }
 
 /**
  * Snapshot for the host control and the projector. `includeAnswers` adds the live

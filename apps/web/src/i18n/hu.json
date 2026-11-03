@@ -1171,6 +1171,14 @@
     "sampleOption3": "Vénusz",
     "sampleOption4": "Szaturnusz",
     "previewSample": "Mintakérdés a beállítások előnézetéhez.",
+    "playThrough": {
+      "start": "Kipróbálás",
+      "startHelp": "Játszd végig a kvízt az előnézetben ettől a kérdéstől. Semmi nem mentődik.",
+      "stop": "Leállítás",
+      "status": "{{index}}. kérdés / {{count}} · {{score}} pont",
+      "ended": "Vége a kvíznek",
+      "noGrading": "Az előnézetben nincs értékelés"
+    },
     "addImageHint": "Húzd ide, illeszd be vagy válaszd ki. JPG, PNG vagy WebP, legfeljebb 5 MB.",
     "replaceImage": "Kép cseréje",
     "uploading": "Feltöltés…",

@@ -1,4 +1,4 @@
-import type { GameSettings, Question, QuestionGroup } from '@quizmoo/shared'
+import { settingsFor, type GameSettings, type Question, type QuestionGroup } from '@quizmoo/shared'
 import type { GameQuiz, GameState } from './types.js'
 
 /** The quiz's groups; games saved before groups existed have none. */
@@ -32,20 +32,8 @@ export function endsGroup(quiz: GameQuiz, index: number): boolean {
   return group !== undefined && quiz.questions[index + 1]?.groupId !== group.id
 }
 
-/**
- * The rules for one question: the game's settings with its group's overrides. Reveal at the
- * group's end means after each question outside groups, and "at the end of the game" stays
- * for the whole game whatever a group says.
- */
-export function settingsFor(settings: GameSettings, group: QuestionGroup | undefined): GameSettings {
-  const merged = { ...settings }
-  for (const [key, value] of Object.entries(group?.settings ?? {})) {
-    if (value !== undefined) Object.assign(merged, { [key]: value })
-  }
-  if (settings.revealAnswers === 'atEnd') merged.revealAnswers = 'atEnd'
-  else if (!group && merged.revealAnswers === 'afterGroup') merged.revealAnswers = 'afterQuestion'
-  return merged
-}
+// The rules for one question (the game's settings with its group's overrides); shared with the editor's preview.
+export { settingsFor }
 
 /** The rules for question `index` of the game (the game's own settings outside the questions). */
 export function settingsAt(state: GameState, index: number): GameSettings {

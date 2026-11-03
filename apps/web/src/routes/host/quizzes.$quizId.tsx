@@ -242,6 +242,12 @@ function Editor({ quiz }: { quiz: Quiz }) {
   const selected = questions[selectedIndex] ?? null
   const selectedGroupIndex = groups.findIndex((g) => g.id === selectedId)
   const selectedGroup = groups[selectedGroupIndex] ?? null
+  // The preview's play-through: the draft as it is now, from the selected question or the selected group's first one.
+  const previewQuiz = useMemo(
+    () => ({ title: draft.title, questions: draft.questions, groups: draft.groups, settings: draft.settings }),
+    [draft.title, draft.questions, draft.groups, draft.settings],
+  )
+  const playFrom = selectedGroup ? questions.findIndex((q) => q.groupId === selectedGroup.id) : selectedIndex
 
   const select = useCallback(
     (id: string | null) => {
@@ -782,12 +788,16 @@ function Editor({ quiz }: { quiz: Quiz }) {
       </TabsContent>
     </Tabs>
   )
-  const preview = (
+  // `label`: the docked column's heading, shown beside the preview's Try it button.
+  const preview = (label?: string) => (
     <PhonePreview
+      label={label}
       question={selected}
       index={selectedIndex}
       count={questions.length}
       settings={draft.settings}
+      quiz={previewQuiz}
+      from={playFrom < 0 ? null : playFrom}
       intro={
         selectedGroup && {
           group: {
@@ -1073,7 +1083,7 @@ function Editor({ quiz }: { quiz: Quiz }) {
               <EyeIcon aria-hidden="true" />
               {previewOpen ? t('editor.hidePreview') : t('editor.showPreview')}
             </Button>
-            {previewOpen && <div className="animate-fade-up xl:hidden">{preview}</div>}
+            {previewOpen && <div className="animate-fade-up xl:hidden">{preview()}</div>}
           </section>
 
           {/* The gap before the preview is a margin, not padding, so the closed column is really 0 wide. */}
@@ -1087,9 +1097,8 @@ function Editor({ quiz }: { quiz: Quiz }) {
                 previewColumn ? 'duration-500 ease-spring' : 'translate-x-8 opacity-0 duration-300 ease-out',
               )}
             >
-              <p className="text-center text-sm font-semibold text-muted-foreground">{t('editor.preview')}</p>
               {/* Scaled so three panes fit a 1280 px laptop; the layout inside stays the phone's. */}
-              <div className="zoom-[0.82]">{preview}</div>
+              <div className="zoom-[0.82]">{preview(t('editor.preview'))}</div>
             </div>
           </aside>
 
