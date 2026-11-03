@@ -7,7 +7,7 @@ import { PlayerAvatar } from '../../components/player-avatar'
 import { RankArrow } from '../../components/rank-arrow'
 import { stagger } from '../../lib/motion'
 
-interface Row {
+export interface Row {
   id: string
   name: string
   /** Players and solo players; teams have none. */
@@ -19,7 +19,7 @@ interface Row {
 }
 
 /** Ranked rows sliding in one after another; the viewer's own row is highlighted. */
-function Rows({ rows, mineId }: { rows: Row[]; mineId?: string | null | undefined }) {
+export function Rows({ rows, mineId }: { rows: Row[]; mineId?: string | null | undefined }) {
   return (
     <ol className="flex w-full flex-col gap-2">
       {rows.map((row, i) => {

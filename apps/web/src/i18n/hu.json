@@ -268,7 +268,21 @@
       "pausedHint": "Szünet: az óra áll, és senki sem válaszolhat, amíg nem folytatod.",
       "shownAgainHint": "A(z) {{index}}. kérdés újra kint van a kijelzőkön. A pontok nem változnak.",
       "backToGame": "Vissza a játékhoz",
-      "podiumOnProjector": "A dobogó a kivetítőn van.",
+      "podiumOnProjector": "Az eredmény a kivetítőn van.",
+      "endShow": {
+        "title": "A kivetítőn",
+        "back": "Vissza",
+        "next": "Tovább",
+        "auto": "Automatikus",
+        "autoHelp": "Kb. 10 másodpercenként új oldal, az utolsó után elölről.",
+        "previousQuestion": "Előző kérdés",
+        "nextQuestion": "Következő kérdés",
+        "recapTitle": "Kérdések újra",
+        "recapHelp": "Minden kérdés a válaszokkal a kivetítőn, egyenként. Automatikus módban kb. 8 másodpercenként jön a következő, a végén vissza az eredményhez.",
+        "recapShow": "Mutasd a kérdéseket",
+        "recapClose": "Vissza az eredményhez",
+        "recapAt": "{{index}}. kérdés / {{count}}"
+      },
       "openProjector": "Kivetítő megnyitása",
       "skip": "Kihagyás",
       "end": "Játék vége",
@@ -462,6 +476,10 @@
       "standings": "állás",
       "standingsTotals": "állás, csak összpontszám",
       "podium": "dobogó",
+      "leaderboard": "ranglista",
+      "awards": "díjak",
+      "facts": "érdekességek",
+      "recap": "visszanézzük a(z) {{index}}. kérdést",
       "waitingResults": "az eredményre várnak"
     },
     "showAnswers": {
@@ -927,6 +945,64 @@
     "gameOver": "Vége a játéknak!",
     "finalRank": "Végső helyezés",
     "podium": "Dobogó",
+    "end": {
+      "pagesLabel": "A játék vége",
+      "pages": {
+        "standings": "Helyezések",
+        "answers": "Válaszok",
+        "facts": "Érdekességek",
+        "stats": "Statisztikám"
+      },
+      "back": "Vissza",
+      "points": "Pontok:",
+      "yourPlace": "Te: {{rank}}. hely, {{score}} pont",
+      "aroundYou": "Körülötted",
+      "rightOf": "{{count}} kérdésből {{right}} jó",
+      "factsTitle": "A játék számokban",
+      "questions": "Kérdés",
+      "players": "Játékos",
+      "rightOnAverage": "Átlagosan jó",
+      "length": "Játékidő",
+      "seconds_one": "{{count}} mp",
+      "seconds_other": "{{count}} mp",
+      "minutes_one": "{{count}} perc",
+      "minutes_other": "{{count}} perc",
+      "hardest": "Legnehezebb",
+      "easiest": "Legkönnyebb",
+      "percentRight": "{{percent}}% jó",
+      "awardsTitle": "Díjak",
+      "awards": {
+        "fastest": "Villámkéz",
+        "fastestValue": "{{seconds}} mp a(z) {{index}}. kérdésnél",
+        "longestStreak": "Megállíthatatlan",
+        "longestStreakValue_one": "{{count}} jó egymás után",
+        "longestStreakValue_other": "{{count}} jó egymás után",
+        "mostCorrect": "Mindentudó",
+        "mostCorrectValue_one": "{{count}} jó válasz",
+        "mostCorrectValue_other": "{{count}} jó válasz",
+        "biggestClimb": "Nagy feltörő",
+        "biggestClimbValue_one": "{{count}} helyet lépett előre",
+        "biggestClimbValue_other": "{{count}} helyet lépett előre"
+      },
+      "thatsYou": "Ez te vagy!",
+      "tieAtTop": "Holtverseny az élen!",
+      "closestFinish_one": "{{count}} pont választotta el az első és a második helyet",
+      "closestFinish_other": "{{count}} pont választotta el az első és a második helyet",
+      "statsTitle": "A te játékod",
+      "rightAnswers": "Jó válaszok",
+      "ofCount": "{{value}} / {{count}}",
+      "bestStreak": "Leghosszabb széria",
+      "averageTime": "Átlagos idő",
+      "fastestAnswer": "Leggyorsabb jó",
+      "secondsShort": "{{seconds}} mp",
+      "rankJourney": "Helyezésed kérdésről kérdésre",
+      "rankLineLabel": "Helyezésed kérdésről kérdésre: {{ranks}}",
+      "rankAfter": "{{index}}. kérdés után: {{rank}}. hely",
+      "pointsPerQuestion": "Pontjaid kérdésenként",
+      "pointsLabel": "Pontjaid kérdésenként: {{points}}",
+      "pointsOn_one": "{{index}}. kérdés: {{count}} pont",
+      "pointsOn_other": "{{index}}. kérdés: {{count}} pont"
+    },
     "backToJoin": "Csatlakozz egy játékhoz",
     "teamRank": "{{team}} csapat: {{rank}}. hely",
     "teamLeaderboard": "Csapatok",
@@ -998,12 +1074,36 @@
     "correctCount_other": "{{count}} válaszból {{correct}} helyes",
     "qrCode": "QR-kód a csatlakozáshoz",
     "runnersUp": "A többiek",
-    "previous": "Előző",
-    "next": "Következő",
     "keyHint": "Szóköz",
-    "pause": "Szünet",
-    "resume": "Folytatás",
-    "paused": "Szünet"
+    "end": {
+      "pagesLabel": "A játék vége",
+      "pages": {
+        "podium": "Dobogó",
+        "leaderboard": "Ranglista",
+        "awards": "Díjak",
+        "facts": "Érdekességek",
+        "recap": "Kérdések"
+      },
+      "drumRoll": "És a győztes…",
+      "leaderboardTitle": "Végeredmény",
+      "rows": "{{from}}–{{to}} / {{count}}",
+      "right_one": "{{count}} jó",
+      "right_other": "{{count}} jó",
+      "members_one": "{{count}} játékos",
+      "members_other": "{{count}} játékos",
+      "noAwards": "Most nincs díj: azokat jó válaszokkal lehet nyerni.",
+      "recapEyebrow": "Visszanézünk",
+      "recapHeading": "{{index}}. kérdés / {{count}}",
+      "gotItRight": "{{percent}}% találta el",
+      "verdict": {
+        "easy": "Ez könnyű volt!",
+        "most": "A többség tudta!",
+        "tricky": "Ez fogós volt!",
+        "hard": "Igazi fejtörő!",
+        "poll": "Ezt gondolja a társaság"
+      },
+      "autoLeft": "Hamarosan lapozunk"
+    }
   },
   "between": {
     "progress": "Haladás",
@@ -1519,6 +1619,32 @@
     "current": "Mostani verzió",
     "releasedOn": "Megjelent: {{date}}",
     "releases": {
+      "1_10_0": {
+        "title": "Igazi finálé a kivetítőn és minden telefonon",
+        "intro": "A játék vége most már egy kis show: dobogó dobpergéssel, ranglista, díjak és érdekességek a kivetítőn, és négy oldalnyi eredmény minden telefonon.",
+        "sections": [
+          {
+            "title": "A kivetítőn",
+            "items": [
+              "A dobogó helyezésről helyezésre épül fel: a győztes előtt dobpergés, aztán leszáll a korona, és jön a konfetti.",
+              "Utána a ranglista mindenkivel (vagy minden csapattal), a díjak (Villámkéz, Megállíthatatlan, Mindentudó, Nagy feltörő) és a játék számokban: kérdések, játékosok, a jó válaszok aránya, a játékidő, a legnehezebb és a legkönnyebb kérdés.",
+              "Te döntöd el, mi van a kivetítőn: válassz oldalt a vezérlő Dobogó kártyáján, vagy használd a nyilakat, az oldalneveket és az Automatikus gombot magán a kivetítőn, ha a vezérlőből nyitottad meg. A szóköz és a nyílbillentyűk is működnek.",
+              "Az Automatikus kb. 10 másodpercenként lapoz, az utolsó oldal után elölről kezdi.",
+              "A „Mutasd a kérdéseket” egyenként végigmegy a kérdéseken a válaszokkal, de csak ha szeretnéd. Mindegyiknél ott a helyes válasz, hányan találták el, és egy szó róla, az „Ez könnyű volt!”-tól az „Igazi fejtörő!”-ig.",
+              "Mostantól egy kivetítő van: a külön eredmény-diavetítés megszűnt. Az eredményoldal „Kivetítő megnyitása” gombja a játék kivetítőjét nyitja meg, amíg a játék még elérhető (a vége után kb. egy óráig)."
+            ]
+          },
+          {
+            "title": "A telefonokon",
+            "items": [
+              "Az utolsó képernyő egy hosszú lista helyett négy oldal: Helyezések, Válaszok, Érdekességek és Statisztikám. A gombokkal, húzással vagy a nyílbillentyűkkel lehet lapozni.",
+              "A Helyezések nagy kártyán mutatja a játékos helyét, és a közvetlenül előtte és mögötte állókat.",
+              "A Válaszok minden kérdést felsorol, koppintásra nyílnak, felül pedig ott, hány lett jó.",
+              "Az Érdekességek a játék számait és a díjakat mutatja, a saját díjon „Ez te vagy!” felirattal. A Statisztikám a legjobb sorozatot, a válaszidőket, a helyezést minden kérdés után és a kérdésenkénti pontokat."
+            ]
+          }
+        ]
+      },
       "1_9_0": {
         "title": "Kvíz kipróbálása a szerkesztőben és rendezettebb kérdéslista",
         "intro": "Játszd végig a kvízt a szerkesztő telefonos előnézetében még a rendezvény előtt, és dolgozz gyorsabban a kérdéslistában, akár 200 kérdéssel is.",
@@ -2026,7 +2152,6 @@
     "backToGames": "Vissza a játékokhoz",
     "running": "A játék még tart. Ez az eddigi eredmény.",
     "exportCsv": "CSV exportálása",
-    "showOnScreen": "Mutasd a kivetítőn",
     "podium": "Dobogó",
     "questions": "Kérdések",
     "noQuestions": "Még egy kérdés sem zárult le.",
@@ -2057,7 +2182,6 @@
     "members": "Tagok",
     "sortedAscending": "növekvő sorrend",
     "sortedDescending": "csökkenő sorrend",
-    "screenHint": "Szóköz vagy → tovább, ← vissza, P szünet",
     "teamAnswers": "A csapatok válaszai",
     "noTeamAnswer": "Nem válaszolt",
     "length": "Játékidő: {{length}}",

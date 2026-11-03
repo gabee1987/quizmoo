@@ -4,6 +4,7 @@ import {
   countdownTimeUp,
   createGame,
   endGame,
+  endPageTimeUp,
   endQuestion,
   expireAnnouncement,
   hostLocked,
@@ -39,6 +40,8 @@ interface Entry {
   timer: ReturnType<typeof setTimeout> | null
   /** Clears a host message that has a duration. */
   messageTimer: ReturnType<typeof setTimeout> | null
+  /** Moves the projector's end pages on in automatic mode. */
+  pageTimer: ReturnType<typeof setTimeout> | null
   saving: Promise<void>
   /** A save is queued behind `saving` and has not started; it writes the latest state when it does. */
   saveQueued?: boolean
@@ -146,6 +149,7 @@ export class GameManager {
       game: { state, hostId: input.hostId, quizId: input.quizId },
       timer: null,
       messageTimer: null,
+      pageTimer: null,
       saving: Promise.resolve(),
       seq: this.now(),
     }
@@ -207,6 +211,7 @@ export class GameManager {
         game: { ...game, state: { ...game.state, settings, players } },
         timer: null,
         messageTimer: null,
+        pageTimer: null,
         saving: Promise.resolve(),
         seq: now,
       }
@@ -260,8 +265,10 @@ export class GameManager {
   private clearTimers(entry: Entry) {
     if (entry.timer) clearTimeout(entry.timer)
     if (entry.messageTimer) clearTimeout(entry.messageTimer)
+    if (entry.pageTimer) clearTimeout(entry.pageTimer)
     entry.timer = null
     entry.messageTimer = null
+    entry.pageTimer = null
   }
 
   private schedule(pin: string, entry: Entry) {
@@ -272,6 +279,10 @@ export class GameManager {
     if (message?.expiresAt) {
       const id = message.id
       entry.messageTimer = setTimeout(() => this.onMessageExpiry(pin, id), Math.max(0, message.expiresAt - this.now()))
+    }
+    const pageEndsAt = state.phase === 'finished' && state.endShow?.auto ? state.endShow.pageEndsAt : null
+    if (pageEndsAt !== null) {
+      entry.pageTimer = setTimeout(() => this.onPageEnd(pin), Math.max(0, pageEndsAt - this.now()))
     }
     // A paused question has no deadline until it resumes.
     if (state.phase === 'question' && state.questionEndsAt !== null && !state.pausedAt) {
@@ -342,6 +353,19 @@ export class GameManager {
       this.apply(pin, (state, now) => expireAnnouncement(state, id, now))
     } catch (error) {
       this.log.error(error, 'clearing a host message on timer failed')
+    }
+  }
+
+  private onPageEnd(pin: string) {
+    const entry = this.games.get(pin)
+    if (!entry) return
+    const show = entry.game.state.endShow
+    if (!show?.auto || show.pageEndsAt === null) return
+    if (this.now() < show.pageEndsAt) return this.schedule(pin, entry)
+    try {
+      this.apply(pin, endPageTimeUp)
+    } catch (error) {
+      this.log.error(error, 'moving the end pages on timer failed')
     }
   }
 

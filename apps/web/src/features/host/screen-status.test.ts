@@ -61,4 +61,13 @@ describe('what the phones and the projector see', () => {
     ])
     expect(both(host({ phase: 'finished', playersWaiting: true })).map((s) => s.key)).toEqual(['host.seen.waitingResults', 'host.seen.podium'])
   })
+
+  it("the projector's end page, while the phones show their own", () => {
+    const endShow = { page: 'recap', recapIndex: 4, auto: false, pageEndsAt: null, recapCount: 8 } as const
+    expect(both(host({ phase: 'finished', endShow }))).toEqual([
+      { key: 'host.seen.podium', values: {} },
+      { key: 'host.seen.recap', values: { index: 5 } },
+    ])
+    expect(screenStatus(host({ phase: 'finished', endShow: { ...endShow, page: 'awards' } }), 'projector').key).toBe('host.seen.awards')
+  })
 })

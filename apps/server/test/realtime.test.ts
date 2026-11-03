@@ -6,6 +6,7 @@ import { createUser } from '../src/auth/users.js'
 import type { Db } from '../src/db/index.js'
 import { games, quizzes } from '../src/db/schema.js'
 import {
+  END_PAGE_MS,
   announce,
   endGame,
   extendTime,
@@ -14,6 +15,7 @@ import {
   quickMessagesOf,
   releaseResults,
   resume,
+  setEndAuto,
   startGame,
   submitAnswer,
   unlockHost,
@@ -199,6 +201,37 @@ describe('GameManager', () => {
     expect(restored.get(pin)!.state.announcement?.id).toBe('m4')
     vi.advanceTimersByTime(1)
     expect(restored.get(pin)!.state.announcement).toBeNull()
+    restored.close()
+  })
+
+  it("moves the projector's end pages on in automatic mode, and after a restart too", async () => {
+    const { manager, pin } = await started()
+    manager.apply(pin, endGame)
+    manager.apply(pin, (s, now) => setEndAuto(s, true, now))
+    const page = (m: GameManager) => m.get(pin)!.state.endShow?.page
+    vi.advanceTimersByTime(END_PAGE_MS - 1)
+    expect(page(manager)).toBe('podium')
+    vi.advanceTimersByTime(1)
+    expect(page(manager)).toBe('leaderboard')
+    vi.advanceTimersByTime(END_PAGE_MS)
+    expect(page(manager)).toBe('awards')
+
+    // Switched off: it stays.
+    manager.apply(pin, (s, now) => setEndAuto(s, false, now))
+    vi.advanceTimersByTime(60_000)
+    expect(page(manager)).toBe('awards')
+
+    manager.apply(pin, (s, now) => setEndAuto(s, true, now))
+    const saved = structuredClone(manager.get(pin)!)
+    manager.close()
+    vi.advanceTimersByTime(4_000)
+    const store = memoryStore()
+    store.active = [saved]
+    const restored = new GameManager(store, quietLog)
+    await restored.restore()
+    expect(page(restored)).toBe('awards')
+    vi.advanceTimersByTime(END_PAGE_MS - 4_000)
+    expect(page(restored)).toBe('facts')
     restored.close()
   })
 

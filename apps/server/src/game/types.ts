@@ -2,6 +2,7 @@ import type {
   Announcement,
   Answer,
   Avatar,
+  EndShow,
   GameBranding,
   GamePhase,
   GameSettings,
@@ -168,6 +169,8 @@ export interface GameState {
    * `locked`: the host's screens get the public snapshot only. Missing in games without either.
    */
   lock?: { codeHash: string | null; locked: boolean }
+  /** The projector's end pages once the game is finished. Missing until the host first moves them (the podium). */
+  endShow?: EndShow
 }
 
 /** Who sees the final results: the projector (podium) or the players' phones. */

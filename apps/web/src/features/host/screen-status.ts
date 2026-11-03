@@ -33,7 +33,10 @@ export function screenStatus(host: HostSnapshot, audience: Audience): SeenStatus
       return seen(host.answersHidden ? 'standingsTotals' : 'standings')
     case 'finished': {
       const waiting = audience === 'phones' ? host.playersWaiting : host.resultsPending
-      return seen(waiting ? 'waitingResults' : 'podium')
+      if (waiting) return seen('waitingResults')
+      // The projector's end pages; the phones step through their own.
+      const show = audience === 'projector' ? host.endShow : null
+      return show ? seen(show.page, { index: show.recapIndex + 1 }) : seen('podium')
     }
   }
 }
