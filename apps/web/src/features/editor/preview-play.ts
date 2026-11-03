@@ -227,6 +227,7 @@ export function revealSnapshot(quiz: PreviewQuiz, play: PreviewPlay, now: number
     announcement: null,
     nextPin: null,
     branding: null,
+    endFacts: null,
     me,
     myAnswer: play.answer,
     myAnswerTimeMs: play.timeMs,
@@ -238,5 +239,6 @@ export function revealSnapshot(quiz: PreviewQuiz, play: PreviewPlay, now: number
     lastCorrect: play.correct,
     lastNearMiss: play.nearMiss,
     myResults: null,
+    myFacts: null,
   }
 }

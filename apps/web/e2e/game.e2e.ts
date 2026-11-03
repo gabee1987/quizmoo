@@ -141,8 +141,27 @@ test('host builds a quiz, three phones play it with a reload mid-question, resul
 
   await test.step('podium on phones and projector', async () => {
     for (const p of phones) await expect(p.getByText('Game over!')).toBeVisible()
-    await expect(red.getByText('Your answers')).toBeVisible()
     await expect(projector.getByText('Player Red')).toBeVisible()
+  })
+
+  await test.step("the phone's end pages: standings, answers, facts, own stats", async () => {
+    const pages = red.getByRole('navigation', { name: 'End of the game' })
+    await expect(red.getByRole('heading', { name: 'Around you' })).toBeVisible()
+    // Next names the page it opens; the step pills come first, the bottom bar last.
+    await red.getByRole('button', { name: 'Answers', exact: true }).last().click()
+    await expect(red.getByRole('heading', { level: 1, name: 'Your answers' })).toBeVisible()
+    await expect(red.getByText('3 of 3 right')).toBeVisible()
+    await expect(red.locator('details[open]')).toHaveCount(0)
+    await expect(red).toHaveURL(/page=answers/)
+    await pages.getByRole('button', { name: 'Facts', exact: true }).click()
+    await expect(red.getByRole('heading', { level: 1, name: 'The game in numbers' })).toBeVisible()
+    await expect(red.getByRole('listitem').filter({ hasText: 'Know-it-all' })).toContainText("That's you!")
+    await red.keyboard.press('ArrowRight')
+    await expect(red.getByRole('heading', { level: 1, name: 'Your game' })).toBeVisible()
+    await expect(red.getByText('3 / 3')).toBeVisible()
+    await red.reload()
+    await expect(red.getByRole('heading', { level: 1, name: 'Your game' })).toBeVisible()
+    await expect(red.getByRole('link', { name: 'Back to home' })).toBeVisible()
   })
 
   await test.step('results page adds up', async () => {

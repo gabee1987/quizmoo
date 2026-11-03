@@ -1,4 +1,4 @@
-import type { GamePublicInfo, HostSnapshot } from '@quizmoo/shared'
+import type { GamePublicInfo, HostCommand, HostSnapshot } from '@quizmoo/shared'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
@@ -11,8 +11,8 @@ import { Countdown } from '../components/between-questions'
 import { ConnectionBar } from '../components/connection-bar'
 import { Spinner } from '../components/spinner'
 import { primaryAction } from '../features/host/primary-action'
+import { ScreenEnd } from '../features/screen/end-show'
 import { ScreenLobby } from '../features/screen/lobby'
-import { ScreenPodium } from '../features/screen/podium'
 import { ScreenQuestion } from '../features/screen/question'
 import { ScreenReveal } from '../features/screen/reveal'
 import { ScreenRoundIntro } from '../features/screen/round-intro'
@@ -31,7 +31,8 @@ export const Route = createFileRoute('/screen/$pin')({
 
 /**
  * Projector view. Public and read-only by PIN; if this browser is also logged in as
- * the game's host it attaches as host, and Space / Right arrow trigger the next step.
+ * the game's host it attaches as host, and Space / Right arrow trigger the next step
+ * (after the game they and Left arrow turn the end pages).
  */
 function ScreenPage() {
   const { t } = useTranslation()
@@ -72,6 +73,12 @@ function ScreenPage() {
     // A locked host drives nothing from here either (the server refuses it).
     if (!isHost || !host || host.locked) return
     const onKey = (e: KeyboardEvent) => {
+      // After the game the keys turn the end pages.
+      if (host.endShow && (e.key === ' ' || e.key === 'ArrowRight' || e.key === 'ArrowLeft')) {
+        e.preventDefault()
+        void emitAck('host:command', { type: 'endPageStep', step: e.key === 'ArrowLeft' ? -1 : 1 })
+        return
+      }
       if (e.key !== ' ' && e.key !== 'ArrowRight') return
       const action = primaryAction(host)
       if (!action) return
@@ -90,11 +97,21 @@ function ScreenPage() {
 
   return (
     // A question takes exactly the screen below the header (4rem) and above the page's bottom padding
-    // (1.5rem), so its answers are always in view.
-    <div className={cn('flex flex-col px-4 py-4 lg:px-12', host.phase === 'question' ? 'h-[calc(100dvh-5.5rem)]' : 'min-h-[calc(100dvh-4rem)]')}>
+    // (1.5rem), so its answers are always in view; the end pages fill that much, their steps at the bottom.
+    <div
+      className={cn(
+        'flex flex-col px-4 py-4 lg:px-12',
+        host.phase === 'question' ? 'h-[calc(100dvh-5.5rem)]' : host.phase === 'finished' ? 'min-h-[calc(100dvh-5.5rem)]' : 'min-h-[calc(100dvh-4rem)]',
+      )}
+    >
       <ConnectionBar status={status} since={since} />
       <AnnouncementBanner announcement={host.announcement} size="screen" clockOffset={clockOffset} />
-      <ScreenPhase host={host} clockOffset={clockOffset} joinUrl={info.data?.joinUrl ?? null} />
+      <ScreenPhase
+        host={host}
+        clockOffset={clockOffset}
+        joinUrl={info.data?.joinUrl ?? null}
+        onCommand={isHost && !host.locked ? (command) => void emitAck('host:command', command) : undefined}
+      />
       {/* The host's next step, for a projector driven with a mouse; the keyboard shortcut still works. */}
       {action && (
         <Button
@@ -103,15 +120,26 @@ function ScreenPage() {
           onClick={() => void emitAck('host:command', action.command)}
         >
           {t(action.label)}
-          {/* Darker than the button, not lighter: a light wash took white text below 4.5:1. */}
-          <kbd className="rounded-md bg-primary-edge px-1.5 text-sm font-semibold">{t('screen.keyHint')}</kbd>
+          {/* Darker than the button, not lighter: a light wash took white text below 4.5:1. Space turns the end pages instead. */}
+          {!host.endShow && <kbd className="rounded-md bg-primary-edge px-1.5 text-sm font-semibold">{t('screen.keyHint')}</kbd>}
         </Button>
       )}
     </div>
   )
 }
 
-function ScreenPhase({ host, clockOffset, joinUrl }: { host: HostSnapshot; clockOffset: number; joinUrl: string | null }) {
+function ScreenPhase({
+  host,
+  clockOffset,
+  joinUrl,
+  onCommand,
+}: {
+  host: HostSnapshot
+  clockOffset: number
+  joinUrl: string | null
+  /** This projector is also the host's: after the game its step bar turns the pages. */
+  onCommand?: ((command: HostCommand) => void) | undefined
+}) {
   switch (host.phase) {
     case 'lobby':
       return <ScreenLobby host={host} joinUrl={joinUrl} />
@@ -126,6 +154,6 @@ function ScreenPhase({ host, clockOffset, joinUrl }: { host: HostSnapshot; clock
     case 'scoreboard':
       return <ScreenScoreboard host={host} />
     case 'finished':
-      return <ScreenPodium host={host} />
+      return <ScreenEnd host={host} clockOffset={clockOffset} onCommand={onCommand} />
   }
 }

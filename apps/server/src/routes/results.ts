@@ -184,7 +184,7 @@ export async function resultRoutes(app: FastifyInstance, { db, manager, keep }: 
     const state = await ownGame(request, reply)
     if (!state) return reply
     const results = toResults(state)
-    return isLive(state) ? results : { ...results, pendingRelease: { screen: false, players: false } }
+    return isLive(state) ? { ...results, live: true } : { ...results, pendingRelease: { screen: false, players: false } }
   })
 
   /** Same as the host control's release buttons, for the results page. Broadcasts like any host command. */

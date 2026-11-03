@@ -3,12 +3,14 @@ import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
+import { z } from 'zod'
 import { AnnouncementBanner } from '../components/announcement-banner'
 import { Countdown } from '../components/between-questions'
 import { ConnectionBar } from '../components/connection-bar'
 import { Button } from '../components/ui/button'
 import { Spinner } from '../components/spinner'
 import { useDismissable } from '../features/play/dismissed-message'
+import { endPages } from '../features/play/end-pages'
 import { Lobby } from '../features/play/lobby'
 import { NextRound } from '../features/play/next-round'
 import { Podium } from '../features/play/podium'
@@ -22,6 +24,8 @@ import { useGameTheme } from '../lib/season'
 import { closeSession, emitAck, startSession, useGameStore } from '../lib/socket'
 
 export const Route = createFileRoute('/play/$pin')({
+  // The end-of-game page the player is on, so a refresh keeps it.
+  validateSearch: z.object({ page: z.enum(endPages).optional().catch(undefined) }),
   component: PlayPage,
 })
 
@@ -131,6 +135,12 @@ function PhaseView({ snapshot, clockOffset }: { snapshot: PlayerSnapshot; clockO
     case 'scoreboard':
       return <Scoreboard snapshot={snapshot} />
     case 'finished':
-      return <Podium snapshot={snapshot} />
+      return <EndOfGame snapshot={snapshot} />
   }
+}
+
+function EndOfGame({ snapshot }: { snapshot: PlayerSnapshot }) {
+  const { page = 'standings' } = Route.useSearch()
+  const navigate = Route.useNavigate()
+  return <Podium snapshot={snapshot} page={page} onPage={(next) => void navigate({ search: { page: next }, replace: true })} />
 }

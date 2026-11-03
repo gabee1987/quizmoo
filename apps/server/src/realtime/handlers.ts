@@ -30,6 +30,7 @@ import {
   createTeam,
   disconnectPlayer,
   endGame,
+  endPageStep,
   endQuestion,
   extendTime,
   gradeText,
@@ -51,9 +52,11 @@ import {
   resume,
   schedule,
   setCaptain,
+  setEndAuto,
   setJoinLocked,
   setTeamMode,
   showAnswers,
+  showEndPage,
   showQuestion,
   showScoreboard,
   skipQuestion,
@@ -463,5 +466,11 @@ function runHostCommand(state: GameState, command: HostCommand, now: number): Ga
       return setJoinLocked(state, command.locked)
     case 'lock':
       return lockHost(state)
+    case 'endPage':
+      return showEndPage(state, command.page, now)
+    case 'endPageStep':
+      return endPageStep(state, command.step, now)
+    case 'endAuto':
+      return setEndAuto(state, command.auto, now)
   }
 }

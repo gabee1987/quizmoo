@@ -16,6 +16,7 @@ import { PlayerAvatar } from '../../components/player-avatar'
 import { Spinner } from '../../components/spinner'
 import { setBoardOptions, useBoardOptions } from '../../features/host/board-options'
 import { Controls, EndGameButton } from '../../features/host/controls'
+import { EndShowPanel } from '../../features/host/end-show-panel'
 import { GamePanels } from '../../features/host/game-panels'
 import { GradingPanel } from '../../features/host/grading-panel'
 import { HostToastsToggle, useHostToasts } from '../../features/host/host-toasts'
@@ -154,7 +155,7 @@ function HostGamePage() {
           {host.phase !== 'finished' && <QuestionStrip host={host} clockOffset={clockOffset} />}
           {host.phase === 'finished' ? (
             <div className="lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
-              <Finished host={host} gameId={gameId} />
+              <Finished host={host} gameId={gameId} send={send} />
             </div>
           ) : grading ? (
             <div className="lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
@@ -312,8 +313,16 @@ function TopBar({
   )
 }
 
-/** The game is over: the top three, the way to the results, and Play again. */
-function Finished({ host, gameId }: { host: HostSnapshot; gameId: string | null }) {
+/** The game is over: the projector's end pages, the top three, the way to the results, and Play again. */
+function Finished({
+  host,
+  gameId,
+  send,
+}: {
+  host: HostSnapshot
+  gameId: string | null
+  send: (command: HostCommand) => Promise<boolean>
+}) {
   const { t } = useTranslation()
   return (
     <section className="flex flex-col gap-2 rounded-2xl border bg-card p-4 shadow-soft">
@@ -330,6 +339,7 @@ function Finished({ host, gameId }: { host: HostSnapshot; gameId: string | null 
           </Button>
         </div>
       )}
+      {host.endShow && <EndShowPanel show={host.endShow} send={send} />}
       {host.mode === 'team' ? (
         <ol className="flex flex-col gap-2">
           {host.teams

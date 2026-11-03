@@ -17,6 +17,7 @@ import { QuestionHighlights } from '../../features/results/results-summary'
 import { questionRuns } from '../../features/results/summary'
 import { WinnerCard } from '../../features/results/winner-card'
 import { apiFetch, errorCode } from '../../lib/api'
+import { openProjector } from '../../lib/projector'
 
 export const Route = createFileRoute('/host/results/$gameId')({
   component: ResultsPage,
@@ -124,12 +125,13 @@ function ResultsPage() {
                 {t('results.exportCsv')}
               </a>
             </Button>
-            <Button asChild variant="secondary">
-              <a href={`/screen/results/${gameId}`} target="_blank" rel="noreferrer">
+            {/* The game's projector, while the server still holds the game; the host shows the results there. */}
+            {data.live && (
+              <Button variant="secondary" onClick={() => openProjector(data.pin)}>
                 <MonitorIcon aria-hidden="true" />
-                {t('results.showOnScreen')}
-              </a>
-            </Button>
+                {t('host.game.openProjector')}
+              </Button>
+            )}
             {data.phase === 'finished' && (
               <Button variant="outline" className="text-destructive sm:ml-auto" onClick={() => setConfirming(true)}>
                 <Trash2Icon aria-hidden="true" />

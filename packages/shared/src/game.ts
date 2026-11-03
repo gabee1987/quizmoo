@@ -367,10 +367,90 @@ export interface GameSnapshotBase {
   nextPin: string | null
   /** The host's logo and event name for this game; null without branding (and on phones unless it is shown there too). */
   branding: BrandingPublic | null
+  /** Figures and awards of a finished game whose results this audience may see; otherwise null. */
+  endFacts: EndFacts | null
+}
+
+/** A question in the end-of-game facts, with the share (0 to 1) of all players who got it right. */
+export interface EndFactQuestion {
+  index: number
+  text: string
+  correctShare: number
+}
+
+/** A player's award: `value` is the award's figure (ms, a count or places); `questionIndex` where it happened, if anywhere. */
+export interface EndAward {
+  playerId: string
+  value: number
+  questionIndex: number | null
+}
+
+/** Figures for the whole room at the end of a game, derived from the answers. */
+export interface EndFacts {
+  /** Questions with a right answer (polls and ungraded text left out). */
+  questionCount: number
+  playerCount: number
+  /** Mean share of all players who were right, over the scored questions; null without any. */
+  averageCorrectShare: number | null
+  /** From the first question's start to the end; null when nobody answered. */
+  lengthMs: number | null
+  /** Fewest players right (the earlier one on a tie); null with fewer than two scored questions or when all went the same. */
+  hardest: EndFactQuestion | null
+  /** Most players right (the earlier one on a tie); null with fewer than two scored questions or when all went the same. */
+  easiest: EndFactQuestion | null
+  awards: {
+    /** The fastest right answer, in ms. */
+    fastest: EndAward | null
+    /** The longest run of right answers. */
+    longestStreak: EndAward | null
+    /** The most right answers. */
+    mostCorrect: EndAward | null
+    /** The most places gained from the first scored question to the end. */
+    biggestClimb: EndAward | null
+  }
+  /** Points between first and second place (teams in team mode); null with fewer than two. */
+  closestFinish: number | null
+}
+
+/** One player's own figures at the end of a game; indexes follow `myResults`. */
+export interface MyEndFacts {
+  /** Answer time in ms per asked question; null where the player did not answer. */
+  answerTimes: (number | null)[]
+  bestStreak: number
+  averageTimeMs: number | null
+  /** The player's fastest right answer. */
+  fastest: { index: number; timeMs: number } | null
+  /** The player's rank among the players after each asked question. */
+  rankAfter: number[]
+}
+
+/** The projector's pages at the end of a game, in order. */
+export const endShowPages = ['podium', 'leaderboard', 'awards', 'facts', 'recap'] as const
+export type EndShowPage = (typeof endShowPages)[number]
+/** The pages Back, Next and automatic mode go round; the recap only opens when the host shows it. */
+export const endLoopPages = ['podium', 'leaderboard', 'awards', 'facts'] as const satisfies readonly EndShowPage[]
+/** The projector's leaderboard shows this many rows at a time... */
+export const LEADERBOARD_ROWS = 12
+/** ...each set for this long; automatic mode keeps a long leaderboard up for all of its sets. */
+export const LEADERBOARD_SET_MS = 6_000
+
+/** The projector's end of the game: the page on it, and whether it moves on by itself. */
+export interface EndShow {
+  page: EndShowPage
+  /** The asked question the recap shows. */
+  recapIndex: number
+  /** Automatic mode: the next page (in the recap, the next question) comes at `pageEndsAt`. */
+  auto: boolean
+  /** Unix ms when automatic mode moves on; null while it is off. */
+  pageEndsAt: number | null
 }
 
 /** What the host control and projector screens receive. */
 export interface HostSnapshot extends GameSnapshotBase {
+  /** A finished game whose results the projector shows: its end pages, with the number of recap questions; otherwise null. */
+  endShow: (EndShow & { recapCount: number }) | null
+  /** The recap page's question with its answers; null on other pages. */
+  recap: RevealInfo | null
   /** Every question revealed so far, in order (on the public screen without correct counts while answers are hidden). */
   questionStats: QuestionStat[]
   /** Answers to the current question. Host room only; null on the public screen. */
@@ -426,6 +506,8 @@ export interface PlayerSnapshot extends GameSnapshotBase {
   lastNearMiss: boolean
   /** Every question with this player's answer, once the game is finished; otherwise null. */
   myResults: PlayerQuestionResult[] | null
+  /** The player's own end-of-game figures, with `myResults`; otherwise null. */
+  myFacts: MyEndFacts | null
 }
 
 /** One question of the player's end-of-game review. */
@@ -536,6 +618,8 @@ export interface GameResults {
    * the game is live and can still be released (`POST /api/games/:gameId/release`).
    */
   pendingRelease: { screen: boolean; players: boolean }
+  /** The game is still in the server's memory, so its projector (`/screen/<pin>`) can show it. */
+  live: boolean
 }
 
 /** One row of `GET /api/games`: the host's game history. */
