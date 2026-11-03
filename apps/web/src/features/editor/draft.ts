@@ -275,6 +275,20 @@ export function addGroup(layout: Layout, group: QuestionGroup, beforeId: string 
   return fromItems([...items.slice(0, at), ...closing, header, ...items.slice(at, stop), end, ...items.slice(stop + closing.length)])
 }
 
+/**
+ * Adds `group` empty just above the block holding `id`: the group it is in (or heads), or the question
+ * itself outside the groups. At the end when `id` is null or not in the list.
+ */
+export function addEmptyGroup(layout: Layout, group: QuestionGroup, id: string | null): Layout {
+  const parts = blocks(listItems(layout))
+  const at = id === null ? -1 : parts.findIndex((block) => block.some((item) => itemId(item) === id))
+  const empty: ListItem[] = [
+    { kind: 'group', group },
+    { kind: 'end', group },
+  ]
+  return fromItems(at < 0 ? [...parts.flat(), ...empty] : [...parts.slice(0, at).flat(), ...empty, ...parts.slice(at).flat()])
+}
+
 /** Starts `group` around the question `id` alone, where it stands (out of its group, right below it). */
 export function addGroupAround(layout: Layout, group: QuestionGroup, id: string): Layout {
   const items = listItems(moveToGroup(layout, id, null))

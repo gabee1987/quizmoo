@@ -54,6 +54,7 @@ import { ConfirmDialog } from '../../components/dialog'
 import { SelectField } from '../../components/select-field'
 import { Spinner } from '../../components/spinner'
 import {
+  addEmptyGroup,
   addGroup,
   addGroupAround,
   addQuestion as addToLayout,
@@ -347,15 +348,25 @@ function Editor({ quiz }: { quiz: Quiz }) {
     setLayout((l) => stepQuestion(l, selected.id, where))
   }
   /**
-   * Starts a group above the question `beforeId` (null: an empty one at the end), or with `around` one
-   * holding just the question `beforeId`, and selects it.
+   * Starts a group at the item `id` and selects it: `split` above the question, taking it and the ones
+   * after it up to the next group; `around` holding just that question; `empty` above the question's
+   * block (its group, when it is in one), or at the end with nothing selected.
    */
-  const newGroup = (beforeId: string | null, around = false) => {
+  const newGroup = (id: string | null, mode: 'split' | 'around' | 'empty') => {
     if (groups.length >= MAX_GROUPS) return
     const group: QuestionGroup = { id: newId(), title: '', info: '', settings: {} }
-    const placed = around && beforeId ? addGroupAround(layout, group, beforeId) : addGroup(layout, group, beforeId)
+    const placed =
+      mode === 'empty' || id === null
+        ? addEmptyGroup(layout, group, id)
+        : mode === 'around'
+          ? addGroupAround(layout, group, id)
+          : addGroup(layout, group, id)
     const index = placed.groups.findIndex((g) => g.id === group.id)
-    const named = { ...group, title: t('editor.groupDefaultTitle', { n: index + 1 }) }
+    // Named by its place, or the next number no other group is called by (a new group can land above others).
+    const taken = new Set(groups.map((g) => g.title))
+    let n = index + 1
+    while (taken.has(t('editor.groupDefaultTitle', { n }))) n++
+    const named = { ...group, title: t('editor.groupDefaultTitle', { n }) }
     setLayout(() => ({ ...placed, groups: placed.groups.map((g) => (g.id === group.id ? named : g)) }))
     select(group.id)
     setListOpen(false)
@@ -565,7 +576,12 @@ function Editor({ quiz }: { quiz: Quiz }) {
       : 'flex flex-col gap-3 pt-3'
     const header = (tools?: ReactNode) => (
       <>
-        {inSidebar && <h2 className="px-1 text-sm font-extrabold">{listTitle}</h2>}
+        {inSidebar && (
+          <div className="flex h-7 items-center gap-2 px-1">
+            <h2 className="min-w-0 flex-1 truncate text-sm font-extrabold">{listTitle}</h2>
+            {offChip}
+          </div>
+        )}
         {listControls(inSidebar ? 'size-9' : 'size-10', tools)}
       </>
     )
@@ -603,7 +619,7 @@ function Editor({ quiz }: { quiz: Quiz }) {
                   </Button>
                 )}
                 {canAddGroup && (
-                  <Button variant="outline" onClick={() => newGroup(null)}>
+                  <Button variant="outline" onClick={() => newGroup(selectedId, 'empty')}>
                     <LayersIcon aria-hidden="true" />
                     {t('editor.addGroup')}
                   </Button>
@@ -616,8 +632,8 @@ function Editor({ quiz }: { quiz: Quiz }) {
   }
   /**
    * Search and jump in one row, then one row of actions: the two add buttons (also here, so a long
-   * list need not be scrolled to its end) and the list's own `tools` (Shuffle, Collapse) as icons;
-   * a slim line when questions are switched off. `size` is the controls' height class.
+   * list need not be scrolled to its end) and the list's own `tools` (Shuffle, Collapse) as icons.
+   * `size` is the controls' height class.
    */
   const listControls = (size: string, tools?: ReactNode) =>
     questions.length > 0 && (
@@ -644,25 +660,32 @@ function Editor({ quiz }: { quiz: Quiz }) {
               <PlusIcon aria-hidden="true" />
               <span className="truncate">{t('editor.newQuestion')}</span>
             </Button>
-            <Button variant="outline" size="sm" className={cn('min-w-0 flex-auto gap-1 px-2!', size === 'size-9' ? 'h-9' : 'h-10')} disabled={!canAddGroup} onClick={() => newGroup(null)}>
+            <Button variant="outline" size="sm" className={cn('min-w-0 flex-auto gap-1 px-2!', size === 'size-9' ? 'h-9' : 'h-10')} disabled={!canAddGroup} onClick={() => newGroup(selectedId, 'empty')}>
               <LayersIcon aria-hidden="true" />
               <span className="truncate">{t('editor.newGroup')}</span>
             </Button>
             {tools}
           </div>
         )}
-        {offIds.length > 0 && !searching && (
-          <div className="flex items-center gap-1.5 rounded-lg border border-dashed border-muted-foreground/40 bg-muted/60 py-0.5 pr-0.5 pl-2 text-xs">
-            <EyeOffIcon className="size-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
-            <span className="min-w-0 flex-1 truncate font-bold">{t('editor.inGame.summary', { count: offIds.length, total: questions.length })}</span>
-            <Button variant="ghost" size="sm" className="h-7 gap-1 px-2! text-xs" onClick={switchAllOn}>
-              <EyeIcon className="size-3.5" aria-hidden="true" />
-              {t('editor.inGame.allOn')}
-            </Button>
-          </div>
-        )}
       </>
     )
+  /**
+   * How many questions are switched off, with "All on": a chip beside the list's title, whose row keeps
+   * its height, so switching the first question off does not push the list down under the pointer.
+   */
+  const offChip = offIds.length > 0 && (
+    <span
+      title={t('editor.inGame.summary', { count: offIds.length, total: questions.length })}
+      className="flex shrink-0 items-center gap-1 rounded-full border border-dashed border-muted-foreground/40 bg-muted/60 py-px pr-px pl-2 text-xs font-bold"
+    >
+      <EyeOffIcon className="size-3.5 text-muted-foreground" aria-hidden="true" />
+      <span aria-hidden="true" className="tabular-nums">{offIds.length}</span>
+      <span className="sr-only">{t('editor.inGame.summary', { count: offIds.length, total: questions.length })}</span>
+      <Button variant="ghost" size="sm" className="h-6 rounded-full px-2! text-xs" onClick={switchAllOn}>
+        {t('editor.inGame.allOn')}
+      </Button>
+    </span>
+  )
   // One tab per group, as on My settings, so only one group's options show at a time.
   const settingsBody = (
     <Tabs value={settingsTab} onValueChange={(value) => setSettingsTab(value as SettingsTab)} className="@container gap-5">
@@ -838,7 +861,7 @@ function Editor({ quiz }: { quiz: Quiz }) {
                 disabled={!canAddGroup}
                 aria-label={t('editor.newGroupTop')}
                 title={t('editor.newGroupTop')}
-                onClick={() => newGroup(null)}
+                onClick={() => newGroup(selectedId, 'empty')}
               >
                 <LayersIcon aria-hidden="true" />
                 <span className="hidden xl:inline">{t('editor.newGroup')}</span>
@@ -1008,7 +1031,7 @@ function Editor({ quiz }: { quiz: Quiz }) {
                   onMove={moveSelected}
                   onDuplicate={duplicateSelected}
                   onDelete={() => deleteQuestion(selected.id)}
-                  onNewGroup={groups.length < MAX_GROUPS ? () => newGroup(selected.id) : null}
+                  onNewGroup={groups.length < MAX_GROUPS ? () => newGroup(selected.id, 'split') : null}
                   onColor={(color) => setQuestions((l) => l.map((q) => (q.id === selected.id ? withTag(q, color) : q)))}
                   onSwitch={(on) => switchItem(selected.id, on)}
                 />
@@ -1031,7 +1054,7 @@ function Editor({ quiz }: { quiz: Quiz }) {
                       ]}
                       onChange={(groupId) =>
                         groupId === NEW_GROUP
-                          ? newGroup(selected.id, true)
+                          ? newGroup(selected.id, 'around')
                           : setLayout((l) => moveToGroup(l, selected.id, groupId === NO_GROUP ? null : groupId))
                       }
                     />
@@ -1137,7 +1160,11 @@ function Editor({ quiz }: { quiz: Quiz }) {
             }}
           >
             <SheetHeader>
-              <SheetTitle className="text-lg font-extrabold">{listTitle}</SheetTitle>
+              {/* Room on the right for the sheet's close button. */}
+              <div className="flex min-h-7 items-center gap-2 pr-10">
+                <SheetTitle className="min-w-0 flex-1 text-lg font-extrabold">{listTitle}</SheetTitle>
+                {offChip}
+              </div>
               <SheetDescription className="text-sm">{t('editor.listHelp')}</SheetDescription>
             </SheetHeader>
             <div className="overflow-y-auto px-4 pb-[max(1rem,env(safe-area-inset-bottom))]">{renderList(false)}</div>

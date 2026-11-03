@@ -75,6 +75,7 @@ Collected while testing phases 9 to 12. Effort as above.
 - Picture details in the editor: stored pixel size, file size and format under each picture (phase 46).
 - Typo tolerance for typed answers: "Accept small typos", near misses marked for host and player (phase 47).
 - Seasonal themes: nine seasons with their own colours, decorations, cow costumes and greeting; the Seasonal theme as the default, a per-device switch, and season dates admins can change (phase 50); six season lines for the cow and seasonal podium confetti (phase 51).
+- Smoother drag with 200 questions: the rows no longer render again on each move of a drag (phase 48).
 
 ### Open
 

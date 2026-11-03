@@ -1,8 +1,8 @@
 import type { Question } from '@quizmoo/shared'
-import { DndContext, DragOverlay, closestCenter, type UniqueIdentifier } from '@dnd-kit/core'
+import { DndContext, DragOverlay, closestCenter, type DraggableAttributes, type UniqueIdentifier } from '@dnd-kit/core'
 import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { useCallback, useState, type KeyboardEventHandler, type ReactNode } from 'react'
+import { memo, useCallback, useState, type KeyboardEventHandler, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ArrowDownIcon, ArrowUpIcon, EyeOffIcon, GripVerticalIcon, PlusIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -106,7 +106,6 @@ function Row({
   onOpen: () => void
   onStep: (by: -1 | 1) => void
 }) {
-  const { t } = useTranslation()
   const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } = useSortable({ id: question.id })
   const { onKeyDown, ...pointerListeners } = listeners ?? {}
   return (
@@ -116,37 +115,81 @@ function Row({
       className={cn('touch-manipulation', isDragging && 'opacity-30')}
       {...pointerListeners}
     >
-      <Card
+      <RowContent
         question={question}
         number={number}
         invalid={invalid}
+        first={first}
+        last={last}
         onOpen={onOpen}
-        handle={
-          <button
-            ref={setActivatorNodeRef}
-            type="button"
-            {...attributes}
-            onKeyDown={onKeyDown as KeyboardEventHandler | undefined}
-            aria-label={t('editor.dragQuestion', { n: number + 1 })}
-            className="flex h-12 w-8 shrink-0 cursor-grab items-center justify-center rounded-lg text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring active:cursor-grabbing"
-          >
-            <GripVerticalIcon className="size-4" aria-hidden="true" />
-          </button>
-        }
-        actions={
-          <>
-            <Button variant="ghost" size="icon-sm" aria-label={t('editor.moveUp')} title={t('editor.moveUp')} disabled={first} onClick={() => onStep(-1)}>
-              <ArrowUpIcon aria-hidden="true" />
-            </Button>
-            <Button variant="ghost" size="icon-sm" aria-label={t('editor.moveDown')} title={t('editor.moveDown')} disabled={last} onClick={() => onStep(1)}>
-              <ArrowDownIcon aria-hidden="true" />
-            </Button>
-          </>
-        }
+        onStep={onStep}
+        handleRef={setActivatorNodeRef}
+        handleAttributes={attributes}
+        onHandleKeyDown={onKeyDown as KeyboardEventHandler | undefined}
       />
     </li>
   )
 }
+
+/**
+ * A row's contents. dnd-kit renders every sortable row again on each move of a drag; only the row's
+ * `li` (its transform) changes then, so the contents keep their last render (phase 48).
+ */
+const RowContent = memo(function RowContent({
+  question,
+  number,
+  invalid,
+  first,
+  last,
+  onOpen,
+  onStep,
+  handleRef,
+  handleAttributes,
+  onHandleKeyDown,
+}: {
+  question: Question
+  number: number
+  invalid: boolean
+  first: boolean
+  last: boolean
+  onOpen: () => void
+  onStep: (by: -1 | 1) => void
+  handleRef: (element: HTMLElement | null) => void
+  handleAttributes: DraggableAttributes
+  onHandleKeyDown: KeyboardEventHandler | undefined
+}) {
+  const { t } = useTranslation()
+  return (
+    <Card
+      question={question}
+      number={number}
+      invalid={invalid}
+      onOpen={onOpen}
+      handle={
+        <button
+          ref={handleRef}
+          type="button"
+          {...handleAttributes}
+          onKeyDown={onHandleKeyDown}
+          aria-label={t('editor.dragQuestion', { n: number + 1 })}
+          className="flex h-12 w-8 shrink-0 cursor-grab items-center justify-center rounded-lg text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring active:cursor-grabbing"
+        >
+          <GripVerticalIcon className="size-4" aria-hidden="true" />
+        </button>
+      }
+      actions={
+        <>
+          <Button variant="ghost" size="icon-sm" aria-label={t('editor.moveUp')} title={t('editor.moveUp')} disabled={first} onClick={() => onStep(-1)}>
+            <ArrowUpIcon aria-hidden="true" />
+          </Button>
+          <Button variant="ghost" size="icon-sm" aria-label={t('editor.moveDown')} title={t('editor.moveDown')} disabled={last} onClick={() => onStep(1)}>
+            <ArrowDownIcon aria-hidden="true" />
+          </Button>
+        </>
+      }
+    />
+  )
+})
 
 function Card({
   question,

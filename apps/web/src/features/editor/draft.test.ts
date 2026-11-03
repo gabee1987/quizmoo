@@ -1,6 +1,7 @@
 import type { Question, QuestionGroup } from '@quizmoo/shared'
 import { describe, expect, it } from 'vitest'
 import {
+  addEmptyGroup,
   addGroup,
   addGroupAround,
   addQuestion,
@@ -174,6 +175,15 @@ describe('groups in the draft', () => {
     expect(shape(addGroup(layout(), group('N'), 'c'))).toBe('a G(b) N(c) H(d) e')
     expect(shape(addGroup(layout(), group('N'), 'e'))).toBe('a G(b c) H(d) N(e)')
     expect(shape(addGroup(layout(), group('N'), null))).toBe('a G(b c) H(d) e N()')
+  })
+
+  it('adds an empty group above the selected question, or above the group it is in', () => {
+    expect(shape(addEmptyGroup(layout(), group('N'), 'a'))).toBe('N() a G(b c) H(d) e')
+    expect(shape(addEmptyGroup(layout(), group('N'), 'c'))).toBe('a N() G(b c) H(d) e')
+    expect(shape(addEmptyGroup(layout(), group('N'), 'H'))).toBe('a G(b c) N() H(d) e')
+    expect(shape(addEmptyGroup(layout(), group('N'), 'e'))).toBe('a G(b c) H(d) N() e')
+    expect(shape(addEmptyGroup(layout(), group('N'), null))).toBe('a G(b c) H(d) e N()')
+    expect(shape(addEmptyGroup(layout(), group('N'), 'gone'))).toBe('a G(b c) H(d) e N()')
   })
 
   it('starts a group around one question, taking it out of its group', () => {

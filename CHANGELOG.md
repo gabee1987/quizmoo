@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+### Smoother drag with 200 questions (phase 48)
+- The sortable lists' sensor options are module constants (`lib/sortable.ts`). `useSensor` memoises on its options object, so new options on every render gave every sortable item new listeners and rendered every row again on each move of a drag.
+- The editor's question list and a group's Questions tab render each row's contents in a memoised component (`RowContent`); during a drag only the rows' outer `li` follows dnd-kit. The question list passes id-taking row handlers that stay the same between renders.
+- While a question or group is dragged near the edge of the editor's list, only the panel the list scrolls in (the sidebar, the sheet) scrolls; the page around it stays put (`autoScroll.canScroll`), so the rows no longer slide under the pointer and move the drop target.
+- Tighter question cards in the editor's list, so the text gets more room: the question's number in a column at the card's left edge, which shows the grip while the card is hovered (the whole card drags); a slightly bigger type icon, which is also the eye switch (it shows the eye while the card is hovered, always on touch screens) instead of a column of its own beside the text and picture. Group headers follow the same pattern: the grip in the left column while hovered, and the group icon as the eye switch for all its questions.
+- "Group" in the list's header adds the new, empty group just above the selected question (above its group when it is in one; `addEmptyGroup`), instead of at the end of the list. A default name already in use moves on to the next free number.
+- The "switched off" summary is a chip beside the list's title (in the phone's sheet, beside the sheet's title) instead of a line of its own, so switching the first question off no longer pushes the list down.
+- Dragging question 1 to question 150 in a 200-question quiz with the CPU slowed 4× (median of 5): long tasks 13.1 s → 0.87 s, 95th percentile frame 90 → 30 ms, frames over 100 ms 24 → 3, longest frame 651 → 411 ms (the drop). Without slowing: longest frame 50 ms.
+
 ## 1.8.0 – 2026-11-01
 
 ### Seasonal themes (phase 50)
