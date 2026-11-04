@@ -24,7 +24,7 @@ How to deploy is in `DEPLOYMENT.md` (Railway step by step) and `docs/deploy.md` 
 - **Feedback** goes to a GitHub issue form (the repository is public), not to a third-party widget.
 - **Smoke test** after every deploy: `scripts/smoke.mjs <url>` (health, SPA fallback, manifest, service worker, HSTS over https, a login, a socket round trip); it deletes what it creates.
 
-## Patch notes (phase 37, done as 1.10.1 on 4 November 2026)
+## Patch notes (phase 37, released with 1.10.0 on 4 November 2026)
 
 - Hosts get a What's new page (`features/whats-new/releases.ts`, texts under `whatsNew.releases.<version>` in both dictionaries); players get none.
 - Each release: news groups first, then a quieter "Fixed" block (wrench icon, muted list) after a border. `ReleaseNotes.fixed?: string[]`; a fixes-only release has `sections: []`. The test refuses a release with no item at all and fix lists of different length between the languages.

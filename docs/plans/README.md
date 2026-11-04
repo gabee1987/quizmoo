@@ -43,7 +43,7 @@ Finished plans are deleted once their branch is merged: `CHANGELOG.md` records w
 | 34 | Help page and interactive tutorial with hints | `feature/help-and-tutorial` | planned |
 | 35 | Screen lock for the host's game screen | `feature/host-game-screen` | done |
 | 36 | E-mail to admins about new sign-ups | `feature/signup-emails` | done |
-| 37 | Fixes in the patch notes, kept for every release (with two small fixes, 1.10.1) | `fix/small-fixes` | done |
+| 37 | Fixes in the patch notes, kept for every release (with small fixes, released with 1.10.0) | `fix/small-fixes` | done |
 | 38 | Default time and points for new questions (done in phase 42) | `feature/question-switch-and-editor` | done |
 | 39 | Random question order, and a roomier phone question screen | `feature/shuffle-questions` | done |
 | 40 | Question groups within a quiz, with intros, per-group rules, and 200 questions | `feature/question-groups` | done |
