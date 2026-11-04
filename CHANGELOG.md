@@ -13,6 +13,7 @@
 
 ### Docs
 - The event checklist follows the current app (Open projector, the end pages, Try it, switched-off questions, lock joining; the removed "Show on screen"); the README's features and project status are brought up to date; finished plans are deleted and their rows in the plans index unlinked; done items left the backlog's open lists.
+- The decisions and reasons from the deleted plans (phases 26, 37, 39 to 47, 50 and 51) are kept in eight feature history skills: `hosting-and-releases`, `question-groups`, `question-order`, `host-live-board`, `game-pacing`, `lock-joining`, `typo-tolerance` and `seasonal-look`. Picture details and the editor's question defaults went into `quiz-editor`. `implement-phase` now moves a plan's decisions into a skill before the plan is deleted.
 
 ## 1.10.0 – 2026-11-03
 

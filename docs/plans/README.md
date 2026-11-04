@@ -2,7 +2,7 @@
 
 One file per phase while it is being built. Each phase is one `feature/*` branch off `develop`, implemented with the `implement-phase` skill (`/implement-phase <N>`), verified with `pnpm verify` plus the phase's own command, and handed over with a delivery report (see the `git-workflow` skill). The user runs all git commands.
 
-Finished plans are deleted once their branch is merged: `CHANGELOG.md` records what each phase shipped, and git history keeps the plan itself. Ideas not yet planned are in the [backlog](backlog.md).
+Finished plans are deleted once their branch is merged: `CHANGELOG.md` records what each phase shipped, the feature history skills in `.claude/skills` keep the decisions and the reasons behind them, and git history keeps the plan itself. Ideas not yet planned are in the [backlog](backlog.md).
 
 | Phase | Plan | Branch | Status |
 |---|---|---|---|
