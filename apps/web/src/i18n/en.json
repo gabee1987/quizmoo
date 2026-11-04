@@ -1619,6 +1619,29 @@
     "releasedOn": "Released {{date}}",
     "fixed": "Fixed",
     "releases": {
+      "1_10_1": {
+        "title": "Small fixes",
+        "intro": "Fixes from testing, one front page for logging in, and every version on this page now says what was fixed.",
+        "sections": [
+          {
+            "title": "This page",
+            "items": [
+              "Every version lists what was fixed after its news, the earlier versions included."
+            ]
+          },
+          {
+            "title": "Logging in",
+            "items": [
+              "There is one front page for everyone: you log in on its Host tab. Old login links still work and open it."
+            ]
+          }
+        ],
+        "fixed": [
+          "A PIN that no game answers no longer stays on the join page after a refresh: the page starts empty. Join links from QR codes work as before.",
+          "The Quizmoo logo at the top of your pages takes you to your home page instead of the players' join page.",
+          "Switching between Play and Host on the front page is smooth: the card grows or shrinks to the other side instead of jumping."
+        ]
+      },
       "1_10_0": {
         "title": "A real finale on the projector and on every phone",
         "intro": "The end of the game is now a show: a podium with a drum roll, the leaderboard, awards and game facts on the projector, and four pages of results on every phone.",
@@ -1642,25 +1665,10 @@
               "Answers lists every question, closed until tapped, with how many were right on top.",
               "Facts shows the game's figures and awards, with \"That's you!\" on the player's own. My stats shows their best streak, answer times, their place after each question and the points per question."
             ]
-          },
-          {
-            "title": "This page",
-            "items": [
-              "Every version lists what was fixed after its news, the earlier versions included."
-            ]
-          },
-          {
-            "title": "Logging in",
-            "items": [
-              "There is one front page for everyone: you log in on its Host tab. Old login links still work and open it."
-            ]
           }
         ],
         "fixed": [
-          "The points inside the result stamp on the phones' answer list are readable in light mode.",
-          "A PIN that no game answers no longer stays on the join page after a refresh: the page starts empty. Join links from QR codes work as before.",
-          "The Quizmoo logo at the top of your pages takes you to your home page instead of the players' join page.",
-          "Switching between Play and Host on the front page is smooth: the card grows or shrinks to the other side instead of jumping."
+          "The points inside the result stamp on the phones' answer list are readable in light mode."
         ]
       },
       "1_9_0": {
