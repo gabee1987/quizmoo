@@ -10,6 +10,7 @@
 ### Fixed
 - The join page no longer keeps a PIN no game answers: when the PIN in the address (`?pin=`) gets "No such game", it is removed from the address, so a refresh starts with an empty form. QR join links and the waiting page of a scheduled game keep their PIN.
 - The logo in the header leads to the host's home page (`/host`) on the host pages instead of the players' join page; elsewhere it still opens the join page.
+- The join page's Play / Host switch no longer jumps: both sides stay mounted in one grid cell, the box around them animates to the chosen side's measured height, and the sides slide and fade in the direction of the switch. A spacer under the card resizes the other way at the same time, so the card's top and the hero stay in place and only the card's bottom edge moves.
 
 ### Docs
 - The event checklist follows the current app (Open projector, the end pages, Try it, switched-off questions, lock joining; the removed "Show on screen"); the README's features and project status are brought up to date; finished plans are deleted and their rows in the plans index unlinked; done items left the backlog's open lists.

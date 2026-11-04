@@ -1633,7 +1633,8 @@
         ],
         "fixed": [
           "Ha egy PIN-hez nem tartozik játék, frissítés után már nem marad a csatlakozó oldalon: az oldal üresen indul. A QR-kódos csatlakozó linkek ugyanúgy működnek.",
-          "Az oldalaid tetején a Quizmoo logó a kezdőlapodra visz, nem a játékosok csatlakozó oldalára."
+          "Az oldalaid tetején a Quizmoo logó a kezdőlapodra visz, nem a játékosok csatlakozó oldalára.",
+          "A nyitóoldalon a Játszom és a Játékot vezetek közti váltás már nem ugrik: a kártya simán nő vagy zsugorodik a másik oldalhoz."
         ]
       },
       "1_10_0": {

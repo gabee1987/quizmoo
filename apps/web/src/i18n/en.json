@@ -1633,7 +1633,8 @@
         ],
         "fixed": [
           "A PIN that no game answers no longer stays on the join page after a refresh: the page starts empty. Join links from QR codes work as before.",
-          "The Quizmoo logo at the top of your pages takes you to your home page instead of the players' join page."
+          "The Quizmoo logo at the top of your pages takes you to your home page instead of the players' join page.",
+          "Switching between Play and Host on the front page is smooth: the card grows or shrinks to the other side instead of jumping."
         ]
       },
       "1_10_0": {
