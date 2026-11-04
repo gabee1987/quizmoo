@@ -13,8 +13,8 @@ Topic skills: `game-screens` (phone, projector, host control and results layouts
 |---|---|---|
 | `/` | players | join form (PIN first, then name and avatar, team picker in team mode), `?pin=` prefill from QR |
 | `/play/$pin` | players | the whole game on a phone: lobby, question, answered, reveal, scoreboard, podium |
-| `/login` | hosts | username + password |
-| `/register` | hosts | self sign-up when `registrationOpen` (honeypot field, done and closed states); linked from `/login` |
+| `/login` | hosts | forwards to `/?side=host` (keeping `?redirect=`) for old links; hosts log in on the front page's Host tab |
+| `/register` | hosts | self sign-up when `registrationOpen` (honeypot field, done and closed states); linked from the front page's Host tab |
 | `/privacy` | everyone | privacy notice; operator, contact and retention days from `GET /api/site` (`useSiteInfo`) |
 | `/host` | hosts | home: greeting, figures, running and scheduled games, recently edited quizzes, latest results (from `/api/quizzes` and `/api/games`; sorting in `features/host/dashboard.ts`) |
 | `/host/quizzes` | hosts | quiz list with search, Play, Edit, New, Import (spreadsheet or Quizmoo file), downloads, batch edit and delete |
@@ -31,7 +31,7 @@ Topic skills: `game-screens` (phone, projector, host control and results layouts
 
 Browser storage: every `localStorage` / `sessionStorage` key is `quizmoo.<name>` and must be listed in `lib/storage-inventory.ts` with its text in `legal.cookies.items` (a test fails otherwise). The test finds any `'quizmoo.<name>'` string in the source, so names that are not storage (a BroadcastChannel) use `quizmoo-<name>`. The first-visit `StorageNotice` (not on `/play` or `/screen`) stays informational: nothing stored needs consent; anything optional would need a real choice first. Legal links: `LegalLinks` under the public cards and in the host sidebar.
 
-`/host/*` routes have a layout route that loads `/api/auth/me` and redirects to `/login` on 401. `HostNav`: Home, Quizzes, Games (plus Users and Names for admins) in the laptop sidebar; the phone tab bar keeps four tabs, so the admin pages sit in its Account menu. Shared host queries (`quizzesQueryOptions`, `gamesQueryOptions`) are in `features/host/queries.ts`, "New quiz" and "Play" in `features/host/quiz-actions.ts`. `/play/$pin` and `/screen/$pin` need no login.
+The header logo (`AppHeader`) links to `/host` on the host pages and to `/` everywhere else. `/host/*` routes have a layout route that loads `/api/auth/me` and redirects to `/?side=host&redirect=<page>` on 401; logout, the lock screen's Log out and account deletion go to `/?side=host` too. `HostNav`: Home, Quizzes, Games (plus Users and Names for admins) in the laptop sidebar; the phone tab bar keeps four tabs, so the admin pages sit in its Account menu. Shared host queries (`quizzesQueryOptions`, `gamesQueryOptions`) are in `features/host/queries.ts`, "New quiz" and "Play" in `features/host/quiz-actions.ts`. `/play/$pin` and `/screen/$pin` need no login.
 
 ## Installable app
 

@@ -1,4 +1,4 @@
-import { Link } from '@tanstack/react-router'
+import { Link, useRouterState } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { useCowAntics } from '@/features/cow/use-cow-antics'
 import { languages, setLanguage } from '@/i18n'
@@ -7,14 +7,18 @@ import { CowLogo } from './cow-logo'
 import { ModeToggle } from './mode-toggle'
 import { SeasonToggle } from './season-greeting'
 
-/** Compact header: logo mark (a link home), language and colour mode. Without `brand` (the home pages show a big one) only the settings. */
+/**
+ * Compact header: logo mark (a link home: the host's home on the host pages, the join page elsewhere),
+ * language and colour mode. Without `brand` (the home pages show a big one) only the settings.
+ */
 export function AppHeader({ brand = true }: { brand?: boolean }) {
   const { t } = useTranslation()
+  const onHostPages = useRouterState({ select: (state) => state.location.pathname.startsWith('/host') })
   return (
     <header className={cn('flex items-center gap-3 px-4 py-3', brand ? 'justify-between' : 'justify-end')}>
       {brand && (
         <Link
-          to="/"
+          to={onHostPages ? '/host' : '/'}
           className="-m-1 flex items-center gap-2.5 rounded-xl p-1 outline-none focus-visible:ring-[3px] focus-visible:ring-ring"
         >
           <LogoMark />

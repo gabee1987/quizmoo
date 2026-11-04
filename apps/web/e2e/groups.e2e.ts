@@ -46,7 +46,7 @@ for (const mode of modes) {
     watch(page, 'host')
     page.on('dialog', (dialog) => void dialog.accept())
 
-    await page.goto('/login')
+    await page.goto('/?side=host')
     await page.getByLabel('Username').fill(username!)
     await page.getByLabel('Password', { exact: true }).fill(password!)
     await page.getByRole('button', { name: 'Log in' }).click()

@@ -1,6 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { WrenchIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Badge } from '@/components/ui/badge'
+import { cn } from '@/lib/cn'
 import { releaseKey, releases, type ReleaseNotes } from '../../features/whats-new/releases'
 import { useMarkReleaseSeen } from '../../features/whats-new/use-release-seen'
 
@@ -49,6 +51,19 @@ function WhatsNewPage() {
                 </ul>
               </div>
             ))}
+            {notes.fixed && notes.fixed.length > 0 && (
+              <div className={cn('flex flex-col gap-2', notes.sections.length > 0 && 'border-t pt-4')}>
+                <h3 className="flex items-center gap-2 font-extrabold">
+                  <WrenchIcon className="size-4 text-muted-foreground" aria-hidden="true" />
+                  {t('whatsNew.fixed')}
+                </h3>
+                <ul className="flex list-disc flex-col gap-1.5 pl-5 text-muted-foreground marker:text-muted-foreground">
+                  {notes.fixed.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </section>
         )
       })}

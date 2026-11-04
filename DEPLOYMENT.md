@@ -200,7 +200,7 @@ Then by hand:
 
 ## Releasing a new version
 
-1. On `develop`: `pnpm verify` and the e2e suite pass; the version in the root `package.json`, `CHANGELOG.md` and the patch notes (`apps/web/src/features/whats-new/releases.ts`, `whatsNew.releases.<x_y_z>` in both dictionaries) are updated.
+1. On `develop`: `pnpm verify` and the e2e suite pass; the version in the root `package.json`, `CHANGELOG.md` and the patch notes (`apps/web/src/features/whats-new/releases.ts`, `whatsNew.releases.<x_y_z>` in both dictionaries, with the fixes under `fixed`) are updated.
 2. Pick a moment when no game runs: `/api/health` must show `"activeGames": 0`. During a deploy the old and the new process run side by side for a moment.
 3. Open a pull request from `develop` into `main`, wait for `verify`, merge. Railway waits for CI, builds and deploys by itself.
 4. Run the smoke test (step 8) against the live address.

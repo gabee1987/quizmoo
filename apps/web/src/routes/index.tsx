@@ -13,7 +13,7 @@ import {
   PlayIcon,
   PresentationIcon,
 } from 'lucide-react'
-import { Suspense, lazy, useEffect, useRef, useState, type FormEvent } from 'react'
+import { Suspense, lazy, useEffect, useLayoutEffect, useRef, useState, type FormEvent } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
 import { z } from 'zod'
 import { AddToCalendarButton } from '@/components/add-to-calendar-button'
@@ -25,6 +25,7 @@ import { LegalLinks } from '@/components/legal-links'
 import { PinInput } from '@/components/pin-input'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { cn } from '@/lib/cn'
 import { LoginForm } from '@/features/auth/login-form'
 import { useSiteInfo } from '@/lib/site'
 import { TextField } from '../components/text-field'
@@ -40,7 +41,13 @@ import { emitAck, ensureConnected } from '../lib/socket'
 export const Route = createFileRoute('/')({
   // Allows QR codes / links like /?pin=123456 to prefill the PIN. Kept a number, as the router parses
   // it (a string of digits would be written back quoted, ?pin=%22123456%22); PINs never start with 0.
-  validateSearch: z.object({ pin: z.coerce.number().int().positive().optional().catch(undefined) }),
+  // `side=host` opens the Host tab (logging out, the host pages' guard), with `redirect` the host page
+  // to return to after logging in (e.g. the Users page from a sign-up e-mail).
+  validateSearch: z.object({
+    pin: z.coerce.number().int().positive().optional().catch(undefined),
+    side: z.enum(['host']).optional().catch(undefined),
+    redirect: z.string().optional().catch(undefined),
+  }),
   component: JoinPage,
 })
 
@@ -65,7 +72,7 @@ function JoinPage() {
   const [scanning, setScanning] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [pinChecked, setPinChecked] = useState(false)
-  const [side, setSide] = useState<'play' | 'host'>('play')
+  const [side, setSide] = useState<'play' | 'host'>(search.side ?? 'play')
   const site = useSiteInfo()
 
   const pinValid = PIN_PATTERN.test(pin)
@@ -127,6 +134,29 @@ function JoinPage() {
   // The empty page fits the screen, so while the PIN boxes have focus a spacer below the card makes
   // room to scroll it up (the phone's keyboard covers the lower half anyway).
   const [pinFocused, setPinFocused] = useState(false)
+
+  // Play and Host stay mounted, stacked on each other; the box around them follows the chosen side's
+  // height (also when that side grows, e.g. once a game is found), so the card never jumps. A spacer
+  // under the card takes up the difference to the taller side with the same transition, so the
+  // column's height stays the same while switching: the centred page keeps the card's top (and the
+  // hero) in place and only the card's bottom edge moves.
+  const playPanel = useRef<HTMLDivElement>(null)
+  const hostPanel = useRef<HTMLDivElement>(null)
+  const [panelHeights, setPanelHeights] = useState<{ play: number; host: number } | null>(null)
+  useLayoutEffect(() => {
+    const play = playPanel.current
+    const host = hostPanel.current
+    if (!play || !host) return
+    const measure = () => setPanelHeights({ play: play.offsetHeight, host: host.offsetHeight })
+    measure()
+    const observer = new ResizeObserver(measure)
+    observer.observe(play)
+    observer.observe(host)
+    return () => observer.disconnect()
+  }, [])
+  const panelHeight = panelHeights?.[side] ?? null
+  const panelSlack = panelHeights ? Math.max(panelHeights.play, panelHeights.host) - panelHeights[side] : 0
+
   useEffect(() => {
     if (!pinFocused) return
     const toTop = () => card.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -161,6 +191,13 @@ function JoinPage() {
 
   const infoError = info.error && 'code' in info.error ? (info.error as { code: string }).code : null
   const pinError = (submitted || pinChecked) && !pinValid ? t('join.pinInvalid') : infoError ? t(infoError) : undefined
+  // A PIN in the address that no game answers (one not created yet, or long gone) leaves the address,
+  // so a refresh starts with an empty form; the boxes keep it with the error until it is changed.
+  useEffect(() => {
+    if (infoError === 'errors.gameNotFound' && searchPin !== '' && searchPin === pin) {
+      void navigate({ to: '/', search: {}, replace: true, resetScroll: false })
+    }
+  }, [infoError, searchPin, pin, navigate])
 
   // "Surprise me": a name from the admins' list that nobody in this game has yet, with the avatar
   // that fits it, or a random one.
@@ -236,7 +273,18 @@ function JoinPage() {
                 {t('home.host')}
               </TabsTrigger>
             </TabsList>
-            <TabsContent value="play">
+            {/* 8 px of padding inside the clipping box keeps the fields' focus rings visible. */}
+            <div
+              className={cn('-m-2 grid overflow-hidden p-2', sideResize)}
+              style={panelHeight === null ? undefined : { height: panelHeight + 16 }}
+            >
+            <TabsContent
+              ref={playPanel}
+              value="play"
+              forceMount
+              inert={side !== 'play'}
+              className={cn(sidePanel, 'data-[state=inactive]:-translate-x-10')}
+            >
               <form className="flex flex-col gap-5" onSubmit={(e) => void onSubmit(e)} noValidate>
                 <h2 className="sr-only">{t('join.title')}</h2>
                 <div
@@ -374,10 +422,16 @@ function JoinPage() {
                 )}
               </form>
             </TabsContent>
-            <TabsContent value="host" className="flex flex-col gap-4">
+            <TabsContent
+              ref={hostPanel}
+              value="host"
+              forceMount
+              inert={side !== 'host'}
+              className={cn(sidePanel, 'flex flex-col gap-4 data-[state=inactive]:translate-x-10')}
+            >
               <h2 className="sr-only">{t('auth.title')}</h2>
               <p className="text-center text-muted-foreground text-balance">{t('home.hostIntro')}</p>
-              <LoginForm />
+              <LoginForm redirect={search.redirect} />
               {site.data?.registrationOpen && (
                 <p className="text-center text-sm text-muted-foreground">
                   {t('home.noAccount')}{' '}
@@ -387,9 +441,12 @@ function JoinPage() {
                 </p>
               )}
             </TabsContent>
+            </div>
           </Tabs>
         </div>
         <LegalLinks />
+        {/* The difference to the taller side (see panelSlack); the column's gap is part of it, hence the -mt-5. */}
+        <div aria-hidden="true" className={cn('-mt-5 shrink-0', sideResize)} style={{ height: panelSlack }} />
         {/* Room below for scrolling the card up; out of the layout, so nothing moves when it comes and goes. */}
         {pinFocused && <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-full h-dvh lg:hidden" />}
       </div>
@@ -408,4 +465,15 @@ function JoinPage() {
   )
 }
 
-const inlineLink = 'rounded-sm font-semibold underline underline-offset-2 outline-none hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring'
+/**
+ * A side of the join card: both share one grid cell (top-aligned, so each keeps its own height to
+ * measure). The chosen one slides in from its own side while the other fades out the opposite way;
+ * hidden at the end of the fade, and inert (set on the element), so it never takes focus or clicks.
+ */
+/** The card's box and the spacer under it resize together, with one timing, so their sum never changes. */
+const sideResize = 'transition-[height] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]'
+
+const sidePanel =
+  'col-start-1 row-start-1 self-start transition-[opacity,translate,visibility] duration-300 ease-out data-[state=active]:animate-none data-[state=inactive]:invisible data-[state=inactive]:opacity-0'
+
+const inlineLink ='rounded-sm font-semibold underline underline-offset-2 outline-none hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring'

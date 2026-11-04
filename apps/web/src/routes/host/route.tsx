@@ -9,7 +9,7 @@ import { cn } from '@/lib/cn'
 import { ApiError } from '../../lib/api'
 import { meQueryOptions } from '../../lib/auth'
 
-// Guard for every /host/* page: no session means back to /login.
+// Guard for every /host/* page: no session means back to the front page's Host tab.
 export const Route = createFileRoute('/host')({
   beforeLoad: async ({ context, location }) => {
     let user
@@ -18,7 +18,7 @@ export const Route = createFileRoute('/host')({
     } catch (error) {
       // Back to this page after logging in, e.g. the Users page from a sign-up e-mail.
       if (error instanceof ApiError && error.status === 401) {
-        throw redirect({ to: '/login', search: { redirect: location.href === '/host' ? undefined : location.href } })
+        throw redirect({ to: '/', search: { side: 'host', redirect: location.href === '/host' ? undefined : location.href } })
       }
       throw error
     }

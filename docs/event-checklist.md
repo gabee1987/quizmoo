@@ -5,8 +5,9 @@ One page for the host. Tick each item; the "if something goes wrong" section is 
 ## The week before
 
 - [ ] The quiz is ready and checked in the editor (the phone preview shows how answers look).
-- [ ] Game settings are chosen on the quiz: individual or team mode (team names entered), when correct answers and the scoreboard are shown, and whether you release the final results yourself.
-- [ ] A test game was played end to end with two phones and the projector screen.
+- [ ] Game settings are chosen on the quiz: when correct answers and the scoreboard are shown, and whether you release the final results yourself. Questions not needed for this event are switched off (the eye in the editor's list), not deleted.
+- [ ] Team mode and the team names are set when the game is created (the new game dialog), or a game is scheduled ahead with **Later** so the PIN can be shared.
+- [ ] The quiz was played through once with **Try it** in the editor, and a test game end to end with two phones and the projector screen.
 - [ ] You know your host username and password. On the venue LAN, use an account whose password is not used anywhere else.
 
 ## At the venue, 30 minutes before
@@ -15,7 +16,7 @@ One page for the host. Tick each item; the "if something goes wrong" section is 
 - [ ] Wifi: phones and the laptop are on the same network, and it has no client isolation (guest networks often have it). A phone opening the app address shows the join page.
 - [ ] Laptop setup only: the address in `APP_ORIGIN` is the laptop's current IP (`ipconfig`), then `docker compose up -d`.
 - [ ] `<app address>/api/health` shows `"ok":true,"db":true`.
-- [ ] Projector: open the game's host control, press **Open screen**, drag that window to the projector and make it full screen (F11). Text is readable from the back of the room.
+- [ ] Projector: open the game's host control, press **Open projector**, drag that window to the projector and make it full screen (F11). Text is readable from the back of the room.
 - [ ] Log in to the host control on a laptop or phone you keep with you.
 
 ## Running the game
@@ -25,18 +26,20 @@ One page for the host. Tick each item; the "if something goes wrong" section is 
 3. When everyone is in, press **Start**. Each question closes when time is up or everyone has answered.
 4. After each question: **Next question**, or **Show scoreboard** first (depending on the settings).
 5. On the projector laptop, Space or → does the same as the main host button.
-6. At the end: **Finish**. If final results are held, press **Show podium** for the projector and **Show results on phones** when you are ready.
+6. After the last question: **Finish**. If final results are held, press **Show podium** for the projector and **Show results on phones** when you are ready.
+7. The projector then shows the podium, the leaderboard, the awards and the game facts. Move between them from the host page or the projector's own controls, or switch on **Automatic**. **Show the questions** goes through every question with its answers, only when you want it.
 
 ## If something goes wrong
 
 - **A phone lost connection or the page was closed:** reopen the same address on the same phone; the player rejoins with their score. Nothing to do on the host side.
 - **A question needs more time:** press **+30 s**. To drop a question: **Skip** (nobody scores on it).
 - **Unwanted nickname:** remove the player from the player list.
+- **Latecomers should not join any more:** switch on **Lock joining**; players already in can still come back.
 - **No projector:** run the game from the host control on the laptop. The QR code and PIN are on the host control in the lobby, and players see each question and its answers on their own phones; read the questions aloud.
 - **The server or laptop restarted:** start it again (`docker compose up -d`). The game resumes where it was; phones reconnect by themselves within a few seconds.
 - **The venue wifi fails:** players can switch to mobile data only if the app runs on a public (cloud) address. On a laptop-only setup, a travel router or phone hotspot that the laptop and the phones join is the fallback.
 
 ## After the event
 
-- [ ] **Games** → the game → **Results**: check the podium and the questions, **Export CSV** if needed, **Show on screen** to present the summary.
+- [ ] **Games** → the game → **Results**: check the podium and the questions, **Export CSV** if needed. While the game is still available (about an hour after it ends), **Open projector** brings its results back on the projector.
 - [ ] Delete games you do not need to keep. Finished games are deleted automatically after the retention period (90 days by default).

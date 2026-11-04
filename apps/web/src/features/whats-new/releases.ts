@@ -8,12 +8,15 @@ export interface Release {
 export interface ReleaseNotes {
   title: string
   intro: string
+  /** The news, in groups; empty in a release that only fixes things. */
   sections: { title: string; items: string[] }[]
+  /** What was fixed, shown after the news. */
+  fixed?: string[]
 }
 
 /** Newest first. The first entry must be the app's version (`releases.test.ts` checks it). */
 export const releases: Release[] = [
-  { version: '1.10.0', date: '2026-11-03' },
+  { version: '1.10.0', date: '2026-11-04' },
   { version: '1.9.0', date: '2026-11-03' },
   { version: '1.8.0', date: '2026-11-01' },
   { version: '1.7.1', date: '2026-10-30' },

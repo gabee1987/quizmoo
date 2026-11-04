@@ -223,7 +223,7 @@ export function DeleteAccountDialog({ account, onClose }: { account: Account; on
     onSuccess: () => {
       queryClient.clear()
       toast.success(t('settings.account.delete.done'))
-      void navigate({ to: '/login' })
+      void navigate({ to: '/', search: { side: 'host' } })
     },
   })
   return (
