@@ -39,6 +39,13 @@ test('the storage notice and the legal pages', async ({ browser }) => {
     await legal.getByRole('link', { name: 'Imprint' }).click()
     await expect(page.getByRole('heading', { name: 'Imprint', level: 1 })).toBeVisible()
 
+    // A PIN in the address that no game answers leaves the address, so a refresh starts empty.
+    await page.goto('/?pin=999998')
+    await expect(page.getByText('No such game. Check the PIN.')).toBeVisible()
+    await expect(page).toHaveURL(/\/$/)
+    await page.reload()
+    await expect(page.getByText('No such game. Check the PIN.')).toHaveCount(0)
+
     // The join page says what joining means, with the links.
     await page.goto('/')
     await expect(page.getByRole('navigation', { name: 'Legal' }).getByRole('link', { name: 'Terms' })).toBeVisible()

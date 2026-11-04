@@ -161,6 +161,13 @@ function JoinPage() {
 
   const infoError = info.error && 'code' in info.error ? (info.error as { code: string }).code : null
   const pinError = (submitted || pinChecked) && !pinValid ? t('join.pinInvalid') : infoError ? t(infoError) : undefined
+  // A PIN in the address that no game answers (one not created yet, or long gone) leaves the address,
+  // so a refresh starts with an empty form; the boxes keep it with the error until it is changed.
+  useEffect(() => {
+    if (infoError === 'errors.gameNotFound' && searchPin !== '' && searchPin === pin) {
+      void navigate({ to: '/', search: {}, replace: true, resetScroll: false })
+    }
+  }, [infoError, searchPin, pin, navigate])
 
   // "Surprise me": a name from the admins' list that nobody in this game has yet, with the avatar
   // that fits it, or a random one.

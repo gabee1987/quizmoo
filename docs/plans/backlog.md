@@ -1,6 +1,6 @@
 # Feature backlog
 
-Candidate features after the design phases (9 to 12). None is planned in detail yet: pick the ones wanted and a phase plan is written for each group, in the format of the other plans. Effort is a rough size: S (a day), M (a few days), L (a week or more). Every item keeps the existing rules: nickname only, server-authoritative state, same origin, i18n keys for errors.
+Candidate features and fixes not planned yet. Pick the ones wanted and a phase plan is written for each group, in the format of the other plans; finished items move to "Already done". Effort is a rough size: S (a day), M (a few days), L (a week or more). Every item keeps the existing rules: nickname only, server-authoritative state, same origin, i18n keys for errors.
 
 ## Playing
 
@@ -9,7 +9,6 @@ Candidate features after the design phases (9 to 12). None is planned in detail 
 | Partial-credit multiple choice ("some of these") | Several correct options where picking some is enough | M | New question type in the shared schema (keeps `multiple` as "all must be picked"); scoring option per question: same points for any correct pick, or points per correct option; wrong picks subtract or void, to decide; phone UI as multiple choice |
 | Slider or range question | Estimation questions with a visual answer | M | Like number with min/max/step and a slider input; distribution as a histogram |
 | Player reactions | Audience energy between questions | M | Emoji burst on the projector; rate limited; not persisted |
-| Sounds and music | Atmosphere | M | Needs licensed audio assets; opt-in on the projector only; phones silent by default |
 | Practice mode (self-paced) | Training use, no host needed | L | Different flow: player advances alone, no projector; engine mostly reusable |
 
 ## Hosting
@@ -77,6 +76,7 @@ Collected while testing phases 9 to 12. Effort as above.
 - Seasonal themes: nine seasons with their own colours, decorations, cow costumes and greeting; the Seasonal theme as the default, a per-device switch, and season dates admins can change (phase 50); six season lines for the cow and seasonal podium confetti (phase 51).
 - Smoother drag with 200 questions: the rows no longer render again on each move of a drag (phase 48).
 - Play-through preview in the editor: "Try it" plays the quiz on the phone preview with the real reveal screen, nothing saved (phase 49).
+- Fixes on the What's new page: every release lists what was fixed after its news, the earlier releases included (phase 37); the join page drops a PIN no game answers from the address, and the logo on the host pages leads to the host's home (1.10.1).
 - The phone's end of the game in four pages (standings, answers, facts with awards, the player's own stats), stepped through with buttons, swipes or arrow keys (phase 52).
 - The projector's end of the game in five pages (podium with a drum roll, leaderboard, awards, game facts) and a question recap the host opens, moved from the host's Finished card or in automatic mode (phase 53).
 
@@ -89,10 +89,8 @@ Collected while testing phases 9 to 12. Effort as above.
 | Hosting without an account (after the MVP) | Feature | L | A guest host with a short-lived identity, tighter limits, the terms checkbox, and "Keep my quizzes" to turn it into an account. Design and open questions in [later-guest-hosting.md](later-guest-hosting.md). Requested 20 October 2026. |
 | Rooms with their own admin | Feature | L | Each room (workspace) has an admin; only its members see and edit its quizzes and games. Today every quiz and game belongs to one host account. Needs a rooms table, membership and roles, permission checks on every route and socket attach, migration of existing quizzes. |
 | Hints to selected players | Feature | M | Messages or hints to chosen players instead of everyone (host-to-player messages were out of scope in phase 12). The live view of the running game itself was done in phase 43; a tile on the board could be where the host picks the players. |
-| Fixes in the patch notes (phase 37) | Feature | S | Each release on the "What's new" page gets a "Fixed" section next to the news, and every future release keeps its notes there. From the 20 October 2026 notes. |
 | Help page and tutorial (phase 34) | Feature | L | A full help page on how the app works, plus an interactive first-run tutorial with hints on the host pages. To decide in the plan: which flows the tour covers, whether it can be replayed, whether players get hints too. From the 20 October 2026 notes; asked again on 24 October 2026: a full tutorial with interactive hints and help, plus a dedicated help page with everything about how the app works. |
-| Sounds for key moments | Feature | M | Short playful sounds for important events and messages, switched on per quiz. Generated in the browser (Web Audio) to avoid licensed audio files; projector only, phones silent by default. Same as the "Sounds and music" item above. |
-| Seasonal themes | Feature | M | The cow logo already changes on special days (phase 32: Christmas, Halloween and others). Each season gets a full theme as well: its own colours, flourishes and background on the app's pages and game screens, switched on by date. Anyone can switch it off and keep their usual theme (a per-device setting next to the colour mode; to decide in the plan whether hosts can also switch it off for their games). Requested 30 October 2026. Phases 50 and 51 done (1.8.0). |
+| Sounds for key moments | Feature | M | Short playful sounds for important events and messages, switched on per quiz. Generated in the browser (Web Audio) to avoid licensed audio files; projector only, phones silent by default. Opt-in on the projector only; licensed music files would need their own review. |
 
 ### From the first production test (24 October 2026)
 
@@ -101,18 +99,4 @@ Collected while testing the Railway deployment. The help page and tutorial (phas
 | Task | Kind | Effort | Notes |
 |---|---|---|---|
 | Tooltips in the app's own look on desktop | Improvement | M | About 60 places use the browser's native `title` tooltip. Replace them with the `Tooltip` primitive styled like the rest of the app (delay, arrow, theme colours, also on keyboard focus), shown only on devices with a mouse. |
-| A PIN remembered after a page refresh | Fix | S | The join page keeps the last PIN after a refresh even when that game is not running yet (it stays in the address as `?pin=`). After a refresh the page should start empty, or check the PIN and drop it when no game answers; the QR join link (`/?pin=…`) must keep working. |
-| Leaving the host pages through the logo | Fix | S | Clicking the logo (home) while logged in goes to the player join page and does not log the host out. The expected behaviour is still open: the user's note says the logo "does not log me out". |
 
-### From the first family game (27 October 2026)
-
-Lock joining, picture details and typo tolerance were done in phases 45 to 47 (release 1.7.0). The play-through preview and smoother drag (phases 49 and 48) moved to their own branch, `feature/editor-drag-and-preview`.
-
-### The end of a game (30 October 2026)
-
-To be implemented together on one branch after `feature/answers-and-editor` closes, each with a phase plan first.
-
-| Task | Kind | Effort | Notes |
-|---|---|---|---|
-| The phone's end-of-game screens, step by step | Improvement | L | Today the phone's last screen piles the podium, the rank and every answer into one long scroll that is hard to get through with many questions. Split it into pages the player steps through with a Next button: 1) the standings with brief info, redesigned to be consistent, nice and engaging; 2) the answers as a collapsible list, closed by default; 3) useful or interesting facts about the game; 4) the player's own detailed statistics for the game. To decide in the plan: which facts and figures, going back, swiping, what a team member sees, results held for release. |
-| The projector's end of the game | Improvement | L | The podium and standings become joyful, game-like and rewarding: proper leaderboards, animations, an achievement feel. The end screen is split into pages like the phone's, designed for the projector. The host has full control over which page shows, and an automatic mode runs them by itself; today's automatic loop through the answers becomes optional. To decide in the plan: the pages, the host's controls (top bar or a panel), timing of the automatic mode, reduced motion. |

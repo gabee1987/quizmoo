@@ -73,19 +73,19 @@ The server is the only judge of time and scores: it sends the question's end tim
 - Large, colourful answer buttons with shapes, letters, numbers or icons, so colour is never the only signal.
 - Points for being right and for being fast, an optional streak bonus, rank change arrows on the scoreboard and a podium with confetti.
 - A reconnect brings the player back with their score; an answer tapped during a dropout is sent once the connection is back and is never lost silently.
-- An end-of-game review of every question with the player's own answer and the correct one.
+- At the end, four pages on the phone: the standings, every question with the player's own answer and the correct one, the game's facts and awards, and the player's own stats.
 - The app can be installed to the home screen (a progressive web app).
 
 ### For hosts
 
-- **Quiz editor** with drag and drop, a live phone preview, autosave that reports offline and failed saves honestly, undo for deleted questions, keyboard shortcuts and a list of problems that takes you to each field.
+- **Quiz editor** with drag and drop, a live phone preview, autosave that reports offline and failed saves honestly, undo for deleted questions, keyboard shortcuts and a list of problems that takes you to each field. Quizzes hold up to 200 questions, optionally in rounds with their own intro and rules; questions can be switched off for one event without deleting them, and "Try it" plays the quiz on the preview.
 - **Seven question types:** single choice, multiple choice, true/false, free text (accepted answers or graded by the host), number (with tolerance), poll, and "Put in order". Every question can have an image.
-- **Game settings** per quiz, overridable per game: twelve themes (playful ones and subdued ones for formal events) plus a custom colour theme, six answer colour sets plus custom colours, symbol sets, time limits, points, speed and streak bonuses, answer changes with an optional lock-in, answers revealed at once or only at the end, and late joining.
+- **Game settings** per quiz, overridable per game: twelve themes (playful ones and subdued ones for formal events) plus a custom colour theme, six answer colour sets plus custom colours, symbol sets, time limits, points, speed and streak bonuses, answer changes with an optional lock-in, answers revealed at once or only at the end, typo tolerance for typed answers, random question order, and late joining. During a season (Christmas, Halloween and others) the screens can take its look.
 - **Teams:** the host sets the teams, the players create them, or both; mixed play with solo players. Each team answers as "Captain decides", "Majority vote" or "Everyone counts".
-- **Running a game** from a laptop or a phone: a lobby built around the QR code, the live answers coming in, pause and resume, extra time, skip, host messages on every screen (timed or until cleared, optionally "important"), removing players, and "Play again" with the same people. The main controls stay in view while the page scrolls, and player names are always shown in full.
+- **Running a game** from a laptop or a phone: a lobby built around the QR code, the live answers coming in, pause and resume, extra time, skip, host messages on every screen (timed or until cleared, optionally "important"), removing players, locking the game to new players, and "Play again" with the same people. A live board shows every player's answer as it comes in, any question still to come can be played next, and everyone sees roughly how long the game takes. The main controls stay in view while the page scrolls, and player names are always shown in full.
 - **Standings and answers on demand:** a live Standings card (real scores, also while results are held until the end) with "Results so far", the scoreboard on the screens after any question, and "Show answers" for the last question, all so far or any chosen ones, whatever the quiz's reveal setting.
 - **What everyone sees:** a chip in the control bar always says what the phones and the projector show, and a preview shows the projector live and the screen the phones get.
-- **Ending a game:** with the podium as usual, or closed at once from any point, which sends every phone and the projector away.
+- **Ending a game:** with the results show on the projector (podium, leaderboard, awards, game facts and an optional question recap), moved by the host or automatically, or closed at once from any point, which sends every phone and the projector away.
 - **Screen lock:** "Lock screen" locks every host page of the account, on every device, until the host types a lock code (4 to 8 digits) or the password. It is enforced by the server, so a reload, another tab or the browser's developer tools reveal no answers, scores or quizzes, while the game carries on for the players.
 - **Scheduled games** up to 30 days ahead, with the PIN reserved at once and an "Add to calendar" file.
 - **Results:** a summary with the podium, the easiest and hardest question and the averages; player, team and question tabs; CSV export. Game history with search by quiz title, player name or PIN.
@@ -94,7 +94,7 @@ The server is the only judge of time and scores: it sends the question's end tim
 
 ### For the projector
 
-- Built for 1080p at 2 to 4 metres: large question text, the QR code and the join link in the lobby, live answer counts, distribution bars in the reveal, the top 10 and the podium.
+- Built for 1080p at 2 to 4 metres: large question text, the QR code and the join link in the lobby, live answer counts, distribution bars in the reveal, the top 10, and at the end the podium with a drum roll, the leaderboard, awards and game facts.
 - A projector opened by the host advances the game with Space or the right arrow; otherwise it is a passive, read-only screen that needs no login.
 
 ### For administrators
@@ -291,7 +291,7 @@ scripts/           dev:lan helper and smoke test
 
 ## Project status
 
-Quizmoo is a personal hobby project, developed in free time and used at real events. Version 1.0.0 was released in October 2026; the work since then (see the changelog) is preparing a hosted beta. Hosting a game without an account is planned for after that ([plan](docs/plans/later-guest-hosting.md)).
+Quizmoo is a personal hobby project, developed in free time and used at real events. Version 1.0.0 was released on 7 October 2026. Since 24 October 2026 a hosted instance runs on Railway for friends and family and is updated with every release; the changelog and the app's What's new page list the changes. Planned work is in the [backlog](docs/plans/backlog.md), including hosting a game without an account ([plan](docs/plans/later-guest-hosting.md)).
 
 ## Contributing
 

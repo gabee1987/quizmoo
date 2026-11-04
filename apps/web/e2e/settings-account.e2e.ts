@@ -47,6 +47,12 @@ test('a host sees, logs out and deletes their own account on My settings', async
       expect(await (await other.request.get('/api/me/release')).json()).toEqual({ seen: version })
       await tab.reload()
       await expect(nav.getByRole('link', { name: "What's new", exact: true })).toBeVisible()
+      // Fixes come after the news, the earlier releases' too.
+      await expect(tab.getByRole('heading', { name: 'Fixed', level: 3 }).first()).toBeVisible()
+      expect(await tab.getByRole('heading', { name: 'Fixed', level: 3 }).count()).toBeGreaterThan(1)
+      // The logo on the host pages leads to the host's home, not the join page.
+      await tab.getByRole('banner').getByRole('link', { name: 'Quizmoo', exact: true }).click()
+      await expect(tab).toHaveURL(/\/host$/)
     })
 
     await test.step('the overview and the logins', async () => {
