@@ -61,7 +61,9 @@ function RegisterPage() {
         <p className="text-xl font-extrabold">{t('auth.register.doneTitle')}</p>
         <p className="text-muted-foreground">{t('auth.register.done', { name: username.trim() })}</p>
         <Button asChild size="lg" className="w-full">
-          <Link to="/login">{t('auth.register.toLogin')}</Link>
+          <Link to="/" search={{ side: 'host' }}>
+            {t('auth.register.toLogin')}
+          </Link>
         </Button>
       </div>
     )
@@ -70,7 +72,9 @@ function RegisterPage() {
       <div className="flex flex-col gap-4 text-center">
         <p className="text-muted-foreground">{t('auth.register.closed')}</p>
         <Button asChild size="lg">
-          <Link to="/login">{t('auth.register.toLogin')}</Link>
+          <Link to="/" search={{ side: 'host' }}>
+            {t('auth.register.toLogin')}
+          </Link>
         </Button>
       </div>
     )
@@ -138,7 +142,7 @@ function RegisterPage() {
           <CardContent>{content}</CardContent>
         </Card>
         <div className="flex flex-wrap justify-center gap-x-5 gap-y-2">
-          <Link to="/login" className={footerLink}>
+          <Link to="/" search={{ side: 'host' }} className={footerLink}>
             {t('auth.register.haveAccount')}
           </Link>
         </div>

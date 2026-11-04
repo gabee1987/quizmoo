@@ -19,6 +19,14 @@ General web rules are in `web-ui`; the settings column's animation is in `motion
 - **Question defaults**: `quiz.questionDefaults` (column `question_defaults`) and `hostSettings.questionDefaults` for new quizzes; `newQuestion(type, defaults)`; `QuestionDefaultsFields` in the General tab and on My settings → Games. `differingFromDefault` / `applyDefault` skip questions in a group with its own value.
 - **Shortcuts**: `matchShortcut` in `shortcuts.ts` (ignored while a field, dialog or menu has focus); list them in `shortcutKeys` so the "?" dialog stays complete.
 
+## Why some editor pieces work as they do
+
+- **Question defaults** (phase 42, user, 24 October 2026): a personal default in My settings that new quizzes start with, and the quiz's own value in its General tab; a round's own time and points still win inside the round, so "Apply to N questions" leaves those questions alone.
+- **Top bar buttons** "New question" / "New group" (user, mid-phase 42) are icons only below 1280 px so the title keeps its room; their names differ from the list's "Add question" and the General tab's field is "Title", so accessible names never clash.
+- **Picture details** (phase 46, from the first family game): the card under a picture shows what phones and the projector get (pixels, file size, format of the stored WebP, at most 1280 px). The original upload's size is not kept: it would be extra data with no use in a game. Owner-only `GET /api/images/:id/info`, and the upload response carries the same fields so a fresh upload shows them at once. Option pictures show it as a tooltip, since their row has no room.
+
+Switched-off questions and Shuffle: see `question-order`; groups: `question-groups`.
+
 ## Quiz branding
 
 `QuizBrandingFields` (`features/editor/quiz-branding-fields.tsx`) sits under the Look group: show on or off, a logo and an event name that override My settings when filled. It is quiz data (`draft.branding`), not a game setting, so batch edit, game defaults and the settings summary leave it out.

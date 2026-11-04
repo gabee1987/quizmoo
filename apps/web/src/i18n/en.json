@@ -225,7 +225,6 @@
       "submit": "Save password"
     },
     "register": {
-      "link": "Create a host account",
       "title": "Sign up",
       "intro": "Pick a username and a password. The admin approves new accounts, then you can log in.",
       "repeat": "Password again",
@@ -1618,7 +1617,31 @@
     "release": "Quizmoo {{version}}",
     "current": "Current version",
     "releasedOn": "Released {{date}}",
+    "fixed": "Fixed",
     "releases": {
+      "1_10_1": {
+        "title": "Small fixes",
+        "intro": "Fixes from testing, one front page for logging in, and every version on this page now says what was fixed.",
+        "sections": [
+          {
+            "title": "This page",
+            "items": [
+              "Every version lists what was fixed after its news, the earlier versions included."
+            ]
+          },
+          {
+            "title": "Logging in",
+            "items": [
+              "There is one front page for everyone: you log in on its Host tab. Old login links still work and open it."
+            ]
+          }
+        ],
+        "fixed": [
+          "A PIN that no game answers no longer stays on the join page after a refresh: the page starts empty. Join links from QR codes work as before.",
+          "The Quizmoo logo at the top of your pages takes you to your home page instead of the players' join page.",
+          "Switching between Play and Host on the front page is smooth: the card grows or shrinks to the other side instead of jumping."
+        ]
+      },
       "1_10_0": {
         "title": "A real finale on the projector and on every phone",
         "intro": "The end of the game is now a show: a podium with a drum roll, the leaderboard, awards and game facts on the projector, and four pages of results on every phone.",
@@ -1643,6 +1666,9 @@
               "Facts shows the game's figures and awards, with \"That's you!\" on the player's own. My stats shows their best streak, answer times, their place after each question and the points per question."
             ]
           }
+        ],
+        "fixed": [
+          "The points inside the result stamp on the phones' answer list are readable in light mode."
         ]
       },
       "1_9_0": {
@@ -1660,7 +1686,6 @@
           {
             "title": "The list of questions",
             "items": [
-              "Dragging questions stays smooth in long quizzes, and the page no longer scrolls along when you drag towards the bottom of the list.",
               "Each card shows its number on the left, which turns into the grip when you point at the card. You can still drag the card from anywhere.",
               "The question type's icon turns into the eye when you point at it: click it to switch the question off or on. Group headers work the same way for all their questions.",
               "Cards are tighter, so the question text has more room.",
@@ -1668,6 +1693,10 @@
               "\"Group\" in the list adds the new group above the selected question instead of at the end of the list, with a name not used yet."
             ]
           }
+        ],
+        "fixed": [
+          "Dragging questions no longer stutters in long quizzes.",
+          "The page no longer scrolls along when you drag a question towards the bottom of the list, so the question lands where you drop it."
         ]
       },
       "1_8_0": {
@@ -1702,13 +1731,9 @@
       "1_7_1": {
         "title": "Clearer release notes",
         "intro": "A small update to this page.",
-        "sections": [
-          {
-            "title": "Fixed",
-            "items": [
-              "The notes of earlier versions are reworded so they describe the changes more clearly."
-            ]
-          }
+        "sections": [],
+        "fixed": [
+          "The notes of earlier versions are reworded so they describe the changes more clearly."
         ]
       },
       "1_7_0": {
@@ -1773,6 +1798,10 @@
               "In the running game and the editor the app bar is part of the page's own top bar: the Quizmoo logo opens the language, the look and your pages."
             ]
           }
+        ],
+        "fixed": [
+          "The button that shows and hides the side panels in the running game works again.",
+          "Buttons no longer flicker when the pointer rests on their bottom edge."
         ]
       },
       "1_5_0": {
@@ -1841,6 +1870,9 @@
               "When you pause, players see a big Paused sign in the middle of their screen, and nothing on it moves."
             ]
           }
+        ],
+        "fixed": [
+          "A game fills the whole phone screen: no empty strip stays at the bottom when the browser's address bar slides away."
         ]
       },
       "1_2_0": {
@@ -1932,6 +1964,15 @@
               "Found a bug or have an idea? Tell us through Feedback in the menu."
             ]
           }
+        ],
+        "fixed": [
+          "The selected answer on colourful buttons is marked inside the option instead of with a ring reaching into the next answer.",
+          "The quiz editor no longer shows two scrollbars when the settings are open next to a short question.",
+          "The app no longer loads as a blank page or with errors when many phones share one venue wifi.",
+          "Confirmation dialogs on phones have full-size buttons instead of squashed ones.",
+          "A host message leaving the screen is no longer cut off at the bottom.",
+          "The menu keeps the current page highlighted while you search the game history.",
+          "A gap that let the limit on login attempts be bypassed is closed."
         ]
       }
     }

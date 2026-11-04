@@ -44,7 +44,7 @@ const origin = `http://${ip}:${webPort}`
 console.log(`
   Quizmoo on your local network
   Players (phones):  ${origin}
-  Host login:        ${origin}/login
+  Host login:        ${origin}/?side=host
   Phones must be on the same wifi. If they cannot connect, allow Node.js
   through the Windows firewall for private networks.
 `)

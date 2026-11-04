@@ -2,7 +2,7 @@
 
 One file per phase while it is being built. Each phase is one `feature/*` branch off `develop`, implemented with the `implement-phase` skill (`/implement-phase <N>`), verified with `pnpm verify` plus the phase's own command, and handed over with a delivery report (see the `git-workflow` skill). The user runs all git commands.
 
-Finished plans are deleted once their branch is merged: `CHANGELOG.md` records what each phase shipped, and git history keeps the plan itself. Ideas not yet planned are in the [backlog](backlog.md).
+Finished plans are deleted once their branch is merged: `CHANGELOG.md` records what each phase shipped, the feature history skills in `.claude/skills` keep the decisions and the reasons behind them, and git history keeps the plan itself. Ideas not yet planned are in the [backlog](backlog.md).
 
 | Phase | Plan | Branch | Status |
 |---|---|---|---|
@@ -32,7 +32,7 @@ Finished plans are deleted once their branch is merged: `CHANGELOG.md` records w
 | 23 | Flexible teams and mixed play, set up per game | `feature/flexible-teams` | done |
 | 24 | Player and host polish from testing | `feature/player-host-polish` | done |
 | 25 | Game history at scale | `feature/game-history` | done |
-| 26 | [Friends and family beta on a hosting provider](phase-26-beta-deploy.md) | `chore/beta-deploy` | in progress |
+| 26 | Friends and family beta on a hosting provider (live on Railway since 24 October 2026) | `chore/beta-deploy` | done |
 | 27 | Quiz files: spreadsheet and Quizmoo file import and export | `feature/quiz-files` | done |
 | 28 | Admin pages: users and names | `feature/admin-pages` | done |
 | 29 | My settings in tabs, and the host's own account | `feature/admin-pages` | done |
@@ -43,21 +43,21 @@ Finished plans are deleted once their branch is merged: `CHANGELOG.md` records w
 | 34 | Help page and interactive tutorial with hints | `feature/help-and-tutorial` | planned |
 | 35 | Screen lock for the host's game screen | `feature/host-game-screen` | done |
 | 36 | E-mail to admins about new sign-ups | `feature/signup-emails` | done |
-| 37 | [Fixes in the patch notes, kept for every release](phase-37-patch-notes-fixes.md) | `feature/patch-notes-fixes` | planned |
+| 37 | Fixes in the patch notes, kept for every release (with small fixes, released as 1.10.1) | `fix/small-fixes` | done |
 | 38 | Default time and points for new questions (done in phase 42) | `feature/question-switch-and-editor` | done |
-| 39 | [Random question order, and a roomier phone question screen](phase-39-shuffle-questions.md) | `feature/shuffle-questions` | done |
-| 40 | [Question groups within a quiz, with intros, per-group rules, and 200 questions](phase-40-question-groups.md) | `feature/question-groups` | done |
+| 39 | Random question order, and a roomier phone question screen | `feature/shuffle-questions` | done |
+| 40 | Question groups within a quiz, with intros, per-group rules, and 200 questions | `feature/question-groups` | done |
 | 41 | Estimated game length, at the start and as time left during the game (done in phase 44) | `feature/game-flow` | done |
-| 42 | [Questions switched off, editor search and navigation, default time and points (includes 38)](phase-42-question-switch-and-editor.md) | `feature/question-switch-and-editor` | done |
-| 43 | [The host's live board: who answered what, at a glance, without scrolling](phase-43-host-live-board.md) | `feature/host-live-view` | done |
-| 44 | [Jump to a question, estimated game length, a livelier screen between questions (includes 41)](phase-44-game-flow.md) | `feature/game-flow` | done |
-| 45 | [Lock joining](phase-45-lock-joining.md) | `feature/answers-and-editor` | done |
-| 46 | [Picture details in the editor](phase-46-picture-details.md) | `feature/answers-and-editor` | done |
-| 47 | [Typo tolerance for typed answers](phase-47-typo-tolerance.md) | `feature/answers-and-editor` | done |
+| 42 | Questions switched off, editor search and navigation, default time and points (includes 38) | `feature/question-switch-and-editor` | done |
+| 43 | The host's live board: who answered what, at a glance, without scrolling | `feature/host-live-view` | done |
+| 44 | Jump to a question, estimated game length, a livelier screen between questions (includes 41) | `feature/game-flow` | done |
+| 45 | Lock joining | `feature/answers-and-editor` | done |
+| 46 | Picture details in the editor | `feature/answers-and-editor` | done |
+| 47 | Typo tolerance for typed answers | `feature/answers-and-editor` | done |
 | 48 | Smoother drag with 200 questions | `feature/editor-drag-and-preview` | done |
 | 49 | Play-through preview in the editor | `feature/editor-drag-and-preview` | done |
-| 50 | [Seasonal themes: colours, decorations and switches for nine seasons](phase-50-seasonal-themes.md) | `feature/seasonal-themes` | done |
-| 51 | [The cow for every season: lines and confetti](phase-51-seasonal-cow.md) | `feature/seasonal-themes` | done |
+| 50 | Seasonal themes: colours, decorations and switches for nine seasons | `feature/seasonal-themes` | done |
+| 51 | The cow for every season: lines and confetti | `feature/seasonal-themes` | done |
 | 52 | The phone's end-of-game screens, step by step | `feature/end-of-game` | done |
 | 53 | The projector's end of the game | `feature/end-of-game` | done |
 | later | [Hosting without an account](later-guest-hosting.md) | `feature/guest-hosting` | planned, after the MVP |

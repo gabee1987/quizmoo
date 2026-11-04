@@ -1,5 +1,24 @@
 # Changelog
 
+## 1.10.1 – 2026-11-04
+
+### Fixes in the patch notes (phase 37)
+- Each release on the What's new page can list its fixes (`fixed` in `ReleaseNotes`), shown after the news under "Fixed" with a wrench icon and a quieter look. A release may have news only, fixes only (`sections: []`, as 1.7.1 now has) or both; `releases.test.ts` refuses an empty release and fix lists that differ between the languages.
+- The earlier releases got their fixes too, from this changelog and the pull requests: 1.10.0, 1.9.0 (the drag fixes moved there from the news), 1.7.1, 1.6.0, 1.3.0 and 1.1.0.
+- `docs/deploy.md` and `DEPLOYMENT.md` tell the releaser to fill in `fixed`.
+
+### One front page
+- The separate login page is gone: hosts log in on the front page's Host tab (`/?side=host`, with `?redirect=` for the page to return to). The host pages' guard, logout, the lock screen and account deletion lead there, and `/login` only forwards to it, so old links and bookmarks keep working. The e2e specs log in through the Host tab; `legal.e2e.ts` checks the forwarding.
+
+### Fixed
+- The join page no longer keeps a PIN no game answers: when the PIN in the address (`?pin=`) gets "No such game", it is removed from the address, so a refresh starts with an empty form. QR join links and the waiting page of a scheduled game keep their PIN.
+- The logo in the header leads to the host's home page (`/host`) on the host pages instead of the players' join page; elsewhere it still opens the join page.
+- The join page's Play / Host switch no longer jumps: both sides stay mounted in one grid cell, the box around them animates to the chosen side's measured height, and the sides slide and fade in the direction of the switch. A spacer under the card resizes the other way at the same time, so the card's top and the hero stay in place and only the card's bottom edge moves.
+
+### Docs
+- The event checklist follows the current app (Open projector, the end pages, Try it, switched-off questions, lock joining; the removed "Show on screen"); the README's features and project status are brought up to date; finished plans are deleted and their rows in the plans index unlinked; done items left the backlog's open lists.
+- The decisions and reasons from the deleted plans (phases 26, 37, 39 to 47, 50 and 51) are kept in eight feature history skills: `hosting-and-releases`, `question-groups`, `question-order`, `host-live-board`, `game-pacing`, `lock-joining`, `typo-tolerance` and `seasonal-look`. Picture details and the editor's question defaults went into `quiz-editor`. `implement-phase` now moves a plan's decisions into a skill before the plan is deleted.
+
 ## 1.10.0 – 2026-11-03
 
 ### The phone's end-of-game screens, step by step (phase 52)

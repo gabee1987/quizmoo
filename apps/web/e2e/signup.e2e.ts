@@ -19,9 +19,9 @@ test('a sign-up waits for approval and the admin rejects it', async ({ browser, 
   const phone = await guest.newPage()
 
   try {
-    await test.step('a newcomer signs up from the login page', async () => {
-      await phone.goto('/login')
-      await phone.getByRole('link', { name: 'Create a host account' }).click()
+    await test.step('a newcomer signs up from the Host tab', async () => {
+      await phone.goto('/?side=host')
+      await phone.getByRole('link', { name: 'Ask for one' }).click()
       await expect(phone.getByRole('heading', { name: 'Sign up' })).toBeVisible()
       await phone.getByLabel('Username').fill(newcomer)
       await phone.getByLabel('Password', { exact: true }).fill('e2e-signup-pass-1')
@@ -43,11 +43,11 @@ test('a sign-up waits for approval and the admin rejects it', async ({ browser, 
       await phone.getByLabel('Password', { exact: true }).fill('e2e-signup-pass-1')
       await phone.getByRole('button', { name: 'Log in' }).click()
       await expect(phone.getByText("Your account is waiting for the admin's approval.")).toBeVisible()
-      await expect(phone).toHaveURL(/\/login$/)
+      await expect(phone).toHaveURL(/\/\?side=host$/)
     })
 
     await test.step('the admin rejects it on the Users page', async () => {
-      await page.goto('/login')
+      await page.goto('/?side=host')
       await page.getByLabel('Username').fill(username!)
       await page.getByLabel('Password', { exact: true }).fill(password!)
       await page.getByRole('button', { name: 'Log in' }).click()

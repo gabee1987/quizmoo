@@ -27,8 +27,8 @@ function RootLayout() {
   // A phone in a game gets the whole screen: no header, only the game's slim top bar with its settings button.
   const pathname = useRouterState({ select: (state) => state.location.pathname })
   const inGame = pathname.startsWith('/play/')
-  // The join, login and sign-up pages show the logo and name big in their hero.
-  const home = pathname === '/' || pathname === '/login' || pathname === '/register'
+  // The front (join and login) and sign-up pages show the logo and name big in their hero.
+  const home = pathname === '/' || pathname === '/register'
   // The editor and a running game (not its lobby) fold the app bar into their own top bar (`AppMenu`).
   // The game's snapshot decides; until it is there the app bar stays.
   const store = useGameStore()

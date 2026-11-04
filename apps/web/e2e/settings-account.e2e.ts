@@ -47,6 +47,12 @@ test('a host sees, logs out and deletes their own account on My settings', async
       expect(await (await other.request.get('/api/me/release')).json()).toEqual({ seen: version })
       await tab.reload()
       await expect(nav.getByRole('link', { name: "What's new", exact: true })).toBeVisible()
+      // Fixes come after the news, the earlier releases' too.
+      await expect(tab.getByRole('heading', { name: 'Fixed', level: 3 }).first()).toBeVisible()
+      expect(await tab.getByRole('heading', { name: 'Fixed', level: 3 }).count()).toBeGreaterThan(1)
+      // The logo on the host pages leads to the host's home, not the join page.
+      await tab.getByRole('banner').getByRole('link', { name: 'Quizmoo', exact: true }).click()
+      await expect(tab).toHaveURL(/\/host$/)
     })
 
     await test.step('the overview and the logins', async () => {
@@ -78,7 +84,7 @@ test('a host sees, logs out and deletes their own account on My settings', async
       await expect(dialog.getByText('The current password is wrong.')).toBeVisible()
       await dialog.getByLabel('Your password').fill(hostPassword)
       await dialog.getByRole('button', { name: 'Delete for good' }).click()
-      await expect(tab).toHaveURL(/\/login$/)
+      await expect(tab).toHaveURL(/\/\?side=host$/)
       await expect(tab.getByText('Your account is deleted')).toBeVisible()
       // Checked in the admin's list rather than by logging in: the suite shares the 10 logins a minute.
       const { users } = (await (await page.request.get('/api/users')).json()) as { users: { username: string }[] }

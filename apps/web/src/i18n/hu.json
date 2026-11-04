@@ -225,7 +225,6 @@
       "submit": "Jelszó mentése"
     },
     "register": {
-      "link": "Kérj játékvezetői fiókot",
       "title": "Regisztrálj!",
       "intro": "Válassz felhasználónevet és jelszót. Az új fiókokat az adminisztrátor hagyja jóvá, utána be tudsz lépni.",
       "repeat": "Jelszó még egyszer",
@@ -1618,7 +1617,31 @@
     "release": "Quizmoo {{version}}",
     "current": "Mostani verzió",
     "releasedOn": "Megjelent: {{date}}",
+    "fixed": "Javítva",
     "releases": {
+      "1_10_1": {
+        "title": "Apró javítások",
+        "intro": "Javítások a tesztelésből, egy nyitóoldal a belépéshez, és ezen az oldalon már minden verziónál látszik, mit javítottunk.",
+        "sections": [
+          {
+            "title": "Ez az oldal",
+            "items": [
+              "Minden verziónál az újdonságok után ott van, mit javítottunk, a korábbi verzióknál is."
+            ]
+          },
+          {
+            "title": "Belépés",
+            "items": [
+              "Mindenkinek egy nyitóoldal van: a Játékot vezetek fülön lépsz be. A régi belépő linkek is működnek, és ide visznek."
+            ]
+          }
+        ],
+        "fixed": [
+          "Ha egy PIN-hez nem tartozik játék, frissítés után már nem marad a csatlakozó oldalon: az oldal üresen indul. A QR-kódos csatlakozó linkek ugyanúgy működnek.",
+          "Az oldalaid tetején a Quizmoo logó a kezdőlapodra visz, nem a játékosok csatlakozó oldalára.",
+          "A nyitóoldalon a Játszom és a Játékot vezetek közti váltás már nem ugrik: a kártya simán nő vagy zsugorodik a másik oldalhoz."
+        ]
+      },
       "1_10_0": {
         "title": "Igazi finálé a kivetítőn és minden telefonon",
         "intro": "A játék vége most már egy kis show: dobogó dobpergéssel, ranglista, díjak és érdekességek a kivetítőn, és négy oldalnyi eredmény minden telefonon.",
@@ -1643,6 +1666,9 @@
               "Az Érdekességek a játék számait és a díjakat mutatja, a saját díjon „Ez te vagy!” felirattal. A Statisztikám a legjobb sorozatot, a válaszidőket, a helyezést minden kérdés után és a kérdésenkénti pontokat."
             ]
           }
+        ],
+        "fixed": [
+          "A telefonok válaszlistáján az eredménybélyegzőben lévő pontok világos módban is jól olvashatók."
         ]
       },
       "1_9_0": {
@@ -1660,7 +1686,6 @@
           {
             "title": "A kérdéslista",
             "items": [
-              "A kérdések húzása hosszú kvízekben is gördülékeny, és az oldal már nem görgeti magát, amikor a lista alja felé húzol.",
               "Minden kártya bal szélén ott a sorszáma, ami fogantyúvá változik, amikor a kártya fölé viszed az egeret. A kártyát továbbra is bárhol megfoghatod.",
               "A kérdéstípus ikonja szemmé változik, ha fölé viszed az egeret: kattints rá a kérdés ki- vagy bekapcsolásához. A csoportok fejléce ugyanígy működik az összes kérdésükre.",
               "A kártyák szűkebbek, így több hely jut a kérdés szövegének.",
@@ -1668,6 +1693,10 @@
               "A listában a „Csoport” az új csoportot a kijelölt kérdés fölé teszi, nem a lista végére, és olyan nevet ad neki, ami még nem foglalt."
             ]
           }
+        ],
+        "fixed": [
+          "A kérdések húzása hosszú kvízekben már nem akad.",
+          "Az oldal már nem görgeti magát, amikor egy kérdést a lista alja felé húzol, így a kérdés oda kerül, ahol elengeded."
         ]
       },
       "1_8_0": {
@@ -1702,13 +1731,9 @@
       "1_7_1": {
         "title": "Érthetőbb újdonságok",
         "intro": "Kisebb frissítés ezen az oldalon.",
-        "sections": [
-          {
-            "title": "Javítva",
-            "items": [
-              "Átfogalmaztuk a korábbi verziók leírását, hogy érthetőbben mutassák be a változásokat."
-            ]
-          }
+        "sections": [],
+        "fixed": [
+          "Átfogalmaztuk a korábbi verziók leírását, hogy érthetőbben mutassák be a változásokat."
         ]
       },
       "1_7_0": {
@@ -1773,6 +1798,10 @@
               "A futó játékban és a szerkesztőben az alkalmazás sávja az oldal saját felső sávjának része lett: a Quizmoo logó nyitja a nyelvet, a megjelenést és az oldalaidat."
             ]
           }
+        ],
+        "fixed": [
+          "A futó játékban újra működik az oldalsó paneleket megjelenítő és elrejtő gomb.",
+          "A gombok már nem villognak, ha az egér az alsó szélükön áll."
         ]
       },
       "1_5_0": {
@@ -1841,6 +1870,9 @@
               "Ha szünetet tartasz, a játékosok egy nagy Szünet jelzést látnak a képernyőjük közepén, és semmi nem mozdul el rajta."
             ]
           }
+        ],
+        "fixed": [
+          "A játék kitölti a telefon teljes képernyőjét: nem marad üres sáv alul, amikor a böngésző címsora eltűnik."
         ]
       },
       "1_2_0": {
@@ -1932,6 +1964,15 @@
               "Hibát találtál, vagy van egy ötleted? Írd meg nekünk a menü Visszajelzés pontjában."
             ]
           }
+        ],
+        "fixed": [
+          "A színes gombokon a kiválasztott választ a gombon belül jelöljük, nem a szomszédos válaszba belelógó kerettel.",
+          "A kvízszerkesztőben már nincs két görgetősáv, ha a beállítások egy rövid kérdés mellett vannak nyitva.",
+          "Az alkalmazás már nem töltődik be üres oldallal vagy hibákkal, ha sok telefon ugyanazt a helyszíni wifit használja.",
+          "A megerősítő ablakok gombjai telefonon teljes méretűek, nem összenyomottak.",
+          "A képernyőről távozó üzenet alja már nem vágódik le.",
+          "A menü kijelölve hagyja az aktuális oldalt, amíg a játékelőzményekben keresel.",
+          "Bezártunk egy rést, amellyel meg lehetett kerülni a belépési próbálkozások korlátját."
         ]
       }
     }

@@ -35,12 +35,23 @@ describe('releases', () => {
         const notes = notesIn(dict, version)
         expect(notes?.title, version).toBeTruthy()
         expect(notes?.intro, version).toBeTruthy()
-        expect(notes?.sections.length, version).toBeGreaterThan(0)
+        expect(Array.isArray(notes?.sections), version).toBe(true)
         for (const section of notes!.sections) {
           expect(section.title).toBeTruthy()
           expect(section.items.length).toBeGreaterThan(0)
         }
+        expect(notes!.sections.length + (notes!.fixed?.length ?? 0), `${version} says nothing`).toBeGreaterThan(0)
       }
+    }
+  })
+
+  it('lists fixes, where a release has them, as non-empty texts in both languages alike', () => {
+    for (const { version } of releases) {
+      const [inHu, inEn] = [notesIn(hu, version)?.fixed, notesIn(en, version)?.fixed]
+      expect(inHu?.length, version).toBe(inEn?.length)
+      if (inEn === undefined) continue
+      expect(inEn.length, version).toBeGreaterThan(0)
+      for (const item of [...inEn, ...inHu!]) expect(item.trim(), version).not.toBe('')
     }
   })
 })

@@ -20,7 +20,7 @@ function watch(page: Page, who: string) {
 }
 
 async function logIn(page: Page) {
-  await page.goto('/login')
+  await page.goto('/?side=host')
   await page.getByLabel('Username').fill(username!)
   await page.getByLabel('Password', { exact: true }).fill(password!)
   await page.getByRole('button', { name: 'Log in' }).click()

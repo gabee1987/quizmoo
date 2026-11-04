@@ -61,7 +61,7 @@ for (const mode of modes) {
 
     const host = await newPage(browser, mode, { width: 1280, height: 800 })
     host.on('dialog', (dialog) => void dialog.accept())
-    await host.goto('/login')
+    await host.goto('/?side=host')
     await expect(host.locator('html')).toHaveAttribute('data-mode', mode)
     await expectAccessible(host, 'login')
     await host.getByRole('link', { name: 'Privacy', exact: true }).click()
@@ -83,7 +83,7 @@ for (const mode of modes) {
       await expect(host.getByRole('heading', { name: 'Sign up' })).toBeVisible()
       await expectAccessible(host, 'sign-up')
     }
-    await host.goto('/login')
+    await host.goto('/?side=host')
 
     await host.getByLabel('Username').fill(username!)
     await host.getByLabel('Password', { exact: true }).fill(password!)
