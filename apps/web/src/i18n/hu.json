@@ -1619,6 +1619,29 @@
     "releasedOn": "Megjelent: {{date}}",
     "fixed": "Javítva",
     "releases": {
+      "1_10_1": {
+        "title": "Apró javítások",
+        "intro": "Javítások a tesztelésből, egy nyitóoldal a belépéshez, és ezen az oldalon már minden verziónál látszik, mit javítottunk.",
+        "sections": [
+          {
+            "title": "Ez az oldal",
+            "items": [
+              "Minden verziónál az újdonságok után ott van, mit javítottunk, a korábbi verzióknál is."
+            ]
+          },
+          {
+            "title": "Belépés",
+            "items": [
+              "Mindenkinek egy nyitóoldal van: a Játékot vezetek fülön lépsz be. A régi belépő linkek is működnek, és ide visznek."
+            ]
+          }
+        ],
+        "fixed": [
+          "Ha egy PIN-hez nem tartozik játék, frissítés után már nem marad a csatlakozó oldalon: az oldal üresen indul. A QR-kódos csatlakozó linkek ugyanúgy működnek.",
+          "Az oldalaid tetején a Quizmoo logó a kezdőlapodra visz, nem a játékosok csatlakozó oldalára.",
+          "A nyitóoldalon a Játszom és a Játékot vezetek közti váltás már nem ugrik: a kártya simán nő vagy zsugorodik a másik oldalhoz."
+        ]
+      },
       "1_10_0": {
         "title": "Igazi finálé a kivetítőn és minden telefonon",
         "intro": "A játék vége most már egy kis show: dobogó dobpergéssel, ranglista, díjak és érdekességek a kivetítőn, és négy oldalnyi eredmény minden telefonon.",
@@ -1642,25 +1665,10 @@
               "A Válaszok minden kérdést felsorol, koppintásra nyílnak, felül pedig ott, hány lett jó.",
               "Az Érdekességek a játék számait és a díjakat mutatja, a saját díjon „Ez te vagy!” felirattal. A Statisztikám a legjobb sorozatot, a válaszidőket, a helyezést minden kérdés után és a kérdésenkénti pontokat."
             ]
-          },
-          {
-            "title": "Ez az oldal",
-            "items": [
-              "Minden verziónál az újdonságok után ott van, mit javítottunk, a korábbi verzióknál is."
-            ]
-          },
-          {
-            "title": "Belépés",
-            "items": [
-              "Mindenkinek egy nyitóoldal van: a Játékot vezetek fülön lépsz be. A régi belépő linkek is működnek, és ide visznek."
-            ]
           }
         ],
         "fixed": [
-          "A telefonok válaszlistáján az eredménybélyegzőben lévő pontok világos módban is jól olvashatók.",
-          "Ha egy PIN-hez nem tartozik játék, frissítés után már nem marad a csatlakozó oldalon: az oldal üresen indul. A QR-kódos csatlakozó linkek ugyanúgy működnek.",
-          "Az oldalaid tetején a Quizmoo logó a kezdőlapodra visz, nem a játékosok csatlakozó oldalára.",
-          "A nyitóoldalon a Játszom és a Játékot vezetek közti váltás már nem ugrik: a kártya simán nő vagy zsugorodik a másik oldalhoz."
+          "A telefonok válaszlistáján az eredménybélyegzőben lévő pontok világos módban is jól olvashatók."
         ]
       },
       "1_9_0": {
