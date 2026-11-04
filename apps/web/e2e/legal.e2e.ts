@@ -46,6 +46,15 @@ test('the storage notice and the legal pages', async ({ browser }) => {
     await page.reload()
     await expect(page.getByText('No such game. Check the PIN.')).toHaveCount(0)
 
+    // Hosts log in on the front page: an old /login link opens its Host tab and keeps the way back.
+    await page.goto('/login?redirect=%2Fhost%2Fusers')
+    await expect(page).toHaveURL(/\/\?side=host&redirect=%2Fhost%2Fusers$/)
+    await expect(page.getByRole('tab', { name: 'Host', selected: true })).toBeVisible()
+    await expect(page.getByLabel('Username')).toBeVisible()
+    // A host page without a session sends the visitor there too.
+    await page.goto('/host/games')
+    await expect(page).toHaveURL(/\/\?side=host&redirect=%2Fhost%2Fgames$/)
+
     // The join page says what joining means, with the links.
     await page.goto('/')
     await expect(page.getByRole('navigation', { name: 'Legal' }).getByRole('link', { name: 'Terms' })).toBeVisible()
@@ -64,7 +73,7 @@ test('a new host accepts the terms before anything else, then downloads their da
   const tab = await context.newPage()
   try {
     await test.step('password first, then the terms', async () => {
-      await tab.goto('/login')
+      await tab.goto('/?side=host')
       await tab.getByLabel('Username').fill(host)
       await tab.getByLabel('Password', { exact: true }).fill('e2e-terms-pass-1')
       await tab.getByRole('button', { name: 'Log in' }).click()

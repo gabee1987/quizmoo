@@ -225,7 +225,6 @@
       "submit": "Save password"
     },
     "register": {
-      "link": "Create a host account",
       "title": "Sign up",
       "intro": "Pick a username and a password. The admin approves new accounts, then you can log in.",
       "repeat": "Password again",
@@ -1628,6 +1627,12 @@
             "title": "This page",
             "items": [
               "Every version lists what was fixed after its news, the earlier versions included."
+            ]
+          },
+          {
+            "title": "Logging in",
+            "items": [
+              "There is one front page for everyone: you log in on its Host tab. Old login links still work and open it."
             ]
           }
         ],

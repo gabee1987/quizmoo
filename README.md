@@ -182,7 +182,7 @@ docker compose up -d --build
 docker compose exec -e SEED_ADMIN_USERNAME=admin -e SEED_ADMIN_PASSWORD=<at least 10 characters> app node apps/server/dist/seed.js
 ```
 
-Open <http://localhost:3000/login> and log in with that account. The seed also creates a sample quiz. To let phones on the same wifi join, set `APP_ORIGIN` in `.env` to `http://<laptop IP>:3000` (see [docs/deploy.md](docs/deploy.md)).
+Open <http://localhost:3000/?side=host> (the front page's Host tab) and log in with that account. The seed also creates a sample quiz. To let phones on the same wifi join, set `APP_ORIGIN` in `.env` to `http://<laptop IP>:3000` (see [docs/deploy.md](docs/deploy.md)).
 
 ### Develop
 

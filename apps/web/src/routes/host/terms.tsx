@@ -42,7 +42,7 @@ function AcceptTermsPage() {
     mutationFn: () => apiFetch<void>('/api/auth/logout', { method: 'POST' }),
     onSettled: () => {
       queryClient.clear()
-      void navigate({ to: '/login' })
+      void navigate({ to: '/', search: { side: 'host' } })
     },
   })
 

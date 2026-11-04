@@ -7,6 +7,9 @@
 - The earlier releases got their fixes too, from this changelog and the pull requests: 1.10.0, 1.9.0 (the drag fixes moved there from the news), 1.7.1, 1.6.0, 1.3.0 and 1.1.0.
 - `docs/deploy.md` and `DEPLOYMENT.md` tell the releaser to fill in `fixed`.
 
+### One front page
+- The separate login page is gone: hosts log in on the front page's Host tab (`/?side=host`, with `?redirect=` for the page to return to). The host pages' guard, logout, the lock screen and account deletion lead there, and `/login` only forwards to it, so old links and bookmarks keep working. The e2e specs log in through the Host tab; `legal.e2e.ts` checks the forwarding.
+
 ### Fixed
 - The join page no longer keeps a PIN no game answers: when the PIN in the address (`?pin=`) gets "No such game", it is removed from the address, so a refresh starts with an empty form. QR join links and the waiting page of a scheduled game keep their PIN.
 - The logo in the header leads to the host's home page (`/host`) on the host pages instead of the players' join page; elsewhere it still opens the join page.

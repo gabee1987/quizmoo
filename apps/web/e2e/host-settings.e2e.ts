@@ -24,7 +24,7 @@ test('quick messages from My settings, sent and saved during a game', async ({ b
   watch(page, 'host')
   page.on('dialog', (dialog) => void dialog.accept())
 
-  await page.goto('/login')
+  await page.goto('/?side=host')
   await page.getByLabel('Username').fill(username!)
   await page.getByLabel('Password', { exact: true }).fill(password!)
   await page.getByRole('button', { name: 'Log in' }).click()
@@ -112,7 +112,7 @@ test('the event name from My settings on the projector, and on the phones only w
   watch(page, 'host')
   page.on('dialog', (dialog) => void dialog.accept())
 
-  await page.goto('/login')
+  await page.goto('/?side=host')
   await page.getByLabel('Username').fill(username!)
   await page.getByLabel('Password', { exact: true }).fill(password!)
   await page.getByRole('button', { name: 'Log in' }).click()

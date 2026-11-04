@@ -225,7 +225,6 @@
       "submit": "Jelszó mentése"
     },
     "register": {
-      "link": "Kérj játékvezetői fiókot",
       "title": "Regisztrálj!",
       "intro": "Válassz felhasználónevet és jelszót. Az új fiókokat az adminisztrátor hagyja jóvá, utána be tudsz lépni.",
       "repeat": "Jelszó még egyszer",
@@ -1628,6 +1627,12 @@
             "title": "Ez az oldal",
             "items": [
               "Minden verziónál az újdonságok után ott van, mit javítottunk, a korábbi verzióknál is."
+            ]
+          },
+          {
+            "title": "Belépés",
+            "items": [
+              "Mindenkinek egy nyitóoldal van: a Játékot vezetek fülön lépsz be. A régi belépő linkek is működnek, és ide visznek."
             ]
           }
         ],

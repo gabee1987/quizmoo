@@ -24,7 +24,7 @@ test('admin edits the Surprise me names and a phone gets one of them', async ({ 
     if (message.type() === 'error' && !message.text().includes('400')) problems.push(message.text())
   })
 
-  await page.goto('/login')
+  await page.goto('/?side=host')
   await page.getByLabel('Username').fill(username!)
   await page.getByLabel('Password', { exact: true }).fill(password!)
   await page.getByRole('button', { name: 'Log in' }).click()

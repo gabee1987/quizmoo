@@ -41,7 +41,13 @@ import { emitAck, ensureConnected } from '../lib/socket'
 export const Route = createFileRoute('/')({
   // Allows QR codes / links like /?pin=123456 to prefill the PIN. Kept a number, as the router parses
   // it (a string of digits would be written back quoted, ?pin=%22123456%22); PINs never start with 0.
-  validateSearch: z.object({ pin: z.coerce.number().int().positive().optional().catch(undefined) }),
+  // `side=host` opens the Host tab (logging out, the host pages' guard), with `redirect` the host page
+  // to return to after logging in (e.g. the Users page from a sign-up e-mail).
+  validateSearch: z.object({
+    pin: z.coerce.number().int().positive().optional().catch(undefined),
+    side: z.enum(['host']).optional().catch(undefined),
+    redirect: z.string().optional().catch(undefined),
+  }),
   component: JoinPage,
 })
 
@@ -66,7 +72,7 @@ function JoinPage() {
   const [scanning, setScanning] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [pinChecked, setPinChecked] = useState(false)
-  const [side, setSide] = useState<'play' | 'host'>('play')
+  const [side, setSide] = useState<'play' | 'host'>(search.side ?? 'play')
   const site = useSiteInfo()
 
   const pinValid = PIN_PATTERN.test(pin)
@@ -425,7 +431,7 @@ function JoinPage() {
             >
               <h2 className="sr-only">{t('auth.title')}</h2>
               <p className="text-center text-muted-foreground text-balance">{t('home.hostIntro')}</p>
-              <LoginForm />
+              <LoginForm redirect={search.redirect} />
               {site.data?.registrationOpen && (
                 <p className="text-center text-sm text-muted-foreground">
                   {t('home.noAccount')}{' '}

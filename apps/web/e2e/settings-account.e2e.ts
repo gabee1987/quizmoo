@@ -84,7 +84,7 @@ test('a host sees, logs out and deletes their own account on My settings', async
       await expect(dialog.getByText('The current password is wrong.')).toBeVisible()
       await dialog.getByLabel('Your password').fill(hostPassword)
       await dialog.getByRole('button', { name: 'Delete for good' }).click()
-      await expect(tab).toHaveURL(/\/login$/)
+      await expect(tab).toHaveURL(/\/\?side=host$/)
       await expect(tab.getByText('Your account is deleted')).toBeVisible()
       // Checked in the admin's list rather than by logging in: the suite shares the 10 logins a minute.
       const { users } = (await (await page.request.get('/api/users')).json()) as { users: { username: string }[] }

@@ -43,7 +43,7 @@ test('host builds a quiz, three phones play it with a reload mid-question, resul
   const title = `E2E quiz ${Date.now()}`
 
   await test.step('host logs in', async () => {
-    await page.goto('/login')
+    await page.goto('/?side=host')
     await page.getByLabel('Username').fill(username!)
     await page.getByLabel('Password', { exact: true }).fill(password!)
     await page.getByRole('button', { name: 'Log in' }).click()

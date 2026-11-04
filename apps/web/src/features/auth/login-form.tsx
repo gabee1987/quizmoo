@@ -9,7 +9,7 @@ import { meQueryOptions, type User } from '@/lib/auth'
 import { safeHostPath } from '@/lib/redirect'
 import { toastError } from '@/lib/toast'
 
-/** Username and password, then on to the host pages (or back to `redirect`, a `/host` path). Used by /login and the home page's Host tab. */
+/** Username and password, then on to the host pages (or back to `redirect`, a `/host` path). Used by the front page's Host tab. */
 export function LoginForm({ redirect }: { redirect?: string | undefined }) {
   const { t } = useTranslation()
   const navigate = useNavigate()

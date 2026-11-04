@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
 import { apiFetch } from './api'
 
-/** Logs the host out and goes to the login page, whatever the server answers. */
+/** Logs the host out and goes to the front page's Host tab, whatever the server answers. */
 export function useLogout() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
@@ -10,7 +10,7 @@ export function useLogout() {
     mutationFn: () => apiFetch<void>('/api/auth/logout', { method: 'POST' }),
     onSettled: () => {
       queryClient.clear()
-      void navigate({ to: '/login' })
+      void navigate({ to: '/', search: { side: 'host' } })
     },
   })
 }

@@ -32,7 +32,7 @@ test('host reorders, duplicates, deletes and restores questions, and duplicates 
 
   try {
     await test.step('host logs in and creates a quiz', async () => {
-      await page.goto('/login')
+      await page.goto('/?side=host')
       await page.getByLabel('Username').fill(username!)
       await page.getByLabel('Password', { exact: true }).fill(password!)
       await page.getByRole('button', { name: 'Log in' }).click()
