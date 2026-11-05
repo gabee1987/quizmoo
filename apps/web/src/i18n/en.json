@@ -1625,6 +1625,30 @@
     "releasedOn": "Released {{date}}",
     "fixed": "Fixed",
     "releases": {
+      "1_11_0": {
+        "title": "A starter quiz and clearer texts",
+        "intro": "Every new host starts with a ready quiz that shows what Quizmoo can do, and every text in the app was reviewed so it reads the same everywhere.",
+        "sections": [
+          {
+            "title": "Starter quiz",
+            "items": [
+              "New accounts get a 20-question starter quiz in their language: funny and tricky questions covering every question type, three rounds, pictures, double points and more.",
+              "The Starter quiz button on your quiz list adds a fresh copy any time, so you can try it again or start from it."
+            ]
+          },
+          {
+            "title": "Texts",
+            "items": [
+              "Every text in the app was reviewed: plainer wording, the same word for the same thing on every screen.",
+              "Groups of questions are called rounds everywhere, in the editor too, and \"Play again\" starts a rematch.",
+              "The privacy notice and the terms of use say the same in both languages and are easier to read. Hosts accept the updated terms at their next login."
+            ]
+          }
+        ],
+        "fixed": [
+          "The role field in the admin's Add user dialog shows its label again."
+        ]
+      },
       "1_10_1": {
         "title": "Small fixes",
         "intro": "Fixes from testing, one front page for logging in, and every version on this page now says what was fixed.",

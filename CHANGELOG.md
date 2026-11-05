@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.11.0 – 2026-11-05
 
 ### Every text in the app, reviewed (phase 54)
 - Both dictionaries were read through key by key for one voice: plain, friendly, game-like, Hungarian always in the "te" form. About 370 strings changed. Question groups are called rounds ("kör"/"round") everywhere in the UI, as the game already did; "Play again" is "Visszavágó" in Hungarian, since "Új kör" read as "new round"; standings, PIN and admin wording is consistent; Hungarian no longer chains "a(z) {{n}}." where a number follows an article; English lost its stiff and machine-like phrasing. Old release notes and the words the spreadsheet importer reads are unchanged.

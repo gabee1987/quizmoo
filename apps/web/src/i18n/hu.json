@@ -1625,6 +1625,30 @@
     "releasedOn": "Megjelent: {{date}}",
     "fixed": "Javítva",
     "releases": {
+      "1_11_0": {
+        "title": "Próbakvíz és érthetőbb szövegek",
+        "intro": "Minden új játékvezető egy kész kvízzel kezd, amely megmutatja, mit tud a Quizmoo, és az alkalmazás minden szövegét átnéztük, hogy mindenhol ugyanúgy szóljon.",
+        "sections": [
+          {
+            "title": "Próbakvíz",
+            "items": [
+              "Az új fiókok egy 20 kérdéses próbakvízt kapnak a saját nyelvükön: vicces és trükkös kérdésekkel, minden kérdéstípussal, három körrel, képekkel, dupla ponttal és még sok mással.",
+              "A kvízeid listáján a Próbakvíz gomb bármikor hozzáad egy új példányt, így újra kipróbálhatod, vagy kiindulhatsz belőle."
+            ]
+          },
+          {
+            "title": "Szövegek",
+            "items": [
+              "Az alkalmazás minden szövegét átnéztük: egyszerűbb megfogalmazás, ugyanarra a dologra mindenhol ugyanaz a szó.",
+              "A kérdések csoportjai mindenhol körök, a szerkesztőben is, az „Új kör” helyett pedig „Visszavágó” indul.",
+              "Az adatkezelési tájékoztató és a felhasználási feltételek mindkét nyelven ugyanazt mondják, és könnyebben olvashatók. A frissített feltételeket a játékvezetők a következő belépéskor fogadják el."
+            ]
+          }
+        ],
+        "fixed": [
+          "Az adminisztrátor Új felhasználó ablakában a szerepkör mezőnek újra van címkéje."
+        ]
+      },
       "1_10_1": {
         "title": "Apró javítások",
         "intro": "Javítások a tesztelésből, egy nyitóoldal a belépéshez, és ezen az oldalon már minden verziónál látszik, mit javítottunk.",
