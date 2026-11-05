@@ -77,6 +77,9 @@ for (const mode of modes) {
       await expect(host.getByRole('heading', { name: heading, level: 1 })).toBeVisible()
       await expectAccessible(host, heading)
     }
+    await host.goto('/help')
+    await expect(host.getByRole('heading', { name: 'Help', level: 1 })).toBeVisible()
+    await expectAccessible(host, 'help')
     const site = (await (await host.request.get('/api/site')).json()) as { registrationOpen: boolean }
     if (site.registrationOpen) {
       await host.goto('/register')
