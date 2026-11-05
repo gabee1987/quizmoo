@@ -88,13 +88,13 @@ test('mixed play: solo players join, rank with the teams and are moved in and ou
     await test.step('the solo player has no team card; the host sees them on their own', async () => {
       await expect(cecil.getByText("You're playing on your own")).toBeVisible()
       await expect(cecil.getByText('Your team answers', { exact: false })).toHaveCount(0)
-      await expect(page.getByRole('heading', { name: /^On their own/ })).toBeVisible()
+      await expect(page.getByRole('heading', { name: /^Solo players/ })).toBeVisible()
     })
 
     await test.step('the host moves Bence out of Red to play alone', async () => {
       await page.getByRole('button', { name: 'Actions for Bence' }).click()
-      await page.getByRole('menuitem', { name: 'On their own' }).click()
-      await expect(bence.getByText('The host made you play on your own.')).toBeVisible()
+      await page.getByRole('menuitem', { name: 'Solo players' }).click()
+      await expect(bence.getByText('The host made you a solo player.')).toBeVisible()
       await expect(bence.getByText("You're playing on your own")).toBeVisible()
     })
 
@@ -104,7 +104,7 @@ test('mixed play: solo players join, rank with the teams and are moved in and ou
       await bence.getByRole('button', { name: 'Debrecen', exact: true }).click()
       await anna.getByRole('button', { name: 'Budapest', exact: true }).click()
       await expect(cecil.getByText('Correct!', { exact: true })).toBeVisible()
-      await page.getByRole('button', { name: 'Show scoreboard', exact: true }).click()
+      await page.getByRole('button', { name: 'Show standings', exact: true }).click()
       await expect(cecil.getByRole('heading', { name: 'Teams and solo players' })).toBeVisible()
       await expect(cecil.getByText('Among the teams: rank', { exact: false })).toBeVisible()
       await expect(anna.getByText('Team Red: rank', { exact: false })).toBeVisible()
@@ -116,7 +116,7 @@ test('mixed play: solo players join, rank with the teams and are moved in and ou
 
     await test.step('the results mark the solo players', async () => {
       await page.goto(`/host/results/${gameId}`)
-      await expect(page.getByRole('row', { name: /Bence.*On their own/ })).toBeVisible()
+      await expect(page.getByRole('row', { name: /Bence.*Solo players/ })).toBeVisible()
       await page.getByRole('tab', { name: /Teams/ }).click()
       await expect(page.getByRole('heading', { name: 'Teams and solo players' })).toBeAttached()
       await expect(page.getByRole('tabpanel').getByRole('row', { name: /Bence/ })).toBeVisible()

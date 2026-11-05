@@ -23,7 +23,7 @@ const MIN_PASSWORD = 10
 
 /** Host self sign-up. The account waits for an admin's approval before it can log in. */
 function RegisterPage() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const site = useSiteInfo()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
@@ -36,7 +36,14 @@ function RegisterPage() {
     mutationFn: () =>
       apiFetch('/api/auth/register', {
         method: 'POST',
-        body: JSON.stringify({ username: username.trim(), password, acceptTerms: accepted, ...(website ? { website } : {}) }),
+        body: JSON.stringify({
+          username: username.trim(),
+          password,
+          acceptTerms: accepted,
+          // The starter quiz comes in the language of this page.
+          lang: i18n.language,
+          ...(website ? { website } : {}),
+        }),
       }),
   })
 

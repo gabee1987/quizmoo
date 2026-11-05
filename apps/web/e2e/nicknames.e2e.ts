@@ -43,7 +43,7 @@ test('admin edits the Surprise me names and a phone gets one of them', async ({ 
       // A small list to start from, so the phone's pick below can only be one of two names.
       await page.request.put('/api/nicknames/en', { data: { names: ['Laser Llama', 'Sleepy Sloth'] } })
       await page.getByRole('link', { name: 'Names' }).first().click()
-      await expect(page.getByRole('heading', { name: 'Surprise me names' })).toBeVisible()
+      await expect(page.getByRole('heading', { name: '“Surprise me” names' })).toBeVisible()
       await page.getByRole('tab', { name: /English/ }).click()
       const panel = page.getByRole('tabpanel')
       const add = panel.getByLabel('New name', { exact: true })

@@ -90,10 +90,10 @@ test('pause and resume, a message that clears itself, showing a question again',
     })
 
     await test.step('question 1 shown again from the scoreboard of question 2, then back', async () => {
-      await hostButton('Show scoreboard').click()
+      await hostButton('Show standings').click()
       await hostButton('Next question').click()
       await phone.getByRole('button', { name: 'False', exact: true }).click()
-      await hostButton('Show scoreboard').click()
+      await hostButton('Show standings').click()
       await page.getByRole('tab', { name: 'Questions' }).click()
       // The played questions are folded until opened.
       await page.getByRole('button', { name: /Questions so far/ }).click()

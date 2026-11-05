@@ -68,20 +68,20 @@ test('host downloads and imports quizzes as files', async ({ page }) => {
       expect(sheet.text).toContain('number,Pi?,,,,,,,3.14,20,1000,0.01')
 
       await menu.click()
-      file = await downloaded(page, () => page.getByRole('menuitem', { name: 'Download Quizmoo file' }).click())
+      file = await downloaded(page, () => page.getByRole('menuitem', { name: 'Download as Quizmoo file' }).click())
       expect(file.name).toMatch(/\.quizmoo\.json$/)
       const json = JSON.parse(file.text) as { format: string; quiz: { questions: { imageId?: string }[] }; images: Record<string, string> }
       expect(json.format).toBe('quizmoo-quiz')
       expect(Object.keys(json.images)).toEqual([json.quiz.questions[0]!.imageId])
     })
 
-    await test.step('import the template: one question of every type, the last two in a group', async () => {
+    await test.step('import the template: one question of every type, the last two in a round', async () => {
       await page.getByRole('button', { name: 'Import' }).click()
       const dialog = page.getByRole('dialog', { name: 'Import a quiz' })
       const template = await downloaded(page, () => dialog.getByRole('button', { name: 'Download template' }).click())
       expect(template.name).toBe('quizmoo-question-template.csv')
       await dialog.locator('input[type="file"]').setInputFiles({ name: `${prefix} sheet.csv`, mimeType: 'text/csv', buffer: Buffer.from(template.text) })
-      await expect(dialog.getByText('7 questions in 1 group, ready to import.')).toBeVisible()
+      await expect(dialog.getByText('7 questions in 1 round, ready to import.')).toBeVisible()
       await expect(dialog.getByLabel('Quiz title')).toHaveValue(`${prefix} sheet`)
       await dialog.getByRole('button', { name: 'Import' }).click()
       await expect(page.getByText('Imported 7 questions.')).toBeVisible()

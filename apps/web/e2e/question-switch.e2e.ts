@@ -57,7 +57,7 @@ test('the editor switches questions and groups off and on, and searches them', a
     await expect.poll(offs, { timeout: 10_000 }).toEqual([false, false, false])
 
     // The group's eye switches both of its questions off; "All on" and Undo.
-    await page.getByRole('button', { name: 'Switch group 1 off' }).click()
+    await page.getByRole('button', { name: 'Switch round 1 off' }).click()
     await expect(page.getByText('2 of 3 questions switched off')).toBeVisible()
     await expect.poll(offs, { timeout: 10_000 }).toEqual([false, true, true])
     await page.getByRole('button', { name: 'All on', exact: true }).click()

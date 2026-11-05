@@ -198,7 +198,7 @@ describe('toCsv', () => {
     results.groups = [{ id: 'g1', title: 'Round; two' }]
     results.questions[1]!.question = { ...results.questions[1]!.question, groupId: 'g1' }
     expect(toCsv(results, 'hu').split('\r\n').slice(0, 2)).toEqual([
-      '﻿;;;Csoport;;"Round; two"',
+      '﻿;;;Kör;;"Round; two"',
       'Helyezés;Név;Csapat;Összesen;1. Capital of Hungary?;2. Which are even?',
     ])
   })

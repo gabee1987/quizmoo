@@ -103,8 +103,8 @@ const csvHeaders: Record<
   CsvLanguage,
   { rank: string; name: string; team: string; solo: string; total: string; teamAnswer: string; group: string; true: string; false: string }
 > = {
-  hu: { rank: 'Helyezés', name: 'Név', team: 'Csapat', solo: 'Egyéni', total: 'Összesen', teamAnswer: 'Csapat válasza', group: 'Csoport', true: 'Igaz', false: 'Hamis' },
-  en: { rank: 'Rank', name: 'Name', team: 'Team', solo: 'On their own', total: 'Total', teamAnswer: 'Team answer', group: 'Group', true: 'True', false: 'False' },
+  hu: { rank: 'Helyezés', name: 'Név', team: 'Csapat', solo: 'Egyéni', total: 'Összesen', teamAnswer: 'Csapat válasza', group: 'Kör', true: 'Igaz', false: 'Hamis' },
+  en: { rank: 'Rank', name: 'Name', team: 'Team', solo: 'Solo', total: 'Total', teamAnswer: 'Team answer', group: 'Round', true: 'True', false: 'False' },
 }
 
 /**

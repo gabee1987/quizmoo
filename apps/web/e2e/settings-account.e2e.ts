@@ -78,7 +78,8 @@ test('a host sees, logs out and deletes their own account on My settings', async
     await test.step('deleting asks for the password again', async () => {
       await tab.getByRole('button', { name: 'Delete my account' }).click()
       const dialog = tab.getByRole('dialog')
-      await expect(dialog.getByText('0 quizzes')).toBeVisible()
+      // The starter quiz every new account gets.
+      await expect(dialog.getByText('1 quiz', { exact: true })).toBeVisible()
       await dialog.getByLabel('Your password').fill('not-my-password')
       await dialog.getByRole('button', { name: 'Delete for good' }).click()
       await expect(dialog.getByText('The current password is wrong.')).toBeVisible()

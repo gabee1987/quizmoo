@@ -21,6 +21,7 @@ import { z } from 'zod'
 import { requireSession } from '../auth/require-session.js'
 import type { Db } from '../db/index.js'
 import { images, quizzes } from '../db/schema.js'
+import { STARTER_IMAGE_COUNT, addStarterQuiz, starterLanguageSchema } from '../starter/add-starter-quiz.js'
 import { parseOr400 } from './http.js'
 import { MAX_IMAGES_PER_HOST, MAX_IMAGE_BYTES, imageCount, imageRow, ownsImage, toWebp } from './images.js'
 import { readHostSettings } from './me.js'
@@ -208,6 +209,17 @@ export async function quizRoutes(app: FastifyInstance, { db }: { db: Db }) {
       .values({ id: nanoid(12), ownerId: request.user!.id, ...input })
       .returning()
     return reply.code(201).send({ quiz: toQuiz(row!) })
+  })
+
+  // A fresh copy of the starter quiz, for hosts who want it (again).
+  app.post('/api/quizzes/starter', auth, async (request, reply) => {
+    const body = parseOr400(z.object({ lang: starterLanguageSchema }), request.body ?? {}, reply)
+    if (!body) return reply
+    const userId = request.user!.id
+    if ((await imageCount(db, userId)) + STARTER_IMAGE_COUNT > MAX_IMAGES_PER_HOST) {
+      return reply.code(409).send({ error: 'errors.tooManyImages' })
+    }
+    return reply.code(201).send({ id: await addStarterQuiz(db, userId, body.lang) })
   })
 
   // A quiz file (a full copy or the questions read from a spreadsheet) becomes a new quiz. Nothing

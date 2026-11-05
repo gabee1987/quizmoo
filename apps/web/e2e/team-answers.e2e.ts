@@ -136,7 +136,7 @@ test('teams choose: the captain decides, a majority vote, and the fallback', asy
     })
 
     await test.step('on the scoreboard the host switches Blue to everyone counts', async () => {
-      await page.getByRole('button', { name: 'Show scoreboard', exact: true }).click()
+      await page.getByRole('button', { name: 'Show standings', exact: true }).click()
       await page.getByRole('tab', { name: 'Players' }).click()
       await page.getByRole('combobox', { name: 'Answer mode of Blue' }).click()
       await page.getByRole('option', { name: 'Everyone counts', exact: true }).click()
@@ -148,9 +148,9 @@ test('teams choose: the captain decides, a majority vote, and the fallback', asy
       await redThree.getByRole('button', { name: 'Velence', exact: true }).click()
       await blueOne.getByRole('button', { name: 'Balaton', exact: true }).click()
       await blueTwo.getByRole('button', { name: 'Balaton', exact: true }).click()
-      await expect(page.getByText('Suggesting (2 of 3)')).toBeVisible()
+      await expect(page.getByText('Picks (2 of 3)')).toBeVisible()
       await page.getByRole('button', { name: 'End question', exact: true }).click()
-      await expect(redOne.getByText("Your captain did not confirm, so the team's majority counted.")).toBeVisible()
+      await expect(redOne.getByText("Your captain didn't confirm, so the majority answer counted.")).toBeVisible()
       await expect(redOne.getByRole('group', { name: "Your team's answer" }).getByText('Velence', { exact: true })).toBeVisible()
       await expect(page.getByText('(Majority, not confirmed)')).toBeVisible()
       await expect(blueTwo.getByText('Correct!', { exact: true })).toBeVisible()
