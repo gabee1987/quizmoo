@@ -9,6 +9,8 @@ import {
   MonitorIcon,
   MoonIcon,
   PartyPopperIcon,
+  RotateCcwIcon,
+  SignpostIcon,
   SmartphoneIcon,
   SunIcon,
   Trash2Icon,
@@ -27,6 +29,7 @@ import { languages, setLanguage, type Language } from '@/i18n'
 import { apiFetch } from '@/lib/api'
 import { modes, setMode, useMode } from '@/lib/mode'
 import { toastError } from '@/lib/toast'
+import { resetTours } from '../tour/use-tour'
 import { timeAgo } from '../users/format'
 import { LockCodeForm } from './lock-code-form'
 import { PasswordForm } from './password-form'
@@ -70,6 +73,12 @@ export function AccountPanel() {
       toast.success(t('settings.account.logins.done'))
       void queryClient.invalidateQueries({ queryKey: accountQueryOptions.queryKey })
     },
+    onError: toastError,
+  })
+
+  const resetAll = useMutation({
+    mutationFn: () => resetTours(queryClient),
+    onSuccess: () => toast.success(t('settings.tours.done')),
     onError: toastError,
   })
 
@@ -124,6 +133,13 @@ export function AccountPanel() {
             }
           })}
         />
+      </SettingsSection>
+
+      <SettingsSection icon={SignpostIcon} title={t('settings.tours.title')} help={t('settings.tours.help')}>
+        <Button variant="outline" className="self-start" disabled={resetAll.isPending} onClick={() => resetAll.mutate()}>
+          <RotateCcwIcon aria-hidden="true" />
+          {t('settings.tours.reset')}
+        </Button>
       </SettingsSection>
 
       <SettingsSection icon={KeyRoundIcon} title={t('auth.passwordChange.title')}>

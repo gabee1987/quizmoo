@@ -5,6 +5,7 @@ import { useCowAntics } from '@/features/cow/use-cow-antics'
 import { languages, setLanguage } from '@/i18n'
 import { cn } from '@/lib/cn'
 import { CowLogo } from './cow-logo'
+import { HelpMenu } from './help-menu'
 import { ModeToggle } from './mode-toggle'
 import { SeasonToggle } from './season-greeting'
 
@@ -30,6 +31,7 @@ export function AppHeader({ brand = true }: { brand?: boolean }) {
         <LanguageSwitch />
         <SeasonToggle />
         <ModeToggle />
+        <HelpMenu />
       </span>
     </header>
   )

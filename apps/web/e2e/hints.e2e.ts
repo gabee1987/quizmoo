@@ -83,7 +83,7 @@ test('every control without visible text has a tooltip', async ({ page, browser 
       await check(page, at('quiz list'))
       await page.getByRole('button', { name: 'Select', exact: true }).click()
       await check(page, at('quiz list, selecting'))
-      for (const path of ['/host/games', '/host/settings', '/host/whats-new', '/host/users', '/host/nicknames']) {
+      for (const path of ['/host/games', '/host/settings', '/host/whats-new', '/host/users', '/host/nicknames', '/help']) {
         await page.goto(path)
         await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
         await check(page, at(path))

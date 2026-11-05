@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { ConfirmDialog } from '@/components/dialog'
+import { HelpMenuItems } from '@/components/help-menu'
 import { Hint } from '@/components/hint'
 import { PlayerAvatar } from '@/components/player-avatar'
 import { SeasonMenuItem } from '@/components/season-greeting'
@@ -73,6 +74,7 @@ export function GameMenu() {
               variant="outline"
               size="icon-sm"
               aria-label={t('app.settings')}
+              data-tour="game-menu"
               // Above the dimmed page of `PausedNote` (z-40): the menu stays usable while the host pauses.
               className="relative z-50 size-11 shrink-0 rounded-full bg-card/90 shadow-soft backdrop-blur"
             >
@@ -137,6 +139,8 @@ export function GameMenu() {
             ))}
           </DropdownMenuRadioGroup>
           <SeasonMenuItem className={touchRadio} />
+          <DropdownMenuSeparator />
+          <HelpMenuItems className={touchItem} newTab />
           {snapshot && snapshot.phase !== 'finished' && (
             <>
               <DropdownMenuSeparator />

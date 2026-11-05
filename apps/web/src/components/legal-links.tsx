@@ -3,14 +3,24 @@ import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/cn'
 import { APP_VERSION } from '@/lib/version'
 
-/** Privacy · Terms · Cookies · Imprint and the version, under the join, login and sign-up cards and in the host sidebar. */
-export function LegalLinks({ className }: { className?: string }) {
+/**
+ * Help · Privacy · Terms · Cookies · Imprint and the version, under the join, login and sign-up cards
+ * and in the host sidebar (which has its own Help link, so leaves it out).
+ */
+export function LegalLinks({ className, help = true }: { className?: string; help?: boolean }) {
   const { t } = useTranslation()
   const link =
     'rounded-md underline-offset-4 outline-none hover:text-foreground hover:underline focus-visible:ring-[3px] focus-visible:ring-ring'
   return (
     <nav aria-label={t('legal.nav.label')} className={cn('text-sm text-muted-foreground', className)}>
       <ul className="flex flex-wrap justify-center gap-x-4 gap-y-1">
+        {help && (
+          <li>
+            <Link to="/help" className={cn(link, 'font-bold')}>
+              {t('help.nav')}
+            </Link>
+          </li>
+        )}
         <li>
           <Link to="/privacy" className={link}>
             {t('legal.nav.privacy')}

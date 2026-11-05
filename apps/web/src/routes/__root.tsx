@@ -7,6 +7,7 @@ import { SeasonLayer } from '@/components/season-layer'
 import { StorageNotice } from '@/components/storage-notice'
 import { Toaster } from '@/components/ui/sonner'
 import { TooltipProvider } from '@/components/ui/tooltip'
+import { TourLayer } from '@/features/tour/tour-layer'
 import { meQueryOptions } from '@/lib/auth'
 import { cn } from '@/lib/cn'
 import { forgetOldPlayers } from '@/lib/player-storage'
@@ -59,6 +60,7 @@ function RootLayout() {
       </div>
       {/* Not over a phone's answers or on the projector: players see it on the join page first. */}
       {!inGame && !pathname.startsWith('/screen/') && <StorageNotice />}
+      <TourLayer />
       <Toaster position="top-center" />
     </TooltipProvider>
   )

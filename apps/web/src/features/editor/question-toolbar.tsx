@@ -62,7 +62,9 @@ export function QuestionToolbar({
         <span className="block text-lg font-black">{t('editor.questionNOfCount', { n: index + 1, count })}</span>
         <span className="block text-sm font-semibold text-muted-foreground">{t(`questionTypes.${question.type}`)}</span>
       </h2>
-      <InGameSwitch state={question.off ? 'off' : 'on'} onChange={onSwitch} />
+      <span data-tour="in-game" className="flex">
+        <InGameSwitch state={question.off ? 'off' : 'on'} onChange={onSwitch} />
+      </span>
       <div className="ml-auto flex items-center gap-0.5">
         <ToolButton label={t('editor.moveUp')} disabled={first} onClick={() => onMove('up')}>
           <ArrowUpIcon aria-hidden="true" />

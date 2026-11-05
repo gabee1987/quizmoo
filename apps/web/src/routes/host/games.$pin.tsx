@@ -34,6 +34,7 @@ import { ApiError, apiFetch } from '../../lib/api'
 import { meQueryOptions } from '../../lib/auth'
 import { openProjector } from '../../lib/projector'
 import { screenLockChanged } from '../../lib/screen-lock'
+import { PageTour } from '../../features/tour/use-tour'
 import { toastError } from '../../lib/toast'
 import { closeSession, emitAck, startSession, useGameStore } from '../../lib/socket'
 
@@ -128,6 +129,8 @@ function HostGamePage() {
   return (
     // The whole window but the page's bottom padding (1.5rem); the app bar is folded into the top bar.
     <div className="flex w-full flex-col gap-3 pt-3 lg:h-[calc(100dvh-1.5rem)] lg:min-h-0">
+      {/* The first question that runs shows the controls, not the countdown or a round's intro. */}
+      {host.phase !== 'finished' && <PageTour id="running" ready={host.phase === 'question'} />}
       <ConnectionBar status={status} since={since} />
       <TopBar
         host={host}

@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+### Tutorial tours and a help page (phase 34)
+- Every main host page shows a short tour the first time it opens: home, quizzes, the editor, the new game dialog, the game's lobby, the first running question, results and My settings. Each bubble points at one control with a soft ring around it and a light dim, shows the progress ("2 / 5" and dots), and has Back, Next and a close button; the arrow keys step and Escape ends it. The page stays usable while a tour is open.
+- Steps adapt to the screen: a step whose control is not shown is left out and the progress counts only what remains; on a phone, steps point at the phone's own controls (the bottom bar, the list button, the +). A tour waits, or hides, while a dialog or menu it is not part of is open.
+- Which tours a host has seen is kept on the account (`GET /api/me/tours`, `PUT /api/me/tours/:tour`, `DELETE /api/me/tours`, a new `tours_seen` column on `host_settings`, in the data export too), so a tour seen on the laptop does not show again on the phone. "Show all tours again" is in My settings, Account.
+- Players get a short tour in the lobby while they wait, once per device (`quizmoo.tours`, listed on the cookies page). Nothing appears while a question runs.
+- A "?" button in the header (and the same items in the editor's and the running game's menu, and the players' game menu) shows the page's tour again and opens Help.
+- A new help page (`/help`) explains the app for players (joining, answering each question type, points, teams, reconnecting) and for hosts (quizzes, the editor, game settings, starting and running a game, results, My settings, the admin pages), with a short FAQ. Linked from the host navigation, the "?" menu, the game menu and the footer of the join, login and sign-up pages; each tour's last bubble links to its section.
+- `e2e/tour.e2e.ts` covers the first run, stepping, closing for good, the replay, the keyboard, a phone and a player. The other specs switch the tours off on their device.
+
 ### Tooltips in the app's own look (phase 57)
 - Every tooltip is the app's own bubble now instead of the browser's plain grey one: the toasts' look in small, with a tail pointing at the element and a springy pop, in the game theme's colours and both colour modes. About 50 places changed, on the host pages, the editor, the admin pages, the phone and the projector (`Hint`, `components/hint.tsx`).
 - They open on mouse hover and on keyboard focus, never on a tap, and not when a dialog or menu hands focus back after a mouse click. `e2e/tooltips.e2e.ts` checks all four.

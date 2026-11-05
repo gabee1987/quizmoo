@@ -1,5 +1,6 @@
 import type { PlayerSnapshot, TeamPublic } from '@quizmoo/shared'
 import { BrandingMark } from '@/components/branding-mark'
+import { usePageTour } from '@/features/tour/use-tour'
 import { useMediaQuery } from '@/lib/use-media-query'
 import { GameInfoCard, PinCard, PlayerCard } from './lobby-parts'
 import { PickTeam } from './pick-team'
@@ -15,6 +16,7 @@ const DESKTOP = '(min-width: 64rem)'
  */
 export function Lobby({ snapshot }: { snapshot: PlayerSnapshot }) {
   const desktop = useMediaQuery(DESKTOP)
+  usePageTour('playerLobby')
   const team = snapshot.teams.find((x) => x.id === snapshot.me.teamId)
   return desktop ? <DesktopLobby snapshot={snapshot} team={team} /> : <PhoneLobby snapshot={snapshot} team={team} />
 }
@@ -26,8 +28,18 @@ interface LayoutProps {
 
 /** The team part: the player's team, or the picker for a player without one (the host removed theirs). */
 function TeamPart({ snapshot, team }: LayoutProps) {
-  if (snapshot.mode === 'team' && !snapshot.me.teamId) return <PickTeam snapshot={snapshot} />
-  return team && !team.solo ? <TeamCard snapshot={snapshot} team={team} /> : null
+  if (snapshot.mode === 'team' && !snapshot.me.teamId) {
+    return (
+      <div data-tour="player-team">
+        <PickTeam snapshot={snapshot} />
+      </div>
+    )
+  }
+  return team && !team.solo ? (
+    <div data-tour="player-team">
+      <TeamCard snapshot={snapshot} team={team} />
+    </div>
+  ) : null
 }
 
 /** One column, phone wide, in the order a thumb scrolls: who I am, the PIN, my team, the game. */

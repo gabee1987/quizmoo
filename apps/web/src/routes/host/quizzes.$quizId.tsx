@@ -111,6 +111,7 @@ import { exportQuiz } from '../../features/host/quiz-files'
 import { QuizBrandingFields } from '../../features/editor/quiz-branding-fields'
 import { ApiError, apiFetch, errorCode } from '../../lib/api'
 import { paletteVars } from '../../lib/themes'
+import { usePageTour } from '../../features/tour/use-tour'
 
 export const Route = createFileRoute('/host/quizzes/$quizId')({
   component: QuizEditorPage,
@@ -164,6 +165,7 @@ function QuizEditorPage() {
  */
 function Editor({ quiz }: { quiz: Quiz }) {
   const { t, i18n } = useTranslation()
+  usePageTour('editor')
   const queryClient = useQueryClient()
   const navigate = useNavigate()
   // The quiz being edited, plus where its empty groups sit in the list (not saved).
@@ -834,7 +836,7 @@ function Editor({ quiz }: { quiz: Quiz }) {
               </Link>
             </Button>
           </Hint>
-          <div className="flex min-w-0 flex-1 basis-56 flex-col">
+          <div data-tour="quiz-title" className="flex min-w-0 flex-1 basis-56 flex-col">
             <Label htmlFor="quiz-title" className="sr-only">
               {t('editor.title')}
             </Label>
@@ -858,7 +860,7 @@ function Editor({ quiz }: { quiz: Quiz }) {
           </div>
           <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
             {/* From lg (labelled from xl, so the title keeps its room); phones and small tablets have the plus in the bottom bar. */}
-            <div className="hidden items-center gap-2 border-r pr-2 lg:flex">
+            <div data-tour="add-question" className="hidden items-center gap-2 border-r pr-2 lg:flex">
               <Hint label={t('editor.newQuestionTop')}>
                 <Button
                   variant="secondary"
@@ -940,6 +942,7 @@ function Editor({ quiz }: { quiz: Quiz }) {
                 size="icon"
                 aria-label={t('editor.settings')}
                 aria-expanded={settingsOpen}
+                data-tour="quiz-settings"
                 ref={settingsToggle}
                 onClick={() => setSettingsOpen((open) => !open)}
               >
@@ -949,7 +952,7 @@ function Editor({ quiz }: { quiz: Quiz }) {
             <Tooltip>
               <TooltipTrigger asChild>
                 {/* A disabled button gets no pointer or focus events; the wrapper carries the tooltip. */}
-                <span tabIndex={playBlocker ? 0 : -1} className="rounded-xl outline-none focus-visible:ring-[3px] focus-visible:ring-ring">
+                <span tabIndex={playBlocker ? 0 : -1} data-tour="quiz-play" className="rounded-xl outline-none focus-visible:ring-[3px] focus-visible:ring-ring">
                   <Button disabled={playBlocker !== null} onClick={() => setStarting(true)}>
                     <PlayIcon aria-hidden="true" />
                     {t('host.play')}
@@ -984,6 +987,7 @@ function Editor({ quiz }: { quiz: Quiz }) {
         >
           <div className="hidden min-w-0 items-start justify-end self-stretch lg:flex xl:overflow-x-clip" inert={docked}>
             <aside
+              data-tour="question-list"
               className={cn(
                 // Not scrolling itself: its list scrolls under the fixed header (`renderList`).
                 'sticky top-22 flex max-h-[calc(100dvh-11rem)] w-80 shrink-0 flex-col overflow-hidden rounded-2xl border bg-card shadow-soft xl:mr-6',
@@ -1091,7 +1095,7 @@ function Editor({ quiz }: { quiz: Quiz }) {
               </div>
             )}
 
-            <Button variant="outline" className="xl:hidden" onClick={() => setPreviewOpen((s) => !s)} aria-expanded={previewOpen}>
+            <Button variant="outline" className="xl:hidden" data-tour="phone-preview" onClick={() => setPreviewOpen((s) => !s)} aria-expanded={previewOpen}>
               <EyeIcon aria-hidden="true" />
               {previewOpen ? t('editor.hidePreview') : t('editor.showPreview')}
             </Button>
@@ -1110,7 +1114,7 @@ function Editor({ quiz }: { quiz: Quiz }) {
               )}
             >
               {/* Scaled so three panes fit a 1280 px laptop; the layout inside stays the phone's. */}
-              <div className="zoom-[0.82]">{preview(t('editor.preview'))}</div>
+              <div data-tour="phone-preview" className="zoom-[0.82]">{preview(t('editor.preview'))}</div>
             </div>
           </aside>
 
@@ -1154,6 +1158,7 @@ function Editor({ quiz }: { quiz: Quiz }) {
             <Button
               variant="secondary"
               className="flex-1"
+              data-tour="question-list"
               onClick={() => {
                 setListOpen(true)
                 jumpToSelected()
@@ -1167,7 +1172,7 @@ function Editor({ quiz }: { quiz: Quiz }) {
             </Button>
             {questions.length < MAX_QUESTIONS && (
               <Hint label={t('editor.addQuestion')}>
-                <Button size="icon" aria-label={t('editor.addQuestion')} onClick={() => setPicking(true)}>
+                <Button size="icon" aria-label={t('editor.addQuestion')} data-tour="add-question" onClick={() => setPicking(true)}>
                   <PlusIcon aria-hidden="true" />
                 </Button>
               </Hint>

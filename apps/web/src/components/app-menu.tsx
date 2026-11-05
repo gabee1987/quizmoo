@@ -20,6 +20,7 @@ import { cn } from '@/lib/cn'
 import { modes, setMode, useMode, type Mode } from '@/lib/mode'
 import { useLogout } from '@/lib/use-logout'
 import { LogoMark } from './app-header'
+import { HelpMenuItems } from './help-menu'
 import { Hint } from './hint'
 import { UnseenDot } from './host-nav'
 import { SeasonMenuItem } from './season-greeting'
@@ -106,6 +107,7 @@ export function AppMenu() {
             {unseen && <UnseenDot />}
           </Link>
         </DropdownMenuItem>
+        <HelpMenuItems />
         <DropdownMenuItem disabled={logout.isPending} onSelect={() => logout.mutate()}>
           <LogOutIcon />
           {t('auth.logout')}

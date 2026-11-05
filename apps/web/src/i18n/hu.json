@@ -2015,6 +2015,12 @@
     "discard": "Elvetés",
     "saved": "Elmentettük",
     "passwordSaved": "Elmentettük az új jelszót",
+    "tours": {
+      "title": "Bemutatók",
+      "help": "Minden oldal rövid bemutatót mutat, amikor először megnyitod. Megnéznéd újra őket? Minden eszközödön előről indulnak.",
+      "reset": "Minden bemutató újra",
+      "done": "A bemutatók újra megjelennek."
+    },
     "lockCode": {
       "title": "Zárkód",
       "help": "Ezzel oldod fel a képernyőidet, ha játék közben zárolod őket („Képernyő zárolása”). Az új játékok ezt használják, hacsak induláskor nem adsz meg másikat. A jelszavad is mindig feloldja.",
@@ -2515,6 +2521,7 @@
         "notice": "Hogy már láttad a tárolásról szóló tájékoztatót, ezért nem jelenik meg újra.",
         "hostToasts": "Hogy a játékvezetői oldal mutasson-e rövid értesítést a csatlakozó és távozó játékosokról.",
         "hostBoard": "Hogyan mutassa a játékvezetői oldal a játékosokat: csempék vagy lista, sorrend, rejtett válaszok, oldalsó panelek és a menü.",
+        "tours": "Mely bemutatókat láttad már ezen az eszközön, hogy ne jöjjenek elő újra. Amíg nem törlöd a böngészőadatokat.",
         "appCache": "Az alkalmazás saját fájljai (kód, betűtípusok, képek), hogy gyorsan induljon és telepíthető legyen. Személyes adat nincs benne."
       },
       "removeTitle": "Törlésük",
@@ -2545,6 +2552,255 @@
       "done": "Köszönjük!"
     },
     "joinNote": "A becenevedet a játékban mindenki látja. A csatlakozással elfogadod a <terms>feltételeket</terms>; lásd az <privacy>adatkezelési tájékoztatót</privacy>."
+  },
+  "help": {
+    "nav": "Súgó",
+    "button": "Súgó és bemutatók",
+    "showTour": "Az oldal bemutatója",
+    "title": "Súgó",
+    "intro": "Így működik a Quizmoo, játékosoknak és játékvezetőknek.",
+    "contents": "Ezen az oldalon",
+    "tours": "Minden játékvezetői oldalnak van rövid bemutatója is. Fent a ? gombbal újra megnézheted, vagy a Beállításaimban mindet újraindíthatod.",
+    "players": {
+      "title": "Játékosoknak",
+      "sections": [
+        {
+          "id": "joining",
+          "heading": "Csatlakozás",
+          "paragraphs": ["Nem kell hozzá se fiók, se alkalmazás: nyisd meg a Quizmoo-t a telefonod böngészőjében."],
+          "items": [
+            "Írd be a kivetítőn látható 6 jegyű PIN-t, vagy olvasd be a QR-kódot a kamerával.",
+            "Válassz nevet, vagy nyomd meg a Lepj meg! gombot, és válassz avatart. Becenevet adj meg, ne a teljes neved.",
+            "Csapatjátékban lépj be egy csapatba, vagy alapíts újat. Ha a játékvezető engedi, egyedül is játszhatsz.",
+            "Aztán várj a váróteremben, amíg a játékvezető elindítja a játékot. Hagyd nyitva az oldalt."
+          ]
+        },
+        {
+          "id": "answering",
+          "heading": "Válaszadás",
+          "paragraphs": [
+            "Minden kérdés megjelenik a telefonodon, mellette a visszaszámláló. Válaszolj, mielőtt lejár az idő.",
+            "Ha a játékvezető engedi, a kérdés alatt még átírhatod a válaszod; az utolsó számít."
+          ],
+          "items": [
+            "Egy helyes válasz: koppints az egyetlen jó lehetőségre.",
+            "Több helyes válasz: jelöld be mind a jókat, aztán küldd el. Csak a teljes válasz ér pontot.",
+            "Igaz vagy hamis: döntsd el, igaz-e az állítás.",
+            "Szöveges válasz: írj be egy rövid választ. Ha a játékvezető engedi, az apró elírás is elfogadható.",
+            "Szám: írj be egy számot. Van, ahol a közeli válasz is jó.",
+            "Sorba rendezés: húzd az elemeket a helyes sorrendbe. Csak a pontos sorrend ér pontot.",
+            "Szavazás: mondd el a véleményed. Nincs jó válasz, és pont sem jár érte."
+          ]
+        },
+        {
+          "id": "points",
+          "heading": "Pontok",
+          "items": [
+            "A jó válasz a kérdés pontjait éri, a rossz vagy a hiányzó semmit.",
+            "Gyorsasági bónusszal a gyorsabb jó válasz többet ér. Az utolsó pillanatban adott jó válasz is megkapja a felét.",
+            "Sorozatbónusszal az egymás utáni jó válaszok pluszt érnek: a másodiktól +100, legfeljebb +500."
+          ]
+        },
+        {
+          "id": "teams",
+          "heading": "Csapatban játszva",
+          "paragraphs": ["A csapatod egyként játszik. Hogy hogyan születik a válasza, az a játéktól függ:"],
+          "items": [
+            "A kapitány dönt: mindenki javasol egy választ, és a kapitány véglegesíti, melyik számít.",
+            "Többségi szavazás: az a válasz számít, amit a legtöbb csapattag adott.",
+            "Mindenki számít: minden tag válaszol, és a csapat a tagjai pontjainak átlagát kapja."
+          ]
+        },
+        {
+          "id": "connection",
+          "heading": "Ha megszakad a kapcsolat",
+          "paragraphs": [
+            "A telefonod emlékszik rád. Töltsd újra az oldalt, vagy nyisd meg újra a játék linkjét ugyanazon a telefonon, ugyanabban a böngészőben, és a pontjaiddal együtt visszakerülsz.",
+            "Ha szándékosan lépnél ki, válaszd a jobb felső menüben a Kilépek a játékból pontot."
+          ]
+        }
+      ]
+    },
+    "hosts": {
+      "title": "Játékvezetőknek",
+      "sections": [
+        {
+          "id": "host-start",
+          "heading": "Az első lépések",
+          "paragraphs": [
+            "Egy játékhoz kell te egy laptoppal vagy telefonnal, a játékosok a telefonjukkal, és jó, ha van egy kivetítő vagy tévé, amit mindenki lát.",
+            "Most ismerkedsz a Quizmoo-val? Add hozzá a próbakvízt a Kvízek oldalon. Minden kérdéstípus benne van: játszd végig a saját telefonodon, és meglátod, milyen egy játék."
+          ]
+        },
+        {
+          "id": "quizzes",
+          "heading": "A kvízeid",
+          "items": [
+            "Az Új kvíz üres kvízt kezd. Az Importálás táblázatból (a sablont ott letöltheted) vagy Quizmoo-fájlból hoz be kérdéseket.",
+            "A kvíz ⋮ menüjében lemásolhatod, letöltheted vagy törölheted.",
+            "A Kijelöléssel egyszerre több kvíz beállításait írhatod át, vagy törölheted őket.",
+            "Az Indítás új játékot kezd a kvízzel."
+          ]
+        },
+        {
+          "id": "editor",
+          "heading": "A szerkesztő",
+          "items": [
+            "Minden változtatást magától mentünk. A felső sávon látod, hogy minden el van-e mentve, és onnan odaugorhatsz ahhoz, amit javítani kell.",
+            "Új kérdésnél először a típusát választod ki. A típus később nem változtatható.",
+            "A kérdéseket húzással rendezheted át, vagy a mozgatógombokkal.",
+            "Kapcsold ki a kérdést, és a következő játékból kimarad, törölni sem kell.",
+            "A körök saját cím alá gyűjtik a kérdéseket. Egy körnek lehet nyitóképernyője, színe, saját sorrendje és saját szabályai.",
+            "A telefonos előnézet úgy mutatja a kérdést, ahogy a játékosok látják, és végig is játszhatod vele az egész kvízt.",
+            "Egy kvízben legfeljebb 200 kérdés lehet. Laptopon a ? megnyomásával látod a billentyűparancsokat."
+          ]
+        },
+        {
+          "id": "game-settings",
+          "heading": "Játékbeállítások",
+          "paragraphs": [
+            "A Kvíz beállításai (a fogaskerék a szerkesztőben) döntik el, hogyan zajlanak a kvíz játékai. Egy új játék ezekkel indul, és arra az egy játékra átírhatod őket.",
+            "A Beállításaimban azok a beállítások vannak, amikkel minden új kvíz indul."
+          ],
+          "items": [
+            "Játékmenet: egyéni vagy csapatjáték, mikor jelenjenek meg a jó válaszok és az állás, késői csatlakozás.",
+            "Megjelenés: a színtéma, a válaszok színei és jelei.",
+            "Pontozás: gyorsasági bónusz, sorozatbónusz, apró elírások, kevert válaszok és kérdéssorrend.",
+            "Arculat: a logód és az esemény neve a kivetítőn, és ha szeretnéd, a telefonokon is."
+          ]
+        },
+        {
+          "id": "starting",
+          "heading": "Játék indítása",
+          "items": [
+            "Nyomd meg egy kvízen az Indítást, nézd át a beállításokat, és válaszd a Most vagy a Később lehetőséget. A későbbre időzített játékot előre megoszthatod.",
+            "A váróteremben ott a PIN, a QR-kód és a csatlakozási link. Nyisd meg a kivetítős nézetet, és húzd az ablakot a kivetítőre vagy a tévére.",
+            "Ahogy csatlakoznak, megjelennek a játékosok. Eltávolíthatsz játékost, csapatjátékban pedig a csapatokat is kezelheted.",
+            "Ha mindenki bent van, zárd le a csatlakozást, és nyomd meg a Startot."
+          ]
+        },
+        {
+          "id": "running",
+          "heading": "A játék vezetése",
+          "items": [
+            "A nagy gomb mindig a következő lépést teszi meg: lezárja a kérdést, megmutatja a válaszokat, az állást, a következő kérdést.",
+            "Kérdés közben: Szünet, +30 mp vagy Kihagyás.",
+            "A játékostábla mutatja, ki mit válaszolt, ahogy beérkezik. Rejtsd el a válaszokat, ha a képernyőd ki van vetítve.",
+            "Küldj üzenetet minden telefonra és a kivetítőre: írj egyet, vagy válassz a gyors üzeneteid közül.",
+            "A szöveges kérdéseket, amiknek nincs elfogadott válasza, a kérdés után te értékeled.",
+            "A Képernyő zárolása lezárja a játékvezetői oldalaidat, amíg be nem írod a zárkódot vagy a jelszavad, ha el kell lépned a géptől.",
+            "Ha a kivetítős nézet a te böngésződben fut, onnan a szóközzel vagy a jobbra nyíllal léptetheted a játékot.",
+            "A Játék vége megmutatja a dobogót, vagy lezárja a játékot nélküle."
+          ]
+        },
+        {
+          "id": "results",
+          "heading": "Eredmények",
+          "paragraphs": [
+            "Játék után az Eredmények oldalon ott vannak a nyertesek, a fő számok, a legkönnyebb és a legnehezebb kérdés, és minden játékos, csapat és kérdés részletei. A CSV exportálása táblázatként tölti le őket.",
+            "A Játékok oldalon látod a futó, az időzített és a befejezett játékaidat. Az eredményeket egy idő után magától töröljük; hogy mikor, azt az adatkezelési tájékoztató írja."
+          ]
+        },
+        {
+          "id": "settings",
+          "heading": "Beállításaim",
+          "items": [
+            "Játék: a beállítások, az időkorlát és a pontszám, amivel minden új kvíz indul.",
+            "Üzenetek: a gyors üzeneteid a játékokhoz.",
+            "Arculat: a logód és az esemény neve.",
+            "Fiók: a nyelv és a megjelenés ezen az eszközön, jelszó, zárkód, bemutatók, bejelentkezések, az adataid letöltése és a fiókod törlése."
+          ]
+        },
+        {
+          "id": "admin",
+          "heading": "Adminisztrátoroknak",
+          "items": [
+            "Felhasználók: játékvezetők felvétele, regisztrációk jóváhagyása vagy elutasítása, fiókok kezelése.",
+            "Nevek: a listák, amikből a Lepj meg! gomb nevet választ a játékosoknak, nyelvenként egy."
+          ]
+        }
+      ]
+    },
+    "faq": {
+      "title": "Gyakori kérdések",
+      "items": [
+        { "question": "Kell a játékosoknak fiók vagy alkalmazás?", "answer": "Nem. Egy böngésző és a PIN elég." },
+        { "question": "Hányan csatlakozhatnak?", "answer": "Egy játékba legfeljebb 60-an." },
+        { "question": "Mit tárol a Quizmoo a játékosokról?", "answer": "Csak a beírt becenevet, az avatart, a csapatot és a válaszokat. E-mail-címet, telefonszámot vagy IP-címet nem." },
+        { "question": "Elaludt egy játékos telefonja. Elvesztek a pontjai?", "answer": "Nem. Ha ugyanazon a telefonon újra megnyitja a játékot, a pontjaival együtt visszakerül." },
+        { "question": "Csatlakozhat valaki a kezdés után?", "answer": "Csak ha be van kapcsolva a Késve is be lehet szállni beállítás, és a csatlakozás nincs lezárva. A korábbi kérdésekért nem kap pontot." },
+        { "question": "Kipróbálhatom a kvízt az esemény előtt?", "answer": "Igen. A szerkesztő telefonos előnézete végigjátssza az egész kvízt, vagy indíts egy játékot, és csatlakozz a saját telefonodról." }
+      ]
+    }
+  },
+  "tour": {
+    "next": "Tovább",
+    "back": "Vissza",
+    "done": "Értem",
+    "close": "Bemutató bezárása",
+    "progress": "{{current}}. lépés / {{total}}",
+    "moreHelp": "Erről bővebben a Súgóban",
+    "home": {
+      "welcome": { "title": "Üdv a Quizmoo-ban!", "body": "Egy gyors körbevezetés: mit csinálhatsz itt, és mit hol találsz. Bármikor bezárhatod, a ? gombbal újra előhozod." },
+      "newQuiz": { "title": "Készíts kvízt", "body": "Itt kezdhetsz új kvízt. Kérdések, körök, képek: minden a szerkesztőben van." },
+      "recent": { "title": "A kvízeid", "body": "Amiket legutóbb szerkesztettél. Nyisd meg, hogy szerkeszd, vagy nyomd meg az Indítást, és játssz vele." },
+      "nav": { "title": "Itt mindent megtalálsz", "body": "A kvízeid, a játékaid és az eredményeik mindig egy kattintásra vannak." },
+      "account": { "title": "A beállításaid", "body": "Alap játékbeállítások, gyors üzenetek, a logód, és hogy mi újság a Quizmoo-ban." },
+      "help": { "title": "Elakadtál?", "body": "Ezzel a gombbal bármelyik oldal bemutatóját újra megnézheted, és itt nyílik a Súgó is, ahol mindent elmagyarázunk." }
+    },
+    "quizzes": {
+      "newQuiz": { "title": "Új kvíz", "body": "Kezdj egy üres kvízzel." },
+      "import": { "title": "Hozz kérdéseket", "body": "Add hozzá a próbakvízt, hogy lásd, hogy néz ki egy kész kvíz, vagy importálj kérdéseket táblázatból vagy Quizmoo-fájlból." },
+      "search": { "title": "Keresd meg", "body": "Keress és rendezz a kvízeid között. A Kijelöléssel egyszerre többnek is átállíthatod a beállításait, vagy törölheted őket." },
+      "card": { "title": "Szerkeszd vagy indítsd", "body": "A Szerkesztés megnyitja a szerkesztőt. Az Indítás új játékot kezd: átnézed a beállításait, aztán megosztod a PIN-t a játékosokkal." },
+      "more": { "title": "További műveletek", "body": "Másold le a kvízt, töltsd le táblázatként vagy Quizmoo-fájlként, vagy töröld." }
+    },
+    "editor": {
+      "title": { "title": "Adj neki nevet", "body": "A játékosok csatlakozáskor látják a címet. Minden változtatást magától mentünk." },
+      "list": { "title": "A kérdéseid", "body": "Válassz ki egy kérdést, hogy szerkeszd, vagy húzd arrébb. A körök saját cím alá gyűjtik a kérdéseket." },
+      "add": { "title": "Adj hozzá kérdéseket", "body": "Adj hozzá kérdést vagy kört. Először a kérdés típusát választod ki: feleletválasztós, igaz-hamis, beírós, szám vagy sorrend." },
+      "inGame": { "title": "Játékban vagy sem", "body": "Kapcsold ki a kérdést, és a következő játékból kimarad, törölni sem kell." },
+      "save": { "title": "Magától ment", "body": "Itt látod, hogy minden el van-e mentve. Ha valamit javítani kell, innen egy gombbal odaugorhatsz." },
+      "preview": { "title": "Nézd meg telefonon", "body": "Így látják a játékosok a kérdést. Itt végig is játszhatod az egész kvízt." },
+      "settings": { "title": "Kvíz beállításai", "body": "Időzítés, pontozás, csapatok, a kinézet és a saját arculatod. A kvíz minden játéka ezekkel indul." },
+      "play": { "title": "Mehet?", "body": "Az Indítás játékot kezd ezzel a kvízzel. A beállításait még átírhatod arra az egy játékra." }
+    },
+    "newGame": {
+      "tabs": { "title": "Ennek a játéknak a beállításai", "body": "A kvízből jönnek. Amit itt átírsz, csak erre a játékra érvényes, a kvíz marad, ahogy volt." },
+      "when": { "title": "Most vagy később", "body": "Indítsd most, vagy időzítsd későbbre: a játékosok akkor látják, mikor kezdődik." },
+      "create": { "title": "Hozd létre a játékot", "body": "Kapsz egy PIN-t és egy QR-kódot a játékosoknak, a játék pedig a váróteremben vár, amíg el nem indítod." }
+    },
+    "lobby": {
+      "join": { "title": "Engedd be a játékosokat", "body": "A játékosok megnyitják a Quizmoo-t a telefonjukon, és beírják ezt a PIN-t, vagy beolvassák a QR-kódot." },
+      "projector": { "title": "Mutasd nagyban", "body": "Új ablakban nyitja meg a kivetítős nézetet: húzd át a kivetítőre vagy a tévére. Először a PIN-t mutatja, aztán a kérdéseket." },
+      "lock": { "title": "Csukd be az ajtót", "body": "Ha mindenki bent van, zárd le a csatlakozást, és senki más nem léphet be." },
+      "players": { "title": "Ki van itt", "body": "Ahogy csatlakoznak, itt jelennek meg a játékosok. Ha mindenki bent van, nyomd meg a Startot." },
+      "message": { "title": "Szólj mindenkinek", "body": "Küldj rövid üzenetet minden telefonra és a kivetítőre, például a szünetről." }
+    },
+    "running": {
+      "primary": { "title": "Ami most jön", "body": "Ez a gomb mindig a következő lépést teszi meg: lezárja a kérdést, megmutatja a válaszokat, az állást, a következő kérdést." },
+      "controls": { "title": "Kell még idő?", "body": "Állítsd meg a kérdést, adj hozzá 30 másodpercet, vagy hagyd ki." },
+      "board": { "title": "Ki mit válaszolt", "body": "Itt jelenik meg minden játékos válasza, ahogy beérkezik. Rejtsd el a válaszokat, ha a képernyőd ki van vetítve." },
+      "panels": { "title": "Oldalsó panelek", "body": "Állás, üzenetek, játékosok és a kérdések, kéznél a játék alatt." },
+      "end": { "title": "Játék vége", "body": "Mutasd meg most a dobogót, vagy zárd le a játékot nélküle." }
+    },
+    "results": {
+      "summary": { "title": "Hogy sikerült", "body": "A nyertesek, a fő számok, a legkönnyebb és a legnehezebb kérdés." },
+      "tabs": { "title": "Minden részlet", "body": "Minden játékos és csapat válaszai és pontjai, és hogy hogyan alakult egy-egy kérdés." },
+      "export": { "title": "Vidd magaddal", "body": "Töltsd le az eredményeket táblázatként." }
+    },
+    "settings": {
+      "tabs": { "title": "A beállításaid", "body": "Alap játékbeállítások, gyors üzenetek, a saját arculatod és a fiókod, mind külön fülön." },
+      "defaults": { "title": "Alap játékbeállítások", "body": "Minden új kvíz ezekkel a beállításokkal indul. Kvízenként még átírhatod őket." },
+      "questions": { "title": "Új kérdések", "body": "Az időkorlát és a pontszám, amivel az új kérdések indulnak." }
+    },
+    "playerLobby": {
+      "card": { "title": "Bent vagy!", "body": "Várj itt, amíg a játékvezető elindítja a játékot. Hagyd nyitva ezt az oldalt." },
+      "team": { "title": "A csapatod", "body": "A csapatod és a tagjai. A válaszaid a csapatodnak is számítanak." },
+      "about": { "title": "A játékról", "body": "Hány kérdés lesz, mennyi időd van egy-egyre, és hogyan jár a pont." },
+      "answering": { "title": "Így játszol", "body": "A kérdések a telefonodon jelennek meg. Koppints a válaszodra, mielőtt lejár az idő: a jó válasz pontot ér, a gyors még többet." },
+      "menu": { "title": "Beállítások", "body": "Itt állíthatod át a nyelvet, vagy kapcsolhatsz sötét módra. Innen ki is léphetsz a játékból." }
+    }
   },
   "quizFile": {
     "importTitle": "Importálj egy kvízt",

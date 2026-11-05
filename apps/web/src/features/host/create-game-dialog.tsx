@@ -14,6 +14,7 @@ import { cn } from '@/lib/cn'
 import { quizMinutes } from '@/lib/game-length'
 import { defaultStart, latestStart, scheduleError } from '@/lib/schedule'
 import { hostSettingsQueryOptions } from '../settings/host-settings'
+import { usePageTour } from '../tour/use-tour'
 import { BrandingFields } from './branding-fields'
 import {
   GameSettingsForm,
@@ -68,6 +69,7 @@ export function CreateGameDialog({
   length?: GameLength | undefined
 }) {
   const { t } = useTranslation()
+  usePageTour('newGame')
   const startsAtId = useId()
   // What "Changed for this game" and "Reset" compare with: the quiz's settings, set up for a game.
   const [defaults] = useState(() => newGameSettings(quizSettings))
@@ -147,6 +149,7 @@ export function CreateGameDialog({
              * group's summary. A group changed for this game gets a dot (the panel says what and offers Reset).
              */}
             <TabsList
+              data-tour="game-tabs"
               aria-label={t('host.create.groupsHelp')}
               className={cn(
                 'h-auto! shrink-0 gap-1 rounded-2xl p-1.5',
@@ -272,7 +275,7 @@ export function CreateGameDialog({
               <fieldset className="flex items-center md:flex-1">
                 <legend className="sr-only">{t('host.create.when')}</legend>
                 {/* One primary pill springs between Now and Later, like the sidebar's highlight. */}
-                <div className="relative grid grid-cols-2 rounded-xl bg-muted p-1">
+                <div data-tour="game-when" className="relative grid grid-cols-2 rounded-xl bg-muted p-1">
                   <span
                     aria-hidden="true"
                     className={cn(
@@ -304,7 +307,7 @@ export function CreateGameDialog({
                   {t('common.cancel')}
                 </Button>
                 {/* Narrow phones drop the icon, so a longer label ("Játék létrehozása") still fits beside Now / Later. */}
-                <Button type="submit" className="flex-1 max-[26rem]:[&>svg]:hidden md:flex-none" disabled={pending || error !== null || lockError !== null}>
+                <Button type="submit" data-tour="game-create" className="flex-1 max-[26rem]:[&>svg]:hidden md:flex-none" disabled={pending || error !== null || lockError !== null}>
                   {later ? <CalendarClockIcon aria-hidden="true" /> : <PlayIcon aria-hidden="true" />}
                   {later ? t('host.create.scheduleSubmit') : t('host.create.submit')}
                 </Button>

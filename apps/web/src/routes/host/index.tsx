@@ -26,6 +26,7 @@ import { CreateGameDialog } from '@/features/host/create-game-dialog'
 import { dashboardGames } from '@/features/host/dashboard'
 import { gameSummaryQueryOptions, quizzesQueryOptions, type QuizSummary } from '@/features/host/queries'
 import { useNewQuiz, useStartGame } from '@/features/host/quiz-actions'
+import { usePageTour } from '@/features/tour/use-tour'
 import { cn } from '@/lib/cn'
 import { quizMinutes } from '@/lib/game-length'
 import { stagger } from '@/lib/motion'
@@ -52,6 +53,7 @@ function HostHome() {
   const sorted = games.data ? dashboardGames(games.data, Date.now()) : null
   const recentQuizzes = (quizzes.data ?? []).slice(0, 4)
   const loading = quizzes.isPending || games.isPending
+  usePageTour('home', !loading)
 
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-5">
@@ -60,7 +62,7 @@ function HostHome() {
           <h1 className="text-3xl font-black tracking-tight wrap-break-word">{t('dashboard.greeting', { name: user.username })}</h1>
           <p className="text-muted-foreground">{t('dashboard.subtitle')}</p>
         </div>
-        <Button onClick={() => create.mutate()} disabled={create.isPending}>
+        <Button data-tour="new-quiz" onClick={() => create.mutate()} disabled={create.isPending}>
           <PlusIcon aria-hidden="true" />
           {t('host.newQuiz')}
         </Button>
@@ -127,7 +129,7 @@ function HostHome() {
           )}
 
           <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-2">
-            <Section icon={PencilIcon} title={t('dashboard.recentQuizzes')} more={quizzes.data.length > 0 ? { to: '/host/quizzes', label: t('dashboard.allQuizzes') } : undefined}>
+            <Section tour="recent-quizzes" icon={PencilIcon} title={t('dashboard.recentQuizzes')} more={quizzes.data.length > 0 ? { to: '/host/quizzes', label: t('dashboard.allQuizzes') } : undefined}>
               {recentQuizzes.length === 0 ? (
                 <Empty icon={SparklesIcon} text={t('dashboard.noQuizzes')}>
                   <Button onClick={() => create.mutate()} disabled={create.isPending}>
@@ -250,16 +252,20 @@ function Section({
   title,
   more,
   highlight = false,
+  tour,
   children,
 }: {
   icon: ComponentType<{ className?: string }>
   title: string
   more?: { to: '/host/quizzes' | '/host/games'; label: string } | undefined
   highlight?: boolean
+  /** The tutorial tour's anchor (`data-tour`). */
+  tour?: string
   children: ReactNode
 }) {
   return (
     <section
+      data-tour={tour}
       className={cn(
         'flex animate-fade-up flex-col gap-3 rounded-2xl border bg-card p-4 shadow-soft sm:p-5',
         highlight && 'border-2 border-primary bg-[color-mix(in_srgb,var(--primary)_9%,var(--card))] shadow-[0_4px_0_0_var(--primary-edge)]',

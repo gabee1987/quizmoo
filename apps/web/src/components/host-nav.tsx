@@ -5,6 +5,7 @@ import {
   HistoryIcon,
   HouseIcon,
   LayoutGridIcon,
+  LifeBuoyIcon,
   LogOutIcon,
   MessageSquareHeartIcon,
   ScaleIcon,
@@ -93,7 +94,7 @@ export function HostNav({ user }: { user: User }) {
             </div>
           )}
         </SlidingItems>
-        <div className="mt-4 flex flex-col gap-1 border-t pt-4">
+        <div data-tour="host-account" className="mt-4 flex flex-col gap-1 border-t pt-4">
           <Hint label={t('nav.signedInAs')} side="right">
             <p className="flex items-center gap-2 px-3 pb-1 text-sm text-muted-foreground">
               <UserRoundIcon className="size-4" aria-hidden="true" />
@@ -115,6 +116,13 @@ export function HostNav({ user }: { user: User }) {
             {t('whatsNew.title')}
             {unseen && <UnseenDot />}
           </Link>
+          <Link
+            to="/help"
+            className="group flex min-h-11 items-center gap-3 rounded-xl px-3 font-semibold text-muted-foreground transition-colors duration-300 outline-none hover:bg-muted hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring"
+          >
+            <LifeBuoyIcon className="size-5 transition-transform duration-500 ease-spring group-hover:rotate-90" />
+            {t('help.nav')}
+          </Link>
           {feedbackUrl && (
             <a
               href={feedbackUrl}
@@ -135,7 +143,7 @@ export function HostNav({ user }: { user: User }) {
             <LogOutIcon className="size-5" />
             {t('auth.logout')}
           </button>
-          <LegalLinks className="mt-3 [&_ul]:justify-start [&_ul]:px-3" />
+          <LegalLinks help={false} className="mt-3 [&_ul]:justify-start [&_ul]:px-3" />
         </div>
       </nav>
 
@@ -144,7 +152,7 @@ export function HostNav({ user }: { user: User }) {
         aria-label={t('nav.label')}
         className="fixed inset-x-0 bottom-0 z-40 border-t bg-card/95 pb-[env(safe-area-inset-bottom)] shadow-soft backdrop-blur lg:hidden"
       >
-        <ul className="mx-auto flex max-w-lg">
+        <ul data-tour="host-nav" className="mx-auto flex max-w-lg">
           {main.map((item) => (
             <li key={item.to} className="flex-1">
               <Link to={item.to} activeOptions={{ exact: item.exact, includeSearch: false }} className={tabClass}>
@@ -153,7 +161,7 @@ export function HostNav({ user }: { user: User }) {
               </Link>
             </li>
           ))}
-          <li className="flex-1">
+          <li data-tour="host-account" className="flex-1">
             <DropdownMenu>
               <DropdownMenuTrigger className={cn(tabClass, 'w-full')}>
                 <TabIcon icon={UserRoundIcon} dot={unseen} />
@@ -190,6 +198,12 @@ export function HostNav({ user }: { user: User }) {
                     <SparklesIcon />
                     {t('whatsNew.title')}
                     {unseen && <UnseenDot />}
+                  </Link>
+                </MenuLink>
+                <MenuLink>
+                  <Link to="/help">
+                    <LifeBuoyIcon />
+                    {t('help.nav')}
                   </Link>
                 </MenuLink>
                 {feedbackUrl && (
@@ -261,7 +275,7 @@ function SlidingItems({ children }: { children: ReactNode }) {
   }, [spot, moving])
 
   return (
-    <div ref={list} className="relative flex flex-col gap-1">
+    <div ref={list} data-tour="host-nav" className="relative flex flex-col gap-1">
       <span
         aria-hidden="true"
         className={cn(

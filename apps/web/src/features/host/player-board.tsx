@@ -76,7 +76,7 @@ export function PlayerBoard({ host, className }: { host: HostSnapshot; className
     }
   }, [box, options.view, size, fit, steps])
   return (
-    <section aria-labelledby="board-title" className={cn('flex min-h-0 flex-col gap-2 rounded-2xl border bg-card p-3 shadow-soft', className)}>
+    <section aria-labelledby="board-title" data-tour="player-board" className={cn('flex min-h-0 flex-col gap-2 rounded-2xl border bg-card p-3 shadow-soft', className)}>
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
         <h2 id="board-title" className="text-lg font-extrabold">
           {t('host.board.title')}

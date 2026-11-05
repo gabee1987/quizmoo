@@ -51,6 +51,7 @@ import { BatchEditDialog, type BatchPatch } from '../../features/host/batch-edit
 import { CreateGameDialog } from '../../features/host/create-game-dialog'
 import { ImportQuizDialog } from '../../features/host/import-quiz-dialog'
 import { exportQuiz } from '../../features/host/quiz-files'
+import { usePageTour } from '../../features/tour/use-tour'
 import { apiFetch } from '../../lib/api'
 
 export const Route = createFileRoute('/host/quizzes/')({
@@ -63,6 +64,7 @@ function QuizList() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const quizzes = useQuery(quizzesQueryOptions)
+  usePageTour('quizzes', quizzes.isSuccess)
   const [creating, setCreating] = useState<QuizSummary | null>(null)
   const [deleting, setDeleting] = useState<QuizSummary | null>(null)
   const [search, setSearch] = useState('')
@@ -170,16 +172,18 @@ function QuizList() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-3xl font-black tracking-tight">{t('host.title')}</h1>
         <div className="flex flex-wrap gap-2">
-          <Button variant="outline" onClick={() => addStarter.mutate()} disabled={addStarter.isPending}>
-            <GiftIcon aria-hidden="true" />
-            {/* Icon only on phones, so the three buttons keep to one row. */}
-            <span className="max-sm:sr-only">{t('host.starter.add')}</span>
-          </Button>
-          <Button variant="outline" onClick={() => setImporting(true)}>
-            <UploadIcon aria-hidden="true" />
-            {t('quizFile.import')}
-          </Button>
-          <Button onClick={() => create.mutate()} disabled={create.isPending}>
+          <div data-tour="quiz-import" className="flex gap-2">
+            <Button variant="outline" onClick={() => addStarter.mutate()} disabled={addStarter.isPending}>
+              <GiftIcon aria-hidden="true" />
+              {/* Icon only on phones, so the three buttons keep to one row. */}
+              <span className="max-sm:sr-only">{t('host.starter.add')}</span>
+            </Button>
+            <Button variant="outline" onClick={() => setImporting(true)}>
+              <UploadIcon aria-hidden="true" />
+              {t('quizFile.import')}
+            </Button>
+          </div>
+          <Button data-tour="new-quiz" onClick={() => create.mutate()} disabled={create.isPending}>
             <PlusIcon aria-hidden="true" />
             {t('host.newQuiz')}
           </Button>
@@ -206,7 +210,7 @@ function QuizList() {
       )}
 
       {(quizzes.data?.length ?? 0) > 1 && (
-        <div className="flex flex-wrap gap-2">
+        <div data-tour="quiz-search" className="flex flex-wrap gap-2">
           <div className="relative min-w-0 flex-1 basis-60">
             <SearchIcon className="pointer-events-none absolute top-1/2 left-3 size-5 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
             <Input
@@ -318,7 +322,7 @@ function QuizList() {
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Hint label={t('host.moreActions', { title: quiz.title })}>
-                      <Button variant="ghost" size="icon-sm" aria-label={t('host.moreActions', { title: quiz.title })}>
+                      <Button variant="ghost" size="icon-sm" aria-label={t('host.moreActions', { title: quiz.title })} data-tour="quiz-more">
                         <EllipsisVerticalIcon aria-hidden="true" />
                       </Button>
                     </Hint>
@@ -372,7 +376,7 @@ function QuizList() {
               </Badge>
             </div>
             {!selecting && (
-              <div className="mt-auto flex gap-2">
+              <div data-tour="quiz-card" className="mt-auto flex gap-2">
                 <Button asChild variant="outline" className="flex-1">
                   <Link to="/host/quizzes/$quizId" params={{ quizId: quiz.id }}>
                     <PencilIcon aria-hidden="true" />

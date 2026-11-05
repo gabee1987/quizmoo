@@ -40,7 +40,7 @@ Finished plans are deleted once their branch is merged: `CHANGELOG.md` records w
 | 31 | The host's running-game screen: standings midgame, names in full, controls in view | `feature/host-game-screen` | done |
 | 32 | Cow antics: random face gags, moo bubbles and seasonal looks | `feature/cow-antics` | done |
 | 33 | Patch notes in the app | `feature/patch-notes` | done |
-| 34 | Help page and interactive tutorial with hints | `feature/help-and-tutorial` | planned |
+| 34 | [Tutorial tours and a help page](phase-34-tutorial-and-help.md) | `feature/tooltips-and-tutorial` | done |
 | 35 | Screen lock for the host's game screen | `feature/host-game-screen` | done |
 | 36 | E-mail to admins about new sign-ups | `feature/signup-emails` | done |
 | 37 | Fixes in the patch notes, kept for every release (with small fixes, released as 1.10.1) | `fix/small-fixes` | done |

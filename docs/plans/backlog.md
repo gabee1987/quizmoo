@@ -83,6 +83,7 @@ Collected while testing phases 9 to 12. Effort as above.
 - Every text reviewed for one voice, rounds named alike everywhere, the legal pages aligned between the languages (phase 54).
 - A 20-question starter quiz for every new host, and a button to add it again (phase 55).
 - Tooltips in the app's own bubble instead of the browser's `title`, on hover and keyboard focus (phase 57).
+- Tutorial tours on every main host page and in the players' lobby, and a help page for everyone (phase 34).
 
 ### Open
 
@@ -93,7 +94,6 @@ Collected while testing phases 9 to 12. Effort as above.
 | Hosting without an account (after the MVP) | Feature | L | A guest host with a short-lived identity, tighter limits, the terms checkbox, and "Keep my quizzes" to turn it into an account. Design and open questions in [later-guest-hosting.md](later-guest-hosting.md). Requested 20 October 2026. |
 | Rooms with their own admin | Feature | L | Each room (workspace) has an admin; only its members see and edit its quizzes and games. Today every quiz and game belongs to one host account. Needs a rooms table, membership and roles, permission checks on every route and socket attach, migration of existing quizzes. |
 | Hints to selected players | Feature | M | Messages or hints to chosen players instead of everyone (host-to-player messages were out of scope in phase 12). The live view of the running game itself was done in phase 43; a tile on the board could be where the host picks the players. |
-| Help page and tutorial (phase 34) | Feature | L | A full help page on how the app works, plus an interactive first-run tutorial with hints on the host pages. To decide in the plan: which flows the tour covers, whether it can be replayed, whether players get hints too. From the 20 October 2026 notes; asked again on 24 October 2026: a full tutorial with interactive hints and help, plus a dedicated help page with everything about how the app works. |
 | Sounds for key moments | Feature | M | Short playful sounds for important events and messages, switched on per quiz. Generated in the browser (Web Audio) to avoid licensed audio files; projector only, phones silent by default. Opt-in on the projector only; licensed music files would need their own review. |
 
 ### From the first production test (24 October 2026)

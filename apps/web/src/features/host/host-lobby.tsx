@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { QrCode } from '@/components/qr-code'
 import { Button } from '@/components/ui/button'
+import { usePageTour } from '@/features/tour/use-tour'
 import { useTimeReached } from '@/lib/clock'
 import { cn } from '@/lib/cn'
 import { openProjector } from '@/lib/projector'
@@ -37,6 +38,7 @@ export function HostLobby({
   send: (command: HostCommand) => Promise<boolean>
 }) {
   const { t } = useTranslation()
+  usePageTour('lobby')
   const open = useTimeReached(host.scheduledAt, clockOffset)
   const navigate = useNavigate()
   // Nothing has been played yet: no podium to choose, the game is closed and everyone sent away.
@@ -65,15 +67,19 @@ export function HostLobby({
             {t('host.game.start')}
           </Button>
         )}
-        <LobbyPlayers
-          host={host}
-          clockOffset={clockOffset}
-          onKick={(playerId) => void send({ type: 'kick', playerId })}
-          onTeamMode={(mode, teamId) => void send({ type: 'teamMode', mode, ...(teamId && { teamId }) })}
-          onCaptain={(playerId) => void send({ type: 'captain', playerId })}
-          teamActions={teamActions(send)}
-        />
-        <MessageBox announcement={host.announcement} quickMessages={host.quickMessages} clockOffset={clockOffset} onCommand={send} />
+        <div data-tour="lobby-players">
+          <LobbyPlayers
+            host={host}
+            clockOffset={clockOffset}
+            onKick={(playerId) => void send({ type: 'kick', playerId })}
+            onTeamMode={(mode, teamId) => void send({ type: 'teamMode', mode, ...(teamId && { teamId }) })}
+            onCaptain={(playerId) => void send({ type: 'captain', playerId })}
+            teamActions={teamActions(send)}
+          />
+        </div>
+        <div data-tour="message-box">
+          <MessageBox announcement={host.announcement} quickMessages={host.quickMessages} clockOffset={clockOffset} onCommand={send} />
+        </div>
         <Button variant="outline" className="self-start" onClick={() => void endGame()}>
           {t('host.game.end')}
         </Button>
@@ -111,7 +117,7 @@ function JoinStage({
           <HostToastsToggle />
         </div>
       </div>
-      <div className="flex flex-col items-center gap-5 @lg:flex-row @lg:items-center">
+      <div data-tour="join-card" className="flex flex-col items-center gap-5 @lg:flex-row @lg:items-center">
         {/* Locked: the code stays for the host to read, faded, with the lock on top. */}
         {joinUrl && (
           <div className="relative w-full max-w-52 shrink-0 @lg:max-w-64">
@@ -158,6 +164,7 @@ function JoinStage({
               href={`/screen/${host.pin}`}
               target="_blank"
               rel="noreferrer"
+              data-tour="open-projector"
               onClick={(e) => {
                 e.preventDefault()
                 openProjector(host.pin)
@@ -169,7 +176,7 @@ function JoinStage({
           </Button>
         </div>
       </div>
-      <div className="border-t pt-1">
+      <div data-tour="lock-joining" className="border-t pt-1">
         <SwitchRow
           label={t('host.game.lockJoining')}
           description={t(host.joinLocked ? 'host.game.joiningLockedHelp' : 'host.game.joiningOpenHelp')}

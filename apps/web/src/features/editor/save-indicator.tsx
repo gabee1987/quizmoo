@@ -25,7 +25,7 @@ export function SaveIndicator({ status, onRetry }: { status: SaveStatus; onRetry
     error: <CircleAlertIcon className="size-4" aria-hidden="true" />,
   }[status]
   return (
-    <div className="flex items-center gap-1">
+    <div data-tour="save-indicator" className="flex items-center gap-1">
       <span
         role="status"
         className={cn('flex min-h-9 items-center gap-1.5 rounded-full px-3 text-sm font-bold whitespace-nowrap', styles[status])}
