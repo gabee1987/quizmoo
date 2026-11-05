@@ -15,8 +15,9 @@ const APP_DEFAULTS: QuestionDefaults = { timeLimitSec: 20, points: 1000 }
 
 /**
  * A fresh question of `type` with the quiz's time and points (the app's 20 s and 1000 points without
- * them) and its first option correct. A poll gives no points, and putting things in order gets at
- * least 30 s.
+ * them) and its first option correct. A poll gives no points, putting things in order gets at
+ * least 30 s, and multiple choice starts with partial credit (the user's choice, phase 59; questions
+ * saved before then have no `scoring` and stay all or nothing).
  */
 export function newQuestion(type: QuestionType, defaults: QuestionDefaults = APP_DEFAULTS): Question {
   const base = { id: newId(), text: '', timeLimitSec: defaults.timeLimitSec, points: defaults.points }
@@ -27,7 +28,7 @@ export function newQuestion(type: QuestionType, defaults: QuestionDefaults = APP
     }
     case 'multiple': {
       const options = emptyOptions()
-      return { ...base, type, options, correctOptionIds: [options[0]!.id] }
+      return { ...base, type, options, correctOptionIds: [options[0]!.id], scoring: 'partial' }
     }
     case 'truefalse':
       return { ...base, type, correct: true }

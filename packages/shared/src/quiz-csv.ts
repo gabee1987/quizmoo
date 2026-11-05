@@ -14,7 +14,7 @@ import {
  * Quiz spreadsheet (CSV): one row per question, written to be edited by hand in Excel,
  * LibreOffice, Google Sheets or a text editor. Rows whose first cell starts with `#` are
  * guidance and ignored, and so is the header row (first cell "type" or "típus").
- * Columns, by position: type, question, answer 1–6, correct, time, points, tolerance, colour.
+ * Columns, by position: type, question, answer 1–6, correct, time, points, tolerance, colour, scoring.
  * A `group` row starts a group (title in the question column, info in answer 1, the group's
  * time and points); the questions below are in it until a `group-end` row or the next group.
  */
@@ -26,10 +26,10 @@ export const MAX_ANSWER_COLUMNS = 6
 /** Larger files are not a quiz of at most `MAX_QUESTIONS` questions; refuse them before parsing. */
 export const MAX_CSV_BYTES = 1024 * 1024
 
-export type CsvColumn = 'type' | 'question' | 'answers' | 'correct' | 'time' | 'points' | 'tolerance' | 'color'
-// The colour came last (after the 12 first columns), so older files still read.
-const at = { type: 0, question: 1, answers: 2, correct: 8, time: 9, points: 10, tolerance: 11, color: 12 } as const
-export const CSV_COLUMN_COUNT = 13
+export type CsvColumn = 'type' | 'question' | 'answers' | 'correct' | 'time' | 'points' | 'tolerance' | 'color' | 'scoring'
+// New columns go last (the colour after the 12 first ones, then the scoring), so older files still read.
+const at = { type: 0, question: 1, answers: 2, correct: 8, time: 9, points: 10, tolerance: 11, color: 12, scoring: 13 } as const
+export const CSV_COLUMN_COUNT = 14
 
 /** The type words, per language. Reading accepts both languages, any case, with or without accents, spaces or dashes. */
 export const csvTypeWords: Record<QuestionType, Record<CsvLanguage, string>> = {
@@ -57,6 +57,14 @@ export const csvColorWords: Record<TagColor, Record<CsvLanguage, string>> = {
   purple: { en: 'purple', hu: 'lila' },
   pink: { en: 'pink', hu: 'rózsaszín' },
 }
+/**
+ * A multiple-choice question's scoring words, read like the type words. An empty cell (and every
+ * file from before the column) is all or nothing, so re-importing an old export keeps its scoring.
+ */
+export const csvScoringWords: Record<'all' | 'partial', Record<CsvLanguage, string>> = {
+  partial: { en: 'partial', hu: 'részleges' },
+  all: { en: 'all', hu: 'mind' },
+}
 const trueWords: Record<CsvLanguage, string> = { en: 'true', hu: 'igaz' }
 const falseWords: Record<CsvLanguage, string> = { en: 'false', hu: 'hamis' }
 
@@ -76,6 +84,11 @@ const typeByWord = new Map<string, QuestionType>(
 const colorByWord = new Map<string, TagColor>(
   Object.entries(csvColorWords).flatMap(([color, words]) => [words.en, words.hu].map((word) => [fold(word), color as TagColor] as const)),
 )
+const scoringByWord = new Map<string, 'all' | 'partial'>(
+  Object.entries(csvScoringWords).flatMap(([scoring, words]) =>
+    [words.en, words.hu].map((word) => [fold(word), scoring as 'all' | 'partial'] as const),
+  ),
+)
 const groupWords = new Set([csvGroupWords.group.en, csvGroupWords.group.hu].map(fold))
 const groupEndWords = new Set([csvGroupWords.end.en, csvGroupWords.end.hu].map(fold))
 /** The header row is recognised by its first cell. */
@@ -91,7 +104,7 @@ export interface CsvTexts {
   language: CsvLanguage
   /** The guidance lines written above the header, without the leading `#`. */
   guide: string[]
-  /** The header row's 12 labels. */
+  /** The header row's labels, one per column. */
   headers: string[]
 }
 
@@ -153,6 +166,8 @@ function questionCells(question: Question, language: CsvLanguage): string[] {
     case 'multiple':
       // "1, 3" with a space: Excel reads "1,3" as a number in some languages.
       cells[at.correct] = question.correctOptionIds.map(position).join(', ')
+      // Empty for a question saved before the setting: it reads back as all or nothing all the same.
+      if (question.scoring) cells[at.scoring] = csvScoringWords[question.scoring][language]
       break
     case 'truefalse':
       cells[at.correct] = question.correct ? trueWords[language] : falseWords[language]
@@ -341,10 +356,15 @@ function rowToQuestion(type: QuestionType, cells: string[], row: number): { ques
       if (!pointsAtAnswers || positions.length !== 1) problems.push({ row, code: 'correct', type })
       Object.assign(candidate, { options, correctOptionId: positions[0] })
       break
-    case 'multiple':
+    case 'multiple': {
       if (!pointsAtAnswers) problems.push({ row, code: 'correct', type })
       Object.assign(candidate, { options, correctOptionIds: [...new Set(positions)] })
+      const word = cells[at.scoring]!
+      const scoring = word === '' ? undefined : scoringByWord.get(fold(word))
+      if (word !== '' && !scoring) problems.push({ row, code: 'scoring', type })
+      if (scoring) candidate.scoring = scoring
       break
+    }
     case 'poll':
     case 'order':
       candidate.options = options

@@ -190,6 +190,17 @@ export function QuestionForm({
           />
         )}
       </div>
+      {question.type === 'multiple' && (
+        <div className="flex flex-col gap-1">
+          <SelectField
+            label={t('editor.scoring')}
+            value={question.scoring ?? 'all'}
+            options={(['partial', 'all'] as const).map((value) => ({ value, label: t(`editor.scoringOptions.${value}`) }))}
+            onChange={(scoring) => onChange({ ...question, scoring })}
+          />
+          <p className="text-sm text-muted-foreground">{t(`editor.scoringHelp.${question.scoring ?? 'all'}`)}</p>
+        </div>
+      )}
     </div>
   )
 }

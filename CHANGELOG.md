@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+### Partial credit for multiple choice (phase 59)
+- A multiple-choice question can give part of its points: each right answer picked earns its share, each wrong one cancels a right one, never below zero (`partialCredit`). With 2 right answers, 1 of them earns half; a right and a wrong pick earn nothing. The speed bonus applies on top.
+- Each multiple-choice question chooses its scoring in the editor, "Partial credit" or "All or nothing", next to its points. New questions start on Partial credit; every question saved before keeps scoring all or nothing (`scoring` missing), so old quizzes, games and files score exactly as before. The starter quiz's two multiple-choice questions use partial credit.
+- A partly right answer is its own verdict (`correct: 'partial'`) with its own colour and mark: "Partly right, 2 of 3 right answers" on the phone's reveal, its review card and stats, the host's board (tile, counts), the review panel, the projector's reveal and recap, and the results page (a "Partly right" column and count). It neither continues nor breaks the streak and earns no streak bonus; the best streak at the end follows the same rule. "Share right" and the awards count fully right answers only.
+- In a majority team (and when a captain does not confirm) a partial-credit question is decided per option: an option is in the team's answer when most of the team picked it.
+- The phone's question screen explains the rule; the help page's multiple choice and points entries too.
+- Spreadsheets have a 14th column, scoring (`partial`/`részleges` or `all`/`mind`); an empty cell and older files mean all or nothing. Batch edit has a "Multiple-choice scoring" group. Quizmoo files carry the setting with no format change.
+
+### Fixed
+- The front page and the other public pages no longer log a 401 error in the browser for every visitor: the logo asks the new `GET /api/auth/session` (always 200) whether a host is logged in, instead of `/api/auth/me` (a 1.12.0 regression that failed seven e2e specs).
+
 ## 1.12.0 – 2026-11-05
 
 ### Tutorial tours and a help page (phase 34)

@@ -1,10 +1,10 @@
-import type { PlayerSnapshot, TeamLive } from '@quizmoo/shared'
+import { rightPicks, type PlayerSnapshot, type TeamLive } from '@quizmoo/shared'
 import { useTranslation } from 'react-i18next'
 import { BetweenQuestions } from '@/components/between-questions'
 import { RoundChip } from '@/components/round-chip'
 import { cn } from '@/lib/cn'
 import { resultsWhen } from '@/lib/results-when'
-import { CheckIcon, CrossIcon } from '../../components/icons'
+import { CheckIcon, CrossIcon, PartialIcon } from '../../components/icons'
 import { RankArrow } from '../../components/rank-arrow'
 import { stagger, useCountUp } from '../../lib/motion'
 import { CorrectAnswer } from '../questions/correct-answer'
@@ -37,8 +37,11 @@ export function Reveal({ snapshot, ungradedTitle }: { snapshot: PlayerSnapshot; 
   let title = t('play.noAnswer')
   if (isPoll) title = answered ? t('play.thanksForVoting') : t('play.noAnswer')
   else if (correct === true) [tone, title] = ['bg-success text-success-foreground', t('play.correct')]
+  else if (correct === 'partial') [tone, title] = ['bg-warning text-warning-foreground', t('play.partlyRight')]
   else if (correct === false) [tone, title] = ['bg-destructive text-destructive-foreground', t('play.wrong')]
   else if (answered) title = ungradedTitle ?? t('play.awaitingGrading')
+  // "2 of 3 right options", from the answer that counted (the team's, for a team).
+  const picks = correct === 'partial' && question && snapshot.myAnswer ? rightPicks(question, snapshot.myAnswer) : null
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-5 text-center">
@@ -74,7 +77,17 @@ export function Reveal({ snapshot, ungradedTitle }: { snapshot: PlayerSnapshot; 
             <CrossIcon className="size-12" />
           </span>
         )}
+        {correct === 'partial' && (
+          <span className="grid size-20 animate-pop place-items-center rounded-full bg-warning-foreground/15" style={stagger(1, 0, 150)}>
+            <PartialIcon className="size-12" />
+          </span>
+        )}
         <h1 className="text-3xl font-black">{title}</h1>
+        {picks && (
+          <p className="animate-pop rounded-full bg-warning-foreground/15 px-4 py-1 font-bold" style={stagger(1, 0, 450)}>
+            {t('play.rightPicks', { right: picks.right, count: picks.of })}
+          </p>
+        )}
         {correct === true && snapshot.lastNearMiss && (
           <p className="animate-pop rounded-full bg-success-foreground/20 px-4 py-1 font-bold" style={stagger(1, 0, 450)}>
             {t('play.closeEnough')}

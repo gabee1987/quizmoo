@@ -87,6 +87,16 @@ describeDb('auth (database)', () => {
     expect(after.json()).toEqual({ error: 'errors.unauthorized' })
   })
 
+  it('tells whether a session is live with 200 either way, and nothing about the user', async () => {
+    const session = (headers: Record<string, string> = {}) => built.app.inject({ method: 'GET', url: '/api/auth/session', headers })
+    const anonymous = await session()
+    expect([anonymous.statusCode, anonymous.json()]).toEqual([200, { loggedIn: false }])
+    const headers = { cookie: sessionCookie(await login('test_host', password)) }
+    expect((await session(headers)).json()).toEqual({ loggedIn: true })
+    await built.app.inject({ method: 'POST', url: '/api/auth/logout', headers })
+    expect((await session(headers)).json()).toEqual({ loggedIn: false })
+  })
+
   it('answers 401 on me without a cookie', async () => {
     const res = await built.app.inject({ method: 'GET', url: '/api/auth/me' })
     expect(res.statusCode).toBe(401)

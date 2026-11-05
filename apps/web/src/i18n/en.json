@@ -447,6 +447,9 @@
       "rightCount_other": "{{count}} right",
       "wrongCount_one": "{{count}} wrong",
       "wrongCount_other": "{{count}} wrong",
+      "partial": "Partly right",
+      "partialCount_one": "{{count}} partly right",
+      "partialCount_other": "{{count}} partly right",
       "missingCount_one": "{{count}} did not answer",
       "missingCount_other": "{{count}} did not answer",
       "teamAnswer": "Team answer: {{answer}}",
@@ -817,7 +820,9 @@
         "flow": "Game flow",
         "flowHelp": "Mode and teams, when answers and the scoreboard show, the countdown, final results",
         "questions": "Every question",
-        "questionsHelp": "Time limit and points of all questions"
+        "questionsHelp": "Time limit and points of all questions",
+        "multipleScoring": "Multiple-choice scoring",
+        "multipleScoringHelp": "Partial credit or all or nothing on every multiple-choice question"
       },
       "deleteTitle_one": "Delete {{count}} quiz?",
       "deleteTitle_other": "Delete {{count}} quizzes?",
@@ -887,6 +892,7 @@
     "paused": "Paused",
     "shownAgain": "shown again",
     "selectAll": "Select every correct answer.",
+    "selectAllPartial": "Select every correct answer. Each right one scores, each wrong one cancels a right one.",
     "confirm": "Confirm",
     "submit": "Send",
     "true": "True",
@@ -927,6 +933,8 @@
     "changeSecondsLeft_one": "You can change it for {{count}} more second",
     "changeSecondsLeft_other": "You can change it for {{count}} more seconds",
     "correct": "Correct!",
+    "partlyRight": "Partly right",
+    "rightPicks": "{{right}} of {{count}} right answers",
     "wrong": "Not this time",
     "closeEnough": "Close enough",
     "noAnswer": "No answer",
@@ -964,6 +972,8 @@
       "yourPlace": "You: rank {{rank}}, {{score}} points",
       "aroundYou": "Around you",
       "rightOf": "{{right}} of {{count}} right",
+      "partlyRight_one": "{{count}} partly right",
+      "partlyRight_other": "{{count}} partly right",
       "factsTitle": "The game in numbers",
       "questions": "Questions",
       "players": "Players",
@@ -1056,6 +1066,7 @@
       "confirmedByName": "Confirmed by {{name}}",
       "votesFor_one": "{{count}} of {{total}} votes",
       "votesFor_other": "{{count}} of {{total}} votes",
+      "perOption": "Every option most of you picked",
       "waitingCaptain": "Waiting for your captain…",
       "suggest": "Pick an answer; your captain decides.",
       "youDecide": "You decide: pick the team's answer and confirm it.",
@@ -1239,6 +1250,15 @@
     "points": "Points",
     "pointsValue_one": "{{count}} point",
     "pointsValue_other": "{{count}} points",
+    "scoring": "Scoring",
+    "scoringOptions": {
+      "partial": "Partial credit",
+      "all": "All or nothing"
+    },
+    "scoringHelp": {
+      "partial": "Each right answer picked earns its share of the points; each wrong one cancels a right one. With 2 right answers, 1 of them earns half.",
+      "all": "Points only for picking exactly the right answers."
+    },
     "moveUp": "Move up",
     "moveDown": "Move down",
     "duplicateQuestion": "Duplicate",
@@ -2267,6 +2287,8 @@
     "noQuestions": "No question has been revealed yet.",
     "questionNumber": "Question {{index}}",
     "correctPercent": "{{percent}}% correct",
+    "partlyRightCount_one": "{{count}} partly right",
+    "partlyRightCount_other": "{{count}} partly right",
     "correctPercentText": "{{share}} of the players got it right",
     "summary": {
       "title": "Summary",
@@ -2289,6 +2311,7 @@
     "team": "Team",
     "score": "Score",
     "correct": "Correct",
+    "partlyRight": "Partly right",
     "members": "Members",
     "sortedAscending": "sorted ascending",
     "sortedDescending": "sorted descending",
@@ -2637,7 +2660,7 @@
         "figure": "A question on a phone: every answer has its own colour and shape, and the bar shows the time left",
         "items": {
           "single": { "text": "Tap the one right option." },
-          "multiple": { "text": "Pick every right option, then send. Only the full set counts." },
+          "multiple": { "text": "Pick every right option, then send. With partial credit each right pick scores and each wrong one cancels a right one; otherwise only the full set counts." },
           "truefalse": { "text": "Judge the statement." },
           "text": { "text": "Type a short answer. Capitals and accents do not matter, and small typos may be accepted if the host allows it." },
           "number": { "text": "Type a number. Some questions accept answers close to it." },
@@ -2649,7 +2672,7 @@
         "heading": "Points",
         "figure": "A right answer to a 1000-point question, given halfway through the time, the third right answer in a row",
         "items": {
-          "right": { "term": "Right answer", "text": "Earns the question's points. A wrong or missing answer earns nothing." },
+          "right": { "term": "Right answer", "text": "Earns the question's points. A partly right answer to a partial-credit question earns its share; a wrong or missing answer earns nothing." },
           "speed": { "text": "A faster right answer earns more. A right answer in the last moment still earns half." },
           "streak": { "text": "Right answers in a row earn extra: +100 from the second, up to +500." }
         }
@@ -2920,6 +2943,7 @@
       "points": "points",
       "tolerance": "tolerance",
       "color": "colour",
+      "scoring": "scoring",
       "emptyGroup": "group"
     },
     "problems": {
@@ -2937,6 +2961,7 @@
       "points": "a whole number from 0 to 5000, or leave it empty.",
       "tolerance": "a number of 0 or more, or leave it empty.",
       "color": "unknown colour. Use one of: {{colors}}, or leave it empty.",
+      "scoring": "write partial or all, or leave it empty (all or nothing).",
       "empty": "No questions in this file. Fill in at least one row below the header.",
       "tooMany": "A quiz holds at most 200 questions. Split the file in two.",
       "group": {
@@ -2959,7 +2984,8 @@
       "time": "time (s)",
       "points": "points",
       "tolerance": "tolerance",
-      "color": "colour"
+      "color": "colour",
+      "scoring": "scoring"
     },
     "guide": [
       "QUIZMOO QUESTIONS: one question per row, below the header row. Save as CSV (UTF-8), then import it in Quizmoo under Quizzes > Import.",
@@ -2974,6 +3000,7 @@
       "correct, for number: the right number, e.g. 1848 or 3.5. For poll and order leave it empty.",
       "time: seconds to answer, 5 to 180 (empty: 20). points: 0 to 5000 (empty: 1000). tolerance, for number only: answers this close also count, e.g. 10 (empty: exact).",
       "colour: the question's or round's colour in the editor: red, orange, yellow, green, teal, blue, purple or pink (empty: no colour).",
+      "scoring, for multiple only: partial (each right answer picked earns its share, each wrong one cancels a right one) or all (points only for exactly the right answers). Empty: all.",
       "group: starts a round. Write its title in the question column (at most 120 characters), its info in answer 1, and in time and points what its new questions get in the editor. The questions below it belong to the round up to the next group row or a group-end row.",
       "Pictures, game settings and a round's own rules can't go in this file: add them in the editor after importing."
     ],

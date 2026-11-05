@@ -29,7 +29,7 @@ import { downloadBlob } from '@/lib/download'
 
 export const csvLanguage = (language: string): CsvLanguage => (language.startsWith('hu') ? 'hu' : 'en')
 
-const columns = ['type', 'question', 'a1', 'a2', 'a3', 'a4', 'a5', 'a6', 'correct', 'time', 'points', 'tolerance', 'color'] as const
+const columns = ['type', 'question', 'a1', 'a2', 'a3', 'a4', 'a5', 'a6', 'correct', 'time', 'points', 'tolerance', 'color', 'scoring'] as const
 
 /** The colour words a spreadsheet takes, for messages: "piros, narancs, …". */
 export const colorWords = (language: CsvLanguage) => tagColors.map((color) => csvColorWords[color][language]).join(', ')
@@ -69,7 +69,7 @@ export function templateCsv(t: TFunction, language: CsvLanguage): string {
   const base = { timeLimitSec: 20, points: 1000 }
   const examples: Question[] = [
     { ...base, id: 'q1', type: 'single', text: e('single'), options: options('single1', 'single2', 'single3', 'single4'), correctOptionId: 'o1' },
-    { ...base, id: 'q2', type: 'multiple', text: e('multiple'), options: options('multiple1', 'multiple2', 'multiple3', 'multiple4'), correctOptionIds: ['o0', 'o2'], timeLimitSec: 30 },
+    { ...base, id: 'q2', type: 'multiple', text: e('multiple'), options: options('multiple1', 'multiple2', 'multiple3', 'multiple4'), correctOptionIds: ['o0', 'o2'], timeLimitSec: 30, scoring: 'partial' },
     { ...base, id: 'q3', type: 'truefalse', text: e('truefalse'), correct: true, timeLimitSec: 10, points: 500 },
     { ...base, id: 'q4', type: 'text', text: e('text'), acceptedAnswers: [e('text1'), e('text2')] },
     { ...base, id: 'q5', type: 'number', text: e('number'), correct: 1014, tolerance: 10 },

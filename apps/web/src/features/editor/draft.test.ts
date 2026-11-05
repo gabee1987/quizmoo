@@ -74,6 +74,13 @@ describe('draft operations', () => {
     expect(ids(middle.questions)).toEqual(['a', middle.copy.id, 'b', 'c'])
   })
 
+  it('starts a new multiple-choice question with partial credit, and a copy keeps its scoring', () => {
+    const multiple = newQuestion('multiple')
+    expect(multiple).toMatchObject({ type: 'multiple', scoring: 'partial' })
+    const all = { ...multiple, scoring: 'all' as const }
+    expect(duplicateQuestion([all], 0).copy).toMatchObject({ scoring: 'all' })
+  })
+
   it('removes a question and restores it at the same index with the same ids', () => {
     const list = three()
     const { questions, removed } = removeQuestion(list, 1)

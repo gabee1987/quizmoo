@@ -87,6 +87,16 @@ describe('majority vote', () => {
   it('has no answer without votes', () => {
     expect(majorityAnswer([])).toBeNull()
   })
+
+  it('decides a partial-credit question per option, else falls back to the whole answer', () => {
+    const m = (...optionIds: string[]): Answer => ({ type: 'multiple', optionIds })
+    const votes = [vote('p1', m('a', 'b'), T0 + 1000), vote('p2', m('a'), T0 + 2000), vote('p3', m('a', 'c'), T0 + 3000)]
+    expect(majorityAnswer(votes, { perOption: true })).toEqual({ answer: m('a'), at: T0 + 2000, timeMs: 2000 })
+    // Without per-option counting the three different sets tie, and the first given wins.
+    expect(majorityAnswer(votes)?.answer).toEqual(m('a', 'b'))
+    // No option picked by more than half: the most common whole answer, as before.
+    expect(majorityAnswer([vote('p1', m('b'), T0 + 1000), vote('p2', m('a'), T0 + 2000)], { perOption: true })?.answer).toEqual(m('b'))
+  })
 })
 
 describe('captains', () => {
@@ -339,6 +349,24 @@ describe('majority team', () => {
     const state = endQuestion(majority())
     expect(state.teams['team-1']!.answers!['q-single']).toBeUndefined()
     expect(state.players.p1!.answers['q-single']).toBeUndefined()
+  })
+
+  it('makes a team partly right together on a partial-credit question, also as the captain fallback', () => {
+    const m = (...optionIds: string[]): Answer => ({ type: 'multiple', optionIds })
+    for (const teamAnswer of ['majority', 'captain'] as const) {
+      let state = startGame(teamGame({ teamAnswer, speedBonus: false }), T0)
+      // The second fixture question (A and C right of A, B, C) with partial credit.
+      state = {
+        ...state,
+        quiz: { ...state.quiz, questions: state.quiz.questions.map((q) => (q.type === 'multiple' ? { ...q, scoring: 'partial' as const } : q)) },
+      }
+      state = next(endQuestion(state), T0 + 30_000)
+      state = answer(state, 'p1', m('a', 'b'), T0 + 31_000)
+      state = answer(state, 'p2', m('a'), T0 + 32_000)
+      state = endQuestion(answer(state, 'p3', m('a', 'c'), T0 + 33_000))
+      expect(state.teams['team-1']!.answers!['q-multiple'], teamAnswer).toMatchObject({ answer: m('a'), correct: 'partial', points: 500 })
+      expect(state.players.p2!.answers['q-multiple']).toMatchObject({ correct: 'partial', points: 500 })
+    }
   })
 
   it('gives the streak bonus per team', () => {

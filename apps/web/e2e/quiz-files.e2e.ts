@@ -98,7 +98,8 @@ test('host downloads and imports quizzes as files', async ({ page }) => {
       const dialog = page.getByRole('dialog', { name: 'Import a quiz' })
       const broken = sheet.text.replace(',2,20,1000,', ',7,20,1000,')
       await dialog.locator('input[type="file"]').setInputFiles({ name: 'broken.csv', mimeType: 'text/csv', buffer: Buffer.from(broken) })
-      await expect(dialog.getByText(/^Row 16, correct: write the number/)).toBeVisible()
+      // The guide's lines come first (one more since the scoring column, phase 59).
+      await expect(dialog.getByText(/^Row 17, correct: write the number/)).toBeVisible()
       await expect(dialog.getByRole('button', { name: 'Import' })).toBeDisabled()
       await page.keyboard.press('Escape')
     })

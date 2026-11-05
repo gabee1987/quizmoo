@@ -447,6 +447,9 @@
       "rightCount_other": "{{count}} helyes",
       "wrongCount_one": "{{count}} hibás",
       "wrongCount_other": "{{count}} hibás",
+      "partial": "Részben helyes",
+      "partialCount_one": "{{count}} részben helyes",
+      "partialCount_other": "{{count}} részben helyes",
       "missingCount_one": "{{count}} nem válaszolt",
       "missingCount_other": "{{count}} nem válaszolt",
       "teamAnswer": "Csapat válasza: {{answer}}",
@@ -817,7 +820,9 @@
         "flow": "Játékmenet",
         "flowHelp": "Játékmód és csapatok, a helyes válaszok és az eredménytábla megjelenítése, visszaszámlálás, végeredmény",
         "questions": "Minden kérdés",
-        "questionsHelp": "Az összes kérdés ideje és pontja"
+        "questionsHelp": "Az összes kérdés ideje és pontja",
+        "multipleScoring": "„Több helyes válasz” pontozása",
+        "multipleScoringHelp": "Részpontos vagy mindent vagy semmit minden „Több helyes válasz” kérdésnél"
       },
       "deleteTitle_one": "Törlöd a kijelölt {{count}} kvízt?",
       "deleteTitle_other": "Törlöd a kijelölt {{count}} kvízt?",
@@ -887,6 +892,7 @@
     "paused": "Szünet",
     "shownAgain": "újra",
     "selectAll": "Jelöld be az összes jó választ.",
+    "selectAllPartial": "Jelöld be az összes jó választ. Minden jó jelölés ér pontot, de minden rossz elvisz egy jót.",
     "confirm": "Rendben",
     "submit": "Küldöm",
     "true": "Igaz",
@@ -927,6 +933,8 @@
     "changeSecondsLeft_one": "Még {{count}} másodpercig változtathatsz",
     "changeSecondsLeft_other": "Még {{count}} másodpercig változtathatsz",
     "correct": "Helyes!",
+    "partlyRight": "Részben helyes",
+    "rightPicks": "{{count}} jó válaszból {{right}}",
     "wrong": "Most nem jött össze",
     "closeEnough": "Kis elírás, de elfogadjuk",
     "noAnswer": "Nem válaszoltál",
@@ -964,6 +972,8 @@
       "yourPlace": "Te: {{rank}}. hely, {{score}} pont",
       "aroundYou": "Körülötted",
       "rightOf": "{{count}} kérdésből {{right}} jó",
+      "partlyRight_one": "{{count}} részben jó",
+      "partlyRight_other": "{{count}} részben jó",
       "factsTitle": "A játék számokban",
       "questions": "Kérdés",
       "players": "Játékos",
@@ -1056,6 +1066,7 @@
       "confirmedByName": "{{name}} véglegesítette",
       "votesFor_one": "{{total}} szavazatból {{count}}",
       "votesFor_other": "{{total}} szavazatból {{count}}",
+      "perOption": "Minden válasz, amit a többségetek bejelölt",
       "waitingCaptain": "Várjuk a kapitányt…",
       "suggest": "Válassz, a kapitány dönt.",
       "youDecide": "Te döntesz: válaszd ki és véglegesítsd a csapat válaszát.",
@@ -1239,6 +1250,15 @@
     "points": "Pontszám",
     "pointsValue_one": "{{count}} pont",
     "pointsValue_other": "{{count}} pont",
+    "scoring": "Pontozás",
+    "scoringOptions": {
+      "partial": "Részpontos",
+      "all": "Mindent vagy semmit"
+    },
+    "scoringHelp": {
+      "partial": "Minden bejelölt jó válasz a pontok rá eső részét éri, minden rossz elvisz egy jót. 2 jó válaszból 1 a pontok felét éri.",
+      "all": "Csak akkor jár pont, ha a játékos pontosan a jó válaszokat jelöli be."
+    },
     "moveUp": "Feljebb",
     "moveDown": "Lejjebb",
     "duplicateQuestion": "Másolás",
@@ -2267,6 +2287,8 @@
     "noQuestions": "Még egy kérdés sem zárult le.",
     "questionNumber": "{{index}}. kérdés",
     "correctPercent": "{{percent}}% helyes",
+    "partlyRightCount_one": "{{count}} részben helyes",
+    "partlyRightCount_other": "{{count}} részben helyes",
     "correctPercentText": "A játékosok {{share}}-a eltalálta",
     "summary": {
       "title": "Összegzés",
@@ -2289,6 +2311,7 @@
     "team": "Csapat",
     "score": "Pont",
     "correct": "Helyes",
+    "partlyRight": "Részben helyes",
     "members": "Tagok",
     "sortedAscending": "növekvő sorrend",
     "sortedDescending": "csökkenő sorrend",
@@ -2637,7 +2660,7 @@
         "figure": "Egy kérdés a telefonon: minden válasznak saját színe és formája van, a csík a hátralévő időt mutatja",
         "items": {
           "single": { "text": "Koppints az egyetlen jó lehetőségre." },
-          "multiple": { "text": "Jelöld be mind a jókat, aztán küldd el. Csak a teljes válasz ér pontot." },
+          "multiple": { "text": "Jelöld be mind a jókat, aztán küldd el. Részpontos kérdésnél minden jó jelölés ér pontot, de minden rossz elvisz egy jót; különben csak a teljes válasz ér pontot." },
           "truefalse": { "text": "Döntsd el, igaz-e az állítás." },
           "text": { "text": "Írj be egy rövid választ. A kis- és nagybetű meg az ékezet nem számít, és ha a játékvezető engedi, az apró elírás is elfogadható." },
           "number": { "text": "Írj be egy számot. Van, ahol a közeli válasz is jó." },
@@ -2649,7 +2672,7 @@
         "heading": "Pontok",
         "figure": "Jó válasz egy 1000 pontos kérdésre, az idő felénél, sorban a harmadik jó válasz",
         "items": {
-          "right": { "term": "Jó válasz", "text": "A kérdés pontjait éri. A rossz vagy a hiányzó válasz semmit." },
+          "right": { "term": "Jó válasz", "text": "A kérdés pontjait éri. Részpontos kérdésnél a részben jó válasz a rá eső részt; a rossz vagy a hiányzó válasz semmit." },
           "speed": { "text": "A gyorsabb jó válasz többet ér. Az utolsó pillanatban adott jó válasz is megkapja a felét." },
           "streak": { "text": "Az egymás utáni jó válaszok pluszt érnek: a másodiktól +100, legfeljebb +500." }
         }
@@ -2920,6 +2943,7 @@
       "points": "pont",
       "tolerance": "tűrés",
       "color": "szín",
+      "scoring": "pontozás",
       "emptyGroup": "csoport"
     },
     "problems": {
@@ -2937,6 +2961,7 @@
       "points": "egész szám 0 és 5000 között, vagy hagyd üresen.",
       "tolerance": "0 vagy nagyobb szám, vagy hagyd üresen.",
       "color": "ismeretlen szín. Ezek közül válassz: {{colors}}, vagy hagyd üresen.",
+      "scoring": "írd be: részleges vagy mind, vagy hagyd üresen (mindent vagy semmit).",
       "empty": "Nincs kérdés a fájlban. Tölts ki legalább egy sort a fejléc alatt.",
       "tooMany": "Egy kvízben legfeljebb 200 kérdés lehet. Vágd ketté a fájlt.",
       "group": {
@@ -2959,7 +2984,8 @@
       "time": "idő (mp)",
       "points": "pont",
       "tolerance": "tűrés",
-      "color": "szín"
+      "color": "szín",
+      "scoring": "pontozás"
     },
     "guide": [
       "QUIZMOO KÉRDÉSEK: soronként egy kérdés, a fejléc sor alatt. Mentsd CSV-ként (UTF-8), aztán a Quizmooban: Kvízek > Importálás.",
@@ -2974,6 +3000,7 @@
       "helyes, szám típusnál: a jó szám, pl. 1848 vagy 3,5. Szavazásnál és sorrendnél hagyd üresen.",
       "idő: ennyi másodperc van a válaszra, 5–180 (ha üres: 20). pont: 0–5000 (ha üres: 1000). tűrés, csak szám típusnál: ennyivel eltérő válasz is jó, pl. 10 (ha üres: pontosan kell).",
       "szín: a kérdés vagy a kör színe a szerkesztőben: piros, narancs, sárga, zöld, türkiz, kék, lila vagy rózsaszín (ha üres: nincs színe).",
+      "pontozás, csak több típusnál: részleges (minden bejelölt jó válasz a pontok rá eső részét éri, minden rossz elvisz egy jót) vagy mind (csak a pontosan eltalált jó válaszok érnek pontot). Ha üres: mind.",
       "csoport: egy kör kezdete. A kérdés oszlopba a kör címét írd (legfeljebb 120 karakter), a válasz 1-be a leírását, az időhöz és a ponthoz azt, amit az új kérdései kapnak a szerkesztőben. Az alatta lévő kérdések a következő csoport sorig vagy egy csoport-vége sorig tartoznak a körhöz.",
       "Képet, játékbeállítást és a körök saját szabályait ebbe a fájlba nem tudsz tenni: importálás után a szerkesztőben add hozzá."
     ],

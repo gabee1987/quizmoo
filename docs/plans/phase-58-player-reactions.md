@@ -33,6 +33,8 @@ Players send a quick emoji reaction that everyone sees on the projector, without
 
 Out of scope: custom emoji sets, reactions during questions, reactions in results or statistics.
 
+Related (backlog, requested 5 November 2026): an expandable list of the joined players on the phone's waiting screen, with the reaction bar beside it. If both are built together, the lobby's bar goes with that list, and a reaction may float from its sender's row there. On phones, reactions show only as counts, never with names. Showing the sender's row in the lobby is the one exception to that, so decide it in the plan.
+
 ## Files (from the code survey)
 
 - `packages/shared/src/events.ts` (payloads, event maps), `quiz.ts` (`gameSettingsSchema`), `game.ts` (snapshot base).

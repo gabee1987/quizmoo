@@ -10,6 +10,7 @@ const player = (name: string, score: number): ResultPlayer => ({
   score,
   rank: 0,
   correctCount: 0,
+  partialCount: 0,
   points: [],
 })
 const players = [player('Zoé', 500), player('ádám', 900), player('Béla', 500), player('Anna', 100)]

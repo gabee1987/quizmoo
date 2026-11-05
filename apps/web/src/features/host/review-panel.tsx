@@ -220,6 +220,7 @@ export function ReviewPanel({
                         count: stat.answeredCount,
                         percent: percent.format(stat.answeredCount ? stat.correctCount / stat.answeredCount : 0),
                       })}
+                  {stat.partialCount > 0 && ` · ${t('results.partlyRightCount', { count: stat.partialCount })}`}
                   {stat.averageTimeMs !== null && ` · ${t('host.review.averageTime', { seconds: seconds.format(stat.averageTimeMs / 1000) })}`}
                 </span>
                 {canShowAgain && !(host.reviewing && host.questionIndex === stat.index) && (

@@ -16,10 +16,11 @@ import {
   type Question,
   type QuickMessage,
   type TeamAnswerMode,
+  type Verdict,
 } from '@quizmoo/shared'
 import { endsGroup, groupAt, groupBounds, groupOf, settingsAt, settingsFor, startsGroup } from './groups.js'
 import { isNameAllowed } from './names.js'
-import { isCorrect, isNearMiss, pointsFor } from './scoring.js'
+import { isCorrect, isNearMiss, partialCredit, pointsFor } from './scoring.js'
 import {
   answersAsOne,
   captainOf,
@@ -1088,13 +1089,13 @@ function answerFits(question: Question, answer: Answer): boolean {
 /**
  * Sets correctness and points on every answer to `question`, adds the points to player scores
  * and moves streaks: a correct answer extends one, a wrong or missing answer resets it, and
- * polls and ungraded answers leave it as it is. With `streakBonus` a correct answer's points
- * include the bonus for the streak it makes.
+ * polls, ungraded and partly right answers leave it as it is. With `streakBonus` a correct
+ * answer's points include the bonus for the streak it makes; a partly right one gets no bonus.
  */
 function scorePlayers(
   state: GameState,
   question: Question,
-  decide: (answer: Answer, playerId: string) => boolean | null,
+  decide: (answer: Answer, playerId: string) => Verdict,
 ): Record<string, Player> {
   const players: Record<string, Player> = {}
   const rules = settingsAt(state, state.questionIndex)
@@ -1112,7 +1113,14 @@ function scorePlayers(
     const points =
       // The stored answer time, not `at - questionStartedAt`: a resume moves the start, and an
       // answer given before the pause keeps the time it took.
-      pointsFor(question.points, correct, record.timeMs, question.timeLimitSec * 1000, rules.speedBonus) + bonus
+      pointsFor(
+        question.points,
+        correct,
+        record.timeMs,
+        question.timeLimitSec * 1000,
+        rules.speedBonus,
+        partialCredit(question, record.answer),
+      ) + bonus
     players[player.id] = {
       ...player,
       streak,

@@ -22,8 +22,21 @@ export const meQueryOptions = queryOptions({
   refetchOnWindowFocus: 'always',
 })
 
-/** Where "home" is on the public pages: the host's home for a logged-in host, the join page for everyone else. */
+/**
+ * Where "home" is on the public pages: the host's home for a logged-in host, the join page for
+ * everyone else. Asks `/api/auth/session`, which answers 200 either way: `/api/auth/me` answers a
+ * logged-out visitor with 401, which the browser logs as an error on every public page.
+ */
 export function useHomePath(): '/host' | '/' {
-  const loggedIn = useQuery({ ...meQueryOptions, throwOnError: false }).isSuccess
-  return loggedIn ? '/host' : '/'
+  // The user from a login in this tab, read from the cache without asking (logging out clears it).
+  const known = useQuery({ ...meQueryOptions, enabled: false }).data !== undefined
+  const session = useQuery({
+    queryKey: ['session'],
+    queryFn: async () => (await apiFetch<{ loggedIn: boolean }>('/api/auth/session')).loggedIn,
+    enabled: !known,
+    retry: false,
+    staleTime: 5 * 60 * 1000,
+    throwOnError: false,
+  }).data
+  return known || session ? '/host' : '/'
 }

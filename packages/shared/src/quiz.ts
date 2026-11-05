@@ -60,6 +60,11 @@ export const multipleChoiceQuestionSchema = baseQuestion.extend({
   type: z.literal('multiple'),
   options: z.array(optionSchema).min(2).max(6),
   correctOptionIds: z.array(z.string().min(1)).min(1),
+  /**
+   * `all`: only the exact set of right options scores. `partial`: each right pick counts and each
+   * wrong pick takes one back (`partialCredit`). Missing: `all`, as every question before phase 59.
+   */
+  scoring: z.enum(['all', 'partial']).optional(),
 })
 
 export const trueFalseQuestionSchema = baseQuestion.extend({

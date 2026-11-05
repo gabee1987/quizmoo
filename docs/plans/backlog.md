@@ -71,6 +71,7 @@ Collected while testing phases 9 to 12. Effort as above.
 - A 20-question starter quiz for every new host, and a button to add it again (phase 55).
 - Tooltips in the app's own bubble instead of the browser's `title`, on hover and keyboard focus (phase 57).
 - Tutorial tours on every main host page and in the players' lobby, and a help page for everyone (phase 34).
+- Partial credit for multiple choice, chosen per question, with "Partly right" on every screen (phase 59).
 
 ### Open
 
@@ -80,6 +81,7 @@ Collected while testing phases 9 to 12. Effort as above.
 | Every member's own answer in team results (after the MVP) | Feature | M | Teams that answer as one keep only the team's answer today: members' votes and suggestions are replaced at the reveal. Keep them (`votes` per team answer), and show on the results page and the phones' review what each member would have answered ("so they can blame each other"). From the 13 October test notes. |
 | Hosting without an account (after the MVP) | Feature | L | A guest host with a short-lived identity, tighter limits, the terms checkbox, and "Keep my quizzes" to turn it into an account. Design and open questions in [later-guest-hosting.md](later-guest-hosting.md). Requested 20 October 2026. |
 | Rooms with their own admin | Feature | L | Planned as phase 62 in [platform-roadmap.md](platform-roadmap.md#62-communities-separate-spaces-with-their-own-owner). Each room (workspace) has an admin; only its members see and edit its quizzes and games. Today every quiz and game belongs to one host account. Needs a rooms table, membership and roles, permission checks on every route and socket attach, migration of existing quizzes. |
+| Who else is here: a player list on the phone's waiting screen | Feature | S | While players wait in the lobby, an expandable list shows everyone who has joined, with name and avatar (grouped by team in team mode), so players can see each other. Today the phone shows only a player-count chip, plus the player's own team card in team mode. Collapsed by default under the count, so the waiting screen stays calm on a small phone; it updates live from the snapshot (`snapshot.players` already holds names and avatars, so nothing new is sent or stored). The emoji reactions of phase 58 go here as well: the reaction bar sits with the list, and a reaction can float from the sender's row. Build after or together with [phase 58](phase-58-player-reactions.md). Requested 5 November 2026. |
 | Hints to selected players | Feature | M | Messages or hints to chosen players instead of everyone (host-to-player messages were out of scope in phase 12). The live view of the running game itself was done in phase 43; a tile on the board could be where the host picks the players. |
 | Sounds for key moments | Feature | M | Short playful sounds for important events and messages, switched on per quiz. Generated in the browser (Web Audio) to avoid licensed audio files; projector only, phones silent by default. Opt-in on the projector only; licensed music files would need their own review. |
 

@@ -15,7 +15,7 @@ import { useTranslation } from 'react-i18next'
 import { Hint } from '@/components/hint'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/cn'
-import { CheckIcon, CrossIcon } from '../../components/icons'
+import { CheckIcon, CrossIcon, PartialIcon } from '../../components/icons'
 import { celebrate } from '../../lib/confetti'
 import { stagger } from '../../lib/motion'
 import { forgetPlayer } from '../../lib/player-storage'
@@ -161,9 +161,10 @@ export function Podium({ snapshot, page, onPage }: { snapshot: PlayerSnapshot; p
 }
 
 /** How a question went for the player: its colour, foreground and the stamp's label. */
-type Outcome = 'right' | 'wrong' | 'voted' | 'missed'
+type Outcome = 'right' | 'partial' | 'wrong' | 'voted' | 'missed'
 const outcomeLook: Record<Outcome, { tone: string; toneForeground: string; label: string }> = {
   right: { tone: 'var(--success)', toneForeground: 'var(--success-foreground)', label: 'play.correct' },
+  partial: { tone: 'var(--warning)', toneForeground: 'var(--warning-foreground)', label: 'play.partlyRight' },
   wrong: { tone: 'var(--destructive)', toneForeground: 'var(--destructive-foreground)', label: 'play.wrong' },
   voted: { tone: 'var(--primary)', toneForeground: 'var(--primary-foreground)', label: 'play.voted' },
   missed: { tone: 'var(--muted-foreground)', toneForeground: 'var(--background)', label: 'play.noAnswer' },
@@ -172,6 +173,7 @@ const outcomeLook: Record<Outcome, { tone: string; toneForeground: string; label
 function outcomeOf(result: PlayerQuestionResult): Outcome {
   if (result.question.type === 'poll') return result.answer ? 'voted' : 'missed'
   if (result.correct === true) return 'right'
+  if (result.correct === 'partial') return 'partial'
   if (result.correct === false) return 'wrong'
   // Unanswered, or host-graded text that was never graded.
   return result.answer ? 'voted' : 'missed'
@@ -186,10 +188,14 @@ function outcomeOf(result: PlayerQuestionResult): Outcome {
 function MyResults({ results, symbols }: { results: PlayerQuestionResult[]; symbols: AnswerSymbols }) {
   const { t, i18n } = useTranslation()
   const right = results.filter((r) => r.correct === true).length
+  const partly = results.filter((r) => r.correct === 'partial').length
   return (
     <section className="flex w-full flex-col gap-3">
       <h1 className="text-center text-3xl font-black">{t('play.yourAnswers')}</h1>
-      <p className="text-center font-bold text-muted-foreground">{t('play.end.rightOf', { right, count: results.length })}</p>
+      <p className="text-center font-bold text-muted-foreground">
+        {t('play.end.rightOf', { right, count: results.length })}
+        {partly > 0 && ` · ${t('play.end.partlyRight', { count: partly })}`}
+      </p>
       <ol className="flex flex-col gap-4">
         {results.map((result, index) => {
           const { question, answer, points, teamAnswer, fallback, nearMiss } = result
@@ -215,9 +221,10 @@ function MyResults({ results, symbols }: { results: PlayerQuestionResult[]; symb
                       style={stagger(index, 50, 500)}
                     >
                       {outcome === 'right' && <CheckIcon className="size-4" drawn />}
+                      {outcome === 'partial' && <PartialIcon className="size-4" />}
                       {outcome === 'wrong' && <CrossIcon className="size-4" />}
-                      <span className={outcome === 'right' ? undefined : 'pr-1.5'}>{t(look.label)}</span>
-                      {outcome === 'right' && (
+                      <span className={outcome === 'right' || outcome === 'partial' ? undefined : 'pr-1.5'}>{t(look.label)}</span>
+                      {(outcome === 'right' || outcome === 'partial') && (
                         <span className="rounded-full bg-(--tone-foreground) px-2 py-0.5 text-(--tone) tabular-nums">+{points}</span>
                       )}
                     </span>

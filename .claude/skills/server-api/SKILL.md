@@ -35,6 +35,7 @@ Error shape everywhere: `{ error: '<i18n key>' }`. Status codes: 400 invalid inp
 | `POST /api/auth/login` | - | `{ username, password }` -> sets session cookie, returns `{ user }` |
 | `POST /api/auth/logout` | session | clears cookie |
 | `GET /api/auth/me` | session (also while locked) | `{ user }` with `screenLocked`, or 401 |
+| `GET /api/auth/session` | - | `{ loggedIn }`, always 200: the public pages' logo (`useHomePath`) asks this, since a 401 from `me` is a console error on every visit |
 | `POST /api/auth/register` | - | `{ username, password, website? }` (honeypot) -> 201 `{ pending: true }`, no session; 403 `errors.registrationClosed` unless `REGISTRATION_OPEN`, 503 `errors.registrationsFull` at 20 pending, 5 per hour per IP |
 | `POST /api/users/:id/approve` / `reject` | admin | pending sign-ups only (404 otherwise); reject deletes the account |
 | `POST /api/users/:id/password` | admin | `{ password }`: new password, `mustChangePassword` set, every session ended |

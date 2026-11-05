@@ -17,6 +17,7 @@ export function useQuestionFigures(question: ResultQuestion, playerCount: number
     hasCorrectAnswer(question) && playerCount > 0
       ? t('results.correctPercent', { percent: Math.round((question.correctCount / playerCount) * 100) })
       : null,
+    question.partialCount > 0 ? t('results.partlyRightCount', { count: question.partialCount }) : null,
     t('results.answered', { answered: question.answeredCount, count: playerCount }),
     question.averageTimeMs === null
       ? t('results.noAnswers')

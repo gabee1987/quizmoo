@@ -81,3 +81,20 @@ $env:E2E_BASE_URL="http://localhost:3999"; $env:E2E_USERNAME="admin"; $env:E2E_P
 8. Download the quiz as a spreadsheet: the Scoring column says `partial` / `all`. Import an older spreadsheet without the column: its multiple-choice questions are All or nothing.
 9. Results page: the player table shows Right and Partly right; the hardest and easiest question count fully right answers.
 10. Quiz list, batch edit two quizzes: set multiple-choice scoring to All or nothing; other question types are untouched.
+
+## Results
+
+- `scoring.test.ts` checks the plan's examples (500 / 1000 / 0 with two right answers, 667 and 333 with three, everything picked 0) and the speed bonus on a partial answer; `partial-credit.test.ts` covers the game: verdicts and points, all or nothing without the field, the streak kept without a bonus, `partialCount` in the reveal and the results, the best streak through a partial answer, and a restored game whose question has no `scoring`.
+- `team-answers.test.ts`: per-option majority, its fallback, and a majority and a captain-fallback team that are partly right together.
+- Editor `draft.test.ts` and `preview-play.test.ts`, the spreadsheet round trip and the older 13-column files in `quiz-csv.test.ts`, the batch route in `quizzes.test.ts`.
+- `e2e/partial-credit.e2e.ts` plays the question with three phones (partly right with 500 points, right, wrong) and checks the host's "1 partly right".
+- Looked at: the phone's reveal (light and dark) and its answers page, the host's board, the projector's reveal, the editor's Scoring field and the results table.
+- `pnpm verify`; server tests with the database: 643; the whole e2e suite on the production build.
+
+## Deviations
+
+- `scoring` is optional (missing means all or nothing) instead of a schema default: a default would have made the field required in the TypeScript type and changed nothing for stored games, which are not parsed again; with an optional field old states need nothing at all.
+- A question written to a spreadsheet without the field gets an empty scoring cell (not `all`), so files round-trip exactly.
+- Batch edit got its own "Multiple-choice scoring" group instead of a field in "Every question", so changing the scoring does not also overwrite every question's time and points.
+- The host's standings card keeps counting fully right answers only (`PlayerPublic` unchanged, to keep snapshots small); the review panel, board and results show the partly right count.
+- Fixed on the way (the user's decision, 5 November 2026): since 1.12.0 the front page asked `/api/auth/me` for the logo, and its 401 for logged-out visitors was a console error that failed seven e2e specs. The logo now asks `GET /api/auth/session`, which always answers 200.

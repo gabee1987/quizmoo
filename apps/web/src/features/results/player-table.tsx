@@ -32,6 +32,8 @@ export function PlayerTable({
   // A solo player's team column says so instead of repeating their name.
   const teamNames = new Map(teams.map((team) => [team.id, team.solo ? t('play.soloGroup') : team.name]))
   const sorted = sortPlayers(players, sort, i18n.language)
+  // The partly right column only when the game had a partial-credit question that someone got partly right.
+  const anyPartial = players.some((p) => p.partialCount > 0)
 
   const sortHeader = (column: SortKey, label: string, className = '') => {
     const active = sort.key === column
@@ -74,6 +76,11 @@ export function PlayerTable({
               <th scope="col" className={`${cell} text-right`}>
                 {t('results.correct')}
               </th>
+              {anyPartial && (
+                <th scope="col" className={`${cell} text-right`}>
+                  {t('results.partlyRight')}
+                </th>
+              )}
               {sortHeader('score', t('results.score'), 'text-right')}
             </tr>
           </thead>
@@ -96,6 +103,7 @@ export function PlayerTable({
                 </td>
                 {teams.length > 0 && <td className={`${cell} max-sm:hidden`}>{team ?? ''}</td>}
                 <td className={`${cell} text-right`}>{player.correctCount}</td>
+                {anyPartial && <td className={`${cell} text-right`}>{player.partialCount}</td>}
                 <td className={`${cell} text-right font-semibold`}>{player.score}</td>
               </tr>
               )
