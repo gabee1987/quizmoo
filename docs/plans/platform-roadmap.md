@@ -30,7 +30,7 @@ Each phase below is a draft plan: goal, scope, a design sketch, the decisions st
 | 69 | [Opening the platform](#69-opening-the-platform) | Platform | L | 62, 66 |
 | 70 | [More than one server process](#70-more-than-one-server-process) | Platform | L | before heavy public use |
 
-58 to 61 and 64 are independent of the platform work and can ship as 1.x releases whenever they are ready. 62 is the turning point: it changes who owns what, so it goes before sharing within communities and the public library. The public library (66) together with opening the platform (69) would be a good point for **2.0.0**.
+58 to 61 and 64 are independent of the platform work and can ship as 1.x releases whenever they are ready. They now have full plans (5 November 2026), built in this order: [59](phase-59-partial-credit.md), [64](phase-64-question-bank.md), [58](phase-58-player-reactions.md), [60](phase-60-certificates.md), [61](phase-61-metrics.md). Where a plan file and a section below differ, the plan file wins. 62 is the turning point: it changes who owns what, so it goes before sharing within communities and the public library. The public library (66) together with opening the platform (69) would be a good point for **2.0.0**.
 
 The open backlog items stay where they are ([backlog.md](backlog.md)). Two of them tie in here: "Rooms with their own admin" becomes phase 62, and "Passwordless host login" becomes part of 69.
 
