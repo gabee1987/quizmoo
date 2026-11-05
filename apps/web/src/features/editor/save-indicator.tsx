@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { CheckIcon, CircleAlertIcon, CloudOffIcon, PencilIcon, RefreshCwIcon } from 'lucide-react'
+import { Hint } from '@/components/hint'
 import { cn } from '@/lib/cn'
 import type { SaveStatus } from './use-autosave'
 
@@ -24,7 +25,7 @@ export function SaveIndicator({ status, onRetry }: { status: SaveStatus; onRetry
     error: <CircleAlertIcon className="size-4" aria-hidden="true" />,
   }[status]
   return (
-    <div className="flex items-center gap-1">
+    <div data-tour="save-indicator" className="flex items-center gap-1">
       <span
         role="status"
         className={cn('flex min-h-9 items-center gap-1.5 rounded-full px-3 text-sm font-bold whitespace-nowrap', styles[status])}
@@ -33,15 +34,16 @@ export function SaveIndicator({ status, onRetry }: { status: SaveStatus; onRetry
         {t(`editor.status.${status}`)}
       </span>
       {(status === 'offline' || status === 'error') && (
-        <button
-          type="button"
-          onClick={onRetry}
-          aria-label={t('editor.retrySave')}
-          title={t('editor.retrySave')}
-          className="grid size-9 place-items-center rounded-full text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring"
-        >
-          <RefreshCwIcon className="size-4" aria-hidden="true" />
-        </button>
+        <Hint label={t('editor.retrySave')}>
+          <button
+            type="button"
+            onClick={onRetry}
+            aria-label={t('editor.retrySave')}
+            className="grid size-9 place-items-center rounded-full text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring"
+          >
+            <RefreshCwIcon className="size-4" aria-hidden="true" />
+          </button>
+        </Hint>
       )}
     </div>
   )

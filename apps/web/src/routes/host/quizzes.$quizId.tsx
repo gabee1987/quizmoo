@@ -45,7 +45,8 @@ import { Label } from '@/components/ui/label'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Hint } from '@/components/hint'
 import { cn } from '@/lib/cn'
 import { quizMinutes } from '@/lib/game-length'
 import { toastError } from '@/lib/toast'
@@ -110,6 +111,7 @@ import { exportQuiz } from '../../features/host/quiz-files'
 import { QuizBrandingFields } from '../../features/editor/quiz-branding-fields'
 import { ApiError, apiFetch, errorCode } from '../../lib/api'
 import { paletteVars } from '../../lib/themes'
+import { usePageTour } from '../../features/tour/use-tour'
 
 export const Route = createFileRoute('/host/quizzes/$quizId')({
   component: QuizEditorPage,
@@ -163,6 +165,7 @@ function QuizEditorPage() {
  */
 function Editor({ quiz }: { quiz: Quiz }) {
   const { t, i18n } = useTranslation()
+  usePageTour('editor')
   const queryClient = useQueryClient()
   const navigate = useNavigate()
   // The quiz being edited, plus where its empty groups sit in the list (not saved).
@@ -648,17 +651,18 @@ function Editor({ quiz }: { quiz: Quiz }) {
           <div className="min-w-0 flex-1">
             <SearchField value={query} onChange={setQuery} className={size === 'size-9' ? 'h-9' : 'h-10'} />
           </div>
-          <Button
-            variant="outline"
-            size="icon-sm"
-            className={size}
-            disabled={!selectedId}
-            aria-label={t('editor.jumpToSelected')}
-            title={t('editor.jumpToSelected')}
-            onClick={jumpToSelected}
-          >
-            <LocateFixedIcon aria-hidden="true" />
-          </Button>
+          <Hint label={t('editor.jumpToSelected')}>
+            <Button
+              variant="outline"
+              size="icon-sm"
+              className={size}
+              disabled={!selectedId}
+              aria-label={t('editor.jumpToSelected')}
+              onClick={jumpToSelected}
+            >
+              <LocateFixedIcon aria-hidden="true" />
+            </Button>
+          </Hint>
         </div>
         {!searching && (
           <div className="flex gap-1.5">
@@ -680,12 +684,13 @@ function Editor({ quiz }: { quiz: Quiz }) {
    * its height, so switching the first question off does not push the list down under the pointer.
    */
   const offChip = offIds.length > 0 && (
-    <span
-      title={t('editor.inGame.summary', { count: offIds.length, total: questions.length })}
-      className="flex shrink-0 items-center gap-1 rounded-full border border-dashed border-muted-foreground/40 bg-muted/60 py-px pr-px pl-2 text-xs font-bold"
-    >
-      <EyeOffIcon className="size-3.5 text-muted-foreground" aria-hidden="true" />
-      <span aria-hidden="true" className="tabular-nums">{offIds.length}</span>
+    <span className="flex shrink-0 items-center gap-1 rounded-full border border-dashed border-muted-foreground/40 bg-muted/60 py-px pr-px pl-2 text-xs font-bold">
+      <Hint label={t('editor.inGame.summary', { count: offIds.length, total: questions.length })}>
+        <span className="flex items-center gap-1">
+          <EyeOffIcon className="size-3.5 text-muted-foreground" aria-hidden="true" />
+          <span aria-hidden="true" className="tabular-nums">{offIds.length}</span>
+        </span>
+      </Hint>
       <span className="sr-only">{t('editor.inGame.summary', { count: offIds.length, total: questions.length })}</span>
       <Button variant="ghost" size="sm" className="h-6 rounded-full px-2! text-xs" onClick={switchAllOn}>
         {t('editor.inGame.allOn')}
@@ -816,7 +821,7 @@ function Editor({ quiz }: { quiz: Quiz }) {
   )
 
   return (
-    <TooltipProvider delayDuration={200}>
+    <>
       {/* data-palette colours the option badges in the editor like the answers in the game. */}
       <div data-palette={draft.settings.answerPalette} style={paletteVars(draft.settings)} className="mx-auto flex w-full max-w-[100rem] flex-col gap-4 pt-3 pb-20 lg:pb-0">
         {/* Sticky from sm: on phones the bar wraps to two rows and the bottom bar already holds the navigation.
@@ -824,12 +829,14 @@ function Editor({ quiz }: { quiz: Quiz }) {
         <div className="z-30 sm:sticky sm:top-2">
         <header className="flex flex-wrap items-center gap-2 rounded-2xl border bg-card/95 p-2 shadow-soft backdrop-blur">
           <AppMenu />
-          <Button asChild variant="ghost" size="icon" aria-label={t('host.game.backToQuizzes')} title={t('host.game.backToQuizzes')}>
-            <Link to="/host/quizzes">
-              <ArrowLeftIcon aria-hidden="true" />
-            </Link>
-          </Button>
-          <div className="flex min-w-0 flex-1 basis-56 flex-col">
+          <Hint label={t('host.game.backToQuizzes')}>
+            <Button asChild variant="ghost" size="icon" aria-label={t('host.game.backToQuizzes')}>
+              <Link to="/host/quizzes">
+                <ArrowLeftIcon aria-hidden="true" />
+              </Link>
+            </Button>
+          </Hint>
+          <div data-tour="quiz-title" className="flex min-w-0 flex-1 basis-56 flex-col">
             <Label htmlFor="quiz-title" className="sr-only">
               {t('editor.title')}
             </Label>
@@ -853,47 +860,50 @@ function Editor({ quiz }: { quiz: Quiz }) {
           </div>
           <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
             {/* From lg (labelled from xl, so the title keeps its room); phones and small tablets have the plus in the bottom bar. */}
-            <div className="hidden items-center gap-2 border-r pr-2 lg:flex">
-              <Button
-                variant="secondary"
-                className="max-xl:w-12 max-xl:px-0"
-                disabled={!canAddQuestion}
-                aria-label={t('editor.newQuestionTop')}
-                title={t('editor.newQuestionTop')}
-                onClick={() => setPicking(true)}
-              >
-                <PlusIcon aria-hidden="true" />
-                <span className="hidden xl:inline">{t('editor.newQuestion')}</span>
-              </Button>
-              <Button
-                variant="outline"
-                className="max-xl:w-12 max-xl:px-0"
-                disabled={!canAddGroup}
-                aria-label={t('editor.newGroupTop')}
-                title={t('editor.newGroupTop')}
-                onClick={() => newGroup(selectedId, 'empty')}
-              >
-                <LayersIcon aria-hidden="true" />
-                <span className="hidden xl:inline">{t('editor.newGroup')}</span>
-              </Button>
+            <div data-tour="add-question" className="hidden items-center gap-2 border-r pr-2 lg:flex">
+              <Hint label={t('editor.newQuestionTop')}>
+                <Button
+                  variant="secondary"
+                  className="max-xl:w-12 max-xl:px-0"
+                  disabled={!canAddQuestion}
+                  aria-label={t('editor.newQuestionTop')}
+                  onClick={() => setPicking(true)}
+                >
+                  <PlusIcon aria-hidden="true" />
+                  <span className="hidden xl:inline">{t('editor.newQuestion')}</span>
+                </Button>
+              </Hint>
+              <Hint label={t('editor.newGroupTop')}>
+                <Button
+                  variant="outline"
+                  className="max-xl:w-12 max-xl:px-0"
+                  disabled={!canAddGroup}
+                  aria-label={t('editor.newGroupTop')}
+                  onClick={() => newGroup(selectedId, 'empty')}
+                >
+                  <LayersIcon aria-hidden="true" />
+                  <span className="hidden xl:inline">{t('editor.newGroup')}</span>
+                </Button>
+              </Hint>
             </div>
             {/* Follows every edit: a question's time, switching one off, the settings. */}
             {questions.some((q) => !q.off) && (
-              <span
-                className="hidden items-center gap-1.5 rounded-full bg-muted px-2.5 py-1 text-sm font-semibold whitespace-nowrap text-muted-foreground sm:inline-flex"
-                title={t('common.lengthEstimate')}
-              >
-                <ClockIcon className="size-4" aria-hidden="true" />
-                {t('common.aboutMin', { count: quizMinutes({ questions, groups }, draft.settings) })}
-              </span>
+              <Hint label={t('common.lengthEstimate')}>
+                <span className="hidden items-center gap-1.5 rounded-full bg-muted px-2.5 py-1 text-sm font-semibold whitespace-nowrap text-muted-foreground sm:inline-flex">
+                  <ClockIcon className="size-4" aria-hidden="true" />
+                  {t('common.aboutMin', { count: quizMinutes({ questions, groups }, draft.settings) })}
+                </span>
+              </Hint>
             )}
             <SaveIndicator status={status} onRetry={retry} />
             {problems.length > 0 && <ProblemsMenu problems={problems} onGo={goToProblem} />}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" aria-label={t('quizFile.exportMenu')} title={t('quizFile.exportMenu')}>
-                  <DownloadIcon aria-hidden="true" />
-                </Button>
+                <Hint label={t('quizFile.exportMenu')}>
+                  <Button variant="ghost" size="icon" aria-label={t('quizFile.exportMenu')}>
+                    <DownloadIcon aria-hidden="true" />
+                  </Button>
+                </Hint>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="min-w-44">
                 {(['csv', 'file'] as const).map((kind) => (
@@ -908,36 +918,41 @@ function Editor({ quiz }: { quiz: Quiz }) {
                 ))}
               </DropdownMenuContent>
             </DropdownMenu>
-            <Button variant="ghost" size="icon" className="hidden lg:inline-flex" aria-label={t('editor.shortcuts.title')} title={t('editor.shortcuts.title')} onClick={() => setHelpOpen(true)}>
-              <KeyboardIcon aria-hidden="true" />
-            </Button>
-            <Button
-              variant={previewColumn ? 'secondary' : 'ghost'}
-              size="icon"
-              className="hidden xl:inline-flex"
-              aria-label={t('editor.preview')}
-              aria-pressed={previewColumn}
-              disabled={docked}
-              title={t(previewColumn ? 'editor.hidePreview' : 'editor.showPreview')}
-              onClick={() => setPreviewShown((shown) => !shown)}
-            >
-              {previewColumn ? <EyeIcon aria-hidden="true" /> : <EyeOffIcon aria-hidden="true" />}
-            </Button>
-            <Button
-              variant={docked ? 'secondary' : 'ghost'}
-              size="icon"
-              aria-label={t('editor.settings')}
-              title={t('editor.settings')}
-              aria-expanded={settingsOpen}
-              ref={settingsToggle}
-              onClick={() => setSettingsOpen((open) => !open)}
-            >
-              <Settings2Icon aria-hidden="true" />
-            </Button>
+            <Hint label={t('editor.shortcuts.title')}>
+              <Button variant="ghost" size="icon" className="hidden lg:inline-flex" aria-label={t('editor.shortcuts.title')} onClick={() => setHelpOpen(true)}>
+                <KeyboardIcon aria-hidden="true" />
+              </Button>
+            </Hint>
+            <Hint label={t(previewColumn ? 'editor.hidePreview' : 'editor.showPreview')}>
+              <Button
+                variant={previewColumn ? 'secondary' : 'ghost'}
+                size="icon"
+                className="hidden xl:inline-flex"
+                aria-label={t('editor.preview')}
+                aria-pressed={previewColumn}
+                disabled={docked}
+                onClick={() => setPreviewShown((shown) => !shown)}
+              >
+                {previewColumn ? <EyeIcon aria-hidden="true" /> : <EyeOffIcon aria-hidden="true" />}
+              </Button>
+            </Hint>
+            <Hint label={t('editor.settings')}>
+              <Button
+                variant={docked ? 'secondary' : 'ghost'}
+                size="icon"
+                aria-label={t('editor.settings')}
+                aria-expanded={settingsOpen}
+                data-tour="quiz-settings"
+                ref={settingsToggle}
+                onClick={() => setSettingsOpen((open) => !open)}
+              >
+                <Settings2Icon aria-hidden="true" />
+              </Button>
+            </Hint>
             <Tooltip>
               <TooltipTrigger asChild>
                 {/* A disabled button gets no pointer or focus events; the wrapper carries the tooltip. */}
-                <span tabIndex={playBlocker ? 0 : -1} className="rounded-xl outline-none focus-visible:ring-[3px] focus-visible:ring-ring">
+                <span tabIndex={playBlocker ? 0 : -1} data-tour="quiz-play" className="rounded-xl outline-none focus-visible:ring-[3px] focus-visible:ring-ring">
                   <Button disabled={playBlocker !== null} onClick={() => setStarting(true)}>
                     <PlayIcon aria-hidden="true" />
                     {t('host.play')}
@@ -972,6 +987,7 @@ function Editor({ quiz }: { quiz: Quiz }) {
         >
           <div className="hidden min-w-0 items-start justify-end self-stretch lg:flex xl:overflow-x-clip" inert={docked}>
             <aside
+              data-tour="question-list"
               className={cn(
                 // Not scrolling itself: its list scrolls under the fixed header (`renderList`).
                 'sticky top-22 flex max-h-[calc(100dvh-11rem)] w-80 shrink-0 flex-col overflow-hidden rounded-2xl border bg-card shadow-soft xl:mr-6',
@@ -1079,7 +1095,7 @@ function Editor({ quiz }: { quiz: Quiz }) {
               </div>
             )}
 
-            <Button variant="outline" className="xl:hidden" onClick={() => setPreviewOpen((s) => !s)} aria-expanded={previewOpen}>
+            <Button variant="outline" className="xl:hidden" data-tour="phone-preview" onClick={() => setPreviewOpen((s) => !s)} aria-expanded={previewOpen}>
               <EyeIcon aria-hidden="true" />
               {previewOpen ? t('editor.hidePreview') : t('editor.showPreview')}
             </Button>
@@ -1098,7 +1114,7 @@ function Editor({ quiz }: { quiz: Quiz }) {
               )}
             >
               {/* Scaled so three panes fit a 1280 px laptop; the layout inside stays the phone's. */}
-              <div className="zoom-[0.82]">{preview(t('editor.preview'))}</div>
+              <div data-tour="phone-preview" className="zoom-[0.82]">{preview(t('editor.preview'))}</div>
             </div>
           </aside>
 
@@ -1124,9 +1140,11 @@ function Editor({ quiz }: { quiz: Quiz }) {
                   </h2>
                   <p className="text-sm text-muted-foreground">{settingsSummary(draft.settings, t)}</p>
                 </div>
-                <Button ref={settingsClose} variant="ghost" size="icon" aria-label={t('common.close')} onClick={closeSettings}>
-                  <XIcon aria-hidden="true" />
-                </Button>
+                <Hint label={t('common.close')}>
+                  <Button ref={settingsClose} variant="ghost" size="icon" aria-label={t('common.close')} onClick={closeSettings}>
+                    <XIcon aria-hidden="true" />
+                  </Button>
+                </Hint>
               </div>
               <div className="overflow-y-auto p-4">{settingsBody}</div>
             </aside>
@@ -1140,6 +1158,7 @@ function Editor({ quiz }: { quiz: Quiz }) {
             <Button
               variant="secondary"
               className="flex-1"
+              data-tour="question-list"
               onClick={() => {
                 setListOpen(true)
                 jumpToSelected()
@@ -1152,9 +1171,11 @@ function Editor({ quiz }: { quiz: Quiz }) {
               {invalidIds.size > 0 && <span className="size-2.5 rounded-full bg-destructive" aria-label={t('editor.needsFixing')} />}
             </Button>
             {questions.length < MAX_QUESTIONS && (
-              <Button size="icon" aria-label={t('editor.addQuestion')} onClick={() => setPicking(true)}>
-                <PlusIcon aria-hidden="true" />
-              </Button>
+              <Hint label={t('editor.addQuestion')}>
+                <Button size="icon" aria-label={t('editor.addQuestion')} data-tour="add-question" onClick={() => setPicking(true)}>
+                  <PlusIcon aria-hidden="true" />
+                </Button>
+              </Hint>
             )}
           </div>
         )}
@@ -1283,6 +1304,6 @@ function Editor({ quiz }: { quiz: Quiz }) {
           </ConfirmDialog>
         )}
       </div>
-    </TooltipProvider>
+    </>
   )
 }

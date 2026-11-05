@@ -20,7 +20,7 @@ import { gameInfo, type InfoLine } from './lobby-info'
 export function PlayerCard({ snapshot, team, className }: { snapshot: PlayerSnapshot; team: TeamPublic | undefined; className?: string }) {
   const { t } = useTranslation()
   return (
-    <div className={cn('glow-border flex animate-pop flex-col items-center gap-4 rounded-3xl bg-card p-6 text-center shadow-soft', className)}>
+    <div data-tour="player-card" className={cn('glow-border flex animate-pop flex-col items-center gap-4 rounded-3xl bg-card p-6 text-center shadow-soft', className)}>
       {/* In the corner, clear of the centred avatar; its bubble speaks to the right. */}
       <WaitingCow bubble="right" className="absolute top-4 left-4" />
       <PlayerAvatar avatar={snapshot.me.avatar} size="xl" className="animate-float bg-accent" />
@@ -102,6 +102,7 @@ export function GameInfoCard({ snapshot, className }: { snapshot: PlayerSnapshot
   return (
     <section
       aria-labelledby="game-info"
+      data-tour="game-info"
       className={cn('@container flex animate-fade-up flex-col gap-3 rounded-3xl border bg-card p-5 text-left shadow-soft', className)}
       style={stagger(1, 0, 280)}
     >

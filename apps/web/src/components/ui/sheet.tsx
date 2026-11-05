@@ -3,6 +3,7 @@ import { cn } from '@/lib/cn'
 import i18next from 'i18next'
 import { XIcon } from 'lucide-react'
 import { Dialog as SheetPrimitive } from 'radix-ui'
+import { Hint } from '@/components/hint'
 import { closeButtonClass } from '@/components/ui/dialog'
 
 function Sheet({ ...props }: React.ComponentProps<typeof SheetPrimitive.Root>) {
@@ -68,9 +69,13 @@ function SheetContent({
       >
         {children}
         {showCloseButton && (
-          <SheetPrimitive.Close className={closeButtonClass}>
-            <XIcon />
-            <span className="sr-only">{i18next.t('common.close')}</span>
+          <SheetPrimitive.Close asChild>
+            <Hint label={i18next.t('common.close')}>
+              <button type="button" className={closeButtonClass}>
+                <XIcon />
+                <span className="sr-only">{i18next.t('common.close')}</span>
+              </button>
+            </Hint>
           </SheetPrimitive.Close>
         )}
       </SheetPrimitive.Content>

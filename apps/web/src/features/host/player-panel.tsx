@@ -1,6 +1,7 @@
 import type { HostSnapshot, PlayerPublic } from '@quizmoo/shared'
 import { CrownIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { Hint } from '@/components/hint'
 import { PlayerAvatar } from '../../components/player-avatar'
 import { useNow } from '../../lib/clock'
 import { MovePlayerMenu } from './move-player-menu'
@@ -82,14 +83,16 @@ export function PlayerPanel({
                       <CrownIcon className="size-4" aria-label={t('play.team.captain')} />
                     </span>
                   ) : (
-                    <button
-                      type="button"
-                      aria-label={t('host.game.makeCaptain', { name: player.name })}
-                      className="grid size-10 place-items-center rounded-full text-muted-foreground/60 outline-none hover:bg-warning/15 hover:text-warning focus-visible:ring-[3px] focus-visible:ring-ring"
-                      onClick={() => onCaptain(player.id)}
-                    >
-                      <CrownIcon className="size-4" aria-hidden="true" />
-                    </button>
+                    <Hint label={t('host.game.makeCaptain', { name: player.name })}>
+                      <button
+                        type="button"
+                        aria-label={t('host.game.makeCaptain', { name: player.name })}
+                        className="grid size-10 place-items-center rounded-full text-muted-foreground/60 outline-none hover:bg-warning/15 hover:text-warning focus-visible:ring-[3px] focus-visible:ring-ring"
+                        onClick={() => onCaptain(player.id)}
+                      >
+                        <CrownIcon className="size-4" aria-hidden="true" />
+                      </button>
+                    </Hint>
                   ))}
                 {teams && betweenQuestions && (
                   <MovePlayerMenu

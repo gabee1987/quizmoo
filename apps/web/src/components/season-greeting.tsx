@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import type { Season } from '@/features/season/calendar'
 import { cn } from '@/lib/cn'
 import { originOf, setSeasonalLook, useActiveSeason, useSeasonalLook } from '@/lib/season'
+import { Hint } from './hint'
 import { Button } from './ui/button'
 import { DropdownMenuCheckboxItem, DropdownMenuSeparator } from './ui/dropdown-menu'
 
@@ -65,15 +66,16 @@ export function SeasonToggle() {
   if (!season) return null
   const label = t('app.seasonalLook', { season: t(`season.names.${season}`) })
   return (
-    <Button
-      variant="ghost"
-      size="icon-sm"
-      aria-pressed={on}
-      aria-label={label}
-      title={label}
-      onClick={(event) => setSeasonalLook(!on, originOf(event.currentTarget))}
-    >
-      <SeasonIcon season={season} className={cn('size-6 transition-[filter,opacity]', !on && 'opacity-60 grayscale')} />
-    </Button>
+    <Hint label={label}>
+      <Button
+        variant="ghost"
+        size="icon-sm"
+        aria-pressed={on}
+        aria-label={label}
+        onClick={(event) => setSeasonalLook(!on, originOf(event.currentTarget))}
+      >
+        <SeasonIcon season={season} className={cn('size-6 transition-[filter,opacity]', !on && 'opacity-60 grayscale')} />
+      </Button>
+    </Hint>
   )
 }

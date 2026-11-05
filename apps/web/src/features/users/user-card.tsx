@@ -14,6 +14,7 @@ import {
 } from 'lucide-react'
 import type { ComponentType, CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Hint } from '@/components/hint'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -94,9 +95,11 @@ export function UserCard({
         {!self && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon-sm" aria-label={t('users.actions.menu', { name: user.username })}>
-                <EllipsisVerticalIcon aria-hidden="true" />
-              </Button>
+              <Hint label={t('users.actions.menu', { name: user.username })}>
+                <Button variant="ghost" size="icon-sm" aria-label={t('users.actions.menu', { name: user.username })}>
+                  <EllipsisVerticalIcon aria-hidden="true" />
+                </Button>
+              </Hint>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="min-w-56">
               <DropdownMenuItem className="min-h-11" onSelect={() => onAction('password')}>

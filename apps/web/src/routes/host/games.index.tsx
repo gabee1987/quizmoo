@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next'
 import { FormAlert } from '@/components/form-alert'
 import { SelectField } from '@/components/select-field'
 import { Spinner } from '@/components/spinner'
+import { Hint } from '@/components/hint'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -103,14 +104,16 @@ function GameHistory() {
         </Button>
       )}
       {(game.phase === 'finished' || isScheduled(game, now)) && (
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          aria-label={`${isScheduled(game, now) ? t('history.cancel') : t('common.delete')}: ${game.quizTitle}`}
-          onClick={() => setDeleting(game)}
-        >
-          <Trash2Icon aria-hidden="true" />
-        </Button>
+        <Hint label={isScheduled(game, now) ? t('history.cancel') : t('common.delete')}>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            aria-label={`${isScheduled(game, now) ? t('history.cancel') : t('common.delete')}: ${game.quizTitle}`}
+            onClick={() => setDeleting(game)}
+          >
+            <Trash2Icon aria-hidden="true" />
+          </Button>
+        </Hint>
       )}
     </>
   )

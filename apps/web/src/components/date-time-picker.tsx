@@ -1,6 +1,7 @@
 import { CalendarDaysIcon, ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Hint } from '@/components/hint'
 import { SelectField } from '@/components/select-field'
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverAnchor, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
@@ -158,29 +159,33 @@ export function DateTimePicker({
       >
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between gap-2">
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-sm"
-              disabled={!canGoBack}
-              aria-label={t('datePicker.previousMonth')}
-              onClick={() => setView(addMonths(view, -1))}
-            >
-              <ChevronLeftIcon aria-hidden="true" />
-            </Button>
+            <Hint label={t('datePicker.previousMonth')}>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-sm"
+                disabled={!canGoBack}
+                aria-label={t('datePicker.previousMonth')}
+                onClick={() => setView(addMonths(view, -1))}
+              >
+                <ChevronLeftIcon aria-hidden="true" />
+              </Button>
+            </Hint>
             <p className="font-extrabold first-letter:uppercase" aria-live="polite">
               {monthLabel}
             </p>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-sm"
-              disabled={!canGoOn}
-              aria-label={t('datePicker.nextMonth')}
-              onClick={() => setView(addMonths(view, 1))}
-            >
-              <ChevronRightIcon aria-hidden="true" />
-            </Button>
+            <Hint label={t('datePicker.nextMonth')}>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-sm"
+                disabled={!canGoOn}
+                aria-label={t('datePicker.nextMonth')}
+                onClick={() => setView(addMonths(view, 1))}
+              >
+                <ChevronRightIcon aria-hidden="true" />
+              </Button>
+            </Hint>
           </div>
 
           <table ref={grid} role="grid" aria-label={monthLabel} className="w-full table-fixed border-separate border-spacing-0.5">

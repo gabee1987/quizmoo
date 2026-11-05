@@ -40,7 +40,7 @@ Finished plans are deleted once their branch is merged: `CHANGELOG.md` records w
 | 31 | The host's running-game screen: standings midgame, names in full, controls in view | `feature/host-game-screen` | done |
 | 32 | Cow antics: random face gags, moo bubbles and seasonal looks | `feature/cow-antics` | done |
 | 33 | Patch notes in the app | `feature/patch-notes` | done |
-| 34 | Help page and interactive tutorial with hints | `feature/help-and-tutorial` | planned |
+| 34 | [Tutorial tours and a help page](phase-34-tutorial-and-help.md) | `feature/tooltips-and-tutorial` | done |
 | 35 | Screen lock for the host's game screen | `feature/host-game-screen` | done |
 | 36 | E-mail to admins about new sign-ups | `feature/signup-emails` | done |
 | 37 | Fixes in the patch notes, kept for every release (with small fixes, released as 1.10.1) | `fix/small-fixes` | done |
@@ -63,6 +63,7 @@ Finished plans are deleted once their branch is merged: `CHANGELOG.md` records w
 | 54 | [Every text in the app, reviewed](phase-54-texts.md) | `feature/texts-and-starter-quiz` | done (1.11.0) |
 | 55 | [A starter quiz for every new host](phase-55-starter-quiz.md) | `feature/texts-and-starter-quiz` | done (1.11.0) |
 | 56 | Small fixes found along the way | `feature/texts-and-starter-quiz` | in progress |
+| 57 | [Tooltips in the app's own look](phase-57-tooltips.md) | `feature/tooltips-and-tutorial` | done |
 | later | [Hosting without an account](later-guest-hosting.md) | `feature/guest-hosting` | planned, after the MVP |
 
 ## Conventions every plan follows

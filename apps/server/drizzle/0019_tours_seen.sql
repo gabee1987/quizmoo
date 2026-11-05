@@ -1,0 +1,1 @@
+ALTER TABLE "host_settings" ADD COLUMN "tours_seen" jsonb DEFAULT '[]'::jsonb NOT NULL;

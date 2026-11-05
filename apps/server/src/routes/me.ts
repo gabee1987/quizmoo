@@ -1,11 +1,13 @@
 import {
   MAX_QUICK_MESSAGES,
   hostSettingsSchema,
+  hostTourIdSchema,
   lockCodeSchema,
   mergeLegacyQuickMessages,
   newQuickMessageSchema,
   unlockSchema,
   type HostSettings,
+  type HostTourId,
   type OwnQuickMessage,
 } from '@quizmoo/shared'
 import { eq, sql } from 'drizzle-orm'
@@ -100,6 +102,20 @@ async function saveSeenRelease(db: Db, userId: string, seenRelease: string) {
 
 const seenReleaseSchema = z.object({ version: z.string().regex(/^\d{1,4}\.\d{1,4}\.\d{1,4}$/) })
 
+/** The tutorial tours the host has seen or closed; ids no longer in the app are left out. */
+export async function readToursSeen(db: Db, userId: string): Promise<HostTourId[]> {
+  const row = (await db.select({ seen: hostSettings.toursSeen }).from(hostSettings).where(eq(hostSettings.userId, userId)))[0]
+  return (row?.seen ?? []).filter((id): id is HostTourId => hostTourIdSchema.safeParse(id).success)
+}
+
+async function saveToursSeen(db: Db, userId: string, toursSeen: HostTourId[]) {
+  const updatedAt = new Date()
+  await db
+    .insert(hostSettings)
+    .values({ userId, toursSeen, updatedAt })
+    .onConflictDoUpdate({ target: hostSettings.userId, set: { toursSeen, updatedAt } })
+}
+
 /**
  * Screen lock: true when `secret` is the lock code of one of the host's locked games, their default
  * lock code or their account password. Codes are checked only when the secret looks like one.
@@ -186,6 +202,23 @@ export async function meRoutes(
     const body = parseOr400(seenReleaseSchema, request.body, reply)
     if (!body) return reply
     await saveSeenRelease(db, request.user!.id, body.version)
+    return reply.code(204).send()
+  })
+
+  // Tutorial tours: which page tours the host has seen, so they show once per account, on any device.
+  app.get('/api/me/tours', auth, async (request) => ({ seen: await readToursSeen(db, request.user!.id) }))
+
+  app.put('/api/me/tours/:tour', auth, async (request, reply) => {
+    const params = parseOr400(z.object({ tour: hostTourIdSchema }), request.params, reply)
+    if (!params) return reply
+    const seen = await readToursSeen(db, request.user!.id)
+    if (!seen.includes(params.tour)) await saveToursSeen(db, request.user!.id, [...seen, params.tour])
+    return reply.code(204).send()
+  })
+
+  // "Show all tours again" in My settings.
+  app.delete('/api/me/tours', auth, async (request, reply) => {
+    await saveToursSeen(db, request.user!.id, [])
     return reply.code(204).send()
   })
 

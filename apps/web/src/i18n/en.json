@@ -210,6 +210,7 @@
     "username": "Username",
     "password": "Password",
     "showPassword": "Show password",
+    "hidePassword": "Hide password",
     "submit": "Log in",
     "logout": "Log out",
     "required": "Fill this in.",
@@ -1625,6 +1626,38 @@
     "releasedOn": "Released {{date}}",
     "fixed": "Fixed",
     "releases": {
+      "1_12_0": {
+        "title": "Tours, help and tooltips",
+        "intro": "Quizmoo now shows you around: a short tour on every main page, a help page that explains everything, and a tooltip on every button that shows only an icon.",
+        "sections": [
+          {
+            "title": "Tours",
+            "items": [
+              "The first time you open a main page (home, quizzes, the editor, a new game, the lobby, the first question, results, My settings), a short tour points at its most important controls. Step through it or close it at any time.",
+              "The tours you have seen are remembered on your account, so a tour you saw on the laptop does not show again on your phone. My settings, Account has \"Show all tours again\".",
+              "Players get a short tour in the lobby while they wait, once per device."
+            ]
+          },
+          {
+            "title": "Help",
+            "items": [
+              "The ? button at the top shows the page's tour again and opens Help.",
+              "The new Help page explains the app for players and hosts, with a small picture of the controls in each section, links to the pages in question and 22 frequently asked questions.",
+              "The Help page opens with a link back to your home."
+            ]
+          },
+          {
+            "title": "Tooltips",
+            "items": [
+              "Tooltips are in Quizmoo's own look and follow the game's colours and the dark mode.",
+              "Every button that shows only an icon has one, and they open on mouse hover and keyboard focus, never on a tap."
+            ]
+          }
+        ],
+        "fixed": [
+          "The Quizmoo logo on the help, legal and projector pages takes a logged-in host to their home instead of the join page."
+        ]
+      },
       "1_11_0": {
         "title": "A starter quiz and clearer texts",
         "intro": "Every new host starts with a ready quiz that shows what Quizmoo can do, and every text in the app was reviewed so it reads the same everywhere.",
@@ -2014,6 +2047,12 @@
     "discard": "Discard",
     "saved": "Settings saved",
     "passwordSaved": "Password saved",
+    "tours": {
+      "title": "Tours",
+      "help": "Each page shows a short tour the first time you open it. Want to see them again? They start over on every device you use.",
+      "reset": "Show all tours again",
+      "done": "The tours will show again."
+    },
     "lockCode": {
       "title": "Screen lock code",
       "help": "Unlocks your screens when you lock them during a game (\"Lock screen\"). New games use it unless you give one when you start them. Your password always unlocks too.",
@@ -2514,6 +2553,7 @@
         "notice": "That you have seen the storage notice, so it is not shown again.",
         "hostToasts": "Whether the host page shows short notifications about players joining and leaving.",
         "hostBoard": "How the host's game page shows the players: tiles or list, the order, hidden answers, the side panels and the menu.",
+        "tours": "Which tutorial tours you have already seen on this device, so they do not show again. Until you clear your browser data.",
         "appCache": "The app's own files (code, fonts, pictures), so it starts quickly and can be installed. No personal data."
       },
       "removeTitle": "Removing them",
@@ -2544,6 +2584,305 @@
       "done": "Thank you!"
     },
     "joinNote": "Everyone in the game sees your nickname. By joining you accept the <terms>terms</terms>; see the <privacy>privacy notice</privacy>."
+  },
+  "help": {
+    "nav": "Help",
+    "button": "Help and tours",
+    "showTour": "Show this page's tour",
+    "title": "Help",
+    "intro": "How Quizmoo works, for players and for hosts.",
+    "contents": "On this page",
+    "back": {
+      "host": "Back to your home",
+      "player": "Back to the join page"
+    },
+    "tours": "Every host page also has a short tour. Open it again with the ? button at the top, or show them all again in My settings.",
+    "links": {
+      "join": "Join a game",
+      "quizzes": "Open your quizzes",
+      "games": "Open your games",
+      "settings": "Open My settings",
+      "tours": "Show the tours again",
+      "users": "Open Users",
+      "names": "Open Names"
+    },
+    "figures": {
+      "player": "Player {{n}}",
+      "quizTitle": "Pub quiz",
+      "answering": { "question": "Which planet is the largest?", "options": ["Mars", "Jupiter", "Venus", "Saturn"] },
+      "points": { "speed": "Answered halfway through the time", "streak": "Third right answer in a row: +200" },
+      "teams": { "answer": "The team's answer" },
+      "devices": { "host": "You, on a laptop or phone", "screen": "A projector or TV", "players": "The players, on their phones" }
+    },
+    "players": { "title": "For players" },
+    "hosts": { "title": "For hosts" },
+    "sections": {
+      "joining": {
+        "heading": "Joining a game",
+        "paragraphs": ["You need no account and no app: open Quizmoo in your phone's browser."],
+        "figure": "The join page on a phone",
+        "items": {
+          "pin": { "term": "PIN or QR code", "text": "Type the 6-digit PIN shown on the projector, or scan the QR code with your phone's camera." },
+          "name": { "term": "Name and avatar", "text": "Type a name, or press Surprise me, and pick an avatar. Use a nickname, not your full name." },
+          "team": { "term": "Team", "text": "In a team game, join a team or start one. If the host allows it, you can also play on your own." },
+          "wait": { "term": "Lobby", "text": "Wait there until the host starts the game, and keep the page open." }
+        }
+      },
+      "answering": {
+        "heading": "Answering",
+        "paragraphs": [
+          "Each question appears on your phone with a timer. Answer before the time runs out.",
+          "If the host allows it, you can change your answer while the question runs; the last one counts."
+        ],
+        "figure": "A question on a phone: every answer has its own colour and shape, and the bar shows the time left",
+        "items": {
+          "single": { "text": "Tap the one right option." },
+          "multiple": { "text": "Pick every right option, then send. Only the full set counts." },
+          "truefalse": { "text": "Judge the statement." },
+          "text": { "text": "Type a short answer. Capitals and accents do not matter, and small typos may be accepted if the host allows it." },
+          "number": { "text": "Type a number. Some questions accept answers close to it." },
+          "order": { "text": "Drag the items into the right order. Only the exact order counts." },
+          "poll": { "text": "Give your opinion. There is no right answer and no points." }
+        }
+      },
+      "points": {
+        "heading": "Points",
+        "figure": "A right answer to a 1000-point question, given halfway through the time, the third right answer in a row",
+        "items": {
+          "right": { "term": "Right answer", "text": "Earns the question's points. A wrong or missing answer earns nothing." },
+          "speed": { "text": "A faster right answer earns more. A right answer in the last moment still earns half." },
+          "streak": { "text": "Right answers in a row earn extra: +100 from the second, up to +500." }
+        }
+      },
+      "teams": {
+        "heading": "Playing in a team",
+        "paragraphs": ["Your team plays as one. How its answer is formed depends on the game:"],
+        "figure": "Teammates suggest answers, and the team gives one",
+        "items": {
+          "captain": { "text": "Everyone suggests an answer, and the captain confirms the one that counts." },
+          "majority": { "text": "The answer most members gave counts for the team." },
+          "average": { "text": "Each member answers, and the team gets the average of their points." }
+        }
+      },
+      "connection": {
+        "heading": "If you lose the connection",
+        "figure": "The bar shown while reconnecting, and the menu at the top right",
+        "items": {
+          "back": { "term": "Back in the game", "text": "Your phone remembers you. Reload the page or open the game's link again, in the same browser on the same phone, and you are back with your points." },
+          "leave": { "text": "To leave on purpose, choose it in the menu at the top right." }
+        }
+      },
+      "host-start": {
+        "heading": "Getting started",
+        "figure": "A typical setup",
+        "items": {
+          "devices": { "term": "What you need", "text": "You with a laptop or a phone, the players with their phones, and ideally a projector or a TV everyone can see." },
+          "starter": { "text": "New to Quizmoo? Add the starter quiz on the Quizzes page. It shows every question type: play it through on your own phone to see how a game feels." }
+        }
+      },
+      "quizzes": {
+        "heading": "Your quizzes",
+        "figure": "The Quizzes page and a quiz in the list",
+        "items": {
+          "new": { "text": "Starts an empty quiz." },
+          "import": { "text": "Brings questions in from a spreadsheet (download the template there) or from a Quizmoo file." },
+          "play": { "text": "Starts a new game with the quiz." },
+          "more": { "term": "The ⋮ menu", "text": "Duplicates the quiz, downloads it, or deletes it." },
+          "select": { "text": "Change the settings of several quizzes at once, or delete them." }
+        }
+      },
+      "editor": {
+        "heading": "The editor",
+        "figure": "The editor's top bar and a question in the list",
+        "items": {
+          "saving": { "term": "Saved by itself", "text": "Everything you change is saved at once. The top bar shows whether it is saved, and takes you to anything that needs fixing." },
+          "add": { "text": "Pick the question's type first. The type cannot be changed later." },
+          "order": { "term": "Reordering", "text": "Drag questions by their handle, or use the move buttons." },
+          "off": { "text": "Switch a question off to leave it out of the next game without deleting it." },
+          "rounds": { "term": "Rounds", "text": "Group questions under a title. A round can have an intro screen, a colour, its own order and its own rules." },
+          "preview": { "term": "Phone preview", "text": "Shows each question as players see it, and can play the whole quiz through." },
+          "keys": { "term": "Limits and shortcuts", "text": "A quiz holds up to 200 questions. On a laptop, press ? to see the keyboard shortcuts." }
+        }
+      },
+      "game-settings": {
+        "heading": "Game settings",
+        "paragraphs": [
+          "Quiz settings (the gear in the editor) decide how the quiz's games play. A new game starts with them, and you can change them for that one game.",
+          "My settings holds the settings every new quiz starts with."
+        ],
+        "figure": "The settings in the new game dialog, with one group open",
+        "items": {
+          "flow": { "text": "Classic or team mode, when the correct answers and the scoreboard show, late joining." },
+          "look": { "text": "The colour theme, the answer colours and symbols." },
+          "scoring": { "text": "Speed bonus, streak bonus, small typos, shuffled options and question order." },
+          "branding": { "text": "Your logo and event name on the projector, and on the phones if you like." }
+        }
+      },
+      "starting": {
+        "heading": "Starting a game",
+        "figure": "The lobby: the PIN, the QR code and the players who joined",
+        "items": {
+          "play": { "term": "Now or later", "text": "Press Play on a quiz, check the settings, and choose Now or Later. A game set for later can be shared in advance." },
+          "projector": { "text": "Opens the projector view in a new window: move it to the projector or the TV." },
+          "players": { "term": "Players", "text": "They appear as they join. You can remove a player and, in a team game, manage the teams." },
+          "lock": { "text": "When everyone is in, lock joining, then press Start." }
+        }
+      },
+      "running": {
+        "heading": "Running the game",
+        "figure": "The controls during a question, and the player board",
+        "items": {
+          "primary": { "term": "The big button", "text": "Always does the next step: end the question, show the answers, the standings, the next question." },
+          "question": { "term": "During a question", "text": "Pause, +30 s or Skip." },
+          "board": { "term": "Player board", "text": "Shows who answered what, as it comes in." },
+          "hide": { "text": "Hides the answers on your screen when it is on show." },
+          "message": { "term": "Messages", "text": "Send a message to every phone and the projector: type one, or pick one of your quick messages." },
+          "grading": { "term": "Grading", "text": "Free-text questions without accepted answers are graded by you after the question." },
+          "lock": { "text": "Locks your host pages until your lock code or password is typed, if you have to step away." },
+          "keys": { "term": "Keyboard", "text": "If the projector view runs in your browser, Space or the right arrow key moves the game on from there." },
+          "end": { "text": "Shows the podium, or closes the game without one." }
+        }
+      },
+      "results": {
+        "heading": "Results",
+        "figure": "The winners, and the export",
+        "items": {
+          "summary": { "term": "Summary", "text": "The winners, the main figures, and the easiest and hardest questions." },
+          "tabs": { "term": "Players, teams and questions", "text": "Every player's, team's and question's details." },
+          "export": { "text": "Downloads the results as a spreadsheet." },
+          "history": { "text": "Lists your running, scheduled and finished games, with their results." },
+          "kept": { "term": "How long they are kept", "text": "Results are deleted automatically after a while; the privacy notice says when." }
+        }
+      },
+      "settings": {
+        "heading": "My settings",
+        "figure": "The tabs of My settings",
+        "items": {
+          "games": { "text": "The settings, time limit and points every new quiz starts with." },
+          "messages": { "text": "Your quick messages for games." },
+          "branding": { "text": "Your logo and event name." },
+          "account": { "text": "Language and look on this device, password, screen lock code, tours, logins, downloading your data and deleting your account." }
+        }
+      },
+      "admin": {
+        "heading": "For administrators",
+        "items": {
+          "users": { "text": "Add hosts, approve or reject sign-ups, and manage accounts." },
+          "names": { "text": "The lists Surprise me picks player names from, one per language." }
+        }
+      }
+    },
+    "faq": {
+      "title": "Questions people ask",
+      "groups": {
+        "playing": {
+          "title": "Playing",
+          "items": [
+            { "question": "Do players need an account or an app?", "answer": "No. A browser and the PIN are enough. Any phone, tablet or laptop with an up-to-date browser works." },
+            { "question": "How many players can join?", "answer": "Up to 60 in one game." },
+            { "question": "Someone already has my name. What now?", "answer": "Names are unique within a game. Add a letter or a number, or press Surprise me." },
+            { "question": "Why was my name refused?", "answer": "Names are checked against a short list of offensive words. Pick another one." },
+            { "question": "A player's phone fell asleep. Are their points lost?", "answer": "No. When they open the game again on the same phone, they are back with their points." },
+            { "question": "Can someone join after the start?", "answer": "Only if Players can join late is on and joining is not locked. They get no points for earlier questions." },
+            { "question": "Do capitals and accents matter in a typed answer?", "answer": "No: \"Győr\", \"gyor\" and \"GYŐR\" count as the same answer. Whether small typos are accepted is up to the host." },
+            { "question": "Why did my answer earn no points?", "answer": "A multiple choice or a put-in-order answer counts only when it is fully right, a poll never earns points, and an answer sent after the time ran out is not taken." },
+            { "question": "Two players have the same score. Who is ahead?", "answer": "Neither: they share the place." }
+          ]
+        },
+        "hosting": {
+          "title": "Hosting",
+          "items": [
+            { "question": "Can I try a quiz before the event?", "answer": "Yes. The phone preview in the editor plays the whole quiz, or start a game and join it from your own phone." },
+            { "question": "Do I need a projector?", "answer": "No, but it helps: the whole room follows the questions, the answers and the standings together. Without one, the phones show each question too." },
+            { "question": "Does the projector's computer need to log in?", "answer": "No. The projector view needs no login: open it with Open projector, or open the same address on another computer." },
+            { "question": "What happens if I close my browser during a game?", "answer": "The game keeps running. Open it again from the home page or from Games, and carry on. A running question still ends on time." },
+            { "question": "Someone joined with an unsuitable name. What can I do?", "answer": "Remove them in the lobby with the button on their tile." },
+            { "question": "Can I play the quiz again with the same players?", "answer": "Yes. At the end of a game, Play again starts a new game with the same quiz, and the players join it with one tap, keeping their name and avatar." },
+            { "question": "Can I bring in questions from a spreadsheet?", "answer": "Yes, with Import on the Quizzes page. Download the template there and fill it in." },
+            { "question": "How many questions can a quiz have?", "answer": "Up to 200. Rounds keep a long quiz in order." },
+            { "question": "Can I set a game up in advance?", "answer": "Yes. Choose Later in the new game dialog. You can share the game in advance, and it is listed under Games until it starts." }
+          ]
+        },
+        "privacy": {
+          "title": "Your data",
+          "items": [
+            { "question": "What does Quizmoo keep about players?", "answer": "Only the nickname they type, their avatar, their team and their answers. No e-mail address, phone number or IP address." },
+            { "question": "How long are results kept?", "answer": "For a limited time, then they are deleted automatically; the privacy notice says how long. You can delete a game's results earlier yourself." },
+            { "question": "What does Quizmoo store on my device?", "answer": "Only what the app needs, such as the language, the look and your place in a game. The Cookies and storage page lists every item." },
+            { "question": "Can I download or delete my data as a host?", "answer": "Yes. In My settings, Account, you can download your data, or delete your account with everything in it." }
+          ]
+        }
+      }
+    }
+  },
+  "tour": {
+    "next": "Next",
+    "back": "Back",
+    "done": "Got it",
+    "close": "End the tour",
+    "progress": "Step {{current}} of {{total}}",
+    "moreHelp": "More about this in Help",
+    "home": {
+      "welcome": { "title": "Welcome to Quizmoo!", "body": "A quick look around: what you can do here and where things are. Close it whenever you like; the ? button brings it back." },
+      "newQuiz": { "title": "Make a quiz", "body": "Start a new quiz here. Questions, rounds, pictures: everything is in the editor." },
+      "recent": { "title": "Your quizzes", "body": "The quizzes you edited last. Open one to edit it, or press Play to start a game with it." },
+      "nav": { "title": "Find your way", "body": "Your quizzes, your games and their results are always one click away here." },
+      "account": { "title": "Your settings", "body": "Game defaults, quick messages, your logo, and what is new in Quizmoo." },
+      "help": { "title": "Need a hand?", "body": "This button shows the tour of any page again, and opens Help, where everything is explained." }
+    },
+    "quizzes": {
+      "newQuiz": { "title": "New quiz", "body": "Start from an empty quiz." },
+      "import": { "title": "Bring questions in", "body": "Add the starter quiz to see an example, or import questions from a spreadsheet or a Quizmoo file." },
+      "search": { "title": "Find a quiz", "body": "Search and sort your quizzes. Select lets you change the settings of several at once, or delete them." },
+      "card": { "title": "Edit or play", "body": "Edit opens the editor. Play starts a new game: you check its settings, then share the PIN with the players." },
+      "more": { "title": "More actions", "body": "Duplicate a quiz, download it as a spreadsheet or a Quizmoo file, or delete it." }
+    },
+    "editor": {
+      "title": { "title": "Give it a name", "body": "Players see the title when they join. Everything you change is saved by itself." },
+      "list": { "title": "Your questions", "body": "Pick a question to edit it, drag it to move it. Rounds group questions under a title of their own." },
+      "add": { "title": "Add questions", "body": "Add a question or a round. You pick the question type first: choice, true or false, typed answer, number or ordering." },
+      "inGame": { "title": "In the game or not", "body": "Switch a question off to leave it out of the next game without deleting it." },
+      "save": { "title": "Saved by itself", "body": "This shows whether everything is saved. When something needs fixing, a button here takes you to it." },
+      "preview": { "title": "See it on a phone", "body": "This is how players see the question. You can play the whole quiz through here." },
+      "settings": { "title": "Quiz settings", "body": "Timing, scoring, teams, the look and your branding. Every game of this quiz starts with these." },
+      "play": { "title": "Ready?", "body": "Play starts a game with this quiz. You can still change its settings for that one game." }
+    },
+    "newGame": {
+      "tabs": { "title": "This game's settings", "body": "They come from the quiz. What you change here applies to this game only; the quiz stays as it is." },
+      "when": { "title": "Now or later", "body": "Start now, or schedule the game for later: players then see when it begins." },
+      "create": { "title": "Create the game", "body": "You get a PIN and a QR code for the players, and the game waits in the lobby until you start it." }
+    },
+    "lobby": {
+      "join": { "title": "Let the players in", "body": "Players open Quizmoo on their phone and type this PIN, or scan the QR code." },
+      "projector": { "title": "Show it big", "body": "Opens the projector view in a new window: move it to the projector or the TV. It shows the PIN, then the questions." },
+      "lock": { "title": "Close the door", "body": "Lock joining when everyone is in, so nobody else can join." },
+      "players": { "title": "Who is here", "body": "Players show up here as they join. When everyone is in, press Start." },
+      "message": { "title": "Talk to everyone", "body": "Send a short message to every phone and the projector, for example about a break." }
+    },
+    "running": {
+      "primary": { "title": "What comes next", "body": "This button always does the next thing: end the question, show the answers, the standings, the next question." },
+      "controls": { "title": "Need more time?", "body": "Pause the question, add 30 seconds, or skip it." },
+      "board": { "title": "Who answered what", "body": "Every player's answer shows up here as it comes in. Hide the answers when your screen is on show." },
+      "panels": { "title": "Side panels", "body": "Standings, messages, players and the questions, at hand while the game runs." },
+      "end": { "title": "End the game", "body": "Show the podium now, or close the game without one." }
+    },
+    "results": {
+      "summary": { "title": "How it went", "body": "The winners, the main figures, and the easiest and hardest questions." },
+      "tabs": { "title": "Every detail", "body": "Each player's and team's answers and points, and how each question went." },
+      "export": { "title": "Take it with you", "body": "Download the results as a spreadsheet." }
+    },
+    "settings": {
+      "tabs": { "title": "Your settings", "body": "Game defaults, quick messages, your branding and your account, each on its own tab." },
+      "defaults": { "title": "Game defaults", "body": "Every new quiz starts with these settings. Each quiz can still change them." },
+      "questions": { "title": "New questions", "body": "The time limit and points new questions start with." }
+    },
+    "playerLobby": {
+      "card": { "title": "You're in!", "body": "Wait here until the host starts the game. Keep this page open." },
+      "team": { "title": "Your team", "body": "Your team and who is in it. Your answers count for your team too." },
+      "about": { "title": "About the game", "body": "How many questions there are, how long you have for each, and how points are given." },
+      "answering": { "title": "How to play", "body": "Each question appears on your phone. Tap your answer before the time runs out: a right answer brings points, a fast one even more." },
+      "menu": { "title": "Settings", "body": "Change the language or switch to dark mode here. You can also leave the game." }
+    }
   },
   "quizFile": {
     "importTitle": "Import a quiz",

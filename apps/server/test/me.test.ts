@@ -165,6 +165,33 @@ describeDb('host settings (database)', () => {
     expect((await req(first, 'GET', '/api/me/export')).json().seenRelease).toBe('1.1.0')
   })
 
+  it('remembers the tutorial tours a host has seen, per account, until they are shown again', async () => {
+    expect((await built.app.inject({ method: 'GET', url: '/api/me/tours' })).statusCode).toBe(401)
+    expect((await built.app.inject({ method: 'PUT', url: '/api/me/tours/home' })).statusCode).toBe(401)
+    expect((await built.app.inject({ method: 'DELETE', url: '/api/me/tours' })).statusCode).toBe(401)
+    expect((await req(first, 'GET', '/api/me/tours')).json()).toEqual({ seen: [] })
+    for (const tour of ['nope', 'playerLobby', 'HOME']) {
+      const refused = await req(first, 'PUT', `/api/me/tours/${tour}`)
+      expect(refused.statusCode).toBe(400)
+      expect(refused.json().error).toBe('errors.invalidInput')
+    }
+    expect((await req(first, 'PUT', '/api/me/tours/home')).statusCode).toBe(204)
+    expect((await req(first, 'PUT', '/api/me/tours/editor')).statusCode).toBe(204)
+    expect((await req(first, 'PUT', '/api/me/tours/home')).statusCode).toBe(204)
+    expect((await req(first, 'GET', '/api/me/tours')).json()).toEqual({ seen: ['home', 'editor'] })
+    expect((await req(second, 'GET', '/api/me/tours')).json()).toEqual({ seen: [] })
+    // Saving My settings leaves them alone, and they are in the export.
+    expect((await req(first, 'PUT', '/api/me/settings', await settingsOf(first))).statusCode).toBe(200)
+    expect((await req(first, 'GET', '/api/me/tours')).json()).toEqual({ seen: ['home', 'editor'] })
+    expect((await req(first, 'GET', '/api/me/export')).json().toursSeen).toEqual(['home', 'editor'])
+    // Ids a later version dropped are not sent back.
+    await db.update(hostSettings).set({ toursSeen: ['home', 'gone'] }).where(eq(hostSettings.userId, firstId))
+    expect((await req(first, 'GET', '/api/me/tours')).json()).toEqual({ seen: ['home'] })
+    expect((await req(first, 'DELETE', '/api/me/tours')).statusCode).toBe(204)
+    expect((await req(first, 'GET', '/api/me/tours')).json()).toEqual({ seen: [] })
+    expect((await settingsOf(first)).eventName).toBe('Christmas party')
+  })
+
   it('deletes the settings and the logo with the host account', async () => {
     expect(await db.select().from(hostSettings).where(eq(hostSettings.userId, firstId))).toHaveLength(1)
     await db.delete(users).where(eq(users.id, firstId))

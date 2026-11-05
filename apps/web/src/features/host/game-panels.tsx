@@ -43,7 +43,7 @@ export function GamePanels({
   const [panel, setPanel] = useState<Panel>('standings')
   return (
     <Tabs value={panel} onValueChange={(value) => setPanel(value as Panel)} className={cn('min-h-0 gap-2', className)}>
-      <TabsList className="grid h-auto! w-full shrink-0 grid-cols-5">
+      <TabsList data-tour="game-panels" className="grid h-auto! w-full shrink-0 grid-cols-5">
         {panels.map((name) => {
           const Icon = icons[name]
           return (

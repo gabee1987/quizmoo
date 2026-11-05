@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Hint } from '@/components/hint'
 import { cn } from '@/lib/cn'
 import { emitAck } from '../../lib/socket'
 
@@ -36,20 +37,21 @@ export function RoundTripBadge({ connected }: { connected: boolean }) {
   const tone = roundTripTone(ms)
   const label = ms === null ? t('host.game.roundTripNone') : t('host.game.roundTrip', { ms })
   return (
-    <span
-      title={label}
-      aria-label={label}
-      role="img"
-      className="inline-flex items-center gap-1.5 rounded-full border bg-card px-2.5 py-0.5 text-xs font-bold tabular-nums"
-    >
+    <Hint label={label}>
       <span
-        aria-hidden="true"
-        className={cn(
-          'size-2 rounded-full',
-          tone === 'good' ? 'bg-success' : tone === 'slow' ? 'bg-warning' : 'bg-destructive',
-        )}
-      />
-      {ms === null ? '–' : `${ms} ms`}
-    </span>
+        aria-label={label}
+        role="img"
+        className="inline-flex items-center gap-1.5 rounded-full border bg-card px-2.5 py-0.5 text-xs font-bold tabular-nums"
+      >
+        <span
+          aria-hidden="true"
+          className={cn(
+            'size-2 rounded-full',
+            tone === 'good' ? 'bg-success' : tone === 'slow' ? 'bg-warning' : 'bg-destructive',
+          )}
+        />
+        {ms === null ? '–' : `${ms} ms`}
+      </span>
+    </Hint>
   )
 }

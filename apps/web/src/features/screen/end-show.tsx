@@ -13,6 +13,7 @@ import {
 } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Hint } from '@/components/hint'
 import { cn } from '@/lib/cn'
 import { EndAwards, EndFactsPage, EndLeaderboard, EndRecap } from './end-pages'
 import { ScreenPodium } from './podium'
@@ -107,15 +108,16 @@ function EndSteps({
     <nav aria-label={t('screen.end.pagesLabel')} className="flex justify-center">
       <div className="flex flex-wrap items-center justify-center gap-2 rounded-full border bg-card p-1.5 shadow-soft">
         {onCommand && (
-          <button
-            type="button"
-            className={cn(control, 'px-2.5')}
-            aria-label={t(recap ? 'host.game.endShow.previousQuestion' : 'host.game.endShow.back')}
-            title={t(recap ? 'host.game.endShow.previousQuestion' : 'host.game.endShow.back')}
-            onClick={() => onCommand({ type: 'endPageStep', step: -1 })}
-          >
-            <ChevronLeftIcon className="size-6" aria-hidden="true" />
-          </button>
+          <Hint label={t(recap ? 'host.game.endShow.previousQuestion' : 'host.game.endShow.back')}>
+            <button
+              type="button"
+              className={cn(control, 'px-2.5')}
+              aria-label={t(recap ? 'host.game.endShow.previousQuestion' : 'host.game.endShow.back')}
+              onClick={() => onCommand({ type: 'endPageStep', step: -1 })}
+            >
+              <ChevronLeftIcon className="size-6" aria-hidden="true" />
+            </button>
+          </Hint>
         )}
         <ol className="flex flex-wrap items-center justify-center gap-2">
           {stepsOf(show).map((page) => {
@@ -152,15 +154,16 @@ function EndSteps({
         </ol>
         {onCommand && (
           <>
-            <button
-              type="button"
-              className={cn(control, 'px-2.5')}
-              aria-label={t(recap ? 'host.game.endShow.nextQuestion' : 'host.game.endShow.next')}
-              title={t(recap ? 'host.game.endShow.nextQuestion' : 'host.game.endShow.next')}
-              onClick={() => onCommand({ type: 'endPageStep', step: 1 })}
-            >
-              <ChevronRightIcon className="size-6" aria-hidden="true" />
-            </button>
+            <Hint label={t(recap ? 'host.game.endShow.nextQuestion' : 'host.game.endShow.next')}>
+              <button
+                type="button"
+                className={cn(control, 'px-2.5')}
+                aria-label={t(recap ? 'host.game.endShow.nextQuestion' : 'host.game.endShow.next')}
+                onClick={() => onCommand({ type: 'endPageStep', step: 1 })}
+              >
+                <ChevronRightIcon className="size-6" aria-hidden="true" />
+              </button>
+            </Hint>
             <span className="h-8 w-px bg-border" aria-hidden="true" />
             <button
               type="button"

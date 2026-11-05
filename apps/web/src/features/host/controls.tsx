@@ -83,7 +83,7 @@ export function Controls({
       >
         <SeenChip host={host} />
         {primary && (
-          <Button size={placement === 'rail' ? 'xl' : 'lg'} className="w-full" onClick={() => onCommand(primary.command)}>
+          <Button size={placement === 'rail' ? 'xl' : 'lg'} className="w-full" data-tour="game-primary" onClick={() => onCommand(primary.command)}>
             {t(primary.label)}
           </Button>
         )}
@@ -111,7 +111,7 @@ export function Controls({
         {host.phase === 'reveal' && host.awaitingGrading && hint(t('host.game.gradeFirst'), 'warning', false)}
         {secondary && (
           // One row also on a phone in Hungarian: tighter buttons, icons from sm up.
-          <div className="flex gap-2 [&_button]:min-w-0 max-sm:[&_button]:px-2 max-sm:[&_svg]:hidden">
+          <div data-tour="game-controls" className="flex gap-2 [&_button]:min-w-0 max-sm:[&_button]:px-2 max-sm:[&_svg]:hidden">
             {queue.length > 1 && (
               <>
                 <Button
@@ -242,7 +242,7 @@ export function EndGameButton({
   )
   return (
     <>
-      <Button variant="outline" size="sm" onClick={() => setOpen(true)}>
+      <Button variant="outline" size="sm" data-tour="end-game" onClick={() => setOpen(true)}>
         {t('host.game.end')}
       </Button>
       <Dialog open={open} onOpenChange={setOpen}>

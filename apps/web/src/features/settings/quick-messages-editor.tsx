@@ -5,6 +5,7 @@ import { CSS } from '@dnd-kit/utilities'
 import { ArrowDownIcon, ArrowUpIcon, GripVerticalIcon, LanguagesIcon, PlusIcon, RotateCcwIcon, XIcon } from 'lucide-react'
 import { useCallback, useId, useMemo, useRef, useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Hint } from '@/components/hint'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
@@ -174,16 +175,18 @@ function MessageRow({
       )}
     >
       <div className="flex items-center gap-1.5">
-        <button
-          ref={setActivatorNodeRef}
-          type="button"
-          {...attributes}
-          {...listeners}
-          aria-label={t('settings.messages.drag', { n })}
-          className="flex h-10 w-6 shrink-0 cursor-grab touch-manipulation items-center justify-center rounded-lg text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring active:cursor-grabbing"
-        >
-          <GripVerticalIcon className="size-4" aria-hidden="true" />
-        </button>
+        <Hint label={t('settings.messages.drag', { n })}>
+          <button
+            ref={setActivatorNodeRef}
+            type="button"
+            {...attributes}
+            {...listeners}
+            aria-label={t('settings.messages.drag', { n })}
+            className="flex h-10 w-6 shrink-0 cursor-grab touch-manipulation items-center justify-center rounded-lg text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring active:cursor-grabbing"
+          >
+            <GripVerticalIcon className="size-4" aria-hidden="true" />
+          </button>
+        </Hint>
         <Input
           value={text}
           maxLength={MAX_LENGTH}
@@ -195,9 +198,11 @@ function MessageRow({
             onChange({ id: message.id, text: e.target.value, durationSec: message.durationSec, ...(message.important && { important: true }) })
           }
         />
-        <Button type="button" variant="ghost" size="icon-sm" aria-label={t('settings.messages.remove', { n })} onClick={remove}>
-          <XIcon aria-hidden="true" />
-        </Button>
+        <Hint label={t('settings.messages.remove', { n })}>
+          <Button type="button" variant="ghost" size="icon-sm" aria-label={t('settings.messages.remove', { n })} onClick={remove}>
+            <XIcon aria-hidden="true" />
+          </Button>
+        </Hint>
       </div>
       {empty && (
         <p id={errorId} className="pl-8 text-sm font-semibold text-destructive">
@@ -218,26 +223,30 @@ function MessageRow({
           </span>
         )}
         <div className="ml-auto flex gap-1">
-          <Button
-            type="button"
-            variant="outline"
-            size="icon-sm"
-            aria-label={t('settings.messages.moveUp', { n })}
-            disabled={index === 0}
-            onClick={() => onMove(index - 1)}
-          >
-            <ArrowUpIcon aria-hidden="true" />
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            size="icon-sm"
-            aria-label={t('settings.messages.moveDown', { n })}
-            disabled={last}
-            onClick={() => onMove(index + 1)}
-          >
-            <ArrowDownIcon aria-hidden="true" />
-          </Button>
+          <Hint label={t('settings.messages.moveUp', { n })}>
+            <Button
+              type="button"
+              variant="outline"
+              size="icon-sm"
+              aria-label={t('settings.messages.moveUp', { n })}
+              disabled={index === 0}
+              onClick={() => onMove(index - 1)}
+            >
+              <ArrowUpIcon aria-hidden="true" />
+            </Button>
+          </Hint>
+          <Hint label={t('settings.messages.moveDown', { n })}>
+            <Button
+              type="button"
+              variant="outline"
+              size="icon-sm"
+              aria-label={t('settings.messages.moveDown', { n })}
+              disabled={last}
+              onClick={() => onMove(index + 1)}
+            >
+              <ArrowDownIcon aria-hidden="true" />
+            </Button>
+          </Hint>
         </div>
       </div>
     </div>

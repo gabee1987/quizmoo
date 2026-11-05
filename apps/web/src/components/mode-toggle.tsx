@@ -1,5 +1,6 @@
 import { MonitorIcon, MoonIcon, SunIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { Hint } from '@/components/hint'
 import { Button } from '@/components/ui/button'
 import { modes, setMode, useMode } from '@/lib/mode'
 
@@ -15,14 +16,10 @@ export function ModeToggle() {
   const Icon = icons[mode]
   const next = modes[(modes.indexOf(mode) + 1) % modes.length]!
   return (
-    <Button
-      variant="ghost"
-      size="icon-sm"
-      aria-label={`${t('app.mode')}: ${t(`app.modes.${mode}`)}`}
-      title={`${t('app.mode')}: ${t(`app.modes.${mode}`)}`}
-      onClick={() => setMode(next)}
-    >
-      <Icon aria-hidden="true" />
-    </Button>
+    <Hint label={`${t('app.mode')}: ${t(`app.modes.${mode}`)}`}>
+      <Button variant="ghost" size="icon-sm" aria-label={`${t('app.mode')}: ${t(`app.modes.${mode}`)}`} onClick={() => setMode(next)}>
+        <Icon aria-hidden="true" />
+      </Button>
+    </Hint>
   )
 }

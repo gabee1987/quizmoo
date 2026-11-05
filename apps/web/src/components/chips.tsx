@@ -1,6 +1,7 @@
 import { useId, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { XIcon } from 'lucide-react'
+import { Hint } from '@/components/hint'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -40,14 +41,16 @@ export function ChipsInput({
           {values.map((value, i) => (
             <li key={`${value}-${i}`} className="flex items-center gap-1 rounded-full bg-secondary py-1 pr-1 pl-3 font-semibold text-secondary-foreground">
               <span className="wrap-break-word">{value}</span>
-              <button
-                type="button"
-                className="flex size-8 items-center justify-center rounded-full hover:bg-background/60 focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:outline-none"
-                aria-label={t('common.removeItem', { name: value })}
-                onClick={() => onChange(values.filter((_, j) => j !== i))}
-              >
-                <XIcon className="size-4" aria-hidden="true" />
-              </button>
+              <Hint label={t('common.removeItem', { name: value })}>
+                <button
+                  type="button"
+                  className="flex size-8 items-center justify-center rounded-full hover:bg-background/60 focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:outline-none"
+                  aria-label={t('common.removeItem', { name: value })}
+                  onClick={() => onChange(values.filter((_, j) => j !== i))}
+                >
+                  <XIcon className="size-4" aria-hidden="true" />
+                </button>
+              </Hint>
             </li>
           ))}
         </ul>
