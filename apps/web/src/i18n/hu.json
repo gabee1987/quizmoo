@@ -1626,6 +1626,38 @@
     "releasedOn": "Megjelent: {{date}}",
     "fixed": "Javítva",
     "releases": {
+      "1_12_0": {
+        "title": "Bemutatók, súgó és buboréktippek",
+        "intro": "A Quizmoo most körbevezet: minden fő oldalon van egy rövid bemutató, a Súgó mindent elmagyaráz, és minden csak ikonos gombnak van buboréktippje.",
+        "sections": [
+          {
+            "title": "Bemutatók",
+            "items": [
+              "Amikor először nyitsz meg egy fő oldalt (kezdőlap, kvízek, szerkesztő, új játék, váróterem, az első kérdés, eredmények, Beállításaim), egy rövid bemutató megmutatja a legfontosabb gombjait. Lépkedhetsz benne, vagy bármikor bezárhatod.",
+              "A már látott bemutatókat a fiókod megjegyzi, így amit a laptopon láttál, az a telefonodon nem jön elő újra. A Beállításaim, Fiók részben ott a „Minden bemutató újra”.",
+              "A játékosok a váróteremben kapnak egy rövid bemutatót, amíg várnak, eszközönként egyszer."
+            ]
+          },
+          {
+            "title": "Súgó",
+            "items": [
+              "A fenti ? gomb újra megmutatja az oldal bemutatóját, és innen nyílik a Súgó is.",
+              "Az új Súgó oldal játékosoknak és játékvezetőknek is elmagyarázza az alkalmazást: minden résznél egy kis kép mutatja a gombokat, linkek visznek a megfelelő oldalra, és 22 gyakori kérdésre is választ kapsz.",
+              "A Súgó tetején egy link visz vissza a kezdőlapodra."
+            ]
+          },
+          {
+            "title": "Buboréktippek",
+            "items": [
+              "A buboréktippek a Quizmoo saját stílusában jelennek meg, és követik a játék színeit és a sötét módot.",
+              "Minden csak ikonos gombnak van buboréktippje, és egérrel fölé víve vagy billentyűzettel jelenik meg, koppintásra soha."
+            ]
+          }
+        ],
+        "fixed": [
+          "A Súgó, a jogi oldalak és a kivetítő tetején a Quizmoo logó a belépett játékvezetőt a kezdőlapjára viszi, nem a csatlakozó oldalra."
+        ]
+      },
       "1_11_0": {
         "title": "Próbakvíz és érthetőbb szövegek",
         "intro": "Minden új játékvezető egy kész kvízzel kezd, amely megmutatja, mit tud a Quizmoo, és az alkalmazás minden szövegét átnéztük, hogy mindenhol ugyanúgy szóljon.",

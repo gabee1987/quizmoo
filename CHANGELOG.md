@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 1.12.0 – 2026-11-05
+
 ### Tutorial tours and a help page (phase 34)
 - Every main host page shows a short tour the first time it opens: home, quizzes, the editor, the new game dialog, the game's lobby, the first running question, results and My settings. Each bubble points at one control with a soft ring around it and a light dim, shows the progress ("2 / 5" and dots), and has Back, Next and a close button; the arrow keys step and Escape ends it. The page stays usable while a tour is open.
 - Steps adapt to the screen: a step whose control is not shown is left out and the progress counts only what remains; on a phone, steps point at the phone's own controls (the bottom bar, the list button, the +). A tour waits, or hides, while a dialog or menu it is not part of is open.

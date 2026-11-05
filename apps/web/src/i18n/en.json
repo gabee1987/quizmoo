@@ -1626,6 +1626,38 @@
     "releasedOn": "Released {{date}}",
     "fixed": "Fixed",
     "releases": {
+      "1_12_0": {
+        "title": "Tours, help and tooltips",
+        "intro": "Quizmoo now shows you around: a short tour on every main page, a help page that explains everything, and a tooltip on every button that shows only an icon.",
+        "sections": [
+          {
+            "title": "Tours",
+            "items": [
+              "The first time you open a main page (home, quizzes, the editor, a new game, the lobby, the first question, results, My settings), a short tour points at its most important controls. Step through it or close it at any time.",
+              "The tours you have seen are remembered on your account, so a tour you saw on the laptop does not show again on your phone. My settings, Account has \"Show all tours again\".",
+              "Players get a short tour in the lobby while they wait, once per device."
+            ]
+          },
+          {
+            "title": "Help",
+            "items": [
+              "The ? button at the top shows the page's tour again and opens Help.",
+              "The new Help page explains the app for players and hosts, with a small picture of the controls in each section, links to the pages in question and 22 frequently asked questions.",
+              "The Help page opens with a link back to your home."
+            ]
+          },
+          {
+            "title": "Tooltips",
+            "items": [
+              "Tooltips are in Quizmoo's own look and follow the game's colours and the dark mode.",
+              "Every button that shows only an icon has one, and they open on mouse hover and keyboard focus, never on a tap."
+            ]
+          }
+        ],
+        "fixed": [
+          "The Quizmoo logo on the help, legal and projector pages takes a logged-in host to their home instead of the join page."
+        ]
+      },
       "1_11_0": {
         "title": "A starter quiz and clearer texts",
         "intro": "Every new host starts with a ready quiz that shows what Quizmoo can do, and every text in the app was reviewed so it reads the same everywhere.",
