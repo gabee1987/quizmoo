@@ -4,6 +4,7 @@ import { useCowAntics } from '@/features/cow/use-cow-antics'
 import { stagger } from '@/lib/motion'
 import { CowBubble } from './cow-bubble'
 import { CowLogo } from './cow-logo'
+import { Hint } from './hint'
 import { SeasonGreeting } from './season-greeting'
 
 /** Speech lines the cow cycles through, one per tap. */
@@ -31,27 +32,29 @@ export function HomeHero({ tagline, titleRef }: { tagline: string; titleRef?: Re
   return (
     <div className="flex flex-col items-center gap-3 text-center">
       <div className="relative">
-        <button
-          type="button"
-          data-no-squish
-          aria-label={t('home.cowLabel')}
-          onClick={() => {
-            setTaps((n) => n + 1)
-            setTappedAt(count)
-            restart()
-          }}
-          className="block rounded-4xl outline-none focus-visible:ring-[3px] focus-visible:ring-ring"
-        >
-          <span className="hero-bob block">
-            {/* Keyed by the tap count so every tap replays the jump. */}
-            <span key={taps} className={taps > 0 ? 'hero-jump block' : 'block'}>
-              <span className="grid size-32 -rotate-6 place-items-center rounded-4xl bg-primary shadow-[0_6px_0_0_var(--primary-edge)] lg:size-48 lg:rounded-[2.5rem] lg:shadow-[0_9px_0_0_var(--primary-edge)]">
-                <CowLogo antic={antic} season={season} className="size-28 lg:size-42" />
+        <Hint label={t('home.cowLabel')} side="bottom">
+          <button
+            type="button"
+            data-no-squish
+            aria-label={t('home.cowLabel')}
+            onClick={() => {
+              setTaps((n) => n + 1)
+              setTappedAt(count)
+              restart()
+            }}
+            className="block rounded-4xl outline-none focus-visible:ring-[3px] focus-visible:ring-ring"
+          >
+            <span className="hero-bob block">
+              {/* Keyed by the tap count so every tap replays the jump. */}
+              <span key={taps} className={taps > 0 ? 'hero-jump block' : 'block'}>
+                <span className="grid size-32 -rotate-6 place-items-center rounded-4xl bg-primary shadow-[0_6px_0_0_var(--primary-edge)] lg:size-48 lg:rounded-[2.5rem] lg:shadow-[0_9px_0_0_var(--primary-edge)]">
+                  <CowLogo antic={antic} season={season} className="size-28 lg:size-42" />
+                </span>
               </span>
             </span>
-          </span>
-          <span aria-hidden="true" className="hero-shadow mx-auto mt-3 block h-3 w-24 rounded-[50%] bg-foreground/15 lg:w-36" />
-        </button>
+            <span aria-hidden="true" className="hero-shadow mx-auto mt-3 block h-3 w-24 rounded-[50%] bg-foreground/15 lg:w-36" />
+          </button>
+        </Hint>
         {/* The tap lines are announced; what the cow says by itself is decoration. A tap clears it. */}
         <p aria-live="polite" className={bubbleSpot}>
           {taps > 0 && tappedAt === count && (

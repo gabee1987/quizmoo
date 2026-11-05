@@ -20,6 +20,7 @@ import { cn } from '@/lib/cn'
 import { modes, setMode, useMode, type Mode } from '@/lib/mode'
 import { useLogout } from '@/lib/use-logout'
 import { LogoMark } from './app-header'
+import { Hint } from './hint'
 import { UnseenDot } from './host-nav'
 import { SeasonMenuItem } from './season-greeting'
 
@@ -38,22 +39,26 @@ export function AppMenu() {
   const stayOpen = (event: Event) => event.preventDefault()
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger
-        aria-label={t('app.menu')}
-        title={t('app.menu')}
-        data-no-squish
-        onPointerDown={() => setHops((n) => n + 1)}
-        className="group relative flex items-center gap-1 rounded-xl py-1 pr-1.5 pl-1 transition-colors duration-200 outline-none hover:bg-muted focus-visible:ring-[3px] focus-visible:ring-ring data-[state=open]:bg-muted"
-      >
-        {/* Keyed by the presses, so every one replays the hop. */}
-        <span key={hops} className={cn('block', hops > 0 && 'logo-hop')}>
-          <LogoMark />
-        </span>
-        <ChevronDownIcon
-          className="size-4 text-muted-foreground transition-transform duration-300 ease-spring group-hover:text-foreground group-data-[state=open]:rotate-180"
-          aria-hidden="true"
-        />
-        {unseen && <UnseenDot className="absolute -top-0.5 -right-0.5" />}
+      <DropdownMenuTrigger asChild>
+        <Hint label={t('app.menu')}>
+          <button
+            type="button"
+            aria-label={t('app.menu')}
+            data-no-squish
+            onPointerDown={() => setHops((n) => n + 1)}
+            className="group relative flex items-center gap-1 rounded-xl py-1 pr-1.5 pl-1 transition-colors duration-200 outline-none hover:bg-muted focus-visible:ring-[3px] focus-visible:ring-ring data-[state=open]:bg-muted"
+          >
+            {/* Keyed by the presses, so every one replays the hop. */}
+            <span key={hops} className={cn('block', hops > 0 && 'logo-hop')}>
+              <LogoMark />
+            </span>
+            <ChevronDownIcon
+              className="size-4 text-muted-foreground transition-transform duration-300 ease-spring group-hover:text-foreground group-data-[state=open]:rotate-180"
+              aria-hidden="true"
+            />
+            {unseen && <UnseenDot className="absolute -top-0.5 -right-0.5" />}
+          </button>
+        </Hint>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="min-w-56">
         {user && (

@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+### Tooltips in the app's own look (phase 57)
+- Every tooltip is the app's own bubble now instead of the browser's plain grey one: the toasts' look in small, with a tail pointing at the element and a springy pop, in the game theme's colours and both colour modes. About 50 places changed, on the host pages, the editor, the admin pages, the phone and the projector (`Hint`, `components/hint.tsx`).
+- They open on mouse hover and on keyboard focus, never on a tap, and not when a dialog or menu hands focus back after a mouse click. `e2e/tooltips.e2e.ts` checks all four.
+- Every control that shows only an icon, a picture or a label hidden at that width has a tooltip: menu buttons, drag handles, delete and remove buttons, the X of dialogs and sheets, the password eye, the date picker's arrows, the team and message editors and the phone's end pages among them. `e2e/hints.e2e.ts` walks the host, player and projector pages at 1024 and 1440 px and fails on any such control without one, so new screens keep to it.
+- A small tile on the host's player board shows its name, time and points on the name, so the answer chip and the offline mark inside it keep their own hints.
+
 ## 1.11.0 – 2026-11-05
 
 ### Every text in the app, reviewed (phase 54)

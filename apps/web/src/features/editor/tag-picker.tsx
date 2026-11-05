@@ -1,6 +1,7 @@
 import { tagColors, type TagColor } from '@quizmoo/shared'
 import { useTranslation } from 'react-i18next'
 import { PaletteIcon } from 'lucide-react'
+import { Hint } from '@/components/hint'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -22,10 +23,12 @@ export function TagPicker({ value, onChange }: { value: TagColor | undefined; on
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" aria-label={label} title={label} className="relative" style={tagStyle(value)}>
-          <PaletteIcon aria-hidden="true" />
-          {value && <span className="absolute right-2 bottom-2 size-2.5 rounded-full border-2 border-card bg-(--tag)" aria-hidden="true" />}
-        </Button>
+        <Hint label={label}>
+          <Button variant="ghost" size="icon" aria-label={label} className="relative" style={tagStyle(value)}>
+            <PaletteIcon aria-hidden="true" />
+            {value && <span className="absolute right-2 bottom-2 size-2.5 rounded-full border-2 border-card bg-(--tag)" aria-hidden="true" />}
+          </Button>
+        </Hint>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="min-w-44">
         <DropdownMenuLabel>{t('editor.tagColor')}</DropdownMenuLabel>

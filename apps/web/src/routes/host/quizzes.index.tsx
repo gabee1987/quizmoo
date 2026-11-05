@@ -25,6 +25,7 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { FormAlert } from '@/components/form-alert'
+import { Hint } from '@/components/hint'
 import { SelectField } from '@/components/select-field'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -246,9 +247,11 @@ function QuizList() {
           aria-label={t('host.batch.selected', { count: chosen.length })}
           className="sticky top-2 z-20 flex animate-fade-up flex-wrap items-center gap-2 rounded-2xl border bg-card/95 p-2 shadow-soft backdrop-blur"
         >
-          <Button variant="ghost" size="icon" aria-label={t('host.batch.exit')} title={t('host.batch.exit')} onClick={stopSelecting}>
-            <XIcon aria-hidden="true" />
-          </Button>
+          <Hint label={t('host.batch.exit')}>
+            <Button variant="ghost" size="icon" aria-label={t('host.batch.exit')} onClick={stopSelecting}>
+              <XIcon aria-hidden="true" />
+            </Button>
+          </Hint>
           <span className="font-bold tabular-nums" aria-live="polite">
             {t('host.batch.selected', { count: chosen.length })}
           </span>
@@ -314,9 +317,11 @@ function QuizList() {
               {!selecting && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon-sm" aria-label={t('host.moreActions', { title: quiz.title })}>
-                      <EllipsisVerticalIcon aria-hidden="true" />
-                    </Button>
+                    <Hint label={t('host.moreActions', { title: quiz.title })}>
+                      <Button variant="ghost" size="icon-sm" aria-label={t('host.moreActions', { title: quiz.title })}>
+                        <EllipsisVerticalIcon aria-hidden="true" />
+                      </Button>
+                    </Hint>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="min-w-44">
                     <DropdownMenuItem className="min-h-11" disabled={duplicate.isPending} onSelect={() => duplicate.mutate(quiz)}>
@@ -342,10 +347,12 @@ function QuizList() {
             <div className="flex flex-wrap gap-1.5">
               <Badge variant="secondary">{t('host.questionCount', { count: quiz.questionCount })}</Badge>
               {quiz.questionCount > quiz.offCount && (
-                <Badge variant="secondary" title={t('common.lengthEstimate')}>
-                  <ClockIcon aria-hidden="true" />
-                  {t('common.aboutMin', { count: quizMinutes(quiz.length, quiz.settings) })}
-                </Badge>
+                <Hint label={t('common.lengthEstimate')}>
+                  <Badge variant="secondary">
+                    <ClockIcon aria-hidden="true" />
+                    {t('common.aboutMin', { count: quizMinutes(quiz.length, quiz.settings) })}
+                  </Badge>
+                </Hint>
               )}
               {quiz.offCount > 0 && (
                 <Badge variant="outline" className="border-dashed text-muted-foreground">
@@ -372,15 +379,12 @@ function QuizList() {
                     {t('host.edit')}
                   </Link>
                 </Button>
-                <Button
-                  className="flex-1"
-                  disabled={quiz.questionCount - quiz.offCount === 0}
-                  title={quiz.questionCount > 0 && quiz.offCount === quiz.questionCount ? t('editor.inGame.playAllOff') : undefined}
-                  onClick={() => setCreating(quiz)}
-                >
-                  <PlayIcon aria-hidden="true" />
-                  {t('host.play')}
-                </Button>
+                <Hint label={quiz.questionCount > 0 && quiz.offCount === quiz.questionCount ? t('editor.inGame.playAllOff') : undefined}>
+                  <Button className="flex-1" disabled={quiz.questionCount - quiz.offCount === 0} onClick={() => setCreating(quiz)}>
+                    <PlayIcon aria-hidden="true" />
+                    {t('host.play')}
+                  </Button>
+                </Hint>
               </div>
             )}
           </li>

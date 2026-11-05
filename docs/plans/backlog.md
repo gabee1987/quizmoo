@@ -82,6 +82,7 @@ Collected while testing phases 9 to 12. Effort as above.
 - The projector's end of the game in five pages (podium with a drum roll, leaderboard, awards, game facts) and a question recap the host opens, moved from the host's Finished card or in automatic mode (phase 53).
 - Every text reviewed for one voice, rounds named alike everywhere, the legal pages aligned between the languages (phase 54).
 - A 20-question starter quiz for every new host, and a button to add it again (phase 55).
+- Tooltips in the app's own bubble instead of the browser's `title`, on hover and keyboard focus (phase 57).
 
 ### Open
 
@@ -101,5 +102,4 @@ Collected while testing the Railway deployment. The help page and tutorial (phas
 
 | Task | Kind | Effort | Notes |
 |---|---|---|---|
-| Tooltips in the app's own look on desktop | Improvement | M | About 60 places use the browser's native `title` tooltip. Replace them with the `Tooltip` primitive styled like the rest of the app (delay, arrow, theme colours, also on keyboard focus), shown only on devices with a mouse. |
 

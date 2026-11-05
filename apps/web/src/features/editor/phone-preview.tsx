@@ -3,6 +3,7 @@ import type { TFunction } from 'i18next'
 import { PlayIcon } from 'lucide-react'
 import { useEffect, useState, type ComponentProps } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Hint } from '@/components/hint'
 import { Timer } from '@/components/timer'
 import { Button } from '@/components/ui/button'
 import { useScreenLook } from '@/lib/season'
@@ -152,16 +153,12 @@ export function PhonePreview({
   const start = (
     <div className="flex items-center justify-center gap-3">
       {label && <p className="text-base font-semibold text-muted-foreground">{label}</p>}
-      <Button
-        size="sm"
-        variant="outline"
-        disabled={from === null}
-        title={t('editor.playThrough.startHelp')}
-        onClick={() => from !== null && setPlay(startPlay(quiz, from, Date.now()))}
-      >
-        <PlayIcon aria-hidden="true" />
-        {t('editor.playThrough.start')}
-      </Button>
+      <Hint label={t('editor.playThrough.startHelp')}>
+        <Button size="sm" variant="outline" disabled={from === null} onClick={() => from !== null && setPlay(startPlay(quiz, from, Date.now()))}>
+          <PlayIcon aria-hidden="true" />
+          {t('editor.playThrough.start')}
+        </Button>
+      </Hint>
     </div>
   )
 

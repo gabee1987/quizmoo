@@ -1,6 +1,7 @@
 import { CheckIcon, PencilIcon, ShuffleIcon, XIcon } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Hint } from '@/components/hint'
 import { PlayerAvatar } from '@/components/player-avatar'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -76,23 +77,29 @@ export function NameRow({
         )}
         {editing ? (
           // onMouseDown: commit before the input's blur would.
-          <Button type="button" variant="ghost" size="icon-sm" aria-label={t('nicknames.done')} onMouseDown={(e) => e.preventDefault()} onClick={commit}>
-            <CheckIcon aria-hidden="true" />
-          </Button>
+          <Hint label={t('nicknames.done')}>
+            <Button type="button" variant="ghost" size="icon-sm" aria-label={t('nicknames.done')} onMouseDown={(e) => e.preventDefault()} onClick={commit}>
+              <CheckIcon aria-hidden="true" />
+            </Button>
+          </Hint>
         ) : (
-          <Button type="button" variant="ghost" size="icon-sm" aria-label={t('nicknames.edit', { name: entry.name })} onClick={() => setEditing(true)}>
-            <PencilIcon aria-hidden="true" />
-          </Button>
+          <Hint label={t('nicknames.edit', { name: entry.name })}>
+            <Button type="button" variant="ghost" size="icon-sm" aria-label={t('nicknames.edit', { name: entry.name })} onClick={() => setEditing(true)}>
+              <PencilIcon aria-hidden="true" />
+            </Button>
+          </Hint>
         )}
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon-sm"
-          aria-label={t('nicknames.remove', { name: entry.name })}
-          onClick={() => (motionOk ? setLeaving(true) : onRemove())}
-        >
-          <XIcon aria-hidden="true" />
-        </Button>
+        <Hint label={t('nicknames.remove', { name: entry.name })}>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            aria-label={t('nicknames.remove', { name: entry.name })}
+            onClick={() => (motionOk ? setLeaving(true) : onRemove())}
+          >
+            <XIcon aria-hidden="true" />
+          </Button>
+        </Hint>
       </div>
       {problem && (
         <p className="pl-11 text-sm font-semibold text-destructive">
@@ -109,13 +116,12 @@ function Avatar({ entry }: { entry: NameEntry }) {
   if (entry.avatar === undefined) return <span aria-hidden="true" className="size-9 shrink-0 animate-pulse rounded-full bg-muted" />
   if (entry.avatar === null) {
     return (
-      <span
-        title={t('nicknames.randomAvatar')}
-        className="grid size-9 shrink-0 place-items-center rounded-full border-2 border-dashed text-muted-foreground"
-      >
-        <ShuffleIcon className="size-4" aria-hidden="true" />
-        <span className="sr-only">{t('nicknames.randomAvatar')}</span>
-      </span>
+      <Hint label={t('nicknames.randomAvatar')}>
+        <span className="grid size-9 shrink-0 place-items-center rounded-full border-2 border-dashed text-muted-foreground">
+          <ShuffleIcon className="size-4" aria-hidden="true" />
+          <span className="sr-only">{t('nicknames.randomAvatar')}</span>
+        </span>
+      </Hint>
     )
   }
   return <PlayerAvatar avatar={entry.avatar} size="md" />

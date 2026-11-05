@@ -27,6 +27,7 @@ import {
   ShuffleIcon,
   Trash2Icon,
 } from 'lucide-react'
+import { Hint } from '@/components/hint'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/cn'
 import { useFlipOnReorder } from '@/lib/flip'
@@ -281,31 +282,26 @@ export function QuestionList({
         {header(
           <>
             {layout.questions.length > 1 && (
-              <Button
-                variant="outline"
-                size="icon-sm"
-                onClick={onShuffle}
-                disabled={!canShuffle}
-                aria-label={t('editor.shuffle.label')}
-                title={canShuffle ? t('editor.shuffle.label') : t('editor.shuffle.nothing')}
-                className={toolClassName}
-              >
-                {/* Keyed by the shuffle count, so the icon wiggles each time the rows are shuffled. */}
-                <ShuffleIcon key={shuffles} className={cn(shuffles > 0 && 'animate-wiggle')} aria-hidden="true" />
-              </Button>
+              <Hint label={canShuffle ? t('editor.shuffle.label') : t('editor.shuffle.nothing')}>
+                <Button variant="outline" size="icon-sm" onClick={onShuffle} disabled={!canShuffle} aria-label={t('editor.shuffle.label')} className={toolClassName}>
+                  {/* Keyed by the shuffle count, so the icon wiggles each time the rows are shuffled. */}
+                  <ShuffleIcon key={shuffles} className={cn(shuffles > 0 && 'animate-wiggle')} aria-hidden="true" />
+                </Button>
+              </Hint>
             )}
             {layout.groups.length > 0 && (
               // Says what it will do, like each header's own arrow.
-              <Button
-                variant="outline"
-                size="icon-sm"
-                onClick={() => setCollapsed(allFolded ? new Set() : new Set(groupsById.keys()))}
-                aria-label={allFolded ? t('editor.expandAllGroups') : t('editor.collapseAllGroups')}
-                title={allFolded ? t('editor.expandAllGroups') : t('editor.collapseAllGroups')}
-                className={toolClassName}
-              >
-                {allFolded ? <ChevronsUpDownIcon aria-hidden="true" /> : <ChevronsDownUpIcon aria-hidden="true" />}
-              </Button>
+              <Hint label={allFolded ? t('editor.expandAllGroups') : t('editor.collapseAllGroups')}>
+                <Button
+                  variant="outline"
+                  size="icon-sm"
+                  onClick={() => setCollapsed(allFolded ? new Set() : new Set(groupsById.keys()))}
+                  aria-label={allFolded ? t('editor.expandAllGroups') : t('editor.collapseAllGroups')}
+                  className={toolClassName}
+                >
+                  {allFolded ? <ChevronsUpDownIcon aria-hidden="true" /> : <ChevronsDownUpIcon aria-hidden="true" />}
+                </Button>
+              </Hint>
             )}
           </>,
         )}
@@ -546,16 +542,18 @@ function GroupRow({
           offCount={offCount}
           onSwitch={onSwitch}
           handle={
-            <button
-              ref={setActivatorNodeRef}
-              type="button"
-              {...attributes}
-              onKeyDown={onKeyDown as KeyboardEventHandler | undefined}
-              aria-label={t('editor.dragGroup', { n: index + 1 })}
-              className={gripClass}
-            >
-              <GripVerticalIcon className="hidden size-4 group-hover/row:block group-focus-visible/grip:block [@media(hover:none)]:block" aria-hidden="true" />
-            </button>
+            <Hint label={t('editor.dragGroup', { n: index + 1 })}>
+              <button
+                ref={setActivatorNodeRef}
+                type="button"
+                {...attributes}
+                onKeyDown={onKeyDown as KeyboardEventHandler | undefined}
+                aria-label={t('editor.dragGroup', { n: index + 1 })}
+                className={gripClass}
+              >
+                <GripVerticalIcon className="hidden size-4 group-hover/row:block group-focus-visible/grip:block [@media(hover:none)]:block" aria-hidden="true" />
+              </button>
+            </Hint>
           }
         />
         {whole && !isDragging && (
@@ -633,24 +631,25 @@ function GroupBody({
       <div onClick={onSelect} className={cn('flex min-w-0 flex-1 cursor-pointer items-center gap-2', shape === 'whole' ? 'min-h-14 py-1.5' : 'min-h-12')}>
         {onSwitch ? (
           // The icon is also the "In the game" switch for all its questions, like a question's type icon.
-          <button
-            type="button"
-            onClick={(event) => {
-              event.stopPropagation()
-              onSwitch(switchState !== 'on')
-            }}
-            aria-label={t(switchState === 'on' ? 'editor.inGame.switchGroupOffN' : 'editor.inGame.switchGroupOnN', { n: index + 1 })}
-            title={t(switchState === 'on' ? 'editor.inGame.switchGroupOffN' : 'editor.inGame.switchGroupOnN', { n: index + 1 })}
-            className={cn(groupIconBox, 'group/eye outline-none hover:bg-muted focus-visible:ring-[3px] focus-visible:ring-ring')}
-          >
-            <LayersIcon className={cn('size-4 group-hover/row:hidden group-focus-visible/eye:hidden [@media(hover:none)]:hidden', switchState === 'off' && 'opacity-55')} aria-hidden="true" />
-            {switchState === 'on' ? (
-              <EyeIcon className="hidden size-4 group-hover/row:block group-focus-visible/eye:block [@media(hover:none)]:block" aria-hidden="true" />
-            ) : (
-              <EyeOffIcon className="hidden size-4 group-hover/row:block group-focus-visible/eye:block [@media(hover:none)]:block" aria-hidden="true" />
-            )}
-            {invalid && <span aria-hidden="true" className="absolute -top-1 -right-1 size-3 rounded-full border-2 border-card bg-destructive" />}
-          </button>
+          <Hint label={t(switchState === 'on' ? 'editor.inGame.switchGroupOffN' : 'editor.inGame.switchGroupOnN', { n: index + 1 })}>
+            <button
+              type="button"
+              onClick={(event) => {
+                event.stopPropagation()
+                onSwitch(switchState !== 'on')
+              }}
+              aria-label={t(switchState === 'on' ? 'editor.inGame.switchGroupOffN' : 'editor.inGame.switchGroupOnN', { n: index + 1 })}
+              className={cn(groupIconBox, 'group/eye outline-none hover:bg-muted focus-visible:ring-[3px] focus-visible:ring-ring')}
+            >
+              <LayersIcon className={cn('size-4 group-hover/row:hidden group-focus-visible/eye:hidden [@media(hover:none)]:hidden', switchState === 'off' && 'opacity-55')} aria-hidden="true" />
+              {switchState === 'on' ? (
+                <EyeIcon className="hidden size-4 group-hover/row:block group-focus-visible/eye:block [@media(hover:none)]:block" aria-hidden="true" />
+              ) : (
+                <EyeOffIcon className="hidden size-4 group-hover/row:block group-focus-visible/eye:block [@media(hover:none)]:block" aria-hidden="true" />
+              )}
+              {invalid && <span aria-hidden="true" className="absolute -top-1 -right-1 size-3 rounded-full border-2 border-card bg-destructive" />}
+            </button>
+          </Hint>
         ) : (
           <span aria-hidden="true" className={groupIconBox}>
             <LayersIcon className={cn('size-4', switchState === 'off' && 'opacity-55')} />
@@ -660,22 +659,23 @@ function GroupBody({
         <span className="flex min-w-0 flex-1 flex-col">
           <span aria-hidden="true" className="flex items-center gap-1 text-xs leading-5 font-extrabold text-foreground/75 tabular-nums">
             {group.keepOrder && (
-              <span title={t('editor.orderKept')} className="inline-flex">
-                <LockIcon className="size-3" />
-              </span>
+              <Hint label={t('editor.orderKept')}>
+                <span className="inline-flex">
+                  <LockIcon className="size-3" />
+                </span>
+              </Hint>
             )}
             <span className="whitespace-nowrap">{t('editor.groupN', { n: index + 1 })}</span>
             {/* In the list the card's badge shows the count. */}
             {showCount && <> · {t('editor.questionCount', { count: questionCount })}</>}
             {/* Some off: how many, as a small count (the questions' own rows show which). */}
             {switchState === 'mixed' && (
-              <span
-                title={t('editor.inGame.someOff', { count: offCount })}
-                className="inline-flex shrink-0 items-center gap-0.5 rounded-full bg-card/80 px-1.5 py-px text-[0.6875rem] leading-4 font-extrabold text-muted-foreground"
-              >
-                <EyeOffIcon className="size-3" />
-                {offCount}
-              </span>
+              <Hint label={t('editor.inGame.someOff', { count: offCount })}>
+                <span className="inline-flex shrink-0 items-center gap-0.5 rounded-full bg-card/80 px-1.5 py-px text-[0.6875rem] leading-4 font-extrabold text-muted-foreground">
+                  <EyeOffIcon className="size-3" />
+                  {offCount}
+                </span>
+              </Hint>
             )}
           </span>
           <button type="button" aria-current={selected ? 'true' : undefined} className="block rounded-md text-left outline-none focus-visible:ring-[3px] focus-visible:ring-ring">
@@ -690,16 +690,18 @@ function GroupBody({
           </button>
         </span>
       </div>
-      <button
-        type="button"
-        onClick={onToggle}
-        aria-expanded={open}
-        aria-label={open ? t('editor.collapseGroup', { n: index + 1 }) : t('editor.expandGroup', { n: index + 1 })}
-        // Round, so its hover sits well inside the card's rounded corner.
-        className="grid size-9 shrink-0 place-items-center rounded-full text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring"
-      >
-        <ChevronDownIcon className={cn('size-4 transition-transform duration-300 ease-spring', !open && '-rotate-90')} aria-hidden="true" />
-      </button>
+      <Hint label={open ? t('editor.collapseGroup', { n: index + 1 }) : t('editor.expandGroup', { n: index + 1 })}>
+        <button
+          type="button"
+          onClick={onToggle}
+          aria-expanded={open}
+          aria-label={open ? t('editor.collapseGroup', { n: index + 1 }) : t('editor.expandGroup', { n: index + 1 })}
+          // Round, so its hover sits well inside the card's rounded corner.
+          className="grid size-9 shrink-0 place-items-center rounded-full text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring"
+        >
+          <ChevronDownIcon className={cn('size-4 transition-transform duration-300 ease-spring', !open && '-rotate-90')} aria-hidden="true" />
+        </button>
+      </Hint>
     </div>
   )
 }
@@ -843,16 +845,18 @@ const RowContent = memo(function RowContent({
           onSelect={() => onSelect(question.id)}
           onSwitch={(on) => onSwitch(question.id, on)}
           handle={
-            <button
-              ref={handleRef}
-              type="button"
-              {...handleAttributes}
-              onKeyDown={onHandleKeyDown}
-              aria-label={t('editor.dragQuestion', { n: index + 1 })}
-              className={gripClass}
-            >
-              <NumberOrGrip n={index + 1} selected={selected} grip />
-            </button>
+            <Hint label={t('editor.dragQuestion', { n: index + 1 })}>
+              <button
+                ref={handleRef}
+                type="button"
+                {...handleAttributes}
+                onKeyDown={onHandleKeyDown}
+                aria-label={t('editor.dragQuestion', { n: index + 1 })}
+                className={gripClass}
+              >
+                <NumberOrGrip n={index + 1} selected={selected} grip />
+              </button>
+            </Hint>
           }
         />
       </div>
@@ -947,25 +951,26 @@ function RowBody({
         {onSwitch ? (
           // The type icon is also the "In the game" switch: while the row is hovered (or the switch has
           // keyboard focus) it shows the eye; touch screens, which do not hover, always show the eye.
-          <button
-            type="button"
-            // Not a click on the row: switching a question off does not select it.
-            onClick={(event) => {
-              event.stopPropagation()
-              onSwitch(off)
-            }}
-            aria-label={t(off ? 'editor.inGame.switchOnN' : 'editor.inGame.switchOffN', { n: index + 1 })}
-            title={t(off ? 'editor.inGame.switchOnN' : 'editor.inGame.switchOffN', { n: index + 1 })}
-            className={cn(typeBox, 'group/eye outline-none hover:bg-muted hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring')}
-          >
-            <Icon className={cn('size-4 group-hover/row:hidden group-focus-visible/eye:hidden [@media(hover:none)]:hidden', off && 'opacity-55')} aria-hidden="true" />
-            {off ? (
-              <EyeOffIcon className="hidden size-4 group-hover/row:block group-focus-visible/eye:block [@media(hover:none)]:block" aria-hidden="true" />
-            ) : (
-              <EyeIcon className="hidden size-4 group-hover/row:block group-focus-visible/eye:block [@media(hover:none)]:block" aria-hidden="true" />
-            )}
-            {invalid && <span aria-hidden="true" className="absolute -top-1 -right-1 size-3 rounded-full border-2 border-card bg-destructive" />}
-          </button>
+          <Hint label={t(off ? 'editor.inGame.switchOnN' : 'editor.inGame.switchOffN', { n: index + 1 })}>
+            <button
+              type="button"
+              // Not a click on the row: switching a question off does not select it.
+              onClick={(event) => {
+                event.stopPropagation()
+                onSwitch(off)
+              }}
+              aria-label={t(off ? 'editor.inGame.switchOnN' : 'editor.inGame.switchOffN', { n: index + 1 })}
+              className={cn(typeBox, 'group/eye outline-none hover:bg-muted hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring')}
+            >
+              <Icon className={cn('size-4 group-hover/row:hidden group-focus-visible/eye:hidden [@media(hover:none)]:hidden', off && 'opacity-55')} aria-hidden="true" />
+              {off ? (
+                <EyeOffIcon className="hidden size-4 group-hover/row:block group-focus-visible/eye:block [@media(hover:none)]:block" aria-hidden="true" />
+              ) : (
+                <EyeIcon className="hidden size-4 group-hover/row:block group-focus-visible/eye:block [@media(hover:none)]:block" aria-hidden="true" />
+              )}
+              {invalid && <span aria-hidden="true" className="absolute -top-1 -right-1 size-3 rounded-full border-2 border-card bg-destructive" />}
+            </button>
+          </Hint>
         ) : (
           <span aria-hidden="true" className={typeBox}>
             <Icon className={cn('size-4', off && 'opacity-55')} />

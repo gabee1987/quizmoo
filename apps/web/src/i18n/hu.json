@@ -210,6 +210,7 @@
     "username": "Felhasználónév",
     "password": "Jelszó",
     "showPassword": "Mutasd a jelszót",
+    "hidePassword": "Rejtsd el a jelszót",
     "submit": "Belépek",
     "logout": "Kilépés",
     "required": "Ezt ki kell tölteni.",

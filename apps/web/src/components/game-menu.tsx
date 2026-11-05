@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { ConfirmDialog } from '@/components/dialog'
+import { Hint } from '@/components/hint'
 import { PlayerAvatar } from '@/components/player-avatar'
 import { SeasonMenuItem } from '@/components/season-greeting'
 import { Button } from '@/components/ui/button'
@@ -67,16 +68,17 @@ export function GameMenu() {
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button
-            variant="outline"
-            size="icon-sm"
-            aria-label={t('app.settings')}
-            title={t('app.settings')}
-            // Above the dimmed page of `PausedNote` (z-40): the menu stays usable while the host pauses.
-            className="relative z-50 size-11 shrink-0 rounded-full bg-card/90 shadow-soft backdrop-blur"
-          >
-            <Settings2Icon aria-hidden="true" />
-          </Button>
+          <Hint label={t('app.settings')} side="bottom">
+            <Button
+              variant="outline"
+              size="icon-sm"
+              aria-label={t('app.settings')}
+              // Above the dimmed page of `PausedNote` (z-40): the menu stays usable while the host pauses.
+              className="relative z-50 size-11 shrink-0 rounded-full bg-card/90 shadow-soft backdrop-blur"
+            >
+              <Settings2Icon aria-hidden="true" />
+            </Button>
+          </Hint>
         </DropdownMenuTrigger>
         <DropdownMenuContent side="bottom" align="end" className="min-w-64">
           {snapshot && (

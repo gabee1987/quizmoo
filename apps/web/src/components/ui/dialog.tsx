@@ -4,6 +4,7 @@ import i18next from 'i18next'
 import { XIcon } from 'lucide-react'
 import { Dialog as DialogPrimitive } from 'radix-ui'
 
+import { Hint } from '@/components/hint'
 import { Button, buttonVariants } from '@/components/ui/button'
 
 /** The X of dialogs and sheets: a round chunky button like the others, the cross turns on hover. */
@@ -65,9 +66,13 @@ function DialogContent({
       >
         {children}
         {showCloseButton && (
-          <DialogPrimitive.Close data-slot="dialog-close" className={closeButtonClass}>
-            <XIcon />
-            <span className="sr-only">{i18next.t('common.close')}</span>
+          <DialogPrimitive.Close data-slot="dialog-close" asChild>
+            <Hint label={i18next.t('common.close')}>
+              <button type="button" className={closeButtonClass}>
+                <XIcon />
+                <span className="sr-only">{i18next.t('common.close')}</span>
+              </button>
+            </Hint>
           </DialogPrimitive.Close>
         )}
       </DialogPrimitive.Content>

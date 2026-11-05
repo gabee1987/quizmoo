@@ -2,6 +2,7 @@ import type { QuestionGroup } from '@quizmoo/shared'
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { LayersIcon, SearchIcon, SearchXIcon, XIcon } from 'lucide-react'
+import { Hint } from '@/components/hint'
 import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/cn'
 import { tagStyle } from '@/lib/tags'
@@ -31,14 +32,16 @@ export function SearchField({ value, onChange, className }: { value: string; onC
         className={cn('h-11 rounded-lg pr-9 pl-9 text-sm [&::-webkit-search-cancel-button]:hidden', className)}
       />
       {value && (
-        <button
-          type="button"
-          onClick={() => onChange('')}
-          aria-label={t('editor.search.clear')}
-          className="absolute top-1/2 right-1 grid size-7 -translate-y-1/2 place-items-center rounded-full text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring"
-        >
-          <XIcon className="size-4" aria-hidden="true" />
-        </button>
+        <Hint label={t('editor.search.clear')}>
+          <button
+            type="button"
+            onClick={() => onChange('')}
+            aria-label={t('editor.search.clear')}
+            className="absolute top-1/2 right-1 grid size-7 -translate-y-1/2 place-items-center rounded-full text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring"
+          >
+            <XIcon className="size-4" aria-hidden="true" />
+          </button>
+        </Hint>
       )}
     </div>
   )

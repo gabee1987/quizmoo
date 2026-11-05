@@ -2,6 +2,7 @@ import type { Announcement } from '@quizmoo/shared'
 import { MegaphoneIcon, XIcon } from 'lucide-react'
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Hint } from '@/components/hint'
 import { SwipeAway } from '@/components/swipe-away'
 import { cn } from '@/lib/cn'
 
@@ -156,16 +157,17 @@ export function AnnouncementBanner({
               </span>
               <p className="min-w-0 flex-1 wrap-break-word">{shown.text}</p>
               {closable.current && (
-                <button
-                  type="button"
-                  aria-label={dismissLabel ?? t('connection.dismissAnnouncement')}
-                  title={dismissLabel}
-                  disabled={leaving || !onDismiss}
-                  onClick={onDismiss}
-                  className="-my-2 -mr-2 grid size-11 shrink-0 place-items-center rounded-full outline-none hover:bg-foreground/10 focus-visible:ring-[3px] focus-visible:ring-ring"
-                >
-                  <XIcon className="size-5" aria-hidden="true" />
-                </button>
+                <Hint label={dismissLabel}>
+                  <button
+                    type="button"
+                    aria-label={dismissLabel ?? t('connection.dismissAnnouncement')}
+                    disabled={leaving || !onDismiss}
+                    onClick={onDismiss}
+                    className="-my-2 -mr-2 grid size-11 shrink-0 place-items-center rounded-full outline-none hover:bg-foreground/10 focus-visible:ring-[3px] focus-visible:ring-ring"
+                  >
+                    <XIcon className="size-5" aria-hidden="true" />
+                  </button>
+                </Hint>
               )}
               {shown.expiresAt && <TimeBar announcement={shown} expiresAt={shown.expiresAt} clockOffset={clockOffset} />}
             </div>

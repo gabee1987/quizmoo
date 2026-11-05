@@ -1,5 +1,6 @@
 import { Link, useRouterState } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
+import { Hint } from '@/components/hint'
 import { useCowAntics } from '@/features/cow/use-cow-antics'
 import { languages, setLanguage } from '@/i18n'
 import { cn } from '@/lib/cn'
@@ -53,20 +54,21 @@ function LanguageSwitch() {
   return (
     <div role="group" aria-label={t('app.language')} className="flex rounded-lg bg-muted p-0.5">
       {languages.map((lang) => (
-        <button
-          key={lang}
-          type="button"
-          lang={lang}
-          aria-pressed={i18n.language === lang}
-          aria-label={t(`app.languages.${lang}`)}
-          onClick={() => setLanguage(lang)}
-          className={cn(
-            'h-9 min-w-10 rounded-md px-2 text-sm font-bold uppercase outline-none focus-visible:ring-[3px] focus-visible:ring-ring',
-            i18n.language === lang ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground',
-          )}
-        >
-          {lang}
-        </button>
+        <Hint key={lang} label={t(`app.languages.${lang}`)}>
+          <button
+            type="button"
+            lang={lang}
+            aria-pressed={i18n.language === lang}
+            aria-label={t(`app.languages.${lang}`)}
+            onClick={() => setLanguage(lang)}
+            className={cn(
+              'h-9 min-w-10 rounded-md px-2 text-sm font-bold uppercase outline-none focus-visible:ring-[3px] focus-visible:ring-ring',
+              i18n.language === lang ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground',
+            )}
+          >
+            {lang}
+          </button>
+        </Hint>
       ))}
     </div>
   )

@@ -1,5 +1,6 @@
 import type { Answer, AnswerSymbols, PublicQuestion, Question } from '@quizmoo/shared'
 import { useTranslation } from 'react-i18next'
+import { Hint } from '@/components/hint'
 import { cn } from '@/lib/cn'
 import { OptionSymbol } from '../../components/icons'
 import { optionFill, optionVars } from '../../components/option-colours'
@@ -7,7 +8,7 @@ import { formatAnswer } from '../questions/format-answer'
 
 /**
  * A player's answer in a few characters: the picked options' colours and symbols (one with its
- * text), true/false, or the typed text or number. The full answer is the chip's title.
+ * text), true/false, or the typed text or number. The full answer is the chip's tooltip.
  */
 export function AnswerChip({
   answer,
@@ -43,17 +44,19 @@ export function AnswerChip({
     // One option: its text too, unless the tile is small.
     const withText = picked.length === 1 && !compact
     return (
-      <span title={text} className="flex min-w-0 items-center gap-1">
-        <span className="flex shrink-0 gap-0.5" aria-hidden="true">
-          {picked.map(swatch)}
+      <Hint label={text}>
+        <span className="flex min-w-0 items-center gap-1">
+          <span className="flex shrink-0 gap-0.5" aria-hidden="true">
+            {picked.map(swatch)}
+          </span>
+          <span className={withText ? 'truncate text-sm font-semibold' : 'sr-only'}>{text}</span>
         </span>
-        <span className={withText ? 'truncate text-sm font-semibold' : 'sr-only'}>{text}</span>
-      </span>
+      </Hint>
     )
   }
   return (
-    <span title={text} className="truncate rounded-md bg-muted px-1.5 text-sm font-semibold">
-      {text}
-    </span>
+    <Hint label={text}>
+      <span className="truncate rounded-md bg-muted px-1.5 text-sm font-semibold">{text}</span>
+    </Hint>
   )
 }

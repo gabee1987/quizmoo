@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { ConfirmDialog } from '@/components/dialog'
 import { FormAlert } from '@/components/form-alert'
+import { Hint } from '@/components/hint'
 import { UnsavedBar } from '@/components/unsaved-bar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -177,9 +178,11 @@ function NamesEditor({ saved }: { saved: Lists }) {
                   {t(`nicknames.languages.${lang}`)}
                   <span className="text-sm font-bold tabular-nums">{drafts[lang].length}</span>
                   {dirty.includes(lang) && (
-                    <span className="size-2 rounded-full bg-warning" title={t('settings.unsaved')}>
-                      <span className="sr-only">({t('settings.unsaved')})</span>
-                    </span>
+                    <Hint label={t('settings.unsaved')}>
+                      <span className="size-2 rounded-full bg-warning">
+                        <span className="sr-only">({t('settings.unsaved')})</span>
+                      </span>
+                    </Hint>
                   )}
                 </TabsTrigger>
               ))}

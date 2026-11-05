@@ -23,6 +23,7 @@ import {
 } from 'lucide-react'
 import { useState, type FormEvent, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Hint } from '@/components/hint'
 import { PlayerAvatar } from '@/components/player-avatar'
 import { SelectField } from '@/components/select-field'
 import { Button } from '@/components/ui/button'
@@ -259,28 +260,32 @@ function TeamGroup({
           <h3 className="flex min-w-0 items-center gap-1 font-bold">
             <span className="truncate">{team.name}</span>
             <span className="text-sm font-semibold text-muted-foreground tabular-nums">{count}</span>
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              className="size-8 rounded-full text-muted-foreground"
-              aria-label={t('host.game.renameTeam', { team: team.name })}
-              onClick={() => setRenaming(true)}
-            >
-              <PencilIcon className="size-4" aria-hidden="true" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              className="size-8 rounded-full text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-              aria-label={t('host.game.removeTeam', { team: team.name })}
-              onClick={() => {
-                if (count === 0 || window.confirm(t('host.game.confirmRemoveTeam', { team: team.name }))) {
-                  teamActions.onRemoveTeam(team.id)
-                }
-              }}
-            >
-              <Trash2Icon className="size-4" aria-hidden="true" />
-            </Button>
+            <Hint label={t('host.game.renameTeam', { team: team.name })}>
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                className="size-8 rounded-full text-muted-foreground"
+                aria-label={t('host.game.renameTeam', { team: team.name })}
+                onClick={() => setRenaming(true)}
+              >
+                <PencilIcon className="size-4" aria-hidden="true" />
+              </Button>
+            </Hint>
+            <Hint label={t('host.game.removeTeam', { team: team.name })}>
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                className="size-8 rounded-full text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                aria-label={t('host.game.removeTeam', { team: team.name })}
+                onClick={() => {
+                  if (count === 0 || window.confirm(t('host.game.confirmRemoveTeam', { team: team.name }))) {
+                    teamActions.onRemoveTeam(team.id)
+                  }
+                }}
+              >
+                <Trash2Icon className="size-4" aria-hidden="true" />
+              </Button>
+            </Hint>
           </h3>
         )}
         <SelectField
@@ -341,12 +346,16 @@ function RenameForm({ name, label, onDone }: { name: string; label: string; onDo
         }}
         className="h-10 min-w-0 flex-1"
       />
-      <Button type="submit" variant="ghost" size="icon-sm" className="size-10" aria-label={t('common.save')}>
-        <CheckIcon aria-hidden="true" />
-      </Button>
-      <Button type="button" variant="ghost" size="icon-sm" className="size-10" aria-label={t('common.cancel')} onClick={() => onDone(null)}>
-        <XIcon aria-hidden="true" />
-      </Button>
+      <Hint label={t('common.save')}>
+        <Button type="submit" variant="ghost" size="icon-sm" className="size-10" aria-label={t('common.save')}>
+          <CheckIcon aria-hidden="true" />
+        </Button>
+      </Hint>
+      <Hint label={t('common.cancel')}>
+        <Button type="button" variant="ghost" size="icon-sm" className="size-10" aria-label={t('common.cancel')} onClick={() => onDone(null)}>
+          <XIcon aria-hidden="true" />
+        </Button>
+      </Hint>
     </form>
   )
 }
@@ -430,21 +439,23 @@ function PlayerTile({
         {avatar}
         {/* Two lines of the name before it is cut; the whole name as a tooltip. */}
         <span className="min-w-0 flex-1">
-          <span className="line-clamp-2 font-bold leading-tight wrap-break-word" title={player.name}>
-            {player.name}
-          </span>
+          <Hint label={player.name}>
+            <span className="line-clamp-2 font-bold leading-tight wrap-break-word">{player.name}</span>
+          </Hint>
           {offline}
         </span>
-        <button
-          type="button"
-          aria-label={t('host.game.kickPlayer', { name: player.name })}
-          className="grid size-8 shrink-0 place-items-center rounded-full text-muted-foreground outline-none hover:bg-destructive/10 hover:text-destructive focus-visible:ring-[3px] focus-visible:ring-ring"
-          onClick={() => {
-            if (window.confirm(t('host.game.confirmKick', { name: player.name }))) onKick(player.id)
-          }}
-        >
-          <XIcon className="size-4" aria-hidden="true" />
-        </button>
+        <Hint label={t('host.game.kickPlayer', { name: player.name })}>
+          <button
+            type="button"
+            aria-label={t('host.game.kickPlayer', { name: player.name })}
+            className="grid size-8 shrink-0 place-items-center rounded-full text-muted-foreground outline-none hover:bg-destructive/10 hover:text-destructive focus-visible:ring-[3px] focus-visible:ring-ring"
+            onClick={() => {
+              if (window.confirm(t('host.game.confirmKick', { name: player.name }))) onKick(player.id)
+            }}
+          >
+            <XIcon className="size-4" aria-hidden="true" />
+          </button>
+        </Hint>
       </li>
     )
   }
@@ -487,14 +498,16 @@ function PlayerActions({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          className="size-9 shrink-0 rounded-full text-muted-foreground"
-          aria-label={t('host.game.playerActions', { name: player.name })}
-        >
-          <EllipsisVerticalIcon aria-hidden="true" />
-        </Button>
+        <Hint label={t('host.game.playerActions', { name: player.name })}>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            className="size-9 shrink-0 rounded-full text-muted-foreground"
+            aria-label={t('host.game.playerActions', { name: player.name })}
+          >
+            <EllipsisVerticalIcon aria-hidden="true" />
+          </Button>
+        </Hint>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="max-h-80 min-w-52 overflow-y-auto">
         {team.captain === false && (

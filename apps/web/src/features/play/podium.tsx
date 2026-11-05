@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Hint } from '@/components/hint'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/cn'
 import { CheckIcon, CrossIcon } from '../../components/icons'
@@ -89,24 +90,26 @@ export function Podium({ snapshot, page, onPage }: { snapshot: PlayerSnapshot; p
           const Icon = pageIcons[p]
           const current = p === page
           return (
-            <button
-              key={p}
-              type="button"
-              aria-current={current ? 'step' : undefined}
-              aria-label={current ? undefined : t(`play.end.pages.${p}`)}
-              onClick={() => go(p)}
-              className={cn(
-                'flex h-10 items-center justify-center gap-1.5 rounded-full text-sm font-extrabold transition-all duration-300 ease-spring outline-none focus-visible:ring-[3px] focus-visible:ring-ring',
-                current
-                  ? 'bg-primary px-4 text-primary-foreground shadow-[0_3px_0_var(--primary-edge)]'
-                  : i < at
-                    ? 'w-10 bg-[color-mix(in_srgb,var(--primary)_22%,var(--card))] text-foreground'
-                    : 'w-10 bg-muted text-muted-foreground',
-              )}
-            >
-              <Icon className="size-4.5" aria-hidden="true" />
-              {current && t(`play.end.pages.${p}`)}
-            </button>
+            // The current page shows its name; the others only their icon, and the name as a hint.
+            <Hint key={p} label={current ? undefined : t(`play.end.pages.${p}`)}>
+              <button
+                type="button"
+                aria-current={current ? 'step' : undefined}
+                aria-label={current ? undefined : t(`play.end.pages.${p}`)}
+                onClick={() => go(p)}
+                className={cn(
+                  'flex h-10 items-center justify-center gap-1.5 rounded-full text-sm font-extrabold transition-all duration-300 ease-spring outline-none focus-visible:ring-[3px] focus-visible:ring-ring',
+                  current
+                    ? 'bg-primary px-4 text-primary-foreground shadow-[0_3px_0_var(--primary-edge)]'
+                    : i < at
+                      ? 'w-10 bg-[color-mix(in_srgb,var(--primary)_22%,var(--card))] text-foreground'
+                      : 'w-10 bg-muted text-muted-foreground',
+                )}
+              >
+                <Icon className="size-4.5" aria-hidden="true" />
+                {current && t(`play.end.pages.${p}`)}
+              </button>
+            </Hint>
           )
         })}
       </nav>

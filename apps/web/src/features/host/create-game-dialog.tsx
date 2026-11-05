@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Collapse } from '@/components/collapse'
 import { DateTimePicker } from '@/components/date-time-picker'
+import { Hint } from '@/components/hint'
 import { TextField } from '@/components/text-field'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -116,9 +117,13 @@ export function CreateGameDialog({
               {quizTitle}
               {/* Follows the settings: a countdown or a scoreboard after every question makes the game longer. */}
               {length && (
-                <span className="text-muted-foreground" title={t('common.lengthEstimate')}>
+                <span className="text-muted-foreground">
                   {' · '}
-                  <ClockIcon className="inline size-4 align-[-0.15em]" aria-hidden="true" /> {t('common.aboutMin', { count: quizMinutes(length, settings) })}
+                  <Hint label={t('common.lengthEstimate')}>
+                    <span>
+                      <ClockIcon className="inline size-4 align-[-0.15em]" aria-hidden="true" /> {t('common.aboutMin', { count: quizMinutes(length, settings) })}
+                    </span>
+                  </Hint>
                 </span>
               )}
               {offCount > 0 && (
@@ -157,7 +162,7 @@ export function CreateGameDialog({
                   <TabsTrigger
                     key={section}
                     value={section}
-                    title={changed ? t('host.create.changedForGame') : undefined}
+                    asChild
                     className={cn(
                       'group/tab h-auto min-h-11 flex-col items-center justify-center! gap-2 rounded-xl px-1 py-2 whitespace-normal md:flex-none md:items-start md:px-3 md:py-3 md:text-left',
                       'transition-[color,background-color,box-shadow,transform] duration-300 ease-spring hover:bg-card/60 md:hover:bg-muted',
@@ -165,26 +170,31 @@ export function CreateGameDialog({
                       'data-[state=active]:-translate-y-px data-[state=active]:shadow-[0_3px_0_0_var(--primary-edge)]!',
                     )}
                   >
-                    <span className="flex items-center gap-1.5 text-sm font-extrabold sm:text-base md:gap-2">
-                      <Icon className="size-4! group-data-[state=active]/tab:animate-wiggle sm:size-5!" />
-                      {t(`host.batch.groups.${section}`)}
-                    </span>
-                    {changed && (
-                      <span className="absolute top-1 right-1 size-2.5 animate-pop rounded-full bg-warning ring-2 ring-card md:top-2 md:right-2">
-                        <span className="sr-only">{t('host.create.changedForGame')}</span>
-                      </span>
-                    )}
-                    {/* The summary only where there is room for it. */}
-                    <span className="hidden flex-wrap gap-1 md:flex">
-                      {(summary.length > 0 ? summary : [t('host.create.noBonuses')]).map((item) => (
-                        <span
-                          key={item}
-                          className="rounded-full bg-muted px-2 py-0.5 text-xs font-semibold text-muted-foreground group-data-[state=active]/tab:bg-primary-foreground/15 group-data-[state=active]/tab:text-primary-foreground"
-                        >
-                          {item}
+                    {/* The hint inside the tab, so `data-state` stays the tab's own (active or not). */}
+                    <Hint label={changed ? t('host.create.changedForGame') : undefined}>
+                      <button type="button">
+                        <span className="flex items-center gap-1.5 text-sm font-extrabold sm:text-base md:gap-2">
+                          <Icon className="size-4! group-data-[state=active]/tab:animate-wiggle sm:size-5!" />
+                          {t(`host.batch.groups.${section}`)}
                         </span>
-                      ))}
-                    </span>
+                        {changed && (
+                          <span className="absolute top-1 right-1 size-2.5 animate-pop rounded-full bg-warning ring-2 ring-card md:top-2 md:right-2">
+                            <span className="sr-only">{t('host.create.changedForGame')}</span>
+                          </span>
+                        )}
+                        {/* The summary only where there is room for it. */}
+                        <span className="hidden flex-wrap gap-1 md:flex">
+                          {(summary.length > 0 ? summary : [t('host.create.noBonuses')]).map((item) => (
+                            <span
+                              key={item}
+                              className="rounded-full bg-muted px-2 py-0.5 text-xs font-semibold text-muted-foreground group-data-[state=active]/tab:bg-primary-foreground/15 group-data-[state=active]/tab:text-primary-foreground"
+                            >
+                              {item}
+                            </span>
+                          ))}
+                        </span>
+                      </button>
+                    </Hint>
                   </TabsTrigger>
                 )
               })}

@@ -2,6 +2,7 @@ import type { Announcement, HostCommand, QuickMessage } from '@quizmoo/shared'
 import { ChevronDownIcon, MegaphoneIcon, TimerIcon, TriangleAlertIcon } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Hint } from '@/components/hint'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -45,16 +46,18 @@ export function QuickMessageMenu({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="secondary" size="sm" className="group relative" title={t('host.game.message.quick')}>
-          <MegaphoneIcon aria-hidden="true" />
-          <span className="max-xl:sr-only">{t('host.game.message.quick')}</span>
-          <ChevronDownIcon
-            className="transition-transform duration-300 ease-spring group-data-[state=open]:rotate-180 max-xl:hidden"
-            aria-hidden="true"
-          />
-          {/* A message is on every screen right now. */}
-          {announcement && <span className="absolute -top-1 -right-1 size-2.5 rounded-full bg-primary ring-2 ring-card" aria-hidden="true" />}
-        </Button>
+        <Hint label={t('host.game.message.quick')}>
+          <Button variant="secondary" size="sm" className="group relative">
+            <MegaphoneIcon aria-hidden="true" />
+            <span className="max-xl:sr-only">{t('host.game.message.quick')}</span>
+            <ChevronDownIcon
+              className="transition-transform duration-300 ease-spring group-data-[state=open]:rotate-180 max-xl:hidden"
+              aria-hidden="true"
+            />
+            {/* A message is on every screen right now. */}
+            {announcement && <span className="absolute -top-1 -right-1 size-2.5 rounded-full bg-primary ring-2 ring-card" aria-hidden="true" />}
+          </Button>
+        </Hint>
       </DropdownMenuTrigger>
       {/* Narrow enough on a phone that the times (11 rem) still fit beside it. */}
       <DropdownMenuContent align="end" className="max-w-[min(20rem,calc(100vw-12.5rem))] sm:min-w-60">

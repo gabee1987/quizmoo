@@ -19,6 +19,7 @@ import { Fragment, useState, type ComponentType, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { CountUp } from '@/components/count-up'
 import { FormAlert } from '@/components/form-alert'
+import { Hint } from '@/components/hint'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { CreateGameDialog } from '@/features/host/create-game-dialog'
@@ -147,11 +148,13 @@ function HostHome() {
                           t('host.updated', { date: date(quiz.updatedAt) }),
                         ]}
                       />
-                      <Button asChild variant="ghost" size="icon-sm" aria-label={`${t('host.edit')}: ${quiz.title}`} title={t('host.edit')}>
-                        <Link to="/host/quizzes/$quizId" params={{ quizId: quiz.id }}>
-                          <PencilIcon aria-hidden="true" />
-                        </Link>
-                      </Button>
+                      <Hint label={t('host.edit')}>
+                        <Button asChild variant="ghost" size="icon-sm" aria-label={`${t('host.edit')}: ${quiz.title}`}>
+                          <Link to="/host/quizzes/$quizId" params={{ quizId: quiz.id }}>
+                            <PencilIcon aria-hidden="true" />
+                          </Link>
+                        </Button>
+                      </Hint>
                       <Button size="sm" disabled={quiz.questionCount - quiz.offCount === 0} onClick={() => setCreating(quiz)}>
                         <PlayIcon aria-hidden="true" />
                         {t('host.play')}

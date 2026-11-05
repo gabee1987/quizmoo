@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { afterEach, beforeAll, describe, expect, it } from 'vitest'
 import i18n from '../i18n'
 import { DateTimePicker } from './date-time-picker'
+import { TooltipProvider } from './ui/tooltip'
 
 // Hungarian on every machine: without it the labels follow the system's locale (CI is English).
 beforeAll(() => i18n.changeLanguage('hu'))
@@ -19,7 +20,7 @@ function Harness() {
 }
 
 function open() {
-  render(<Harness />)
+  render(<Harness />, { wrapper: TooltipProvider })
   fireEvent.click(screen.getByRole('button', { name: /19:00/ }))
 }
 

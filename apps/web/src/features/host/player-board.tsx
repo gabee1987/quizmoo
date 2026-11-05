@@ -2,6 +2,7 @@ import type { HostSnapshot, TeamAnswerPublic } from '@quizmoo/shared'
 import { CheckCircle2Icon, EyeIcon, EyeOffIcon, HourglassIcon, SlidersHorizontalIcon, WifiOffIcon } from 'lucide-react'
 import { useEffect, useLayoutEffect, useRef, useState, type RefObject } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Hint } from '@/components/hint'
 import { TypoTag } from '@/components/typo-tag'
 import { Button } from '@/components/ui/button'
 import {
@@ -296,10 +297,12 @@ function Presence({ entry }: { entry: BoardEntry }) {
   if (entry.player.left) return <span className="text-xs font-semibold text-muted-foreground">{t('host.game.leftGame')}</span>
   if (entry.player.connected) return null
   return (
-    <span className="shrink-0 text-muted-foreground" title={t('host.game.offline')}>
-      <WifiOffIcon className="size-3.5" aria-hidden="true" />
-      <span className="sr-only">{t('host.game.offline')}</span>
-    </span>
+    <Hint label={t('host.game.offline')}>
+      <span className="shrink-0 text-muted-foreground">
+        <WifiOffIcon className="size-3.5" aria-hidden="true" />
+        <span className="sr-only">{t('host.game.offline')}</span>
+      </span>
+    </Hint>
   )
 }
 
@@ -330,16 +333,17 @@ function Tile({ host, entry, size, hideAnswers }: { host: HostSnapshot; entry: B
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
         <div className="flex min-w-0 items-center gap-1">
           {/* Large tiles show a long name on two lines; medium ones keep one line (and their height). */}
-          <span
-            className={cn(
-              'min-w-0 flex-1 leading-tight font-bold',
-              size === 'lg' ? 'line-clamp-2 text-lg wrap-break-word' : 'truncate text-sm',
-              gone && 'text-muted-foreground',
-            )}
-            title={size === 'md' ? player.name : undefined}
-          >
-            {player.name}
-          </span>
+          <Hint label={size === 'md' ? player.name : undefined}>
+            <span
+              className={cn(
+                'min-w-0 flex-1 leading-tight font-bold',
+                size === 'lg' ? 'line-clamp-2 text-lg wrap-break-word' : 'truncate text-sm',
+                gone && 'text-muted-foreground',
+              )}
+            >
+              {player.name}
+            </span>
+          </Hint>
           <Presence entry={entry} />
           <Verdict correct={view.verdict} className={size === 'lg' ? 'size-6 shrink-0' : 'size-5 shrink-0'} />
         </div>
@@ -360,12 +364,12 @@ function SmallTile({ host, entry, view }: { host: HostSnapshot; entry: BoardEntr
   const { player } = entry
   const gone = !player.connected
   return (
-    <li
-      title={[player.name, view.time, view.points !== null ? `+${view.points}` : null].filter(Boolean).join(' · ')}
-      className={cn('flex min-w-0 items-center gap-1 rounded-lg border-2 px-1.5 py-0.5 transition-colors', tileTone(entry, view.over))}
-    >
+    <li className={cn('flex min-w-0 items-center gap-1 rounded-lg border-2 px-1.5 py-0.5 transition-colors', tileTone(entry, view.over))}>
       <PlayerAvatar avatar={player.avatar} size="sm" className={cn('size-5 text-xs', gone && 'opacity-50')} />
-      <span className={cn('min-w-0 flex-1 truncate text-sm leading-tight font-bold', gone && 'text-muted-foreground')}>{player.name}</span>
+      {/* On the name, not the tile: the answer chip and the offline mark inside have hints of their own. */}
+      <Hint label={[player.name, view.time, view.points !== null ? `+${view.points}` : null].filter(Boolean).join(' · ')}>
+        <span className={cn('min-w-0 flex-1 truncate text-sm leading-tight font-bold', gone && 'text-muted-foreground')}>{player.name}</span>
+      </Hint>
       <Presence entry={entry} />
       {entry.status === 'waiting' && (
         <span className="text-muted-foreground">
@@ -433,9 +437,9 @@ function Row({ host, entry, hideAnswers }: { host: HostSnapshot; entry: BoardEnt
   return (
     <li className={cn('flex min-w-0 items-center gap-2 border-b py-1', entry.status === 'waiting' && 'opacity-80')}>
       <PlayerAvatar avatar={player.avatar} size="sm" className={cn('size-6 text-sm', !player.connected && 'opacity-50')} />
-      <span className={cn('w-32 shrink-0 truncate text-sm font-bold', !player.connected && 'text-muted-foreground')} title={player.name}>
-        {player.name}
-      </span>
+      <Hint label={player.name}>
+        <span className={cn('w-32 shrink-0 truncate text-sm font-bold', !player.connected && 'text-muted-foreground')}>{player.name}</span>
+      </Hint>
       <Presence entry={entry} />
       <span className="flex min-w-0 flex-1 items-center gap-1.5 text-xs text-muted-foreground">
         <EntryAnswer host={host} entry={entry} view={view} />

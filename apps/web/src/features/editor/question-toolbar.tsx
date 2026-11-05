@@ -11,6 +11,7 @@ import {
   LayersIcon,
   Trash2Icon,
 } from 'lucide-react'
+import { Hint } from '@/components/hint'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { InGameSwitch } from './in-game-switch'
@@ -78,9 +79,11 @@ export function QuestionToolbar({
         </ToolButton>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" aria-label={t('editor.moreQuestionActions')}>
-              <EllipsisVerticalIcon aria-hidden="true" />
-            </Button>
+            <Hint label={t('editor.moreQuestionActions')}>
+              <Button variant="ghost" size="icon" aria-label={t('editor.moreQuestionActions')}>
+                <EllipsisVerticalIcon aria-hidden="true" />
+              </Button>
+            </Hint>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="min-w-48">
             <DropdownMenuItem className="min-h-11" disabled={first} onSelect={() => onMove('top')}>
@@ -116,8 +119,10 @@ function ToolButton({
   children: ReactNode
 }) {
   return (
-    <Button variant="ghost" size="icon" aria-label={label} title={label} disabled={disabled} onClick={onClick} className={className}>
-      {children}
-    </Button>
+    <Hint label={label}>
+      <Button variant="ghost" size="icon" aria-label={label} disabled={disabled} onClick={onClick} className={className}>
+        {children}
+      </Button>
+    </Hint>
   )
 }

@@ -2,6 +2,7 @@ import type { HostSnapshot } from '@quizmoo/shared'
 import { ChevronDownIcon, InfoIcon, ListStartIcon, LoaderCircleIcon, MonitorUpIcon, SearchIcon, XIcon } from 'lucide-react'
 import { useEffect, useId, useRef, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Hint } from '@/components/hint'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -89,15 +90,17 @@ export function ReviewPanel({
             }}
           />
           {searching && (
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              className="absolute top-1/2 right-1 -translate-y-1/2"
-              aria-label={t('host.review.clearSearch')}
-              onClick={() => setQuery('')}
-            >
-              <XIcon aria-hidden="true" />
-            </Button>
+            <Hint label={t('host.review.clearSearch')}>
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                className="absolute top-1/2 right-1 -translate-y-1/2"
+                aria-label={t('host.review.clearSearch')}
+                onClick={() => setQuery('')}
+              >
+                <XIcon aria-hidden="true" />
+              </Button>
+            </Hint>
           )}
         </div>
         {/* What plays next, always in view; it pops when the host picks another one. */}

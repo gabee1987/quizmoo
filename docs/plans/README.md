@@ -63,6 +63,7 @@ Finished plans are deleted once their branch is merged: `CHANGELOG.md` records w
 | 54 | [Every text in the app, reviewed](phase-54-texts.md) | `feature/texts-and-starter-quiz` | done (1.11.0) |
 | 55 | [A starter quiz for every new host](phase-55-starter-quiz.md) | `feature/texts-and-starter-quiz` | done (1.11.0) |
 | 56 | Small fixes found along the way | `feature/texts-and-starter-quiz` | in progress |
+| 57 | [Tooltips in the app's own look](phase-57-tooltips.md) | `feature/tooltips-and-tutorial` | done |
 | later | [Hosting without an account](later-guest-hosting.md) | `feature/guest-hosting` | planned, after the MVP |
 
 ## Conventions every plan follows

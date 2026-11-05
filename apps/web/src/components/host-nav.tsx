@@ -16,6 +16,7 @@ import {
 } from 'lucide-react'
 import { useEffect, useLayoutEffect, useRef, useState, type ComponentType, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Hint } from '@/components/hint'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -93,10 +94,12 @@ export function HostNav({ user }: { user: User }) {
           )}
         </SlidingItems>
         <div className="mt-4 flex flex-col gap-1 border-t pt-4">
-          <p className="flex items-center gap-2 px-3 pb-1 text-sm text-muted-foreground" title={t('nav.signedInAs')}>
-            <UserRoundIcon className="size-4" aria-hidden="true" />
-            <span className="truncate">{user.username}</span>
-          </p>
+          <Hint label={t('nav.signedInAs')} side="right">
+            <p className="flex items-center gap-2 px-3 pb-1 text-sm text-muted-foreground">
+              <UserRoundIcon className="size-4" aria-hidden="true" />
+              <span className="truncate">{user.username}</span>
+            </p>
+          </Hint>
           <Link
             to="/host/settings"
             className="group flex min-h-11 items-center gap-3 rounded-xl px-3 font-semibold text-muted-foreground transition-colors duration-300 outline-none hover:bg-muted hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring data-[status=active]:bg-secondary data-[status=active]:text-secondary-foreground"

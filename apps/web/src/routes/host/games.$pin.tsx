@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AnnouncementBanner } from '@/components/announcement-banner'
 import { AppMenu } from '@/components/app-menu'
+import { Hint } from '@/components/hint'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/cn'
 import { lengthMinutes } from '@/lib/game-length'
@@ -207,22 +208,25 @@ function TopBar({
       <div className="flex items-center gap-1">
         <AppMenu />
         {/* Laptops: the host menu back next to the game, or away again. */}
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          className="hidden lg:inline-flex"
-          aria-pressed={sidebar}
-          aria-label={t(sidebar ? 'host.board.hideSidebar' : 'host.board.showSidebar')}
-          title={t(sidebar ? 'host.board.hideSidebar' : 'host.board.showSidebar')}
-          onClick={() => setBoardOptions({ sidebar: !sidebar })}
-        >
-          {sidebar ? <PanelLeftCloseIcon aria-hidden="true" /> : <PanelLeftOpenIcon aria-hidden="true" />}
-        </Button>
-        <Button asChild variant="ghost" size="icon-sm">
-          <Link to="/host/quizzes" aria-label={t('host.game.backToQuizzes')} title={t('host.game.backToQuizzes')}>
-            <ArrowLeftIcon aria-hidden="true" />
-          </Link>
-        </Button>
+        <Hint label={t(sidebar ? 'host.board.hideSidebar' : 'host.board.showSidebar')}>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            className="hidden lg:inline-flex"
+            aria-pressed={sidebar}
+            aria-label={t(sidebar ? 'host.board.hideSidebar' : 'host.board.showSidebar')}
+            onClick={() => setBoardOptions({ sidebar: !sidebar })}
+          >
+            {sidebar ? <PanelLeftCloseIcon aria-hidden="true" /> : <PanelLeftOpenIcon aria-hidden="true" />}
+          </Button>
+        </Hint>
+        <Hint label={t('host.game.backToQuizzes')}>
+          <Button asChild variant="ghost" size="icon-sm">
+            <Link to="/host/quizzes" aria-label={t('host.game.backToQuizzes')}>
+              <ArrowLeftIcon aria-hidden="true" />
+            </Link>
+          </Button>
+        </Hint>
       </div>
       <span className="hidden h-8 w-px bg-border sm:block" aria-hidden="true" />
       {/* The PIN as a chip: what latecomers ask for. */}
@@ -231,9 +235,9 @@ function TopBar({
         <span className="text-2xl leading-tight font-black tracking-[0.12em] text-primary tabular-nums dark:text-foreground">{host.pin}</span>
       </div>
       <div className="flex min-w-0 flex-1 flex-col justify-center gap-0.5 sm:min-w-40">
-        <p className="truncate text-base leading-tight font-extrabold" title={settings.join(' · ')}>
-          {host.quizTitle}
-        </p>
+        <Hint label={settings.join(' · ')} side="bottom">
+          <p className="truncate text-base leading-tight font-extrabold">{host.quizTitle}</p>
+        </Hint>
         <p className="flex flex-wrap items-center gap-x-2 text-sm leading-tight font-semibold text-muted-foreground">
           <span className="inline-flex items-center gap-1.5 text-foreground">
             <span className={cn('size-2 shrink-0 rounded-full', dot)} aria-hidden="true" />
@@ -252,10 +256,12 @@ function TopBar({
             </span>
           )}
           {host.phase !== 'finished' && host.estimatedLeftSec > 0 && (
-            <span className="tabular-nums" title={t('common.lengthEstimate')}>
-              <span aria-hidden="true">· </span>
-              {t('common.aboutMinLeft', { count: lengthMinutes(host.estimatedLeftSec) })}
-            </span>
+            <Hint label={t('common.lengthEstimate')} side="bottom">
+              <span className="tabular-nums">
+                <span aria-hidden="true">· </span>
+                {t('common.aboutMinLeft', { count: lengthMinutes(host.estimatedLeftSec) })}
+              </span>
+            </Hint>
           )}
         </p>
       </div>
@@ -274,39 +280,43 @@ function TopBar({
         {host.phase !== 'finished' && <QuickMessageMenu announcement={host.announcement} quickMessages={host.quickMessages} onCommand={send} />}
         {/* Late joining: the door stays open after the start until the host closes it. */}
         {host.phase !== 'finished' && host.settings.lateJoin && (
-          <Button
-            variant={host.joinLocked ? 'default' : 'secondary'}
-            size="sm"
-            aria-pressed={host.joinLocked}
-            title={t(host.joinLocked ? 'host.game.joiningLockedHelp' : 'host.game.joiningOpenHelp')}
-            onClick={() => void send({ type: 'lockJoining', locked: !host.joinLocked })}
-          >
-            {host.joinLocked ? <DoorClosedIcon aria-hidden="true" /> : <DoorOpenIcon aria-hidden="true" />}
-            {/* The fourth labelled button would wrap the bar at 1440 px: its label shows on wider screens only. */}
-            <span className="max-2xl:sr-only">{t('host.game.lockJoining')}</span>
-          </Button>
+          <Hint label={t(host.joinLocked ? 'host.game.joiningLockedHelp' : 'host.game.joiningOpenHelp')} side="bottom">
+            <Button
+              variant={host.joinLocked ? 'default' : 'secondary'}
+              size="sm"
+              aria-pressed={host.joinLocked}
+              onClick={() => void send({ type: 'lockJoining', locked: !host.joinLocked })}
+            >
+              {host.joinLocked ? <DoorClosedIcon aria-hidden="true" /> : <DoorOpenIcon aria-hidden="true" />}
+              {/* The fourth labelled button would wrap the bar at 1440 px: its label shows on wider screens only. */}
+              <span className="max-2xl:sr-only">{t('host.game.lockJoining')}</span>
+            </Button>
+          </Hint>
         )}
         {/* Locks every host page of the account until the lock code or the password is typed. */}
-        <Button variant="secondary" size="sm" onClick={onLock} title={t('host.lock.button')}>
-          <LockIcon aria-hidden="true" />
-          <span className="max-xl:sr-only">{t('host.lock.button')}</span>
-        </Button>
-        <Button asChild variant="secondary" size="sm">
-          {/* A second click brings the same projector window up instead of opening another one. */}
-          <a
-            href={`/screen/${host.pin}`}
-            target="_blank"
-            rel="noreferrer"
-            title={t('host.game.openScreen')}
-            onClick={(e) => {
-              e.preventDefault()
-              openProjector(host.pin)
-            }}
-          >
-            <MonitorIcon aria-hidden="true" />
-            <span className="max-xl:sr-only">{t('host.game.openScreen')}</span>
-          </a>
-        </Button>
+        <Hint label={t('host.lock.button')} side="bottom">
+          <Button variant="secondary" size="sm" onClick={onLock}>
+            <LockIcon aria-hidden="true" />
+            <span className="max-xl:sr-only">{t('host.lock.button')}</span>
+          </Button>
+        </Hint>
+        <Hint label={t('host.game.openScreen')} side="bottom">
+          <Button asChild variant="secondary" size="sm">
+            {/* A second click brings the same projector window up instead of opening another one. */}
+            <a
+              href={`/screen/${host.pin}`}
+              target="_blank"
+              rel="noreferrer"
+              onClick={(e) => {
+                e.preventDefault()
+                openProjector(host.pin)
+              }}
+            >
+              <MonitorIcon aria-hidden="true" />
+              <span className="max-xl:sr-only">{t('host.game.openScreen')}</span>
+            </a>
+          </Button>
+        </Hint>
         <EndGameButton host={host} send={send} gameId={gameId} />
       </div>
     </header>
