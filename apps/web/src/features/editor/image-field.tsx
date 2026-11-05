@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import type { TFunction } from 'i18next'
 import { ImageUpIcon, Trash2Icon } from 'lucide-react'
 import { toast } from 'sonner'
+import { Hint } from '@/components/hint'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { cn } from '@/lib/cn'
@@ -207,12 +208,9 @@ export function ImageField({
   if (imageId) {
     return (
       <div {...dropProps} className={cn('flex flex-wrap items-center gap-2 rounded-xl', dragOver && 'ring-[3px] ring-ring')}>
-        <img
-          src={`/api/images/${imageId}`}
-          alt={label}
-          title={details?.line}
-          className="h-12 w-16 rounded-xl border bg-muted object-contain"
-        />
+        <Hint label={details?.line}>
+          <img src={`/api/images/${imageId}`} alt={label} className="h-12 w-16 rounded-xl border bg-muted object-contain" />
+        </Hint>
         {bar}
         {fileInput}
         <label

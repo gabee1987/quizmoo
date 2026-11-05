@@ -25,6 +25,7 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { FormAlert } from '@/components/form-alert'
+import { Hint } from '@/components/hint'
 import { SelectField } from '@/components/select-field'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -50,6 +51,7 @@ import { BatchEditDialog, type BatchPatch } from '../../features/host/batch-edit
 import { CreateGameDialog } from '../../features/host/create-game-dialog'
 import { ImportQuizDialog } from '../../features/host/import-quiz-dialog'
 import { exportQuiz } from '../../features/host/quiz-files'
+import { usePageTour } from '../../features/tour/use-tour'
 import { apiFetch } from '../../lib/api'
 
 export const Route = createFileRoute('/host/quizzes/')({
@@ -62,6 +64,7 @@ function QuizList() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const quizzes = useQuery(quizzesQueryOptions)
+  usePageTour('quizzes', quizzes.isSuccess)
   const [creating, setCreating] = useState<QuizSummary | null>(null)
   const [deleting, setDeleting] = useState<QuizSummary | null>(null)
   const [search, setSearch] = useState('')
@@ -169,16 +172,18 @@ function QuizList() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-3xl font-black tracking-tight">{t('host.title')}</h1>
         <div className="flex flex-wrap gap-2">
-          <Button variant="outline" onClick={() => addStarter.mutate()} disabled={addStarter.isPending}>
-            <GiftIcon aria-hidden="true" />
-            {/* Icon only on phones, so the three buttons keep to one row. */}
-            <span className="max-sm:sr-only">{t('host.starter.add')}</span>
-          </Button>
-          <Button variant="outline" onClick={() => setImporting(true)}>
-            <UploadIcon aria-hidden="true" />
-            {t('quizFile.import')}
-          </Button>
-          <Button onClick={() => create.mutate()} disabled={create.isPending}>
+          <div data-tour="quiz-import" className="flex gap-2">
+            <Button variant="outline" onClick={() => addStarter.mutate()} disabled={addStarter.isPending}>
+              <GiftIcon aria-hidden="true" />
+              {/* Icon only on phones, so the three buttons keep to one row. */}
+              <span className="max-sm:sr-only">{t('host.starter.add')}</span>
+            </Button>
+            <Button variant="outline" onClick={() => setImporting(true)}>
+              <UploadIcon aria-hidden="true" />
+              {t('quizFile.import')}
+            </Button>
+          </div>
+          <Button data-tour="new-quiz" onClick={() => create.mutate()} disabled={create.isPending}>
             <PlusIcon aria-hidden="true" />
             {t('host.newQuiz')}
           </Button>
@@ -205,7 +210,7 @@ function QuizList() {
       )}
 
       {(quizzes.data?.length ?? 0) > 1 && (
-        <div className="flex flex-wrap gap-2">
+        <div data-tour="quiz-search" className="flex flex-wrap gap-2">
           <div className="relative min-w-0 flex-1 basis-60">
             <SearchIcon className="pointer-events-none absolute top-1/2 left-3 size-5 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
             <Input
@@ -246,9 +251,11 @@ function QuizList() {
           aria-label={t('host.batch.selected', { count: chosen.length })}
           className="sticky top-2 z-20 flex animate-fade-up flex-wrap items-center gap-2 rounded-2xl border bg-card/95 p-2 shadow-soft backdrop-blur"
         >
-          <Button variant="ghost" size="icon" aria-label={t('host.batch.exit')} title={t('host.batch.exit')} onClick={stopSelecting}>
-            <XIcon aria-hidden="true" />
-          </Button>
+          <Hint label={t('host.batch.exit')}>
+            <Button variant="ghost" size="icon" aria-label={t('host.batch.exit')} onClick={stopSelecting}>
+              <XIcon aria-hidden="true" />
+            </Button>
+          </Hint>
           <span className="font-bold tabular-nums" aria-live="polite">
             {t('host.batch.selected', { count: chosen.length })}
           </span>
@@ -314,9 +321,11 @@ function QuizList() {
               {!selecting && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon-sm" aria-label={t('host.moreActions', { title: quiz.title })}>
-                      <EllipsisVerticalIcon aria-hidden="true" />
-                    </Button>
+                    <Hint label={t('host.moreActions', { title: quiz.title })}>
+                      <Button variant="ghost" size="icon-sm" aria-label={t('host.moreActions', { title: quiz.title })} data-tour="quiz-more">
+                        <EllipsisVerticalIcon aria-hidden="true" />
+                      </Button>
+                    </Hint>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="min-w-44">
                     <DropdownMenuItem className="min-h-11" disabled={duplicate.isPending} onSelect={() => duplicate.mutate(quiz)}>
@@ -342,10 +351,12 @@ function QuizList() {
             <div className="flex flex-wrap gap-1.5">
               <Badge variant="secondary">{t('host.questionCount', { count: quiz.questionCount })}</Badge>
               {quiz.questionCount > quiz.offCount && (
-                <Badge variant="secondary" title={t('common.lengthEstimate')}>
-                  <ClockIcon aria-hidden="true" />
-                  {t('common.aboutMin', { count: quizMinutes(quiz.length, quiz.settings) })}
-                </Badge>
+                <Hint label={t('common.lengthEstimate')}>
+                  <Badge variant="secondary">
+                    <ClockIcon aria-hidden="true" />
+                    {t('common.aboutMin', { count: quizMinutes(quiz.length, quiz.settings) })}
+                  </Badge>
+                </Hint>
               )}
               {quiz.offCount > 0 && (
                 <Badge variant="outline" className="border-dashed text-muted-foreground">
@@ -365,22 +376,19 @@ function QuizList() {
               </Badge>
             </div>
             {!selecting && (
-              <div className="mt-auto flex gap-2">
+              <div data-tour="quiz-card" className="mt-auto flex gap-2">
                 <Button asChild variant="outline" className="flex-1">
                   <Link to="/host/quizzes/$quizId" params={{ quizId: quiz.id }}>
                     <PencilIcon aria-hidden="true" />
                     {t('host.edit')}
                   </Link>
                 </Button>
-                <Button
-                  className="flex-1"
-                  disabled={quiz.questionCount - quiz.offCount === 0}
-                  title={quiz.questionCount > 0 && quiz.offCount === quiz.questionCount ? t('editor.inGame.playAllOff') : undefined}
-                  onClick={() => setCreating(quiz)}
-                >
-                  <PlayIcon aria-hidden="true" />
-                  {t('host.play')}
-                </Button>
+                <Hint label={quiz.questionCount > 0 && quiz.offCount === quiz.questionCount ? t('editor.inGame.playAllOff') : undefined}>
+                  <Button className="flex-1" disabled={quiz.questionCount - quiz.offCount === 0} onClick={() => setCreating(quiz)}>
+                    <PlayIcon aria-hidden="true" />
+                    {t('host.play')}
+                  </Button>
+                </Hint>
               </div>
             )}
           </li>

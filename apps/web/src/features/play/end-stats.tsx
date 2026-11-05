@@ -2,6 +2,7 @@ import type { MyEndFacts, PlayerQuestionResult } from '@quizmoo/shared'
 import { CheckCheckIcon, FlameIcon, type LucideIcon, TimerIcon, ZapIcon } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Hint } from '@/components/hint'
 import { stagger } from '@/lib/motion'
 
 function Tile({ icon: Icon, label, children, note, index }: { icon: LucideIcon; label: string; children: ReactNode; note?: string | undefined; index: number }) {
@@ -64,12 +65,12 @@ function PointsBars({ results }: { results: PlayerQuestionResult[] }) {
   return (
     <div className="flex h-28 items-end gap-0.5" role="img" aria-label={t('play.end.pointsLabel', { points: results.map((r) => r.points).join(', ') })}>
       {results.map((result, i) => (
-        <div
-          key={result.question.id}
-          title={t('play.end.pointsOn', { index: i + 1, count: result.points })}
-          className="min-w-0 flex-1 origin-bottom animate-grow-y rounded-t-[4px] bg-success"
-          style={{ height: `${Math.max(result.points > 0 ? 6 : 0, (result.points / most) * 100)}%`, ...stagger(i, 30, 300) }}
-        />
+        <Hint key={result.question.id} label={t('play.end.pointsOn', { index: i + 1, count: result.points })}>
+          <div
+            className="min-w-0 flex-1 origin-bottom animate-grow-y rounded-t-[4px] bg-success"
+            style={{ height: `${Math.max(result.points > 0 ? 6 : 0, (result.points / most) * 100)}%`, ...stagger(i, 30, 300) }}
+          />
+        </Hint>
       ))}
     </div>
   )

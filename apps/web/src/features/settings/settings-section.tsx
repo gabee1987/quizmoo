@@ -7,8 +7,11 @@ export function SettingsSection({
   title,
   help,
   danger = false,
+  tour,
   children,
 }: {
+  /** The tutorial tour's anchor (`data-tour`). */
+  tour?: string
   icon: ComponentType<{ className?: string }>
   title: string
   help?: string | undefined
@@ -18,6 +21,7 @@ export function SettingsSection({
 }) {
   return (
     <section
+      data-tour={tour}
       className={cn(
         'flex flex-col gap-4 rounded-2xl border bg-card p-4 shadow-soft sm:p-5',
         danger && 'border-2 border-destructive/60',

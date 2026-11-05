@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next'
 import { FormDialog } from '@/components/form-dialog'
 import { SeasonIcon } from '@/components/season-greeting'
 import { TextField } from '@/components/text-field'
+import { Hint } from '@/components/hint'
 import { Button } from '@/components/ui/button'
 import { SwitchRow } from '@/features/host/game-settings-form'
 import { defaultWindows, seasonDates, seasons, type Season } from '@/features/season/calendar'
@@ -69,16 +70,18 @@ export function SeasonPreview() {
                 )}
               </span>
             </button>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-sm"
-              className="absolute top-1/2 right-1.5 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-              aria-label={t('settings.seasonPreview.edit', { season: name })}
-              onClick={() => setEditing(season)}
-            >
-              <PencilIcon aria-hidden="true" />
-            </Button>
+            <Hint label={t('settings.seasonPreview.edit', { season: name })}>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-sm"
+                className="absolute top-1/2 right-1.5 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                aria-label={t('settings.seasonPreview.edit', { season: name })}
+                onClick={() => setEditing(season)}
+              >
+                <PencilIcon aria-hidden="true" />
+              </Button>
+            </Hint>
           </div>
         )
       })}

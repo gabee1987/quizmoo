@@ -23,10 +23,19 @@ export default defineConfig({
   use: {
     baseURL,
     // The first visit's storage notice is a fixed card that could cover buttons; legal.e2e.ts checks it
-    // in a context of its own. Contexts the specs open themselves inherit this too.
+    // in a context of its own. The tutorial tours that start by themselves are off on this device for
+    // the same reason; tour.e2e.ts switches them back on. Contexts the specs open themselves inherit this too.
     storageState: {
       cookies: [],
-      origins: [{ origin: new URL(baseURL).origin, localStorage: [{ name: 'quizmoo.storageNotice', value: 'seen' }] }],
+      origins: [
+        {
+          origin: new URL(baseURL).origin,
+          localStorage: [
+            { name: 'quizmoo.storageNotice', value: 'seen' },
+            { name: 'quizmoo.tours', value: 'off' },
+          ],
+        },
+      ],
     },
     locale: 'en-US',
     trace: 'retain-on-failure',

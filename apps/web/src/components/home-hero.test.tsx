@@ -3,6 +3,7 @@ import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 import i18n from '../i18n'
 import { HomeHero, MOO_LINES, mooKey } from './home-hero'
+import { TooltipProvider } from './ui/tooltip'
 
 beforeAll(() => i18n.changeLanguage('en'))
 afterEach(cleanup)
@@ -23,13 +24,13 @@ describe('mooKey', () => {
 
 describe('HomeHero', () => {
   it('has the app name as the page heading and shows the tagline', () => {
-    render(<HomeHero tagline="The party quiz" />)
+    render(<HomeHero tagline="The party quiz" />, { wrapper: TooltipProvider })
     expect(screen.getByRole('heading', { level: 1, name: 'Quizmoo' })).toBeTruthy()
     expect(screen.getByText('The party quiz')).toBeTruthy()
   })
 
   it('says nothing until the cow is tapped, then a new line on every tap', () => {
-    render(<HomeHero tagline="" />)
+    render(<HomeHero tagline="" />, { wrapper: TooltipProvider })
     const cow = screen.getByRole('button', { name: 'Pet the cow' })
     expect(screen.queryByText('Moo!')).toBeNull()
 
@@ -42,7 +43,7 @@ describe('HomeHero', () => {
   })
 
   it('announces the line to screen readers', () => {
-    render(<HomeHero tagline="" />)
+    render(<HomeHero tagline="" />, { wrapper: TooltipProvider })
     fireEvent.click(screen.getByRole('button', { name: 'Pet the cow' }))
     expect(screen.getByText('Moo!').closest('[aria-live="polite"]')).toBeTruthy()
   })
@@ -52,7 +53,7 @@ describe('HomeHero', () => {
     // The highest pick: the last antic (moo), an everyday line, the longest first wait.
     vi.spyOn(Math, 'random').mockReturnValue(0.99)
     try {
-      render(<HomeHero tagline="" />)
+      render(<HomeHero tagline="" />, { wrapper: TooltipProvider })
       const line = i18n.t('cow.lines.line8')
       act(() => vi.advanceTimersByTime(19_000))
       expect(screen.queryByText(line)).toBeNull()

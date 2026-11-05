@@ -3,6 +3,7 @@ import type { TFunction } from 'i18next'
 import { useId, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ArrowDownIcon, ArrowUpIcon, LayersIcon, ListOrderedIcon, Settings2Icon, Trash2Icon } from 'lucide-react'
+import { Hint } from '@/components/hint'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -190,20 +191,17 @@ export function GroupForm({
             { label: t('editor.moveGroupUp'), disabled: !canMove.up, where: 'up' as const, Icon: ArrowUpIcon },
             { label: t('editor.moveGroupDown'), disabled: !canMove.down, where: 'down' as const, Icon: ArrowDownIcon },
           ].map(({ label, disabled, where, Icon }) => (
-            <Button key={label} variant="ghost" size="icon" aria-label={label} title={label} disabled={disabled} onClick={() => onMove(where)}>
-              <Icon aria-hidden="true" />
-            </Button>
+            <Hint key={label} label={label}>
+              <Button variant="ghost" size="icon" aria-label={label} disabled={disabled} onClick={() => onMove(where)}>
+                <Icon aria-hidden="true" />
+              </Button>
+            </Hint>
           ))}
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label={t('editor.deleteGroup')}
-            title={t('editor.deleteGroup')}
-            onClick={onDelete}
-            className="text-destructive hover:text-destructive"
-          >
-            <Trash2Icon aria-hidden="true" />
-          </Button>
+          <Hint label={t('editor.deleteGroup')}>
+            <Button variant="ghost" size="icon" aria-label={t('editor.deleteGroup')} onClick={onDelete} className="text-destructive hover:text-destructive">
+              <Trash2Icon aria-hidden="true" />
+            </Button>
+          </Hint>
         </div>
       </div>
       {ownError && <p className="text-sm font-semibold text-destructive">{t(ownError)}</p>}

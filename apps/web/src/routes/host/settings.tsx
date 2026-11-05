@@ -22,6 +22,7 @@ import { AccountPanel } from '../../features/settings/account-panel'
 import { hostSettingsQueryOptions, saveHostSettings } from '../../features/settings/host-settings'
 import { QuickMessagesEditor } from '../../features/settings/quick-messages-editor'
 import { SettingsSection } from '../../features/settings/settings-section'
+import { usePageTour } from '../../features/tour/use-tour'
 
 const settingsTabs = ['games', 'messages', 'branding', 'account'] as const
 type SettingsTab = (typeof settingsTabs)[number]
@@ -39,6 +40,7 @@ const same = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b)
 function SettingsPage() {
   const { t } = useTranslation()
   const settings = useQuery(hostSettingsQueryOptions)
+  usePageTour('settings', settings.isSuccess)
 
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-5">
@@ -107,7 +109,7 @@ function SettingsForm({ saved }: { saved: HostSettings }) {
         onValueChange={(next) => void navigate({ search: { tab: next as SettingsTab }, replace: true })}
         className="gap-5"
       >
-        <TabsList variant="bold" aria-label={t('settings.tabs.label')}>
+        <TabsList variant="bold" aria-label={t('settings.tabs.label')} data-tour="settings-tabs">
           {settingsTabs.map((value) => {
             const Icon = tabIcons[value]
             return (
@@ -128,7 +130,7 @@ function SettingsForm({ saved }: { saved: HostSettings }) {
 
         {/* origin-top: the panels are tall, and their squash and stretch would lift their top into the tabs from a centre origin. */}
         <TabsContent value="games" className="flex origin-top flex-col gap-5">
-          <SettingsSection icon={SlidersHorizontalIcon} title={t('settings.defaults.title')} help={t('settings.defaults.help')}>
+          <SettingsSection tour="game-defaults" icon={SlidersHorizontalIcon} title={t('settings.defaults.title')} help={t('settings.defaults.help')}>
             <div className="flex min-h-9 flex-wrap items-center justify-between gap-2">
               <p key={String(!!draft.gameDefaults)} className="animate-panel-swap text-sm font-semibold text-muted-foreground">
                 {draft.gameDefaults ? t('settings.defaults.own') : t('settings.defaults.app')}
@@ -177,7 +179,7 @@ function SettingsForm({ saved }: { saved: HostSettings }) {
               </SmoothHeight>
             </Tabs>
           </SettingsSection>
-          <SettingsSection icon={TimerIcon} title={t('settings.questionDefaults.title')} help={t('settings.questionDefaults.help')}>
+          <SettingsSection tour="question-defaults" icon={TimerIcon} title={t('settings.questionDefaults.title')} help={t('settings.questionDefaults.help')}>
             <QuestionDefaultsFields value={draft.questionDefaults} onChange={(questionDefaults) => setDraft((d) => ({ ...d, questionDefaults }))} />
           </SettingsSection>
         </TabsContent>

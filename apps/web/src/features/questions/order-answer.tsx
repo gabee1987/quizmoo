@@ -5,6 +5,7 @@ import type { Answer, Option } from '@quizmoo/shared'
 import { ChevronDownIcon, ChevronUpIcon, GripVerticalIcon, Loader2Icon } from 'lucide-react'
 import { useCallback, useRef, useState, type KeyboardEventHandler } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Hint } from '@/components/hint'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/cn'
 import { useFlip } from '@/lib/flip'
@@ -164,24 +165,22 @@ function OrderItem({
         <span className="min-w-0 flex-1 wrap-break-word">{item.text}</span>
         {!locked && (
           <span className="flex shrink-0">
-            <button
-              type="button"
-              className={arrow}
-              disabled={index === 0}
-              aria-label={t('play.moveUp', { item: item.text })}
-              onClick={() => onMove(index - 1)}
-            >
-              <ChevronUpIcon className="size-5" aria-hidden="true" />
-            </button>
-            <button
-              type="button"
-              className={arrow}
-              disabled={index === count - 1}
-              aria-label={t('play.moveDown', { item: item.text })}
-              onClick={() => onMove(index + 1)}
-            >
-              <ChevronDownIcon className="size-5" aria-hidden="true" />
-            </button>
+            <Hint label={t('play.moveUp', { item: item.text })}>
+              <button type="button" className={arrow} disabled={index === 0} aria-label={t('play.moveUp', { item: item.text })} onClick={() => onMove(index - 1)}>
+                <ChevronUpIcon className="size-5" aria-hidden="true" />
+              </button>
+            </Hint>
+            <Hint label={t('play.moveDown', { item: item.text })}>
+              <button
+                type="button"
+                className={arrow}
+                disabled={index === count - 1}
+                aria-label={t('play.moveDown', { item: item.text })}
+                onClick={() => onMove(index + 1)}
+              >
+                <ChevronDownIcon className="size-5" aria-hidden="true" />
+              </button>
+            </Hint>
           </span>
         )}
       </div>

@@ -18,6 +18,7 @@ import { questionRuns } from '../../features/results/summary'
 import { WinnerCard } from '../../features/results/winner-card'
 import { apiFetch, errorCode } from '../../lib/api'
 import { openProjector } from '../../lib/projector'
+import { usePageTour } from '../../features/tour/use-tour'
 
 export const Route = createFileRoute('/host/results/$gameId')({
   component: ResultsPage,
@@ -86,6 +87,7 @@ function ResultsPage() {
     },
     onError: toastError,
   })
+  usePageTour('results', results.isSuccess)
 
   if (results.isPending) return <Spinner />
   if (results.isError) {
@@ -120,7 +122,7 @@ function ResultsPage() {
         actions={
           <>
             <Button asChild>
-              <a href={`/api/games/${gameId}/results.csv?lang=${lang}`} download>
+              <a href={`/api/games/${gameId}/results.csv?lang=${lang}`} download data-tour="results-export">
                 <DownloadIcon aria-hidden="true" />
                 {t('results.exportCsv')}
               </a>
@@ -148,13 +150,13 @@ function ResultsPage() {
       <ReleaseButtons gameId={gameId} pending={data.pendingRelease} />
 
       {/* Who won and what was easy or hard first; the full tables below. */}
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+      <div data-tour="results-summary" className="grid gap-5 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
         <WinnerCard results={data} />
         <QuestionHighlights results={data} />
       </div>
 
       <Tabs defaultValue="players" className="gap-4">
-        <TabsList variant="bold" aria-label={t('results.details')}>
+        <TabsList variant="bold" aria-label={t('results.details')} data-tour="results-tabs">
           <TabsTrigger value="players">
             <UsersIcon aria-hidden="true" />
             {t('results.players')}

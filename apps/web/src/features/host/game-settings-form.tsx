@@ -22,6 +22,7 @@ import { Collapse } from '@/components/collapse'
 import { ColourWheel } from '@/components/colour-wheel'
 import { OptionSymbol } from '@/components/icons'
 import { OPTION_COLOURS } from '@/components/option-colours'
+import { Hint } from '@/components/hint'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
@@ -512,16 +513,18 @@ function TeamNamesField({ value, onChange }: { value: GameSettings; onChange: (t
             className="flex items-center gap-1 rounded-full bg-secondary py-1 pr-1 pl-3 font-semibold text-secondary-foreground"
           >
             <span>{name}</span>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-sm"
-              className="size-8 rounded-full"
-              aria-label={t('host.create.removeTeam', { name })}
-              onClick={() => onChange(value.teamNames.filter((_, j) => j !== i))}
-            >
-              <XIcon className="size-4" />
-            </Button>
+            <Hint label={t('host.create.removeTeam', { name })}>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-sm"
+                className="size-8 rounded-full"
+                aria-label={t('host.create.removeTeam', { name })}
+                onClick={() => onChange(value.teamNames.filter((_, j) => j !== i))}
+              >
+                <XIcon className="size-4" />
+              </Button>
+            </Hint>
           </li>
         ))}
       </ul>
@@ -602,18 +605,20 @@ function LegendWithHelp({ title, help }: { title: string; help: string }) {
     <>
       <legend className="flex items-center gap-1 px-1 font-bold">
         {title}
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon-sm"
-          className="size-8 rounded-full text-muted-foreground hover:text-foreground aria-expanded:bg-secondary aria-expanded:text-secondary-foreground"
-          aria-label={t('host.create.aboutThis', { title })}
-          aria-expanded={open}
-          aria-controls={helpId}
-          onClick={() => setOpen((o) => !o)}
-        >
-          <InfoIcon aria-hidden="true" />
-        </Button>
+        <Hint label={t('host.create.aboutThis', { title })}>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            className="size-8 rounded-full text-muted-foreground hover:text-foreground aria-expanded:bg-secondary aria-expanded:text-secondary-foreground"
+            aria-label={t('host.create.aboutThis', { title })}
+            aria-expanded={open}
+            aria-controls={helpId}
+            onClick={() => setOpen((o) => !o)}
+          >
+            <InfoIcon aria-hidden="true" />
+          </Button>
+        </Hint>
       </legend>
       {/* The fieldset's gap is taken inside (below), so a closed one leaves none. */}
       <Collapse open={open} className="-mb-3" innerClassName="pb-3">

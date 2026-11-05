@@ -145,5 +145,7 @@ export const hostSettings = pgTable('host_settings', {
   signupNotifyEmail: text('signup_notify_email'),
   /** The last version whose patch notes the host opened ("What's new"); null: none yet. */
   seenRelease: text('seen_release'),
+  /** The tutorial tours the host has seen or closed. Outside `settings`, so saving My settings never brings them back. */
+  toursSeen: jsonb('tours_seen').$type<string[]>().notNull().default([]),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 })

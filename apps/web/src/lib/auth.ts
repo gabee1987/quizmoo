@@ -1,4 +1,4 @@
-import { queryOptions } from '@tanstack/react-query'
+import { queryOptions, useQuery } from '@tanstack/react-query'
 import { apiFetch } from './api'
 
 export interface User {
@@ -21,3 +21,9 @@ export const meQueryOptions = queryOptions({
   // Back to a tab: asks again, so a tab left open when the screens were locked shows the lock screen.
   refetchOnWindowFocus: 'always',
 })
+
+/** Where "home" is on the public pages: the host's home for a logged-in host, the join page for everyone else. */
+export function useHomePath(): '/host' | '/' {
+  const loggedIn = useQuery({ ...meQueryOptions, throwOnError: false }).isSuccess
+  return loggedIn ? '/host' : '/'
+}

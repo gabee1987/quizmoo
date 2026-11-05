@@ -5,6 +5,7 @@ import { useId, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { AnnouncementBanner } from '@/components/announcement-banner'
+import { Hint } from '@/components/hint'
 import { SmoothHeight } from '@/components/smooth-height'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -208,20 +209,20 @@ export function MessageBox({
           ) : (
             <div key="sending" className="flex animate-panel-swap flex-wrap items-center gap-2">
               {quick.map((message) => (
-                <Button
-                  key={message.id}
-                  variant="secondary"
-                  size="sm"
-                  disabled={sending}
-                  onClick={() => void announce(messageText(message, t), message.durationSec, message.important === true)}
-                  title={message.important ? t('host.game.message.importantPreset') : undefined}
-                >
-                  {message.important && <TriangleAlertIcon aria-label={t('host.game.message.importantPreset')} />}
-                  {messageText(message, t)}
-                  {message.durationSec !== null && (
-                    <span className="font-semibold opacity-75">{t('host.game.message.seconds', { count: message.durationSec })}</span>
-                  )}
-                </Button>
+                <Hint key={message.id} label={message.important ? t('host.game.message.importantPreset') : undefined}>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    disabled={sending}
+                    onClick={() => void announce(messageText(message, t), message.durationSec, message.important === true)}
+                  >
+                    {message.important && <TriangleAlertIcon aria-label={t('host.game.message.importantPreset')} />}
+                    {messageText(message, t)}
+                    {message.durationSec !== null && (
+                      <span className="font-semibold opacity-75">{t('host.game.message.seconds', { count: message.durationSec })}</span>
+                    )}
+                  </Button>
+                </Hint>
               ))}
               <Button variant="ghost" size="sm" aria-pressed={false} onClick={() => setEditing(true)}>
                 <PencilIcon aria-hidden="true" />
@@ -253,16 +254,12 @@ export function MessageBox({
                 <SendIcon aria-hidden="true" />
                 {t('host.game.message.send')}
               </Button>
-              <Button
-                type="button"
-                variant="outline"
-                disabled={sending || !text.trim() || full}
-                title={full ? t('settings.messages.full', { max: MAX_QUICK_MESSAGES }) : undefined}
-                onClick={() => void saveToMine()}
-              >
-                <BookmarkPlusIcon aria-hidden="true" />
-                {t('host.game.message.saveToMine')}
-              </Button>
+              <Hint label={full ? t('settings.messages.full', { max: MAX_QUICK_MESSAGES }) : undefined}>
+                <Button type="button" variant="outline" disabled={sending || !text.trim() || full} onClick={() => void saveToMine()}>
+                  <BookmarkPlusIcon aria-hidden="true" />
+                  {t('host.game.message.saveToMine')}
+                </Button>
+              </Hint>
             </div>
           </form>
         </div>
@@ -298,14 +295,11 @@ function EditRow({ message, onCommand }: { message: QuickMessage; onCommand: (co
         value={message.durationSec}
         onChange={(durationSec) => void onCommand({ type: 'setQuickMessageTime', id: message.id, durationSec })}
       />
-      <Button
-        variant="ghost"
-        size="icon-sm"
-        aria-label={t('host.game.message.removeFromGame', { text })}
-        onClick={() => (motionOk ? setLeaving(true) : void remove())}
-      >
-        <XIcon aria-hidden="true" />
-      </Button>
+      <Hint label={t('host.game.message.removeFromGame', { text })}>
+        <Button variant="ghost" size="icon-sm" aria-label={t('host.game.message.removeFromGame', { text })} onClick={() => (motionOk ? setLeaving(true) : void remove())}>
+          <XIcon aria-hidden="true" />
+        </Button>
+      </Hint>
     </div>
   )
 }

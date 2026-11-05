@@ -5,6 +5,7 @@ import { CSS } from '@dnd-kit/utilities'
 import { memo, useCallback, useState, type KeyboardEventHandler, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ArrowDownIcon, ArrowUpIcon, EyeOffIcon, GripVerticalIcon, PlusIcon } from 'lucide-react'
+import { Hint } from '@/components/hint'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/cn'
 import { dragMove, useSortableAccessibility, useSortableSensors } from '@/lib/sortable'
@@ -166,25 +167,31 @@ const RowContent = memo(function RowContent({
       invalid={invalid}
       onOpen={onOpen}
       handle={
-        <button
-          ref={handleRef}
-          type="button"
-          {...handleAttributes}
-          onKeyDown={onHandleKeyDown}
-          aria-label={t('editor.dragQuestion', { n: number + 1 })}
-          className="flex h-12 w-8 shrink-0 cursor-grab items-center justify-center rounded-lg text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring active:cursor-grabbing"
-        >
-          <GripVerticalIcon className="size-4" aria-hidden="true" />
-        </button>
+        <Hint label={t('editor.dragQuestion', { n: number + 1 })}>
+          <button
+            ref={handleRef}
+            type="button"
+            {...handleAttributes}
+            onKeyDown={onHandleKeyDown}
+            aria-label={t('editor.dragQuestion', { n: number + 1 })}
+            className="flex h-12 w-8 shrink-0 cursor-grab items-center justify-center rounded-lg text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring active:cursor-grabbing"
+          >
+            <GripVerticalIcon className="size-4" aria-hidden="true" />
+          </button>
+        </Hint>
       }
       actions={
         <>
-          <Button variant="ghost" size="icon-sm" aria-label={t('editor.moveUp')} title={t('editor.moveUp')} disabled={first} onClick={() => onStep(-1)}>
-            <ArrowUpIcon aria-hidden="true" />
-          </Button>
-          <Button variant="ghost" size="icon-sm" aria-label={t('editor.moveDown')} title={t('editor.moveDown')} disabled={last} onClick={() => onStep(1)}>
-            <ArrowDownIcon aria-hidden="true" />
-          </Button>
+          <Hint label={t('editor.moveUp')}>
+            <Button variant="ghost" size="icon-sm" aria-label={t('editor.moveUp')} disabled={first} onClick={() => onStep(-1)}>
+              <ArrowUpIcon aria-hidden="true" />
+            </Button>
+          </Hint>
+          <Hint label={t('editor.moveDown')}>
+            <Button variant="ghost" size="icon-sm" aria-label={t('editor.moveDown')} disabled={last} onClick={() => onStep(1)}>
+              <ArrowDownIcon aria-hidden="true" />
+            </Button>
+          </Hint>
         </>
       }
     />

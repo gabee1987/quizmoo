@@ -5,6 +5,7 @@ import { CSS } from '@dnd-kit/utilities'
 import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { CheckIcon, GripVerticalIcon, PlusIcon, XIcon } from 'lucide-react'
+import { Hint } from '@/components/hint'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/cn'
@@ -186,16 +187,18 @@ function OptionRow({
       )}
     >
       <div className="flex items-center gap-1.5">
-        <button
-          ref={setActivatorNodeRef}
-          type="button"
-          {...attributes}
-          {...listeners}
-          aria-label={t('editor.dragOption', { n })}
-          className="flex h-10 w-6 shrink-0 cursor-grab touch-manipulation items-center justify-center rounded-lg text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring active:cursor-grabbing"
-        >
-          <GripVerticalIcon className="size-4" aria-hidden="true" />
-        </button>
+        <Hint label={t('editor.dragOption', { n })}>
+          <button
+            ref={setActivatorNodeRef}
+            type="button"
+            {...attributes}
+            {...listeners}
+            aria-label={t('editor.dragOption', { n })}
+            className="flex h-10 w-6 shrink-0 cursor-grab touch-manipulation items-center justify-center rounded-lg text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring active:cursor-grabbing"
+          >
+            <GripVerticalIcon className="size-4" aria-hidden="true" />
+          </button>
+        </Hint>
         {marker === 'order' ? (
           // Its place in the correct order.
           <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-secondary text-lg font-black text-secondary-foreground tabular-nums">
@@ -248,15 +251,17 @@ function OptionRow({
             <span className="hidden sm:inline">{t('editor.correct')}</span>
           </button>
         )}
-        <button
-          type="button"
-          className="flex size-10 shrink-0 items-center justify-center rounded-lg text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring disabled:opacity-30"
-          disabled={!canRemove}
-          aria-label={t('editor.removeOption', { n })}
-          onClick={onRemove}
-        >
-          <XIcon className="size-5" aria-hidden="true" />
-        </button>
+        <Hint label={t('editor.removeOption', { n })}>
+          <button
+            type="button"
+            className="flex size-10 shrink-0 items-center justify-center rounded-lg text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring disabled:opacity-30"
+            disabled={!canRemove}
+            aria-label={t('editor.removeOption', { n })}
+            onClick={onRemove}
+          >
+            <XIcon className="size-5" aria-hidden="true" />
+          </button>
+        </Hint>
       </div>
       {/* Ordering items are text only: the phone's sortable list has no room for pictures. */}
       {marker !== 'order' && (

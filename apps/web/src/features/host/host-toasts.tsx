@@ -4,6 +4,7 @@ import { useEffect, useRef, useSyncExternalStore } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import i18next from 'i18next'
+import { Hint } from '@/components/hint'
 import { Button } from '@/components/ui/button'
 import { playerEvents, playerToasts, type PlayerEvent } from './player-events'
 
@@ -87,16 +88,17 @@ export function HostToastsToggle() {
   const { t } = useTranslation()
   const off = useMuted()
   return (
-    <Button
-      variant="outline"
-      size="icon-sm"
-      className="size-7 rounded-full text-muted-foreground"
-      aria-label={t('host.game.toasts.label')}
-      aria-pressed={!off}
-      title={off ? t('host.game.toasts.off') : t('host.game.toasts.on')}
-      onClick={() => setMuted(!off)}
-    >
-      {off ? <BellOffIcon className="size-4" aria-hidden="true" /> : <BellIcon className="size-4" aria-hidden="true" />}
-    </Button>
+    <Hint label={off ? t('host.game.toasts.off') : t('host.game.toasts.on')}>
+      <Button
+        variant="outline"
+        size="icon-sm"
+        className="size-7 rounded-full text-muted-foreground"
+        aria-label={t('host.game.toasts.label')}
+        aria-pressed={!off}
+        onClick={() => setMuted(!off)}
+      >
+        {off ? <BellOffIcon className="size-4" aria-hidden="true" /> : <BellIcon className="size-4" aria-hidden="true" />}
+      </Button>
+    </Hint>
   )
 }

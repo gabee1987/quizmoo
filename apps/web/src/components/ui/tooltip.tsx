@@ -23,9 +23,11 @@ function TooltipTrigger({ ...props }: React.ComponentProps<typeof TooltipPrimiti
   return <TooltipPrimitive.Trigger data-slot="tooltip-trigger" {...props} />
 }
 
+/** The bubble: styled by `.tooltip` in `styles.css`, the toasts' look in small, with a tail. */
 function TooltipContent({
   className,
-  sideOffset = 0,
+  sideOffset = 4,
+  collisionPadding = 8,
   children,
   ...props
 }: React.ComponentProps<typeof TooltipPrimitive.Content>) {
@@ -34,14 +36,20 @@ function TooltipContent({
       <TooltipPrimitive.Content
         data-slot="tooltip-content"
         sideOffset={sideOffset}
-        className={cn(
-          'z-50 w-fit origin-(--radix-tooltip-content-transform-origin) animate-in rounded-lg bg-foreground px-3 py-1.5 text-sm text-balance text-background fade-in-0 zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95',
-          className,
-        )}
+        collisionPadding={collisionPadding}
+        arrowPadding={14}
+        className={cn('tooltip', className)}
         {...props}
       >
         {children}
-        <TooltipPrimitive.Arrow className="z-50 size-2.5 translate-y-[calc(-50%_-_2px)] rotate-45 rounded-[2px] bg-foreground fill-foreground" />
+        {/* Drawn pointing down (Radix turns it for the other sides). Its fill starts 2 px inside the
+            bubble to cover the border there, and only the two slanted sides are stroked. */}
+        <TooltipPrimitive.Arrow asChild>
+          <svg className="tooltip-tail" width={18} height={11} viewBox="0 0 18 11" aria-hidden="true">
+            <path d="M0 0H18V2L9 10L0 2Z" />
+            <path d="M0 2L9 10L18 2" />
+          </svg>
+        </TooltipPrimitive.Arrow>
       </TooltipPrimitive.Content>
     </TooltipPrimitive.Portal>
   )

@@ -6,6 +6,8 @@ import { GameBar } from '@/components/game-bar'
 import { SeasonLayer } from '@/components/season-layer'
 import { StorageNotice } from '@/components/storage-notice'
 import { Toaster } from '@/components/ui/sonner'
+import { TooltipProvider } from '@/components/ui/tooltip'
+import { TourLayer } from '@/features/tour/tour-layer'
 import { meQueryOptions } from '@/lib/auth'
 import { cn } from '@/lib/cn'
 import { forgetOldPlayers } from '@/lib/player-storage'
@@ -44,7 +46,8 @@ function RootLayout() {
   const phase = (inGame ? store.player : projector || hostGame ? game : null)?.phase
   const decor = home ? 'home' : projector ? 'projector' : inGame || hostGame ? 'game' : 'page'
   return (
-    <>
+    // One provider for every tooltip: a short wait before the first, none while moving to the next.
+    <TooltipProvider delayDuration={350} skipDelayDuration={400}>
       <Backdrop />
       {phase !== 'question' && phase !== 'reveal' && <SeasonLayer density={decor} />}
       {/* A game fills the visible screen (`dvh`): `100%` follows the small viewport, so a phone whose
@@ -57,7 +60,8 @@ function RootLayout() {
       </div>
       {/* Not over a phone's answers or on the projector: players see it on the join page first. */}
       {!inGame && !pathname.startsWith('/screen/') && <StorageNotice />}
+      <TourLayer />
       <Toaster position="top-center" />
-    </>
+    </TooltipProvider>
   )
 }

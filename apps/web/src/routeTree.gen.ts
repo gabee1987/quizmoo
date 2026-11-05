@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CookiesRouteImport } from './routes/cookies'
+import { Route as HelpRouteImport } from './routes/help'
 import { Route as HostRouteRouteImport } from './routes/host/route'
 import { Route as ImprintRouteImport } from './routes/imprint'
 import { Route as LoginRouteImport } from './routes/login'
@@ -40,6 +41,11 @@ const IndexRoute = IndexRouteImport.update({
 const CookiesRoute = CookiesRouteImport.update({
   id: '/cookies',
   path: '/cookies',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HelpRoute = HelpRouteImport.update({
+  id: '/help',
+  path: '/help',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HostRouteRoute = HostRouteRouteImport.update({
@@ -147,6 +153,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/host': typeof HostRouteRouteWithChildren
   '/cookies': typeof CookiesRoute
+  '/help': typeof HelpRoute
   '/imprint': typeof ImprintRoute
   '/login': typeof LoginRoute
   '/privacy': typeof PrivacyRoute
@@ -170,6 +177,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/cookies': typeof CookiesRoute
+  '/help': typeof HelpRoute
   '/imprint': typeof ImprintRoute
   '/login': typeof LoginRoute
   '/privacy': typeof PrivacyRoute
@@ -195,6 +203,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/host': typeof HostRouteRouteWithChildren
   '/cookies': typeof CookiesRoute
+  '/help': typeof HelpRoute
   '/imprint': typeof ImprintRoute
   '/login': typeof LoginRoute
   '/privacy': typeof PrivacyRoute
@@ -221,6 +230,7 @@ export interface FileRouteTypes {
     | '/'
     | '/host'
     | '/cookies'
+    | '/help'
     | '/imprint'
     | '/login'
     | '/privacy'
@@ -244,6 +254,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/cookies'
+    | '/help'
     | '/imprint'
     | '/login'
     | '/privacy'
@@ -268,6 +279,7 @@ export interface FileRouteTypes {
     | '/'
     | '/host'
     | '/cookies'
+    | '/help'
     | '/imprint'
     | '/login'
     | '/privacy'
@@ -293,6 +305,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   HostRouteRoute: typeof HostRouteRouteWithChildren
   CookiesRoute: typeof CookiesRoute
+  HelpRoute: typeof HelpRoute
   ImprintRoute: typeof ImprintRoute
   LoginRoute: typeof LoginRoute
   PrivacyRoute: typeof PrivacyRoute
@@ -316,6 +329,13 @@ declare module '@tanstack/react-router' {
       path: '/cookies'
       fullPath: '/cookies'
       preLoaderRoute: typeof CookiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/help': {
+      id: '/help'
+      path: '/help'
+      fullPath: '/help'
+      preLoaderRoute: typeof HelpRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/host': {
@@ -499,6 +519,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   HostRouteRoute: HostRouteRouteWithChildren,
   CookiesRoute: CookiesRoute,
+  HelpRoute: HelpRoute,
   ImprintRoute: ImprintRoute,
   LoginRoute: LoginRoute,
   PrivacyRoute: PrivacyRoute,

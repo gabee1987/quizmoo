@@ -1,24 +1,28 @@
 import { Link, useRouterState } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
+import { Hint } from '@/components/hint'
 import { useCowAntics } from '@/features/cow/use-cow-antics'
 import { languages, setLanguage } from '@/i18n'
+import { useHomePath } from '@/lib/auth'
 import { cn } from '@/lib/cn'
 import { CowLogo } from './cow-logo'
+import { HelpMenu } from './help-menu'
 import { ModeToggle } from './mode-toggle'
 import { SeasonToggle } from './season-greeting'
 
 /**
- * Compact header: logo mark (a link home: the host's home on the host pages, the join page elsewhere),
+ * Compact header: logo mark (a link home: the host's home on the host pages and for a logged-in host, the join page otherwise),
  * language and colour mode. Without `brand` (the home pages show a big one) only the settings.
  */
 export function AppHeader({ brand = true }: { brand?: boolean }) {
   const { t } = useTranslation()
   const onHostPages = useRouterState({ select: (state) => state.location.pathname.startsWith('/host') })
+  const home = useHomePath()
   return (
     <header className={cn('flex items-center gap-3 px-4 py-3', brand ? 'justify-between' : 'justify-end')}>
       {brand && (
         <Link
-          to={onHostPages ? '/host' : '/'}
+          to={onHostPages ? '/host' : home}
           className="-m-1 flex items-center gap-2.5 rounded-xl p-1 outline-none focus-visible:ring-[3px] focus-visible:ring-ring"
         >
           <LogoMark />
@@ -29,6 +33,7 @@ export function AppHeader({ brand = true }: { brand?: boolean }) {
         <LanguageSwitch />
         <SeasonToggle />
         <ModeToggle />
+        <HelpMenu />
       </span>
     </header>
   )
@@ -53,20 +58,21 @@ function LanguageSwitch() {
   return (
     <div role="group" aria-label={t('app.language')} className="flex rounded-lg bg-muted p-0.5">
       {languages.map((lang) => (
-        <button
-          key={lang}
-          type="button"
-          lang={lang}
-          aria-pressed={i18n.language === lang}
-          aria-label={t(`app.languages.${lang}`)}
-          onClick={() => setLanguage(lang)}
-          className={cn(
-            'h-9 min-w-10 rounded-md px-2 text-sm font-bold uppercase outline-none focus-visible:ring-[3px] focus-visible:ring-ring',
-            i18n.language === lang ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground',
-          )}
-        >
-          {lang}
-        </button>
+        <Hint key={lang} label={t(`app.languages.${lang}`)}>
+          <button
+            type="button"
+            lang={lang}
+            aria-pressed={i18n.language === lang}
+            aria-label={t(`app.languages.${lang}`)}
+            onClick={() => setLanguage(lang)}
+            className={cn(
+              'h-9 min-w-10 rounded-md px-2 text-sm font-bold uppercase outline-none focus-visible:ring-[3px] focus-visible:ring-ring',
+              i18n.language === lang ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground',
+            )}
+          >
+            {lang}
+          </button>
+        </Hint>
       ))}
     </div>
   )
