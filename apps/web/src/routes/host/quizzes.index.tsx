@@ -10,6 +10,7 @@ import {
   EllipsisVerticalIcon,
   EyeOffIcon,
   FileDownIcon,
+  GiftIcon,
   FileSpreadsheetIcon,
   ListChecksIcon,
   PencilIcon,
@@ -105,6 +106,15 @@ function QuizList() {
     },
     onError: toastError,
   })
+  // A fresh copy of the starter quiz, in the page's language.
+  const addStarter = useMutation({
+    mutationFn: () => apiFetch<{ id: string }>('/api/quizzes/starter', { method: 'POST', body: JSON.stringify({ lang: i18n.language }) }),
+    onSuccess: () => {
+      refresh()
+      toast.success(t('host.starter.added'))
+    },
+    onError: toastError,
+  })
   const remove = useMutation({
     mutationFn: (quiz: QuizSummary) => apiFetch(`/api/quizzes/${quiz.id}`, { method: 'DELETE' }),
     onSuccess: () => {
@@ -158,7 +168,12 @@ function QuizList() {
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-3xl font-black tracking-tight">{t('host.title')}</h1>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" onClick={() => addStarter.mutate()} disabled={addStarter.isPending}>
+            <GiftIcon aria-hidden="true" />
+            {/* Icon only on phones, so the three buttons keep to one row. */}
+            <span className="max-sm:sr-only">{t('host.starter.add')}</span>
+          </Button>
           <Button variant="outline" onClick={() => setImporting(true)}>
             <UploadIcon aria-hidden="true" />
             {t('quizFile.import')}
@@ -181,6 +196,11 @@ function QuizList() {
         <div className="flex flex-col items-center gap-2 rounded-2xl border-2 border-dashed px-6 py-12 text-center text-muted-foreground">
           <SparklesIcon className="size-8 text-primary" aria-hidden="true" />
           <p className="font-semibold">{t('host.empty')}</p>
+          <p className="max-w-sm text-sm">{t('host.starter.help')}</p>
+          <Button className="mt-2" onClick={() => addStarter.mutate()} disabled={addStarter.isPending}>
+            <GiftIcon aria-hidden="true" />
+            {t('host.starter.addLong')}
+          </Button>
         </div>
       )}
 

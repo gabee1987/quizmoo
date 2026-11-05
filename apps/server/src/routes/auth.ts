@@ -14,6 +14,7 @@ import {
 } from '../auth/session.js'
 import type { Db } from '../db/index.js'
 import { localCredentials, users } from '../db/schema.js'
+import { addStarterQuizSafely, starterLanguageSchema } from '../starter/add-starter-quiz.js'
 import { parseOr400 } from './http.js'
 import { isUniqueViolation, usernameSchema } from './users.js'
 
@@ -34,6 +35,8 @@ const registerSchema = z.object({
   acceptTerms: z.literal(true),
   /** Honeypot: hidden from people, filled in by form-filling bots. */
   website: z.string().max(200).optional(),
+  /** The sign-up page's language; the starter quiz is written in it. */
+  lang: starterLanguageSchema,
 })
 
 /** Sign-ups waiting for approval at once; beyond this, registering is refused until the admin catches up. */
@@ -104,12 +107,15 @@ export async function authRoutes(app: FastifyInstance, { db, secureCookies, regi
 
       const [pending] = await db.select({ n: count() }).from(users).where(eq(users.status, 'pending'))
       if ((pending?.n ?? 0) >= MAX_PENDING_SIGNUPS) return reply.code(503).send({ error: 'errors.registrationsFull' })
+      let userId: string
       try {
-        await createUser(db, body.username, body.password, 'editor', { status: 'pending', termsVersion: TERMS_VERSION })
+        userId = (await createUser(db, body.username, body.password, 'editor', { status: 'pending', termsVersion: TERMS_VERSION })).id
       } catch (error) {
         if (isUniqueViolation(error)) return reply.code(409).send({ error: 'errors.usernameTaken' })
         throw error
       }
+      // Added now, so it is there at the first login; a rejected sign-up takes it with it.
+      await addStarterQuizSafely(db, userId, body.lang, request.log)
       onSignup?.()
       return reply.code(201).send({ pending: true })
     },

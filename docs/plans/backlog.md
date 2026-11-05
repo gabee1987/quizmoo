@@ -80,6 +80,8 @@ Collected while testing phases 9 to 12. Effort as above.
 - Fixes on the What's new page: every release lists what was fixed after its news, the earlier releases included (phase 37); the join page drops a PIN no game answers from the address, and the logo on the host pages leads to the host's home, hosts log in on the front page's Host tab, and its Play / Host switch no longer jumps (1.10.1).
 - The phone's end of the game in four pages (standings, answers, facts with awards, the player's own stats), stepped through with buttons, swipes or arrow keys (phase 52).
 - The projector's end of the game in five pages (podium with a drum roll, leaderboard, awards, game facts) and a question recap the host opens, moved from the host's Finished card or in automatic mode (phase 53).
+- Every text reviewed for one voice, rounds named alike everywhere, the legal pages aligned between the languages (phase 54).
+- A 20-question starter quiz for every new host, and a button to add it again (phase 55).
 
 ### Open
 

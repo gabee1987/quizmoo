@@ -46,7 +46,7 @@ test('an admin manages a host account from the Users page', async ({ browser, pa
       await expect(dialog.getByText('At least 10 characters.')).toBeVisible()
       await dialog.getByLabel('Initial password').fill('e2e-initial-pass-1')
       await dialog.getByRole('button', { name: 'Create' }).click()
-      await expect(page.getByText(`User ${host} created.`)).toBeVisible()
+      await expect(page.getByText(`Account ${host} created.`)).toBeVisible()
       await expect(card.getByText('Password not changed yet')).toBeVisible()
       await expect(card.getByText('never logged in')).toBeVisible()
     })

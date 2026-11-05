@@ -1,5 +1,20 @@
 # Changelog
 
+## Unreleased
+
+### Every text in the app, reviewed (phase 54)
+- Both dictionaries were read through key by key for one voice: plain, friendly, game-like, Hungarian always in the "te" form. About 370 strings changed. Question groups are called rounds ("kör"/"round") everywhere in the UI, as the game already did; "Play again" is "Visszavágó" in Hungarian, since "Új kör" read as "new round"; standings, PIN and admin wording is consistent; Hungarian no longer chains "a(z) {{n}}." where a number follows an article; English lost its stiff and machine-like phrasing. Old release notes and the words the spreadsheet importer reads are unchanged.
+- The legal pages keep a professional tone, in plainer and more precise words, with GDPR terms as the official Hungarian translation uses them. Three points now say the same in both languages: an account may be neither shared nor passed on, the content licence covers only providing the service to the host, and a player's seat is removed when they leave the game or, once expired after two days, the next time Quizmoo opens on that device (which is what the code does). The terms version is now 2026-11-05, so every host accepts them again at the next login.
+- The results CSV names rounds "Kör"/"Round" and solo players "Solo".
+
+### A starter quiz for every new host (phase 55)
+- Every new account gets "Quizmoo próbakvíz" / "Quizmoo starter quiz": 20 questions, funny and tricky, covering every question type, three rounds with intro pictures and their own rules, a picture question and picture answers, 2 to 6 options, a 0-point warm-up poll, double points, a tolerance, several accepted answers and a host-graded answer. It comes in the sign-up page's language, or the admin's when an admin makes the account; a failure to add it is logged and never stops the account.
+- The quiz list has a "Starter quiz" button (an icon on phones, and a larger one when the list is empty) that adds a fresh copy any time (`POST /api/quizzes/starter`).
+- The pictures are drawings kept as SVG in `apps/server/src/starter/drawings.ts` and rendered to WebP when the quiz is added, stored as the host's own images. No stock photos and no outside service. The seed script uses the starter quiz too.
+
+### Fixed
+- The role field in the admin's "Add user" dialog had no label: `users.role` was both a string and an object in the dictionaries, and the object won. The label is `users.roleLabel` now.
+
 ## 1.10.1 – 2026-11-04
 
 ### Fixes in the patch notes (phase 37)

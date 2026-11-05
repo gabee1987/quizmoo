@@ -78,7 +78,7 @@ test('streaks, ordering, avatars, nicknames and play again', async ({ browser, p
       await red.goto(`/?pin=${pin}`)
       await red.getByLabel('Your name').fill('Kurva Anna')
       await red.getByRole('button', { name: 'Join' }).click()
-      await expect(red.getByText('Please choose another name.')).toBeVisible()
+      await expect(red.getByText("You can't use this name. Pick another one.")).toBeVisible()
       await red.getByRole('button', { name: 'Surprise me' }).click()
       await expect(red.getByLabel('Your name')).not.toHaveValue('')
       await red.getByRole('button', { name: 'Join' }).click()
@@ -155,7 +155,7 @@ test('streaks, ordering, avatars, nicknames and play again', async ({ browser, p
       await expect(projector).toHaveURL(new RegExp(`/screen/${nextPin}$`))
       await expect(projector.getByText(nextPin, { exact: true })).toBeVisible()
       for (const p of [red, blue]) {
-        await p.getByRole('button', { name: 'Join the next round' }).click()
+        await p.getByRole('button', { name: 'Join the rematch' }).click()
         await expect(p).toHaveURL(new RegExp(`/play/${nextPin}$`))
         await expect(p.getByText(/You.re in/)).toBeVisible()
       }

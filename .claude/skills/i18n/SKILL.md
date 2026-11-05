@@ -36,6 +36,27 @@ t('play.answeredCount', { count: snapshot.answeredCount })
 
 Hungarian is friendly, natural and informal ("te") on every screen, hosts, editor and admin pages included; never "Ön" or "Kérjük, …" (the user decided it is a game, October 2026). Write what a person would say: headings and calls to action as verbs ("Csatlakozz!", "Lépj be!", "Értékeld a válaszokat", "Törlöd ezt a kvízt?"), not noun phrases ("Csatlakozás a játékhoz", "Válaszok értékelése"). Short nouns stay where Hungarian apps use them on buttons ("Mentés", "Törlés", "Mégse", "Kész"). Prefer everyday words: "online/offline", "végleg", "pár mező", "Valami elromlott". Messages from the app speak as "we" ("Keressük a játékot…", "Nem találjuk."). English is plain and short.
 
+Legal pages (`legal.*`) are the exception: professional, plain and precise, never playful, GDPR terms as the official Hungarian translation uses them ("adatkezelő", "felügyeleti hatóság", "helyesbítés"), still in the "te" form. A change of meaning there raises `TERMS_VERSION` (user decision, phase 54).
+
+## Glossary (phase 54)
+
+One word per thing, in every screen and help text:
+
+| Thing | Hungarian | English |
+|---|---|---|
+| A group of questions with an intro (`groups` in code) | kör | round |
+| Playing the same quiz again (`playAgain`) | visszavágó | play again / rematch |
+| The person running the game | játékvezető | host |
+| The big shared display | kivetítő | projector |
+| Standings between questions | állás | standings |
+| A team member's proposed answer | tipp | pick |
+| Solo player in team mode | egyéni játékos | solo player |
+| The site's operator role | adminisztrátor (admin on short labels) | admin, administrator on legal pages |
+
+"PIN" on short labels, "PIN-kód" inside Hungarian sentences. Never put a number placeholder after an article ("a {{n}}. kérdés" breaks for 1 and 5): write "{{n}}. kérdés", "kérdés: {{n}}." or keep "a(z)". The spreadsheet's row words ("csoport", "csoport-vége", type names, "igaz"/"hamis") are read by the importer and stay as they are.
+
+`i18n.test.ts` compares key sets, but `JSON.parse` silently drops a key that appears twice in one object (`users.role` was both a string and an object until phase 54): after hand-editing, check for duplicate keys.
+
 The app's look is playful, the wording around it is not: patch notes (`whatsNew.releases.*`), documentation and the codebase stay professional. Release notes say plainly what changed and how to use it, in words any player understands; no wordplay, metaphors or in-jokes ("a door you can close", "lessons from the family game"). Titles name the features.
 
 Keep button labels to one or two words. Error messages say what to do next: "Nincs ilyen játék. Ellenőrizd a PIN-t."

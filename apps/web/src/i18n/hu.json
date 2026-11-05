@@ -55,7 +55,7 @@
     "newTeam": "Új csapat",
     "newTeamHelp": "Alapíts csapatot, te leszel a kapitánya.",
     "solo": "Egyedül",
-    "soloHelp": "Csapat nélkül játszol, a csapatokkal együtt rangsorolunk.",
+    "soloHelp": "Csapat nélkül játszol, a csapatokkal egy ranglistán.",
     "newTeamName": "Csapatnév",
     "newTeamPlaceholder": "pl. Kvízvarázslók",
     "newTeamNameRequired": "Adj nevet a csapatodnak.",
@@ -91,9 +91,9 @@
     "sides": "Játék vagy játékvezetés",
     "play": "Játszom",
     "host": "Játékot vezetek",
-    "hostIntro": "Lépj be, és készíts kvízeket, vezess játékokat a csapatodnak.",
+    "hostIntro": "Lépj be, készíts kvízeket, és vezess játékokat a társaságnak.",
     "noAccount": "Még nincs fiókod?",
-    "createAccount": "Kérj egyet",
+    "createAccount": "Regisztrálj",
     "moo": {
       "line1": "Múú!",
       "line2": "Írd be a PIN-kódot, várok!",
@@ -214,7 +214,7 @@
     "logout": "Kilépés",
     "required": "Ezt ki kell tölteni.",
     "passwordChange": {
-      "title": "Jelszó módosítása",
+      "title": "Jelszócsere",
       "mustChange": "Mielőtt továbbmész, cseréld le a kezdeti jelszót.",
       "current": "Jelenlegi jelszó",
       "new": "Új jelszó",
@@ -253,7 +253,7 @@
         "countdown": "Visszaszámlálás",
         "question": "Megy a kérdés",
         "reveal": "Kiderültek a válaszok",
-        "scoreboard": "Eredménytábla",
+        "scoreboard": "Állás",
         "finished": "Vége a játéknak"
       },
       "answered_one": "{{count}} játékosból {{answered}} válaszolt",
@@ -265,7 +265,7 @@
       "pause": "Szünet",
       "resume": "Folytatás",
       "pausedHint": "Szünet: az óra áll, és senki sem válaszolhat, amíg nem folytatod.",
-      "shownAgainHint": "A(z) {{index}}. kérdés újra kint van a kijelzőkön. A pontok nem változnak.",
+      "shownAgainHint": "{{index}}. kérdés: újra kint van a képernyőkön. A pontok nem változnak.",
       "backToGame": "Vissza a játékhoz",
       "podiumOnProjector": "Az eredmény a kivetítőn van.",
       "endShow": {
@@ -276,7 +276,7 @@
         "autoHelp": "Kb. 10 másodpercenként új oldal, az utolsó után elölről.",
         "previousQuestion": "Előző kérdés",
         "nextQuestion": "Következő kérdés",
-        "recapTitle": "Kérdések újra",
+        "recapTitle": "Nézzük újra a kérdéseket",
         "recapHelp": "Minden kérdés a válaszokkal a kivetítőn, egyenként. Automatikus módban kb. 8 másodpercenként jön a következő, a végén vissza az eredményhez.",
         "recapShow": "Mutasd a kérdéseket",
         "recapClose": "Vissza az eredményhez",
@@ -294,17 +294,17 @@
       "offline": "Offline",
       "waitingForPlayers": "Még senki sincs itt. Oszd meg a PIN-kódot vagy a QR-kódot.",
       "backToQuizzes": "Vissza a kvízekhez",
-      "showScoreboard": "Eredménytábla",
+      "showScoreboard": "Mutasd az állást",
       "controls": "Játékvezérlés",
       "nextQuestion": "Következő kérdés",
       "startRound": "Indulhat a kör",
       "nextRound": "Következő kör",
-      "showRoundAnswers": "A kör megoldásai",
+      "showRoundAnswers": "Mutasd a kör megoldásait",
       "holdIntro": "Várjunk",
       "releaseIntro": "Mehet",
-      "introHeldHint": "Megállítva: a kör akkor indul, ha továbbengeded, vagy megnyomod az Indulhat a kör gombot.",
-      "introWaits": "A kör akkor indul, ha megnyomod az Indulhat a kör gombot.",
-      "roundRules": "A(z) {{round}}. kör szabályai",
+      "introHeldHint": "Megállítva: a kör akkor indul, ha továbbengeded, vagy megnyomod az „Indulhat a kör” gombot.",
+      "introWaits": "A kör akkor indul, ha megnyomod az „Indulhat a kör” gombot.",
+      "roundRules": "{{round}}. kör szabályai",
       "standingsOnDemand": "Állás a körök után, ha megmutatom",
       "finish": "Vége",
       "gradeFirst": "A folytatáshoz értékeld a lenti válaszokat.",
@@ -313,11 +313,11 @@
       "openScreen": "Kivetítő megnyitása",
       "results": "Eredmények",
       "resultsPendingHint": "A kivetítő és a játékosok még nem látják az eredményt.",
-      "showPodium": "Jöhet a dobogó!",
+      "showPodium": "Jöhet a dobogó",
       "releaseToPlayers": "Eredmény a telefonokra",
       "podiumPendingHint": "A kivetítő még nem mutatja az eredményt.",
       "playersWaitingHint": "A játékosok még nem látják az eredményüket.",
-      "playAgain": "Új kör",
+      "playAgain": "Visszavágó",
       "connectedOfTotal": "{{connected}} / {{count}} online",
       "offlineForSeconds": "{{count}} mp óta offline",
       "leftGame": "Kilépett a játékból",
@@ -354,7 +354,7 @@
         "seconds_other": "{{count}} mp",
         "disappearsIn_one": "{{count}} mp múlva eltűnik",
         "disappearsIn_other": "{{count}} mp múlva eltűnik",
-        "ownTime": "saját idő",
+        "ownTime": "saját ideje",
         "edit": "Szerkesztés",
         "doneEditing": "Kész",
         "removeFromGame": "Vedd ki ebből a játékból: {{text}}",
@@ -382,7 +382,7 @@
       "teamMode": "{{team}} válaszmódja",
       "makeCaptain": "{{name}} legyen a kapitány",
       "move": "Áthelyezés",
-      "playerActions": "Teendők: {{name}}",
+      "playerActions": "Lehetőségek: {{name}}",
       "makeCaptainShort": "Legyen ő a kapitány",
       "movePlayer": "{{name}} áthelyezése másik csapatba",
       "moveTo": "Melyik csapatba?",
@@ -399,7 +399,7 @@
       "teamModes": "Csapatmódok",
       "teamModesHelp": "A változás a következő kérdéstől érvényes.",
       "teamConfirmed": "Véglegesítve",
-      "teamSuggesting": "Javaslatok ({{picked}}/{{count}})",
+      "teamSuggesting": "Tippek ({{picked}}/{{count}})",
       "teamFallback": "Többség, nem véglegesítették",
       "copyLink": "Link másolása",
       "linkCopied": "Kimásoltuk a linket.",
@@ -412,11 +412,11 @@
       "onScreen": {
         "reveal": "Most kint: a válaszok",
         "answerHidden": "Most kint: lezárt kérdés, rejtett válaszok",
-        "scoreboard": "Most kint: az állás e kérdés után",
+        "scoreboard": "Most kint: az állás a kérdés után",
         "shownAgain": "Most kint: újra ez a kérdés"
       },
       "averageTime": "Átlagos idő",
-      "fastest": "Leggyorsabb helyes",
+      "fastest": "Leggyorsabb jó válasz",
       "seconds": "{{seconds}} mp"
     },
     "board": {
@@ -430,7 +430,7 @@
         "name": "Név",
         "rank": "Helyezés",
         "answer": "Válaszidő",
-        "waiting": "Akik még nem válaszoltak"
+        "waiting": "Elöl, aki még nem válaszolt"
       },
       "hideAnswers": "Válaszok elrejtése",
       "showAnswers": "Válaszok mutatása",
@@ -449,7 +449,7 @@
       "missingCount_one": "{{count}} nem válaszolt",
       "missingCount_other": "{{count}} nem válaszolt",
       "teamAnswer": "Csapat válasza: {{answer}}",
-      "counts": "Válaszok opciónként"
+      "counts": "Hányan melyiket választották"
     },
     "panels": {
       "standings": "Állás",
@@ -463,22 +463,22 @@
       "phones": "Telefonok:",
       "projector": "Kivetítő:",
       "lobby": "váróterem",
-      "intro": "a(z) {{round}}. kör bevezetője",
-      "introHeld": "a(z) {{round}}. kör bevezetője, megállítva",
-      "countdown": "visszaszámlálás a(z) {{index}}. kérdésig",
+      "intro": "{{round}}. kör bevezetője",
+      "introHeld": "{{round}}. kör bevezetője, megállítva",
+      "countdown": "visszaszámlálás, utána: {{index}}. kérdés",
       "question": "{{index}}. kérdés",
       "paused": "{{index}}. kérdés, szünet",
-      "answer": "a(z) {{index}}. kérdés megoldása",
-      "answerHidden": "a(z) {{index}}. kérdés lezárva, a válaszok rejtve",
-      "grading": "várnak, amíg értékeled a(z) {{index}}. kérdést",
-      "shownAgain": "a(z) {{index}}. kérdés megoldása{{position}}",
+      "answer": "{{index}}. kérdés megoldása",
+      "answerHidden": "{{index}}. kérdés lezárva, a válaszok rejtve",
+      "grading": "várnak az értékelésedre ({{index}}. kérdés)",
+      "shownAgain": "{{index}}. kérdés megoldása újra{{position}}",
       "standings": "állás",
       "standingsTotals": "állás, csak összpontszám",
       "podium": "dobogó",
       "leaderboard": "ranglista",
       "awards": "díjak",
       "facts": "érdekességek",
-      "recap": "visszanézzük a(z) {{index}}. kérdést",
+      "recap": "visszanézzük: {{index}}. kérdés",
       "waitingResults": "az eredményre várnak"
     },
     "showAnswers": {
@@ -530,7 +530,7 @@
       "useCode": "Inkább a zárkódom",
       "logout": "Kilépés",
       "dialogTitle": "Zárolod a képernyőt?",
-      "dialogHelp": "Amíg fel nem oldod, ezen az eszközön senki nem látja a válaszokat, a pontokat és a kvízeidet: egyik oldalon sem, és egyik eszközödön sem, ahol be vagy lépve. Adj meg egy kódot a gyors feloldáshoz, vagy hagyd üresen, és oldd fel a jelszavaddal.",
+      "dialogHelp": "Amíg fel nem oldod, senki sem látja a válaszokat, a pontokat és a kvízeidet egyik eszközödön sem, ahol be vagy lépve. Adj meg egy kódot a gyors feloldáshoz, vagy hagyd üresen, és a jelszavaddal oldod fel.",
       "newCode": "Zárkód ehhez a játékhoz (nem kötelező)",
       "codeRule": "4–8 számjegyet adj meg.",
       "lockWithCode": "Zárolás ezzel a kóddal",
@@ -558,24 +558,24 @@
       "correctOf_other": "{{count}} válaszból {{correct}} helyes ({{percent}})",
       "averageTime": "átlagosan {{seconds}} mp",
       "showAgain": "Mutasd újra",
-      "showAgainLabel": "Mutasd újra a(z) {{index}}. kérdést a kijelzőkön",
+      "showAgainLabel": "Mutasd újra a képernyőkön: {{index}}. kérdés",
       "upcoming": "Még hátravan",
       "pickHelp": "Bármelyiket választhatod következőnek, a többi sorrendje marad.",
       "pickWhen": "Két kérdés között kiválaszthatod, melyik jöjjön.",
       "upNext": "Ez jön",
       "playNext": "Ez jöjjön",
-      "playNextLabel": "A(z) {{index}}. kérdés jöjjön most",
-      "search": "Keress a kérdések között",
+      "playNextLabel": "Ez jöjjön most: {{index}}. kérdés",
+      "search": "Keresés a kérdések között",
       "clearSearch": "Keresés törlése",
       "nextUp": "Ez jön",
       "noneLeft": "Nincs több kérdés, ez az utolsó.",
       "noMatches": "Nincs ilyen kérdés.",
       "joinsRound": "Ha most jön, bekerül ebbe a körbe: „{{round}}”",
-      "leavesRound": "Ha most jön, kikerül a(z) „{{round}}” körből, és külön megy"
+      "leavesRound": "Ha most jön, kikerül ebből a körből: „{{round}}”, és külön megy"
     },
     "grading": {
       "title": "Értékeld a válaszokat",
-      "help": "Pipáld ki az összes elfogadható választ. Az egyforma válaszok egy csoportban vannak.",
+      "help": "Pipáld ki az összes elfogadható választ. Az egyforma válaszokat egybevettük.",
       "noAnswers": "Erre a kérdésre senki sem válaszolt.",
       "apply": "Mentés"
     },
@@ -624,8 +624,8 @@
       "answerLockBefore_one": "{{count}} mp-cel a vége előtt",
       "answerLockBefore_other": "{{count}} mp-cel a vége előtt",
       "answerChangesShort": "Válaszváltoztatás",
-      "answerChangesLocked_one": "Válaszváltoztatás {{count}} mp-cel a vége előttig",
-      "answerChangesLocked_other": "Válaszváltoztatás {{count}} mp-cel a vége előttig",
+      "answerChangesLocked_one": "Válaszcsere, az utolsó {{count}} mp-ben már nem",
+      "answerChangesLocked_other": "Válaszcsere, az utolsó {{count}} mp-ben már nem",
       "shuffle": "Keverd össze a válaszokat",
       "shuffleQuestions": "Keverd össze a kérdéseket",
       "shuffleQuestionsHelp": "Minden játék új sorrendben hozza a kérdéseket. Egy kör egyben mozog a kérdéseivel, és azok is keverednek, hacsak a kör nem tartja a sorrendjét.",
@@ -633,15 +633,15 @@
       "branding": {
         "title": "Arculat",
         "show": "Mutasd az arculatomat",
-        "showHelp": "A logód és az esemény neve a kivetítő váróján és dobogóján.",
+        "showHelp": "A logód és az esemény neve a kivetítő várótermében és dobogóján.",
         "nothing": "Írd be az esemény nevét, vagy adj meg logót a Beállításaimban.",
         "onPhones": "A telefonokon is",
-        "onPhonesHelp": "A játékosok telefonján, a váróban.",
+        "onPhonesHelp": "A játékosok telefonján, a váróteremben.",
         "addLogo": "Logó hozzáadása",
         "offInQuiz": "A kvíz beállításaiban ki van kapcsolva. Itt csak erre a játékra kapcsolhatod be.",
         "eventName": "Esemény neve"
       },
-      "groupsHelp": "A játék a kvíz beállításaival indul. Bármelyik csoportot átállíthatod csak erre a játékra.",
+      "groupsHelp": "A játék a kvíz beállításaival indul. Bármelyiket átállíthatod csak erre a játékra.",
       "reset": "Visszaállítás",
       "changedForGame": "Erre a játékra átállítva",
       "aboutThis": "Bővebben: {{title}}",
@@ -680,9 +680,9 @@
         "progress": "Haladás",
         "progressHelp": "Hol tart a kvíz és a kör, és nagyjából mennyi van még hátra",
         "next": "Mi jön",
-        "nextHelp": "A következő kérdés száma, típusa, ideje és pontja, a szövege soha",
+        "nextHelp": "A következő kérdés száma, típusa, ideje és pontja, de a szövege soha",
         "leaders": "Top 3",
-        "leadersHelp": "Az éllovasok; soha, amíg az eredményeket visszatartod"
+        "leadersHelp": "Az első három; nem látszik, amíg visszatartod az eredményt"
       },
       "answerStyle": "Válaszgombok a telefonokon",
       "answerStyleOptions": {
@@ -725,7 +725,7 @@
       "seasonalChip": "Ünnepi megjelenés: {{screens}}",
       "seasonalNowhere": "sehol",
       "answerPalette": "Válaszok színei",
-      "answerPaletteHelp": "A válaszgombok és az eredménysávok színei a telefonokon és a kivetítőn, a témától függetlenül. A Tompa és a Céges a nyugodtabb.",
+      "answerPaletteHelp": "A válaszgombok és az eredménysávok színei a telefonokon és a kivetítőn, a témától függetlenül. A Tompa és a Céges a nyugodtabbak.",
       "answerPaletteOptions": {
         "vivid": "Élénk",
         "candy": "Cukorka",
@@ -733,7 +733,7 @@
         "earth": "Földszínek",
         "muted": "Tompa",
         "corporate": "Céges",
-        "custom": "Egyéni"
+        "custom": "Saját színek"
       },
       "answerSymbols": "Válaszok jelei",
       "answerSymbolsOptions": {
@@ -753,7 +753,7 @@
       },
       "teamsChooseOptions": {
         "choose": "A csapatok választanak",
-        "chooseHelp": "A kapitány a várakozóban választja ki a csapat módját. Alapból a kapitány dönt.",
+        "chooseHelp": "A kapitány a váróteremben választja ki a csapat módját. Alapból a kapitány dönt.",
         "same": "Minden csapatnak ugyanaz",
         "sameHelp": "Te választod ki a módot, a csapatok nem változtathatják meg."
       },
@@ -841,6 +841,12 @@
       "changeTime": "Időpont módosítása",
       "cancel": "Lefújom a játékot",
       "confirmCancel": "Lefújod az időzített játékot? A PIN-kód és a link megszűnik."
+    },
+    "starter": {
+      "add": "Próbakvíz",
+      "addLong": "Kérem a próbakvízt",
+      "added": "Ott a próbakvíz a listádban. Próbáld ki egy-két baráttal!",
+      "help": "20 kérdés minden kérdéstípusból: így a legkönnyebb kipróbálni, mit tud a Quizmoo."
     }
   },
   "play": {
@@ -889,7 +895,7 @@
     "answerSent": "Megvan a válaszod!",
     "answeredIn": "{{seconds}} mp alatt válaszoltál",
     "copyPin": "PIN másolása",
-    "copyPinLabel": "A játék PIN-kódjának másolása: {{pin}}",
+    "copyPinLabel": "PIN-kód másolása: {{pin}}",
     "copied": "Kimásolva",
     "pinCopied": "Kimásoltad a PIN-t. Küldd el annak, aki csatlakozna.",
     "copyFailed": "Nem sikerült másolni. Jelöld ki a PIN-t, és másold ki kézzel.",
@@ -907,8 +913,8 @@
       "speedBonus": "A gyorsabb helyes válasz több pontot ér.",
       "streakBonus": "Egymás után több helyes válasz extra pontot ér.",
       "answerChanges": "Amíg megy az idő, megváltoztathatod a válaszod.",
-      "answerChangesLocked_one": "A válaszod a vége előtt {{count}} mp-ig változtathatod.",
-      "answerChangesLocked_other": "A válaszod a vége előtt {{count}} mp-ig változtathatod.",
+      "answerChangesLocked_one": "Az utolsó {{count}} mp-ben már nem változtathatsz a válaszodon.",
+      "answerChangesLocked_other": "Az utolsó {{count}} mp-ben már nem változtathatsz a válaszodon.",
       "answersAtEnd": "A helyes válaszok és a pontok a játék végén derülnek ki.",
       "answersAtRoundEnd": "A helyes válaszok és a pontok minden kör végén derülnek ki.",
       "lateJoin": "Kezdés után is be lehet még szállni."
@@ -935,8 +941,8 @@
     "moveDown": "{{item}} lejjebb",
     "streak_one": "{{count}} jó egymás után",
     "streak_other": "{{count}} jó egymás után",
-    "nextRoundReady": "A játékvezető új kört indított!",
-    "joinNextRound": "Beszállok a következő körbe",
+    "nextRoundReady": "A játékvezető visszavágót indított!",
+    "joinNextRound": "Beszállok a visszavágóba",
     "totalScore": "Pontjaid: {{score}}",
     "rank": "Helyezésed: {{rank}}.",
     "yourRank": "Helyezésed",
@@ -972,14 +978,14 @@
       "awardsTitle": "Díjak",
       "awards": {
         "fastest": "Villámkéz",
-        "fastestValue": "{{seconds}} mp a(z) {{index}}. kérdésnél",
+        "fastestValue": "{{seconds}} mp ({{index}}. kérdés)",
         "longestStreak": "Megállíthatatlan",
         "longestStreakValue_one": "{{count}} jó egymás után",
         "longestStreakValue_other": "{{count}} jó egymás után",
         "mostCorrect": "Mindentudó",
         "mostCorrectValue_one": "{{count}} jó válasz",
         "mostCorrectValue_other": "{{count}} jó válasz",
-        "biggestClimb": "Nagy feltörő",
+        "biggestClimb": "Feltörekvő",
         "biggestClimbValue_one": "{{count}} helyet lépett előre",
         "biggestClimbValue_other": "{{count}} helyet lépett előre"
       },
@@ -992,7 +998,7 @@
       "ofCount": "{{value}} / {{count}}",
       "bestStreak": "Leghosszabb széria",
       "averageTime": "Átlagos idő",
-      "fastestAnswer": "Leggyorsabb jó",
+      "fastestAnswer": "Leggyorsabb jó válasz",
       "secondsShort": "{{seconds}} mp",
       "rankJourney": "Helyezésed kérdésről kérdésre",
       "rankLineLabel": "Helyezésed kérdésről kérdésre: {{ranks}}",
@@ -1065,7 +1071,7 @@
   },
   "screen": {
     "joinAt": "Csatlakozz itt",
-    "joiningClosed": "A csatlakozás lezárva",
+    "joiningClosed": "Már nem lehet csatlakozni",
     "pin": "PIN-kód",
     "answerOnPhone": "Írd be a válaszod a telefonodon",
     "other": "Egyéb",
@@ -1141,28 +1147,28 @@
     "title": "Kvíz címe",
     "description": "Leírás (nem kötelező)",
     "newQuestion": "Kérdés",
-    "newGroup": "Csoport",
+    "newGroup": "Kör",
     "newQuestionTop": "Új kérdés",
-    "newGroupTop": "Új csoport",
+    "newGroupTop": "Új kör",
     "titleSetting": "Cím",
     "jumpToSelected": "Mutasd a kijelöltet a listában",
     "questionDefaults": "Új kérdések",
-    "questionDefaultsHelp": "Ennyi idővel és ponttal indulnak az új kérdések. Egy csoporton belül a csoport saját értékei számítanak.",
+    "questionDefaultsHelp": "Ennyi idővel és ponttal indulnak az új kérdések. Egy körön belül a kör saját értékei számítanak.",
     "inGame": {
       "label": "Játékban",
-      "someOn": "{{count}}-ból {{on}} bekapcsolva",
+      "someOn": "{{count}} közül {{on}} bekapcsolva",
       "offBadge": "Kikapcsolva",
       "someOff_one": "{{count}} kikapcsolva",
       "someOff_other": "{{count}} kikapcsolva",
       "questionOff": "Ez a kérdés ki van kapcsolva",
       "questionOffHelp": "A kvízben marad, de az új játékok kihagyják. Kapcsold be, ha egy eseményen jól jön.",
-      "groupOff": "Ez a csoport ki van kapcsolva",
-      "groupOffHelp": "A kérdései a kvízben maradnak, de az új játékok az egész csoportot kihagyják, a bevezetőjével együtt.",
+      "groupOff": "Ez a kör ki van kapcsolva",
+      "groupOffHelp": "A kérdései a kvízben maradnak, de az új játékok az egész kört kihagyják, a bevezetőjével együtt.",
       "switchOn": "Bekapcsolás",
       "switchOnN": "A(z) {{n}}. kérdés bekapcsolása",
       "switchOffN": "A(z) {{n}}. kérdés kikapcsolása",
-      "switchGroupOnN": "A(z) {{n}}. csoport bekapcsolása",
-      "switchGroupOffN": "A(z) {{n}}. csoport kikapcsolása",
+      "switchGroupOnN": "A(z) {{n}}. kör bekapcsolása",
+      "switchGroupOffN": "A(z) {{n}}. kör kikapcsolása",
       "summary_one": "{{total}} kérdésből {{count}} kikapcsolva",
       "summary_other": "{{total}} kérdésből {{count}} kikapcsolva",
       "allOn": "Mind be",
@@ -1222,7 +1228,7 @@
     "correctAnswer": "Helyes válasz",
     "acceptedAnswers": "Elfogadott válaszok",
     "acceptedAnswerPlaceholder": "pl. Győr",
-    "acceptedAnswersHint": "Az összevetésnél a kis- és nagybetű, az ékezet és a felesleges szóköz nem számít.",
+    "acceptedAnswersHint": "A kis- és nagybetű, az ékezet és a felesleges szóköz nem számít.",
     "hostGradedHint": "Nincs elfogadott válasz: a játék közben te jelölöd meg a helyeseket.",
     "correctNumber": "Helyes szám",
     "tolerance": "Tűrés (±)",
@@ -1258,11 +1264,11 @@
       "invalid": "Ez így nem jó.",
       "markCorrect": "Jelöld meg a helyes választ.",
       "duplicateOptions": "Két lehetőség nem lehet egyforma.",
-      "duplicateQuestions": "Ismétlődő kérdésazonosító; másold újra a kérdést.",
-      "duplicateGroups": "Ismétlődő csoportazonosító; add hozzá újra a csoportot.",
-      "unknownGroup": "Ennek a kérdésnek eltűnt a csoportja; tedd át egy csoportba.",
-      "groupOrder": "Egy csoport kérdései maradjanak együtt; tedd vissza ezt a kérdést a csoportjába.",
-      "emptyGroup": "Tegyél ebbe a csoportba egy kérdést, vagy töröld."
+      "duplicateQuestions": "Két kérdés azonosítója egyezik. Másold le újra a kérdést.",
+      "duplicateGroups": "Két kör azonosítója egyezik. Add hozzá újra a kört.",
+      "unknownGroup": "Ennek a kérdésnek eltűnt a köre. Tedd át egy körbe.",
+      "groupOrder": "Egy kör kérdései maradjanak együtt. Tedd vissza ezt a kérdést a körébe.",
+      "emptyGroup": "Tegyél ebbe a körbe egy kérdést, vagy töröld."
     },
     "sampleQuestion": "Melyik a Naprendszer legnagyobb bolygója?",
     "sampleOption1": "Jupiter",
@@ -1301,57 +1307,57 @@
     "moveToBottom": "A végére",
     "questionDuplicated": "Kérdés másolva",
     "questionDeleted": "A(z) {{n}}. kérdés törölve",
-    "groupN": "{{n}}. csoport",
-    "groupNOfCount": "{{n}}. csoport / {{count}}",
+    "groupN": "{{n}}. kör",
+    "groupNOfCount": "{{n}}. kör / {{count}}",
     "groupDefaultTitle": "{{n}}. kör",
-    "addGroup": "Új csoport",
-    "groupFromHere": "Új csoport innen",
-    "groupTitle": "A csoport címe",
+    "addGroup": "Új kör",
+    "groupFromHere": "Új kör innen",
+    "groupTitle": "A kör címe",
     "groupInfo": "Leírás (nem kötelező)",
-    "groupInfoHelp": "A címet és a leírást a kivetítőn és a telefonokon látják a játékosok, a csoport első kérdése előtt.",
-    "groupImage": "A csoport képe",
+    "groupInfoHelp": "A címet és a leírást a kivetítőn és a telefonokon látják a játékosok, a kör első kérdése előtt.",
+    "groupImage": "A kör képe",
     "groupDefaults": "Idő és pontok",
-    "groupDefaultsHelp": "Az új kérdések ezzel indulnak ebben a csoportban. Bármelyik kérdésnél átállíthatod.",
+    "groupDefaultsHelp": "Az új kérdések ezzel indulnak ebben a körben. Bármelyik kérdésnél átállíthatod.",
     "notSet": "Nincs megadva",
     "applyToQuestions_one": "Beállítom {{count}} kérdésnél",
     "applyToQuestions_other": "Beállítom {{count}} kérdésnél",
-    "groupRules": "A csoport szabályai",
+    "groupRules": "A kör szabályai",
     "groupRulesHelp": "Ami „Mint a kvízben” maradt, az a kvíz beállításait követi.",
     "sameAsQuiz": "Mint a kvízben ({{value}})",
     "on": "Be",
     "off": "Ki",
-    "moveGroupUp": "Csoport feljebb",
-    "moveGroupDown": "Csoport lejjebb",
-    "deleteGroup": "Csoport törlése",
-    "groupDeleted": "A(z) {{n}}. csoport törölve, a kérdései maradtak",
-    "collapseGroup": "A(z) {{n}}. csoport becsukása",
-    "expandGroup": "A(z) {{n}}. csoport kinyitása",
-    "collapseAllGroups": "Minden csoport becsukása",
-    "expandAllGroups": "Minden csoport kinyitása",
+    "moveGroupUp": "Kör feljebb",
+    "moveGroupDown": "Kör lejjebb",
+    "deleteGroup": "Kör törlése",
+    "groupDeleted": "A(z) {{n}}. kör törölve, a kérdései maradtak",
+    "collapseGroup": "A(z) {{n}}. kör becsukása",
+    "expandGroup": "A(z) {{n}}. kör kinyitása",
+    "collapseAllGroups": "Minden kör becsukása",
+    "expandAllGroups": "Minden kör kinyitása",
     "collapseAll": "Mind becsukása",
     "expandAll": "Mind kinyitása",
     "shuffle": {
       "button": "Keverés",
       "label": "Kérdések összekeverése",
       "title": "Összekevered a kérdéseket?",
-      "body": "Minden kérdés új helyre kerül ebben a kvízben. Egy csoport egyben mozog, a kérdései pedig egymás között keverednek.",
-      "bodyLocked": "A „Maradjon a sorrend” csoportokon belül nem változik a sorrend.",
+      "body": "Minden kérdés új helyre kerül ebben a kvízben. Egy kör egyben mozog, a kérdései pedig egymás között keverednek.",
+      "bodyLocked": "A „Maradjon a sorrend” beállítású körökben nem változik a kérdések sorrendje.",
       "confirm": "Keverés",
       "done": "Összekevertük a kérdéseket",
-      "nothing": "Nincs mit keverni: adj hozzá kérdéseket, vagy oldd fel egy csoport zárását."
+      "nothing": "Nincs mit keverni: adj hozzá kérdéseket, vagy kapcsold ki egy körben a „Maradjon a sorrend” beállítást."
     },
     "groupOrder": "Kérdések sorrendje",
     "keepOrder": "Maradjon a sorrend",
-    "keepOrderHelp": "Ha a kérdések összekeverednek, játékban vagy a Keverés gombbal, a csoport máshová kerülhet, de a kérdései ebben a sorrendben maradnak.",
+    "keepOrderHelp": "Ha a kérdések összekeverednek, játékban vagy a Keverés gombbal, a kör máshová kerülhet, de a kérdései ebben a sorrendben maradnak.",
     "orderKept": "Rögzített sorrend",
-    "dragGroup": "A(z) {{n}}. csoport áthelyezése",
-    "groupEndN": "A(z) {{n}}. csoport vége",
-    "questionGroup": "Csoport",
-    "noGroup": "Nincs csoportban",
-    "groupOption": "{{n}}. csoport: {{title}}",
-    "newGroupOption": "+ Új csoport",
-    "groupCount_one": "{{count}} csoport",
-    "groupCount_other": "{{count}} csoport",
+    "dragGroup": "A(z) {{n}}. kör áthelyezése",
+    "groupEndN": "A(z) {{n}}. kör vége",
+    "questionGroup": "Kör",
+    "noGroup": "Nincs körben",
+    "groupOption": "{{n}}. kör: {{title}}",
+    "newGroupOption": "+ Új kör",
+    "groupCount_one": "{{count}} kör",
+    "groupCount_other": "{{count}} kör",
     "listSummary": "{{questions}} · {{groups}}",
     "trash": "Kuka",
     "dropToDelete": "Húzd ide a törléshez",
@@ -1373,12 +1379,12 @@
       "settings": "Beállítások",
       "questions": "Kérdések ({{count}})"
     },
-    "groupNoQuestions": "Ebben a csoportban még nincs kérdés.",
-    "addQuestionToGroup": "Kérdés hozzáadása a csoporthoz",
-    "groupDeletedWithQuestions": "A(z) {{n}}. csoport és a kérdései törölve",
-    "deleteGroupTitle": "Törlöd a(z) „{{title}}” csoportot?",
-    "deleteGroupBody_one": "Ebben a csoportban {{count}} kérdés van. Megtartod csoport nélkül, vagy azt is törlöd?",
-    "deleteGroupBody_other": "Ebben a csoportban {{count}} kérdés van. Megtartod őket csoport nélkül, vagy azokat is törlöd?",
+    "groupNoQuestions": "Ebben a körben még nincs kérdés.",
+    "addQuestionToGroup": "Kérdés hozzáadása a körhöz",
+    "groupDeletedWithQuestions": "A(z) {{n}}. kör és a kérdései törölve",
+    "deleteGroupTitle": "Törlöd a(z) „{{title}}” kört?",
+    "deleteGroupBody_one": "Ebben a körben {{count}} kérdés van. Megtartod körön kívül, vagy azt is törlöd?",
+    "deleteGroupBody_other": "Ebben a körben {{count}} kérdés van. Megtartod őket körön kívül, vagy azokat is törlöd?",
     "deleteGroupKeepQuestions": "Kérdések maradnak",
     "deleteGroupWithQuestions": "Törlés kérdésekkel",
     "undo": "Visszavonás",
@@ -1411,7 +1417,7 @@
   "nicknames": {
     "nav": "Nevek",
     "title": "„Lepj meg!” nevek",
-    "help": "Ha egy játékos a csatlakozásnál a „Lepj meg!” gombra nyom, ezek közül kap egyet véletlenszerűen: az oldala nyelvének listájából, és sosem olyat, ami a játékban már foglalt.",
+    "help": "Ha egy játékos csatlakozáskor a „Lepj meg!” gombra nyom, kap egy véletlen nevet a saját nyelve listájáról, de sosem olyat, ami a játékban már foglalt.",
     "languages": {
       "hu": "Magyar",
       "en": "Angol"
@@ -1459,19 +1465,19 @@
   },
   "users": {
     "title": "Felhasználók",
-    "intro": "A játékvezetői fiókok ezen az oldalon: mit csinálnak, és mit állíthatsz rajtuk.",
-    "add": "Felhasználó hozzáadása",
+    "intro": "Itt látod a játékvezetői fiókokat: mit csinál mindegyik, és mit állíthatsz rajtuk.",
+    "add": "Új felhasználó",
     "addSubmit": "Létrehozás",
-    "role": "Szerepkör",
+    "roleLabel": "Szerepkör",
     "roles": {
       "admin": "Adminisztrátor",
       "editor": "Játékvezető"
     },
     "initialPassword": "Kezdeti jelszó",
-    "initialPasswordHint": "A kezdeti jelszót négyszemközt add át. Első belépéskor le kell cserélni.",
+    "initialPasswordHint": "A kezdeti jelszót négyszemközt add át. Első belépéskor le kell cserélnie.",
     "usernameRules": "3–40 karakter: betű, szám, pont, kötőjel, aláhúzás. E-mail-cím nem lehet.",
     "pendingPassword": "Még nem cserélte le a jelszavát",
-    "created": "{{name}} felhasználó létrehozva.",
+    "created": "{{name}} fiókja elkészült.",
     "pending": {
       "title": "Jóváhagyásra várnak",
       "hint": "Akik a regisztrációs oldalon jelentkeztek. Csak azt hagyd jóvá, akit felismersz; a jóvá nem hagyott regisztrációkat 7 nap után töröljük.",
@@ -1489,12 +1495,12 @@
     "search": "Keresés név szerint",
     "noMatch": "Nincs ilyen nevű felhasználó: „{{query}}”.",
     "you": "Te",
-    "joined": "Csatlakozott: {{date}}",
+    "joined": "Itt van {{date}} óta",
     "lastLogin": "utoljára belépett {{when}}",
     "neverLoggedIn": "még nem lépett be",
     "figures": {
       "quizzes": "Kvízek",
-      "gamesPlayed": "Lezárt játékok",
+      "gamesPlayed": "Lejátszott játékok",
       "playersReached": "Játékosok",
       "gamesActive": "Aktív játékok",
       "images": "Képek",
@@ -1513,7 +1519,7 @@
       "body": "Ezzel a jelszóval léphet be, és rögtön le kell cserélnie. Minden eszközéről kiléptetjük. A jelszót négyszemközt add át.",
       "field": "Új jelszó",
       "submit": "Jelszó beállítása",
-      "done": "Új jelszót állítottál be neki: {{name}}."
+      "done": "Beállítottad {{name}} új jelszavát."
     },
     "role": {
       "adminTitle": "{{name}} legyen adminisztrátor?",
@@ -1545,14 +1551,14 @@
     "gameAlreadyStarted": "A játék már elindult.",
     "nameTaken": "Ez a név már foglalt.",
     "nameNotAllowed": "Ezt a nevet nem használhatod, válassz másikat.",
-    "invalidInput": "Hibás adat.",
+    "invalidInput": "Valami nem stimmel. Nézd át, mit írtál be.",
     "notFound": "Nem találjuk.",
-    "connectionLost": "Megszakadt a kapcsolat, újracsatlakozás…",
+    "connectionLost": "Megszakadt a kapcsolat, újracsatlakozunk…",
     "questionClosed": "Ez a kérdés már lezárult.",
     "gamePaused": "Szünet van. Válaszolj, ha folytatódik.",
     "alreadyAnswered": "Már válaszoltál.",
     "answerLocked": "Ezt már nem változtathatod meg.",
-    "invalidAnswer": "Érvénytelen válasz.",
+    "invalidAnswer": "Ezt a választ nem tudjuk elfogadni.",
     "unknownTeam": "Válassz csapatot.",
     "teamNameTaken": "Ilyen nevű csapat már van. Válaszd a listából, vagy adj más nevet.",
     "teamNameNotAllowed": "Válassz másik csapatnevet.",
@@ -1979,7 +1985,7 @@
   },
   "settings": {
     "title": "Beállításaim",
-    "help": "Minden kvízedhez és játékodhoz ezek járnak.",
+    "help": "Ezek minden kvízedre és játékodra érvényesek.",
     "unsaved": "Nem mentett változások",
     "discard": "Elvetés",
     "saved": "Elmentettük",
@@ -1998,7 +2004,7 @@
     },
     "seasonPreview": {
       "title": "Ünnepek",
-      "help": "Minden ünnep a dátumaival. Válassz egyet, és ezen az eszközön megnézheted a színeit, díszeit és tehenét, a dátumtól függetlenül (csak ezen az eszközön; a Dátum szerint visszaállítja). A ceruzával mindenkinek módosíthatod egy ünnep dátumait.",
+      "help": "Minden ünnep a dátumaival. Válassz egyet, és megnézheted a színeit, díszeit és a tehenét, bármi is a mai dátum. Ez csak ezen az eszközön látszik; a „Dátum szerint” visszaállítja. A ceruzával mindenkinek átírhatod egy ünnep dátumait.",
       "byDate": "Dátum szerint",
       "none": "Ma nincs ünnep",
       "changed": "Módosított dátum",
@@ -2016,8 +2022,8 @@
       "reset": "Vissza az alap dátumokra"
     },
     "signupEmail": {
-      "title": "Értesítés regisztrációkról",
-      "help": "Ha valaki házigazdának regisztrál, e-mailt küldünk erre a címre egy linkkel a Felhasználók oldalra, ahol jóváhagyod vagy elutasítod. Az e-mailben csak az áll, hányan várnak, az nem, hogy kik. Legfeljebb 15 percenként egy e-mail.",
+      "title": "E-mail új regisztrációkor",
+      "help": "Ha valaki játékvezetőként regisztrál, e-mailt küldünk erre a címre egy linkkel a Felhasználók oldalra, ahol jóváhagyod vagy elutasítod. Az e-mailben csak az áll, hányan várnak, az nem, hogy kik. Legfeljebb 15 percenként megy egy e-mail.",
       "set": "Az értesítések ide mennek: {{email}}.",
       "none": "Még nincs címed: az új regisztrációkat csak a Felhasználók oldalon látod.",
       "notConfigured": "Ezen a szerveren nincs beállítva az e-mail-küldés, így semmi nem megy ki. Az üzemeltetőnek kell megadnia egy Brevo API-kulcsot és egy feladócímet (lásd a telepítési útmutatót).",
@@ -2031,7 +2037,7 @@
       "testSent": "Elküldtük a próba e-mailt. Nézd meg a postafiókodat (és a spam mappát)."
     },
     "leaveTitle": "Kilépsz mentés nélkül?",
-    "leaveBody": "A Beállításaimban tett változásokat még nem mentetted.",
+    "leaveBody": "Még nem mentetted a változásokat.",
     "messages": {
       "title": "Gyors üzenetek",
       "help": "Játék közben egy koppintással elküldheted őket az üzenetdobozból. Bármelyiket átírhatod, törölheted vagy átrendezheted. Egy játék azokkal az üzenetekkel megy végig, amelyekkel elindult.",
@@ -2109,8 +2115,8 @@
         "body": "Ezek végleg törlődnek, és nem lehet visszahozni őket:",
         "quizzes_one": "{{count}} kvíz",
         "quizzes_other": "{{count}} kvíz",
-        "games_one": "{{count}} lezárt játék az eredményeivel",
-        "games_other": "{{count}} lezárt játék az eredményeikkel",
+        "games_one": "{{count}} befejezett játék az eredményeivel",
+        "games_other": "{{count}} befejezett játék az eredményeikkel",
         "images_one": "{{count}} kép",
         "images_other": "{{count}} kép",
         "running": "A még futó játékaid azonnal véget érnek.",
@@ -2152,7 +2158,7 @@
     "results": "Eredmények",
     "control": "Vezérlés",
     "deleteTitle": "Törlöd a játékot?",
-    "deleteBody": "A(z) „{{title}}” ({{date}}) eredményei végleg törlődnek.",
+    "deleteBody": "„{{title}}” ({{date}}) eredményei végleg törlődnek.",
     "quiz": "Kvíz",
     "date": "Időpont",
     "mode": "Mód",
@@ -2161,7 +2167,7 @@
     "scheduled": "Időzítve",
     "cancel": "Lefújás",
     "cancelTitle": "Lefújod a játékot?",
-    "cancelBody": "A(z) „{{title}}” ({{date}}) időzített játék törlődik, a PIN-kód és a link megszűnik.",
+    "cancelBody": "Az időzített „{{title}}” ({{date}}) játék törlődik, a PIN-kód és a link nem működik tovább.",
     "search": "Keresés",
     "searchPlaceholder": "Kvíz, játékos vagy PIN",
     "searchHint": "Kvíz címe, játékos neve vagy PIN-kód.",
@@ -2260,7 +2266,7 @@
     "operator": {
       "title": "Ki üzemelteti itt a Quizmoót",
       "name": "Üzemeltető",
-      "nameUnknown": "Ez az oldal nem adta meg. Kérdezd azt, aki játszani hívott.",
+      "nameUnknown": "Ezen a webhelyen nincs megadva. Kérdezd azt, aki játszani hívott.",
       "contact": "Kapcsolat",
       "contactUnknown": "Kérdezd a játékod szervezőjét.",
       "hosting": "Tárhely",
@@ -2270,7 +2276,7 @@
     },
     "privacy": {
       "title": "Adatkezelési tájékoztató",
-      "intro": "Ez a tájékoztató a GDPR szerint elmondja, mit tárol rólad a Quizmoo, miért, meddig, és mit tehetsz ezzel kapcsolatban. Röviden: a lehető legkevesebbet, csak a játék működéséhez, és soha nem adjuk el, nem használjuk reklámra vagy követésre.",
+      "intro": "Ez a tájékoztató a GDPR előírásainak megfelelően ismerteti, mit tárol rólad a Quizmoo, milyen célból, meddig, és milyen jogaid vannak ezzel kapcsolatban. Röviden: a lehető legkevesebbet, csak a játék működéséhez, és soha nem adjuk el, nem használjuk reklámra vagy követésre.",
       "sections": [
         {
           "heading": "Ki a felelős",
@@ -2282,25 +2288,25 @@
           "heading": "Ha játszol",
           "items": [
             "A beírt beceneved, a választott avatarod és a csapatod. Ezeket a játékban mindenki látja: a játékvezető, a többi játékos és a közös kijelző. Becenevet adj meg, ne a teljes neved.",
-            "A válaszaid, a válaszidőd és a pontjaid, hogy a játékot pontozni és az eredményt megmutatni lehessen.",
-            "Egy véletlen játékoskód a böngésződben, hogy újratöltés után visszajuss a játékba.",
-            "Semmi más: se fiók, se e-mail-cím, se telefonszám, se hely, se IP-cím nem kerül tárolásra."
+            "A válaszaid, a válaszidőd és a pontjaid, a játék pontozásához és az eredmények megjelenítéséhez.",
+            "Egy véletlenszerű játékoskód a böngésződben, hogy újratöltés után visszajuss a játékba.",
+            "Semmi mást nem tárolunk: sem fiókot, sem e-mail-címet, sem telefonszámot, sem helyadatot, sem IP-címet."
           ],
           "paragraphs": [
-            "Jogalap: részvétel a játékban, amihez csatlakozni döntöttél (GDPR 6. cikk (1) bekezdés b) pont), valamint a játékvezető jogos érdeke, hogy utólag visszanézhesse a rendezvénye eredményét (6. cikk (1) bekezdés f) pont)."
+            "Jogalap: a játékban való részvétel, amelyhez a saját döntésed alapján csatlakoztál (GDPR 6. cikk (1) bekezdés b) pont), valamint a játékvezető jogos érdeke, hogy utólag visszanézhesse a rendezvénye eredményét (6. cikk (1) bekezdés f) pont)."
           ]
         },
         {
           "heading": "Ha játékot vezetsz",
           "items": [
-            "A felhasználóneved, a jelszavad pedig csak egyirányú hash-ként, amiből senki nem tudja visszafejteni a jelszót.",
-            "Mikor léptél be utoljára (ezt csak az adminisztrátor látja, hogy tudja, mely fiókokat használják még), és hogy a feltételek melyik változatát mikor fogadtad el (a megállapodásunk nyoma).",
-            "A belépéseid: böngészőnként egy véletlen kód, hash-ként, legfeljebb {{sessionDays}} napig.",
+            "A felhasználóneved, a jelszavad pedig csak egyirányú hash-ként, amelyből senki nem tudja visszafejteni a jelszót.",
+            "Mikor léptél be utoljára (ezt csak az adminisztrátor látja, hogy tudja, mely fiókokat használják még), és hogy a feltételek melyik változatát mikor fogadtad el (a megállapodásunk igazolására).",
+            "A belépéseid: böngészőnként egy véletlenszerű kód, hash-ként, legfeljebb {{sessionDays}} napig.",
             "A kvízeid, a feltöltött képeid, a beállításaid és a játékaid az eredményeikkel.",
-            "Csak adminoknál, ha megadnak egyet: egy e-mail-cím az új regisztrációkról szóló értesítésekhez. Másra nem használjuk, és töröljük, ha az admin kiveszi, vagy már nem admin."
+            "Csak adminisztrátorok esetében, ha megadják: egy e-mail-cím az új regisztrációkról szóló értesítésekhez. Másra nem használjuk, és töröljük, ha az adminisztrátor eltávolítja, vagy megszűnik az adminisztrátori szerepköre."
           ],
           "paragraphs": [
-            "Jogalap: a szolgáltatás használatára kötött megállapodás, vagyis a felhasználási feltételek (6. cikk (1) bekezdés b) pont); az utolsó belépés, a feltételek elfogadásának nyoma és a biztonsági intézkedések esetén a szolgáltatás biztonságos működtetéséhez fűződő jogos érdek (6. cikk (1) bekezdés f) pont)."
+            "Jogalap: a szolgáltatás használatára kötött megállapodás, vagyis a felhasználási feltételek (6. cikk (1) bekezdés b) pont); az utolsó belépés, a feltételek elfogadásának rögzítése és a biztonsági intézkedések esetében a szolgáltatás biztonságos működtetéséhez fűződő jogos érdek (6. cikk (1) bekezdés f) pont)."
           ]
         },
         {
@@ -2325,7 +2331,7 @@
             "A be nem fejezett játékokat 12 óra után lezárjuk, aztán ugyanúgy töröljük, mint a befejezetteket.",
             "Azokat a képeket, amelyeket már egy kvíz, beállítás vagy játék sem használ, két napon belül töröljük.",
             "A lejárt belépéseket naponta töröljük. Ha az adminisztrátor {{signupDays}} napon belül nem hagy jóvá egy regisztrációt, töröljük.",
-            "A játékos helye a böngészőben akkor törlődik, amikor kilép a játékból, de legkésőbb {{seatDays}} nap után.",
+            "A játékos helye a böngészőben törlődik, amikor kilép a játékból. Ha nem lép ki, {{seatDays}} nap után lejár, és a Quizmoo következő megnyitásakor törlődik az adott eszközön.",
             "A játékvezetői fiók a kvízekkel és képekkel együtt addig marad, amíg a játékvezető vagy az adminisztrátor nem törli.",
             "A tárhelyszolgáltató mentéseiben a törölt adatok legfeljebb 30 napig maradhatnak meg, utána felülíródnak."
           ]
@@ -2333,41 +2339,41 @@
         {
           "heading": "Ki kapja még meg az adataidat",
           "paragraphs": [
-            "Senki, a saját céljaira. A szolgáltatás egy tárhelyszolgáltatónál fut ({{hosting}}), amely az adatokat csak a működtetéshez tárolja és kezeli, adatfeldolgozóként, a saját adatfeldolgozási feltételei szerint. Ha a szolgáltató vagy az anyavállalata az EU/EGT-n kívül van, az adattovábbítás a GDPR által előírt garanciákon alapul: megfelelőségi határozaton (például az EU–USA adatvédelmi kereten) vagy általános szerződési feltételeken.",
-            "Ha egy admin megadott címet a regisztrációs értesítésekhez, ezek az e-mailek egy e-mail-szolgáltatón keresztül mennek ki ({{mail}}), szintén adatfeldolgozóként. A szolgáltató megkapja az admin címét és az értesítést, amelyben csak az áll, hány regisztráció vár.",
-            "Nincs statisztika, reklám vagy közösségimédia-eszköz, és az alkalmazás más oldalról semmit nem tölt be. A játékvezetőknek szóló Visszajelzés link a GitHubra visz, ami külön szolgáltatás a saját adatvédelmi szabályaival; a használata nem kötelező."
+            "Senki nem kapja meg őket a saját céljaira. A szolgáltatás egy tárhelyszolgáltatónál fut ({{hosting}}), amely az adatokat csak a szolgáltatás működtetéséhez tárolja és kezeli, adatfeldolgozóként, a saját adatfeldolgozási feltételei szerint. Ha a szolgáltató vagy az anyavállalata az EU/EGT-n kívül van, az adattovábbítás a GDPR által előírt garanciákon alapul: megfelelőségi határozaton (például az EU–USA adatvédelmi kereten) vagy általános adatvédelmi kikötéseken.",
+            "Ha egy adminisztrátor megadott címet a regisztrációs értesítésekhez, ezek az e-mailek egy e-mail-szolgáltatón keresztül mennek ki ({{mail}}), szintén adatfeldolgozóként. A szolgáltató megkapja az adminisztrátor címét és az értesítést, amelyben csak az áll, hány regisztráció vár jóváhagyásra.",
+            "Nincs statisztikai, reklám- vagy közösségimédia-eszköz, és az alkalmazás más webhelyről semmit nem tölt be. A játékvezetőknek szóló Visszajelzés link a GitHubra visz, amely külön szolgáltatás a saját adatvédelmi szabályaival; a használata nem kötelező."
           ]
         },
         {
           "heading": "A jogaid",
           "items": [
             "Hozzáférés: másolatot kérhetsz a rólad tárolt adatokról. Játékvezetőként: Beállításaim → Fiók → Adataim letöltése.",
-            "Helyesbítés, ha valami nem stimmel.",
+            "Helyesbítés: a pontatlan adatok kijavítása.",
             "Törlés. Játékvezetőként: a fiókodat a Beállításaim → Fiók oldalon törölheted, a játékokat és a kvízeket pedig bármikor. Játékosként: szólj a játékvezetőnek, vagy írj a fenti címre a játék dátumával, PIN-kódjával és a beceneveddel.",
             "Az adatkezelés korlátozása, és tiltakozás a jogos érdeken alapuló adatkezelés ellen.",
             "Adathordozhatóság: a fenti letöltés géppel olvasható JSON-fájl."
           ],
           "paragraphs": [
-            "Egy hónapon belül válaszolunk. Mivel a játékosoknak nincs fiókjuk, az adataid megtalálásához elkérhetjük a játék dátumát, PIN-kódját és a beceneved, ennél többet soha."
+            "Egy hónapon belül válaszolunk. Mivel a játékosoknak nincs fiókjuk, az adataid megtalálásához elkérhetjük a játék dátumát, PIN-kódját és a becenevedet, de ennél többet soha."
           ]
         },
         {
           "heading": "Panasz",
           "paragraphs": [
-            "Panaszt tehetsz a Nemzeti Adatvédelmi és Információszabadság Hatóságnál (NAIH, 1055 Budapest, Falk Miksa utca 9–11., ugyfelszolgalat@naih.hu, naih.hu), vagy a lakóhelyed, munkahelyed szerinti hatóságnál, és bírósághoz is fordulhatsz. Sokat segít, ha előbb a fenti címre írsz, hogy rendbe tehessük."
+            "Panaszt nyújthatsz be a felügyeleti hatóságnál, a Nemzeti Adatvédelmi és Információszabadság Hatóságnál (NAIH, 1055 Budapest, Falk Miksa utca 9–11., ugyfelszolgalat@naih.hu, naih.hu), vagy a lakóhelyed, illetve munkahelyed szerinti felügyeleti hatóságnál, és bírósághoz is fordulhatsz. Segít, ha előbb a fenti címre írsz, hogy orvosolhassuk a problémát."
           ]
         },
         {
           "heading": "Gyerekek",
           "paragraphs": [
-            "Játékot vezetni {{age}} éves kortól lehet. A játékosoknak nincs fiókjuk, csak becenevet adnak meg; ha gyerekek játszanak, a rendezvényt vezető játékvezető gondoskodik róla, hogy a szüleik, az iskola vagy a szervezők beleegyezzenek."
+            "Játékot vezetni {{age}} éves kortól lehet. A játékosoknak nincs fiókjuk, csak becenevet adnak meg; ha gyerekek játszanak, a játékvezető gondoskodik róla, hogy a szüleik, az iskola vagy a szervezők beleegyezzenek."
           ]
         },
         {
           "heading": "Automatikus döntések és változások",
           "paragraphs": [
-            "A Quizmoo rólad semmilyen automatizált döntést nem hoz, azon kívül, hogy pontozza a kvízt, amit játszol.",
-            "Ha ez a tájékoztató változik, a fenti dátum is változik. Ha a változás azt érinti, amibe a játékvezetők beleegyeztek, a következő belépéskor újra elfogadják a feltételeket."
+            "A Quizmoo a játék pontozásán kívül semmilyen automatizált döntést nem hoz rólad.",
+            "Ha ez a tájékoztató változik, a fenti dátum is változik. Ha a változás azt érinti, amit a játékvezetők elfogadtak, a következő belépéskor az új feltételeket is el kell fogadniuk."
           ]
         }
       ]
@@ -2380,21 +2386,21 @@
         {
           "heading": "A szolgáltatás",
           "paragraphs": [
-            "A Quizmoo egy ingyenes, nem üzleti kvízjáték, amit egy magánszemély hobbiból működtet. Nincs fizetős csomag és nincs reklám. Úgy kínáljuk, ahogy van: a funkciók változhatnak, és a szolgáltatás szünetelhet vagy megszűnhet, lehetőleg előre jelezve ezen az oldalon."
+            "A Quizmoo egy ingyenes, nem üzleti kvízjáték, amelyet egy magánszemély hobbiból működtet. Nincs fizetős csomag és nincs reklám. A szolgáltatást a jelenlegi állapotában nyújtjuk: a funkciók változhatnak, és a szolgáltatás szünetelhet vagy megszűnhet, lehetőség szerint ezen az oldalon előre jelezve."
           ]
         },
         {
           "heading": "Ki használhatja",
           "items": [
             "A játékosok PIN-kóddal és becenévvel csatlakoznak egy játékhoz, fiók nélkül.",
-            "A játékvezetőknek fiók kell, legalább {{age}} évesnek kell lenniük, és a fiókot maguk használják: egy fiók egy ember, nem adható tovább.",
-            "A regisztrációk az adminisztrátor jóváhagyására várnak. Az adminisztrátor indoklás nélkül is elutasíthat egyet."
+            "A játékvezetőknek fiók kell, legalább {{age}} évesnek kell lenniük, és a fiókot maguk használják: egy fiókot csak egy személy használhat, és az nem adható át másnak.",
+            "A regisztrációk az adminisztrátor jóváhagyására várnak. Az adminisztrátor indoklás nélkül is elutasíthatja a regisztrációt."
           ]
         },
         {
           "heading": "A fiókod",
           "items": [
-            "A jelszavadat tartsd meg magadnak, és máshol ne használd.",
+            "A jelszavadat tartsd titokban, és más szolgáltatásnál ne használd.",
             "Ha úgy gondolod, más is használta a fiókodat, a Beállításaimban cseréld le a jelszavad és léptesd ki a többi eszközt, és szólj az üzemeltetőnek.",
             "A fiókodat bármikor törölheted a Beállításaim → Fiók oldalon."
           ]
@@ -2404,9 +2410,9 @@
           "items": [
             "A kvízeidért, képeidért, csapatneveidért és üzeneteidért te felelsz, és jogosultnak kell lenned a felhasználásukra: a saját munkád, licenced van rá, vagy a törvény megengedi.",
             "Tilos: bármi jogellenes, gyűlöletkeltés, zaklatás, szexuális tartalom, kiskorúakat szexualizáló tartalom, az erőszak dicsőítése, és mások személyes adatai jogalap nélkül.",
-            "Nincs reklám, spam és káros oldalakra mutató link.",
+            "Tilos a reklám, a spam és a káros oldalakra mutató link.",
             "A becenév nem lehet sértő, és nem adhatod ki magad másnak. A játékvezető eltávolíthat játékosokat a játékából.",
-            "Amit létrehozol, az a tiéd marad. Az üzemeltetőnek csak annyit engedsz meg, hogy a szolgáltatás működtetéséhez szükséges mértékben tárolja és megjelenítse, például a játékaid kijelzőin és telefonjain."
+            "Amit létrehozol, annak jogai nálad maradnak. Az üzemeltetőnek kizárólag arra adsz engedélyt, hogy a tartalmat a szolgáltatás számodra történő nyújtásához szükséges mértékben tárolja és megjelenítse, például a játékaid kijelzőin és telefonjain."
           ]
         },
         {
@@ -2420,12 +2426,12 @@
           "heading": "Tisztességes használat",
           "items": [
             "Ne támadd, ne terheld túl és ne próbálgasd a szolgáltatást, ne kerüld meg a korlátait, és ne csatlakozz játékokhoz vagy hozz létre fiókokat automatizált eszközökkel.",
-            "A korlátok mindenkinek fair használatot biztosítanak, például játékvezetőnként 20 nyitott játék és 1000 kép.",
-            "Biztonsági hibát találtál? Jelezd négyszemközt a fenti címen, és ne használd ki, ne hozd nyilvánosságra, amíg nincs javítva. Köszönjük!"
+            "A korlátok mindenki számára tisztességes használatot biztosítanak, például játékvezetőnként 20 nyitott játék és 1000 kép.",
+            "Biztonsági hibát találtál? Jelezd bizalmasan a fenti címen, és ne használd ki, ne hozd nyilvánosságra, amíg nincs javítva. Köszönjük!"
           ]
         },
         {
-          "heading": "Ha valami nem stimmel",
+          "heading": "Jogsértés és adatvesztés",
           "items": [
             "Az üzemeltető eltávolíthatja azt a tartalmat, illetve felfüggesztheti vagy törölheti azt a fiókot, amely sérti ezeket a feltételeket vagy a jogszabályokat; ha a károk megelőzéséhez szükséges, előzetes értesítés nélkül is.",
             "A fontos kvízeidről legyen saját másolatod: a kvízlistából letöltheted őket. Vannak mentések, de az adatvesztést teljesen kizárni nem lehet."
@@ -2434,13 +2440,13 @@
         {
           "heading": "Felelősség",
           "paragraphs": [
-            "A szolgáltatás ingyenes, és úgy nyújtjuk, ahogy van, annak garantálása nélkül, hogy elérhető, vagy hogy egy adott célra megfelel. A jogszabályok által megengedett mértékben az üzemeltető nem felel a közvetett károkért és az adatvesztésért. Ez nem korlátozza a felelősséget a szándékosan vagy súlyos gondatlansággal okozott károkért, az életet, testi épséget vagy egészséget megsértő károkért, és semmiért, aminek a kizárását a jogszabályok (különösen a Polgári Törvénykönyv 6:152. §-a) nem engedik."
+            "A szolgáltatás ingyenes, és a jelenlegi állapotában nyújtjuk, annak garantálása nélkül, hogy elérhető, vagy hogy egy adott célra megfelel. A jogszabályok által megengedett mértékben az üzemeltető nem felel a közvetett károkért és az adatvesztésért. Ez nem korlátozza a felelősséget a szándékosan vagy súlyos gondatlansággal okozott károkért, az életet, testi épséget vagy egészséget megsértő károkért, és semmiért, aminek a kizárását a jogszabályok (különösen a Polgári Törvénykönyv 6:152. §-a) nem engedik."
           ]
         },
         {
           "heading": "A feltételek változása",
           "paragraphs": [
-            "A változat és a dátum fent látható. Ha a feltételek lényegesen változnak, a játékvezetők a következő belépéskor elfogadják az új változatot; addig is letölthetik az adataikat vagy törölhetik a fiókjukat."
+            "A változat és a dátum fent látható. Ha a feltételek lényegesen változnak, a játékvezetőknek a következő belépéskor el kell fogadniuk az új változatot; addig is letölthetik az adataikat vagy törölhetik a fiókjukat."
           ]
         },
         {
@@ -2453,7 +2459,7 @@
     },
     "cookies": {
       "title": "Sütik és tárolás",
-      "intro": "A Quizmoo egyetlen sütit használ, a belépő játékvezetőknek, és néhány bejegyzést a böngésződ tárhelyén, mindegyiket valamihez, amit te kértél. Ezért nem kér hozzájárulást: az ePrivacy-irányelv és az elektronikus hírközlésről szóló törvény (Eht.) 155. § (4) bekezdése a feltétlenül szükséges tárolást hozzájárulás nélkül is megengedi. Nincs követő, statisztikai vagy reklámsüti, és más oldalról semmi.",
+      "intro": "A Quizmoo egyetlen sütit használ, a bejelentkezett játékvezetők számára, valamint néhány bejegyzést a böngésződ tárhelyén, mindegyiket olyan funkcióhoz, amelyet te kértél. Ezért nem kér hozzájárulást: az ePrivacy-irányelv és az elektronikus hírközlésről szóló törvény (Eht.) 155. § (4) bekezdése a feltétlenül szükséges tárolást hozzájárulás nélkül is megengedi. Nincs követő, statisztikai vagy reklámsüti, és más webhelyről semmi nem töltődik be.",
       "columns": {
         "name": "Név",
         "kind": "Hol",
@@ -2472,26 +2478,26 @@
         "everyone": "Mindenki"
       },
       "items": {
-        "session": "Bejelentkezve tart. Az oldal szkriptjei nem olvashatják, és csak ennek az oldalnak, HTTPS-en megy el. Legfeljebb 30 napig, vagy amíg ki nem lépsz. Helyi hálózaton, HTTPS nélkül quizmoo_session a neve.",
-        "player": "A helyed egy játékban (egy véletlen kód, a beceneved és az avatarod), hogy újratöltés után visszajuss. Törlődik, amikor kilépsz a játékból, de legkésőbb 2 nap után.",
+        "session": "Bejelentkezve tart. Az oldal szkriptjei nem olvashatják, és a böngésző csak ennek a webhelynek, HTTPS-kapcsolaton küldi el. Legfeljebb 30 napig, vagy amíg ki nem lépsz. Helyi hálózaton, HTTPS nélkül quizmoo_session a neve.",
+        "player": "A helyed egy játékban (egy véletlenszerű kód, a beceneved és az avatarod), hogy újratöltés után visszajuss. Törlődik, amikor kilépsz a játékból; ha nem lépsz ki, 2 nap után lejár, és a Quizmoo következő megnyitásakor törlődik.",
         "draft": "Amit egy ütemezett játékra várva kitöltöttél. Törlődik, amikor csatlakozol vagy kilépsz.",
-        "dismissed": "A játékvezető üzenete, amit elsöpörtél. Amíg be nem zárod a lapot.",
+        "dismissed": "A játékvezető üzenete, amelyet bezártál. Amíg be nem zárod a lapot.",
         "picksOpen": "Hogy nyitva vannak-e a csapatod tippjei. Amíg be nem zárod a lapot.",
         "lang": "A nyelved. Amíg át nem állítod, vagy nem törlöd a böngészőadatokat.",
         "mode": "Világos, sötét vagy rendszer szerinti megjelenés. Amíg át nem állítod, vagy nem törlöd a böngészőadatokat.",
         "seasonal": "Hogy ezen az eszközön kikapcsoltad az ünnepi megjelenést. Amíg vissza nem kapcsolod, vagy nem törlöd a böngészőadatokat.",
-        "seasonPreview": "Csak adminisztrátoroknak: az ünnep, amelyet ezen az eszközön előnézetben látsz. Amíg a Dátum szerintet nem választod, vagy nem törlöd a böngészőadatokat.",
-        "notice": "Hogy már láttad a tárolásról szóló tájékoztatót, így nem jön elő újra.",
+        "seasonPreview": "Csak adminisztrátoroknak: az ünnep, amelyet ezen az eszközön előnézetben látsz. Amíg a „Dátum szerint” lehetőséget nem választod, vagy nem törlöd a böngészőadatokat.",
+        "notice": "Hogy már láttad a tárolásról szóló tájékoztatót, ezért nem jelenik meg újra.",
         "hostToasts": "Hogy a játékvezetői oldal mutasson-e rövid értesítést a csatlakozó és távozó játékosokról.",
         "hostBoard": "Hogyan mutassa a játékvezetői oldal a játékosokat: csempék vagy lista, sorrend, rejtett válaszok, oldalsó panelek és a menü.",
-        "appCache": "Az alkalmazás saját fájljai (kód, betűk, képek), hogy gyorsan induljon és telepíthető legyen. Személyes adat nincs benne."
+        "appCache": "Az alkalmazás saját fájljai (kód, betűtípusok, képek), hogy gyorsan induljon és telepíthető legyen. Személyes adat nincs benne."
       },
       "removeTitle": "Törlésük",
       "remove": "Mindet törölheted a böngésződ beállításaiban (ennek a címnek a webhelyadatai). Ekkor kilépsz, a játékos pedig elveszíti a helyét egy futó játékban."
     },
     "imprint": {
       "title": "Impresszum",
-      "intro": "Az itteni Quizmoo egy magánszemély ingyenes, nem üzleti hobbiprojektje, nem vállalkozás.",
+      "intro": "Ez a Quizmoo-webhely egy magánszemély ingyenes, nem üzleti hobbiprojektje, nem vállalkozás.",
       "items": [
         "A kvízeket, képeket és üzeneteket a játékvezetők készítik, és ők felelnek értük.",
         "Jogellenes tartalmat vagy biztonsági hibát a fenti címen jelezhetsz."
@@ -2505,7 +2511,7 @@
     },
     "accept": {
       "title": "Fogadd el a felhasználási feltételeket",
-      "intro": "Mielőtt továbbmész, olvasd el a felhasználási feltételeket ({{version}} változat). Az adatkezelési tájékoztató elmondja, mit tárolunk rólad.",
+      "intro": "Mielőtt továbblépsz, olvasd el a felhasználási feltételeket ({{version}} változat). Az adatkezelési tájékoztató ismerteti, mit tárolunk rólad.",
       "checkbox": "Elmúltam {{age}} éves, elfogadom a <terms>felhasználási feltételeket</terms>, és elolvastam az <privacy>adatkezelési tájékoztatót</privacy>.",
       "required": "Pipáld be a továbblépéshez.",
       "submit": "Elfogadom, tovább",
@@ -2518,7 +2524,7 @@
   "quizFile": {
     "importTitle": "Importálj egy kvízt",
     "importHelp": "Írd meg a kérdéseket bárhol: Excelben, Google Táblázatokban vagy a telefonodon, aztán töltsd be ide. Egy Quizmoo-fájl is jó, amit valaki megosztott veled.",
-    "templateHelp": "Kezdd a sablonnal: minden oszlopot elmagyaráz, és minden kérdéstípusra meg egy csoportra is van benne példa.",
+    "templateHelp": "Kezdd a sablonnal: minden oszlopot elmagyaráz, és minden kérdéstípusra meg egy körre is van benne példa.",
     "downloadTemplate": "Sablon letöltése",
     "templateName": "quizmoo-kerdes-sablon.csv",
     "chooseFile": "Válassz fájlt",
@@ -2571,11 +2577,11 @@
       "empty": "Nincs kérdés a fájlban. Tölts ki legalább egy sort a fejléc alatt.",
       "tooMany": "Egy kvízben legfeljebb 200 kérdés lehet. Vágd ketté a fájlt.",
       "group": {
-        "question": "írd be a csoport címét, legfeljebb 120 karakter.",
-        "answers": "a csoport leírása legfeljebb 500 karakter lehet."
+        "question": "írd be a kör címét, legfeljebb 120 karakter.",
+        "answers": "a kör leírása legfeljebb 500 karakter lehet."
       },
       "emptyGroup": "nincs alatta kérdés. Írj alá legalább egyet, vagy töröld a sort.",
-      "tooManyGroups": "Egy kvízben legfeljebb 50 csoport lehet."
+      "tooManyGroups": "Egy kvízben legfeljebb 50 kör lehet."
     },
     "columns": {
       "type": "típus",
@@ -2604,9 +2610,9 @@
       "helyes, szöveg típusnál: az elfogadott válaszok | jellel elválasztva, pl. Jupiter | a Jupiter. A kis- és nagybetű meg az ékezet nem számít. Ha üres, a játék közben te döntöd el, mi jó.",
       "helyes, szám típusnál: a jó szám, pl. 1848 vagy 3,5. Szavazásnál és sorrendnél hagyd üresen.",
       "idő: ennyi másodperc van a válaszra, 5–180 (ha üres: 20). pont: 0–5000 (ha üres: 1000). tűrés, csak szám típusnál: ennyivel eltérő válasz is jó, pl. 10 (ha üres: pontosan kell).",
-      "szín: a kérdés vagy a csoport színe a szerkesztőben: piros, narancs, sárga, zöld, türkiz, kék, lila vagy rózsaszín (ha üres: nincs színe).",
-      "csoport: egy forduló kezdete. A kérdés oszlopba a címét írd (legfeljebb 120 karakter), a válasz 1-be a leírását, az időhöz és a ponthoz azt, amit az új kérdései kapnak a szerkesztőben. Az alatta lévő kérdések a következő csoportig vagy egy csoport-vége sorig tartoznak hozzá.",
-      "Képet, játékbeállítást és a csoportok saját szabályait ebbe a fájlba nem tudsz tenni: importálás után a szerkesztőben add hozzá."
+      "szín: a kérdés vagy a kör színe a szerkesztőben: piros, narancs, sárga, zöld, türkiz, kék, lila vagy rózsaszín (ha üres: nincs színe).",
+      "csoport: egy kör kezdete. A kérdés oszlopba a kör címét írd (legfeljebb 120 karakter), a válasz 1-be a leírását, az időhöz és a ponthoz azt, amit az új kérdései kapnak a szerkesztőben. Az alatta lévő kérdések a következő csoport sorig vagy egy csoport-vége sorig tartoznak a körhöz.",
+      "Képet, játékbeállítást és a körök saját szabályait ebbe a fájlba nem tudsz tenni: importálás után a szerkesztőben add hozzá."
     ],
     "templateNote": "A fejléc alatti sorok csak példák: írd át vagy töröld őket.",
     "jsonGuide": [
@@ -2614,7 +2620,7 @@
       "Ha kézzel írnál kérdéseket, inkább a táblázatsablont használd (Kvízek > Importálás > Sablon letöltése)."
     ],
     "examples": {
-      "group": "Ráadás kör",
+      "group": "Ráadáskör",
       "groupInfo": "Két könnyű kérdés a végére.",
       "single": "Mi Magyarország fővárosa?",
       "single1": "Bécs",

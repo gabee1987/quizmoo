@@ -114,7 +114,7 @@ for (const mode of modes) {
 
       await test.step('the standings follow the round, then the next round', async () => {
         await answerTrue()
-        await controls.getByRole('button', { name: 'Show scoreboard' }).click()
+        await controls.getByRole('button', { name: 'Show standings' }).click()
         await expect(projector.getByRole('heading', { name: 'Leaderboard' })).toBeVisible()
         await expect(phone.getByText('Your rank')).toBeVisible()
         await controls.getByRole('button', { name: 'Next round' }).click()
@@ -138,7 +138,7 @@ for (const mode of modes) {
 
       await test.step('the last round ends the game', async () => {
         await answerTrue()
-        await controls.getByRole('button', { name: 'Show scoreboard' }).click()
+        await controls.getByRole('button', { name: 'Show standings' }).click()
         await controls.getByRole('button', { name: 'Finish' }).click()
         await expect(phone.getByText('Game over!')).toBeVisible()
         finished = true

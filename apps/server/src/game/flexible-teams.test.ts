@@ -253,7 +253,7 @@ describe('solo players', () => {
       ['solo-p3', state.players.p3!.avatar],
       ['team-1', null],
     ])
-    expect(toCsv(results, 'en')).toContain('Player 3;On their own;1000')
+    expect(toCsv(results, 'en')).toContain('Player 3;Solo;1000')
   })
 
   it('moves a player between a team and playing alone; after the start the solo points wait for them', () => {
