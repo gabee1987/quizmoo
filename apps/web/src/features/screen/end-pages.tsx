@@ -9,6 +9,7 @@ import { cn } from '@/lib/cn'
 import { stagger } from '@/lib/motion'
 import { awardKinds, useAwardValue, useLength } from '../play/end-facts'
 import { CorrectAnswer } from '../questions/correct-answer'
+import { PartialIcon } from '../../components/icons'
 import { medalColours } from './podium'
 
 interface LeaderRow {
@@ -294,6 +295,12 @@ function RecapSlide({
             <UsersIcon className="size-6" aria-hidden="true" />
             {t('results.answered', { answered: reveal.answeredCount, count: host.players.length })}
           </li>
+          {reveal.partialCount > 0 && (
+            <li className="flex animate-fade-up items-center gap-2 rounded-full bg-secondary px-5 py-2 text-2xl font-bold text-secondary-foreground" style={stagger(1, 120, 900)}>
+              <PartialIcon className="size-6" />
+              {t('results.partlyRightCount', { count: reveal.partialCount })}
+            </li>
+          )}
           {averageMs !== null && (
             <li className="flex animate-fade-up items-center gap-2 rounded-full bg-secondary px-5 py-2 text-2xl font-bold text-secondary-foreground" style={stagger(1, 120, 900)}>
               <TimerIcon className="size-6" aria-hidden="true" />

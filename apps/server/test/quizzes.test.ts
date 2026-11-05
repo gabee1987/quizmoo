@@ -245,6 +245,15 @@ describeDb('quiz routes (database)', () => {
     }
   })
 
+  it('batch update sets the scoring of multiple-choice questions only', async () => {
+    const multiple = { type: 'multiple', text: 'Pick A and B', options: quizBody.questions[0]!.options, correctOptionIds: ['a', 'b'] }
+    const quiz = (await req(alice, 'POST', '/api/quizzes', { ...quizBody, questions: [...quizBody.questions, multiple] })).json().quiz
+    const res = await req(alice, 'PATCH', '/api/quizzes/batch', { ids: [quiz.id], multipleScoring: 'partial' })
+    expect(res.statusCode).toBe(200)
+    const after = (await req(alice, 'GET', `/api/quizzes/${quiz.id}`)).json().quiz
+    expect(after.questions.map((q: { scoring?: string }) => q.scoring)).toEqual([undefined, undefined, 'partial'])
+  })
+
   it('batch update changes nothing when a merged quiz is invalid or a quiz is not the user’s', async () => {
     const quiz = (await req(alice, 'POST', '/api/quizzes', quizBody)).json().quiz
     const bobs = (await req(bob, 'POST', '/api/quizzes', quizBody)).json().quiz

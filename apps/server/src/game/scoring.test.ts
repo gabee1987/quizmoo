@@ -1,7 +1,7 @@
 import type { Answer, Question } from '@quizmoo/shared'
 import { describe, expect, it } from 'vitest'
 import { fixtureQuiz } from './fixtures.js'
-import { denseRank, isCorrect, pointsFor, textMatch, typoDistance } from './scoring.js'
+import { denseRank, isCorrect, partialCredit, pointsFor, textMatch, typoDistance } from './scoring.js'
 
 function question(id: string): Question {
   const q = fixtureQuiz().questions.find((x) => x.id === id)
@@ -37,6 +37,53 @@ describe('isCorrect', () => {
     expect(isCorrect(q, { type: 'text', value: 'anything' })).toBeNull()
   })
 
+  describe('partial credit', () => {
+    // A and B right, C and D wrong; and A, B and C right of four.
+    const two: Question = {
+      id: 'p2',
+      type: 'multiple',
+      text: 'Two right',
+      timeLimitSec: 20,
+      points: 1000,
+      scoring: 'partial',
+      options: ['a', 'b', 'c', 'd'].map((id) => ({ id, text: id })),
+      correctOptionIds: ['a', 'b'],
+    }
+    const three: Question = { ...two, id: 'p3', correctOptionIds: ['a', 'b', 'c'] }
+    const pick = (...optionIds: string[]): Answer => ({ type: 'multiple', optionIds })
+
+    it.each([
+      [two, ['a'], 'partial', 0.5],
+      [two, ['a', 'b'], true, 1],
+      [two, ['a', 'c'], false, 0],
+      [two, ['c', 'd'], false, 0],
+      [two, ['a', 'b', 'c', 'd'], false, 0],
+      [three, ['a', 'b'], 'partial', 2 / 3],
+      [three, ['a', 'b', 'd'], 'partial', 1 / 3],
+      [three, ['a', 'b', 'c', 'd'], 'partial', 2 / 3],
+    ] as const)('%#: %j is %s with credit %d', (q, ids, verdict, credit) => {
+      expect(isCorrect(q, pick(...ids))).toBe(verdict)
+      expect(partialCredit(q, pick(...ids))).toBeCloseTo(credit)
+    })
+
+    it('scores the roadmap examples', () => {
+      const score = (q: Question, ...ids: string[]) =>
+        pointsFor(1000, isCorrect(q, pick(...ids)), 0, 20_000, false, partialCredit(q, pick(...ids)))
+      expect(score(two, 'a')).toBe(500)
+      expect(score(two, 'a', 'b')).toBe(1000)
+      expect(score(two, 'a', 'c')).toBe(0)
+      expect(score(three, 'a', 'b')).toBe(667)
+      expect(score(three, 'a', 'b', 'd')).toBe(333)
+    })
+
+    it('keeps all or nothing without the setting', () => {
+      const { scoring: _, ...all } = two as Extract<Question, { type: 'multiple' }>
+      expect(isCorrect(all, pick('a'))).toBe(false)
+      expect(isCorrect({ ...all, scoring: 'all' }, pick('a'))).toBe(false)
+      expect(isCorrect(all, pick('b', 'a'))).toBe(true)
+    })
+  })
+
   it('treats tolerance 0 as exact', () => {
     const q: Question = { ...question('q-number'), type: 'number', correct: 7, tolerance: 0 }
     expect(isCorrect(q, { type: 'number', value: 7 })).toBe(true)
@@ -62,6 +109,14 @@ describe('pointsFor', () => {
   it('gives 0 for wrong and ungraded answers', () => {
     expect(pointsFor(1000, false, 0, 20_000, true)).toBe(0)
     expect(pointsFor(1000, null, 0, 20_000, true)).toBe(0)
+  })
+
+  it('gives a partly right answer its share, the speed bonus on top', () => {
+    expect(pointsFor(1000, 'partial', 0, 20_000, false, 0.5)).toBe(500)
+    expect(pointsFor(1000, 'partial', 10_000, 20_000, true, 0.5)).toBe(375)
+    expect(pointsFor(1000, 'partial', 0, 20_000, true, 0)).toBe(0)
+    // The credit only matters for a partly right answer.
+    expect(pointsFor(1000, true, 0, 20_000, false, 0.5)).toBe(1000)
   })
 
   it('rounds to an integer', () => {

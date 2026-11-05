@@ -1,4 +1,4 @@
-import type { HostSnapshot, TeamAnswerPublic } from '@quizmoo/shared'
+import type { HostSnapshot, TeamAnswerPublic, Verdict as VerdictValue } from '@quizmoo/shared'
 import { CheckCircle2Icon, EyeIcon, EyeOffIcon, HourglassIcon, SlidersHorizontalIcon, WifiOffIcon } from 'lucide-react'
 import { useEffect, useLayoutEffect, useRef, useState, type RefObject } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -18,7 +18,7 @@ import {
 import { cn } from '@/lib/cn'
 import { answerProgress } from '@/lib/answer-progress'
 import { useMediaQuery } from '@/lib/use-media-query'
-import { CheckIcon, CrossIcon } from '../../components/icons'
+import { CheckIcon, CrossIcon, PartialIcon } from '../../components/icons'
 import { PlayerAvatar } from '../../components/player-avatar'
 import { RankArrow } from '../../components/rank-arrow'
 import { formatAnswer } from '../questions/format-answer'
@@ -143,6 +143,7 @@ function BoardSummary({ host }: { host: HostSnapshot }) {
   if (!host.reveal) return null
   const answers = host.currentAnswers ?? []
   const right = answers.filter((a) => a.correct === true).length
+  const partly = answers.filter((a) => a.correct === 'partial').length
   const wrong = answers.filter((a) => a.correct === false).length
   const missing = host.players.length - answers.length
   const scored = host.reveal.question.type !== 'poll' && !host.awaitingGrading
@@ -154,6 +155,12 @@ function BoardSummary({ host }: { host: HostSnapshot }) {
             <CheckIcon className="size-4" />
             {t('host.board.rightCount', { count: right })}
           </span>
+          {partly > 0 && (
+            <span className="inline-flex items-center gap-1">
+              <PartialIcon className="size-4" />
+              {t('host.board.partialCount', { count: partly })}
+            </span>
+          )}
           <span className="inline-flex items-center gap-1 text-destructive">
             <CrossIcon className="size-4" />
             {t('host.board.wrongCount', { count: wrong })}
@@ -275,9 +282,17 @@ function useEntryView(host: HostSnapshot, entry: BoardEntry, hideAnswers: boolea
   }
 }
 
-function Verdict({ correct, className }: { correct: boolean | null; className?: string }) {
+function Verdict({ correct, className }: { correct: VerdictValue; className?: string }) {
   const { t } = useTranslation()
   if (correct === null) return null
+  if (correct === 'partial') {
+    return (
+      <span className={cn('animate-pop', className)}>
+        <PartialIcon className="size-full" />
+        <span className="sr-only">{t('host.board.partial')}</span>
+      </span>
+    )
+  }
   return correct ? (
     <span className={cn('animate-pop text-success', className)}>
       <CheckIcon className="size-full" />
@@ -311,6 +326,7 @@ function tileTone(entry: BoardEntry, over: boolean): string {
   if (entry.status === 'waiting') return 'border-dashed border-border bg-transparent'
   if (entry.status === 'missed') return 'border-dashed border-border bg-muted/50'
   if (over && entry.correct === true) return 'border-success bg-[color-mix(in_srgb,var(--success)_12%,var(--card))]'
+  if (over && entry.correct === 'partial') return 'border-warning bg-[color-mix(in_srgb,var(--warning)_16%,var(--card))]'
   if (over && entry.correct === false) return 'border-destructive/70 bg-[color-mix(in_srgb,var(--destructive)_9%,var(--card))]'
   return 'border-border bg-card'
 }

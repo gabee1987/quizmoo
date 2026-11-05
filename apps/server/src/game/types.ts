@@ -11,6 +11,7 @@ import type {
   QuestionGroup,
   QuickMessage,
   TeamAnswerMode,
+  Verdict,
 } from '@quizmoo/shared'
 
 export { MAX_PLAYERS } from '@quizmoo/shared'
@@ -24,8 +25,8 @@ export interface PlayerAnswerRecord {
   points: number
   /** The streak bonus within `points`. Missing in games saved before it existed. */
   bonus?: number
-  /** null for polls and for host-graded text until `gradeText`. */
-  correct: boolean | null
+  /** null for polls and for host-graded text until `gradeText`; `'partial'` for a partly right partial-credit answer. */
+  correct: Verdict
   /** Correct only thanks to the typo allowance. Missing when not (and in games saved before it existed). */
   nearMiss?: boolean
 }
@@ -67,7 +68,7 @@ export interface TeamAnswerRecord {
   picks?: { playerId: string; answer: Answer }[]
   points: number
   bonus?: number
-  correct: boolean | null
+  correct: Verdict
   nearMiss?: boolean
 }
 

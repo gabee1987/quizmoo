@@ -71,6 +71,8 @@ const batchUpdateSchema = z.object({
   ids: batchIds,
   settings: z.record(z.string(), z.unknown()).default({}),
   questions: z.object({ timeLimitSec: z.number().optional(), points: z.number().optional() }).default({}),
+  /** Partial credit or all or nothing, set on the multiple-choice questions only. */
+  multipleScoring: z.enum(['all', 'partial']).optional(),
 })
 
 /** New ids for a question and its options, keeping the correct-answer references intact. */
@@ -280,7 +282,11 @@ export async function quizRoutes(app: FastifyInstance, { db }: { db: Db }) {
         {
           title: row.title,
           description: row.description,
-          questions: row.questions.map((question) => ({ ...question, ...body.questions })),
+          questions: row.questions.map((question) => ({
+            ...question,
+            ...body.questions,
+            ...(question.type === 'multiple' && body.multipleScoring && { scoring: body.multipleScoring }),
+          })),
           groups: row.groups,
           settings: { ...row.settings, ...body.settings },
           branding: parseQuizBranding(row.branding),

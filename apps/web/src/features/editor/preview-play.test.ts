@@ -63,6 +63,25 @@ describe('preview play-through', () => {
     expect(revealSnapshot(q, second, 0)?.me.streak).toBe(2)
   })
 
+  it('scores a partly right partial-credit answer as a game would, keeping the streak', () => {
+    const multi: Question = {
+      id: 'm',
+      type: 'multiple',
+      text: 'm',
+      timeLimitSec: 20,
+      points: 1000,
+      scoring: 'partial',
+      options: ['a', 'b', 'c'].map((id) => ({ id, text: id })),
+      correctOptionIds: ['a', 'b'],
+    }
+    const q = quiz([single('s'), multi], { streakBonus: true, speedBonus: false })
+    const first = reveal(q, startPlay(q, 0, 0)!, right('s'), 0)
+    const second = reveal(q, nextQuestion(q, first, 0)!, { type: 'multiple', optionIds: ['a'] }, 0)
+    expect(second).toMatchObject({ correct: 'partial', points: 500, bonus: 0 })
+    const snapshot = revealSnapshot(q, second, 0)
+    expect([snapshot?.lastCorrect, snapshot?.me.streak, snapshot?.reveal?.partialCount]).toEqual(['partial', 1, 1])
+  })
+
   it('leaves polls and text without accepted answers ungraded', () => {
     const poll = { id: 'p', type: 'poll', text: 'p', timeLimitSec: 20, points: 1000, options: [{ id: 'o', text: 'x' }, { id: 'o2', text: 'y' }] } as Question
     const text = { id: 't', type: 'text', text: 't', timeLimitSec: 20, points: 1000, acceptedAnswers: [] } as unknown as Question

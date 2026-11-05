@@ -86,6 +86,18 @@ describe('quiz spreadsheet', () => {
     ])
   })
 
+  it('writes and reads the multiple-choice scoring; an empty cell or an older file is all or nothing', () => {
+    const partial: Question = { ...questions[1]!, scoring: 'partial' } as Question
+    const csv = questionsToCsv([partial, { ...partial, id: 'q9', scoring: 'all' } as Question], texts('hu'))
+    expect(csv).toContain(';1, 3;30;2000;;;részleges')
+    const read = parseQuizCsv(csv).questions
+    expect(read.map((q) => (q.type === 'multiple' ? q.scoring : null))).toEqual(['partial', 'all'])
+    // Words in either language, any case; the 13 columns of an older file have no scoring at all.
+    const words = parseQuizCsv(sheet('több;Q;a;b;;;;;1;;;;;Partial', 'multiple;Q;a;b;;;;;1;;;;;MIND', 'multiple;Q;a;b;;;;;1;;;;')).questions
+    expect(words.map((q) => (q.type === 'multiple' ? q.scoring : null))).toEqual(['partial', 'all', undefined])
+    expect(parseQuizCsv('multiple;Q;a;b;;;;;1;;;;;half').problems).toEqual([{ row: 1, code: 'scoring', type: 'multiple' }])
+  })
+
   it('names the answer column numbers even with a gap between answers', () => {
     const [question] = parseQuizCsv('single;Q;a;;c;;;;3').questions
     expect(question).toMatchObject({ options: [{ text: 'a' }, { text: 'c' }], correctOptionId: 'a3' })
@@ -126,7 +138,7 @@ describe('quiz spreadsheet', () => {
     expect(parseQuizCsv(many).problems).toEqual([{ row: 0, code: 'tooMany' }])
   })
 
-  it.each(['hu', 'en'] as const)('reads back question and group colours in the last column (%s)', (language) => {
+  it.each(['hu', 'en'] as const)('reads back question and group colours in the colour column (%s)', (language) => {
     const coloured: Question[] = [
       { ...questions[2]!, color: 'teal', groupId: 'g1' },
       { ...questions[0]!, color: 'pink' },
@@ -134,7 +146,8 @@ describe('quiz spreadsheet', () => {
     ]
     const groups: QuestionGroup[] = [{ id: 'g1', title: 'Round', info: '', settings: {}, color: 'orange' }]
     const csv = questionsToCsv(coloured, texts(language), groups)
-    expect(csv).toContain(language === 'hu' ? ';;rózsaszín\r\n' : ',,pink\r\n')
+    // The colour, then the empty scoring column.
+    expect(csv).toContain(language === 'hu' ? ';;rózsaszín;\r\n' : ',,pink,\r\n')
     const result = parseQuizCsv(csv)
     expect(result.problems).toEqual([])
     expect(result.questions.map((q) => q.color)).toEqual(['teal', 'pink', undefined])

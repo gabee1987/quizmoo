@@ -122,6 +122,12 @@ export interface TeamPublic {
 }
 
 /** A one-answer team's answer to a question (captain decides and majority vote). */
+/**
+ * How an answer was judged: right, wrong, partly right (a partial-credit multiple-choice answer
+ * that scored above zero but below full marks), or null for polls and ungraded text.
+ */
+export type Verdict = boolean | 'partial' | null
+
 export interface TeamAnswerPublic {
   teamId: string
   /** Null when the team gave no answer. */
@@ -134,7 +140,7 @@ export interface TeamAnswerPublic {
    */
   fallback: boolean
   /** Null while the question runs, for polls and for ungraded text. */
-  correct: boolean | null
+  correct: Verdict
   points: number
 }
 
@@ -168,6 +174,8 @@ export interface RevealInfo {
   /** Answer bucket (option id, 'true'/'false', normalised text, or number) to count. */
   distribution: Record<string, number>
   correctCount: number
+  /** Partly right answers (partial-credit multiple choice), not part of `correctCount`. */
+  partialCount: number
   answeredCount: number
   /** Distribution keys that count as correct (empty for polls and ungraded text). */
   correctKeys: string[]
@@ -185,6 +193,7 @@ export interface QuestionStat {
   groupId: string | null
   answeredCount: number
   correctCount: number
+  partialCount: number
   /** Mean answer time in ms over everyone who answered; null when nobody did. */
   averageTimeMs: number | null
 }
@@ -201,7 +210,7 @@ export interface CurrentAnswer {
    * Scored once the question ends; while it runs, the verdict so far (host only). Null for polls
    * and for text the host grades.
    */
-  correct: boolean | null
+  correct: Verdict
   /** Correct thanks to the typo allowance (text); while the question runs, the verdict so far. */
   nearMiss: boolean
   points: number
@@ -501,7 +510,7 @@ export interface PlayerSnapshot extends GameSnapshotBase {
   /** The streak bonus within `lastPoints`; null outside a reveal. */
   lastBonus: number | null
   /** Whether that answer was correct; null for polls, ungraded text, or no answer. */
-  lastCorrect: boolean | null
+  lastCorrect: Verdict
   /** That correct answer only counted thanks to the typo allowance ("Close enough"). */
   lastNearMiss: boolean
   /** Every question with this player's answer, once the game is finished; otherwise null. */
@@ -515,7 +524,7 @@ export interface PlayerQuestionResult {
   /** Full question including the correct answer. */
   question: Question
   answer: Answer | null
-  correct: boolean | null
+  correct: Verdict
   /** Correct thanks to the typo allowance. */
   nearMiss: boolean
   points: number
@@ -579,6 +588,7 @@ export interface ResultPlayer {
   score: number
   rank: number
   correctCount: number
+  partialCount: number
   /** Points per result question, in order; null where the player gave no answer. */
   points: (number | null)[]
 }

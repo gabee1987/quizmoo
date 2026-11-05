@@ -65,7 +65,7 @@ Finished plans are deleted once their branch is merged: `CHANGELOG.md` records w
 | 56 | Small fixes found along the way | `feature/texts-and-starter-quiz` | in progress |
 | 57 | [Tooltips in the app's own look](phase-57-tooltips.md) | `feature/tooltips-and-tutorial` | done |
 | 58 | [Player reactions](phase-58-player-reactions.md) (third) | `feature/player-reactions` | planned |
-| 59 | [Partial credit for multiple choice](phase-59-partial-credit.md) (first) | `feature/partial-credit` | planned |
+| 59 | [Partial credit for multiple choice](phase-59-partial-credit.md) | `feature/partial-credit` | done |
 | 60 | [Certificates and a results report as PDF](phase-60-certificates.md) (fourth) | `feature/certificates` | planned |
 | 61 | [Platform metrics and statistics](phase-61-metrics.md) (fifth) | `feature/platform-metrics` | planned |
 | 62 | [Communities: separate spaces with their own owner](platform-roadmap.md#62-communities-separate-spaces-with-their-own-owner) | to decide | draft |

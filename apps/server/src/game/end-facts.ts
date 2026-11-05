@@ -49,14 +49,19 @@ function ranksAfter(state: GameState): Map<string, number[]> {
   return ranks
 }
 
-/** The longest run of right answers over the scored questions; a wrong or missing answer ends a run. */
+/**
+ * The longest run of right answers over the scored questions; a wrong or missing answer ends a
+ * run, and a partly right one neither adds to it nor ends it (as the live streak does).
+ */
 function bestStreak(state: GameState, player: Player): number {
   const scored = scoredIndexes(state)
   let run = 0
   let best = 0
   askedQuestions(state).forEach((question, i) => {
     if (!scored.has(i)) return
-    run = player.answers[question.id]?.correct === true ? run + 1 : 0
+    const correct = player.answers[question.id]?.correct
+    if (correct === 'partial') return
+    run = correct === true ? run + 1 : 0
     best = Math.max(best, run)
   })
   return best
