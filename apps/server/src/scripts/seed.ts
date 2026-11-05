@@ -1,12 +1,11 @@
 import { eq } from 'drizzle-orm'
-import { nanoid } from 'nanoid'
 import { createUser } from '../auth/users.js'
 import { loadConfig } from '../config.js'
 import { createDb } from '../db/index.js'
 import { quizzes, users } from '../db/schema.js'
-import { fixtureQuiz } from '../game/fixtures.js'
+import { addStarterQuiz } from '../starter/add-starter-quiz.js'
 
-// Idempotent: creates the admin if missing, and a sample quiz if the admin has none.
+// Idempotent: creates the admin if missing, and the starter quiz if the admin has none.
 // Runs as `pnpm --filter @quizmoo/server seed` or `node apps/server/dist/seed.js` in the Docker image.
 
 const config = loadConfig()
@@ -29,9 +28,8 @@ try {
 
   const owned = await db.select({ id: quizzes.id }).from(quizzes).where(eq(quizzes.ownerId, adminId)).limit(1)
   if (owned.length === 0) {
-    const { title, description, questions } = fixtureQuiz()
-    await db.insert(quizzes).values({ id: nanoid(12), ownerId: adminId, title, description, questions })
-    console.log('created sample quiz')
+    await addStarterQuiz(db, adminId, 'hu')
+    console.log('created the starter quiz')
     changed = true
   }
 

@@ -48,7 +48,7 @@ describe('quiz files', () => {
     expect(csvProblemLabel({ row: 3, code: 'type' }, i18n.t, 'hu')).toBe(
       '3. sor, típus: ismeretlen kérdéstípus. Ezek közül válassz: egy, több, igaz-hamis, szöveg, szám, szavazás, sorrend, csoport, csoport-vége.',
     )
-    expect(csvProblemLabel({ row: 4, code: 'question', group: true }, i18n.t, 'hu')).toBe('4. sor, kérdés: írd be a csoport címét, legfeljebb 120 karakter.')
+    expect(csvProblemLabel({ row: 4, code: 'question', group: true }, i18n.t, 'hu')).toBe('4. sor, kérdés: írd be a kör címét, legfeljebb 120 karakter.')
     expect(csvProblemLabel({ row: 6, code: 'color', type: 'single' }, i18n.t, 'hu')).toBe(
       '6. sor, szín: ismeretlen szín. Ezek közül válassz: piros, narancs, sárga, zöld, türkiz, kék, lila, rózsaszín, vagy hagyd üresen.',
     )

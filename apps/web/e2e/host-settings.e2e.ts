@@ -47,7 +47,7 @@ test('quick messages from My settings, sent and saved during a game', async ({ b
       await expect(page.getByRole('textbox', { name: 'Message 3', exact: true })).toHaveCount(0)
       await page.getByLabel('New message').fill('Pizza is here!')
       await page.getByRole('button', { name: 'Add', exact: true }).click()
-      await page.getByRole('combobox', { name: 'Shown' }).last().click()
+      await page.getByRole('combobox', { name: 'How long' }).last().click()
       await page.getByRole('option', { name: '30 s' }).click()
       await page.getByRole('button', { name: 'Save', exact: true }).click()
       await expect(page.getByText('Settings saved')).toBeVisible()

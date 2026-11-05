@@ -56,7 +56,7 @@ test('the editor shuffles the questions after asking, keeps a locked group, and 
     const shuffle = page.getByRole('button', { name: 'Shuffle the questions' })
     await shuffle.click()
     const dialog = page.getByRole('dialog', { name: 'Shuffle the questions?' })
-    await expect(dialog.getByText('Inside groups with “Keep question order” the order stays as it is.')).toBeVisible()
+    await expect(dialog.getByText('In rounds set to “Keep question order”, the questions keep their order.')).toBeVisible()
     await dialog.getByRole('button', { name: 'Cancel' }).click()
     await expect(dialog).toBeHidden()
 
@@ -73,7 +73,7 @@ test('the editor shuffles the questions after asking, keeps a locked group, and 
     await expect.poll(async () => (await saved()).questions.map((q) => q.text).join(), { timeout: 10_000 }).toBe(texts.join())
 
     // The second group gets the lock from its form.
-    await page.getByRole('button', { name: /Group 2\s*·.*Dairy/ }).first().click()
+    await page.getByRole('button', { name: /Round 2\s*·.*Dairy/ }).first().click()
     await page.getByRole('switch', { name: /Keep question order/ }).click()
     await expect.poll(async () => (await saved()).groups[1]?.keepOrder, { timeout: 10_000 }).toBe(true)
     expect(problems).toEqual([])

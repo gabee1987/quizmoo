@@ -93,7 +93,7 @@ test('standings midgame with answers held until the end, controls in view', asyn
     })
 
     await test.step('showing the standings midgame: totals and ranks, no last-question points', async () => {
-      await controls.getByRole('button', { name: 'Show scoreboard' }).click()
+      await controls.getByRole('button', { name: 'Show standings' }).click()
       await expect(projector.getByRole('heading', { name: 'Leaderboard' })).toBeVisible()
       await expect(projector.getByText(LONG_NAME)).toBeVisible()
       await expect(projector.getByText(/^\+\d+$/)).toHaveCount(0)
@@ -111,7 +111,7 @@ test('standings midgame with answers held until the end, controls in view', asyn
       await expect(phone.getByText(/\d+ points?/)).toHaveCount(0)
       await expect(phone.getByText(/^Score:/)).toHaveCount(0)
       await expect(projector.getByText('Correct answer')).toBeVisible()
-      await expect(controls.getByRole('status').first()).toContainText('answer to question 1')
+      await expect(controls.getByRole('status').first()).toContainText('answer to question 1 again')
     })
 
     await test.step('the preview shows what the phones show first, and the projector live', async () => {

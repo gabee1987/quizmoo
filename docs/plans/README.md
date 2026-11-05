@@ -60,6 +60,9 @@ Finished plans are deleted once their branch is merged: `CHANGELOG.md` records w
 | 51 | The cow for every season: lines and confetti | `feature/seasonal-themes` | done |
 | 52 | The phone's end-of-game screens, step by step | `feature/end-of-game` | done |
 | 53 | The projector's end of the game | `feature/end-of-game` | done |
+| 54 | [Every text in the app, reviewed](phase-54-texts.md) | `feature/texts-and-starter-quiz` | done (1.11.0) |
+| 55 | [A starter quiz for every new host](phase-55-starter-quiz.md) | `feature/texts-and-starter-quiz` | done (1.11.0) |
+| 56 | Small fixes found along the way | `feature/texts-and-starter-quiz` | in progress |
 | later | [Hosting without an account](later-guest-hosting.md) | `feature/guest-hosting` | planned, after the MVP |
 
 ## Conventions every plan follows

@@ -21,18 +21,18 @@ test('a sign-up waits for approval and the admin rejects it', async ({ browser, 
   try {
     await test.step('a newcomer signs up from the Host tab', async () => {
       await phone.goto('/?side=host')
-      await phone.getByRole('link', { name: 'Ask for one' }).click()
+      await phone.getByRole('link', { name: 'Sign up' }).click()
       await expect(phone.getByRole('heading', { name: 'Sign up' })).toBeVisible()
       await phone.getByLabel('Username').fill(newcomer)
       await phone.getByLabel('Password', { exact: true }).fill('e2e-signup-pass-1')
       await phone.getByLabel('Password again').fill('e2e-signup-pass-2')
       await phone.getByRole('button', { name: 'Sign up' }).click()
-      await expect(phone.getByText('The two passwords differ.')).toBeVisible()
+      await expect(phone.getByText("The passwords don't match.")).toBeVisible()
       await phone.getByLabel('Password again').fill('e2e-signup-pass-1')
       // The terms box is required.
       await phone.getByRole('button', { name: 'Sign up' }).click()
       await expect(phone.getByText('Tick this to go on.')).toBeVisible()
-      await phone.getByRole('checkbox', { name: /I'm 16 or older, I accept the terms of use/ }).check()
+      await phone.getByRole('checkbox', { name: /I am 16 or older, I accept the terms of use/ }).check()
       await phone.getByRole('button', { name: 'Sign up' }).click()
       await expect(phone.getByText(`Your account ${newcomer} is waiting for the admin's approval.`)).toBeVisible()
     })
@@ -57,7 +57,7 @@ test('a sign-up waits for approval and the admin rejects it', async ({ browser, 
       const row = waiting.getByRole('listitem').filter({ hasText: newcomer })
       await row.getByRole('button', { name: 'Reject' }).click()
       await page.getByRole('dialog').getByRole('button', { name: 'Reject' }).click()
-      await expect(page.getByText(`Sign-up ${newcomer} deleted.`)).toBeVisible()
+      await expect(page.getByText(`Sign-up from ${newcomer} deleted.`)).toBeVisible()
       await expect(page.getByText(newcomer, { exact: true })).toHaveCount(0)
     })
   } finally {

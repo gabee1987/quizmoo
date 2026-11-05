@@ -12,7 +12,7 @@ const MIN_PASSWORD = 10
 const usernamePattern = /^[a-zA-Z0-9._-]{3,40}$/
 
 export function AddUserDialog({ onClose }: { onClose: () => void }) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const queryClient = useQueryClient()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
@@ -21,7 +21,9 @@ export function AddUserDialog({ onClose }: { onClose: () => void }) {
   const usernameValid = usernamePattern.test(username.trim())
 
   const create = useMutation({
-    mutationFn: () => apiFetch('/api/users', { method: 'POST', body: JSON.stringify({ username: username.trim(), password, role }) }),
+    // The new account's starter quiz comes in the admin's language.
+    mutationFn: () =>
+      apiFetch('/api/users', { method: 'POST', body: JSON.stringify({ username: username.trim(), password, role, lang: i18n.language }) }),
     onSuccess: () => {
       toast.success(t('users.created', { name: username.trim() }))
       void queryClient.invalidateQueries({ queryKey: ['users'] })
@@ -59,7 +61,7 @@ export function AddUserDialog({ onClose }: { onClose: () => void }) {
         error={submitted && password.length < MIN_PASSWORD ? t('auth.passwordChange.tooShort', { count: MIN_PASSWORD }) : undefined}
       />
       <SelectField
-        label={t('users.role')}
+        label={t('users.roleLabel')}
         value={role}
         onChange={setRole}
         options={[

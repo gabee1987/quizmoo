@@ -53,7 +53,7 @@
     "teamMembers_one": "{{count}} player",
     "teamMembers_other": "{{count}} players",
     "newTeam": "New team",
-    "newTeamHelp": "Start your own team; you will be its captain.",
+    "newTeamHelp": "Start your own team. You'll be its captain.",
     "solo": "On my own",
     "soloHelp": "Play without a team, ranked with the teams.",
     "newTeamName": "Team name",
@@ -63,9 +63,9 @@
     "pinInvalid": "Enter the 6-digit PIN.",
     "nameRequired": "Enter a name.",
     "scan": "Scan QR code",
-    "scanHint": "Point the camera at the QR code on the screen.",
-    "cameraDenied": "Camera access was refused. Type the PIN instead.",
-    "cameraUnavailable": "The camera is not available. Type the PIN instead.",
+    "scanHint": "Point the camera at the QR code on the projector.",
+    "cameraDenied": "No camera access. Type the PIN instead.",
+    "cameraUnavailable": "The camera isn't available right now. Type the PIN instead.",
     "pinDigit": "Digit {{n}}",
     "pinOk": "OK",
     "findingGame": "Finding the game…",
@@ -93,7 +93,7 @@
     "host": "Host",
     "hostIntro": "Log in to make quizzes and run games for your crowd.",
     "noAccount": "No account yet?",
-    "createAccount": "Ask for one",
+    "createAccount": "Sign up",
     "moo": {
       "line1": "Moo!",
       "line2": "Type the PIN, I’m waiting!",
@@ -212,16 +212,16 @@
     "showPassword": "Show password",
     "submit": "Log in",
     "logout": "Log out",
-    "required": "Required.",
+    "required": "Fill this in.",
     "passwordChange": {
       "title": "Change password",
-      "mustChange": "Please replace the initial password before you continue.",
+      "mustChange": "Replace the initial password before you continue.",
       "current": "Current password",
       "new": "New password",
       "repeat": "New password again",
       "tooShort_one": "At least {{count}} character.",
       "tooShort_other": "At least {{count}} characters.",
-      "mismatch": "The two passwords differ.",
+      "mismatch": "The passwords don't match.",
       "submit": "Save password"
     },
     "register": {
@@ -239,7 +239,7 @@
   },
   "host": {
     "title": "Quizzes",
-    "empty": "No quizzes yet.",
+    "empty": "No quizzes yet. Create one!",
     "questionCount_one": "{{count}} question",
     "questionCount_other": "{{count}} questions",
     "offCount_one": "{{count}} switched off",
@@ -253,7 +253,7 @@
         "countdown": "Countdown",
         "question": "Question running",
         "reveal": "Answers revealed",
-        "scoreboard": "Scoreboard",
+        "scoreboard": "Standings",
         "finished": "Game finished"
       },
       "answered_one": "{{answered}} of {{count}} answered",
@@ -265,7 +265,7 @@
       "pause": "Pause",
       "resume": "Resume",
       "pausedHint": "Paused: the clock has stopped and nobody can answer until you resume.",
-      "shownAgainHint": "Question {{index}} is on the screens again. Nothing changes in the scores.",
+      "shownAgainHint": "Question {{index}} is on the screens again. The scores don't change.",
       "backToGame": "Back to the game",
       "podiumOnProjector": "The results are on the projector.",
       "endShow": {
@@ -294,7 +294,7 @@
       "offline": "Disconnected",
       "waitingForPlayers": "No players yet. Share the PIN or the QR code.",
       "backToQuizzes": "Back to quizzes",
-      "showScoreboard": "Show scoreboard",
+      "showScoreboard": "Show standings",
       "controls": "Game controls",
       "nextQuestion": "Next question",
       "startRound": "Start round",
@@ -302,21 +302,21 @@
       "showRoundAnswers": "Show the round’s answers",
       "holdIntro": "Hold",
       "releaseIntro": "Release",
-      "introHeldHint": "On hold: the round starts when you release it or press Start round.",
-      "introWaits": "The round starts when you press Start round.",
+      "introHeldHint": "On hold: the round starts when you release it or press “Start round”.",
+      "introWaits": "The round starts when you press “Start round”.",
       "roundRules": "Round {{round}} rules",
       "standingsOnDemand": "Standings after a round when I show them",
       "finish": "Finish",
       "gradeFirst": "Grade the answers below to continue.",
       "onlineCount_one": "{{count}} online",
       "onlineCount_other": "{{count}} online",
-      "openScreen": "Open screen",
+      "openScreen": "Open projector",
       "results": "Results",
-      "resultsPendingHint": "The projector and the players do not see the results yet.",
-      "showPodium": "Show podium",
+      "resultsPendingHint": "The projector and the players don't see the results yet.",
+      "showPodium": "Show the podium",
       "releaseToPlayers": "Show results on phones",
-      "podiumPendingHint": "The projector does not show the results yet.",
-      "playersWaitingHint": "The players do not see their results yet.",
+      "podiumPendingHint": "The projector doesn't show the results yet.",
+      "playersWaitingHint": "The players don't see their results yet.",
       "playAgain": "Play again",
       "connectedOfTotal": "{{connected}} / {{count}} connected",
       "offlineForSeconds": "Offline for {{count}} s",
@@ -348,13 +348,13 @@
         "send": "Send",
         "clear": "Clear",
         "showing": "Showing now",
-        "duration": "Shown",
+        "duration": "How long",
         "stays": "until cleared",
         "seconds_one": "{{count}} s",
         "seconds_other": "{{count}} s",
         "disappearsIn_one": "disappears in {{count}} s",
         "disappearsIn_other": "disappears in {{count}} s",
-        "ownTime": "own time",
+        "ownTime": "its own time",
         "edit": "Edit",
         "doneEditing": "Done",
         "removeFromGame": "Remove \"{{text}}\" from this game",
@@ -399,12 +399,12 @@
       "teamModes": "Team modes",
       "teamModesHelp": "Changes apply from the next question.",
       "teamConfirmed": "Confirmed",
-      "teamSuggesting": "Suggesting ({{picked}} of {{count}})",
+      "teamSuggesting": "Picks ({{picked}} of {{count}})",
       "teamFallback": "Majority, not confirmed",
       "copyLink": "Copy link",
       "linkCopied": "Link copied.",
       "lockJoining": "Lock joining",
-      "joiningLocked": "Joining closed",
+      "joiningLocked": "Joining locked",
       "joiningLockedHelp": "New players can't join. Players already in can still come back.",
       "joiningOpenHelp": "Anyone with the PIN or the QR code can join."
     },
@@ -412,11 +412,11 @@
       "onScreen": {
         "reveal": "On the screens: answers revealed",
         "answerHidden": "On the screens: question closed, answers hidden",
-        "scoreboard": "On the screens: scoreboard after this question",
-        "shownAgain": "On the screens: shown again"
+        "scoreboard": "On the screens: standings after this question",
+        "shownAgain": "On the screens: this question again"
       },
       "averageTime": "Average time",
-      "fastest": "Fastest right",
+      "fastest": "Fastest correct answer",
       "seconds": "{{seconds}} s"
     },
     "board": {
@@ -465,13 +465,13 @@
       "lobby": "lobby",
       "intro": "intro of round {{round}}",
       "introHeld": "intro of round {{round}}, on hold",
-      "countdown": "countdown to question {{index}}",
+      "countdown": "countdown, then question {{index}}",
       "question": "question {{index}}",
       "paused": "question {{index}}, paused",
       "answer": "answer to question {{index}}",
       "answerHidden": "question {{index}} closed, answers hidden",
-      "grading": "waiting while you grade question {{index}}",
-      "shownAgain": "answer to question {{index}}{{position}}",
+      "grading": "waiting for your grading (question {{index}})",
+      "shownAgain": "answer to question {{index}} again{{position}}",
       "standings": "standings",
       "standingsTotals": "standings, totals only",
       "podium": "podium",
@@ -516,7 +516,7 @@
       "podiumHelp": "The game ends here and the podium goes on the projector and the phones.",
       "podiumHeldHelp": "The game ends here; you release the podium to the projector and the phones when you are ready.",
       "close": "Close the game",
-      "closeHelp": "Ends at once with no podium. Every phone and the projector are told the game is over and disconnected. The results stay in your history.",
+      "closeHelp": "Ends at once with no podium. Every phone and the projector learn the game is over and disconnect. The results stay in your history.",
       "confirmClose": "Close the game for everyone? Every phone and the projector are disconnected."
     },
     "lock": {
@@ -530,7 +530,7 @@
       "useCode": "Use my lock code",
       "logout": "Log out",
       "dialogTitle": "Lock the screen?",
-      "dialogHelp": "Nobody at this device sees answers, scores or your quizzes until you unlock it, on every page and every device you are logged in on. Choose a code to unlock it quickly, or leave it empty and unlock with your password.",
+      "dialogHelp": "Until you unlock it, nobody sees answers, scores or your quizzes on any device you're logged in on. Choose a code to unlock it quickly, or leave it empty and unlock with your password.",
       "newCode": "Lock code for this game (optional)",
       "codeRule": "Use 4 to 8 digits.",
       "lockWithCode": "Lock with this code",
@@ -568,14 +568,14 @@
       "search": "Search questions",
       "clearSearch": "Clear the search",
       "nextUp": "Plays next",
-      "noneLeft": "No more questions: this is the last one.",
+      "noneLeft": "No more questions. This is the last one.",
       "noMatches": "No question matches.",
-      "joinsRound": "Played next, it joins the round “{{round}}”",
-      "leavesRound": "Played next, it leaves the round “{{round}}” and plays on its own"
+      "joinsRound": "If it plays next, it joins the round “{{round}}”",
+      "leavesRound": "If it plays next, it leaves the round “{{round}}” and plays on its own"
     },
     "grading": {
       "title": "Grade the answers",
-      "help": "Tick every answer that counts as correct. Identical answers are grouped.",
+      "help": "Tick every answer that counts as correct. Identical answers are listed once.",
       "noAnswers": "Nobody answered this question.",
       "apply": "Apply grading"
     },
@@ -597,12 +597,12 @@
       "defaultTeam": "Team {{n}}",
       "needTwoTeams": "Add at least two teams.",
       "duplicateTeams": "Team names must be different.",
-      "teamSetup": "Who makes the teams",
+      "teamSetup": "Who makes the teams?",
       "teamSetupOptions": {
         "host": "I set the teams",
         "hostHelp": "Players pick one of your teams when joining.",
         "players": "Players create teams",
-        "playersHelp": "Players start a team or join one when joining. Alone, a player is a team of one.",
+        "playersHelp": "When they join, players start a team or join one. A player on their own is a team of one.",
         "both": "Both",
         "bothHelp": "Your teams, and players can start their own too."
       },
@@ -617,15 +617,15 @@
       "typoTolerance": "Accept small typos",
       "typoToleranceHelp": "Typed answers still count with a slip: one mistake from 4 letters, two from 8, three from 12, four from 18. Numbers must be exact.",
       "exactSpelling": "Exact spelling",
-      "answerChanges": "Change answers",
+      "answerChanges": "Players can change answers",
       "answerChangesHelp": "Players can change their answer while the question runs. The last one counts, with its time.",
       "answerLock": "Changes allowed until",
-      "answerLockEnd": "The time is up",
+      "answerLockEnd": "Time runs out",
       "answerLockBefore_one": "{{count}} s before the end",
       "answerLockBefore_other": "{{count}} s before the end",
       "answerChangesShort": "Answer changes",
-      "answerChangesLocked_one": "Answer changes until {{count}} s before the end",
-      "answerChangesLocked_other": "Answer changes until {{count}} s before the end",
+      "answerChangesLocked_one": "Answer changes, locked for the last {{count}} s",
+      "answerChangesLocked_other": "Answer changes, locked for the last {{count}} s",
       "shuffle": "Shuffle answer options",
       "shuffleQuestions": "Shuffle question order",
       "shuffleQuestionsHelp": "Every game plays the questions in a new order. A round moves as one block with its questions, which are mixed too, unless the round keeps its order.",
@@ -638,10 +638,10 @@
         "onPhones": "Also on the phones",
         "onPhonesHelp": "In the lobby on the players' phones.",
         "addLogo": "Add a logo",
-        "offInQuiz": "Turned off in this quiz's settings. Turn it on for this game only.",
+        "offInQuiz": "Turned off in this quiz's settings. Here you can turn it on for this game only.",
         "eventName": "Event name"
       },
-      "groupsHelp": "The game starts with the quiz's settings. Change any group for this game only.",
+      "groupsHelp": "The game starts with the quiz's settings. Change any of them for this game only.",
       "reset": "Reset",
       "changedForGame": "Changed for this game",
       "aboutThis": "About {{title}}",
@@ -659,10 +659,10 @@
       },
       "scoreboardAtEnd": "Scores would give the answers away, so the standings appear only when you show them, with totals only.",
       "groupIntro": "Round intro",
-      "groupIntroHelp": "Each round opens with its title, info and picture on the projector and the phones.",
+      "groupIntroHelp": "Each round opens with its title, description and picture on the projector and the phones.",
       "groupIntroWait": "Until I start the round",
-      "groupIntroSeconds_one": "{{count}} second",
-      "groupIntroSeconds_other": "{{count}} seconds",
+      "groupIntroSeconds_one": "For {{count}} second",
+      "groupIntroSeconds_other": "For {{count}} seconds",
       "groupStandings": "Standings after a round",
       "groupStandingsOptions": {
         "afterGroup": "After each round",
@@ -674,15 +674,15 @@
       "countdownSeconds_one": "{{count}} s",
       "countdownSeconds_other": "{{count}} s",
       "betweenQuestions": "Between questions",
-      "betweenQuestionsHelp": "What the projector shows while players wait for the next question; phones show progress and what's next in small.",
+      "betweenQuestionsHelp": "What the projector shows while players wait for the next question; phones show a small version of the progress and what's next.",
       "betweenQuestionsNone": "nothing extra",
       "betweenQuestionsOptions": {
         "progress": "Progress",
         "progressHelp": "Where the quiz and the round are, and about how long is left",
         "next": "What's next",
-        "nextHelp": "The next question's number, type, time and points, never its text",
+        "nextHelp": "The next question's number, type, time and points, but never its text",
         "leaders": "Top 3",
-        "leadersHelp": "The current leaders; never while results are held back"
+        "leadersHelp": "The current top three; hidden while you hold back the results"
       },
       "answerStyle": "Answer buttons on phones",
       "answerStyleOptions": {
@@ -742,7 +742,7 @@
         "numbers": "Numbers",
         "icons": "Icons"
       },
-      "teamAnswer": "How teams answer",
+      "teamAnswer": "How do teams answer?",
       "teamAnswerOptions": {
         "captain": "Captain decides",
         "captainHelp": "Everyone suggests an answer; the captain sees the team's picks and confirms the one that counts.",
@@ -784,7 +784,7 @@
       "startsAt": "Start time",
       "laterHelp": "The PIN and the link are yours now, ready to share. Players can join from that time on; you start the game.",
       "lockCode": "Lock code for this game (optional)",
-      "lockCodeHelp": "Unlocks the host screen when you lock it during the game. Empty: your lock code from My settings, or your password.",
+      "lockCodeHelp": "Unlocks the host screen when you lock it during the game. Left empty, your lock code from My settings or your password unlocks it.",
       "scheduleSubmit": "Schedule"
     },
     "newQuiz": "New quiz",
@@ -841,6 +841,12 @@
       "changeTime": "Change time",
       "cancel": "Call off game",
       "confirmCancel": "Call off this scheduled game? The PIN and the link stop working."
+    },
+    "starter": {
+      "add": "Starter quiz",
+      "addLong": "Add the starter quiz",
+      "added": "The starter quiz is in your list. Try it with a friend or two!",
+      "help": "20 questions covering every question type: the easiest way to see what Quizmoo can do."
     }
   },
   "play": {
@@ -848,13 +854,13 @@
     "yourTeam": "Team: {{team}}",
     "yourTeamLabel": "Your team",
     "solo": "You're playing on your own",
-    "soloGroup": "On their own",
-    "soloRank": "Among the teams: rank {{rank}}.",
+    "soloGroup": "Solo players",
+    "soloRank": "Among the teams: rank {{rank}}",
     "mixedLeaderboard": "Teams and solo players",
     "leave": {
       "action": "Leave game",
       "title": "Leave this game?",
-      "lobby": "You can join again with the PIN while the game has not started.",
+      "lobby": "Until the game starts, you can join again with the PIN.",
       "running": "Your points so far stay in the results, but you can't come back to this game.",
       "confirm": "Leave",
       "done": "You left the game."
@@ -906,9 +912,9 @@
       "teamsAndSolo": "Teams and solo players compete in one ranking.",
       "speedBonus": "Faster correct answers earn more points.",
       "streakBonus": "Correct answers in a row earn extra points.",
-      "answerChanges": "You can change your answer while the time runs.",
-      "answerChangesLocked_one": "You can change your answer until {{count}} second before the end.",
-      "answerChangesLocked_other": "You can change your answer until {{count}} seconds before the end.",
+      "answerChanges": "You can change your answer while the clock is running.",
+      "answerChangesLocked_one": "Your answer is locked in the last {{count}} second.",
+      "answerChangesLocked_other": "Your answer is locked in the last {{count}} seconds.",
       "answersAtEnd": "Correct answers and scores are revealed at the end.",
       "answersAtRoundEnd": "Correct answers and scores are revealed at the end of each round.",
       "lateJoin": "Latecomers can still join after the start."
@@ -935,10 +941,10 @@
     "moveDown": "Move {{item}} down",
     "streak_one": "{{count}} in a row",
     "streak_other": "{{count}} in a row",
-    "nextRoundReady": "The host started another round!",
-    "joinNextRound": "Join the next round",
+    "nextRoundReady": "The host started a rematch!",
+    "joinNextRound": "Join the rematch",
     "totalScore": "Score: {{score}}",
-    "rank": "Rank: {{rank}}.",
+    "rank": "Rank: {{rank}}",
     "yourRank": "Your rank",
     "leaderboard": "Leaderboard",
     "gameOver": "Game over!",
@@ -992,7 +998,7 @@
       "ofCount": "{{value}} / {{count}}",
       "bestStreak": "Best streak",
       "averageTime": "Average time",
-      "fastestAnswer": "Fastest right",
+      "fastestAnswer": "Fastest right answer",
       "secondsShort": "{{seconds}} s",
       "rankJourney": "Your rank after each question",
       "rankLineLabel": "Your rank after each question: {{ranks}}",
@@ -1003,7 +1009,7 @@
       "pointsOn_other": "Question {{index}}: {{count}} points"
     },
     "backToJoin": "Join a game",
-    "teamRank": "Team {{team}}: rank {{rank}}.",
+    "teamRank": "Team {{team}}: rank {{rank}}",
     "teamLeaderboard": "Teams",
     "answerKept": "Answer saved",
     "resultsAtEnd": "Correct answers are revealed at the end of the game.",
@@ -1012,7 +1018,7 @@
     "yourAnswers": "Your answers",
     "voted": "Voted",
     "yourAnswer": "Your answer",
-    "resultsComing": "The results will be shown soon.",
+    "resultsComing": "Results coming up.",
     "movedUp_one": "Up {{count}} place",
     "movedUp_other": "Up {{count}} places",
     "movedDown_one": "Down {{count}} place",
@@ -1027,7 +1033,7 @@
       "chooseMode": "How should your team answer?",
       "passCaptaincy": "Pass the captaincy",
       "moved": "The host moved you to {{team}}.",
-      "movedSolo": "The host made you play on your own.",
+      "movedSolo": "The host made you a solo player.",
       "nowCaptain": "You're the captain of {{team}} now.",
       "joined": "{{name}} joined your team.",
       "noLongerCaptain": "{{name}} is your team's captain now.",
@@ -1057,9 +1063,9 @@
       "pickedBy": "Picked by {{names}}",
       "thinking": "thinking…",
       "you": "You",
-      "useAnswer": "Use",
+      "useAnswer": "Use this",
       "useAnswerFor": "Confirm {{name}}'s pick for the team",
-      "fallback": "Your captain did not confirm, so the team's majority counted.",
+      "fallback": "Your captain didn't confirm, so the majority answer counted.",
       "teamAnswerLabel": "Your team's answer"
     }
   },
@@ -1125,7 +1131,7 @@
     "single": "Single choice",
     "singleHelp": "One correct option.",
     "multiple": "Multiple choice",
-    "multipleHelp": "Several correct options, all must be picked.",
+    "multipleHelp": "Several correct options; pick them all.",
     "truefalse": "True or false",
     "truefalseHelp": "A statement to judge.",
     "text": "Free text",
@@ -1141,13 +1147,13 @@
     "title": "Quiz title",
     "description": "Description (optional)",
     "newQuestion": "Question",
-    "newGroup": "Group",
+    "newGroup": "Round",
     "newQuestionTop": "New question",
-    "newGroupTop": "New group",
+    "newGroupTop": "New round",
     "titleSetting": "Title",
     "jumpToSelected": "Show the selected one in the list",
     "questionDefaults": "New questions",
-    "questionDefaultsHelp": "The time and points new questions start with. A group's own values still win inside the group.",
+    "questionDefaultsHelp": "The time and points new questions start with. Inside a round, the round's own values win.",
     "inGame": {
       "label": "In the game",
       "someOn": "{{on}} of {{count}} on",
@@ -1156,13 +1162,13 @@
       "someOff_other": "{{count}} off",
       "questionOff": "This question is switched off",
       "questionOffHelp": "It stays in the quiz, but new games skip it. Switch it on for an event where it fits.",
-      "groupOff": "This group is switched off",
-      "groupOffHelp": "Its questions stay in the quiz, but new games skip the whole group, intro included.",
+      "groupOff": "This round is switched off",
+      "groupOffHelp": "Its questions stay in the quiz, but new games skip the whole round, intro included.",
       "switchOn": "Switch on",
       "switchOnN": "Switch question {{n}} on",
       "switchOffN": "Switch question {{n}} off",
-      "switchGroupOnN": "Switch group {{n}} on",
-      "switchGroupOffN": "Switch group {{n}} off",
+      "switchGroupOnN": "Switch round {{n}} on",
+      "switchGroupOffN": "Switch round {{n}} off",
       "summary_one": "{{count}} of {{total}} questions switched off",
       "summary_other": "{{count}} of {{total}} questions switched off",
       "allOn": "All on",
@@ -1186,12 +1192,12 @@
     "branding": {
       "title": "Branding",
       "show": "Show branding",
-      "showHelp": "A logo and event name on the projector, and on the phones if chosen when starting a game.",
-      "offHelp": "No logo or event name in this quiz's games, on the projector or on the phones. You can still turn it on when starting a game.",
+      "showHelp": "A logo and event name on the projector, and on phones too if you pick that when starting a game.",
+      "offHelp": "This quiz's games show no logo or event name, neither on the projector nor on phones. You can still turn it on when starting a game.",
       "logo": "Quiz logo",
       "logoHelp": "Leave it empty to use the logo from My settings.",
       "eventName": "Event name",
-      "eventNameHelp": "Leave it empty to use the last event name you used."
+      "eventNameHelp": "Leave it empty to reuse your last event name."
     },
     "untitledQuestion": "Untitled question",
     "questionCount_one": "{{count}} question",
@@ -1222,7 +1228,7 @@
     "correctAnswer": "Correct answer",
     "acceptedAnswers": "Accepted answers",
     "acceptedAnswerPlaceholder": "e.g. Győr",
-    "acceptedAnswersHint": "Upper and lower case, accents and extra spaces are ignored when comparing.",
+    "acceptedAnswersHint": "Upper and lower case, accents and extra spaces don't matter.",
     "hostGradedHint": "No accepted answers: you will mark the correct answers yourself during the game.",
     "correctNumber": "Correct number",
     "tolerance": "Tolerance (±)",
@@ -1236,7 +1242,7 @@
     "moveDown": "Move down",
     "duplicateQuestion": "Duplicate",
     "deleteQuestion": "Delete question",
-    "needsFixing": "Fix",
+    "needsFixing": "Needs fixing",
     "preview": "Phone preview",
     "showPreview": "Show phone preview",
     "hidePreview": "Hide phone preview",
@@ -1246,7 +1252,7 @@
       "saving": "Saving…",
       "invalid": "Not saved: some fields are incomplete",
       "error": "Saving failed",
-      "offline": "Offline: saved once back online"
+      "offline": "Offline: we'll save once you're back"
     },
     "errors": {
       "required": "Required.",
@@ -1255,14 +1261,14 @@
       "tooLong": "Too long.",
       "tooSmall": "Too small.",
       "tooBig": "Too big.",
-      "invalid": "Invalid value.",
+      "invalid": "That doesn't look right.",
       "markCorrect": "Mark the correct option.",
-      "duplicateOptions": "Options must be distinct.",
-      "duplicateQuestions": "Duplicate question ids; duplicate the question again.",
-      "duplicateGroups": "Duplicate group ids; add the group again.",
-      "unknownGroup": "This question's group is gone; move it into a group.",
-      "groupOrder": "A group's questions must stay together; move this question back to its group.",
-      "emptyGroup": "Add a question to this group, or delete it."
+      "duplicateOptions": "Two options can't be the same.",
+      "duplicateQuestions": "Two questions share the same id. Duplicate the question again.",
+      "duplicateGroups": "Two rounds share the same id. Add the round again.",
+      "unknownGroup": "This question's round is gone. Move it into a round.",
+      "groupOrder": "A round's questions must stay together. Move this question back into its round.",
+      "emptyGroup": "Add a question to this round, or delete it."
     },
     "sampleQuestion": "Which is the largest planet in the Solar System?",
     "sampleOption1": "Jupiter",
@@ -1272,7 +1278,7 @@
     "previewSample": "A sample question to preview the settings.",
     "playThrough": {
       "start": "Try it",
-      "startHelp": "Play the quiz on the preview from this question. Nothing is saved.",
+      "startHelp": "Play the quiz in the preview, starting from this question. Nothing is saved.",
       "stop": "Stop",
       "status": "Question {{index}} of {{count}} · {{score}} points",
       "ended": "End of the quiz",
@@ -1301,57 +1307,57 @@
     "moveToBottom": "Move to bottom",
     "questionDuplicated": "Question duplicated",
     "questionDeleted": "Question {{n}} deleted",
-    "groupN": "Group {{n}}",
-    "groupNOfCount": "Group {{n}} of {{count}}",
+    "groupN": "Round {{n}}",
+    "groupNOfCount": "Round {{n}} of {{count}}",
     "groupDefaultTitle": "Round {{n}}",
-    "addGroup": "Add group",
-    "groupFromHere": "Start a group here",
-    "groupTitle": "Group title",
+    "addGroup": "Add round",
+    "groupFromHere": "Start a round here",
+    "groupTitle": "Round title",
     "groupInfo": "Info (optional)",
-    "groupInfoHelp": "Players see the title and the info on the projector and their phones before the group's first question.",
-    "groupImage": "Group picture",
+    "groupInfoHelp": "Players see the title and the info on the projector and their phones before the round's first question.",
+    "groupImage": "Round picture",
     "groupDefaults": "Time and points",
-    "groupDefaultsHelp": "New questions in this group start with these. Any question can still have its own.",
+    "groupDefaultsHelp": "New questions in this round start with these. Any question can still have its own.",
     "notSet": "Not set",
     "applyToQuestions_one": "Apply to {{count}} question",
     "applyToQuestions_other": "Apply to {{count}} questions",
-    "groupRules": "Rules for this group",
+    "groupRules": "Rules for this round",
     "groupRulesHelp": "A rule left on “Same as the quiz” follows the quiz settings.",
     "sameAsQuiz": "Same as the quiz ({{value}})",
     "on": "On",
     "off": "Off",
-    "moveGroupUp": "Move group up",
-    "moveGroupDown": "Move group down",
-    "deleteGroup": "Delete group",
-    "groupDeleted": "Group {{n}} deleted, its questions stay",
-    "collapseGroup": "Collapse group {{n}}",
-    "expandGroup": "Expand group {{n}}",
-    "collapseAllGroups": "Collapse all groups",
-    "expandAllGroups": "Expand all groups",
+    "moveGroupUp": "Move round up",
+    "moveGroupDown": "Move round down",
+    "deleteGroup": "Delete round",
+    "groupDeleted": "Round {{n}} deleted, its questions stay",
+    "collapseGroup": "Collapse round {{n}}",
+    "expandGroup": "Expand round {{n}}",
+    "collapseAllGroups": "Collapse all rounds",
+    "expandAllGroups": "Expand all rounds",
     "collapseAll": "Collapse all",
     "expandAll": "Expand all",
     "shuffle": {
       "button": "Shuffle",
       "label": "Shuffle the questions",
       "title": "Shuffle the questions?",
-      "body": "Every question gets a new place in this quiz. A group moves as one block, and its questions are mixed among themselves.",
-      "bodyLocked": "Inside groups with “Keep question order” the order stays as it is.",
+      "body": "Every question gets a new place in this quiz. A round moves as one block, and its questions are shuffled within it.",
+      "bodyLocked": "In rounds set to “Keep question order”, the questions keep their order.",
       "confirm": "Shuffle",
       "done": "Questions shuffled",
-      "nothing": "Nothing to shuffle: add questions or unlock a group."
+      "nothing": "Nothing to shuffle: add questions, or turn off “Keep question order” in a round."
     },
     "groupOrder": "Question order",
     "keepOrder": "Keep question order",
-    "keepOrderHelp": "When the questions are shuffled, in a game or with the Shuffle button, the group may move, but its questions keep this order.",
+    "keepOrderHelp": "When the questions are shuffled, in a game or with the Shuffle button, the round may move, but its questions keep this order.",
     "orderKept": "Order kept",
-    "dragGroup": "Reorder group {{n}}",
-    "groupEndN": "End of group {{n}}",
-    "questionGroup": "Group",
-    "noGroup": "No group",
-    "groupOption": "Group {{n}}: {{title}}",
-    "newGroupOption": "+ New group",
-    "groupCount_one": "{{count}} group",
-    "groupCount_other": "{{count}} groups",
+    "dragGroup": "Reorder round {{n}}",
+    "groupEndN": "End of round {{n}}",
+    "questionGroup": "Round",
+    "noGroup": "No round",
+    "groupOption": "Round {{n}}: {{title}}",
+    "newGroupOption": "+ New round",
+    "groupCount_one": "{{count}} round",
+    "groupCount_other": "{{count}} rounds",
     "listSummary": "{{questions}} · {{groups}}",
     "trash": "Trash",
     "dropToDelete": "Drop to delete",
@@ -1373,12 +1379,12 @@
       "settings": "Settings",
       "questions": "Questions ({{count}})"
     },
-    "groupNoQuestions": "No questions in this group yet.",
-    "addQuestionToGroup": "Add question to this group",
-    "groupDeletedWithQuestions": "Group {{n}} and its questions deleted",
+    "groupNoQuestions": "No questions in this round yet.",
+    "addQuestionToGroup": "Add question to this round",
+    "groupDeletedWithQuestions": "Round {{n}} and its questions deleted",
     "deleteGroupTitle": "Delete “{{title}}”?",
-    "deleteGroupBody_one": "This group has {{count}} question. Keep it without the group, or delete it too?",
-    "deleteGroupBody_other": "This group has {{count}} questions. Keep them without the group, or delete them too?",
+    "deleteGroupBody_one": "This round has {{count}} question. Keep it outside any round, or delete it too?",
+    "deleteGroupBody_other": "This round has {{count}} questions. Keep them outside any round, or delete them too?",
     "deleteGroupKeepQuestions": "Keep questions",
     "deleteGroupWithQuestions": "Delete with questions",
     "undo": "Undo",
@@ -1410,8 +1416,8 @@
   },
   "nicknames": {
     "nav": "Names",
-    "title": "Surprise me names",
-    "help": "Players get one of these at random when they press “Surprise me” on the join page, from the list of their page's language, never one already taken in the game.",
+    "title": "“Surprise me” names",
+    "help": "When players press “Surprise me” on the join page, they get a random name from the list in their language, never one already taken in the game.",
     "languages": {
       "hu": "Hungarian",
       "en": "English"
@@ -1423,7 +1429,7 @@
     "saved": "Names saved",
     "restore": "Restore built-in",
     "restoreTitle": "Restore the built-in list ({{language}})?",
-    "restoreBody": "The edited names of this language are replaced by the built-in ones.",
+    "restoreBody": "Your edits to this language's names are replaced with the built-in list.",
     "restored": "Built-in list restored",
     "addLabel": "New name",
     "addPlaceholder": "Type a name, or paste a list",
@@ -1459,26 +1465,26 @@
   },
   "users": {
     "title": "Users",
-    "intro": "The host accounts on this site: what each one does, and what you can change for it.",
+    "intro": "Every host account on this site: what each one does and what you can change.",
     "add": "Add user",
     "addSubmit": "Create",
-    "role": "Role",
+    "roleLabel": "Role",
     "roles": {
       "admin": "Admin",
       "editor": "Host"
     },
     "initialPassword": "Initial password",
-    "initialPasswordHint": "Share the initial password privately. The user must change it at first login.",
+    "initialPasswordHint": "Share the initial password privately. They must change it when they first log in.",
     "usernameRules": "3–40 characters: letters, digits, dot, dash, underscore. No e-mail addresses.",
     "pendingPassword": "Password not changed yet",
-    "created": "User {{name}} created.",
+    "created": "Account {{name}} created.",
     "pending": {
       "title": "Waiting for approval",
       "hint": "People who signed up on the sign-up page. Only approve names you recognise; unapproved sign-ups are deleted after 7 days.",
       "approve": "Approve",
       "reject": "Reject",
       "approved": "{{name}} can log in now.",
-      "rejected": "Sign-up {{name}} deleted.",
+      "rejected": "Sign-up from {{name}} deleted.",
       "rejectTitle": "Reject {{name}}?",
       "rejectBody": "The sign-up is deleted. They can sign up again."
     },
@@ -1489,7 +1495,7 @@
     "search": "Search by name",
     "noMatch": "No user called “{{query}}”.",
     "you": "You",
-    "joined": "Joined {{date}}",
+    "joined": "Here since {{date}}",
     "lastLogin": "last login {{when}}",
     "neverLoggedIn": "never logged in",
     "figures": {
@@ -1510,14 +1516,14 @@
     },
     "reset": {
       "title": "New password for {{name}}",
-      "body": "They log in with this password and must change it right away. Every device they are logged in on is logged out. Share it privately.",
+      "body": "They log in with this password and must change it right away. They're logged out on every device. Share it privately.",
       "field": "New password",
       "submit": "Set password",
       "done": "New password set for {{name}}."
     },
     "role": {
       "adminTitle": "Make {{name}} an admin?",
-      "adminBody": "Admins see and manage every account and edit the Surprise me names.",
+      "adminBody": "Admins see and manage every account and edit the “Surprise me” names.",
       "hostTitle": "Make {{name}} a host?",
       "hostBody": "They keep their quizzes and games but no longer see the admin pages.",
       "madeAdmin": "{{name}} is an admin now.",
@@ -1544,24 +1550,24 @@
     "gameFull": "The game is full.",
     "gameAlreadyStarted": "The game has already started.",
     "nameTaken": "That name is already taken.",
-    "nameNotAllowed": "Please choose another name.",
-    "invalidInput": "Invalid input.",
-    "notFound": "Not found.",
+    "nameNotAllowed": "You can't use this name. Pick another one.",
+    "invalidInput": "Something's not right. Check what you entered.",
+    "notFound": "We can't find it.",
     "connectionLost": "Connection lost, reconnecting…",
     "questionClosed": "This question is closed.",
     "gamePaused": "The game is paused. Answer once it continues.",
     "alreadyAnswered": "You have already answered.",
     "answerLocked": "Too late to change your answer.",
-    "invalidAnswer": "Invalid answer.",
+    "invalidAnswer": "We can't accept that answer.",
     "unknownTeam": "Choose a team.",
     "teamNameTaken": "There is a team with this name already. Pick it from the list or choose another name.",
-    "teamNameNotAllowed": "Please choose another team name.",
-    "teamLimit": "There are as many teams as can be. Join one of them.",
+    "teamNameNotAllowed": "Pick another team name.",
+    "teamLimit": "There's no room for more teams. Join one of them.",
     "playersWithoutTeam": "Someone has no team yet. Move them to a team, or wait until they pick one.",
     "invalidTransition": "That is not possible right now.",
-    "playerNotFound": "Player not found. Join again.",
+    "playerNotFound": "We can't find you in this game. Join again.",
     "invalidCredentials": "Wrong username or password.",
-    "unauthorized": "Please log in.",
+    "unauthorized": "Log in first.",
     "forbidden": "You do not have access to this.",
     "rateLimited": "Too many attempts. Wait a minute and try again.",
     "internal": "Something went wrong. Try again.",
@@ -1619,6 +1625,30 @@
     "releasedOn": "Released {{date}}",
     "fixed": "Fixed",
     "releases": {
+      "1_11_0": {
+        "title": "A starter quiz and clearer texts",
+        "intro": "Every new host starts with a ready quiz that shows what Quizmoo can do, and every text in the app was reviewed so it reads the same everywhere.",
+        "sections": [
+          {
+            "title": "Starter quiz",
+            "items": [
+              "New accounts get a 20-question starter quiz in their language: funny and tricky questions covering every question type, three rounds, pictures, double points and more.",
+              "The Starter quiz button on your quiz list adds a fresh copy any time, so you can try it again or start from it."
+            ]
+          },
+          {
+            "title": "Texts",
+            "items": [
+              "Every text in the app was reviewed: plainer wording, the same word for the same thing on every screen.",
+              "Groups of questions are called rounds everywhere, in the editor too, and \"Play again\" starts a rematch.",
+              "The privacy notice and the terms of use say the same in both languages and are easier to read. Hosts accept the updated terms at their next login."
+            ]
+          }
+        ],
+        "fixed": [
+          "The role field in the admin's Add user dialog shows its label again."
+        ]
+      },
       "1_10_1": {
         "title": "Small fixes",
         "intro": "Fixes from testing, one front page for logging in, and every version on this page now says what was fixed.",
@@ -1979,7 +2009,7 @@
   },
   "settings": {
     "title": "My settings",
-    "help": "Yours across every quiz and game.",
+    "help": "These apply to all your quizzes and games.",
     "unsaved": "Unsaved changes",
     "discard": "Discard",
     "saved": "Settings saved",
@@ -1998,7 +2028,7 @@
     },
     "seasonPreview": {
       "title": "Seasons",
-      "help": "Each season with its dates. Pick one to see its colours, decorations and cow on this device, whatever the date (only on this device; By date goes back). The pencil changes a season's dates for everyone.",
+      "help": "Each season with its dates. Pick one to see its colours, decorations and cow, whatever today's date. Only this device shows it; “By date” switches back. The pencil changes a season's dates for everyone.",
       "byDate": "By date",
       "none": "No season today",
       "changed": "Changed dates",
@@ -2007,8 +2037,8 @@
       "dialogTitle": "{{season}}: dates",
       "dialogHelp": "Applies on every device, from its next page load. Where two seasons overlap, the one whose main day is closer wins.",
       "mainDay": "Main day: {{day}}",
-      "before": "Starts days before",
-      "after": "Ends days after",
+      "before": "Starts this many days before",
+      "after": "Ends this many days after",
       "daysRange": "0 to {{max}} days",
       "runs": "Runs {{range}}",
       "show": "Show this season",
@@ -2031,7 +2061,7 @@
       "testSent": "Test e-mail sent. Check your inbox (and the spam folder)."
     },
     "leaveTitle": "Leave without saving?",
-    "leaveBody": "Your changes to My settings are not saved yet.",
+    "leaveBody": "You haven't saved your changes yet.",
     "messages": {
       "title": "Quick messages",
       "help": "One tap sends them from the message box during a game. Edit, remove or reorder any of them. A game keeps the messages it started with.",
@@ -2093,7 +2123,7 @@
       },
       "data": {
         "title": "Your data",
-        "help": "One JSON file with your account, settings, quizzes, the list of your pictures and your games with their results.",
+        "help": "One JSON file with your account, settings, quizzes, the list of your images and your games with their results.",
         "download": "Download my data",
         "terms": "You accepted the <terms>terms of use</terms> (version {{version}}) on {{date}}. See also the <privacy>privacy notice</privacy>."
       },
@@ -2113,7 +2143,7 @@
         "games_other": "{{count}} finished games with their results",
         "images_one": "{{count}} image",
         "images_other": "{{count}} images",
-        "running": "Games still running end at once.",
+        "running": "Any games still running end right away.",
         "password": "Your password",
         "submit": "Delete for good",
         "done": "Your account is deleted"
@@ -2152,7 +2182,7 @@
     "results": "Results",
     "control": "Control",
     "deleteTitle": "Delete game?",
-    "deleteBody": "The results of \"{{title}}\" ({{date}}) will be deleted permanently.",
+    "deleteBody": "The results of “{{title}}” ({{date}}) are deleted for good.",
     "quiz": "Quiz",
     "date": "Date",
     "mode": "Mode",
@@ -2161,7 +2191,7 @@
     "scheduled": "Scheduled",
     "cancel": "Call off",
     "cancelTitle": "Call off game?",
-    "cancelBody": "The scheduled game \"{{title}}\" ({{date}}) will be deleted and its PIN and link stop working.",
+    "cancelBody": "The scheduled game “{{title}}” ({{date}}) is deleted and its PIN and link stop working.",
     "search": "Search",
     "searchPlaceholder": "Quiz, player or PIN",
     "searchHint": "A quiz title, a player's name or a PIN.",
@@ -2203,7 +2233,7 @@
       "title": "Summary",
       "players": "Players",
       "questions": "Questions",
-      "averageCorrect": "Right on average",
+      "averageCorrect": "Correct on average",
       "averageTime": "Average answer time",
       "seconds": "{{seconds}} s",
       "easiest": "Easiest question",
@@ -2260,7 +2290,7 @@
     "operator": {
       "title": "Who runs Quizmoo here",
       "name": "Operator",
-      "nameUnknown": "Not set by this site. Ask whoever invited you to play.",
+      "nameUnknown": "Not specified on this site. Ask the person who invited you to play.",
       "contact": "Contact",
       "contactUnknown": "Ask the organiser of your game.",
       "hosting": "Hosting",
@@ -2270,7 +2300,7 @@
     },
     "privacy": {
       "title": "Privacy notice",
-      "intro": "This notice explains, as the GDPR requires, what Quizmoo stores about you, why, for how long, and what you can do about it. The short version: as little as possible, only to run the game, never sold, never used for advertising or tracking.",
+      "intro": "This notice explains, as the GDPR requires, what Quizmoo stores about you, why, for how long, and what rights you have. In short: as little as possible, only to run the game, never sold and never used for advertising or tracking.",
       "sections": [
         {
           "heading": "Who is responsible",
@@ -2294,13 +2324,13 @@
           "heading": "If you host",
           "items": [
             "Your username, and your password only as a one-way hash that nobody can turn back into the password.",
-            "When you last logged in (shown only to the admin, to see which accounts are still used), and which version of the terms you accepted and when (the record of our agreement).",
+            "When you last logged in (shown only to the administrator, to see which accounts are still in use), and which version of the terms you accepted and when (as a record of our agreement).",
             "Your logins: a random code per browser, stored as a hash, for up to {{sessionDays}} days.",
             "Your quizzes, the pictures you upload, your settings, and the games you ran with their results.",
-            "Admins only, if they enter one: an e-mail address for notices about new sign-ups, used for nothing else and deleted when they remove it or stop being an admin."
+            "Administrators only, if they enter one: an e-mail address for notices about new sign-ups. It is used for nothing else and is deleted when the administrator removes it or is no longer an administrator."
           ],
           "paragraphs": [
-            "Legal basis: the agreement to use the service, i.e. the terms of use (Article 6(1)(b)); for the last login, the record of the terms and the security measures, the legitimate interest in running the service safely (Article 6(1)(f))."
+            "Legal basis: the agreement to use the service, i.e. the terms of use (Article 6(1)(b)); for the last login, the record of accepting the terms and the security measures, the legitimate interest in running the service securely (Article 6(1)(f))."
           ]
         },
         {
@@ -2315,34 +2345,34 @@
             "The connection is encrypted (HTTPS), and passwords and login codes are stored only as hashes.",
             "To stop password guessing and abuse, the server counts requests per network address for a minute, in memory only. Addresses are never written to the database or the logs.",
             "The hosting provider may log network addresses for its own security, under its own privacy policy.",
-            "If a data breach puts your rights at risk, the operator reports it to the authority within 72 hours and tells the people affected where the law requires it."
+            "If a personal data breach puts your rights at risk, the operator reports it to the supervisory authority within 72 hours and notifies the data subjects concerned where the law requires it."
           ]
         },
         {
           "heading": "How long",
           "items": [
-            "Finished games, with the players' nicknames and answers, are deleted {{days}} days after the game at the latest, and each host keeps at most their newest 200.",
-            "Games nobody finished are closed after 12 hours and then deleted like finished ones.",
+            "Finished games, with the players' nicknames and answers, are deleted {{days}} days after the game at the latest, and only the newest 200 games are kept for each host.",
+            "Unfinished games are closed after 12 hours and then deleted in the same way as finished ones.",
             "Pictures that no quiz, setting or game uses any more are deleted within two days.",
             "Expired logins are deleted daily. A sign-up the admin does not approve within {{signupDays}} days is deleted.",
-            "A player's seat in the browser is removed when they leave the game, or after {{seatDays}} days.",
+            "A player's seat stored in the browser is removed when they leave the game. Otherwise it expires after {{seatDays}} days and is removed the next time Quizmoo is opened on that device.",
             "Host accounts, with their quizzes and pictures, stay until the host or the admin deletes them.",
-            "The hosting provider's backups can hold deleted data for up to 30 days before they are overwritten."
+            "The hosting provider's backups may retain deleted data for up to 30 days, after which it is overwritten."
           ]
         },
         {
           "heading": "Who else gets your data",
           "paragraphs": [
-            "Nobody, for their own purposes. The service runs at a hosting provider ({{hosting}}), which stores and processes the data only to run it, as a processor under its data processing terms. If the provider or its parent company is outside the EU/EEA, transfers rely on the safeguards the GDPR requires: an adequacy decision such as the EU–US Data Privacy Framework, or standard contractual clauses.",
-            "When an admin has entered an address for sign-up notices, those e-mails go out through an e-mail provider ({{mail}}), also as a processor. It receives the admin's address and the notice, which says only how many sign-ups are waiting.",
+            "Nobody receives it for their own purposes. The service runs at a hosting provider ({{hosting}}), which stores and processes the data only to run the service, as a processor under its data processing terms. If the provider or its parent company is outside the EU/EEA, transfers rely on the safeguards the GDPR requires: an adequacy decision such as the EU–US Data Privacy Framework, or standard contractual clauses.",
+            "When an administrator has entered an address for sign-up notices, those e-mails are sent through an e-mail provider ({{mail}}), also acting as a processor. It receives the administrator's address and the notice, which states only how many sign-ups are awaiting approval.",
             "There are no analytics, advertising or social media tools, and the app loads nothing from other sites. The Feedback link for hosts leads to GitHub, a separate service with its own privacy policy; using it is optional."
           ]
         },
         {
           "heading": "Your rights",
           "items": [
-            "Access: a copy of the data about you. Hosts: My settings → Account → Download my data.",
-            "Correction of data that is wrong.",
+            "Access: you can request a copy of the data stored about you. Hosts: My settings → Account → Download my data.",
+            "Rectification of inaccurate data.",
             "Erasure. Hosts: delete your account on My settings → Account; games and quizzes can be deleted at any time. Players: ask the host or write to the contact above with the date of the game, its PIN and your nickname.",
             "Restriction of processing, and objection to processing based on legitimate interest.",
             "Portability: the download above is a machine-readable JSON file."
@@ -2354,7 +2384,7 @@
         {
           "heading": "Complaints",
           "paragraphs": [
-            "You can complain to the Hungarian data protection authority: Nemzeti Adatvédelmi és Információszabadság Hatóság (NAIH), 1055 Budapest, Falk Miksa utca 9–11., ugyfelszolgalat@naih.hu, naih.hu. You can also turn to the authority where you live or work, or go to court. It helps if you write to the contact above first, so we can put it right."
+            "You can lodge a complaint with the Hungarian supervisory authority: Nemzeti Adatvédelmi és Információszabadság Hatóság (NAIH), 1055 Budapest, Falk Miksa utca 9–11., ugyfelszolgalat@naih.hu, naih.hu. You can also turn to the supervisory authority where you live or work, or go to court. It helps if you write to the contact above first, so we can resolve the issue."
           ]
         },
         {
@@ -2366,8 +2396,8 @@
         {
           "heading": "Automated decisions and changes",
           "paragraphs": [
-            "Quizmoo makes no decisions about you by automated means, apart from scoring the quiz you play.",
-            "When this notice changes, the date above changes. If a change affects what hosts agreed to, they are asked to accept the new terms at their next login."
+            "Quizmoo makes no automated decisions about you other than scoring the quiz you play.",
+            "When this notice changes, the date above changes too. If a change affects what hosts have accepted, they are asked to accept the new terms at their next login."
           ]
         }
       ]
@@ -2380,33 +2410,33 @@
         {
           "heading": "The service",
           "paragraphs": [
-            "Quizmoo is a free, non-commercial quiz game run as a hobby by a private individual. It has no paid plans and shows no ads. It is offered as it is: features can change, and the service can pause or stop, if possible with notice on this site."
+            "Quizmoo is a free, non-commercial quiz game run as a hobby by a private individual. It has no paid plans and shows no ads. It is provided as is: features may change, and the service may be suspended or discontinued, with advance notice on this site where possible."
           ]
         },
         {
           "heading": "Who can use it",
           "items": [
             "Players join a game with its PIN and a nickname; they need no account.",
-            "Hosts need an account, must be at least {{age}} years old and use it themselves: one person per account, no sharing.",
-            "Sign-ups wait for the admin's approval. The admin may decline one without giving a reason."
+            "Hosts need an account, must be at least {{age}} years old and must use it themselves: an account is for one person only and may not be shared or transferred.",
+            "Sign-ups wait for the administrator's approval. The administrator may decline a sign-up without giving a reason."
           ]
         },
         {
           "heading": "Your account",
           "items": [
-            "Keep your password to yourself, and don't use it anywhere else.",
-            "If you think someone else used your account, change your password and log out your other devices on My settings, and tell the operator.",
+            "Keep your password secret and do not use it for any other service.",
+            "If you think someone else has used your account, change your password and sign out of your other devices in My settings, and inform the operator.",
             "You can delete your account at any time on My settings → Account."
           ]
         },
         {
-          "heading": "What you put in",
+          "heading": "Content you upload",
           "items": [
             "You are responsible for your quizzes, pictures, team names and messages, and you must have the right to use them: your own work, licensed to you, or allowed by law.",
-            "Not allowed: anything illegal, hate speech, harassment, sexual content, content that sexualises minors, glorified violence, or other people's personal data without a legal basis.",
+            "Not allowed: anything illegal, hate speech, harassment, sexual content, content that sexualises minors, glorification of violence, and other people's personal data without a legal basis.",
             "No advertising, spam or links to harmful sites.",
             "Nicknames must not be offensive or pretend to be someone else. Hosts can remove players from their games.",
-            "You keep the rights to what you create. You allow the operator to store and show it only as far as needed to run the service for you, for example on the screens and phones of your games."
+            "You keep the rights to what you create. You allow the operator to store and display it only as far as needed to provide the service to you, for example on the screens and phones of your games."
           ]
         },
         {
@@ -2419,28 +2449,28 @@
         {
           "heading": "Fair use",
           "items": [
-            "Don't attack, overload or probe the service, get around its limits, or use automated tools to join games or create accounts.",
-            "Limits keep it fair for everyone, for example 20 open games and 1,000 pictures per host.",
-            "Found a security problem? Report it privately to the contact, and don't use or publish it before it is fixed. Thank you!"
+            "Do not attack, overload or probe the service, circumvent its limits, or use automated tools to join games or create accounts.",
+            "Limits ensure fair use for everyone, for example 20 open games and 1,000 pictures per host.",
+            "Found a security problem? Report it confidentially to the contact above, and do not exploit or publish it before it is fixed. Thank you!"
           ]
         },
         {
-          "heading": "When something goes wrong",
+          "heading": "Breaches and data loss",
           "items": [
-            "The operator may remove content, or suspend or delete an account, that breaks these terms or the law; without notice when that is needed to prevent harm.",
-            "Keep your own copy of important quizzes: download them from the quiz list. There are backups, but losing data can't be ruled out entirely."
+            "The operator may remove content, or suspend or delete an account, that breaches these terms or the law; without prior notice where this is necessary to prevent harm.",
+            "Keep your own copy of important quizzes: you can download them from the quiz list. There are backups, but data loss cannot be ruled out entirely."
           ]
         },
         {
           "heading": "Liability",
           "paragraphs": [
-            "The service is free and provided as it is, without any guarantee that it is available or fits a particular purpose. As far as the law allows, the operator is not liable for indirect damage or lost data. This does not limit liability for damage caused intentionally or by gross negligence, for harm to life, body or health, or for anything else the law (in particular Section 6:152 of the Hungarian Civil Code) does not allow to be excluded."
+            "The service is free and provided as is, without any warranty that it is available or fit for a particular purpose. To the extent permitted by law, the operator is not liable for indirect damage or loss of data. This does not limit liability for damage caused intentionally or by gross negligence, for harm to life, physical integrity or health, or for anything else the law (in particular Section 6:152 of the Hungarian Civil Code) does not allow to be excluded."
           ]
         },
         {
           "heading": "Changes to these terms",
           "paragraphs": [
-            "The version and date are shown above. When the terms change in a way that matters, hosts are asked to accept the new version at their next login; until they do, they can still download their data or delete their account."
+            "The version and date are shown above. When the terms change materially, hosts are asked to accept the new version at their next login; until they do, they can still download their data or delete their account."
           ]
         },
         {
@@ -2453,7 +2483,7 @@
     },
     "cookies": {
       "title": "Cookies and storage",
-      "intro": "Quizmoo uses one cookie, for hosts who log in, and a few entries in your browser's storage, each needed for something you asked for. That is why it does not ask for consent: the ePrivacy Directive and Section 155(4) of the Hungarian Electronic Communications Act allow strictly necessary storage without it. No tracking, analytics or advertising cookies, and nothing from other sites.",
+      "intro": "Quizmoo uses one cookie, for hosts who log in, and a few entries in your browser's storage, each needed for something you asked for. That is why it does not ask for consent: the ePrivacy Directive and Section 155(4) of the Hungarian Electronic Communications Act allow strictly necessary storage without consent. There are no tracking, analytics or advertising cookies, and nothing is loaded from other sites.",
       "columns": {
         "name": "Name",
         "kind": "Where",
@@ -2473,16 +2503,16 @@
       },
       "items": {
         "session": "Keeps you logged in. Page scripts can't read it, and it is sent only to this site over HTTPS. Up to 30 days, or until you log out. On a local network without HTTPS it is called quizmoo_session.",
-        "player": "Your seat in a game (a random code, your nickname and avatar), so a reload brings you back. Removed when you leave the game, or after 2 days.",
+        "player": "Your seat in a game (a random code, your nickname and avatar), so a reload brings you back. Removed when you leave the game; otherwise it expires after 2 days and is removed the next time you open Quizmoo.",
         "draft": "What you filled in while waiting for a scheduled game. Removed when you join or leave.",
-        "dismissed": "The host message you swiped away. Until you close the tab.",
+        "dismissed": "The host message you dismissed. Until you close the tab.",
         "picksOpen": "Whether your team's picks are open. Until you close the tab.",
         "lang": "Your language. Until you change it or clear your browser data.",
         "mode": "Light, dark or system look. Until you change it or clear your browser data.",
         "seasonal": "That you switched the seasonal look off on this device. Until you switch it back on or clear your browser data.",
-        "seasonPreview": "Admins only: the season you preview on this device. Until you pick By date or clear your browser data.",
-        "notice": "That you have seen the storage notice, so it does not come back.",
-        "hostToasts": "Whether the host page shows short notes about players joining and leaving.",
+        "seasonPreview": "Administrators only: the season you preview on this device. Until you select “By date” or clear your browser data.",
+        "notice": "That you have seen the storage notice, so it is not shown again.",
+        "hostToasts": "Whether the host page shows short notifications about players joining and leaving.",
         "hostBoard": "How the host's game page shows the players: tiles or list, the order, hidden answers, the side panels and the menu.",
         "appCache": "The app's own files (code, fonts, pictures), so it starts quickly and can be installed. No personal data."
       },
@@ -2491,7 +2521,7 @@
     },
     "imprint": {
       "title": "Imprint",
-      "intro": "Quizmoo here is a free, non-commercial hobby project of a private individual, not a business.",
+      "intro": "This Quizmoo site is a free, non-commercial hobby project of a private individual, not a business.",
       "items": [
         "Quizzes, pictures and messages are created by their hosts, who are responsible for them.",
         "To report illegal content or a security problem, write to the contact above."
@@ -2506,7 +2536,7 @@
     "accept": {
       "title": "Accept the terms of use",
       "intro": "Before you go on, please read the terms of use (version {{version}}). The privacy notice explains what we store about you.",
-      "checkbox": "I'm {{age}} or older, I accept the <terms>terms of use</terms> and I've read the <privacy>privacy notice</privacy>.",
+      "checkbox": "I am {{age}} or older, I accept the <terms>terms of use</terms> and I have read the <privacy>privacy notice</privacy>.",
       "required": "Tick this to go on.",
       "submit": "Accept and continue",
       "otherTitle": "Don't agree?",
@@ -2518,7 +2548,7 @@
   "quizFile": {
     "importTitle": "Import a quiz",
     "importHelp": "Write your questions anywhere: in Excel, Google Sheets or on your phone, then bring them in here. A Quizmoo file someone shared with you works too.",
-    "templateHelp": "Start from the template: it explains every column and has an example of each question type and of a group.",
+    "templateHelp": "Start from the template: it explains every column and has an example of each question type and of a round.",
     "downloadTemplate": "Download template",
     "templateName": "quizmoo-question-template.csv",
     "chooseFile": "Choose a file",
@@ -2540,7 +2570,7 @@
     "missingImage": "A picture is missing from the file.",
     "exportMenu": "Download",
     "exportCsv": "Download as spreadsheet",
-    "exportFile": "Download Quizmoo file",
+    "exportFile": "Download as Quizmoo file",
     "problemAt": "Row {{row}}, {{column}}: {{message}}",
     "problemColumns": {
       "type": "type",
@@ -2571,11 +2601,11 @@
       "empty": "No questions in this file. Fill in at least one row below the header.",
       "tooMany": "A quiz holds at most 200 questions. Split the file in two.",
       "group": {
-        "question": "write the group's title, at most 120 characters.",
-        "answers": "the group's info may be at most 500 characters."
+        "question": "write the round's title, at most 120 characters.",
+        "answers": "the round's info may be at most 500 characters."
       },
       "emptyGroup": "no questions below it. Add at least one, or delete the row.",
-      "tooManyGroups": "A quiz holds at most 50 groups."
+      "tooManyGroups": "A quiz holds at most 50 rounds."
     },
     "columns": {
       "type": "type",
@@ -2604,9 +2634,9 @@
       "correct, for text: the accepted answers separated by |, e.g. Jupiter | planet Jupiter. Capitals and accents don't matter. Empty: you mark the answers right or wrong during the game.",
       "correct, for number: the right number, e.g. 1848 or 3.5. For poll and order leave it empty.",
       "time: seconds to answer, 5 to 180 (empty: 20). points: 0 to 5000 (empty: 1000). tolerance, for number only: answers this close also count, e.g. 10 (empty: exact).",
-      "colour: the question's or group's colour in the editor: red, orange, yellow, green, teal, blue, purple or pink (empty: no colour).",
-      "group: starts a round. Write its title in the question column (at most 120 characters), its info in answer 1, and in time and points what its new questions get in the editor. The questions below it are in the group up to the next group or a group-end row.",
-      "Pictures, game settings and a group's own rules can't go in this file: add them in the editor after importing."
+      "colour: the question's or round's colour in the editor: red, orange, yellow, green, teal, blue, purple or pink (empty: no colour).",
+      "group: starts a round. Write its title in the question column (at most 120 characters), its info in answer 1, and in time and points what its new questions get in the editor. The questions below it belong to the round up to the next group row or a group-end row.",
+      "Pictures, game settings and a round's own rules can't go in this file: add them in the editor after importing."
     ],
     "templateNote": "The rows below the header are examples: overwrite or delete them.",
     "jsonGuide": [

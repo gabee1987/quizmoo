@@ -8,6 +8,7 @@ import type { Db } from '../db/index.js'
 import { hostSettings, localCredentials, sessions, users } from '../db/schema.js'
 import { endGame } from '../game/engine.js'
 import type { GameManager } from '../realtime/game-manager.js'
+import { addStarterQuizSafely, starterLanguageSchema } from '../starter/add-starter-quiz.js'
 import { parseOr400 } from './http.js'
 
 // Login names only: no e-mail addresses or other personal data in usernames.
@@ -25,6 +26,8 @@ const createUserSchema = z.object({
   username: usernameSchema,
   password: passwordSchema,
   role: roleSchema.default('editor'),
+  /** The admin's page language; the new account's starter quiz is written in it. */
+  lang: starterLanguageSchema,
 })
 
 const userIdParams = z.object({ id: z.string().min(1).max(40) })
@@ -74,6 +77,7 @@ export async function userRoutes(app: FastifyInstance, { db, manager }: { db: Db
       // The initial password is known to the admin, so the new user must replace it.
       // Made for someone else: its owner changes the password and accepts the terms at the first login.
       const user = await createUser(db, body.username, body.password, body.role, { mustChangePassword: true, termsVersion: null })
+      await addStarterQuizSafely(db, user.id, body.lang, request.log)
       return reply.code(201).send({ user: { ...user, mustChangePassword: true } })
     } catch (error) {
       if (isUniqueViolation(error)) return reply.code(409).send({ error: 'errors.usernameTaken' })
