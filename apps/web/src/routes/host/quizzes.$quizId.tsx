@@ -27,7 +27,9 @@ import {
   ImageIcon,
   KeyboardIcon,
   LayersIcon,
+  ListChecksIcon,
   ListOrderedIcon,
+  CopyPlusIcon,
   PlayIcon,
   PlusIcon,
   Settings2Icon,
@@ -93,6 +95,8 @@ import { GroupQuestions } from '../../features/editor/group-questions'
 import { OffNotice } from '../../features/editor/in-game-switch'
 import { QuestionDefaultsFields } from '../../features/editor/question-defaults-fields'
 import { SearchField, SearchResults } from '../../features/editor/question-search'
+import { SelectList } from '../../features/editor/select-list'
+import { CopyToQuizDialog } from '../../features/bank/copy-to-quiz-dialog'
 import { PhonePreview } from '../../features/editor/phone-preview'
 import { ProblemsMenu, listProblems, problemLabel, type Problem } from '../../features/editor/problems-menu'
 import { QuestionForm } from '../../features/editor/question-form'
@@ -226,7 +230,12 @@ function Editor({ quiz }: { quiz: Quiz }) {
   const [focusField, setFocusField] = useState<string | null>(null)
   // The list's search; while it has text, the matches show instead of the sortable list.
   const [query, setQuery] = useState('')
-  const searching = query.trim() !== ''
+  // The list's select mode: ticked questions for Copy to quiz and Delete (no dragging meanwhile).
+  const [selecting, setSelecting] = useState(false)
+  const [ticked, setTicked] = useState<ReadonlySet<string>>(new Set())
+  // The questions waiting in the Copy to quiz dialog.
+  const [copying, setCopying] = useState<Question[] | null>(null)
+  const searching = !selecting && query.trim() !== ''
   // Raised to scroll the list to the selected row (the jump button, and after adding something).
   const [jump, setJump] = useState(0)
   const jumpToSelected = () => {
@@ -463,6 +472,57 @@ function Editor({ quiz }: { quiz: Quiz }) {
       },
     })
   }
+  const stopSelecting = () => {
+    setSelecting(false)
+    setTicked(new Set())
+  }
+  const tick = (ids: string[], on: boolean) =>
+    setTicked((current) => {
+      const next = new Set(current)
+      for (const id of ids) {
+        if (on) next.add(id)
+        else next.delete(id)
+      }
+      return next
+    })
+  // Questions deleted meanwhile drop out of the selection; the order is the list's.
+  const tickedQuestions = questions.filter((q) => ticked.has(q.id))
+  /** Opens Copy to quiz for these questions, unless one of them still needs fixing (the server would refuse it). */
+  const copyToQuiz = (list: Question[]) => {
+    if (list.some((q) => errorsUnder(errors, `questions.${questions.indexOf(q)}`).length > 0)) {
+      toast.error(t('editor.copy.fixFirst'))
+      return
+    }
+    setCopying(list)
+  }
+  /** Deletes the ticked questions at once; Undo puts them all back where they were. */
+  const deleteTicked = () => {
+    const removed = questions.flatMap((question, index) => (ticked.has(question.id) ? [{ question, index }] : []))
+    if (removed.length === 0) return
+    setLayout((l) => fromItems(listItems(l).filter((i) => !(i.kind === 'question' && ticked.has(i.question.id)))))
+    if (selectedId && ticked.has(selectedId)) {
+      setSelectedId(questions.find((q, i) => i > removed[0]!.index && !ticked.has(q.id))?.id ?? questions.find((q) => !ticked.has(q.id))?.id ?? null)
+    }
+    stopSelecting()
+    toast(t('editor.select.deleted', { count: removed.length }), {
+      duration: UNDO_MS,
+      action: {
+        label: t('editor.undo'),
+        // In ascending order, so each one goes back to its old index.
+        onClick: () => setQuestions((list) => removed.reduce((acc, r) => restoreQuestion(acc, r), list)),
+      },
+    })
+  }
+  // Escape leaves the select mode (a dialog or menu takes Escape first).
+  useEffect(() => {
+    if (!selecting) return
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !document.querySelector('[role="dialog"], [role="menu"]')) stopSelecting()
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [selecting])
+
   // A new order for good (groups move as blocks); Undo puts the old one back while nothing changed since.
   const shuffle = () => {
     setConfirmShuffle(false)
@@ -591,7 +651,7 @@ function Editor({ quiz }: { quiz: Quiz }) {
             {offChip}
           </div>
         )}
-        {listControls(inSidebar ? 'size-9' : 'size-10', tools)}
+        {selecting ? selectBar(inSidebar ? 'h-9' : 'h-10') : listControls(inSidebar ? 'size-9' : 'size-10', tools)}
       </>
     )
     return (
@@ -613,13 +673,15 @@ function Editor({ quiz }: { quiz: Quiz }) {
           headerClassName={headerClass}
           toolClassName={inSidebar ? 'size-9' : 'size-10'}
           results={
-            searching ? (
+            selecting ? (
+              <SelectList layout={layout} picked={ticked} invalidIds={invalidIds} onToggle={tick} />
+            ) : searching ? (
               <SearchResults layout={layout} query={query} selectedId={selectedId} invalidIds={invalidIds} onSelect={pickRow} onSwitch={switchItem} />
             ) : null
           }
           bodyClassName={bodyClass}
           footer={
-            !searching && (
+            !searching && !selecting && (
               <>
                 {questions.length > 0 && canAddQuestion && (
                   <Button variant="secondary" onClick={() => setPicking(true)}>
@@ -675,10 +737,68 @@ function Editor({ quiz }: { quiz: Quiz }) {
               <span className="truncate">{t('editor.newGroup')}</span>
             </Button>
             {tools}
+            <Hint label={t('editor.select.start')}>
+              <Button
+                variant="outline"
+                size="icon-sm"
+                className={size}
+                aria-label={t('editor.select.start')}
+                onClick={() => {
+                  setQuery('')
+                  setSelecting(true)
+                }}
+              >
+                <ListChecksIcon aria-hidden="true" />
+              </Button>
+            </Hint>
           </div>
         )}
       </>
     )
+  /**
+   * The select mode's bar in the list's header: how many are ticked, all or none, Done, and the actions
+   * on them. `height` is the buttons' height class.
+   */
+  const selectBar = (height: string) => {
+    const all = questions.length > 0 && tickedQuestions.length === questions.length
+    return (
+      <div role="toolbar" aria-label={t('editor.select.bar')} className="flex flex-col gap-1.5">
+        <div className="flex items-center gap-1.5">
+          <span className="min-w-0 flex-1 truncate px-1 text-sm font-extrabold tabular-nums" aria-live="polite">
+            {t('host.batch.selected', { count: tickedQuestions.length })}
+          </span>
+          <Button variant="ghost" size="sm" className={height} onClick={() => setTicked(all ? new Set() : new Set(questions.map((q) => q.id)))}>
+            {all ? t('host.batch.clearSelection') : t('host.batch.selectAll')}
+          </Button>
+          <Button variant="secondary" size="sm" className={height} onClick={stopSelecting}>
+            {t('editor.select.done')}
+          </Button>
+        </div>
+        <div className="flex gap-1.5">
+          <Button
+            variant="outline"
+            size="sm"
+            className={cn('min-w-0 flex-auto gap-1 px-2!', height)}
+            disabled={tickedQuestions.length === 0}
+            onClick={() => copyToQuiz(tickedQuestions)}
+          >
+            <CopyPlusIcon aria-hidden="true" />
+            <span className="truncate">{t('editor.copy.action')}</span>
+          </Button>
+          <Button
+            variant="destructive"
+            size="sm"
+            className={cn('min-w-0 flex-auto gap-1 px-2!', height)}
+            disabled={tickedQuestions.length === 0}
+            onClick={deleteTicked}
+          >
+            <Trash2Icon aria-hidden="true" />
+            <span className="truncate">{t('common.delete')}</span>
+          </Button>
+        </div>
+      </div>
+    )
+  }
   /**
    * How many questions are switched off, with "All on": a chip beside the list's title, whose row keeps
    * its height, so switching the first question off does not push the list down under the pointer.
@@ -1060,6 +1180,7 @@ function Editor({ quiz }: { quiz: Quiz }) {
                   onNewGroup={groups.length < MAX_GROUPS ? () => newGroup(selected.id, 'split') : null}
                   onColor={(color) => setQuestions((l) => l.map((q) => (q.id === selected.id ? withTag(q, color) : q)))}
                   onSwitch={(on) => switchItem(selected.id, on)}
+                  onCopyToQuiz={() => copyToQuiz([selected])}
                 />
                 {selected.off && <OffNotice kind="question" onSwitchOn={() => switchItem(selected.id, true)} />}
                 <QuestionForm
@@ -1195,7 +1316,7 @@ function Editor({ quiz }: { quiz: Quiz }) {
                 <SheetTitle className="min-w-0 flex-1 text-lg font-extrabold">{listTitle}</SheetTitle>
                 {offChip}
               </div>
-              <SheetDescription className="text-sm">{t('editor.listHelp')}</SheetDescription>
+              <SheetDescription className="text-sm">{t(selecting ? 'editor.select.help' : 'editor.listHelp')}</SheetDescription>
             </SheetHeader>
             <div className="overflow-y-auto px-4 pb-[max(1rem,env(safe-area-inset-bottom))]">{renderList(false)}</div>
           </SheetContent>
@@ -1265,6 +1386,17 @@ function Editor({ quiz }: { quiz: Quiz }) {
           >
             {t('host.deleteBody', { title: draft.title })}
           </ConfirmDialog>
+        )}
+
+        {copying && (
+          <CopyToQuizDialog
+            questions={copying}
+            fromQuizId={quiz.id}
+            onClose={(copied) => {
+              setCopying(null)
+              if (copied) stopSelecting()
+            }}
+          />
         )}
 
         {confirmGroup && (

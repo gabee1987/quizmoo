@@ -1,6 +1,6 @@
 # Phase 58: Player reactions
 
-**Branch:** `feature/player-reactions` (from `develop`)
+**Branch:** `feature/question-bank-and-reactions` (from `develop`), after phase 64 on the same branch
 
 ## Goal
 

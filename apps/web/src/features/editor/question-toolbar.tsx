@@ -7,6 +7,7 @@ import {
   ArrowUpIcon,
   ArrowUpToLineIcon,
   CopyIcon,
+  CopyPlusIcon,
   EllipsisVerticalIcon,
   LayersIcon,
   Trash2Icon,
@@ -35,6 +36,7 @@ export function QuestionToolbar({
   onNewGroup,
   onColor,
   onSwitch,
+  onCopyToQuiz,
 }: {
   question: Question
   index: number
@@ -48,6 +50,8 @@ export function QuestionToolbar({
   onColor: (color: TagColor | undefined) => void
   /** "In the game" switched: off keeps the question, but new games leave it out. */
   onSwitch: (on: boolean) => void
+  /** "Copy to quiz…": a copy goes to the end of another of the host's quizzes. */
+  onCopyToQuiz: () => void
 }) {
   const { t } = useTranslation()
   const Icon = typeIcons[question.type]
@@ -99,6 +103,10 @@ export function QuestionToolbar({
             <DropdownMenuItem className="min-h-11" disabled={!onNewGroup} onSelect={() => onNewGroup?.()}>
               <LayersIcon aria-hidden="true" />
               {t('editor.groupFromHere')}
+            </DropdownMenuItem>
+            <DropdownMenuItem className="min-h-11" onSelect={onCopyToQuiz}>
+              <CopyPlusIcon aria-hidden="true" />
+              {t('editor.copy.menu')}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

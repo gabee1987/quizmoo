@@ -875,7 +875,10 @@ export function QuestionRow({
   invalid: boolean
   group: QuestionGroup | undefined
   onSelect: () => void
-  onSwitch: (on: boolean) => void
+  /** Left out: the type icon is not a switch (the select mode). */
+  onSwitch?: ((on: boolean) => void) | undefined
+  /** In place of the number on the left (the select mode's checkbox). */
+  handle?: ReactNode
 }) {
   return <RowBody {...props} groupTitle={group?.title} />
 }

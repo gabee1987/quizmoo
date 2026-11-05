@@ -1,6 +1,6 @@
 # Phase 64: Question bank and share codes
 
-**Branch:** `feature/question-bank` (from `develop`). Delivered in three commits, one per part below; each part is usable on its own.
+**Branch:** `feature/question-bank-and-reactions` (from `develop`), shared with phase 58 (the user wants two or three features per branch, 5 November 2026). Delivered in three commits, one per part below; each part is usable on its own.
 
 ## Goal
 

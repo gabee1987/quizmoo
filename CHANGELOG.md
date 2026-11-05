@@ -10,6 +10,12 @@
 - The phone's question screen explains the rule; the help page's multiple choice and points entries too.
 - Spreadsheets have a 14th column, scoring (`partial`/`részleges` or `all`/`mind`); an empty cell and older files mean all or nothing. Batch edit has a "Multiple-choice scoring" group. Quizmoo files carry the setting with no format change.
 
+### Copy questions to another quiz (phase 64, part 1)
+- The editor's question list has a select mode ("Select questions"): a checkbox on every question, and on every round to tick all of its questions, with Select all, Done (or Escape) and a bar of actions. Dragging is off while selecting. On a phone it works in the list's sheet.
+- "Copy to quiz" (in the select mode's bar and in a question's More actions menu) copies the questions to the end of another of the host's quizzes, picked in a dialog with a search; the copies get fresh ids and leave their round behind, and editing one never changes the other. A quiz they would take past 200 questions cannot be picked. A toast confirms and opens the quiz. New route `POST /api/quizzes/:id/questions`: all or nothing, the 200-question limit checked in the same update (`errors.tooManyQuestions`).
+- Deleting several ticked questions at once, with one Undo for all of them.
+- Saving a quiz now checks that every picture on its questions, options and rounds belongs to the host (`errors.imageNotFound`); pictures already in the stored quiz are let through, so an older quiz never stops saving. Before, only the logo was checked.
+
 ### Fixed
 - The front page and the other public pages no longer log a 401 error in the browser for every visitor: the logo asks the new `GET /api/auth/session` (always 200) whether a host is logged in, instead of `/api/auth/me` (a 1.12.0 regression that failed seven e2e specs).
 
