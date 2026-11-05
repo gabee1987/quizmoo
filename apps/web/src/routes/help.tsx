@@ -1,10 +1,11 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { ArrowRightIcon, ChevronDownIcon, LifeBuoyIcon, MessageCircleQuestionIcon, type LucideIcon } from 'lucide-react'
+import { ArrowLeftIcon, ArrowRightIcon, ChevronDownIcon, LifeBuoyIcon, MessageCircleQuestionIcon, type LucideIcon } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { buttonVariants } from '@/components/ui/button'
 import { HelpFigure, helpFigures } from '@/features/help/help-figures'
 import { faqGroups, helpGroups, type HelpSectionDef } from '@/features/help/help-sections'
+import { useHomePath } from '@/lib/auth'
 import { cn } from '@/lib/cn'
 import { stagger } from '@/lib/motion'
 
@@ -26,8 +27,13 @@ const linkClass =
  */
 function HelpPage() {
   const { t } = useTranslation()
+  const home = useHomePath()
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 pt-2">
+      <Link to={home} className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), 'self-start')}>
+        <ArrowLeftIcon aria-hidden="true" />
+        {t(home === '/host' ? 'help.back.host' : 'help.back.player')}
+      </Link>
       <header className="flex animate-fade-up items-center gap-4 rounded-3xl border bg-card p-5 shadow-soft sm:p-7">
         <span className="grid size-14 shrink-0 -rotate-6 place-items-center rounded-2xl bg-primary text-primary-foreground shadow-[0_3px_0_0_var(--primary-edge)]">
           <LifeBuoyIcon className="size-8" aria-hidden="true" />

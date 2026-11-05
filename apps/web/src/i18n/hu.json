@@ -2560,6 +2560,10 @@
     "title": "Súgó",
     "intro": "Így működik a Quizmoo, játékosoknak és játékvezetőknek.",
     "contents": "Ezen az oldalon",
+    "back": {
+      "host": "Vissza a kezdőlapodra",
+      "player": "Vissza a csatlakozáshoz"
+    },
     "tours": "Minden játékvezetői oldalnak van rövid bemutatója is. Fent a ? gombbal újra megnézheted, vagy a Beállításaimban mindet újraindíthatod.",
     "links": {
       "join": "Csatlakozom egy játékhoz",

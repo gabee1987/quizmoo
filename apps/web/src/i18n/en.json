@@ -2560,6 +2560,10 @@
     "title": "Help",
     "intro": "How Quizmoo works, for players and for hosts.",
     "contents": "On this page",
+    "back": {
+      "host": "Back to your home",
+      "player": "Back to the join page"
+    },
     "tours": "Every host page also has a short tour. Open it again with the ? button at the top, or show them all again in My settings.",
     "links": {
       "join": "Join a game",

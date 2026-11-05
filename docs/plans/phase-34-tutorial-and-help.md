@@ -145,6 +145,7 @@ $env:E2E_BASE_URL="http://localhost:3999"; $env:E2E_USERNAME="admin"; $env:E2E_P
 - "Show this page's tour" retries for up to two seconds: while the menu it was chosen from is open, Radix hides the rest of the page from screen readers (`aria-hidden`), so no element counts as on screen yet.
 - The seen tours went into their own column (`tours_seen`), as noted under "Data and API", not into the settings JSON.
 - After the first review the help page was extended, at the user's request: every section has a picture of its controls (`features/help/help-figures.tsx`, built from the app's own buttons, colours and labels rather than screenshots, so it follows the theme, the colour mode and the language and does not go out of date with every restyle), each point an icon and the control's app label as its term, links to the page it is about, and the FAQ grew to 22 questions in three groups. The structure moved to `features/help/help-sections.ts`; a unit test checks every text, caption and link label in both languages and that every tour's help link has a section. `a11y.e2e.ts` now also checks `/help`.
+- From the same review: the help page had no way back, and its header logo led a logged-in host to the join page. It now opens with a back link, and the logo on the public pages goes to `/host` for a logged-in host (`useHomePath` in `lib/auth.ts`).
 
 ## Skills to load
 

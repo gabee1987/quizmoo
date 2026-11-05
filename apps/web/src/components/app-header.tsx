@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Hint } from '@/components/hint'
 import { useCowAntics } from '@/features/cow/use-cow-antics'
 import { languages, setLanguage } from '@/i18n'
+import { useHomePath } from '@/lib/auth'
 import { cn } from '@/lib/cn'
 import { CowLogo } from './cow-logo'
 import { HelpMenu } from './help-menu'
@@ -10,17 +11,18 @@ import { ModeToggle } from './mode-toggle'
 import { SeasonToggle } from './season-greeting'
 
 /**
- * Compact header: logo mark (a link home: the host's home on the host pages, the join page elsewhere),
+ * Compact header: logo mark (a link home: the host's home on the host pages and for a logged-in host, the join page otherwise),
  * language and colour mode. Without `brand` (the home pages show a big one) only the settings.
  */
 export function AppHeader({ brand = true }: { brand?: boolean }) {
   const { t } = useTranslation()
   const onHostPages = useRouterState({ select: (state) => state.location.pathname.startsWith('/host') })
+  const home = useHomePath()
   return (
     <header className={cn('flex items-center gap-3 px-4 py-3', brand ? 'justify-between' : 'justify-end')}>
       {brand && (
         <Link
-          to={onHostPages ? '/host' : '/'}
+          to={onHostPages ? '/host' : home}
           className="-m-1 flex items-center gap-2.5 rounded-xl p-1 outline-none focus-visible:ring-[3px] focus-visible:ring-ring"
         >
           <LogoMark />

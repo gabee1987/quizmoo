@@ -9,6 +9,7 @@
 - Players get a short tour in the lobby while they wait, once per device (`quizmoo.tours`, listed on the cookies page). Nothing appears while a question runs.
 - A "?" button in the header (and the same items in the editor's and the running game's menu, and the players' game menu) shows the page's tour again and opens Help.
 - A new help page (`/help`) explains the app for players (joining, answering each question type, points, teams, reconnecting) and for hosts (quizzes, the editor, game settings, starting and running a game, results, My settings, the admin pages). Each section shows a small picture of the controls it describes, drawn with the app's own buttons, colours and labels, so it follows the theme, the colour mode and the language; each point carries an icon and the control's name as the app shows it, and links lead to the page in question. The FAQ has 22 questions in three groups: playing, hosting, and data. Linked from the host navigation, the "?" menu, the game menu and the footer of the join, login and sign-up pages; each tour's last bubble links to its section.
+- The help page opens with a back link: to the host's home when logged in, to the join page otherwise. The header logo on the public pages (help, legal pages, projector) now also leads a logged-in host to their home instead of the join page.
 - `e2e/tour.e2e.ts` covers the first run, stepping, closing for good, the replay, the keyboard, a phone and a player. The other specs switch the tours off on their device.
 
 ### Tooltips in the app's own look (phase 57)
