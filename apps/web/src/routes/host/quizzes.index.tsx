@@ -12,6 +12,7 @@ import {
   FileDownIcon,
   GiftIcon,
   FileSpreadsheetIcon,
+  LibraryIcon,
   ListChecksIcon,
   PencilIcon,
   PlayIcon,
@@ -183,6 +184,13 @@ function QuizList() {
               {t('quizFile.import')}
             </Button>
           </div>
+          <Button variant="outline" asChild>
+            <Link to="/host/bank">
+              <LibraryIcon aria-hidden="true" />
+              {/* Icon only on phones, like the starter quiz button. */}
+              <span className="max-sm:sr-only">{t('bank.title')}</span>
+            </Link>
+          </Button>
           <Button data-tour="new-quiz" onClick={() => create.mutate()} disabled={create.isPending}>
             <PlusIcon aria-hidden="true" />
             {t('host.newQuiz')}

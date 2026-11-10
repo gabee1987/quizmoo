@@ -16,6 +16,13 @@
 - Deleting several ticked questions at once, with one Undo for all of them.
 - Saving a quiz now checks that every picture on its questions, options and rounds belongs to the host (`errors.imageNotFound`); pictures already in the stored quiz are let through, so an older quiz never stops saving. Before, only the logo was checked.
 
+### Question bank (phase 64, part 2)
+- A question bank per host account: questions kept outside any quiz, with free-form tags (up to 10, 1–30 characters, the same tag in another case counts once). Up to 2000 questions (`errors.bankFull`, checked under a per-host lock). New table `bank_questions` (migration `0020_bank_questions`, additive), deleted with the account.
+- Routes: `GET /api/bank` (search in the text, options and accepted answers without accents, type and tag filters, 50 per page), `POST /api/bank` (copies with fresh ids, no round, not switched off; pictures must be the host's), `PUT /api/bank/:id`, `POST /api/bank/delete` and `GET /api/bank/tags` (the host's tags with their counts).
+- Editor: "Save to bank…" in a question's More actions menu and in the select mode's bar, with a tag field that offers the host's tags; "Add from bank" under the question types opens a picker with search, type and tag filters, a preview and multi-select. The copies go after the selected question, into its round, keeping their own time and points.
+- A "Question bank" page (`/host/bank`, in the sidebar under Quizzes and in the quiz list's header) lists the questions with their answer and tags, two columns on wide screens, more loading while scrolling. A question is edited in a dialog with the editor's form; Delete has Undo; "Import from spreadsheet" reads the quiz template into the bank (rounds left out).
+- The account overview counts bank questions before deletion, "Download my data" includes them, and the daily image clean-up keeps pictures a bank question uses.
+
 ### Fixed
 - The front page and the other public pages no longer log a 401 error in the browser for every visitor: the logo asks the new `GET /api/auth/session` (always 200) whether a host is logged in, instead of `/api/auth/me` (a 1.12.0 regression that failed seven e2e specs).
 

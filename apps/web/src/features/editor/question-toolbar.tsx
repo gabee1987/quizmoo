@@ -6,6 +6,7 @@ import {
   ArrowDownToLineIcon,
   ArrowUpIcon,
   ArrowUpToLineIcon,
+  BookmarkPlusIcon,
   CopyIcon,
   CopyPlusIcon,
   EllipsisVerticalIcon,
@@ -37,6 +38,7 @@ export function QuestionToolbar({
   onColor,
   onSwitch,
   onCopyToQuiz,
+  onSaveToBank,
 }: {
   question: Question
   index: number
@@ -52,6 +54,8 @@ export function QuestionToolbar({
   onSwitch: (on: boolean) => void
   /** "Copy to quiz…": a copy goes to the end of another of the host's quizzes. */
   onCopyToQuiz: () => void
+  /** "Save to bank…": a copy goes to the host's question bank. */
+  onSaveToBank: () => void
 }) {
   const { t } = useTranslation()
   const Icon = typeIcons[question.type]
@@ -107,6 +111,10 @@ export function QuestionToolbar({
             <DropdownMenuItem className="min-h-11" onSelect={onCopyToQuiz}>
               <CopyPlusIcon aria-hidden="true" />
               {t('editor.copy.menu')}
+            </DropdownMenuItem>
+            <DropdownMenuItem className="min-h-11" onSelect={onSaveToBank}>
+              <BookmarkPlusIcon aria-hidden="true" />
+              {t('bank.save.menu')}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

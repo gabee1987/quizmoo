@@ -1,6 +1,6 @@
 import { and, eq, lt, sql } from 'drizzle-orm'
 import type { Db } from './db/index.js'
-import { games, hostSettings, images, quizzes, sessions, users } from './db/schema.js'
+import { bankQuestions, games, hostSettings, images, quizzes, sessions, users } from './db/schema.js'
 
 export const DAY_MS = 24 * 60 * 60 * 1000
 
@@ -59,7 +59,7 @@ export const UNUSED_IMAGE_GRACE_MS = DAY_MS
  * Data minimisation: deletes images nothing refers to any more (a removed question image, a
  * replaced logo, a deleted quiz). They can show people, and stayed public by their address until
  * the account was deleted. An image counts as used while a quiz (questions, options, branding),
- * the host's settings (logo) or a stored game (its quiz copy and branding) of the same owner names
+ * a bank question, the host's settings (logo) or a stored game (its quiz copy and branding) of the same owner names
  * it. Image ids are long random strings, so a text search of the JSON finds exactly those uses.
  */
 export async function deleteUnusedImages(db: Db, now: number): Promise<number> {
@@ -70,6 +70,7 @@ export async function deleteUnusedImages(db: Db, now: number): Promise<number> {
       and(
         lt(images.createdAt, cutoff),
         sql`not exists (select 1 from ${quizzes} q where q.owner_id = ${images.ownerId} and (strpos(q.questions::text, ${images.id}) > 0 or strpos(q.groups::text, ${images.id}) > 0 or strpos(q.branding::text, ${images.id}) > 0))`,
+        sql`not exists (select 1 from ${bankQuestions} b where b.owner_id = ${images.ownerId} and strpos(b.question::text, ${images.id}) > 0)`,
         sql`not exists (select 1 from ${hostSettings} s where s.user_id = ${images.ownerId} and strpos(s.settings::text, ${images.id}) > 0)`,
         sql`not exists (select 1 from ${games} g where g.host_id = ${images.ownerId} and strpos(g.state::text, ${images.id}) > 0)`,
       ),

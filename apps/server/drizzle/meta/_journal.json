@@ -141,6 +141,13 @@
       "when": 1793873177247,
       "tag": "0019_tours_seen",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1794303151993,
+      "tag": "0020_bank_questions",
+      "breakpoints": true
     }
   ]
 }

@@ -62,6 +62,32 @@ export const quizzes = pgTable('quizzes', {
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 })
 
+// The host's question bank: questions kept outside any quiz, with free-form tags, copied into quizzes
+// with fresh ids. Pictures stay the owner's images, so the daily clean-up keeps those a bank question uses.
+export const bankQuestions = pgTable(
+  'bank_questions',
+  {
+    id: text('id').primaryKey(),
+    ownerId: text('owner_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    /** Checked with the quiz schema on write; no `groupId` and no `off`. */
+    question: jsonb('question').$type<Question>().notNull(),
+    tags: text('tags').array().notNull().default(sql`'{}'::text[]`),
+    /** The question text, its options and accepted answers in lower case without accents, for the search. */
+    searchText: text('search_text')
+      .notNull()
+      .generatedAlwaysAs(() =>
+        foldSql(
+          sql`("question"->>'text') || ' ' || jsonb_path_query_array("question", '$.options[*].text')::text || ' ' || jsonb_path_query_array("question", '$.acceptedAnswers[*]')::text`,
+        ),
+      ),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [index('bank_questions_owner_idx').on(table.ownerId, table.createdAt.desc(), table.id.desc())],
+)
+
 // Question images, resized server-side and stored inline. Keeps the deployment
 // to a single Postgres dependency; sizes are small at quiz scale.
 export const images = pgTable('images', {

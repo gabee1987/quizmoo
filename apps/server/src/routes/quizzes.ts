@@ -113,6 +113,38 @@ export function pictureIds(questions: readonly Question[], groups: readonly Ques
   return [...new Set([...ids, ...groups.map((g) => g.imageId)].filter((id): id is string => !!id))]
 }
 
+/**
+ * Every picture on the questions and groups must be one the host uploaded, so nobody can store (and
+ * later share) another account's picture. Pictures in `known` (as stored) are let through, so a quiz
+ * saved before this check never stops saving. Answers 400 and returns false otherwise.
+ */
+export async function picturesAllowed(
+  db: Db,
+  questions: readonly Question[],
+  groups: readonly QuestionGroup[],
+  userId: string,
+  reply: FastifyReply,
+  known: ReadonlySet<string> = new Set(),
+): Promise<boolean> {
+  const ids = pictureIds(questions, groups).filter((id) => !known.has(id))
+  const owned = await ownedImageIds(db, userId, ids)
+  if (ids.every((id) => owned.has(id))) return true
+  void reply.code(400).send({ error: 'errors.imageNotFound' })
+  return false
+}
+
+/**
+ * Loose questions (copies for another quiz or the bank) checked with the quiz schema, without their
+ * round; `drop` names more fields to leave behind. Answers 400 and returns null when one is invalid.
+ */
+export function parseLooseQuestions(raw: readonly unknown[], reply: FastifyReply, drop: readonly string[] = []): Question[] | null {
+  const loose = raw.map((q) =>
+    typeof q === 'object' && q !== null ? { ...q, groupId: undefined, ...Object.fromEntries(drop.map((key) => [key, undefined])) } : q,
+  )
+  const checked = parseOr400(quizInputSchema, assignIds({ title: 'questions', questions: loose }), reply)
+  return checked ? checked.questions.map(({ groupId: _, ...question }) => question) : null
+}
+
 type QuizRow = typeof quizzes.$inferSelect
 
 function toQuiz(row: QuizRow) {
@@ -171,25 +203,6 @@ export async function quizRoutes(app: FastifyInstance, { db }: { db: Db }) {
     return false
   }
 
-  /**
-   * Every picture on the questions and groups must be one the host uploaded, so nobody can store (and
-   * later share) another account's picture. Pictures in `known` (the quiz as stored) are let through,
-   * so a quiz saved before this check never stops saving. Answers 400 and returns false otherwise.
-   */
-  async function picturesAllowed(
-    questions: readonly Question[],
-    groups: readonly QuestionGroup[],
-    userId: string,
-    reply: FastifyReply,
-    known: ReadonlySet<string> = new Set(),
-  ): Promise<boolean> {
-    const ids = pictureIds(questions, groups).filter((id) => !known.has(id))
-    const owned = await ownedImageIds(db, userId, ids)
-    if (ids.every((id) => owned.has(id))) return true
-    void reply.code(400).send({ error: 'errors.imageNotFound' })
-    return false
-  }
-
   app.get('/api/quizzes', auth, async (request) => {
     const rows = await db
       .select({
@@ -235,7 +248,7 @@ export async function quizRoutes(app: FastifyInstance, { db }: { db: Db }) {
   app.post('/api/quizzes', auth, async (request, reply) => {
     const input = parseQuiz(await withHostDefaults(request.body, request.user!.id), reply)
     if (!input || !(await logoAllowed(input, request.user!.id, reply))) return reply
-    if (!(await picturesAllowed(input.questions, input.groups, request.user!.id, reply))) return reply
+    if (!(await picturesAllowed(db, input.questions, input.groups, request.user!.id, reply))) return reply
     const [row] = await db
       .insert(quizzes)
       .values({ id: nanoid(12), ownerId: request.user!.id, ...input })
@@ -351,7 +364,7 @@ export async function quizRoutes(app: FastifyInstance, { db }: { db: Db }) {
     const input = parseQuiz(request.body, reply)
     if (!input || !(await logoAllowed(input, request.user!.id, reply))) return reply
     const stored = new Set(pictureIds(row.questions, row.groups))
-    if (!(await picturesAllowed(input.questions, input.groups, request.user!.id, reply, stored))) return reply
+    if (!(await picturesAllowed(db, input.questions, input.groups, request.user!.id, reply, stored))) return reply
     const [updated] = await db
       .update(quizzes)
       .set({ ...input, updatedAt: new Date() })
@@ -391,11 +404,10 @@ export async function quizRoutes(app: FastifyInstance, { db }: { db: Db }) {
     const body = parseOr400(appendSchema, request.body, reply)
     if (!body) return reply
     // The round stays behind with the quiz the question came from.
-    const loose = body.questions.map((q) => (typeof q === 'object' && q !== null ? { ...q, groupId: undefined } : q))
-    const checked = parseOr400(quizInputSchema, assignIds({ title: row.title, questions: loose }), reply)
+    const checked = parseLooseQuestions(body.questions, reply)
     if (!checked) return reply
-    const copies = checked.questions.map(({ groupId: _, ...question }) => withFreshIds(question))
-    if (!(await picturesAllowed(copies, [], userId, reply))) return reply
+    const copies = checked.map(withFreshIds)
+    if (!(await picturesAllowed(db, copies, [], userId, reply))) return reply
     const updated = await db
       .update(quizzes)
       .set({ questions: sql`${quizzes.questions} || ${JSON.stringify(copies)}::jsonb`, updatedAt: new Date() })

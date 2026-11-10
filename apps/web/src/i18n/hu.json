@@ -1462,6 +1462,79 @@
       "cancelled": "Átrendezés visszavonva, {{item}} a helyén maradt."
     }
   },
+  "bank": {
+    "title": "Kérdésbank",
+    "help": "Későbbre félretett kérdéseid. A szerkesztőből bármelyik kvízbe beteheted őket.",
+    "tags": {
+      "label": "Címkék",
+      "placeholder": "pl. földrajz",
+      "suggestions": "Címkéid"
+    },
+    "filters": {
+      "search": "Keress a kérdésekben és a válaszokban",
+      "type": "Kérdéstípus",
+      "anyType": "Bármilyen típus",
+      "tag": "Címke",
+      "anyTag": "Bármilyen címke"
+    },
+    "card": {
+      "options": "Lehetőségek"
+    },
+    "list": {
+      "empty": "Még üres a bankod. A szerkesztőben egy kérdés menüjében válaszd a Mentés a bankba lehetőséget, vagy importálj ide egy táblázatot.",
+      "noMatches": "Egy kérdés sem felel meg ezeknek a szűrőknek.",
+      "count_one": "{{count}} kérdés / {{max}}",
+      "count_other": "{{count}} kérdés / {{max}}",
+      "matches_one": "{{count}} találat",
+      "matches_other": "{{count}} találat",
+      "edit": "Kérdés szerkesztése",
+      "deleted": "Kitöröltük a kérdést a bankból"
+    },
+    "save": {
+      "menu": "Mentés a bankba…",
+      "action": "Bankba",
+      "title_one": "Mentsd a kérdést a bankodba",
+      "title_other": "Mentsd a bankodba a kijelölt {{count}} kérdést",
+      "description": "A bank egy másolatot tart meg. A címkékkel később könnyen megtalálod.",
+      "submit": "Mentés",
+      "done_one": "Elmentettük a kérdést a bankodba",
+      "done_other": "Elmentettünk {{count}} kérdést a bankodba",
+      "open": "Bank megnyitása"
+    },
+    "add": {
+      "open": "Hozzáadás a bankból",
+      "title": "Válassz a bankodból",
+      "description": "Jelöld ki a kérdéseket. A másolatok a kiválasztott kérdés után kerülnek.",
+      "list_one": "{{count}} kérdés a bankban",
+      "list_other": "{{count}} kérdés a bankban",
+      "pick": "Kijelölés: {{text}}",
+      "preview": "Előnézet",
+      "previewHint": "Kattints egy kérdésre, és itt megnézheted.",
+      "seconds_one": "{{count}} másodperc",
+      "seconds_other": "{{count}} másodperc",
+      "tooMany_one": "Ebbe a kvízbe már csak {{count}} kérdés fér.",
+      "tooMany_other": "Ebbe a kvízbe már csak {{count}} kérdés fér.",
+      "manage": "Bank kezelése",
+      "submit_one": "Hozzáadás",
+      "submit_other": "{{count}} kérdés hozzáadása",
+      "done_one": "Betettük a kérdést a bankodból",
+      "done_other": "Betettünk {{count}} kérdést a bankodból"
+    },
+    "edit": {
+      "title": "Bankkérdés szerkesztése",
+      "description": "A módosítás csak a bankban lévő példányt érinti, a kvízekben lévőket nem."
+    },
+    "import": {
+      "open": "Importálás táblázatból",
+      "title": "Importálj kérdéseket a bankodba",
+      "help": "Töltsd ki a kvízsablont, és válaszd ki a fájlt. Minden kérdés a bankodba kerül.",
+      "fileTypes": "CSV vagy TSV, ahogy az Excel, a Numbers vagy a Google Táblázatok menti",
+      "sheetOnly": "Ez egy Quizmoo kvízfájl. Importáld kvízként a kvízlistán, aztán mentsd a kérdéseit a bankba.",
+      "noRounds": "A köröket kihagyjuk: a bank kérdései nem tartoznak körhöz.",
+      "done_one": "{{count}} kérdést importáltunk a bankodba",
+      "done_other": "{{count}} kérdést importáltunk a bankodba"
+    }
+  },
   "nicknames": {
     "nav": "Nevek",
     "title": "„Lepj meg!” nevek",
@@ -1636,6 +1709,7 @@
     "tooManyImages": "Elérted a képek felső határát (1000). Töröld a régi kvízeket, a nem használt képeket naponta takarítjuk.",
     "imageNotFound": "Az egyik kép ezekben a kérdésekben nem a tiéd. Töltsd fel újra.",
     "tooManyQuestions": "Így a kvíz 200 kérdésnél több lenne, ezért nem adtunk hozzá semmit.",
+    "bankFull": "A kérdésbankodban 2000 kérdés fér el. Előbb törölj párat.",
     "imageTooBig": "Ez a kép túl nagy felbontású (legfeljebb 50 megapixel). Kicsinyítsd le, és töltsd fel újra.",
     "usernameTaken": "Ez a felhasználónév már foglalt.",
     "notOnYourself": "A saját fiókoddal ezt nem teheted meg. A jelszavadat a Beállításaimban cserélheted le.",
@@ -2227,6 +2301,8 @@
         "body": "Ezek végleg törlődnek, és nem lehet visszahozni őket:",
         "quizzes_one": "{{count}} kvíz",
         "quizzes_other": "{{count}} kvíz",
+        "bankQuestions_one": "{{count}} kérdés a kérdésbankodban",
+        "bankQuestions_other": "{{count}} kérdés a kérdésbankodban",
         "games_one": "{{count}} befejezett játék az eredményeivel",
         "games_other": "{{count}} befejezett játék az eredményeikkel",
         "images_one": "{{count}} kép",

@@ -27,7 +27,9 @@ import {
   ImageIcon,
   KeyboardIcon,
   LayersIcon,
+  LibraryIcon,
   ListChecksIcon,
+  BookmarkPlusIcon,
   ListOrderedIcon,
   CopyPlusIcon,
   PlayIcon,
@@ -62,6 +64,7 @@ import {
   addGroupAround,
   addQuestion as addToLayout,
   applyDefault,
+  copyQuestion,
   applyToGroup,
   differingFromDefault,
   differingQuestions,
@@ -96,7 +99,9 @@ import { OffNotice } from '../../features/editor/in-game-switch'
 import { QuestionDefaultsFields } from '../../features/editor/question-defaults-fields'
 import { SearchField, SearchResults } from '../../features/editor/question-search'
 import { SelectList } from '../../features/editor/select-list'
+import { AddFromBankDialog } from '../../features/bank/add-from-bank-dialog'
 import { CopyToQuizDialog } from '../../features/bank/copy-to-quiz-dialog'
+import { SaveToBankDialog } from '../../features/bank/save-to-bank-dialog'
 import { PhonePreview } from '../../features/editor/phone-preview'
 import { ProblemsMenu, listProblems, problemLabel, type Problem } from '../../features/editor/problems-menu'
 import { QuestionForm } from '../../features/editor/question-form'
@@ -235,6 +240,9 @@ function Editor({ quiz }: { quiz: Quiz }) {
   const [ticked, setTicked] = useState<ReadonlySet<string>>(new Set())
   // The questions waiting in the Copy to quiz dialog.
   const [copying, setCopying] = useState<Question[] | null>(null)
+  // The questions waiting in the Save to bank dialog, and whether Add from bank is open.
+  const [banking, setBanking] = useState<Question[] | null>(null)
+  const [fromBank, setFromBank] = useState(false)
   const searching = !selecting && query.trim() !== ''
   // Raised to scroll the list to the selected row (the jump button, and after adding something).
   const [jump, setJump] = useState(0)
@@ -487,13 +495,36 @@ function Editor({ quiz }: { quiz: Quiz }) {
     })
   // Questions deleted meanwhile drop out of the selection; the order is the list's.
   const tickedQuestions = questions.filter((q) => ticked.has(q.id))
-  /** Opens Copy to quiz for these questions, unless one of them still needs fixing (the server would refuse it). */
-  const copyToQuiz = (list: Question[]) => {
-    if (list.some((q) => errorsUnder(errors, `questions.${questions.indexOf(q)}`).length > 0)) {
-      toast.error(t('editor.copy.fixFirst'))
-      return
+  /** Whether these questions can be copied out: one that still needs fixing would be refused by the server. */
+  const complete = (list: Question[]) => {
+    if (!list.some((q) => errorsUnder(errors, `questions.${questions.indexOf(q)}`).length > 0)) return true
+    toast.error(t('editor.copy.fixFirst'))
+    return false
+  }
+  /** Opens Copy to quiz for these questions. */
+  const copyToQuiz = (list: Question[]) => complete(list) && setCopying(list)
+  /** Opens Save to bank for these questions. */
+  const saveToBank = (list: Question[]) => complete(list) && setBanking(list)
+  /**
+   * Copies of bank questions (new ids) go after the selected question, into its group, or at the end of
+   * the selected group, in the order picked; the first one is selected. They keep their own time and points.
+   */
+  const addFromBank = (picked: Question[]) => {
+    const copies = picked.map(({ groupId: _, ...question }) => copyQuestion(question))
+    let next = layout
+    let after = selectedId
+    for (const copy of copies) {
+      next = addToLayout(next, copy, after)
+      after = copy.id
     }
-    setCopying(list)
+    setLayout(() => next)
+    setVisited((v) => new Set([...v, ...copies.map((q) => q.id)]))
+    setFromBank(false)
+    setPicking(false)
+    setListOpen(false)
+    if (copies[0]) select(copies[0].id)
+    jumpToSelected()
+    toast.success(t('bank.add.done', { count: copies.length }))
   }
   /** Deletes the ticked questions at once; Undo puts them all back where they were. */
   const deleteTicked = () => {
@@ -755,6 +786,23 @@ function Editor({ quiz }: { quiz: Quiz }) {
         )}
       </>
     )
+  // "Add from bank" under the type cards. From the type dialog, that dialog closes first without
+  // returning the focus (it would close the bank's dialog, as after a pick).
+  const fromBankButton = (
+    <Button
+      variant="outline"
+      className="self-start"
+      disabled={questions.length >= MAX_QUESTIONS}
+      onClick={() => {
+        picked.current = picking
+        setPicking(false)
+        setFromBank(true)
+      }}
+    >
+      <LibraryIcon aria-hidden="true" />
+      {t('bank.add.open')}
+    </Button>
+  )
   /**
    * The select mode's bar in the list's header: how many are ticked, all or none, Done, and the actions
    * on them. `height` is the buttons' height class.
@@ -784,6 +832,16 @@ function Editor({ quiz }: { quiz: Quiz }) {
           >
             <CopyPlusIcon aria-hidden="true" />
             <span className="truncate">{t('editor.copy.action')}</span>
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className={cn('min-w-0 flex-auto gap-1 px-2!', height)}
+            disabled={tickedQuestions.length === 0}
+            onClick={() => saveToBank(tickedQuestions)}
+          >
+            <BookmarkPlusIcon aria-hidden="true" />
+            <span className="truncate">{t('bank.save.action')}</span>
           </Button>
           <Button
             variant="destructive"
@@ -1181,6 +1239,7 @@ function Editor({ quiz }: { quiz: Quiz }) {
                   onColor={(color) => setQuestions((l) => l.map((q) => (q.id === selected.id ? withTag(q, color) : q)))}
                   onSwitch={(on) => switchItem(selected.id, on)}
                   onCopyToQuiz={() => copyToQuiz([selected])}
+                  onSaveToBank={() => saveToBank([selected])}
                 />
                 {selected.off && <OffNotice kind="question" onSwitchOn={() => switchItem(selected.id, true)} />}
                 <QuestionForm
@@ -1213,6 +1272,7 @@ function Editor({ quiz }: { quiz: Quiz }) {
                 <h2 className="text-xl font-extrabold">{t('editor.pickType')}</h2>
                 <p className="text-muted-foreground">{t('editor.emptyHelp')}</p>
                 <TypePicker onPick={addQuestion} />
+                {fromBankButton}
               </div>
             )}
 
@@ -1351,8 +1411,21 @@ function Editor({ quiz }: { quiz: Quiz }) {
               <DialogTitle>{t('editor.pickType')}</DialogTitle>
             </DialogHeader>
             <TypePicker onPick={addQuestion} />
+            {fromBankButton}
           </DialogContent>
         </Dialog>
+
+        {fromBank && <AddFromBankDialog room={MAX_QUESTIONS - questions.length} onAdd={addFromBank} onClose={() => setFromBank(false)} />}
+
+        {banking && (
+          <SaveToBankDialog
+            questions={banking}
+            onClose={(saved) => {
+              setBanking(null)
+              if (saved) stopSelecting()
+            }}
+          />
+        )}
 
         <ShortcutsDialog open={helpOpen} onOpenChange={setHelpOpen} />
 

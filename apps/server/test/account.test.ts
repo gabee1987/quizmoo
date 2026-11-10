@@ -45,7 +45,7 @@ describeDb('own account on My settings (database)', () => {
     const res = await req(cookie, 'GET', '/api/me/account')
     expect(res.statusCode).toBe(200)
     const { account } = res.json()
-    expect(account).toMatchObject({ username: 'test_overview', role: 'editor', sessions: 2, quizzes: 0, gamesPlayed: 0, images: 0 })
+    expect(account).toMatchObject({ username: 'test_overview', role: 'editor', sessions: 2, quizzes: 0, bankQuestions: 0, gamesPlayed: 0, images: 0 })
     expect(Date.now() - new Date(account.lastLoginAt).getTime()).toBeLessThan(60_000)
     expect(account.createdAt).toBeTruthy()
     expect((await built.app.inject({ method: 'GET', url: '/api/me/account' })).statusCode).toBe(401)

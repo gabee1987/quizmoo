@@ -5,7 +5,7 @@ import { afterAll, afterEach, beforeAll, expect, it } from 'vitest'
 import { createSession } from '../src/auth/session.js'
 import { createUser } from '../src/auth/users.js'
 import type { Db } from '../src/db/index.js'
-import { games, hostSettings, images, quizzes, sessions, users } from '../src/db/schema.js'
+import { bankQuestions, games, hostSettings, images, quizzes, sessions, users } from '../src/db/schema.js'
 import { fixtureQuiz, fixtureSettings } from '../src/game/fixtures.js'
 import { MAX_OPEN_GAMES_PER_HOST } from '../src/routes/games.js'
 import { MAX_IMAGES_PER_HOST } from '../src/routes/images.js'
@@ -177,6 +177,7 @@ describeDb('hardening before the public beta (database)', () => {
       image('img-cleanup-group'),
       image('img-cleanup-my-logo'),
       image('img-cleanup-game'),
+      image('img-cleanup-bank'),
       image('img-cleanup-unused'),
       image('img-cleanup-fresh', host.id, new Date()),
       image('img-cleanup-named-by-other'),
@@ -205,6 +206,7 @@ describeDb('hardening before the public beta (database)', () => {
       { id: 'quiz-cleanup-other', ownerId: other.id, title: 'Q', questions: fixtureQuiz().questions, description: 'img-cleanup-named-by-other' },
     ])
     await db.insert(hostSettings).values({ userId: host.id, settings: { logoImageId: 'img-cleanup-my-logo' } })
+    await db.insert(bankQuestions).values({ id: 'bank-cleanup', ownerId: host.id, question: { ...first, imageId: 'img-cleanup-bank' } })
     const { state } = await built.manager.create({
       id: 'game-cleanup',
       quiz: { ...fixtureQuiz(), questions: [{ ...first, imageId: 'img-cleanup-game' }] },
@@ -218,7 +220,7 @@ describeDb('hardening before the public beta (database)', () => {
     await deleteUnusedImages(db, Date.now())
     const left = (await db.select({ id: images.id }).from(images).where(eq(images.ownerId, host.id))).map((r) => r.id).sort()
     expect(left).toEqual(
-      ['img-cleanup-fresh', 'img-cleanup-game', 'img-cleanup-group', 'img-cleanup-my-logo', 'img-cleanup-option', 'img-cleanup-question', 'img-cleanup-quiz-logo'].sort(),
+      ['img-cleanup-bank', 'img-cleanup-fresh', 'img-cleanup-game', 'img-cleanup-group', 'img-cleanup-my-logo', 'img-cleanup-option', 'img-cleanup-question', 'img-cleanup-quiz-logo'].sort(),
     )
   })
 })

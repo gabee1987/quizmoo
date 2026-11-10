@@ -5,6 +5,7 @@ import {
   HistoryIcon,
   HouseIcon,
   LayoutGridIcon,
+  LibraryIcon,
   LifeBuoyIcon,
   LogOutIcon,
   MessageSquareHeartIcon,
@@ -33,13 +34,15 @@ import { useSiteInfo } from '@/lib/site'
 import { useLogout } from '@/lib/use-logout'
 import { useUnseenRelease } from '../features/whats-new/use-release-seen'
 
-type To = '/host' | '/host/quizzes' | '/host/games' | '/host/users' | '/host/nicknames'
+type To = '/host' | '/host/quizzes' | '/host/bank' | '/host/games' | '/host/users' | '/host/nicknames'
 
 interface Item {
   to: To
   label: string
   icon: ComponentType<{ className?: string }>
   exact: boolean
+  /** Not on the phone's tab bar (four tabs fit); reached from another page there. */
+  sidebarOnly?: boolean
 }
 
 /**
@@ -52,6 +55,7 @@ export function HostNav({ user }: { user: User }) {
   const main: Item[] = [
     { to: '/host', label: t('nav.home'), icon: HouseIcon, exact: true },
     { to: '/host/quizzes', label: t('nav.quizzes'), icon: LayoutGridIcon, exact: false },
+    { to: '/host/bank', label: t('bank.title'), icon: LibraryIcon, exact: true, sidebarOnly: true },
     { to: '/host/games', label: t('nav.games'), icon: HistoryIcon, exact: true },
   ]
   const admin: Item[] =
@@ -153,7 +157,7 @@ export function HostNav({ user }: { user: User }) {
         className="fixed inset-x-0 bottom-0 z-40 border-t bg-card/95 pb-[env(safe-area-inset-bottom)] shadow-soft backdrop-blur lg:hidden"
       >
         <ul data-tour="host-nav" className="mx-auto flex max-w-lg">
-          {main.map((item) => (
+          {main.filter((item) => !item.sidebarOnly).map((item) => (
             <li key={item.to} className="flex-1">
               <Link to={item.to} activeOptions={{ exact: item.exact, includeSearch: false }} className={tabClass}>
                 <TabIcon icon={item.icon} />

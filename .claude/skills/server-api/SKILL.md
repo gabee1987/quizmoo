@@ -55,6 +55,11 @@ Error shape everywhere: `{ error: '<i18n key>' }`. Status codes: 400 invalid inp
 | `DELETE /api/quizzes/:id` | owner | |
 | `POST /api/quizzes/starter` | session | `{ lang: 'hu' \| 'en' }` -> `{ id }`: a fresh copy of the starter quiz (`src/starter/`), its drawings stored as the host's images; sign-up and `POST /api/users` add one too (their `lang`), and a failure there is only logged |
 | `POST /api/quizzes/:id/questions` | owner | `{ questions }` (1–200) -> `{ added, title, questionIds }`: copies appended with fresh ids and no `groupId`; pictures must be the host's (`errors.imageNotFound`); 409 `errors.tooManyQuestions` and nothing added past 200 (checked inside the UPDATE) |
+| `GET /api/bank?q=&type=&tag=&offset=` | session | own bank questions, newest first, 50 per page: `{ questions, total, next }`; `q` searches the folded `search_text` (text, options, accepted answers) |
+| `GET /api/bank/tags` | session | `{ tags: [{ tag, count }] }`, one per tag ignoring case, most used first |
+| `POST /api/bank` | session | `{ questions (1–200), tags }` -> 201 `{ questions }`: copies with fresh ids, no `groupId`, no `off`; picture check; 409 `errors.bankFull` past 2000 (per-host advisory lock) |
+| `PUT /api/bank/:id` | owner | `{ question, tags }`; 404 for another host's; pictures already stored are let through |
+| `POST /api/bank/delete` | owner | `{ ids }` -> `{ deleted }`; others' ids are skipped |
 | `POST /api/quizzes/batch-delete` | owner of all | `{ ids }` -> `{ deleted }`; 404 and nothing deleted if any id is missing or not owned |
 | `GET /api/me/settings` | session | the host's own settings (`hostSettingsSchema`, defaults when never saved): `{ settings, hasLockCode }` |
 | `PUT /api/me/lock-code` / `DELETE /api/me/lock-code` | session | the default screen lock code `{ code }` (4 to 8 digits), stored only as an argon2 hash in `host_settings.lock_code_hash`, never sent back |

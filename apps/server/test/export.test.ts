@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, expect, it } from 'vitest'
 import { createUser } from '../src/auth/users.js'
 import type { Db } from '../src/db/index.js'
-import { images, quizzes } from '../src/db/schema.js'
+import { bankQuestions, images, quizzes } from '../src/db/schema.js'
 import { fixtureQuiz } from '../src/game/fixtures.js'
 import { endGame, joinPlayer } from '../src/game/index.js'
 import { buildTestApp, sessionCookie } from './helpers/app.js'
@@ -42,6 +42,10 @@ describeDb('downloading my data (database)', () => {
       { id: 'quiz-export', ownerId: host.id, title: 'My quiz', questions: fixtureQuiz().questions },
       { id: 'quiz-not-mine', ownerId: other.id, title: 'Not mine', questions: fixtureQuiz().questions },
     ])
+    await db.insert(bankQuestions).values([
+      { id: 'bank-export', ownerId: host.id, question: fixtureQuiz().questions[0]!, tags: ['geography'] },
+      { id: 'bank-not-mine', ownerId: other.id, question: { ...fixtureQuiz().questions[0]!, text: 'Not mine either' } },
+    ])
     await db.insert(images).values({ id: 'img-export', ownerId: host.id, mime: 'image/webp', width: 2, height: 1, data: Buffer.alloc(300) })
     const { pin } = (await req(cookie, 'POST', '/api/games', { quizId: 'quiz-export' })).json() as { pin: string }
     built.manager.apply(pin, (state) => joinPlayer(state, { id: 'p1', name: 'Anna', token: 'secret-player-token' }))
@@ -57,6 +61,8 @@ describeDb('downloading my data (database)', () => {
     expect(data.account.termsVersion).toBeTruthy()
     expect(data.settings.quickMessages).toBeInstanceOf(Array)
     expect(data.quizzes.map((q: { title: string }) => q.title)).toEqual(['My quiz'])
+    expect(data.bankQuestions).toEqual([expect.objectContaining({ id: 'bank-export', tags: ['geography'] })])
+    expect(res.body).not.toContain('Not mine either')
     expect(data.images).toEqual([expect.objectContaining({ id: 'img-export', bytes: 300, url: '/api/images/img-export' })])
     expect(data.games).toHaveLength(1)
     expect(data.games[0]).toMatchObject({ quizTitle: 'My quiz', phase: 'finished' })
