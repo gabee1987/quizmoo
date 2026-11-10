@@ -180,6 +180,38 @@ describeDb('question bank (database)', () => {
     expect((await req(alice, 'POST', `/api/bank/${item!.id}/sync`, { quizIds: [] })).statusCode).toBe(400)
   })
 
+  it('with the switch on, brings each save to the unchanged copies only, and keeps what a save leaves out', async () => {
+    const [item] = (await req(alice, 'POST', '/api/bank', { questions: [single('Which river crosses Szeged?')], tags: ['Rivers'] })).json()
+      .questions as (Listed & { autoSync: boolean })[]
+    expect(item!.autoSync).toBe(false)
+    const link = { id: item!.id, hash: questionHash(item!.question as Question) }
+    const quiz = async (title: string, questions: object[]) => (await req(alice, 'POST', '/api/quizzes', { title, questions })).json().quiz.id as string
+    const plain = await quiz('Auto plain', [{ ...item!.question, id: 'a1', bank: link, color: 'blue' }])
+    const tweaked = await quiz('Auto tweaked', [{ ...item!.question, id: 'a2', bank: link, text: 'Which river crosses Szeged, Hungary?' }])
+    const texts = async (id: string) => ((await req(alice, 'GET', `/api/quizzes/${id}`)).json().quiz.questions as { text: string }[]).map((q) => q.text)
+
+    // Off (the default): a save changes the library only.
+    const off = await req(alice, 'PUT', `/api/bank/${item!.id}`, { question: { ...item!.question, text: 'Which river flows through Szeged?' } })
+    expect(off.json()).toMatchObject({ question: { tags: ['Rivers'], autoSync: false }, synced: [] })
+    expect(await texts(plain)).toEqual(['Which river crosses Szeged?'])
+
+    // Switched on: the unchanged copy follows at once (keeping its colour), the changed one waits.
+    const on = await req(alice, 'PUT', `/api/bank/${item!.id}`, { question: { ...item!.question, text: 'Which river flows through Szeged?' }, autoSync: true })
+    expect(on.json()).toMatchObject({ question: { tags: ['Rivers'], autoSync: true }, synced: [plain] })
+    const [copy] = (await req(alice, 'GET', `/api/quizzes/${plain}`)).json().quiz.questions as Question[]
+    expect(copy).toMatchObject({ id: 'a1', text: 'Which river flows through Szeged?', color: 'blue' })
+    expect(questionHash(copy!)).toBe(copy!.bank!.hash)
+    expect(await texts(tweaked)).toEqual(['Which river crosses Szeged, Hungary?'])
+
+    // The next save follows too; a save at the same version touches no quiz.
+    const next = await req(alice, 'PUT', `/api/bank/${item!.id}`, { question: { ...item!.question, text: 'Which river is Szeged on?' } })
+    expect(next.json().synced).toEqual([plain])
+    expect(await texts(plain)).toEqual(['Which river is Szeged on?'])
+    expect((await req(alice, 'PUT', `/api/bank/${item!.id}`, { question: { ...item!.question, text: 'Which river is Szeged on?' } })).json().synced).toEqual([])
+    const uses = (await req(alice, 'GET', `/api/bank/${item!.id}/uses`)).json().quizzes as { id: string; changed: boolean }[]
+    expect(uses.find((u) => u.id === tweaked)).toMatchObject({ changed: true })
+  })
+
   it('pages by 50 and never goes past the limit', async () => {
     await db.delete(bankQuestions).where(eq(bankQuestions.ownerId, bobId))
     const filler = Array.from({ length: MAX_BANK_QUESTIONS - 2 }, (_, i) => ({

@@ -1469,9 +1469,6 @@
       "newTitle": "New question",
       "editTitle": "Edit question",
       "back": "Back to the question library",
-      "create": "Add to library",
-      "created": "Question added to your library",
-      "saved": "Question saved",
       "leave": "Leave without saving your changes?",
       "missing": "This question is no longer in your library. It may have been deleted.",
       "usedIn_one": "Used in {{count}} quiz",
@@ -1480,7 +1477,9 @@
       "updateQuizzes": "Update quizzes",
       "upToDate": "Up to date",
       "older": "Older version",
-      "changedThere": "Changed in this quiz"
+      "changedThere": "Changed in this quiz",
+      "autoSync": "Update the quizzes automatically",
+      "autoSyncHelp": "Every change here goes to the quizzes at once. A question you changed in a quiz waits for you to update it."
     },
     "sync": {
       "title": "Update the quizzes too?",
@@ -1522,6 +1521,11 @@
     "save": {
       "menu": "Save to library…",
       "openLinked": "Open in question library",
+      "push": "Save changes to the library",
+      "pushTitle": "Replace the library's version?",
+      "pushBody": "The question in your library takes this quiz's version. If its quizzes are updated automatically, the other quizzes get it too; otherwise you can update them from the library.",
+      "pushSubmit": "Replace",
+      "pushed": "Library question updated",
       "action": "Save to library",
       "title_one": "Save the question to your library",
       "title_other": "Save {{count}} questions to your library",

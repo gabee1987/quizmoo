@@ -103,6 +103,7 @@ import { SearchField, SearchResults } from '../../features/editor/question-searc
 import { SelectList } from '../../features/editor/select-list'
 import { AddFromBankDialog } from '../../features/bank/add-from-bank-dialog'
 import { CopyToQuizDialog } from '../../features/bank/copy-to-quiz-dialog'
+import { updateBankQuestion } from '../../features/bank/queries'
 import { SaveToBankDialog } from '../../features/bank/save-to-bank-dialog'
 import { PhonePreview } from '../../features/editor/phone-preview'
 import { ProblemsMenu, listProblems, problemLabel, type Problem } from '../../features/editor/problems-menu'
@@ -245,6 +246,8 @@ function Editor({ quiz }: { quiz: Quiz }) {
   // The questions waiting in the Save to bank dialog, and whether Add from bank is open.
   const [banking, setBanking] = useState<Question[] | null>(null)
   const [fromBank, setFromBank] = useState(false)
+  // The linked question changed here that waits for "Replace the library's version?".
+  const [pushing, setPushing] = useState<Question | null>(null)
   const searching = !selecting && query.trim() !== ''
   // Raised to scroll the list to the selected row (the jump button, and after adding something).
   const [jump, setJump] = useState(0)
@@ -637,6 +640,19 @@ function Editor({ quiz }: { quiz: Quiz }) {
       deleted.current = false
       toastError(error)
     },
+  })
+  // This quiz's version becomes the library's; the copy then counts as up to date again. Other quizzes
+  // follow on the server when the library question updates them automatically.
+  const pushToBank = useMutation({
+    mutationFn: (question: Question) => updateBankQuestion(question.bank!.id, { question }),
+    onSuccess: ({ question: item }, sent) => {
+      const bank = { id: item.id, hash: questionHash(item.question) }
+      setQuestions((list) => list.map((q) => (q.id === sent.id && q.bank?.id === item.id ? { ...q, bank } : q)))
+      void queryClient.invalidateQueries({ queryKey: ['bank'] })
+      setPushing(null)
+      toast.success(t('bank.save.pushed'))
+    },
+    onError: toastError,
   })
   const playBlocker =
     questions.length === 0
@@ -1246,6 +1262,7 @@ function Editor({ quiz }: { quiz: Quiz }) {
                   onSwitch={(on) => switchItem(selected.id, on)}
                   onCopyToQuiz={() => copyToQuiz([selected])}
                   onSaveToBank={() => saveToBank([selected])}
+                  onSaveChangesToBank={() => setPushing(selected)}
                 />
                 {selected.off && <OffNotice kind="question" onSwitchOn={() => switchItem(selected.id, true)} />}
                 <QuestionForm
@@ -1441,6 +1458,18 @@ function Editor({ quiz }: { quiz: Quiz }) {
               setBanking(null)
             }}
           />
+        )}
+
+        {pushing && (
+          <ConfirmDialog
+            title={t('bank.save.pushTitle')}
+            confirmLabel={t('bank.save.pushSubmit')}
+            pending={pushToBank.isPending}
+            onConfirm={() => pushToBank.mutate(questions.find((q) => q.id === pushing.id) ?? pushing)}
+            onCancel={() => setPushing(null)}
+          >
+            {t('bank.save.pushBody')}
+          </ConfirmDialog>
         )}
 
         <ShortcutsDialog open={helpOpen} onOpenChange={setHelpOpen} />

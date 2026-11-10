@@ -148,6 +148,13 @@
       "when": 1794303151993,
       "tag": "0020_bank_questions",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1794318393695,
+      "tag": "0021_bank_auto_sync",
+      "breakpoints": true
     }
   ]
 }

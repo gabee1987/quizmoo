@@ -20,7 +20,8 @@ export const bankSaveSchema = z.object({
   tags: bankTagsSchema.default([]),
 })
 
-export const bankUpdateSchema = z.object({ question: z.unknown(), tags: bankTagsSchema })
+/** Left-out tags or switch stay as they are (the quiz editor sends only the question). */
+export const bankUpdateSchema = z.object({ question: z.unknown(), tags: bankTagsSchema.optional(), autoSync: z.boolean().optional() })
 
 export const bankDeleteSchema = z.object({ ids: z.array(z.string().min(1)).min(1).max(MAX_QUESTIONS) })
 
@@ -36,6 +37,8 @@ export const bankQuestionSchema = z.object({
   id: z.string(),
   question: questionSchema,
   tags: z.array(z.string()),
+  /** Saves update the quizzes' unchanged copies at once. */
+  autoSync: z.boolean(),
   createdAt: z.string(),
   updatedAt: z.string(),
 })

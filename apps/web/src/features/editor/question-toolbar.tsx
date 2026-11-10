@@ -1,4 +1,4 @@
-import type { Question, TagColor } from '@quizmoo/shared'
+import { questionHash, type Question, type TagColor } from '@quizmoo/shared'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
@@ -6,6 +6,7 @@ import {
   ArrowDownToLineIcon,
   ArrowUpIcon,
   ArrowUpToLineIcon,
+  BookmarkCheckIcon,
   BookmarkPlusIcon,
   CopyIcon,
   CopyPlusIcon,
@@ -41,6 +42,7 @@ export function QuestionToolbar({
   onSwitch,
   onCopyToQuiz,
   onSaveToBank,
+  onSaveChangesToBank,
 }: {
   question: Question
   index: number
@@ -58,6 +60,8 @@ export function QuestionToolbar({
   onCopyToQuiz: () => void
   /** "Save to bank…": a copy goes to the host's question bank. */
   onSaveToBank: () => void
+  /** "Save changes to the library": a linked question changed here replaces the library's version. */
+  onSaveChangesToBank: () => void
 }) {
   const { t } = useTranslation()
   const Icon = typeIcons[question.type]
@@ -115,12 +119,20 @@ export function QuestionToolbar({
               {t('editor.copy.menu')}
             </DropdownMenuItem>
             {question.bank ? (
-              <DropdownMenuItem className="min-h-11" asChild>
-                <Link to="/host/library/$questionId" params={{ questionId: question.bank.id }}>
-                  <LibraryIcon aria-hidden="true" />
-                  {t('bank.save.openLinked')}
-                </Link>
-              </DropdownMenuItem>
+              <>
+                <DropdownMenuItem className="min-h-11" asChild>
+                  <Link to="/host/library/$questionId" params={{ questionId: question.bank.id }}>
+                    <LibraryIcon aria-hidden="true" />
+                    {t('bank.save.openLinked')}
+                  </Link>
+                </DropdownMenuItem>
+                {questionHash(question) !== question.bank.hash && (
+                  <DropdownMenuItem className="min-h-11" onSelect={onSaveChangesToBank}>
+                    <BookmarkCheckIcon aria-hidden="true" />
+                    {t('bank.save.push')}
+                  </DropdownMenuItem>
+                )}
+              </>
             ) : (
               <DropdownMenuItem className="min-h-11" onSelect={onSaveToBank}>
                 <BookmarkPlusIcon aria-hidden="true" />

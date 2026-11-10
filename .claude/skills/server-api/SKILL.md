@@ -58,9 +58,9 @@ Error shape everywhere: `{ error: '<i18n key>' }`. Status codes: 400 invalid inp
 | `GET /api/bank?q=&type=&tag=&offset=` | session | own bank questions, newest first, 50 per page: `{ questions, total, next }`; `q` searches the folded `search_text` (text, options, accepted answers) |
 | `GET /api/bank/tags` | session | `{ tags: [{ tag, count }] }`, one per tag ignoring case, most used first |
 | `POST /api/bank` | session | `{ questions (1–200), tags }` -> 201 `{ questions }`: copies with fresh ids, no `groupId`, no `off`; picture check; 409 `errors.bankFull` past 2000 (per-host advisory lock) |
-| `PUT /api/bank/:id` | owner | `{ question, tags }`; 404 for another host's; pictures already stored are let through |
+| `PUT /api/bank/:id` | owner | `{ question, tags?, autoSync? }` -> `{ question, synced }` (left-out fields kept); with `autoSync` on, the copies not changed in their quiz take the new version in the same transaction (`synced`: those quizzes); 404 for another host's; pictures already stored are let through |
 | `POST /api/bank/delete` | owner | `{ ids }` -> `{ deleted }`; others' ids are skipped |
-| `POST /api/bank/restore` | session | `{ id, question, tags, createdAt }`: Undo of a delete under the old id (linked quizzes stay linked); 409 if the id is taken |
+| `POST /api/bank/restore` | session | `{ id, question, tags, autoSync?, createdAt }`: Undo of a delete under the old id (linked quizzes stay linked); 409 if the id is taken |
 | `GET /api/bank/:id` | owner | `{ question }`; 404 for another host's |
 | `GET /api/bank/:id/uses` | owner | `{ quizzes: [{ id, title, copies, changed, outdated }] }`: own quizzes with `questions @> [{ bank: { id } }]`; `changed`: a copy's `questionHash` differs from its `bank.hash`; `outdated`: it differs from the library's |
 | `POST /api/bank/:id/sync` | owner | `{ quizIds }` -> `{ updated }`: the library version replaces the linked copies (id, `groupId`, `off`, `color` kept, `bank.hash` renewed); others' and unlinked quizzes skipped |

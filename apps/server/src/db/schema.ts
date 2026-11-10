@@ -74,6 +74,8 @@ export const bankQuestions = pgTable(
     /** Checked with the quiz schema on write; no `groupId` and no `off`. */
     question: jsonb('question').$type<Question>().notNull(),
     tags: text('tags').array().notNull().default(sql`'{}'::text[]`),
+    /** Every save brings the new version to the quizzes' copies that were not changed there. */
+    autoSync: boolean('auto_sync').notNull().default(false),
     /** The question text, its options and accepted answers in lower case without accents, for the search. */
     searchText: text('search_text')
       .notNull()

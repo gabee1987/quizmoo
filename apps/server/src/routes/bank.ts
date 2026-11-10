@@ -29,6 +29,7 @@ function toBankQuestion(row: BankRow): BankQuestion {
     id: row.id,
     question: row.question,
     tags: row.tags,
+    autoSync: row.autoSync,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
   }
@@ -41,13 +42,55 @@ const restoreSchema = z.object({
   id: z.string().regex(/^[\w-]{12}$/),
   question: z.unknown(),
   tags: bankTagsSchema,
+  autoSync: z.boolean().default(false),
   createdAt: z.iso.datetime(),
 })
 
 const syncSchema =z.object({ quizIds: z.array(z.string().min(1)).min(1).max(500) })
 
+type Tx = Parameters<Parameters<Db['transaction']>[0]>[0]
+
 /** The quiz's copies of the bank question `id`, in quiz order. */
 const copiesOf = (questions: readonly Question[], id: string) => questions.filter((q) => q.bank?.id === id)
+
+/** A copy that was changed in its quiz since it was linked (or last brought up to date). */
+const changedInQuiz = (copy: Question) => questionHash(copy) !== copy.bank?.hash
+
+/** The host's quizzes holding a copy of the bank question `id`. */
+const quizzesUsing = (db: Db | Tx, id: string, userId: string) =>
+  db
+    .select({ id: quizzes.id, title: quizzes.title, questions: quizzes.questions, groups: quizzes.groups })
+    .from(quizzes)
+    .where(and(eq(quizzes.ownerId, userId), sql`${quizzes.questions} @> ${JSON.stringify([{ bank: { id } }])}::jsonb`))
+    .orderBy(desc(quizzes.updatedAt))
+
+/**
+ * The bank's version replaces the copies `take` picks; each copy keeps its id, round, switch and colour.
+ * Copies already at this version are left alone, and a quiz that would turn invalid is skipped (it should
+ * not: the bank question was checked on save). Returns the quizzes that changed.
+ */
+async function bringCopiesUpToDate(tx: Tx, row: BankRow, userId: string, take: (quizId: string, copy: Question) => boolean) {
+  const hash = questionHash(row.question)
+  const { id: _, ...content } = row.question
+  const now = new Date()
+  const updated: string[] = []
+  for (const quiz of await quizzesUsing(tx, row.id, userId)) {
+    let touched = false
+    const questions = quiz.questions.map((q): Question => {
+      if (q.bank?.id !== row.id || !take(quiz.id, q)) return q
+      if (q.bank.hash === hash && questionHash(q) === hash) return q
+      touched = true
+      return { ...content, id: q.id, groupId: q.groupId, off: q.off, color: q.color, bank: { id: row.id, hash } } as Question
+    })
+    if (!touched || !quizInputSchema.safeParse({ title: quiz.title, questions, groups: quiz.groups }).success) continue
+    await tx
+      .update(quizzes)
+      .set({ questions, updatedAt: now })
+      .where(and(eq(quizzes.id, quiz.id), eq(quizzes.ownerId, userId)))
+    updated.push(quiz.id)
+  }
+  return updated
+}
 
 /** The host's question bank: questions kept outside any quiz, copied into quizzes with fresh ids. */
 export async function bankRoutes(app: FastifyInstance, { db }: { db: Db }) {
@@ -122,14 +165,6 @@ export async function bankRoutes(app: FastifyInstance, { db }: { db: Db }) {
     return null
   }
 
-  /** The host's quizzes holding a copy of the bank question `id`. */
-  const quizzesUsing = (id: string, userId: string) =>
-    db
-      .select({ id: quizzes.id, title: quizzes.title, questions: quizzes.questions, groups: quizzes.groups })
-      .from(quizzes)
-      .where(and(eq(quizzes.ownerId, userId), sql`${quizzes.questions} @> ${JSON.stringify([{ bank: { id } }])}::jsonb`))
-      .orderBy(desc(quizzes.updatedAt))
-
   app.get<{ Params: { id: string } }>('/api/bank/:id', auth, async (request, reply) => {
     const row = await ownBankQuestion(request.params.id, request.user!.id, reply)
     return row ? { question: toBankQuestion(row) } : reply
@@ -141,7 +176,7 @@ export async function bankRoutes(app: FastifyInstance, { db }: { db: Db }) {
     const row = await ownBankQuestion(request.params.id, request.user!.id, reply)
     if (!row) return reply
     const current = questionHash(row.question)
-    const rows = await quizzesUsing(row.id, request.user!.id)
+    const rows = await quizzesUsing(db, row.id, request.user!.id)
     return {
       quizzes: rows.map((quiz) => {
         const copies = copiesOf(quiz.questions, row.id)
@@ -149,15 +184,15 @@ export async function bankRoutes(app: FastifyInstance, { db }: { db: Db }) {
           id: quiz.id,
           title: quiz.title,
           copies: copies.length,
-          changed: copies.some((q) => questionHash(q) !== q.bank!.hash),
+          changed: copies.some(changedInQuiz),
           outdated: copies.some((q) => q.bank!.hash !== current || questionHash(q) !== current),
         }
       }),
     }
   })
 
-  // The bank's version replaces the copies in the chosen quizzes; each copy keeps its id, round, switch
-  // and colour. Quizzes that are not the host's or hold no copy are skipped. All in one transaction.
+  // The bank's version replaces every copy in the chosen quizzes, changed there or not (the host chose).
+  // Quizzes that are not the host's or hold no copy are skipped. All in one transaction.
   app.post<{ Params: { id: string } }>('/api/bank/:id/sync', auth, async (request, reply) => {
     const userId = request.user!.id
     const row = await ownBankQuestion(request.params.id, userId, reply)
@@ -165,30 +200,8 @@ export async function bankRoutes(app: FastifyInstance, { db }: { db: Db }) {
     const body = parseOr400(syncSchema, request.body, reply)
     if (!body) return reply
     const wanted = new Set(body.quizIds)
-    const hash = questionHash(row.question)
-    const { id: _, ...content } = row.question
-    const updates: { id: string; questions: Question[] }[] = []
-    for (const quiz of await quizzesUsing(row.id, userId)) {
-      if (!wanted.has(quiz.id)) continue
-      const questions = quiz.questions.map((q): Question =>
-        q.bank?.id === row.id
-          ? ({ ...content, id: q.id, groupId: q.groupId, off: q.off, color: q.color, bank: { id: row.id, hash } } as Question)
-          : q,
-      )
-      // The quiz must stay valid as a whole (it always should: the bank question was checked on save).
-      if (!quizInputSchema.safeParse({ title: quiz.title, questions, groups: quiz.groups }).success) continue
-      updates.push({ id: quiz.id, questions })
-    }
-    const now = new Date()
-    await db.transaction(async (tx) => {
-      for (const update of updates) {
-        await tx
-          .update(quizzes)
-          .set({ questions: update.questions, updatedAt: now })
-          .where(and(eq(quizzes.id, update.id), eq(quizzes.ownerId, userId)))
-      }
-    })
-    return { updated: updates.map((u) => u.id) }
+    const updated = await db.transaction((tx) => bringCopiesUpToDate(tx, row, userId, (quizId) => wanted.has(quizId)))
+    return { updated }
   })
 
   app.put<{ Params: { id: string } }>('/api/bank/:id', auth, async (request, reply) => {
@@ -201,12 +214,18 @@ export async function bankRoutes(app: FastifyInstance, { db }: { db: Db }) {
     if (!checked) return reply
     const question: Question = checked[0]!
     if (!(await picturesAllowed(db, [question], [], userId, reply, new Set(pictureIds([row.question]))))) return reply
-    const [updated] = await db
-      .update(bankQuestions)
-      .set({ question, tags: body.tags, updatedAt: new Date() })
-      .where(and(eq(bankQuestions.id, row.id), eq(bankQuestions.ownerId, userId)))
-      .returning()
-    return { question: toBankQuestion(updated!) }
+    // With the switch on, the copies nobody changed in their quiz follow at once; changed ones wait for
+    // the host's choice ("Update quizzes"). Edits never flow back from a quiz on their own.
+    const { updated, synced } = await db.transaction(async (tx) => {
+      const [updated] = await tx
+        .update(bankQuestions)
+        .set({ question, tags: body.tags ?? row.tags, autoSync: body.autoSync ?? row.autoSync, updatedAt: new Date() })
+        .where(and(eq(bankQuestions.id, row.id), eq(bankQuestions.ownerId, userId)))
+        .returning()
+      const synced = updated!.autoSync ? await bringCopiesUpToDate(tx, updated!, userId, (_, copy) => !changedInQuiz(copy)) : []
+      return { updated: updated!, synced }
+    })
+    return { question: toBankQuestion(updated), synced }
   })
 
   // Undo of a delete: the question comes back under its old id, so the quizzes linked to it stay linked.
@@ -225,7 +244,7 @@ export async function bankRoutes(app: FastifyInstance, { db }: { db: Db }) {
       if ((held?.n ?? 0) + 1 > MAX_BANK_QUESTIONS) return 'full' as const
       const rows = await tx
         .insert(bankQuestions)
-        .values({ id: body.id, ownerId: userId, question, tags: body.tags, createdAt: new Date(body.createdAt) })
+        .values({ id: body.id, ownerId: userId, question, tags: body.tags, autoSync: body.autoSync, createdAt: new Date(body.createdAt) })
         .onConflictDoNothing()
         .returning()
       return rows[0] ?? null

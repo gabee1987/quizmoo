@@ -1469,9 +1469,6 @@
       "newTitle": "Új kérdés",
       "editTitle": "Kérdés szerkesztése",
       "back": "Vissza a kérdéstárba",
-      "create": "Hozzáadás a tárhoz",
-      "created": "Betettük a kérdést a kérdéstáradba",
-      "saved": "Elmentettük a kérdést",
       "leave": "Mentés nélkül lépsz ki?",
       "missing": "Ez a kérdés már nincs a kérdéstáradban. Lehet, hogy törölted.",
       "usedIn_one": "{{count}} kvízben szerepel",
@@ -1480,7 +1477,9 @@
       "updateQuizzes": "Kvízek frissítése",
       "upToDate": "Naprakész",
       "older": "Régebbi változat",
-      "changedThere": "Ebben a kvízben módosítottad"
+      "changedThere": "Ebben a kvízben módosítottad",
+      "autoSync": "Kvízek automatikus frissítése",
+      "autoSyncHelp": "Minden itteni módosítás azonnal bekerül a kvízekbe. Ha egy kvízben átírtad a kérdést, az megvárja, hogy te frissítsd."
     },
     "sync": {
       "title": "Frissíted a kvízeket is?",
@@ -1522,6 +1521,11 @@
     "save": {
       "menu": "Mentés a kérdéstárba…",
       "openLinked": "Megnyitás a kérdéstárban",
+      "push": "Módosítások mentése a kérdéstárba",
+      "pushTitle": "Lecseréled a kérdéstárbeli változatot?",
+      "pushBody": "A kérdéstáradban a kérdés ennek a kvíznek a változatát kapja. Ha a kvízei automatikusan frissülnek, a többi kvíz is megkapja; ha nem, a kérdéstárból frissítheted őket.",
+      "pushSubmit": "Csere",
+      "pushed": "Frissítettük a kérdést a kérdéstáradban",
       "action": "Kérdéstárba",
       "title_one": "Mentsd a kérdést a kérdéstáradba",
       "title_other": "Mentsd a kérdéstáradba a kijelölt {{count}} kérdést",

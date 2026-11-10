@@ -53,9 +53,16 @@ export const bankUsesQueryOptions = (id: string) =>
 export const saveToBank =(questions: Question[], tags: string[]) =>
   apiFetch<{ questions: BankQuestion[] }>('/api/bank', { method: 'POST', body: JSON.stringify({ questions, tags }) })
 
+/**
+ * Saves a library question; left-out tags or switch stay as they are. `synced`: the quizzes whose
+ * unchanged copies took the new version (the switch is on).
+ */
+export const updateBankQuestion = (id: string, body: { question: Question; tags?: string[]; autoSync?: boolean }) =>
+  apiFetch<{ question: BankQuestion; synced: string[] }>(`/api/bank/${id}`, { method: 'PUT', body: JSON.stringify(body) })
+
 /** Undo of a delete: back under its old id, so quizzes linked to it stay linked. */
-export const restoreToBank = ({ id, question, tags, createdAt }: BankQuestion) =>
-  apiFetch<{ question: BankQuestion }>('/api/bank/restore', { method: 'POST', body: JSON.stringify({ id, question, tags, createdAt }) })
+export const restoreToBank = ({ id, question, tags, autoSync, createdAt }: BankQuestion) =>
+  apiFetch<{ question: BankQuestion }>('/api/bank/restore', { method: 'POST', body: JSON.stringify({ id, question, tags, autoSync, createdAt }) })
 
 export const deleteFromBank =(ids: string[]) =>
   apiFetch<{ deleted: number }>('/api/bank/delete', { method: 'POST', body: JSON.stringify({ ids }) })

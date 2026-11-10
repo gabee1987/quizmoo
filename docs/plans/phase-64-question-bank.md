@@ -19,6 +19,10 @@ Questions stop being locked into one quiz. A host copies questions to another of
 - **A question has its own page**, laid out like the editor (form, tags, the quizzes using it, phone preview), not a dialog. New questions are written there too (`/host/library/new`).
 - **Linked copies, with an offered update** (replaces "Copies, not links" below for the library): a copy added from the library or saved to it keeps `Question.bank = { id, hash }`. After a library edit the host is offered "Update the quizzes too?" with the quizzes holding an older version; nothing changes without asking. A copy changed in its own quiz since it was linked is marked "Changed in this quiz" and starts unticked; ticking it replaces those changes. `questionHash` leaves out ids, round, switch, colour and the link, so moving or switching a copy off does not count as a change.
 - **Undo of a delete keeps the id** (`POST /api/bank/restore`), so the quizzes' links survive it.
+- **Deleting asks first** (a confirmation naming the question), and Undo stays.
+- **The question page autosaves**, like everything else in the editor; there is no Save button. A new question is created by its first valid save, and the address then shows `/host/library/<id>` through a route mask, because a real navigation would remount the form while the host is typing.
+- **"Update the quizzes automatically"**, a switch per library question, **off by default** (the user agreed). On, every save brings the new version to the copies that were not changed in their quiz; changed copies keep waiting for "Update quizzes".
+- **Changes go one way, library to quizzes.** The user asked whether a quiz edit should flow back when the switch is on. No: a tweak for one event would silently rewrite the library and every other quiz, two quizzes could overwrite each other, and the editor saves on every keystroke. Instead a linked question changed in its quiz offers **"Save changes to the library"** in its More actions menu, behind a confirmation; with the switch on the other unchanged copies then follow (user's choice, 10 November 2026).
 
 ## Decided in this plan
 
