@@ -60,6 +60,12 @@ Error shape everywhere: `{ error: '<i18n key>' }`. Status codes: 400 invalid inp
 | `POST /api/bank` | session | `{ questions (1–200), tags }` -> 201 `{ questions }`: copies with fresh ids, no `groupId`, no `off`; picture check; 409 `errors.bankFull` past 2000 (per-host advisory lock) |
 | `PUT /api/bank/:id` | owner | `{ question, tags }`; 404 for another host's; pictures already stored are let through |
 | `POST /api/bank/delete` | owner | `{ ids }` -> `{ deleted }`; others' ids are skipped |
+| `POST /api/bank/restore` | session | `{ id, question, tags, createdAt }`: Undo of a delete under the old id (linked quizzes stay linked); 409 if the id is taken |
+| `GET /api/bank/:id` | owner | `{ question }`; 404 for another host's |
+| `GET /api/bank/:id/uses` | owner | `{ quizzes: [{ id, title, copies, changed, outdated }] }`: own quizzes with `questions @> [{ bank: { id } }]`; `changed`: a copy's `questionHash` differs from its `bank.hash`; `outdated`: it differs from the library's |
+| `POST /api/bank/:id/sync` | owner | `{ quizIds }` -> `{ updated }`: the library version replaces the linked copies (id, `groupId`, `off`, `color` kept, `bank.hash` renewed); others' and unlinked quizzes skipped |
+
+The UI calls the bank the "Question library" / "Kérdéstár" (`/host/library`); routes, table and code keep `bank`.
 | `POST /api/quizzes/batch-delete` | owner of all | `{ ids }` -> `{ deleted }`; 404 and nothing deleted if any id is missing or not owned |
 | `GET /api/me/settings` | session | the host's own settings (`hostSettingsSchema`, defaults when never saved): `{ settings, hasLockCode }` |
 | `PUT /api/me/lock-code` / `DELETE /api/me/lock-code` | session | the default screen lock code `{ code }` (4 to 8 digits), stored only as an argon2 hash in `host_settings.lock_code_hash`, never sent back |

@@ -13,9 +13,16 @@ Questions stop being locked into one quiz. A host copies questions to another of
 - **Share codes:** anyone with the code can **preview** the questions without an account (answers hidden); adding them to a bank or a quiz needs a host login. Default expiry 30 days, with 7 days and "never" as the other choices.
 - **Selecting several questions:** a "Select" mode in the editor's question list with checkboxes and an action bar, as on the quiz list page.
 
+## Decisions after testing part 2 (10 November 2026)
+
+- **Name:** "Question library" / "Kérdéstár" in the UI, route `/host/library`. "Bank" sounded corporate, and the farm-themed names were too playful. The code, routes and table keep `bank`. The public quiz library (phase 66) needs a name that cannot be confused with it (for example "Quiz library" / "Kvíztár").
+- **A question has its own page**, laid out like the editor (form, tags, the quizzes using it, phone preview), not a dialog. New questions are written there too (`/host/library/new`).
+- **Linked copies, with an offered update** (replaces "Copies, not links" below for the library): a copy added from the library or saved to it keeps `Question.bank = { id, hash }`. After a library edit the host is offered "Update the quizzes too?" with the quizzes holding an older version; nothing changes without asking. A copy changed in its own quiz since it was linked is marked "Changed in this quiz" and starts unticked; ticking it replaces those changes. `questionHash` leaves out ids, round, switch, colour and the link, so moving or switching a copy off does not count as a change.
+- **Undo of a delete keeps the id** (`POST /api/bank/restore`), so the quizzes' links survive it.
+
 ## Decided in this plan
 
-- **Copies, not links.** Adding a question to a quiz, the bank or another account always copies it with fresh ids. Editing one copy never changes another. The roadmap's "a newer version is in the bank" note is left for later: it needs version tracking that nothing else uses yet.
+- **Copies, not links.** Adding a question to a quiz, the bank or another account always copies it with fresh ids. Editing one copy never changes another. (For the library, changed on 10 November 2026: see above. Share codes still copy without a link: another account's library ids mean nothing to the receiver.)
 - **Pictures:** within one account a copy reuses the same image ids (as "Duplicate" does today). Redeeming a code copies the image bytes into the receiver's account, so the sharer deleting a picture never breaks the copy. The receiver's image quota (1000) applies; over it, the redeem fails with `errors.tooManyImages` and nothing is added.
 - **Codes:** `QM-` followed by 10 characters in two blocks of five (`QM-7K4PX-2XNAQ`) from a 31-character alphabet without 0, O, 1, I and L: about 49 bits, unguessable with the rate limits below. Codes are matched case-insensitively and with or without the dashes. A link carries the code: `/share/<code>`.
 - **Frozen copy:** a code stores its own copy of the questions (or the quiz with its settings and groups) when it is created. Revoking deletes the code and its copy at once; expired codes are deleted by the daily job.

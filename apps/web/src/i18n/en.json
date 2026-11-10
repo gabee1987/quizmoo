@@ -1463,8 +1463,35 @@
     }
   },
   "bank": {
-    "title": "Question bank",
+    "title": "Question library",
     "help": "Questions you keep for later. Add them to any quiz from the editor.",
+    "page": {
+      "newTitle": "New question",
+      "editTitle": "Edit question",
+      "back": "Back to the question library",
+      "create": "Add to library",
+      "created": "Question added to your library",
+      "saved": "Question saved",
+      "leave": "Leave without saving your changes?",
+      "missing": "This question is no longer in your library. It may have been deleted.",
+      "usedIn_one": "Used in {{count}} quiz",
+      "usedIn_other": "Used in {{count}} quizzes",
+      "notUsed": "No quiz uses this question yet. Add it from a quiz's editor with Add from library.",
+      "updateQuizzes": "Update quizzes",
+      "upToDate": "Up to date",
+      "older": "Older version",
+      "changedThere": "Changed in this quiz"
+    },
+    "sync": {
+      "title": "Update the quizzes too?",
+      "description": "These quizzes have an older version of the question. Each keeps the question in its place, round and switch.",
+      "list": "Quizzes with an older version",
+      "changedNote": "Changed in this quiz. Updating replaces those changes.",
+      "submit_one": "Update {{count}} quiz",
+      "submit_other": "Update {{count}} quizzes",
+      "done_one": "Updated in {{count}} quiz",
+      "done_other": "Updated in {{count}} quizzes"
+    },
     "tags": {
       "label": "Tags",
       "placeholder": "e.g. geography",
@@ -1481,32 +1508,35 @@
       "options": "Options"
     },
     "list": {
-      "empty": "Your bank is empty. In the editor, choose Save to bank in a question's menu, or import a spreadsheet here.",
+      "empty": "Your library is empty. Write a question here, import a spreadsheet, or choose Save to library in a question's menu in the editor.",
       "noMatches": "No questions match these filters.",
       "count_one": "{{count}} question of {{max}}",
       "count_other": "{{count}} questions of {{max}}",
       "matches_one": "{{count}} question found",
       "matches_other": "{{count}} questions found",
       "edit": "Edit question",
-      "deleted": "Question deleted from the bank"
+      "deleted": "Question deleted from the library",
+      "deleteTitle": "Delete this question from your library?",
+      "deleteBody": "Quizzes that use it keep their copy, but can no longer be updated from the library."
     },
     "save": {
-      "menu": "Save to bank…",
-      "action": "Save to bank",
-      "title_one": "Save the question to your bank",
-      "title_other": "Save {{count}} questions to your bank",
-      "description": "The bank keeps a copy. Tags help you find it again.",
+      "menu": "Save to library…",
+      "openLinked": "Open in question library",
+      "action": "Save to library",
+      "title_one": "Save the question to your library",
+      "title_other": "Save {{count}} questions to your library",
+      "description": "The library keeps a copy, linked to this quiz: later changes in the library can be brought here. Tags help you find it again.",
       "submit": "Save",
-      "done_one": "Question saved to your bank",
-      "done_other": "{{count}} questions saved to your bank",
-      "open": "Open bank"
+      "done_one": "Question saved to your library",
+      "done_other": "{{count}} questions saved to your library",
+      "open": "Open library"
     },
     "add": {
-      "open": "Add from bank",
-      "title": "Add from your bank",
+      "open": "Add from library",
+      "title": "Add from your question library",
       "description": "Pick questions. Copies go after the selected question.",
-      "list_one": "{{count}} bank question",
-      "list_other": "{{count}} bank questions",
+      "list_one": "{{count}} library question",
+      "list_other": "{{count}} library questions",
       "pick": "Pick: {{text}}",
       "preview": "Preview",
       "previewHint": "Click a question to see it here.",
@@ -1514,25 +1544,21 @@
       "seconds_other": "{{count}} seconds",
       "tooMany_one": "Only {{count}} more question fits this quiz.",
       "tooMany_other": "Only {{count}} more questions fit this quiz.",
-      "manage": "Manage bank",
+      "manage": "Open library",
       "submit_one": "Add question",
       "submit_other": "Add {{count}} questions",
-      "done_one": "Question added from your bank",
-      "done_other": "{{count}} questions added from your bank"
-    },
-    "edit": {
-      "title": "Edit bank question",
-      "description": "Changes apply to the bank's copy only, not to quizzes that already use it."
+      "done_one": "Question added from your library",
+      "done_other": "{{count}} questions added from your library"
     },
     "import": {
       "open": "Import from spreadsheet",
-      "title": "Import questions into your bank",
-      "help": "Fill in the quiz template and choose the file. Every question goes into your bank.",
+      "title": "Import questions into your library",
+      "help": "Fill in the quiz template and choose the file. Every question goes into your library.",
       "fileTypes": "CSV or TSV, as saved from Excel, Numbers or Google Sheets",
-      "sheetOnly": "This is a Quizmoo quiz file. Import it as a quiz from the quiz list, then save its questions to the bank.",
-      "noRounds": "Rounds are left out: bank questions do not belong to a round.",
-      "done_one": "{{count}} question imported into your bank",
-      "done_other": "{{count}} questions imported into your bank"
+      "sheetOnly": "This is a Quizmoo quiz file. Import it as a quiz from the quiz list, then save its questions to the library.",
+      "noRounds": "Rounds are left out: library questions do not belong to a round.",
+      "done_one": "{{count}} question imported into your library",
+      "done_other": "{{count}} questions imported into your library"
     }
   },
   "nicknames": {
@@ -1709,7 +1735,7 @@
     "tooManyImages": "You reached the image limit (1000). Delete old quizzes; unused images are cleaned up daily.",
     "imageNotFound": "A picture in these questions is not one of yours. Upload it again.",
     "tooManyQuestions": "That would take the quiz over 200 questions, so nothing was added.",
-    "bankFull": "Your question bank can hold 2000 questions. Delete a few first.",
+    "bankFull": "Your question library can hold 2000 questions. Delete a few first.",
     "imageTooBig": "This picture has too many pixels (50 megapixels at most). Make it smaller and upload it again.",
     "usernameTaken": "This username is already taken.",
     "notOnYourself": "You can't do this to your own account. Change your password in My settings.",
@@ -2301,8 +2327,8 @@
         "body": "These go for good and can't be brought back:",
         "quizzes_one": "{{count}} quiz",
         "quizzes_other": "{{count}} quizzes",
-        "bankQuestions_one": "{{count}} question in your question bank",
-        "bankQuestions_other": "{{count}} questions in your question bank",
+        "bankQuestions_one": "{{count}} question in your question library",
+        "bankQuestions_other": "{{count}} questions in your question library",
         "games_one": "{{count}} finished game with its results",
         "games_other": "{{count}} finished games with their results",
         "images_one": "{{count}} image",

@@ -11,8 +11,10 @@ import {
   CopyPlusIcon,
   EllipsisVerticalIcon,
   LayersIcon,
+  LibraryIcon,
   Trash2Icon,
 } from 'lucide-react'
+import { Link } from '@tanstack/react-router'
 import { Hint } from '@/components/hint'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
@@ -112,10 +114,19 @@ export function QuestionToolbar({
               <CopyPlusIcon aria-hidden="true" />
               {t('editor.copy.menu')}
             </DropdownMenuItem>
-            <DropdownMenuItem className="min-h-11" onSelect={onSaveToBank}>
-              <BookmarkPlusIcon aria-hidden="true" />
-              {t('bank.save.menu')}
-            </DropdownMenuItem>
+            {question.bank ? (
+              <DropdownMenuItem className="min-h-11" asChild>
+                <Link to="/host/library/$questionId" params={{ questionId: question.bank.id }}>
+                  <LibraryIcon aria-hidden="true" />
+                  {t('bank.save.openLinked')}
+                </Link>
+              </DropdownMenuItem>
+            ) : (
+              <DropdownMenuItem className="min-h-11" onSelect={onSaveToBank}>
+                <BookmarkPlusIcon aria-hidden="true" />
+                {t('bank.save.menu')}
+              </DropdownMenuItem>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

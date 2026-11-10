@@ -19,7 +19,6 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as HostIndexRouteImport } from './routes/host/index'
-import { Route as HostBankRouteImport } from './routes/host/bank'
 import { Route as HostNicknamesRouteImport } from './routes/host/nicknames'
 import { Route as HostPasswordRouteImport } from './routes/host/password'
 import { Route as HostSettingsRouteImport } from './routes/host/settings'
@@ -30,6 +29,9 @@ import { Route as PlayPinRouteImport } from './routes/play.$pin'
 import { Route as ScreenPinRouteImport } from './routes/screen.$pin'
 import { Route as HostGamesIndexRouteImport } from './routes/host/games.index'
 import { Route as HostGamesPinRouteImport } from './routes/host/games.$pin'
+import { Route as HostLibraryIndexRouteImport } from './routes/host/library.index'
+import { Route as HostLibraryQuestionIdRouteImport } from './routes/host/library.$questionId'
+import { Route as HostLibraryNewRouteImport } from './routes/host/library.new'
 import { Route as HostQuizzesIndexRouteImport } from './routes/host/quizzes.index'
 import { Route as HostQuizzesQuizIdRouteImport } from './routes/host/quizzes.$quizId'
 import { Route as HostResultsGameIdRouteImport } from './routes/host/results.$gameId'
@@ -84,11 +86,6 @@ const HostIndexRoute = HostIndexRouteImport.update({
   path: '/',
   getParentRoute: () => HostRouteRoute,
 } as any)
-const HostBankRoute = HostBankRouteImport.update({
-  id: '/bank',
-  path: '/bank',
-  getParentRoute: () => HostRouteRoute,
-} as any)
 const HostNicknamesRoute = HostNicknamesRouteImport.update({
   id: '/nicknames',
   path: '/nicknames',
@@ -139,6 +136,21 @@ const HostGamesPinRoute = HostGamesPinRouteImport.update({
   path: '/games/$pin',
   getParentRoute: () => HostRouteRoute,
 } as any)
+const HostLibraryIndexRoute = HostLibraryIndexRouteImport.update({
+  id: '/library/',
+  path: '/library/',
+  getParentRoute: () => HostRouteRoute,
+} as any)
+const HostLibraryQuestionIdRoute = HostLibraryQuestionIdRouteImport.update({
+  id: '/library/$questionId',
+  path: '/library/$questionId',
+  getParentRoute: () => HostRouteRoute,
+} as any)
+const HostLibraryNewRoute = HostLibraryNewRouteImport.update({
+  id: '/library/new',
+  path: '/library/new',
+  getParentRoute: () => HostRouteRoute,
+} as any)
 const HostQuizzesIndexRoute = HostQuizzesIndexRouteImport.update({
   id: '/quizzes/',
   path: '/quizzes/',
@@ -165,7 +177,6 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/register': typeof RegisterRoute
   '/terms': typeof TermsRoute
-  '/host/bank': typeof HostBankRoute
   '/host/nicknames': typeof HostNicknamesRoute
   '/host/password': typeof HostPasswordRoute
   '/host/settings': typeof HostSettingsRoute
@@ -176,9 +187,12 @@ export interface FileRoutesByFullPath {
   '/screen/$pin': typeof ScreenPinRoute
   '/host/': typeof HostIndexRoute
   '/host/games/$pin': typeof HostGamesPinRoute
+  '/host/library/$questionId': typeof HostLibraryQuestionIdRoute
+  '/host/library/new': typeof HostLibraryNewRoute
   '/host/quizzes/$quizId': typeof HostQuizzesQuizIdRoute
   '/host/results/$gameId': typeof HostResultsGameIdRoute
   '/host/games/': typeof HostGamesIndexRoute
+  '/host/library/': typeof HostLibraryIndexRoute
   '/host/quizzes/': typeof HostQuizzesIndexRoute
 }
 export interface FileRoutesByTo {
@@ -190,7 +204,6 @@ export interface FileRoutesByTo {
   '/privacy': typeof PrivacyRoute
   '/register': typeof RegisterRoute
   '/terms': typeof TermsRoute
-  '/host/bank': typeof HostBankRoute
   '/host/nicknames': typeof HostNicknamesRoute
   '/host/password': typeof HostPasswordRoute
   '/host/settings': typeof HostSettingsRoute
@@ -201,9 +214,12 @@ export interface FileRoutesByTo {
   '/screen/$pin': typeof ScreenPinRoute
   '/host': typeof HostIndexRoute
   '/host/games/$pin': typeof HostGamesPinRoute
+  '/host/library/$questionId': typeof HostLibraryQuestionIdRoute
+  '/host/library/new': typeof HostLibraryNewRoute
   '/host/quizzes/$quizId': typeof HostQuizzesQuizIdRoute
   '/host/results/$gameId': typeof HostResultsGameIdRoute
   '/host/games': typeof HostGamesIndexRoute
+  '/host/library': typeof HostLibraryIndexRoute
   '/host/quizzes': typeof HostQuizzesIndexRoute
 }
 export interface FileRoutesById {
@@ -217,7 +233,6 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/register': typeof RegisterRoute
   '/terms': typeof TermsRoute
-  '/host/bank': typeof HostBankRoute
   '/host/nicknames': typeof HostNicknamesRoute
   '/host/password': typeof HostPasswordRoute
   '/host/settings': typeof HostSettingsRoute
@@ -228,9 +243,12 @@ export interface FileRoutesById {
   '/screen/$pin': typeof ScreenPinRoute
   '/host/': typeof HostIndexRoute
   '/host/games/$pin': typeof HostGamesPinRoute
+  '/host/library/$questionId': typeof HostLibraryQuestionIdRoute
+  '/host/library/new': typeof HostLibraryNewRoute
   '/host/quizzes/$quizId': typeof HostQuizzesQuizIdRoute
   '/host/results/$gameId': typeof HostResultsGameIdRoute
   '/host/games/': typeof HostGamesIndexRoute
+  '/host/library/': typeof HostLibraryIndexRoute
   '/host/quizzes/': typeof HostQuizzesIndexRoute
 }
 export interface FileRouteTypes {
@@ -245,7 +263,6 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/register'
     | '/terms'
-    | '/host/bank'
     | '/host/nicknames'
     | '/host/password'
     | '/host/settings'
@@ -256,9 +273,12 @@ export interface FileRouteTypes {
     | '/screen/$pin'
     | '/host/'
     | '/host/games/$pin'
+    | '/host/library/$questionId'
+    | '/host/library/new'
     | '/host/quizzes/$quizId'
     | '/host/results/$gameId'
     | '/host/games/'
+    | '/host/library/'
     | '/host/quizzes/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -270,7 +290,6 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/register'
     | '/terms'
-    | '/host/bank'
     | '/host/nicknames'
     | '/host/password'
     | '/host/settings'
@@ -281,9 +300,12 @@ export interface FileRouteTypes {
     | '/screen/$pin'
     | '/host'
     | '/host/games/$pin'
+    | '/host/library/$questionId'
+    | '/host/library/new'
     | '/host/quizzes/$quizId'
     | '/host/results/$gameId'
     | '/host/games'
+    | '/host/library'
     | '/host/quizzes'
   id:
     | '__root__'
@@ -296,7 +318,6 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/register'
     | '/terms'
-    | '/host/bank'
     | '/host/nicknames'
     | '/host/password'
     | '/host/settings'
@@ -307,9 +328,12 @@ export interface FileRouteTypes {
     | '/screen/$pin'
     | '/host/'
     | '/host/games/$pin'
+    | '/host/library/$questionId'
+    | '/host/library/new'
     | '/host/quizzes/$quizId'
     | '/host/results/$gameId'
     | '/host/games/'
+    | '/host/library/'
     | '/host/quizzes/'
   fileRoutesById: FileRoutesById
 }
@@ -399,13 +423,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HostIndexRouteImport
       parentRoute: typeof HostRouteRoute
     }
-    '/host/bank': {
-      id: '/host/bank'
-      path: '/bank'
-      fullPath: '/host/bank'
-      preLoaderRoute: typeof HostBankRouteImport
-      parentRoute: typeof HostRouteRoute
-    }
     '/host/nicknames': {
       id: '/host/nicknames'
       path: '/nicknames'
@@ -476,6 +493,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HostGamesPinRouteImport
       parentRoute: typeof HostRouteRoute
     }
+    '/host/library/': {
+      id: '/host/library/'
+      path: '/library'
+      fullPath: '/host/library/'
+      preLoaderRoute: typeof HostLibraryIndexRouteImport
+      parentRoute: typeof HostRouteRoute
+    }
+    '/host/library/$questionId': {
+      id: '/host/library/$questionId'
+      path: '/library/$questionId'
+      fullPath: '/host/library/$questionId'
+      preLoaderRoute: typeof HostLibraryQuestionIdRouteImport
+      parentRoute: typeof HostRouteRoute
+    }
+    '/host/library/new': {
+      id: '/host/library/new'
+      path: '/library/new'
+      fullPath: '/host/library/new'
+      preLoaderRoute: typeof HostLibraryNewRouteImport
+      parentRoute: typeof HostRouteRoute
+    }
     '/host/quizzes/': {
       id: '/host/quizzes/'
       path: '/quizzes'
@@ -501,7 +539,6 @@ declare module '@tanstack/react-router' {
 }
 
 interface HostRouteRouteChildren {
-  HostBankRoute: typeof HostBankRoute
   HostNicknamesRoute: typeof HostNicknamesRoute
   HostPasswordRoute: typeof HostPasswordRoute
   HostSettingsRoute: typeof HostSettingsRoute
@@ -510,14 +547,16 @@ interface HostRouteRouteChildren {
   HostWhatsNewRoute: typeof HostWhatsNewRoute
   HostIndexRoute: typeof HostIndexRoute
   HostGamesPinRoute: typeof HostGamesPinRoute
+  HostLibraryQuestionIdRoute: typeof HostLibraryQuestionIdRoute
+  HostLibraryNewRoute: typeof HostLibraryNewRoute
   HostQuizzesQuizIdRoute: typeof HostQuizzesQuizIdRoute
   HostResultsGameIdRoute: typeof HostResultsGameIdRoute
   HostGamesIndexRoute: typeof HostGamesIndexRoute
+  HostLibraryIndexRoute: typeof HostLibraryIndexRoute
   HostQuizzesIndexRoute: typeof HostQuizzesIndexRoute
 }
 
 const HostRouteRouteChildren: HostRouteRouteChildren = {
-  HostBankRoute: HostBankRoute,
   HostNicknamesRoute: HostNicknamesRoute,
   HostPasswordRoute: HostPasswordRoute,
   HostSettingsRoute: HostSettingsRoute,
@@ -526,9 +565,12 @@ const HostRouteRouteChildren: HostRouteRouteChildren = {
   HostWhatsNewRoute: HostWhatsNewRoute,
   HostIndexRoute: HostIndexRoute,
   HostGamesPinRoute: HostGamesPinRoute,
+  HostLibraryQuestionIdRoute: HostLibraryQuestionIdRoute,
+  HostLibraryNewRoute: HostLibraryNewRoute,
   HostQuizzesQuizIdRoute: HostQuizzesQuizIdRoute,
   HostResultsGameIdRoute: HostResultsGameIdRoute,
   HostGamesIndexRoute: HostGamesIndexRoute,
+  HostLibraryIndexRoute: HostLibraryIndexRoute,
   HostQuizzesIndexRoute: HostQuizzesIndexRoute,
 }
 

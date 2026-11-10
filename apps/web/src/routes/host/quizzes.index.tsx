@@ -185,7 +185,7 @@ function QuizList() {
             </Button>
           </div>
           <Button variant="outline" asChild>
-            <Link to="/host/bank">
+            <Link to="/host/library">
               <LibraryIcon aria-hidden="true" />
               {/* Icon only on phones, like the starter quiz button. */}
               <span className="max-sm:sr-only">{t('bank.title')}</span>

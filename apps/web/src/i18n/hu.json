@@ -1463,8 +1463,35 @@
     }
   },
   "bank": {
-    "title": "Kérdésbank",
+    "title": "Kérdéstár",
     "help": "Későbbre félretett kérdéseid. A szerkesztőből bármelyik kvízbe beteheted őket.",
+    "page": {
+      "newTitle": "Új kérdés",
+      "editTitle": "Kérdés szerkesztése",
+      "back": "Vissza a kérdéstárba",
+      "create": "Hozzáadás a tárhoz",
+      "created": "Betettük a kérdést a kérdéstáradba",
+      "saved": "Elmentettük a kérdést",
+      "leave": "Mentés nélkül lépsz ki?",
+      "missing": "Ez a kérdés már nincs a kérdéstáradban. Lehet, hogy törölted.",
+      "usedIn_one": "{{count}} kvízben szerepel",
+      "usedIn_other": "{{count}} kvízben szerepel",
+      "notUsed": "Még egy kvíz sem használja. A kvíz szerkesztőjében a Hozzáadás a kérdéstárból gombbal teheted bele.",
+      "updateQuizzes": "Kvízek frissítése",
+      "upToDate": "Naprakész",
+      "older": "Régebbi változat",
+      "changedThere": "Ebben a kvízben módosítottad"
+    },
+    "sync": {
+      "title": "Frissíted a kvízeket is?",
+      "description": "Ezekben a kvízekben a kérdés régebbi változata van. A kérdés mindegyikben a helyén, a körében és a kapcsolójával marad.",
+      "list": "Kvízek régebbi változattal",
+      "changedNote": "Ebben a kvízben módosítottad. A frissítés felülírja ezeket a módosításokat.",
+      "submit_one": "{{count}} kvíz frissítése",
+      "submit_other": "{{count}} kvíz frissítése",
+      "done_one": "Frissítettük {{count}} kvízben",
+      "done_other": "Frissítettük {{count}} kvízben"
+    },
     "tags": {
       "label": "Címkék",
       "placeholder": "pl. földrajz",
@@ -1481,32 +1508,35 @@
       "options": "Lehetőségek"
     },
     "list": {
-      "empty": "Még üres a bankod. A szerkesztőben egy kérdés menüjében válaszd a Mentés a bankba lehetőséget, vagy importálj ide egy táblázatot.",
+      "empty": "Még üres a kérdéstárad. Írj ide egy kérdést, importálj egy táblázatot, vagy a szerkesztőben egy kérdés menüjében válaszd a Mentés a kérdéstárba lehetőséget.",
       "noMatches": "Egy kérdés sem felel meg ezeknek a szűrőknek.",
       "count_one": "{{count}} kérdés / {{max}}",
       "count_other": "{{count}} kérdés / {{max}}",
       "matches_one": "{{count}} találat",
       "matches_other": "{{count}} találat",
       "edit": "Kérdés szerkesztése",
-      "deleted": "Kitöröltük a kérdést a bankból"
+      "deleted": "Kitöröltük a kérdést a kérdéstárból",
+      "deleteTitle": "Törlöd ezt a kérdést a kérdéstáradból?",
+      "deleteBody": "A kvízekben, amelyek használják, megmarad a másolata, de a kérdéstárból már nem frissítheted őket."
     },
     "save": {
-      "menu": "Mentés a bankba…",
-      "action": "Bankba",
-      "title_one": "Mentsd a kérdést a bankodba",
-      "title_other": "Mentsd a bankodba a kijelölt {{count}} kérdést",
-      "description": "A bank egy másolatot tart meg. A címkékkel később könnyen megtalálod.",
+      "menu": "Mentés a kérdéstárba…",
+      "openLinked": "Megnyitás a kérdéstárban",
+      "action": "Kérdéstárba",
+      "title_one": "Mentsd a kérdést a kérdéstáradba",
+      "title_other": "Mentsd a kérdéstáradba a kijelölt {{count}} kérdést",
+      "description": "A kérdéstár egy másolatot tart meg, ehhez a kvízhez kötve: amit később a kérdéstárban módosítasz, azt ide is átveheted. A címkékkel könnyen megtalálod.",
       "submit": "Mentés",
-      "done_one": "Elmentettük a kérdést a bankodba",
-      "done_other": "Elmentettünk {{count}} kérdést a bankodba",
-      "open": "Bank megnyitása"
+      "done_one": "Elmentettük a kérdést a kérdéstáradba",
+      "done_other": "Elmentettünk {{count}} kérdést a kérdéstáradba",
+      "open": "Kérdéstár megnyitása"
     },
     "add": {
-      "open": "Hozzáadás a bankból",
-      "title": "Válassz a bankodból",
+      "open": "Hozzáadás a kérdéstárból",
+      "title": "Válassz a kérdéstáradból",
       "description": "Jelöld ki a kérdéseket. A másolatok a kiválasztott kérdés után kerülnek.",
-      "list_one": "{{count}} kérdés a bankban",
-      "list_other": "{{count}} kérdés a bankban",
+      "list_one": "{{count}} kérdés a kérdéstárban",
+      "list_other": "{{count}} kérdés a kérdéstárban",
       "pick": "Kijelölés: {{text}}",
       "preview": "Előnézet",
       "previewHint": "Kattints egy kérdésre, és itt megnézheted.",
@@ -1514,25 +1544,21 @@
       "seconds_other": "{{count}} másodperc",
       "tooMany_one": "Ebbe a kvízbe már csak {{count}} kérdés fér.",
       "tooMany_other": "Ebbe a kvízbe már csak {{count}} kérdés fér.",
-      "manage": "Bank kezelése",
+      "manage": "Kérdéstár megnyitása",
       "submit_one": "Hozzáadás",
       "submit_other": "{{count}} kérdés hozzáadása",
-      "done_one": "Betettük a kérdést a bankodból",
-      "done_other": "Betettünk {{count}} kérdést a bankodból"
-    },
-    "edit": {
-      "title": "Bankkérdés szerkesztése",
-      "description": "A módosítás csak a bankban lévő példányt érinti, a kvízekben lévőket nem."
+      "done_one": "Betettük a kérdést a kérdéstáradból",
+      "done_other": "Betettünk {{count}} kérdést a kérdéstáradból"
     },
     "import": {
       "open": "Importálás táblázatból",
-      "title": "Importálj kérdéseket a bankodba",
-      "help": "Töltsd ki a kvízsablont, és válaszd ki a fájlt. Minden kérdés a bankodba kerül.",
+      "title": "Importálj kérdéseket a kérdéstáradba",
+      "help": "Töltsd ki a kvízsablont, és válaszd ki a fájlt. Minden kérdés a kérdéstáradba kerül.",
       "fileTypes": "CSV vagy TSV, ahogy az Excel, a Numbers vagy a Google Táblázatok menti",
-      "sheetOnly": "Ez egy Quizmoo kvízfájl. Importáld kvízként a kvízlistán, aztán mentsd a kérdéseit a bankba.",
-      "noRounds": "A köröket kihagyjuk: a bank kérdései nem tartoznak körhöz.",
-      "done_one": "{{count}} kérdést importáltunk a bankodba",
-      "done_other": "{{count}} kérdést importáltunk a bankodba"
+      "sheetOnly": "Ez egy Quizmoo kvízfájl. Importáld kvízként a kvízlistán, aztán mentsd a kérdéseit a kérdéstárba.",
+      "noRounds": "A köröket kihagyjuk: a kérdéstár kérdései nem tartoznak körhöz.",
+      "done_one": "{{count}} kérdést importáltunk a kérdéstáradba",
+      "done_other": "{{count}} kérdést importáltunk a kérdéstáradba"
     }
   },
   "nicknames": {
@@ -1709,7 +1735,7 @@
     "tooManyImages": "Elérted a képek felső határát (1000). Töröld a régi kvízeket, a nem használt képeket naponta takarítjuk.",
     "imageNotFound": "Az egyik kép ezekben a kérdésekben nem a tiéd. Töltsd fel újra.",
     "tooManyQuestions": "Így a kvíz 200 kérdésnél több lenne, ezért nem adtunk hozzá semmit.",
-    "bankFull": "A kérdésbankodban 2000 kérdés fér el. Előbb törölj párat.",
+    "bankFull": "A kérdéstáradban 2000 kérdés fér el. Előbb törölj párat.",
     "imageTooBig": "Ez a kép túl nagy felbontású (legfeljebb 50 megapixel). Kicsinyítsd le, és töltsd fel újra.",
     "usernameTaken": "Ez a felhasználónév már foglalt.",
     "notOnYourself": "A saját fiókoddal ezt nem teheted meg. A jelszavadat a Beállításaimban cserélheted le.",
@@ -2301,8 +2327,8 @@
         "body": "Ezek végleg törlődnek, és nem lehet visszahozni őket:",
         "quizzes_one": "{{count}} kvíz",
         "quizzes_other": "{{count}} kvíz",
-        "bankQuestions_one": "{{count}} kérdés a kérdésbankodban",
-        "bankQuestions_other": "{{count}} kérdés a kérdésbankodban",
+        "bankQuestions_one": "{{count}} kérdés a kérdéstáradban",
+        "bankQuestions_other": "{{count}} kérdés a kérdéstáradban",
         "games_one": "{{count}} befejezett játék az eredményeivel",
         "games_other": "{{count}} befejezett játék az eredményeikkel",
         "images_one": "{{count}} kép",

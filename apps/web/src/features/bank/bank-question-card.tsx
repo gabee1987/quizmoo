@@ -1,4 +1,5 @@
 import type { BankQuestion } from '@quizmoo/shared'
+import { Link } from '@tanstack/react-router'
 import { CheckIcon, TagIcon } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -12,12 +13,15 @@ import { answerSummary } from './summary'
  */
 export function BankQuestionCard({
   item,
+  open,
   lead,
   actions,
   active = false,
   className,
 }: {
   item: BankQuestion
+  /** The question's own page: its text becomes the link. */
+  open?: { to: '/host/library/$questionId'; params: { questionId: string } }
   lead?: ReactNode
   actions?: ReactNode
   active?: boolean
@@ -35,7 +39,15 @@ export function BankQuestionCard({
         <span className="sr-only">{t(`questionTypes.${question.type}`)}</span>
       </span>
       <div className="flex min-w-0 flex-1 flex-col gap-1">
-        <p className="line-clamp-3 font-bold wrap-break-word">{question.text}</p>
+        <p className="line-clamp-3 font-bold wrap-break-word">
+          {open ? (
+            <Link {...open} className="rounded outline-none hover:underline focus-visible:ring-[3px] focus-visible:ring-ring">
+              {question.text}
+            </Link>
+          ) : (
+            question.text
+          )}
+        </p>
         {answer && (
           <p className="flex min-w-0 items-start gap-1 text-sm text-muted-foreground">
             <CheckIcon className="mt-0.5 size-4 shrink-0 text-success" aria-hidden="true" />

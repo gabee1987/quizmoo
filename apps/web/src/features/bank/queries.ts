@@ -29,8 +29,33 @@ export const bankTagsQueryOptions = queryOptions({
   queryFn: async () => (await apiFetch<{ tags: { tag: string; count: number }[] }>('/api/bank/tags')).tags,
 })
 
-export const saveToBank = (questions: Question[], tags: string[]) =>
+/** A quiz holding a copy of a library question: changed there since it was linked, and/or differing from the library. */
+export interface BankUse {
+  id: string
+  title: string
+  copies: number
+  changed: boolean
+  outdated: boolean
+}
+
+export const bankItemQueryOptions = (id: string) =>
+  queryOptions({
+    queryKey: ['bank', 'item', id],
+    queryFn: async () => (await apiFetch<{ question: BankQuestion }>(`/api/bank/${id}`)).question,
+  })
+
+export const bankUsesQueryOptions = (id: string) =>
+  queryOptions({
+    queryKey: ['bank', 'uses', id],
+    queryFn: async () => (await apiFetch<{ quizzes: BankUse[] }>(`/api/bank/${id}/uses`)).quizzes,
+  })
+
+export const saveToBank =(questions: Question[], tags: string[]) =>
   apiFetch<{ questions: BankQuestion[] }>('/api/bank', { method: 'POST', body: JSON.stringify({ questions, tags }) })
 
-export const deleteFromBank = (ids: string[]) =>
+/** Undo of a delete: back under its old id, so quizzes linked to it stay linked. */
+export const restoreToBank = ({ id, question, tags, createdAt }: BankQuestion) =>
+  apiFetch<{ question: BankQuestion }>('/api/bank/restore', { method: 'POST', body: JSON.stringify({ id, question, tags, createdAt }) })
+
+export const deleteFromBank =(ids: string[]) =>
   apiFetch<{ deleted: number }>('/api/bank/delete', { method: 'POST', body: JSON.stringify({ ids }) })

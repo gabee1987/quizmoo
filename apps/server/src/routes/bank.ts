@@ -4,16 +4,20 @@ import {
   bankDeleteSchema,
   bankListQuerySchema,
   bankSaveSchema,
+  bankTagsSchema,
   bankUpdateSchema,
+  questionHash,
+  quizInputSchema,
   type BankQuestion,
   type Question,
 } from '@quizmoo/shared'
 import { and, count, desc, eq, inArray, sql, type SQL } from 'drizzle-orm'
-import type { FastifyInstance } from 'fastify'
+import type { FastifyInstance, FastifyReply } from 'fastify'
 import { nanoid } from 'nanoid'
+import { z } from 'zod'
 import { requireSession } from '../auth/require-session.js'
 import type { Db } from '../db/index.js'
-import { bankQuestions } from '../db/schema.js'
+import { bankQuestions, quizzes } from '../db/schema.js'
 import { escapeLike, foldSql } from '../db/search.js'
 import { parseOr400 } from './http.js'
 import { parseLooseQuestions, pictureIds, picturesAllowed, withFreshIds } from './quizzes.js'
@@ -30,8 +34,20 @@ function toBankQuestion(row: BankRow): BankQuestion {
   }
 }
 
-/** A bank question has no round and is never switched off: those belong to a quiz. */
-const QUIZ_ONLY_FIELDS = ['off']
+/** A bank question has no round, is never switched off and links to nothing: those belong to a quiz's copy. */
+const QUIZ_ONLY_FIELDS = ['off', 'bank']
+
+const restoreSchema = z.object({
+  id: z.string().regex(/^[\w-]{12}$/),
+  question: z.unknown(),
+  tags: bankTagsSchema,
+  createdAt: z.iso.datetime(),
+})
+
+const syncSchema =z.object({ quizIds: z.array(z.string().min(1)).min(1).max(500) })
+
+/** The quiz's copies of the bank question `id`, in quiz order. */
+const copiesOf = (questions: readonly Question[], id: string) => questions.filter((q) => q.bank?.id === id)
 
 /** The host's question bank: questions kept outside any quiz, copied into quizzes with fresh ids. */
 export async function bankRoutes(app: FastifyInstance, { db }: { db: Db }) {
@@ -98,10 +114,87 @@ export async function bankRoutes(app: FastifyInstance, { db }: { db: Db }) {
     return reply.code(201).send({ questions: saved.map(toBankQuestion) })
   })
 
+  /** The host's bank question `id`, or a 404 (another host's looks missing too) and null. */
+  async function ownBankQuestion(id: string, userId: string, reply: FastifyReply): Promise<BankRow | null> {
+    const row = (await db.select().from(bankQuestions).where(eq(bankQuestions.id, id)))[0]
+    if (row && row.ownerId === userId) return row
+    void reply.code(404).send({ error: 'errors.notFound' })
+    return null
+  }
+
+  /** The host's quizzes holding a copy of the bank question `id`. */
+  const quizzesUsing = (id: string, userId: string) =>
+    db
+      .select({ id: quizzes.id, title: quizzes.title, questions: quizzes.questions, groups: quizzes.groups })
+      .from(quizzes)
+      .where(and(eq(quizzes.ownerId, userId), sql`${quizzes.questions} @> ${JSON.stringify([{ bank: { id } }])}::jsonb`))
+      .orderBy(desc(quizzes.updatedAt))
+
+  app.get<{ Params: { id: string } }>('/api/bank/:id', auth, async (request, reply) => {
+    const row = await ownBankQuestion(request.params.id, request.user!.id, reply)
+    return row ? { question: toBankQuestion(row) } : reply
+  })
+
+  // Where the question is used: per quiz, whether a copy was changed there since it was linked, and
+  // whether a copy lags behind the bank's version.
+  app.get<{ Params: { id: string } }>('/api/bank/:id/uses', auth, async (request, reply) => {
+    const row = await ownBankQuestion(request.params.id, request.user!.id, reply)
+    if (!row) return reply
+    const current = questionHash(row.question)
+    const rows = await quizzesUsing(row.id, request.user!.id)
+    return {
+      quizzes: rows.map((quiz) => {
+        const copies = copiesOf(quiz.questions, row.id)
+        return {
+          id: quiz.id,
+          title: quiz.title,
+          copies: copies.length,
+          changed: copies.some((q) => questionHash(q) !== q.bank!.hash),
+          outdated: copies.some((q) => q.bank!.hash !== current || questionHash(q) !== current),
+        }
+      }),
+    }
+  })
+
+  // The bank's version replaces the copies in the chosen quizzes; each copy keeps its id, round, switch
+  // and colour. Quizzes that are not the host's or hold no copy are skipped. All in one transaction.
+  app.post<{ Params: { id: string } }>('/api/bank/:id/sync', auth, async (request, reply) => {
+    const userId = request.user!.id
+    const row = await ownBankQuestion(request.params.id, userId, reply)
+    if (!row) return reply
+    const body = parseOr400(syncSchema, request.body, reply)
+    if (!body) return reply
+    const wanted = new Set(body.quizIds)
+    const hash = questionHash(row.question)
+    const { id: _, ...content } = row.question
+    const updates: { id: string; questions: Question[] }[] = []
+    for (const quiz of await quizzesUsing(row.id, userId)) {
+      if (!wanted.has(quiz.id)) continue
+      const questions = quiz.questions.map((q): Question =>
+        q.bank?.id === row.id
+          ? ({ ...content, id: q.id, groupId: q.groupId, off: q.off, color: q.color, bank: { id: row.id, hash } } as Question)
+          : q,
+      )
+      // The quiz must stay valid as a whole (it always should: the bank question was checked on save).
+      if (!quizInputSchema.safeParse({ title: quiz.title, questions, groups: quiz.groups }).success) continue
+      updates.push({ id: quiz.id, questions })
+    }
+    const now = new Date()
+    await db.transaction(async (tx) => {
+      for (const update of updates) {
+        await tx
+          .update(quizzes)
+          .set({ questions: update.questions, updatedAt: now })
+          .where(and(eq(quizzes.id, update.id), eq(quizzes.ownerId, userId)))
+      }
+    })
+    return { updated: updates.map((u) => u.id) }
+  })
+
   app.put<{ Params: { id: string } }>('/api/bank/:id', auth, async (request, reply) => {
     const userId = request.user!.id
-    const row = (await db.select().from(bankQuestions).where(eq(bankQuestions.id, request.params.id)))[0]
-    if (!row || row.ownerId !== userId) return reply.code(404).send({ error: 'errors.notFound' })
+    const row = await ownBankQuestion(request.params.id, userId, reply)
+    if (!row) return reply
     const body = parseOr400(bankUpdateSchema, request.body, reply)
     if (!body) return reply
     const checked = parseLooseQuestions([body.question], reply, QUIZ_ONLY_FIELDS)
@@ -114,6 +207,32 @@ export async function bankRoutes(app: FastifyInstance, { db }: { db: Db }) {
       .where(and(eq(bankQuestions.id, row.id), eq(bankQuestions.ownerId, userId)))
       .returning()
     return { question: toBankQuestion(updated!) }
+  })
+
+  // Undo of a delete: the question comes back under its old id, so the quizzes linked to it stay linked.
+  // An id that is taken (by anyone) is refused rather than overwritten.
+  app.post('/api/bank/restore', auth, async (request, reply) => {
+    const userId = request.user!.id
+    const body = parseOr400(restoreSchema, request.body, reply)
+    if (!body) return reply
+    const checked = parseLooseQuestions([body.question], reply, QUIZ_ONLY_FIELDS)
+    if (!checked) return reply
+    const question = checked[0]!
+    if (!(await picturesAllowed(db, [question], [], userId, reply))) return reply
+    const restored = await db.transaction(async (tx) => {
+      await tx.execute(sql`select pg_advisory_xact_lock(hashtext(${`bank:${userId}`}))`)
+      const [held] = await tx.select({ n: count() }).from(bankQuestions).where(eq(bankQuestions.ownerId, userId))
+      if ((held?.n ?? 0) + 1 > MAX_BANK_QUESTIONS) return 'full' as const
+      const rows = await tx
+        .insert(bankQuestions)
+        .values({ id: body.id, ownerId: userId, question, tags: body.tags, createdAt: new Date(body.createdAt) })
+        .onConflictDoNothing()
+        .returning()
+      return rows[0] ?? null
+    })
+    if (restored === 'full') return reply.code(409).send({ error: 'errors.bankFull' })
+    if (!restored) return reply.code(409).send({ error: 'errors.invalidInput' })
+    return reply.code(201).send({ question: toBankQuestion(restored) })
   })
 
   // Ids that are missing or someone else's are skipped; the answer says how many went.

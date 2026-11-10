@@ -17,7 +17,7 @@ import { useBankList } from './use-bank-list'
  * "Add from bank": pick questions from the host's bank (search, type and tag), with a preview of the
  * last one clicked from `md` up. At most `room` questions fit the quiz. `onAdd` gets them in the order picked.
  */
-export function AddFromBankDialog({ room, onAdd, onClose }: { room: number; onAdd: (questions: Question[]) => void; onClose: () => void }) {
+export function AddFromBankDialog({ room, onAdd, onClose }: { room: number; onAdd: (items: BankQuestion[]) => void; onClose: () => void }) {
   const { t } = useTranslation()
   const [filters, setFilters] = useState<BankFilters>({ q: '', type: null, tag: null })
   const { list, items, total, end } = useBankList(filters)
@@ -96,12 +96,12 @@ export function AddFromBankDialog({ room, onAdd, onClose }: { room: number; onAd
             {tooMany ? <span className="text-destructive">{t('bank.add.tooMany', { count: room })}</span> : t('host.batch.selected', { count: picked.size })}
           </p>
           <Button variant="ghost" className="max-sm:hidden" asChild>
-            <Link to="/host/bank">{t('bank.add.manage')}</Link>
+            <Link to="/host/library">{t('bank.add.manage')}</Link>
           </Button>
           <Button variant="secondary" className="max-sm:flex-1" onClick={onClose}>
             {t('common.cancel')}
           </Button>
-          <Button className="max-sm:flex-1" disabled={picked.size === 0 || tooMany} onClick={() => onAdd([...picked.values()].map((item) => item.question))}>
+          <Button className="max-sm:flex-1" disabled={picked.size === 0 || tooMany} onClick={() => onAdd([...picked.values()])}>
             {t('bank.add.submit', { count: picked.size })}
           </Button>
         </DialogFooter>

@@ -1,4 +1,4 @@
-import { MAX_BANK_QUESTIONS } from '@quizmoo/shared'
+import { MAX_BANK_QUESTIONS, questionHash, type Question } from '@quizmoo/shared'
 import { eq } from 'drizzle-orm'
 import { afterAll, beforeAll, expect, it } from 'vitest'
 import { createUser } from '../src/auth/users.js'
@@ -141,6 +141,45 @@ describeDb('question bank (database)', () => {
     expect(kept.statusCode).toBe(200)
   })
 
+  it('lists the quizzes using a question and updates the chosen ones, keeping each copy in its place', async () => {
+    const [item] = (
+      await req(alice, 'POST', '/api/bank', { questions: [single('Which city is on the Rába?', { bank: { id: 'ignored', hash: 'x' } })] })
+    ).json().questions as Listed[]
+    expect((item!.question as { bank?: unknown }).bank).toBeUndefined()
+    const fetched = await req(alice, 'GET', `/api/bank/${item!.id}`)
+    expect(fetched.json().question.id).toBe(item!.id)
+    expect((await req(bob, 'GET', `/api/bank/${item!.id}`)).statusCode).toBe(404)
+
+    const link = { id: item!.id, hash: questionHash(item!.question as Question) }
+    const copy = (id: string, extra: Record<string, unknown> = {}) => ({ ...item!.question, id, bank: link, ...extra })
+    const quiz = async (title: string, questions: object[], groups: object[] = []) =>
+      (await req(alice, 'POST', '/api/quizzes', { title, questions, groups })).json().quiz.id as string
+    const untouched = await quiz('Untouched', [tf('First'), copy('c1', { groupId: 'g1', off: true, color: 'red' })], [{ id: 'g1', title: 'Round', settings: {} }])
+    const changedHere = await quiz('Changed here', [copy('c2', { text: 'Which town is on the Rába?' })])
+    await quiz('Unrelated', [tf('Nothing linked')])
+
+    const uses = async () => (await req(alice, 'GET', `/api/bank/${item!.id}/uses`)).json().quizzes as { id: string; title: string; changed: boolean; outdated: boolean }[]
+    expect((await uses()).map(({ title, changed, outdated }) => ({ title, changed, outdated })).sort((a, b) => a.title.localeCompare(b.title))).toEqual([
+      { title: 'Changed here', changed: true, outdated: true },
+      { title: 'Untouched', changed: false, outdated: false },
+    ])
+
+    await req(alice, 'PUT', `/api/bank/${item!.id}`, { question: { ...item!.question, text: 'Which Hungarian city is on the Rába?' }, tags: [] })
+    expect((await uses()).find((u) => u.title === 'Untouched')).toMatchObject({ changed: false, outdated: true })
+
+    // Someone else's quiz id and an unknown one are skipped.
+    const synced = await req(alice, 'POST', `/api/bank/${item!.id}/sync`, { quizIds: [untouched, 'missing'] })
+    expect(synced.json()).toEqual({ updated: [untouched] })
+    const stored = (await req(alice, 'GET', `/api/quizzes/${untouched}`)).json().quiz.questions as Listed['question'][]
+    expect(stored[1]).toMatchObject({ id: 'c1', text: 'Which Hungarian city is on the Rába?', groupId: 'g1', off: true, color: 'red' })
+    expect((await uses()).find((u) => u.title === 'Untouched')).toMatchObject({ changed: false, outdated: false })
+    // The copy changed in its quiz stays as it was until it is chosen.
+    expect((await req(alice, 'GET', `/api/quizzes/${changedHere}`)).json().quiz.questions[0].text).toBe('Which town is on the Rába?')
+
+    expect((await req(bob, 'POST', `/api/bank/${item!.id}/sync`, { quizIds: [untouched] })).statusCode).toBe(404)
+    expect((await req(alice, 'POST', `/api/bank/${item!.id}/sync`, { quizIds: [] })).statusCode).toBe(400)
+  })
+
   it('pages by 50 and never goes past the limit', async () => {
     await db.delete(bankQuestions).where(eq(bankQuestions.ownerId, bobId))
     const filler = Array.from({ length: MAX_BANK_QUESTIONS - 2 }, (_, i) => ({
@@ -162,6 +201,19 @@ describeDb('question bank (database)', () => {
     expect(over.json().error).toBe('errors.bankFull')
     expect((await list(bob)).total).toBe(MAX_BANK_QUESTIONS - 2)
     expect((await req(bob, 'POST', '/api/bank', { questions: [tf('One'), tf('Two')] })).statusCode).toBe(201)
+  })
+
+  it('restores a deleted question under its old id, and never over another one', async () => {
+    const [item] = (await req(alice, 'POST', '/api/bank', { questions: [tf('Restore me')], tags: ['Undo'] })).json().questions as (Listed & { createdAt: string })[]
+    await req(alice, 'POST', '/api/bank/delete', { ids: [item!.id] })
+    const back = { id: item!.id, question: item!.question, tags: item!.tags, createdAt: item!.createdAt }
+    const restored = await req(alice, 'POST', '/api/bank/restore', back)
+    expect(restored.statusCode).toBe(201)
+    expect(restored.json().question).toMatchObject({ id: item!.id, tags: ['Undo'], createdAt: item!.createdAt })
+    // Taken now, by Alice or by anyone else.
+    expect((await req(alice, 'POST', '/api/bank/restore', back)).statusCode).toBe(409)
+    expect((await req(bob, 'POST', '/api/bank/restore', back)).statusCode).toBe(409)
+    expect((await req(alice, 'POST', '/api/bank/restore', { ...back, id: 'short' })).statusCode).toBe(400)
   })
 
   it('deletes only own questions, and everything goes with the account', async () => {

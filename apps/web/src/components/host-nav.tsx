@@ -34,7 +34,7 @@ import { useSiteInfo } from '@/lib/site'
 import { useLogout } from '@/lib/use-logout'
 import { useUnseenRelease } from '../features/whats-new/use-release-seen'
 
-type To = '/host' | '/host/quizzes' | '/host/bank' | '/host/games' | '/host/users' | '/host/nicknames'
+type To = '/host' | '/host/quizzes' | '/host/library' | '/host/games' | '/host/users' | '/host/nicknames'
 
 interface Item {
   to: To
@@ -55,7 +55,7 @@ export function HostNav({ user }: { user: User }) {
   const main: Item[] = [
     { to: '/host', label: t('nav.home'), icon: HouseIcon, exact: true },
     { to: '/host/quizzes', label: t('nav.quizzes'), icon: LayoutGridIcon, exact: false },
-    { to: '/host/bank', label: t('bank.title'), icon: LibraryIcon, exact: true, sidebarOnly: true },
+    { to: '/host/library', label: t('bank.title'), icon: LibraryIcon, exact: false, sidebarOnly: true },
     { to: '/host/games', label: t('nav.games'), icon: HistoryIcon, exact: true },
   ]
   const admin: Item[] =

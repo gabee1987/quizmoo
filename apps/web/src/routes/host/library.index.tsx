@@ -1,10 +1,11 @@
 import { MAX_BANK_QUESTIONS, type BankQuestion } from '@quizmoo/shared'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { createFileRoute } from '@tanstack/react-router'
-import { LibraryIcon, PencilIcon, Trash2Icon, UploadIcon } from 'lucide-react'
+import { Link, createFileRoute } from '@tanstack/react-router'
+import { LibraryIcon, PencilIcon, PlusIcon, Trash2Icon, UploadIcon } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
+import { ConfirmDialog } from '@/components/dialog'
 import { FormAlert } from '@/components/form-alert'
 import { Hint } from '@/components/hint'
 import { Spinner } from '@/components/spinner'
@@ -12,13 +13,12 @@ import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { BankFiltersBar } from '@/features/bank/bank-filters'
 import { BankQuestionCard } from '@/features/bank/bank-question-card'
-import { EditBankQuestionDialog } from '@/features/bank/edit-bank-question-dialog'
 import { ImportToBankDialog } from '@/features/bank/import-to-bank-dialog'
-import { deleteFromBank, saveToBank, type BankFilters } from '@/features/bank/queries'
+import { deleteFromBank, restoreToBank, type BankFilters } from '@/features/bank/queries'
 import { useBankList } from '@/features/bank/use-bank-list'
 import { toastError } from '@/lib/toast'
 
-export const Route = createFileRoute('/host/bank')({
+export const Route = createFileRoute('/host/library/')({
   component: BankPage,
 })
 
@@ -30,21 +30,23 @@ function BankPage() {
   const queryClient = useQueryClient()
   const [filters, setFilters] = useState<BankFilters>({ q: '', type: null, tag: null })
   const { list, items, total, end } = useBankList(filters)
-  const [editing, setEditing] = useState<BankQuestion | null>(null)
   const [importing, setImporting] = useState(false)
+  // The question waiting for "Delete it?".
+  const [deleting, setDeleting] = useState<BankQuestion | null>(null)
   const filtered = filters.q.trim() !== '' || filters.type !== null || filters.tag !== null
   const number = new Intl.NumberFormat(i18n.language)
   const refresh = () => void queryClient.invalidateQueries({ queryKey: ['bank'] })
 
-  // Undo saves the question again (with a new id): deleting it already took the old one.
+  // Undo brings it back under its old id, so quizzes linked to it stay linked.
   const restore = useMutation({
-    mutationFn: (item: BankQuestion) => saveToBank([item.question], item.tags),
+    mutationFn: restoreToBank,
     onSuccess: refresh,
     onError: toastError,
   })
   const remove = useMutation({
     mutationFn: (item: BankQuestion) => deleteFromBank([item.id]),
     onSuccess: (_, item) => {
+      setDeleting(null)
       refresh()
       toast(t('bank.list.deleted'), {
         id: `bank-deleted-${item.id}`,
@@ -62,10 +64,18 @@ function BankPage() {
           <h1 className="text-3xl font-black tracking-tight">{t('bank.title')}</h1>
           <p className="text-muted-foreground">{t('bank.help')}</p>
         </div>
-        <Button variant="outline" onClick={() => setImporting(true)}>
-          <UploadIcon aria-hidden="true" />
-          {t('bank.import.open')}
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" onClick={() => setImporting(true)}>
+            <UploadIcon aria-hidden="true" />
+            {t('bank.import.open')}
+          </Button>
+          <Button asChild>
+            <Link to="/host/library/new">
+              <PlusIcon aria-hidden="true" />
+              {t('bank.page.newTitle')}
+            </Link>
+          </Button>
+        </div>
       </div>
 
       <BankFiltersBar value={filters} onChange={setFilters} />
@@ -94,12 +104,15 @@ function BankPage() {
               <li key={item.id}>
                 <BankQuestionCard
                   item={item}
+                  open={{ to: '/host/library/$questionId', params: { questionId: item.id } }}
                   className="h-full"
                   actions={
                     <div className="-my-1 -mr-1 flex shrink-0 flex-col">
                       <Hint label={t('bank.list.edit')}>
-                        <Button variant="ghost" size="icon" aria-label={t('bank.list.edit')} onClick={() => setEditing(item)}>
-                          <PencilIcon aria-hidden="true" />
+                        <Button variant="ghost" size="icon" asChild>
+                          <Link to="/host/library/$questionId" params={{ questionId: item.id }} aria-label={t('bank.list.edit')}>
+                            <PencilIcon aria-hidden="true" />
+                          </Link>
                         </Button>
                       </Hint>
                       <Hint label={t('common.delete')}>
@@ -109,7 +122,7 @@ function BankPage() {
                           aria-label={t('common.delete')}
                           className="text-destructive hover:text-destructive"
                           disabled={remove.isPending}
-                          onClick={() => remove.mutate(item)}
+                          onClick={() => setDeleting(item)}
                         >
                           <Trash2Icon aria-hidden="true" />
                         </Button>
@@ -129,8 +142,22 @@ function BankPage() {
         </div>
       )}
 
-      {editing && <EditBankQuestionDialog item={editing} onClose={() => setEditing(null)} />}
       {importing && <ImportToBankDialog onClose={() => setImporting(false)} />}
+      {deleting && (
+        <ConfirmDialog
+          title={t('bank.list.deleteTitle')}
+          confirmLabel={t('common.delete')}
+          danger
+          pending={remove.isPending}
+          onConfirm={() => remove.mutate(deleting)}
+          onCancel={() => setDeleting(null)}
+        >
+          <span className="flex flex-col gap-2">
+            <span className="font-bold wrap-break-word text-foreground">{deleting.question.text}</span>
+            <span>{t('bank.list.deleteBody')}</span>
+          </span>
+        </ConfirmDialog>
+      )}
     </div>
   )
 }

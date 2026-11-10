@@ -2,7 +2,9 @@ import {
   MAX_GROUPS,
   MAX_QUESTIONS,
   canShuffleQuestions,
+  questionHash,
   shuffleQuestionOrder,
+  type BankQuestion,
   type GameSettings,
   type Question,
   type QuestionGroup,
@@ -509,8 +511,12 @@ function Editor({ quiz }: { quiz: Quiz }) {
    * Copies of bank questions (new ids) go after the selected question, into its group, or at the end of
    * the selected group, in the order picked; the first one is selected. They keep their own time and points.
    */
-  const addFromBank = (picked: Question[]) => {
-    const copies = picked.map(({ groupId: _, ...question }) => copyQuestion(question))
+  const addFromBank = (picked: BankQuestion[]) => {
+    // Linked to their library question, so its later edits can be brought here.
+    const copies = picked.map(({ id, question: { groupId: _, ...question } }) => ({
+      ...copyQuestion(question),
+      bank: { id, hash: questionHash(question) },
+    }))
     let next = layout
     let after = selectedId
     for (const copy of copies) {
@@ -1421,8 +1427,18 @@ function Editor({ quiz }: { quiz: Quiz }) {
           <SaveToBankDialog
             questions={banking}
             onClose={(saved) => {
+              if (saved) {
+                // The quiz's questions now follow their library copies, so library edits can come back here.
+                const links = new Map(banking.map((q, i) => [q.id, saved[i]]))
+                setQuestions((list) =>
+                  list.map((q) => {
+                    const item = links.get(q.id)
+                    return item ? { ...q, bank: { id: item.id, hash: questionHash(item.question) } } : q
+                  }),
+                )
+                stopSelecting()
+              }
               setBanking(null)
-              if (saved) stopSelecting()
             }}
           />
         )}
