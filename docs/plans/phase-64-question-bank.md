@@ -91,6 +91,12 @@ Out of scope: community banks (after 62), public question collections (66), a "n
 7. **Part 3 web:** Share dialog, `/share/$code`, My share codes, legal texts. Check: screenshots of the preview logged out and logged in; e2e with two host accounts: share a quiz, redeem it as the other host, revoke, the code stops working.
 8. **Docs:** a `question-bank` feature skill (decisions above), the `server-api` route table, the `database` skill, backlog and CHANGELOG. Check: read the diff.
 
+## Results (12 November 2026)
+
+- All three parts delivered; the decisions and deviations are in the `question-library` skill, so this file can be deleted once the branch is merged.
+- Checked: `pnpm typecheck`; tests: shared 71, web 384, server 673 (16 share-code tests); e2e `share-codes`, `copy-to-quiz`, `question-library` and `legal` against the production build; screenshots at 390 and 1440 px in both modes, the share dialog also through the LAN address.
+- Fixed after the user's test: duplicate codes for the same quiz, unclear add actions, a shared quiz offered for the library, no navigation after "Enter a code", Copy code copying nothing on plain http, and the share dialog overflowing on the LAN address.
+
 ## Done when
 
 - A question can be copied to another quiz, saved to and added from the bank, and shared by code, as one question, a selection or a whole quiz.

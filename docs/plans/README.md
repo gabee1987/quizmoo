@@ -70,7 +70,7 @@ Finished plans are deleted once their branch is merged: `CHANGELOG.md` records w
 | 61 | [Platform metrics and statistics](phase-61-metrics.md) (fifth) | `feature/platform-metrics` | planned |
 | 62 | [Communities: separate spaces with their own owner](platform-roadmap.md#62-communities-separate-spaces-with-their-own-owner) | to decide | draft |
 | 63 | [Community dashboard](platform-roadmap.md#63-community-dashboard) | to decide | draft |
-| 64 | [Question bank and share codes](phase-64-question-bank.md) (second) | `feature/question-bank-and-reactions` | in progress |
+| 64 | [Question bank and share codes](phase-64-question-bank.md) (second) | `feature/question-bank-and-reactions` | done |
 | 65 | [Editing quizzes together](platform-roadmap.md#65-editing-quizzes-together) | to decide | draft |
 | 66 | [Public quiz library](platform-roadmap.md#66-public-quiz-library) | to decide | draft |
 | 67 | [Party games: a section next to quizzes](platform-roadmap.md#67-party-games-a-section-next-to-quizzes) | to decide | draft |

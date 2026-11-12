@@ -64,8 +64,11 @@ Error shape everywhere: `{ error: '<i18n key>' }`. Status codes: 400 invalid inp
 | `GET /api/bank/:id` | owner | `{ question }`; 404 for another host's |
 | `GET /api/bank/:id/uses` | owner | `{ quizzes: [{ id, title, copies, changed, outdated }] }`: own quizzes with `questions @> [{ bank: { id } }]`; `changed`: a copy's `questionHash` differs from its `bank.hash`; `outdated`: it differs from the library's |
 | `POST /api/bank/:id/sync` | owner | `{ quizIds }` -> `{ updated }`: the library version replaces the linked copies (id, `groupId`, `off`, `color` kept, `bank.hash` renewed); others' and unlinked quizzes skipped |
-
-The UI calls the bank the "Question library" / "Kérdéstár" (`/host/library`); routes, table and code keep `bank`.
+| `POST /api/share` | session | `{ kind: 'questions', title, questions, expiry }` or `{ kind: 'quiz', quizId, expiry }` (`shareCreateSchema`, expiry `7d` / `30d` / `never`) -> 201 `{ share, reused: false }`, or 200 `{ share, reused: true }` when a live code already holds that quiz (`content->>'quizId'`) or equal questions: its copy is refreshed and its expiry restarts; picture check; 409 `errors.tooManyShareCodes` past 100 live codes (per-host advisory lock) |
+| `GET /api/share` | session | `{ shares }`: own live codes (`ShareCodeSummary`), newest first |
+| `DELETE /api/share/:id` | owner | revoke: deletes the code and its copy (204); 404 for another host's |
+| `GET /api/share/:code` | - | `SharePreview`: title, kind, count and the questions through `toPublicQuestion` (no answers, no library links), `Cache-Control: no-store`; 20 a minute per IP; wrong, expired and revoked codes all 404 `errors.shareCodeNotFound` |
+| `POST /api/share/:code/redeem` | session | `{ target: 'bank' }`, `{ target: 'quiz', quizId }` or `{ target: 'newQuiz' }` -> `ShareRedeemResult`; a quiz code allows only `newQuiz`, a questions code only the other two (400); one transaction: fresh ids, pictures copied to the receiver (the sharer's own redeem reuses them), `uses` raised; quiz, library and picture limits apply; 30 an hour per account |
 | `POST /api/quizzes/batch-delete` | owner of all | `{ ids }` -> `{ deleted }`; 404 and nothing deleted if any id is missing or not owned |
 | `GET /api/me/settings` | session | the host's own settings (`hostSettingsSchema`, defaults when never saved): `{ settings, hasLockCode }` |
 | `PUT /api/me/lock-code` / `DELETE /api/me/lock-code` | session | the default screen lock code `{ code }` (4 to 8 digits), stored only as an argon2 hash in `host_settings.lock_code_hash`, never sent back |
@@ -95,6 +98,8 @@ The UI calls the bank the "Question library" / "Kérdéstár" (`/host/library`);
 | `GET /api/games/:gameId/results` | owner | full results JSON |
 | `GET /api/games/:gameId/results.csv?lang=hu\|en` | owner | CSV export |
 | `DELETE /api/games/:gameId` | owner | delete a finished game and its results, or call off a scheduled game before joining opens |
+
+The UI calls the bank the "Question library" / "Kérdéstár" (`/host/library`); routes, table and code keep `bank`.
 
 Quiz question ids and option ids are generated server-side with `nanoid(8)` when missing, so the editor can send new questions without ids.
 

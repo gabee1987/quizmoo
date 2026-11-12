@@ -73,6 +73,7 @@ Collected while testing phases 9 to 12. Effort as above.
 - Tooltips in the app's own bubble instead of the browser's `title`, on hover and keyboard focus (phase 57).
 - Tutorial tours on every main host page and in the players' lobby, and a help page for everyone (phase 34).
 - Partial credit for multiple choice, chosen per question, with "Partly right" on every screen (phase 59).
+- Copy questions to another quiz, a question library per host with linked copies, and share codes for questions and whole quizzes (phase 64).
 
 ### Open
 

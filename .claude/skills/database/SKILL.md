@@ -12,7 +12,8 @@ description: Drizzle and PostgreSQL conventions for apps/server: schema, migrati
 - Comparing a raw `sql` expression with a time: pass ``sql`${date.toISOString()}::timestamptz` ``, not a `Date`. Drizzle maps a `Date` only against a typed column; next to a raw expression the driver throws `ERR_INVALID_ARG_TYPE`.
 - JSON columns are typed with `$type<>()` from shared types and validated with Zod on write.
 - Images: accept `image/jpeg`, `image/png`, `image/webp` up to 5 MB, resize with `sharp` to max 1280 px on the long edge, store as WebP. Reject anything else with 400.
-- A new table that names images (as `bank_questions.question` does) must be added to `deleteUnusedImages` in `retention.ts`, or the daily clean-up deletes its pictures; and to the account export in `routes/account.ts`.
+- A new table that names images (as `bank_questions.question` and `share_codes.content` do) must be added to `deleteUnusedImages` in `retention.ts`, or the daily clean-up deletes its pictures; and to the account overview and export in `routes/account.ts`.
+- `bank_questions`: one question per row (`question` jsonb, `tags` text array, `auto_sync`), cascade on the owner. `share_codes`: unique `code`, `kind` (`questions` | `quiz`), a frozen `content` (`ShareContent`: the questions, plus `quizId`, groups, settings and description for a quiz), `expires_at` (null: never), `uses`; cascade on the owner, expired rows deleted by the daily job (`deleteExpiredShareCodes`).
 - Search columns are generated: `foldSql(...)` over the JSON (`games.search_text`, `bank_questions.search_text`), compared with `like foldSql(pattern)` and `escapeLike`.
 
 ## Host settings
