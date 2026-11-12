@@ -36,11 +36,14 @@ export const Route = createFileRoute('/host')({
  * in the quiz editor, a full-width workspace with its own back button, and on a running game's page.
  * While the screens are locked, the lock screen instead of every page.
  */
+/** The editors (a quiz, a library question): full-width workspaces with their own top bar. */
+const EDITORS: string[] = ['/host/quizzes/$quizId', '/host/library/$questionId', '/host/library/new']
+
 function HostLayout() {
   const { user } = Route.useRouteContext()
   const me = useQuery(meQueryOptions)
   useScreenLockSync()
-  const editing = useMatches({ select: (matches) => matches.some((m) => m.routeId === '/host/quizzes/$quizId') })
+  const editing = useMatches({ select: (matches) => matches.some((m) => EDITORS.includes(m.routeId)) })
   const inGame = useMatches({ select: (matches) => matches.some((m) => m.routeId === '/host/games/$pin') })
   // A running game's board takes the whole width unless the host opens the sidebar from its top bar; the lobby keeps it.
   const lobby = useGameStore().host?.phase === 'lobby'

@@ -1468,6 +1468,7 @@
     "page": {
       "newTitle": "New question",
       "editTitle": "Edit question",
+      "details": "Tags and quizzes",
       "back": "Back to the question library",
       "leave": "Leave without saving your changes?",
       "missing": "This question is no longer in your library. It may have been deleted.",

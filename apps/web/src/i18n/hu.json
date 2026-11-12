@@ -1468,6 +1468,7 @@
     "page": {
       "newTitle": "Új kérdés",
       "editTitle": "Kérdés szerkesztése",
+      "details": "Címkék és kvízek",
       "back": "Vissza a kérdéstárba",
       "leave": "Mentés nélkül lépsz ki?",
       "missing": "Ez a kérdés már nincs a kérdéstáradban. Lehet, hogy törölted.",

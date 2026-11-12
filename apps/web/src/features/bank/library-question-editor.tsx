@@ -4,6 +4,8 @@ import { Link, useBlocker, useNavigate } from '@tanstack/react-router'
 import { ArrowLeftIcon, EyeIcon, RefreshCwIcon, TriangleAlertIcon } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { AppMenu } from '@/components/app-menu'
+import { Hint } from '@/components/hint'
 import { Button } from '@/components/ui/button'
 import { newQuestion } from '@/features/editor/draft'
 import { PhonePreview } from '@/features/editor/phone-preview'
@@ -101,63 +103,103 @@ export function LibraryQuestionEditor({ item }: { item: BankQuestion | null }) {
 
   const pick = (type: QuestionType) => setQuestion(newQuestion(type, EMPTY_QUIZ.questionDefaults))
   const Icon = question ? typeIcons[question.type] : null
-  const preview = question && (
+  // `label`: the docked column's heading, shown beside the preview's Try it button.
+  const preview = (label?: string) => (
     <PhonePreview
+      label={label}
       question={question}
       index={0}
-      count={1}
+      count={question ? 1 : 0}
       settings={EMPTY_QUIZ.settings}
-      quiz={{ title: t('bank.title'), questions: [question], groups: [], settings: EMPTY_QUIZ.settings }}
+      quiz={{ title: t('bank.title'), questions: question ? [question] : [], groups: [], settings: EMPTY_QUIZ.settings }}
       from={valid ? 0 : null}
     />
   )
 
+  // The quiz editor's workspace without what belongs to a quiz (its list, rounds, settings and Play): the
+  // same top bar, the tags and the quizzes using it where the editor has its question list, the question
+  // in the middle and the docked phone preview on the right.
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-5">
-      <div className="flex flex-wrap items-center gap-3">
-        <Button variant="ghost" size="icon" asChild>
-          <Link to="/host/library" aria-label={t('bank.page.back')}>
-            <ArrowLeftIcon aria-hidden="true" />
-          </Link>
-        </Button>
-        <h1 className="min-w-0 flex-1 text-3xl font-black tracking-tight">{id ? t('bank.page.editTitle') : t('bank.page.newTitle')}</h1>
-        {question && <SaveIndicator status={status} onRetry={retry} />}
+    <div className="mx-auto flex w-full max-w-[100rem] flex-col gap-4 pt-3">
+      <div className="z-30 sm:sticky sm:top-2">
+        <header className="flex flex-wrap items-center gap-2 rounded-2xl border bg-card/95 p-2 shadow-soft backdrop-blur">
+          <AppMenu />
+          <Hint label={t('bank.page.back')}>
+            <Button asChild variant="ghost" size="icon" aria-label={t('bank.page.back')}>
+              <Link to="/host/library">
+                <ArrowLeftIcon aria-hidden="true" />
+              </Link>
+            </Button>
+          </Hint>
+          <h1 className="flex h-12 min-w-0 flex-1 basis-56 items-center px-3 text-xl font-black">
+            <span className="truncate">{id ? t('bank.page.editTitle') : t('bank.page.newTitle')}</span>
+          </h1>
+          {question && (
+            <div className="ml-auto flex items-center gap-2">
+              <SaveIndicator status={status} onRetry={retry} />
+            </div>
+          )}
+        </header>
       </div>
 
-      {!question ? (
-        <div className="flex flex-col gap-4 rounded-2xl border bg-card p-4 shadow-soft sm:p-5">
-          <h2 className="text-xl font-extrabold">{t('editor.pickType')}</h2>
-          <TypePicker onPick={pick} />
+      <div className="grid items-start gap-4 lg:grid-cols-[20rem_minmax(0,1fr)] xl:grid-cols-[21.5rem_minmax(0,1fr)_22rem] xl:gap-0">
+        {/* After the question on phones; beside it, where the editor has its list, from lg. */}
+        <div className="min-w-0 self-stretch max-lg:order-last">
+          <aside
+            aria-label={t('bank.page.details')}
+            className="flex flex-col divide-y rounded-2xl border bg-card shadow-soft lg:sticky lg:top-22 lg:max-h-[calc(100dvh-7rem)] lg:w-80 lg:overflow-y-auto xl:mr-6"
+          >
+            <div className="p-4">
+              <BankTagsField value={tags} onChange={setTags} />
+            </div>
+            {id && (
+              <UsedIn uses={uses.data ?? null} outdated={outdated.length} onSync={() => setSyncing(true)} autoSync={autoSync} onAutoSync={setAutoSync} />
+            )}
+          </aside>
         </div>
-      ) : (
-        <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_24rem]">
-          <div className="flex min-w-0 flex-col gap-4">
-            <section className="flex flex-col gap-4 rounded-2xl border bg-card p-4 shadow-soft sm:p-5">
+
+        <section className="flex min-w-0 flex-col gap-4">
+          {!question ? (
+            <div className="flex flex-col gap-4 rounded-2xl border bg-card p-4 shadow-soft sm:p-5">
+              <h2 className="text-xl font-extrabold">{t('editor.pickType')}</h2>
+              <TypePicker onPick={pick} />
+            </div>
+          ) : (
+            <div className="flex animate-fade-up flex-col gap-4 rounded-2xl border bg-card p-4 shadow-soft sm:p-5">
+              {/* The editor's question toolbar, without the actions that place a question in a quiz. */}
               <div className="flex items-center gap-2">
                 {Icon && (
                   <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-primary text-primary-foreground shadow-[0_3px_0_0_var(--primary-edge)]">
                     <Icon className="size-5" aria-hidden="true" />
                   </span>
                 )}
-                <p className="text-lg font-black">{t(`questionTypes.${question.type}`)}</p>
+                <h2 className="min-w-0 flex-1 leading-tight">
+                  <span className="block text-lg font-black">{t(`questionTypes.${question.type}`)}</span>
+                  <span className="block text-sm font-semibold text-muted-foreground">{t('bank.title')}</span>
+                </h2>
               </div>
               <QuestionForm question={question} onChange={setQuestion} errors={errors} path="questions.0" symbols={EMPTY_QUIZ.settings.answerSymbols} />
-            </section>
-            <section className="flex flex-col gap-3 rounded-2xl border bg-card p-4 shadow-soft sm:p-5">
-              <BankTagsField value={tags} onChange={setTags} />
-            </section>
-            {id && (
-              <UsedIn uses={uses.data ?? null} outdated={outdated.length} onSync={() => setSyncing(true)} autoSync={autoSync} onAutoSync={setAutoSync} />
-            )}
-            <Button variant="outline" className="lg:hidden" onClick={() => setPreviewOpen((open) => !open)} aria-expanded={previewOpen}>
-              <EyeIcon aria-hidden="true" />
-              {previewOpen ? t('editor.hidePreview') : t('editor.showPreview')}
-            </Button>
-            {previewOpen && <div className="animate-fade-up lg:hidden">{preview}</div>}
+            </div>
+          )}
+
+          {question && (
+            <>
+              <Button variant="outline" className="xl:hidden" onClick={() => setPreviewOpen((open) => !open)} aria-expanded={previewOpen}>
+                <EyeIcon aria-hidden="true" />
+                {previewOpen ? t('editor.hidePreview') : t('editor.showPreview')}
+              </Button>
+              {previewOpen && <div className="animate-fade-up xl:hidden">{preview()}</div>}
+            </>
+          )}
+        </section>
+
+        <aside className="sticky top-22 hidden min-w-0 xl:block">
+          {/* Scaled like the editor's, so three panes fit a 1280 px laptop. */}
+          <div className="ml-6 flex w-82 flex-col gap-2">
+            <div className="zoom-[0.82]">{preview(t('editor.preview'))}</div>
           </div>
-          <aside className="sticky top-4 hidden lg:block">{preview}</aside>
-        </div>
-      )}
+        </aside>
+      </div>
 
       {syncing && id && uses.data && <SyncQuizzesDialog bankId={id} uses={uses.data} onClose={() => setSyncing(false)} />}
     </div>
@@ -185,9 +227,9 @@ function UsedIn({
   const { t } = useTranslation()
   if (!uses) return null
   return (
-    <section className="flex flex-col gap-3 rounded-2xl border bg-card p-4 shadow-soft sm:p-5" aria-labelledby="used-in">
+    <section className="flex flex-col gap-3 p-4" aria-labelledby="used-in">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 id="used-in" className="text-lg font-extrabold">
+        <h2 id="used-in" className="font-extrabold">
           {t('bank.page.usedIn', { count: uses.length })}
         </h2>
         {outdated > 0 && (

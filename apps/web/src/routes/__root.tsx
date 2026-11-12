@@ -31,12 +31,12 @@ function RootLayout() {
   const inGame = pathname.startsWith('/play/')
   // The front (join and login) and sign-up pages show the logo and name big in their hero.
   const home = pathname === '/' || pathname === '/register'
-  // The editor and a running game (not its lobby) fold the app bar into their own top bar (`AppMenu`).
-  // The game's snapshot decides; until it is there the app bar stays.
+  // The editors (a quiz, a library question) and a running game (not its lobby) fold the app bar into
+  // their own top bar (`AppMenu`). The game's snapshot decides; until it is there the app bar stays.
   const store = useGameStore()
   const game = store.host
   const running = game !== null && game.phase !== 'lobby' && pathname === `/host/games/${game.pin}`
-  const workspace = /^\/host\/quizzes\/[^/]+$/.test(pathname) || running
+  const workspace = /^\/host\/(quizzes|library)\/[^/]+$/.test(pathname) || running
   const locked = useQuery({ ...meQueryOptions, enabled: workspace }).data?.screenLocked === true
   const header = !inGame && !(workspace && !locked)
   // The season's decorations: roomy on the home pages, large on the projector, in the corners of a game,
