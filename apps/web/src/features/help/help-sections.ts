@@ -4,6 +4,7 @@ import {
   EyeOffIcon,
   FileDownIcon,
   FlagIcon,
+  GaugeIcon,
   FlameIcon,
   GamepadIcon,
   GiftIcon,
@@ -255,6 +256,7 @@ export const helpGroups: HelpGroupDef[] = [
         id: 'admin',
         items: [
           { id: 'users', icon: UsersRoundIcon, termKey: 'users.title' },
+          { id: 'limits', icon: GaugeIcon, termKey: 'limits.nav' },
           { id: 'names', icon: TagIcon, termKey: 'nicknames.nav' },
         ],
         links: [

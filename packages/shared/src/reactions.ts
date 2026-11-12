@@ -14,11 +14,14 @@ export const reactionGlyphs: Record<Reaction, string> = {
   cow: '🐮',
 }
 
-/** Per player: at most this many reactions within `REACTION_WINDOW_MS` (a burst of 3, then one per 2 s). */
+/**
+ * Per player on the server: at most this many reactions within `REACTION_WINDOW_MS`, a backstop for
+ * scripted clients; the phone's own cooldown keeps real players far below it.
+ */
 export const REACTION_BURST = 3
 export const REACTION_WINDOW_MS = 6000
-/** The phone's bar waits this long after a tap. */
-export const REACTION_COOLDOWN_MS = 2000
+/** The phone's reaction button rests this long after a tap (user, 12 November 2026: 5 s, was 2 s). */
+export const REACTION_COOLDOWN_MS = 5000
 /** The server sends what it collected at most this often. */
 export const REACTION_FLUSH_MS = 750
 

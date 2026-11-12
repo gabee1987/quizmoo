@@ -24,7 +24,10 @@ export const Route = createFileRoute('/host')({
     }
     // The server enforces this too; the redirect just takes the user where they can act.
     if (user.mustChangePassword && location.pathname !== '/host/password') throw redirect({ to: '/host/password' })
-    if (!user.mustChangePassword && user.mustAcceptTerms && location.pathname !== '/host/terms') throw redirect({ to: '/host/terms' })
+    if (!user.mustChangePassword && user.mustAddEmail && location.pathname !== '/host/email') throw redirect({ to: '/host/email' })
+    if (!user.mustChangePassword && !user.mustAddEmail && user.mustAcceptTerms && location.pathname !== '/host/terms') {
+      throw redirect({ to: '/host/terms' })
+    }
     return { user }
   },
   component: HostLayout,
@@ -49,7 +52,7 @@ function HostLayout() {
   const lobby = useGameStore().host?.phase === 'lobby'
   const { sidebar } = useBoardOptions()
   if (me.data?.screenLocked) return <LockScreen />
-  const allowed = !user.mustChangePassword && !user.mustAcceptTerms && !editing
+  const allowed = !user.mustChangePassword && !user.mustAddEmail && !user.mustAcceptTerms && !editing
   // The running game's board: the sidebar slides in and out from its top bar.
   const board = allowed && inGame && !lobby
   const nav = allowed && !board

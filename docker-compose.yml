@@ -21,6 +21,13 @@ services:
       timeout: 5s
       retries: 10
 
+  # Testing only: catches the app's e-mails (login codes) when the app runs with
+  # MAILPIT_URL=http://localhost:8025. Inbox on http://localhost:8025. Nothing is sent out.
+  mailpit:
+    image: axllent/mailpit:v1.21.8
+    ports:
+      - "127.0.0.1:8025:8025"
+
   # Full app on http://localhost:3000 (or http://<laptop-ip>:3000 on the venue LAN).
   # The values come from .env next to this file (see .env.example); unset ones keep the app's defaults.
   app:

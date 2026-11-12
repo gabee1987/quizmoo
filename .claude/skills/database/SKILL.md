@@ -30,7 +30,7 @@ Results are derived from the persisted `games.state` (player answers and scores)
 
 ## Personal data
 
-Players: the nickname they typed and an avatar id, nothing else (no emails, device ids or IPs). Hosts: `users` holds the username only. Future SSO adds an `oidc_identities` table; do not add provider columns to `users`.
+Players: the nickname they typed and an avatar id, nothing else (no emails, device ids or IPs). Hosts: `users` holds the username, the e-mail address (the login since phase 71; `email_codes` holds HMACs of one-time codes) and the admin's budget. Future SSO adds an `oidc_identities` table; do not add provider columns to `users`. `app_settings` keeps install-wide values the admin edits (`budgetDefaults`, `databaseBudgetMb`).
 
 ## The dev database is the user's
 

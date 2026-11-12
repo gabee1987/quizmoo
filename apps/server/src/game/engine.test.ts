@@ -141,6 +141,15 @@ describe('lobby commands', () => {
     expectCode(() => join(state, 61), 'errors.gameFull')
   })
 
+  it("stops at the host's players-per-game budget, but never above 60", () => {
+    let state: GameState = { ...newGame(), playerLimit: 2 }
+    for (let i = 1; i <= 2; i++) state = join(state, i)
+    expectCode(() => join(state, 3), 'errors.gameFull')
+    let high: GameState = { ...newGame(), playerLimit: 100 }
+    for (let i = 1; i <= 60; i++) high = join(high, i)
+    expectCode(() => join(high, 61), 'errors.gameFull')
+  })
+
   it('requires a known team in team mode', () => {
     const state = newGame({ mode: 'team', teamNames: ['Red'] })
     expectCode(() => join(state, 1), 'errors.unknownTeam')

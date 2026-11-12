@@ -99,10 +99,11 @@ The server is the only judge of time and scores: it sends the question's end tim
 
 ### For administrators
 
-- **Users:** approve or reject sign-ups, create accounts, set a new password (forced change at the next login), change roles, log an account out everywhere, and delete an account with everything it owns.
+- **Users:** every account's e-mail address, usage and budget; create accounts (by e-mail address), set a budget per account and the defaults, enter the hosting plan's database limit, set a new password (forced change at the next login), change roles, log an account out everywhere, and delete an account with everything it owns.
 - **Names:** edit the "Surprise me" name lists per language.
-- Self sign-up is off by default and, when switched on, every new account waits for an admin's approval.
-- **Sign-up e-mails:** an admin can enter an address in My settings to hear about new sign-ups, with a link that opens the Users page after login. The e-mail says only how many wait, never who, and at most one goes out every 15 minutes. It is sent through Brevo's HTTPS API and only when the server has a Brevo key.
+- **Login by e-mail code:** with e-mail set up, hosts log in with a one-time code sent to their address, no password; admins keep theirs. Without e-mail (a venue laptop), username and password as before.
+- Self sign-up is off by default. Switched on, a host signs up with an e-mail address confirmed by a code, with no approval; budgets limit what each account may use (storage, quizzes, library, share codes, open games, games a month, players per game).
+- **Sign-up e-mails:** an admin can enter an address in My settings to hear about new hosts (username and e-mail address), with a link that opens the Users page after login, at most one every 15 minutes. Sent through Brevo's HTTPS API, only when the server has a Brevo key.
 
 ## Privacy and legal
 
@@ -111,13 +112,13 @@ Quizmoo is designed around data minimisation (GDPR Article 5(1)(c)).
 | Who | What is stored | How long |
 |---|---|---|
 | Players | The nickname they typed, the avatar they picked and their answers, inside the game | Until the game is deleted: after `RESULTS_RETENTION_DAYS` (default 90), or earlier when the host keeps more than `MAX_GAMES_PER_HOST` finished games (default 200) |
-| Hosts | Username, password hash (Argon2), role, sign-up and last login time, accepted terms version, own quizzes, images and settings, and the screen lock code as an Argon2 hash | Until the account is deleted; unapproved sign-ups after 7 days |
+| Hosts | Username, e-mail address (the login), a password hash (Argon2) for admins and older accounts only, role, budget, sign-up and last login time, accepted terms version, own quizzes, images and settings, and the screen lock code as an Argon2 hash | Until the account is deleted; login codes (as HMACs) for 10 minutes |
 | Admins (optional) | An e-mail address for sign-up notices, entered by the admin | Until removed, the account stops being an admin, or is deleted |
 | Sessions | A hash of the session token, never the token itself | 30 days, or until logout |
 
-- No e-mail addresses (except an admin's own, optional notice address), device identifiers or IP addresses are stored in the database, and request logs leave out IP addresses and query strings.
+- No e-mail addresses of players, no device identifiers and no IP addresses are stored in the database; hosts' addresses are visible only to the host and the admins. Request logs leave out IP addresses and query strings.
 - The browser keeps only what the app needs to work (the session cookie, the player's seat in a running game, language and colour mode). Nothing needs consent, so the first visit shows a calm notice instead of a consent banner, and the cookies page lists every item.
-- No analytics, advertising, tracking, external fonts or CDNs. The only third parties are the hosting provider and PostgreSQL, plus an e-mail provider (Brevo) when sign-up e-mails are switched on.
+- No analytics, advertising, tracking, external fonts or CDNs. The only third parties are the hosting provider and PostgreSQL, plus an e-mail provider (Brevo) when e-mail is switched on (login codes and sign-up notices).
 - Hosts can download all their data as one JSON file and delete their own account from My settings.
 - Signing up requires confirming an age of at least 16 and accepting the terms; the accepted version and time are recorded, and a new terms version is accepted again at the next login.
 
@@ -161,7 +162,7 @@ The app ships a privacy notice, terms of use, a cookies and storage page and an 
 | Database | PostgreSQL 17 |
 | Security | Argon2 (`@node-rs/argon2`) password hashing, `@fastify/helmet` (strict CSP), `@fastify/rate-limit`, httpOnly `__Host-` session cookies over HTTPS |
 | Images | `sharp`: resized to 1280 px and stored as WebP |
-| E-mail | Brevo's HTTPS API through `fetch`, no mail library (sign-up notices to admins; optional) |
+| E-mail | Brevo's HTTPS API through `fetch`, no mail library (login codes and sign-up notices; optional) |
 | Web app | React 19, Vite 8, TanStack Router (file-based) and TanStack Query, Tailwind CSS 4, shadcn/ui on Radix, lucide icons, Nunito (self-hosted) |
 | Realtime client | `socket.io-client` with a small snapshot store |
 | Internationalisation | i18next with Hungarian (default) and English dictionaries |
@@ -214,10 +215,11 @@ All settings are environment variables, read and validated once at start. [.env.
 | `TRUST_PROXY` | no | Number of trusted proxies in front of the app (1 on Railway or Render, 0 on a laptop) |
 | `RESULTS_RETENTION_DAYS` | no | Days finished games are kept (default 90) |
 | `MAX_GAMES_PER_HOST` | no | Finished games kept per host (default 200) |
-| `REGISTRATION_OPEN` | no | `true` lets people request a host account, approved by an admin |
+| `REGISTRATION_OPEN` | no | `true` lets people sign up as hosts with an e-mail code, no approval (needs e-mail) |
 | `OPERATOR_NAME`, `OPERATOR_EMAIL` | for a public site | Who runs the site, shown on the legal pages |
 | `HOSTING_PROVIDER` | for a public site | Provider and data location, shown on the legal pages |
-| `BREVO_API_KEY`, `MAIL_FROM` | no | Brevo API key and verified sender for sign-up e-mails to admins; nothing is sent without them |
+| `BREVO_API_KEY`, `MAIL_FROM` | no | Brevo API key and verified sender: login codes for hosts and sign-up notices to admins; without them, password logins and no sign-up |
+| `MAILPIT_URL` | no | Testing only: e-mails go to a local Mailpit (`pnpm mail:up`, inbox on http://localhost:8025); local addresses only, wins over Brevo in development, refused with `BREVO_API_KEY` in production |
 | `MAIL_PROVIDER` | with `BREVO_API_KEY` | E-mail provider and data location, shown on the privacy page |
 | `FEEDBACK_URL` | no | Link for the Feedback item in the host navigation |
 | `SEED_ADMIN_USERNAME`, `SEED_ADMIN_PASSWORD` | seed only | First admin account; clear the password afterwards |

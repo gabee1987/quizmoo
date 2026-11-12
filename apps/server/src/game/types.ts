@@ -174,6 +174,8 @@ export interface GameState {
   lock?: { codeHash: string | null; locked: boolean }
   /** The projector's end pages once the game is finished. Missing until the host first moves them (the podium). */
   endShow?: EndShow
+  /** Players allowed in this game, from the host's budget at creation (below `MAX_PLAYERS`). Missing: `MAX_PLAYERS`. */
+  playerLimit?: number
 }
 
 /** Who sees the final results: the projector (podium) or the players' phones. */

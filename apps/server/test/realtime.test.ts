@@ -302,7 +302,7 @@ describe('GameManager', () => {
       manager.close()
     })
 
-    it('never drops one tap every 2 s, the pace the phone allows', async () => {
+    it('never drops one tap per cooldown, the pace the phone allows', async () => {
       const { manager, pin } = await lobby()
       manager.apply(pin, (s) => joinPlayer(s, { id: 'p1', name: 'Anna', token: 't1' }))
       for (let i = 0; i < 10; i++) {

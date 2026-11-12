@@ -16,10 +16,11 @@ import type { FastifyInstance, FastifyReply } from 'fastify'
 import { nanoid } from 'nanoid'
 import { z } from 'zod'
 import { requireSession } from '../auth/require-session.js'
+import { jsonBytes, overBudget } from '../budgets.js'
 import type { Db } from '../db/index.js'
 import { bankQuestions, quizzes } from '../db/schema.js'
 import { escapeLike, foldSql } from '../db/search.js'
-import { parseOr400 } from './http.js'
+import { featureOff, parseOr400 } from './http.js'
 import { parseLooseQuestions, pictureIds, picturesAllowed, withFreshIds } from './quizzes.js'
 
 type BankRow = typeof bankQuestions.$inferSelect
@@ -130,6 +131,7 @@ export async function bankRoutes(app: FastifyInstance, { db }: { db: Db }) {
 
   // Copies with fresh ids, all or nothing, never past MAX_BANK_QUESTIONS (checked under a per-host lock).
   app.post('/api/bank', auth, async (request, reply) => {
+    if (featureOff(request, reply, 'library')) return reply
     const userId = request.user!.id
     const body = parseOr400(bankSaveSchema, request.body, reply)
     if (!body) return reply
@@ -147,6 +149,8 @@ export async function bankRoutes(app: FastifyInstance, { db }: { db: Db }) {
       createdAt: new Date(now - i),
       updatedAt: new Date(now - i),
     }))
+    const over = await overBudget(db, userId, { bankQuestions: rows.length, storageBytes: jsonBytes(rows) })
+    if (over) return reply.code(409).send({ error: over })
     const saved = await db.transaction(async (tx) => {
       await tx.execute(sql`select pg_advisory_xact_lock(hashtext(${`bank:${userId}`}))`)
       const [held] = await tx.select({ n: count() }).from(bankQuestions).where(eq(bankQuestions.ownerId, userId))
@@ -194,6 +198,7 @@ export async function bankRoutes(app: FastifyInstance, { db }: { db: Db }) {
   // The bank's version replaces every copy in the chosen quizzes, changed there or not (the host chose).
   // Quizzes that are not the host's or hold no copy are skipped. All in one transaction.
   app.post<{ Params: { id: string } }>('/api/bank/:id/sync', auth, async (request, reply) => {
+    if (featureOff(request, reply, 'library')) return reply
     const userId = request.user!.id
     const row = await ownBankQuestion(request.params.id, userId, reply)
     if (!row) return reply
@@ -205,6 +210,7 @@ export async function bankRoutes(app: FastifyInstance, { db }: { db: Db }) {
   })
 
   app.put<{ Params: { id: string } }>('/api/bank/:id', auth, async (request, reply) => {
+    if (featureOff(request, reply, 'library')) return reply
     const userId = request.user!.id
     const row = await ownBankQuestion(request.params.id, userId, reply)
     if (!row) return reply
@@ -214,6 +220,8 @@ export async function bankRoutes(app: FastifyInstance, { db }: { db: Db }) {
     if (!checked) return reply
     const question: Question = checked[0]!
     if (!(await picturesAllowed(db, [question], [], userId, reply, new Set(pictureIds([row.question]))))) return reply
+    const over = await overBudget(db, userId, { storageBytes: jsonBytes(question) - jsonBytes(row.question) })
+    if (over) return reply.code(409).send({ error: over })
     // With the switch on, the copies nobody changed in their quiz follow at once; changed ones wait for
     // the host's choice ("Update quizzes"). Edits never flow back from a quiz on their own.
     const { updated, synced } = await db.transaction(async (tx) => {
@@ -231,6 +239,7 @@ export async function bankRoutes(app: FastifyInstance, { db }: { db: Db }) {
   // Undo of a delete: the question comes back under its old id, so the quizzes linked to it stay linked.
   // An id that is taken (by anyone) is refused rather than overwritten.
   app.post('/api/bank/restore', auth, async (request, reply) => {
+    if (featureOff(request, reply, 'library')) return reply
     const userId = request.user!.id
     const body = parseOr400(restoreSchema, request.body, reply)
     if (!body) return reply
@@ -238,6 +247,8 @@ export async function bankRoutes(app: FastifyInstance, { db }: { db: Db }) {
     if (!checked) return reply
     const question = checked[0]!
     if (!(await picturesAllowed(db, [question], [], userId, reply))) return reply
+    const over = await overBudget(db, userId, { bankQuestions: 1, storageBytes: jsonBytes(question) })
+    if (over) return reply.code(409).send({ error: over })
     const restored = await db.transaction(async (tx) => {
       await tx.execute(sql`select pg_advisory_xact_lock(hashtext(${`bank:${userId}`}))`)
       const [held] = await tx.select({ n: count() }).from(bankQuestions).where(eq(bankQuestions.ownerId, userId))

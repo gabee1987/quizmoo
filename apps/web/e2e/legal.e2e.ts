@@ -50,7 +50,8 @@ test('the storage notice and the legal pages', async ({ browser }) => {
     await page.goto('/login?redirect=%2Fhost%2Fusers')
     await expect(page).toHaveURL(/\/\?side=host&redirect=%2Fhost%2Fusers$/)
     await expect(page.getByRole('tab', { name: 'Host', selected: true })).toBeVisible()
-    await expect(page.getByLabel('Username')).toBeVisible()
+    // The e-mail address (code login) on a fresh device, or the username where the server sends no e-mail.
+    await expect(page.getByLabel(/^(E-mail address|Username)$/)).toBeVisible()
     // A host page without a session sends the visitor there too.
     await page.goto('/host/games')
     await expect(page).toHaveURL(/\/\?side=host&redirect=%2Fhost%2Fgames$/)

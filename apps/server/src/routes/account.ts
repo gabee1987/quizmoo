@@ -1,23 +1,38 @@
 import { and, asc, count, eq, sql } from 'drizzle-orm'
 import type { FastifyInstance } from 'fastify'
+import { loginCodeSchema } from '@quizmoo/shared'
 import { z } from 'zod'
+import { codeMessage } from '../auth/code-mail.js'
+import type { EmailCodes } from '../auth/email-codes.js'
 import { verifyPassword } from '../auth/password.js'
 import { requireSession } from '../auth/require-session.js'
 import { clearSessionCookie, destroyOtherSessions } from '../auth/session.js'
 import type { Db } from '../db/index.js'
 import { bankQuestions, games, images, localCredentials, quizzes, shareCodes, users } from '../db/schema.js'
 import { toResults } from '../game/results.js'
+import type { Mailer } from '../mail.js'
 import type { GameManager } from '../realtime/game-manager.js'
+import { starterLanguageSchema } from '../starter/add-starter-quiz.js'
 import { parseOr400 } from './http.js'
 import { readHostSettings, readSeenRelease, readSignupEmail, readToursSeen } from './me.js'
 import { deleteAccount, figures } from './users.js'
 
-const deleteAccountSchema = z.object({ password: z.string().min(1).max(200) })
+/** The password for an account with one; a code mailed to the own address for one that logs in with codes. */
+const deleteAccountSchema = z.union([
+  z.object({ password: z.string().min(1).max(200) }),
+  z.object({ code: loginCodeSchema }),
+])
 
 /** The host's own account on My settings: what it is, its logins, and deleting it. */
 export async function accountRoutes(
   app: FastifyInstance,
-  { db, manager, secureCookies }: { db: Db; manager: GameManager; secureCookies: boolean },
+  {
+    db,
+    manager,
+    secureCookies,
+    mailer,
+    codes,
+  }: { db: Db; manager: GameManager; secureCookies: boolean; mailer: Mailer; codes: EmailCodes },
 ) {
   const auth = { preHandler: requireSession(db) }
   // Someone who does not accept new terms can still see what they have, take it and leave.
@@ -29,6 +44,8 @@ export async function accountRoutes(
     const [account] = await db
       .select({
         username: users.username,
+        email: users.email,
+        hasPassword: sql<boolean>`exists (select 1 from "local_credentials" c where c."user_id" = "users"."id")`,
         role: users.role,
         createdAt: users.createdAt,
         lastLoginAt: users.lastLoginAt,
@@ -65,7 +82,10 @@ export async function accountRoutes(
       const [account] = await db
         .select({
           username: users.username,
+          email: users.email,
+          emailVerifiedAt: users.emailVerifiedAt,
           role: users.role,
+          budget: users.budget,
           createdAt: users.createdAt,
           lastLoginAt: users.lastLoginAt,
           termsVersion: users.termsVersion,
@@ -155,7 +175,29 @@ export async function accountRoutes(
     },
   )
 
-  // Asks for the password again, so an open laptop is not enough. The last admin stays, or nobody could approve sign-ups.
+  // An account without a password confirms deleting with a code sent to its own address.
+  app.post(
+    '/api/me/account/code',
+    { ...leaving, config: { rateLimit: { max: 5, timeWindow: '15 minutes' } } },
+    async (request, reply) => {
+      const body = parseOr400(z.object({ lang: starterLanguageSchema }), request.body ?? {}, reply)
+      if (!body) return reply
+      const user = request.user!
+      if (!mailer.configured || !user.email) return reply.code(409).send({ error: 'errors.codeLoginOff' })
+      const code = await codes.issue({ email: user.email, purpose: 'confirm', userId: user.id })
+      if (code) {
+        try {
+          await mailer.send(codeMessage(user.email, code, 'confirm', body.lang))
+        } catch (error) {
+          request.log.error({ reason: (error as Error).message }, 'code e-mail failed')
+          return reply.code(502).send({ error: 'errors.mailFailed' })
+        }
+      }
+      return reply.code(202).send({ sent: true })
+    },
+  )
+
+  // Asks for the password (or a code) again, so an open laptop is not enough. The last admin stays.
   app.delete(
     '/api/me/account',
     { ...leaving, config: { rateLimit: { max: 10, timeWindow: '1 minute' } } },
@@ -167,8 +209,15 @@ export async function accountRoutes(
         .select({ hash: localCredentials.passwordHash })
         .from(localCredentials)
         .where(eq(localCredentials.userId, user.id))
-      if (!current || !(await verifyPassword(current.hash, body.password))) {
-        return reply.code(400).send({ error: 'errors.wrongCurrentPassword' })
+      if (current) {
+        if (!('password' in body) || !(await verifyPassword(current.hash, body.password))) {
+          return reply.code(400).send({ error: 'errors.wrongCurrentPassword' })
+        }
+      } else {
+        const confirmed = 'code' in body && user.email ? await codes.confirm(user.email, body.code) : null
+        if (!confirmed || confirmed.purpose !== 'confirm' || confirmed.userId !== user.id) {
+          return reply.code(400).send({ error: 'errors.invalidCode' })
+        }
       }
       if (user.role === 'admin') {
         const [admins] = await db

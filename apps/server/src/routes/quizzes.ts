@@ -20,6 +20,7 @@ import type { FastifyInstance, FastifyReply } from 'fastify'
 import { nanoid } from 'nanoid'
 import { z } from 'zod'
 import { requireSession } from '../auth/require-session.js'
+import { jsonBytes, overBudget, type Adding } from '../budgets.js'
 import type { Db } from '../db/index.js'
 import { images, quizzes } from '../db/schema.js'
 import { STARTER_IMAGE_COUNT, addStarterQuiz, starterLanguageSchema } from '../starter/add-starter-quiz.js'
@@ -162,8 +163,27 @@ function toQuiz(row: QuizRow) {
   }
 }
 
+/** What a quiz stores, for the storage budget (compared with the same fields of an incoming quiz). */
+function quizContent(row: QuizRow) {
+  return {
+    title: row.title,
+    description: row.description,
+    questions: row.questions,
+    groups: row.groups,
+    settings: row.settings,
+    branding: row.branding,
+    questionDefaults: row.questionDefaults,
+  }
+}
+
 export async function quizRoutes(app: FastifyInstance, { db }: { db: Db }) {
   const auth = { preHandler: requireSession(db) }
+  /** Answers 409 with the budget's error key when the action would exceed one; true when it did. */
+  const refusedByBudget = async (userId: string, adding: Adding, reply: FastifyReply) => {
+    const over = await overBudget(db, userId, adding)
+    if (over) reply.code(409).send({ error: over })
+    return over !== null
+  }
 
   /** Loads a quiz the current user owns, or answers 404 / 403 and returns null. */
   async function ownQuiz(id: string, userId: string, reply: FastifyReply): Promise<QuizRow | null> {
@@ -249,6 +269,7 @@ export async function quizRoutes(app: FastifyInstance, { db }: { db: Db }) {
     const input = parseQuiz(await withHostDefaults(request.body, request.user!.id), reply)
     if (!input || !(await logoAllowed(input, request.user!.id, reply))) return reply
     if (!(await picturesAllowed(db, input.questions, input.groups, request.user!.id, reply))) return reply
+    if (await refusedByBudget(request.user!.id, { quizzes: 1, storageBytes: jsonBytes(input) }, reply)) return reply
     const [row] = await db
       .insert(quizzes)
       .values({ id: nanoid(12), ownerId: request.user!.id, ...input })
@@ -264,6 +285,8 @@ export async function quizRoutes(app: FastifyInstance, { db }: { db: Db }) {
     if ((await imageCount(db, userId)) + STARTER_IMAGE_COUNT > MAX_IMAGES_PER_HOST) {
       return reply.code(409).send({ error: 'errors.tooManyImages' })
     }
+    // Its size is known only once made: it needs a free quiz and some storage left.
+    if (await refusedByBudget(userId, { quizzes: 1, storageBytes: 1 }, reply)) return reply
     return reply.code(201).send({ id: await addStarterQuiz(db, userId, body.lang) })
   })
 
@@ -295,6 +318,8 @@ export async function quizRoutes(app: FastifyInstance, { db }: { db: Db }) {
     }
 
     const quiz = mapQuizImages(input, newIds)
+    const bytes = jsonBytes(quiz) + rows.reduce((sum, image) => sum + image.data.length, 0)
+    if (await refusedByBudget(userId, { quizzes: 1, storageBytes: bytes }, reply)) return reply
     const row = await db.transaction(async (tx) => {
       if (rows.length > 0) await tx.insert(images).values(rows)
       return (await tx.insert(quizzes).values({ id: nanoid(12), ownerId: userId, ...quiz }).returning())[0]!
@@ -365,6 +390,9 @@ export async function quizRoutes(app: FastifyInstance, { db }: { db: Db }) {
     if (!input || !(await logoAllowed(input, request.user!.id, reply))) return reply
     const stored = new Set(pictureIds(row.questions, row.groups))
     if (!(await picturesAllowed(db, input.questions, input.groups, request.user!.id, reply, stored))) return reply
+    // Only growth counts: a host over budget can still save a quiz that stays the same size or shrinks.
+    const growth = jsonBytes(input) - jsonBytes(quizContent(row))
+    if (await refusedByBudget(request.user!.id, { storageBytes: growth }, reply)) return reply
     const [updated] = await db
       .update(quizzes)
       .set({ ...input, updatedAt: new Date() })
@@ -379,6 +407,7 @@ export async function quizRoutes(app: FastifyInstance, { db }: { db: Db }) {
     if (!row) return reply
     const body = parseOr400(duplicateSchema, request.body ?? {}, reply)
     if (!body) return reply
+    if (await refusedByBudget(request.user!.id, { quizzes: 1, storageBytes: jsonBytes(quizContent(row)) }, reply)) return reply
     const [copy] = await db
       .insert(quizzes)
       .values({
@@ -408,6 +437,7 @@ export async function quizRoutes(app: FastifyInstance, { db }: { db: Db }) {
     if (!checked) return reply
     const copies = checked.map(withFreshIds)
     if (!(await picturesAllowed(db, copies, [], userId, reply))) return reply
+    if (await refusedByBudget(userId, { storageBytes: jsonBytes(copies) }, reply)) return reply
     const updated = await db
       .update(quizzes)
       .set({ questions: sql`${quizzes.questions} || ${JSON.stringify(copies)}::jsonb`, updatedAt: new Date() })

@@ -457,6 +457,7 @@
   --animate-shimmer: shimmer 3s linear infinite;
   --animate-draw: draw 0.7s ease-out both;
   --animate-progress: progress linear both;
+  --animate-ring-drain: ring-drain linear both;
   --animate-drift: drift 28s ease-in-out infinite alternate;
   --animate-dot: dot 1.2s ease-in-out infinite;
   --animate-spin-angle: spin-angle 6s linear infinite;
@@ -780,6 +781,15 @@
     }
     to {
       transform: scaleX(1);
+    }
+  }
+  /* A full ring (pathLength 100, dasharray 100) that runs out: a short SVG wait indicator. */
+  @keyframes ring-drain {
+    from {
+      stroke-dashoffset: 0;
+    }
+    to {
+      stroke-dashoffset: 100;
     }
   }
   @keyframes drift {

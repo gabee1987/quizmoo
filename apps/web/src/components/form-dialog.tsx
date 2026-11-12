@@ -4,6 +4,7 @@ import { FormAlert } from '@/components/form-alert'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { errorCode } from '@/lib/api'
+import { cn } from '@/lib/cn'
 
 /** A dialog around a small form: fields, an error from the server, Cancel and the submit button. */
 export function FormDialog({
@@ -16,6 +17,7 @@ export function FormDialog({
   error,
   onSubmit,
   onCancel,
+  wide = false,
   children,
 }: {
   title: string
@@ -27,12 +29,15 @@ export function FormDialog({
   error: unknown
   onSubmit: () => void
   onCancel: () => void
+  /** Room for fields in two columns from `sm` on. */
+  wide?: boolean
   children: ReactNode
 }) {
   const { t } = useTranslation()
   return (
     <Dialog open onOpenChange={(open) => !open && onCancel()}>
-      <DialogContent className="sm:max-w-md">
+      {/* Taller than a small phone: the whole dialog scrolls, never a box inside it. */}
+      <DialogContent className={cn('max-h-[calc(100dvh-2rem)] overflow-y-auto', wide ? 'sm:max-w-2xl' : 'sm:max-w-md')}>
         <form
           className="flex flex-col gap-5"
           noValidate

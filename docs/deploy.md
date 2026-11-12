@@ -17,7 +17,7 @@ Quizmoo runs as one Node process (API, Socket.IO and the web app on the same ori
 | `MAX_GAMES_PER_HOST` | no | Finished games kept per host account; finishing one more deletes that host's oldest, default `200` |
 | `OPERATOR_NAME`, `OPERATOR_EMAIL` | for a public site | Who runs this install and where to send privacy questions and deletion requests, shown on `/privacy`, `/terms` and `/imprint` |
 | `HOSTING_PROVIDER` | for a public site | The hosting provider and the data's location, named as processor on the privacy page and imprint, e.g. `Railway Corporation, EU West (Amsterdam)` |
-| `REGISTRATION_OPEN` | no | `true` lets anyone sign up as a host on `/register`; the account cannot log in until an admin approves it on the Users page. Off (`false`) by default: leave it off on the venue LAN |
+| `REGISTRATION_OPEN` | no | `true` lets anyone sign up as a host on `/register` with an e-mail address confirmed by a code, without approval; needs e-mail (`BREVO_API_KEY`). Off (`false`) by default: leave it off on the venue LAN |
 | `BREVO_API_KEY`, `MAIL_FROM` | no | E-mail to admins about new sign-ups through Brevo's HTTPS API (Railway's Hobby plan blocks SMTP): an API key and a sender address verified in Brevo. Nothing is sent without both; each admin enters their own address in My settings, Account. See "Sign-up e-mails" below |
 | `MAIL_PROVIDER` | with `BREVO_API_KEY` | The e-mail provider and its data location, named as processor on the privacy page, e.g. `Brevo (Sendinblue SAS), EU` |
 | `FEEDBACK_URL` | no | An `https://` link for the Feedback item in the host navigation, e.g. the repository's issue form `https://github.com/<owner>/quizmoo/issues/new?template=feedback.yml`. No item without it |
@@ -55,19 +55,22 @@ The step-by-step walkthrough of the first setup, with the problems met on the wa
 7. Run the smoke test (below) against the address.
 8. On GitHub, protect `main`: Settings, Branches, require the `verify` check to pass before merging.
 
-Friends who want to host either get an account from the admin's Users page, or, with `REGISTRATION_OPEN=true`, sign up on `/register` ("Create a host account" on the login page). A sign-up waits under "Waiting for approval" on the Users page: approve only usernames you recognise (ask friends to tell you theirs). Rejected sign-ups are deleted at once, unapproved ones after 7 days. A friend who forgets the password gets a new account or a reset from the admin: the app sends no e-mail to hosts.
+With e-mail set up (below), hosts log in with a one-time code sent to their address; there are no passwords to forget. Friends who want to host either get an account from the admin's Users page (username and e-mail address), or, with `REGISTRATION_OPEN=true`, sign up on `/register` themselves: the account exists once the code from the e-mail is confirmed, with no approval. The Users page shows every account's address, what it uses and its budget (picture storage, quizzes, library questions, share codes, open games, games a month, players per game); set the defaults and the database limit of your hosting plan there. Accounts from before e-mail login add their address once at their next login (their password ends then); admins keep their password. At most 30 new accounts a day.
 
-### Sign-up e-mails (optional)
+### E-mail: login codes and sign-up notices
 
-With `REGISTRATION_OPEN=true`, admins can get an e-mail when someone signs up, with a link to the Users page (log in, then approve or reject on any device). The e-mail says only how many sign-ups wait, never who; at most one goes out every 15 minutes.
+With `BREVO_API_KEY` and `MAIL_FROM` set, hosts log in with codes sent by e-mail, sign-up works (with `REGISTRATION_OPEN=true`), and admins who enter an address get a notice naming each new host (username and address), at most one every 15 minutes. Without them the app works as before: username and password, no sign-up.
 
-> **Compliance note.** Brevo is a third-party service and a processor under the GDPR (it receives the admin's address and the notice). Accept its data processing agreement, add it to `docs/legal/records-of-processing.md`, and for a government or client project have it reviewed for compliance before turning this on.
+> **Compliance note.** Brevo is a third-party service and a processor under the GDPR: it receives every host's address, the login codes and the notices, and keeps send logs. Accept its data processing agreement, check where and how long it keeps the logs, add it to `docs/legal/records-of-processing.md`, and for a government or client project have it reviewed for compliance before turning this on.
 
 1. Create a free account at brevo.com (EU data centres; the free plan allows 300 e-mails a day).
 2. Senders, Domains & Dedicated IPs: add and verify the sender address (`MAIL_FROM`). A verified own domain (SPF, DKIM) keeps the e-mails out of spam folders better than a free mailbox.
 3. SMTP & API, API keys: create a key (`BREVO_API_KEY`). Keep it only in the service's variables.
 4. Set `BREVO_API_KEY`, `MAIL_FROM` and `MAIL_PROVIDER` on the app service and redeploy.
 5. Log in as admin, My settings, Account, "Sign-up e-mails": enter your address, Save, "Send a test e-mail".
+6. Users page: enter the hosting plan's database limit under Database, and check the default budget.
+
+**Trying it locally without sending e-mail:** `pnpm mail:up` starts Mailpit (a local test inbox in Docker, nothing leaves the computer), then run the app with `MAILPIT_URL=http://localhost:8025` and open http://localhost:8025 to read the codes. It wins over a Brevo key in development and is refused next to one in production.
 
 ### Releasing
 

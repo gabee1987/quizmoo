@@ -1,3 +1,4 @@
+import { fallbackAvatar } from '@quizmoo/shared'
 import { eq } from 'drizzle-orm'
 import { afterAll, beforeAll, expect, it } from 'vitest'
 import { hashPassword, verifyPassword } from '../src/auth/password.js'
@@ -70,7 +71,18 @@ describeDb('auth (database)', () => {
     const res = await login('test_host', password)
     expect(res.statusCode).toBe(200)
     expect(res.json()).toEqual({
-      user: { id: userId, username: 'test_host', role: 'editor', mustChangePassword: false, mustAcceptTerms: false },
+      user: {
+        id: userId,
+        username: 'test_host',
+        role: 'editor',
+        email: null,
+        hasPassword: true,
+        mustChangePassword: false,
+        mustAddEmail: false,
+        mustAcceptTerms: false,
+        avatar: fallbackAvatar(userId),
+        permissions: {},
+      },
     })
     const cookie = res.cookies.find((c) => c.name === 'quizmoo_session')!
     expect(cookie).toMatchObject({ httpOnly: true, sameSite: 'Lax', path: '/' })

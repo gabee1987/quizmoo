@@ -10,13 +10,14 @@ import { cn } from '@/lib/cn'
  * (animals, food, fantasy, fun). Native radio buttons under the emoji tiles, so arrow keys and
  * screen readers work as with any radio group; the picked tile pops and stays raised.
  */
-export function AvatarPicker({ value, onChange }: { value: Avatar; onChange: (avatar: Avatar) => void }) {
+export function AvatarPicker({ value, onChange, label }: { value: Avatar; onChange: (avatar: Avatar) => void; label?: string }) {
   const { t } = useTranslation()
+  const name = label ?? t('join.avatar')
   const [open, setOpen] = useState(false)
   const panelId = useId()
   return (
     <fieldset className="flex flex-col gap-3">
-      <legend className="sr-only">{t('join.avatar')}</legend>
+      <legend className="sr-only">{name}</legend>
       <div className="flex items-center gap-3">
         <span
           key={value}
@@ -25,7 +26,7 @@ export function AvatarPicker({ value, onChange }: { value: Avatar; onChange: (av
         >
           {value}
         </span>
-        <span className="min-w-0 flex-1 font-semibold">{t('join.avatar')}</span>
+        <span className="min-w-0 flex-1 font-semibold">{name}</span>
         <Button type="button" variant="outline" size="sm" aria-expanded={open} aria-controls={panelId} onClick={() => setOpen((o) => !o)}>
           {open ? t('join.avatarDone') : t('join.avatarChange')}
           <ChevronDownIcon className={cn('transition-transform duration-300', open && 'rotate-180')} aria-hidden="true" />

@@ -4,6 +4,8 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import type { TFunction } from 'i18next'
 import { ImageUpIcon, Trash2Icon } from 'lucide-react'
 import { toast } from 'sonner'
+import { allowed } from '@quizmoo/shared'
+import { meQueryOptions } from '@/lib/auth'
 import { Hint } from '@/components/hint'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
@@ -77,12 +79,16 @@ export function ImageField({
     retry: false,
   }).data
   const details = info ? imageDetails(info, i18n.language, t) : undefined
+  const me = useQuery(meQueryOptions).data
+  const canUpload = !me || allowed(me, 'images')
   const [progress, setProgress] = useState<number | null>(null)
   const [dragOver, setDragOver] = useState(false)
   const onChangeRef = useRef(onChange)
   onChangeRef.current = onChange
 
   async function upload(file: File) {
+    // The admin switched pictures off for this account: say so rather than failing on the server.
+    if (!canUpload) return void toast.error(t('errors.featureOff'))
     if (!ACCEPT.includes(file.type)) return void toast.error(t('errors.unsupportedImage'))
     if (file.size > MAX_BYTES) return void toast.error(t('errors.fileTooLarge'))
     setProgress(0)
@@ -143,7 +149,7 @@ export function ImageField({
       accept={ACCEPT.join(',')}
       className="peer sr-only"
       aria-label={imageId ? t('editor.replaceImage') : label}
-      disabled={uploading}
+      disabled={uploading || !canUpload}
       onChange={(e) => {
         const file = e.target.files?.[0]
         e.target.value = ''
