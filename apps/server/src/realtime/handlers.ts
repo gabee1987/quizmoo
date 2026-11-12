@@ -5,6 +5,7 @@ import {
   playerAnswerSchema,
   playerCaptainSchema,
   playerJoinSchema,
+  playerReactSchema,
   playerTeamModeSchema,
   playerTeamSchema,
   type ClientToServerEvents,
@@ -54,6 +55,7 @@ import {
   setCaptain,
   setEndAuto,
   setJoinLocked,
+  setReactionsMuted,
   setTeamMode,
   showAnswers,
   showEndPage,
@@ -136,6 +138,16 @@ export function registerSocketHandlers(io: AppSocketServer, { manager, db, parse
     io.to(rooms.screen(state.pin)).emit('game:host', toHostSnapshot(state, now, { seq }))
     for (const playerId of Object.keys(state.players)) {
       io.to(rooms.player(state.pin, playerId)).emit('game:player', toPlayerSnapshot(state, playerId, now, seq))
+    }
+  })
+
+  // Reactions are not game state: the host room and the screens get every one, each player all but their own.
+  manager.subscribeReactions(({ pin, all, forPlayer }) => {
+    io.to([rooms.host(pin), rooms.screen(pin)]).emit('game:reactions', all)
+    const game = manager.get(pin)
+    for (const playerId of Object.keys(game?.state.players ?? {})) {
+      const batch = forPlayer(playerId)
+      if (batch) io.to(rooms.player(pin, playerId)).emit('game:reactions', batch)
     }
   })
 
@@ -280,6 +292,14 @@ export function registerSocketHandlers(io: AppSocketServer, { manager, db, parse
         return { ok: true as const }
       }),
     )
+
+    // No ack: a reaction that is not allowed now, or comes too fast, is simply dropped.
+    socket.on('player:react', (data) => {
+      const { pin, playerId, role } = socket.data
+      if (role !== 'player' || !pin || !playerId) return
+      const parsed = playerReactSchema.safeParse(data)
+      if (parsed.success) manager.react(pin, playerId, parsed.data.reaction)
+    })
 
     socket.on('player:leave', (_data, ack) =>
       respond(ack, () => {
@@ -464,6 +484,8 @@ function runHostCommand(state: GameState, command: HostCommand, now: number): Ga
       return openJoining(state, now)
     case 'lockJoining':
       return setJoinLocked(state, command.locked)
+    case 'muteReactions':
+      return setReactionsMuted(state, command.muted)
     case 'lock':
       return lockHost(state)
     case 'endPage':

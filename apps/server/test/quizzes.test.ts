@@ -307,6 +307,89 @@ describeDb('quiz routes (database)', () => {
     expect(copy.branding).toEqual(quiz.branding)
   })
 
+  it("takes only the host's own pictures on questions, options and groups, but keeps pictures already stored", async () => {
+    const userId = async (username: string) => (await db.select().from(users).where(eq(users.username, username)))[0]!.id
+    const image = (id: string, ownerId: string) => ({ id, ownerId, mime: 'image/webp', width: 1, height: 1, data: Buffer.from('x') })
+    await db.insert(images).values([image('pic-alice', await userId('test_alice')), image('pic-bob', await userId('test_bob'))])
+    const [single, other] = quizBody.questions as unknown as [Record<string, unknown> & { options: object[] }, Record<string, unknown>]
+    const withPicture = (where: 'question' | 'option' | 'group', id: string) => ({
+      ...quizBody,
+      questions: [
+        {
+          ...single,
+          ...(where === 'question' && { imageId: id }),
+          options: single.options.map((o, i) => (where === 'option' && i === 0 ? { ...o, imageId: id } : o)),
+          ...(where === 'group' && { groupId: 'g1' }),
+        },
+        other,
+      ],
+      groups: where === 'group' ? [{ id: 'g1', title: 'Round 1', imageId: id, settings: {} }] : [],
+    })
+
+    const quiz = (await req(alice, 'POST', '/api/quizzes', quizBody)).json().quiz
+    for (const where of ['question', 'option', 'group'] as const) {
+      for (const [method, url] of [['POST', '/api/quizzes'], ['PUT', `/api/quizzes/${quiz.id}`]] as const) {
+        const own = await req(alice, method, url, withPicture(where, 'pic-alice'))
+        expect(own.statusCode, `${method} own ${where}`).toBe(method === 'POST' ? 201 : 200)
+        for (const foreign of ['pic-bob', 'pic-missing']) {
+          const refused = await req(alice, method, url, withPicture(where, foreign))
+          expect([refused.statusCode, refused.json().error], `${method} ${foreign} ${where}`).toEqual([400, 'errors.imageNotFound'])
+        }
+      }
+    }
+
+    // A quiz stored before the check with a picture that is not the host's still saves while it keeps it.
+    await db.update(quizzes).set({ questions: withPicture('question', 'pic-bob').questions as never }).where(eq(quizzes.id, quiz.id))
+    const kept = await req(alice, 'PUT', `/api/quizzes/${quiz.id}`, { ...withPicture('question', 'pic-bob'), title: 'Renamed' })
+    expect(kept.statusCode).toBe(200)
+  })
+
+  describe('append questions', () => {
+    it('appends copies with fresh ids and no round, and only to an own quiz', async () => {
+      const source = (await req(alice, 'POST', '/api/quizzes', quizBody)).json().quiz
+      const target = (await req(alice, 'POST', '/api/quizzes', { ...quizBody, title: 'Target' })).json().quiz
+      const picked = [{ ...source.questions[0], groupId: 'g-elsewhere' }]
+
+      const res = await req(alice, 'POST', `/api/quizzes/${target.id}/questions`, { questions: picked })
+      expect(res.statusCode).toBe(201)
+      expect(res.json()).toMatchObject({ added: 1, title: 'Target' })
+      const after = (await req(alice, 'GET', `/api/quizzes/${target.id}`)).json().quiz
+      expect(after.questions).toHaveLength(3)
+      const copy = after.questions[2]
+      expect(copy.id).toBe(res.json().questionIds[0])
+      expect(copy.id).not.toBe(source.questions[0].id)
+      expect(copy.groupId).toBeUndefined()
+      expect(copy.text).toBe('Pick A')
+      // The right answer follows the option's new id.
+      expect(copy.options.map((o: { id: string }) => o.id)).not.toContain('a')
+      expect(copy.correctOptionId).toBe(copy.options[0].id)
+
+      expect((await req(bob, 'POST', `/api/quizzes/${target.id}/questions`, { questions: picked })).statusCode).toBe(403)
+      expect((await req(alice, 'POST', '/api/quizzes/nope/questions', { questions: picked })).statusCode).toBe(404)
+      const empty = await req(alice, 'POST', `/api/quizzes/${target.id}/questions`, { questions: [] })
+      expect([empty.statusCode, empty.json().error]).toEqual([400, 'errors.invalidInput'])
+      const invalid = await req(alice, 'POST', `/api/quizzes/${target.id}/questions`, { questions: [{ type: 'single', text: '' }] })
+      expect([invalid.statusCode, invalid.json().error]).toEqual([400, 'errors.invalidInput'])
+    })
+
+    it("refuses another account's picture and anything past 200 questions, adding nothing", async () => {
+      const bobId = (await db.select().from(users).where(eq(users.username, 'test_bob')))[0]!.id
+      await db.insert(images).values({ id: 'pic-append-bob', ownerId: bobId, mime: 'image/webp', width: 1, height: 1, data: Buffer.from('x') })
+      const target = (await req(alice, 'POST', '/api/quizzes', quizBody)).json().quiz
+      const foreign = await req(alice, 'POST', `/api/quizzes/${target.id}/questions`, {
+        questions: [{ ...quizBody.questions[1], imageId: 'pic-append-bob' }],
+      })
+      expect([foreign.statusCode, foreign.json().error]).toEqual([400, 'errors.imageNotFound'])
+
+      const many = Array.from({ length: 198 }, (_, i) => ({ ...quizBody.questions[1], text: `Q${i}` }))
+      expect((await req(alice, 'POST', `/api/quizzes/${target.id}/questions`, { questions: many })).statusCode).toBe(201)
+      const over = await req(alice, 'POST', `/api/quizzes/${target.id}/questions`, { questions: quizBody.questions })
+      expect([over.statusCode, over.json().error]).toEqual([409, 'errors.tooManyQuestions'])
+      const after = (await req(alice, 'GET', `/api/quizzes/${target.id}`)).json().quiz
+      expect(after.questions).toHaveLength(200)
+    })
+  })
+
   describe('question groups', () => {
     const grouped = {
       title: 'Grouped',

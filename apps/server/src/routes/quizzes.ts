@@ -1,4 +1,5 @@
 import {
+  MAX_QUESTIONS,
   MAX_QUIZ_FILE_BYTES,
   gameSettingsSchema,
   type GameLength,
@@ -23,7 +24,7 @@ import type { Db } from '../db/index.js'
 import { images, quizzes } from '../db/schema.js'
 import { STARTER_IMAGE_COUNT, addStarterQuiz, starterLanguageSchema } from '../starter/add-starter-quiz.js'
 import { parseOr400 } from './http.js'
-import { MAX_IMAGES_PER_HOST, MAX_IMAGE_BYTES, imageCount, imageRow, ownsImage, toWebp } from './images.js'
+import { MAX_IMAGES_PER_HOST, MAX_IMAGE_BYTES, imageCount, imageRow, ownedImageIds, ownsImage, toWebp } from './images.js'
 import { readHostSettings } from './me.js'
 
 /** A quiz's stored branding read through the schema; a value that no longer validates falls back to the defaults. */
@@ -60,6 +61,9 @@ export function assignIds(body: unknown): unknown {
 
 /** The client sends the translated title ("… (copy)"); the server never writes human text itself. */
 const duplicateSchema = z.object({ title: z.string().trim().min(1).max(120).optional() })
+
+/** Questions to append; each is checked with the quiz schema on the server. */
+const appendSchema = z.object({ questions: z.array(z.unknown()).min(1).max(MAX_QUESTIONS) })
 
 const batchIds = z.array(z.string().min(1)).min(1).max(100)
 const batchDeleteSchema = z.object({ ids: batchIds })
@@ -101,6 +105,44 @@ export function withFreshGroupIds(questions: Question[], groups: QuestionGroup[]
     }),
     groups: groups.map((g) => ({ ...g, id: map.get(g.id)! })),
   }
+}
+
+/** The pictures on questions, their options and groups (the logo is checked on its own). */
+export function pictureIds(questions: readonly Question[], groups: readonly QuestionGroup[] = []): string[] {
+  const ids = questions.flatMap((q) => [q.imageId, ...('options' in q ? q.options.map((o) => o.imageId) : [])])
+  return [...new Set([...ids, ...groups.map((g) => g.imageId)].filter((id): id is string => !!id))]
+}
+
+/**
+ * Every picture on the questions and groups must be one the host uploaded, so nobody can store (and
+ * later share) another account's picture. Pictures in `known` (as stored) are let through, so a quiz
+ * saved before this check never stops saving. Answers 400 and returns false otherwise.
+ */
+export async function picturesAllowed(
+  db: Db,
+  questions: readonly Question[],
+  groups: readonly QuestionGroup[],
+  userId: string,
+  reply: FastifyReply,
+  known: ReadonlySet<string> = new Set(),
+): Promise<boolean> {
+  const ids = pictureIds(questions, groups).filter((id) => !known.has(id))
+  const owned = await ownedImageIds(db, userId, ids)
+  if (ids.every((id) => owned.has(id))) return true
+  void reply.code(400).send({ error: 'errors.imageNotFound' })
+  return false
+}
+
+/**
+ * Loose questions (copies for another quiz or the bank) checked with the quiz schema, without their
+ * round; `drop` names more fields to leave behind. Answers 400 and returns null when one is invalid.
+ */
+export function parseLooseQuestions(raw: readonly unknown[], reply: FastifyReply, drop: readonly string[] = []): Question[] | null {
+  const loose = raw.map((q) =>
+    typeof q === 'object' && q !== null ? { ...q, groupId: undefined, ...Object.fromEntries(drop.map((key) => [key, undefined])) } : q,
+  )
+  const checked = parseOr400(quizInputSchema, assignIds({ title: 'questions', questions: loose }), reply)
+  return checked ? checked.questions.map(({ groupId: _, ...question }) => question) : null
 }
 
 type QuizRow = typeof quizzes.$inferSelect
@@ -206,6 +248,7 @@ export async function quizRoutes(app: FastifyInstance, { db }: { db: Db }) {
   app.post('/api/quizzes', auth, async (request, reply) => {
     const input = parseQuiz(await withHostDefaults(request.body, request.user!.id), reply)
     if (!input || !(await logoAllowed(input, request.user!.id, reply))) return reply
+    if (!(await picturesAllowed(db, input.questions, input.groups, request.user!.id, reply))) return reply
     const [row] = await db
       .insert(quizzes)
       .values({ id: nanoid(12), ownerId: request.user!.id, ...input })
@@ -320,6 +363,8 @@ export async function quizRoutes(app: FastifyInstance, { db }: { db: Db }) {
     if (!row) return reply
     const input = parseQuiz(request.body, reply)
     if (!input || !(await logoAllowed(input, request.user!.id, reply))) return reply
+    const stored = new Set(pictureIds(row.questions, row.groups))
+    if (!(await picturesAllowed(db, input.questions, input.groups, request.user!.id, reply, stored))) return reply
     const [updated] = await db
       .update(quizzes)
       .set({ ...input, updatedAt: new Date() })
@@ -348,6 +393,34 @@ export async function quizRoutes(app: FastifyInstance, { db }: { db: Db }) {
       })
       .returning()
     return reply.code(201).send({ quiz: toQuiz(copy!) })
+  })
+
+  // Copies of questions (from another quiz, the bank or a share code) go to the end of a quiz: fresh
+  // ids, no round. All or nothing, and never past MAX_QUESTIONS, checked in the same UPDATE.
+  app.post<{ Params: { id: string } }>('/api/quizzes/:id/questions', auth, async (request, reply) => {
+    const userId = request.user!.id
+    const row = await ownQuiz(request.params.id, userId, reply)
+    if (!row) return reply
+    const body = parseOr400(appendSchema, request.body, reply)
+    if (!body) return reply
+    // The round stays behind with the quiz the question came from.
+    const checked = parseLooseQuestions(body.questions, reply)
+    if (!checked) return reply
+    const copies = checked.map(withFreshIds)
+    if (!(await picturesAllowed(db, copies, [], userId, reply))) return reply
+    const updated = await db
+      .update(quizzes)
+      .set({ questions: sql`${quizzes.questions} || ${JSON.stringify(copies)}::jsonb`, updatedAt: new Date() })
+      .where(
+        and(
+          eq(quizzes.id, row.id),
+          eq(quizzes.ownerId, userId),
+          sql`jsonb_array_length(${quizzes.questions}) + ${copies.length} <= ${MAX_QUESTIONS}`,
+        ),
+      )
+      .returning({ id: quizzes.id })
+    if (updated.length === 0) return reply.code(409).send({ error: 'errors.tooManyQuestions' })
+    return reply.code(201).send({ added: copies.length, title: row.title, questionIds: copies.map((q) => q.id) })
   })
 
   app.delete<{ Params: { id: string } }>('/api/quizzes/:id', auth, async (request, reply) => {

@@ -170,7 +170,10 @@ export function ensureConnected(timeoutMs = 5000): Promise<void> {
   })
 }
 
-type AckOf<E extends keyof ClientToServerEvents> = Parameters<Parameters<ClientToServerEvents[E]>[1]>[0]
+// `never` for an event without an ack (`player:react`).
+type AckOf<E extends keyof ClientToServerEvents> = ClientToServerEvents[E] extends (data: never, ack: (res: infer R) => void) => void
+  ? R
+  : never
 
 /** The events that make a session live; everything else in a session waits for them. */
 const attachEvents: ReadonlySet<keyof ClientToServerEvents> = new Set(['player:join', 'host:attach', 'screen:attach'])

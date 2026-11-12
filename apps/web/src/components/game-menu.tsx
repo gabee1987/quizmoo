@@ -1,5 +1,5 @@
 import { useNavigate } from '@tanstack/react-router'
-import { CrownIcon, LogOutIcon, Settings2Icon } from 'lucide-react'
+import { CrownIcon, LogOutIcon, Settings2Icon, SmileIcon } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
@@ -11,6 +11,7 @@ import { SeasonMenuItem } from '@/components/season-greeting'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
@@ -23,6 +24,7 @@ import { languages, setLanguage, type Language } from '@/i18n'
 import { modes, setMode, useMode, type Mode } from '@/lib/mode'
 import { forgetPlayer } from '@/lib/player-storage'
 import { emitAck, useGameStore } from '@/lib/socket'
+import { setShowOthers, useReactions } from '@/features/reactions/reaction-store'
 
 /**
  * Phones in a game have no header: the screen belongs to the game. Language and colour mode sit
@@ -42,6 +44,7 @@ export function GameMenu() {
   const [leaving, setLeaving] = useState(false)
   const [pending, setPending] = useState(false)
   const snapshot = useGameStore().player
+  const { showOthers } = useReactions()
   const team = snapshot?.teams.find((x) => x.id === snapshot.me.teamId)
   const teammates =
     snapshot && team?.captainId === snapshot.me.id && snapshot.phase !== 'finished'
@@ -139,6 +142,22 @@ export function GameMenu() {
             ))}
           </DropdownMenuRadioGroup>
           <SeasonMenuItem className={touchRadio} />
+          {snapshot && snapshot.settings.reactions !== false && (
+            <>
+              <DropdownMenuSeparator />
+              <DropdownMenuCheckboxItem
+                checked={showOthers}
+                onSelect={(event) => {
+                  event.preventDefault()
+                  setShowOthers(!showOthers)
+                }}
+                className={touchRadio}
+              >
+                <SmileIcon className="size-5" aria-hidden="true" />
+                {t('reactions.showOthers')}
+              </DropdownMenuCheckboxItem>
+            </>
+          )}
           <DropdownMenuSeparator />
           <HelpMenuItems className={touchItem} newTab />
           {snapshot && snapshot.phase !== 'finished' && (

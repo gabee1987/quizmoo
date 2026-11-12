@@ -368,6 +368,7 @@ function buildBaseSnapshot(state: GameState, now: number, audience: ResultsAudie
     nextPin: state.nextPin ?? null,
     scheduledAt: state.scheduledAt ?? null,
     joinLocked: state.joinLocked ?? false,
+    reactionsMuted: state.reactionsMuted ?? false,
     branding: brandingFor(state, audience),
     endFacts: phase === 'finished' && !answersHidden(state, audience) ? endFacts(state) : null,
   }

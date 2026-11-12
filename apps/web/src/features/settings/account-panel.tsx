@@ -48,6 +48,8 @@ export interface Account {
   /** Active logins, this browser's included. */
   sessions: number
   quizzes: number
+  bankQuestions: number
+  shareCodes: number
   gamesPlayed: number
   images: number
 }
@@ -250,6 +252,8 @@ export function DeleteAccountDialog({ account, onClose }: { account: Account; on
           <p>{t('settings.account.delete.body')}</p>
           <ul className="list-disc pl-5 font-semibold text-foreground">
             <li>{t('settings.account.delete.quizzes', { count: account.quizzes })}</li>
+            {account.bankQuestions > 0 && <li>{t('settings.account.delete.bankQuestions', { count: account.bankQuestions })}</li>}
+            {account.shareCodes > 0 && <li>{t('settings.account.delete.shareCodes', { count: account.shareCodes })}</li>}
             <li>{t('settings.account.delete.games', { count: account.gamesPlayed })}</li>
             <li>{t('settings.account.delete.images', { count: account.images })}</li>
           </ul>

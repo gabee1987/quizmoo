@@ -346,6 +346,8 @@ export interface GameSnapshotBase {
   scheduledAt: number | null
   /** The host closed the game to new players. */
   joinLocked: boolean
+  /** The host muted the players' reactions for now (the `reactions` setting switches them off for the game). */
+  reactionsMuted: boolean
   answeredCount: number
   players: PlayerPublic[]
   teams: TeamPublic[]

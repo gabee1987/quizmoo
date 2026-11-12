@@ -5,9 +5,11 @@ import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { QrCode } from '@/components/qr-code'
 import { Button } from '@/components/ui/button'
+import { ReactionsSwitch } from '@/features/reactions/host-reactions'
 import { usePageTour } from '@/features/tour/use-tour'
 import { useTimeReached } from '@/lib/clock'
 import { cn } from '@/lib/cn'
+import { confirmAction } from '@/lib/confirm'
 import { openProjector } from '@/lib/projector'
 import { HostToastsToggle } from './host-toasts'
 import { LobbyPlayers, teamActions } from './lobby-players'
@@ -43,7 +45,13 @@ export function HostLobby({
   const navigate = useNavigate()
   // Nothing has been played yet: no podium to choose, the game is closed and everyone sent away.
   const endGame = async () => {
-    if (!window.confirm(t('host.endGame.confirmClose'))) return
+    const ok = await confirmAction({
+      title: t('host.endGame.confirmClose'),
+      body: t('host.endGame.confirmCloseBody'),
+      confirmLabel: t('host.endGame.close'),
+      danger: true,
+    })
+    if (!ok) return
     if (await send({ type: 'close' })) void navigate({ to: '/host' })
   }
   return (
@@ -183,6 +191,7 @@ function JoinStage({
           checked={host.joinLocked}
           onChange={(locked) => void send({ type: 'lockJoining', locked })}
         />
+        <ReactionsSwitch host={host} onCommand={(command) => void send(command)} />
       </div>
     </section>
   )

@@ -2,7 +2,9 @@ import {
   MAX_GROUPS,
   MAX_QUESTIONS,
   canShuffleQuestions,
+  questionHash,
   shuffleQuestionOrder,
+  type BankQuestion,
   type GameSettings,
   type Question,
   type QuestionGroup,
@@ -27,10 +29,15 @@ import {
   ImageIcon,
   KeyboardIcon,
   LayersIcon,
+  LibraryIcon,
+  ListChecksIcon,
+  BookmarkPlusIcon,
   ListOrderedIcon,
+  CopyPlusIcon,
   PlayIcon,
   PlusIcon,
   Settings2Icon,
+  Share2Icon,
   Trash2Icon,
   XIcon,
 } from 'lucide-react'
@@ -60,6 +67,7 @@ import {
   addGroupAround,
   addQuestion as addToLayout,
   applyDefault,
+  copyQuestion,
   applyToGroup,
   differingFromDefault,
   differingQuestions,
@@ -93,6 +101,12 @@ import { GroupQuestions } from '../../features/editor/group-questions'
 import { OffNotice } from '../../features/editor/in-game-switch'
 import { QuestionDefaultsFields } from '../../features/editor/question-defaults-fields'
 import { SearchField, SearchResults } from '../../features/editor/question-search'
+import { SelectList } from '../../features/editor/select-list'
+import { AddFromBankDialog } from '../../features/bank/add-from-bank-dialog'
+import { CopyToQuizDialog, appendToQuiz } from '../../features/bank/copy-to-quiz-dialog'
+import { updateBankQuestion } from '../../features/bank/queries'
+import { SaveToBankDialog } from '../../features/bank/save-to-bank-dialog'
+import { ShareDialog, shareTitle } from '../../features/share/share-dialog'
 import { PhonePreview } from '../../features/editor/phone-preview'
 import { ProblemsMenu, listProblems, problemLabel, type Problem } from '../../features/editor/problems-menu'
 import { QuestionForm } from '../../features/editor/question-form'
@@ -226,7 +240,19 @@ function Editor({ quiz }: { quiz: Quiz }) {
   const [focusField, setFocusField] = useState<string | null>(null)
   // The list's search; while it has text, the matches show instead of the sortable list.
   const [query, setQuery] = useState('')
-  const searching = query.trim() !== ''
+  // The list's select mode: ticked questions for Copy to quiz and Delete (no dragging meanwhile).
+  const [selecting, setSelecting] = useState(false)
+  const [ticked, setTicked] = useState<ReadonlySet<string>>(new Set())
+  // The questions waiting in the Copy to quiz dialog.
+  const [copying, setCopying] = useState<Question[] | null>(null)
+  // The questions waiting in the Save to bank dialog, and whether Add from bank is open.
+  const [banking, setBanking] = useState<Question[] | null>(null)
+  // The questions waiting for a share code.
+  const [sharing, setSharing] = useState<Question[] | null>(null)
+  const [fromBank, setFromBank] = useState(false)
+  // The linked question changed here that waits for "Replace the library's version?".
+  const [pushing, setPushing] = useState<Question | null>(null)
+  const searching = !selecting && query.trim() !== ''
   // Raised to scroll the list to the selected row (the jump button, and after adding something).
   const [jump, setJump] = useState(0)
   const jumpToSelected = () => {
@@ -463,6 +489,86 @@ function Editor({ quiz }: { quiz: Quiz }) {
       },
     })
   }
+  const stopSelecting = () => {
+    setSelecting(false)
+    setTicked(new Set())
+  }
+  const tick = (ids: string[], on: boolean) =>
+    setTicked((current) => {
+      const next = new Set(current)
+      for (const id of ids) {
+        if (on) next.add(id)
+        else next.delete(id)
+      }
+      return next
+    })
+  // Questions deleted meanwhile drop out of the selection; the order is the list's.
+  const tickedQuestions = questions.filter((q) => ticked.has(q.id))
+  /** Whether these questions can be copied out: one that still needs fixing would be refused by the server. */
+  const complete = (list: Question[]) => {
+    if (!list.some((q) => errorsUnder(errors, `questions.${questions.indexOf(q)}`).length > 0)) return true
+    toast.error(t('editor.copy.fixFirst'))
+    return false
+  }
+  /** Opens Copy to quiz for these questions. */
+  const copyToQuiz = (list: Question[]) => complete(list) && setCopying(list)
+  /** Opens Share for these questions. */
+  const share = (list: Question[]) => complete(list) && setSharing(list)
+  /** Opens Save to bank for these questions. */
+  const saveToBank = (list: Question[]) => complete(list) && setBanking(list)
+  /**
+   * Copies of bank questions (new ids) go after the selected question, into its group, or at the end of
+   * the selected group, in the order picked; the first one is selected. They keep their own time and points.
+   */
+  const addFromBank = (picked: BankQuestion[]) => {
+    // Linked to their library question, so its later edits can be brought here.
+    const copies = picked.map(({ id, question: { groupId: _, ...question } }) => ({
+      ...copyQuestion(question),
+      bank: { id, hash: questionHash(question) },
+    }))
+    let next = layout
+    let after = selectedId
+    for (const copy of copies) {
+      next = addToLayout(next, copy, after)
+      after = copy.id
+    }
+    setLayout(() => next)
+    setVisited((v) => new Set([...v, ...copies.map((q) => q.id)]))
+    setFromBank(false)
+    setPicking(false)
+    setListOpen(false)
+    if (copies[0]) select(copies[0].id)
+    jumpToSelected()
+    toast.success(t('bank.add.done', { count: copies.length }))
+  }
+  /** Deletes the ticked questions at once; Undo puts them all back where they were. */
+  const deleteTicked = () => {
+    const removed = questions.flatMap((question, index) => (ticked.has(question.id) ? [{ question, index }] : []))
+    if (removed.length === 0) return
+    setLayout((l) => fromItems(listItems(l).filter((i) => !(i.kind === 'question' && ticked.has(i.question.id)))))
+    if (selectedId && ticked.has(selectedId)) {
+      setSelectedId(questions.find((q, i) => i > removed[0]!.index && !ticked.has(q.id))?.id ?? questions.find((q) => !ticked.has(q.id))?.id ?? null)
+    }
+    stopSelecting()
+    toast(t('editor.select.deleted', { count: removed.length }), {
+      duration: UNDO_MS,
+      action: {
+        label: t('editor.undo'),
+        // In ascending order, so each one goes back to its old index.
+        onClick: () => setQuestions((list) => removed.reduce((acc, r) => restoreQuestion(acc, r), list)),
+      },
+    })
+  }
+  // Escape leaves the select mode (a dialog or menu takes Escape first).
+  useEffect(() => {
+    if (!selecting) return
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !document.querySelector('[role="dialog"], [role="menu"]')) stopSelecting()
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [selecting])
+
   // A new order for good (groups move as blocks); Undo puts the old one back while nothing changed since.
   const shuffle = () => {
     setConfirmShuffle(false)
@@ -541,6 +647,19 @@ function Editor({ quiz }: { quiz: Quiz }) {
       toastError(error)
     },
   })
+  // This quiz's version becomes the library's; the copy then counts as up to date again. Other quizzes
+  // follow on the server when the library question updates them automatically.
+  const pushToBank = useMutation({
+    mutationFn: (question: Question) => updateBankQuestion(question.bank!.id, { question }),
+    onSuccess: ({ question: item }, sent) => {
+      const bank = { id: item.id, hash: questionHash(item.question) }
+      setQuestions((list) => list.map((q) => (q.id === sent.id && q.bank?.id === item.id ? { ...q, bank } : q)))
+      void queryClient.invalidateQueries({ queryKey: ['bank'] })
+      setPushing(null)
+      toast.success(t('bank.save.pushed'))
+    },
+    onError: toastError,
+  })
   const playBlocker =
     questions.length === 0
       ? t('editor.playNeedsQuestion')
@@ -591,7 +710,7 @@ function Editor({ quiz }: { quiz: Quiz }) {
             {offChip}
           </div>
         )}
-        {listControls(inSidebar ? 'size-9' : 'size-10', tools)}
+        {selecting ? selectBar(inSidebar ? 'h-9' : 'h-10') : listControls(inSidebar ? 'size-9' : 'size-10', tools)}
       </>
     )
     return (
@@ -613,13 +732,15 @@ function Editor({ quiz }: { quiz: Quiz }) {
           headerClassName={headerClass}
           toolClassName={inSidebar ? 'size-9' : 'size-10'}
           results={
-            searching ? (
+            selecting ? (
+              <SelectList layout={layout} picked={ticked} invalidIds={invalidIds} onToggle={tick} />
+            ) : searching ? (
               <SearchResults layout={layout} query={query} selectedId={selectedId} invalidIds={invalidIds} onSelect={pickRow} onSwitch={switchItem} />
             ) : null
           }
           bodyClassName={bodyClass}
           footer={
-            !searching && (
+            !searching && !selecting && (
               <>
                 {questions.length > 0 && canAddQuestion && (
                   <Button variant="secondary" onClick={() => setPicking(true)}>
@@ -675,10 +796,107 @@ function Editor({ quiz }: { quiz: Quiz }) {
               <span className="truncate">{t('editor.newGroup')}</span>
             </Button>
             {tools}
+            <Hint label={t('editor.select.start')}>
+              <Button
+                variant="outline"
+                size="icon-sm"
+                className={size}
+                aria-label={t('editor.select.start')}
+                data-tour="select-questions"
+                onClick={() => {
+                  setQuery('')
+                  setSelecting(true)
+                }}
+              >
+                <ListChecksIcon aria-hidden="true" />
+              </Button>
+            </Hint>
           </div>
         )}
       </>
     )
+  // "Add from bank" under the type cards. From the type dialog, that dialog closes first without
+  // returning the focus (it would close the bank's dialog, as after a pick).
+  const fromBankButton = (
+    <Button
+      variant="outline"
+      className="self-start"
+      disabled={questions.length >= MAX_QUESTIONS}
+      onClick={() => {
+        picked.current = picking
+        setPicking(false)
+        setFromBank(true)
+      }}
+    >
+      <LibraryIcon aria-hidden="true" />
+      {t('bank.add.open')}
+    </Button>
+  )
+  /**
+   * The select mode's bar in the list's header: how many are ticked, all or none, Done, and the actions
+   * on them. `height` is the buttons' height class.
+   */
+  const selectBar = (height: string) => {
+    const all = questions.length > 0 && tickedQuestions.length === questions.length
+    return (
+      <div role="toolbar" aria-label={t('editor.select.bar')} className="flex flex-col gap-1.5">
+        <div className="flex items-center gap-1.5">
+          <span className="min-w-0 flex-1 truncate px-1 text-sm font-extrabold tabular-nums" aria-live="polite">
+            {t('host.batch.selected', { count: tickedQuestions.length })}
+          </span>
+          <Button variant="ghost" size="sm" className={height} onClick={() => setTicked(all ? new Set() : new Set(questions.map((q) => q.id)))}>
+            {all ? t('host.batch.clearSelection') : t('host.batch.selectAll')}
+          </Button>
+          <Button variant="secondary" size="sm" className={height} onClick={stopSelecting}>
+            {t('editor.select.done')}
+          </Button>
+        </div>
+        {/* Two by two: four labels in one row of the narrow list would all be cut short. */}
+        <div className="grid grid-cols-2 gap-1.5">
+          <Button
+            variant="outline"
+            size="sm"
+            className={cn('min-w-0 gap-1 px-2!', height)}
+            disabled={tickedQuestions.length === 0}
+            onClick={() => copyToQuiz(tickedQuestions)}
+          >
+            <CopyPlusIcon aria-hidden="true" />
+            <span className="truncate">{t('editor.copy.action')}</span>
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className={cn('min-w-0 gap-1 px-2!', height)}
+            disabled={tickedQuestions.length === 0}
+            onClick={() => saveToBank(tickedQuestions)}
+          >
+            <BookmarkPlusIcon aria-hidden="true" />
+            <span className="truncate">{t('bank.save.action')}</span>
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className={cn('min-w-0 gap-1 px-2!', height)}
+            disabled={tickedQuestions.length === 0}
+            onClick={() => share(tickedQuestions)}
+          >
+            <Share2Icon aria-hidden="true" />
+            <span className="truncate">{t('share.action')}</span>
+          </Button>
+          <Button
+            variant="destructive"
+            size="sm"
+            className={cn('min-w-0 gap-1 px-2!', height)}
+            disabled={tickedQuestions.length === 0}
+            onClick={deleteTicked}
+          >
+            <Trash2Icon aria-hidden="true" />
+            <span className="truncate">{t('common.delete')}</span>
+          </Button>
+        </div>
+      </div>
+    )
+  }
   /**
    * How many questions are switched off, with "All on": a chip beside the list's title, whose row keeps
    * its height, so switching the first question off does not push the list down under the pointer.
@@ -1060,6 +1278,10 @@ function Editor({ quiz }: { quiz: Quiz }) {
                   onNewGroup={groups.length < MAX_GROUPS ? () => newGroup(selected.id, 'split') : null}
                   onColor={(color) => setQuestions((l) => l.map((q) => (q.id === selected.id ? withTag(q, color) : q)))}
                   onSwitch={(on) => switchItem(selected.id, on)}
+                  onCopyToQuiz={() => copyToQuiz([selected])}
+                  onSaveToBank={() => saveToBank([selected])}
+                  onSaveChangesToBank={() => setPushing(selected)}
+                  onShare={() => share([selected])}
                 />
                 {selected.off && <OffNotice kind="question" onSwitchOn={() => switchItem(selected.id, true)} />}
                 <QuestionForm
@@ -1092,6 +1314,7 @@ function Editor({ quiz }: { quiz: Quiz }) {
                 <h2 className="text-xl font-extrabold">{t('editor.pickType')}</h2>
                 <p className="text-muted-foreground">{t('editor.emptyHelp')}</p>
                 <TypePicker onPick={addQuestion} />
+                {fromBankButton}
               </div>
             )}
 
@@ -1195,7 +1418,7 @@ function Editor({ quiz }: { quiz: Quiz }) {
                 <SheetTitle className="min-w-0 flex-1 text-lg font-extrabold">{listTitle}</SheetTitle>
                 {offChip}
               </div>
-              <SheetDescription className="text-sm">{t('editor.listHelp')}</SheetDescription>
+              <SheetDescription className="text-sm">{t(selecting ? 'editor.select.help' : 'editor.listHelp')}</SheetDescription>
             </SheetHeader>
             <div className="overflow-y-auto px-4 pb-[max(1rem,env(safe-area-inset-bottom))]">{renderList(false)}</div>
           </SheetContent>
@@ -1230,8 +1453,43 @@ function Editor({ quiz }: { quiz: Quiz }) {
               <DialogTitle>{t('editor.pickType')}</DialogTitle>
             </DialogHeader>
             <TypePicker onPick={addQuestion} />
+            {fromBankButton}
           </DialogContent>
         </Dialog>
+
+        {fromBank && <AddFromBankDialog room={MAX_QUESTIONS - questions.length} onAdd={addFromBank} onClose={() => setFromBank(false)} />}
+
+        {banking && (
+          <SaveToBankDialog
+            questions={banking}
+            onClose={(saved) => {
+              if (saved) {
+                // The quiz's questions now follow their library copies, so library edits can come back here.
+                const links = new Map(banking.map((q, i) => [q.id, saved[i]]))
+                setQuestions((list) =>
+                  list.map((q) => {
+                    const item = links.get(q.id)
+                    return item ? { ...q, bank: { id: item.id, hash: questionHash(item.question) } } : q
+                  }),
+                )
+                stopSelecting()
+              }
+              setBanking(null)
+            }}
+          />
+        )}
+
+        {pushing && (
+          <ConfirmDialog
+            title={t('bank.save.pushTitle')}
+            confirmLabel={t('bank.save.pushSubmit')}
+            pending={pushToBank.isPending}
+            onConfirm={() => pushToBank.mutate(questions.find((q) => q.id === pushing.id) ?? pushing)}
+            onCancel={() => setPushing(null)}
+          >
+            {t('bank.save.pushBody')}
+          </ConfirmDialog>
+        )}
 
         <ShortcutsDialog open={helpOpen} onOpenChange={setHelpOpen} />
 
@@ -1265,6 +1523,32 @@ function Editor({ quiz }: { quiz: Quiz }) {
           >
             {t('host.deleteBody', { title: draft.title })}
           </ConfirmDialog>
+        )}
+
+        {copying && (
+          <CopyToQuizDialog
+            count={copying.length}
+            fromQuizId={quiz.id}
+            copy={(quizId) => appendToQuiz(quizId, copying)}
+            onClose={(copied) => {
+              setCopying(null)
+              if (copied) stopSelecting()
+            }}
+          />
+        )}
+
+        {sharing && (
+          <ShareDialog
+            request={{
+              kind: 'questions',
+              title: sharing.length === 1 ? shareTitle(sharing[0]!.text) : shareTitle(t('share.fromQuiz', { count: sharing.length, title: draft.title })),
+              questions: sharing,
+            }}
+            onClose={() => {
+              setSharing(null)
+              stopSelecting()
+            }}
+          />
         )}
 
         {confirmGroup && (

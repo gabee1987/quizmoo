@@ -1,4 +1,4 @@
-import type { Question, TagColor } from '@quizmoo/shared'
+import { questionHash, type Question, type TagColor } from '@quizmoo/shared'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
@@ -6,11 +6,17 @@ import {
   ArrowDownToLineIcon,
   ArrowUpIcon,
   ArrowUpToLineIcon,
+  BookmarkCheckIcon,
+  BookmarkPlusIcon,
   CopyIcon,
+  CopyPlusIcon,
   EllipsisVerticalIcon,
   LayersIcon,
+  LibraryIcon,
+  Share2Icon,
   Trash2Icon,
 } from 'lucide-react'
+import { Link } from '@tanstack/react-router'
 import { Hint } from '@/components/hint'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
@@ -35,6 +41,10 @@ export function QuestionToolbar({
   onNewGroup,
   onColor,
   onSwitch,
+  onCopyToQuiz,
+  onSaveToBank,
+  onSaveChangesToBank,
+  onShare,
 }: {
   question: Question
   index: number
@@ -48,6 +58,14 @@ export function QuestionToolbar({
   onColor: (color: TagColor | undefined) => void
   /** "In the game" switched: off keeps the question, but new games leave it out. */
   onSwitch: (on: boolean) => void
+  /** "Copy to quiz…": a copy goes to the end of another of the host's quizzes. */
+  onCopyToQuiz: () => void
+  /** "Save to bank…": a copy goes to the host's question bank. */
+  onSaveToBank: () => void
+  /** "Save changes to the library": a linked question changed here replaces the library's version. */
+  onSaveChangesToBank: () => void
+  /** "Share…": a share code for this question. */
+  onShare: () => void
 }) {
   const { t } = useTranslation()
   const Icon = typeIcons[question.type]
@@ -100,6 +118,35 @@ export function QuestionToolbar({
               <LayersIcon aria-hidden="true" />
               {t('editor.groupFromHere')}
             </DropdownMenuItem>
+            <DropdownMenuItem className="min-h-11" onSelect={onCopyToQuiz}>
+              <CopyPlusIcon aria-hidden="true" />
+              {t('editor.copy.menu')}
+            </DropdownMenuItem>
+            <DropdownMenuItem className="min-h-11" onSelect={onShare}>
+              <Share2Icon aria-hidden="true" />
+              {t('share.menu')}
+            </DropdownMenuItem>
+            {question.bank ? (
+              <>
+                <DropdownMenuItem className="min-h-11" asChild>
+                  <Link to="/host/library/$questionId" params={{ questionId: question.bank.id }}>
+                    <LibraryIcon aria-hidden="true" />
+                    {t('bank.save.openLinked')}
+                  </Link>
+                </DropdownMenuItem>
+                {questionHash(question) !== question.bank.hash && (
+                  <DropdownMenuItem className="min-h-11" onSelect={onSaveChangesToBank}>
+                    <BookmarkCheckIcon aria-hidden="true" />
+                    {t('bank.save.push')}
+                  </DropdownMenuItem>
+                )}
+              </>
+            ) : (
+              <DropdownMenuItem className="min-h-11" onSelect={onSaveToBank}>
+                <BookmarkPlusIcon aria-hidden="true" />
+                {t('bank.save.menu')}
+              </DropdownMenuItem>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

@@ -30,7 +30,9 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { WaitingDots } from '@/components/waiting-dots'
 import { cn } from '@/lib/cn'
+import { confirmAction } from '@/lib/confirm'
 import { useNow } from '@/lib/clock'
+import { confirmKick } from './confirm-kick'
 import { lobbyGroups } from './lobby-groups'
 import {
   DropdownMenu,
@@ -277,10 +279,16 @@ function TeamGroup({
                 size="icon-sm"
                 className="size-8 rounded-full text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
                 aria-label={t('host.game.removeTeam', { team: team.name })}
-                onClick={() => {
-                  if (count === 0 || window.confirm(t('host.game.confirmRemoveTeam', { team: team.name }))) {
-                    teamActions.onRemoveTeam(team.id)
-                  }
+                onClick={async () => {
+                  const ok =
+                    count === 0 ||
+                    (await confirmAction({
+                      title: t('host.game.confirmRemoveTeam', { team: team.name }),
+                      body: t('host.game.confirmRemoveTeamBody'),
+                      confirmLabel: t('common.delete'),
+                      danger: true,
+                    }))
+                  if (ok) teamActions.onRemoveTeam(team.id)
                 }}
               >
                 <Trash2Icon className="size-4" aria-hidden="true" />
@@ -449,9 +457,7 @@ function PlayerTile({
             type="button"
             aria-label={t('host.game.kickPlayer', { name: player.name })}
             className="grid size-8 shrink-0 place-items-center rounded-full text-muted-foreground outline-none hover:bg-destructive/10 hover:text-destructive focus-visible:ring-[3px] focus-visible:ring-ring"
-            onClick={() => {
-              if (window.confirm(t('host.game.confirmKick', { name: player.name }))) onKick(player.id)
-            }}
+            onClick={() => void confirmKick(t, player.name).then((ok) => ok && onKick(player.id))}
           >
             <XIcon className="size-4" aria-hidden="true" />
           </button>
@@ -536,9 +542,7 @@ function PlayerActions({
         <DropdownMenuSeparator />
         <DropdownMenuItem
           variant="destructive"
-          onSelect={() => {
-            if (window.confirm(t('host.game.confirmKick', { name: player.name }))) onKick(player.id)
-          }}
+          onSelect={() => void confirmKick(t, player.name).then((ok) => ok && onKick(player.id))}
         >
           <XIcon aria-hidden="true" />
           {t('host.game.kick')}

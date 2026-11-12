@@ -5,7 +5,7 @@ import { verifyPassword } from '../auth/password.js'
 import { requireSession } from '../auth/require-session.js'
 import { clearSessionCookie, destroyOtherSessions } from '../auth/session.js'
 import type { Db } from '../db/index.js'
-import { games, images, localCredentials, quizzes, users } from '../db/schema.js'
+import { bankQuestions, games, images, localCredentials, quizzes, shareCodes, users } from '../db/schema.js'
 import { toResults } from '../game/results.js'
 import type { GameManager } from '../realtime/game-manager.js'
 import { parseOr400 } from './http.js'
@@ -36,6 +36,8 @@ export async function accountRoutes(
         termsAcceptedAt: users.termsAcceptedAt,
         sessions: figures.sessions,
         quizzes: figures.quizzes,
+        bankQuestions: figures.bankQuestions,
+        shareCodes: figures.shareCodes,
         gamesPlayed: figures.gamesPlayed,
         images: figures.images,
       })
@@ -87,6 +89,30 @@ export async function accountRoutes(
         .from(quizzes)
         .where(eq(quizzes.ownerId, id))
         .orderBy(asc(quizzes.createdAt))
+      const ownBank = await db
+        .select({
+          id: bankQuestions.id,
+          question: bankQuestions.question,
+          tags: bankQuestions.tags,
+          createdAt: bankQuestions.createdAt,
+          updatedAt: bankQuestions.updatedAt,
+        })
+        .from(bankQuestions)
+        .where(eq(bankQuestions.ownerId, id))
+        .orderBy(asc(bankQuestions.createdAt))
+      const ownShareCodes = await db
+        .select({
+          code: shareCodes.code,
+          kind: shareCodes.kind,
+          title: shareCodes.title,
+          content: shareCodes.content,
+          uses: shareCodes.uses,
+          createdAt: shareCodes.createdAt,
+          expiresAt: shareCodes.expiresAt,
+        })
+        .from(shareCodes)
+        .where(eq(shareCodes.ownerId, id))
+        .orderBy(asc(shareCodes.createdAt))
       const ownImages = await db
         .select({
           id: images.id,
@@ -113,6 +139,8 @@ export async function accountRoutes(
         seenRelease: await readSeenRelease(db, id),
         toursSeen: await readToursSeen(db, id),
         quizzes: ownQuizzes,
+        bankQuestions: ownBank,
+        shareCodes: ownShareCodes,
         images: ownImages.map((image) => ({ ...image, url: `/api/images/${image.id}` })),
         games: ownGames.map(({ state, ...game }) => ({ ...game, quizTitle: state.quiz.title, results: toResults(state) })),
       }

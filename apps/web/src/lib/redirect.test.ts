@@ -3,7 +3,7 @@ import { safeHostPath } from './redirect'
 
 describe('safeHostPath', () => {
   it('keeps paths under /host', () => {
-    for (const path of ['/host', '/host/users', '/host/settings?tab=account', '/host/games/123456#top']) {
+    for (const path of ['/host', '/host/users', '/host/settings?tab=account', '/host/games/123456#top', '/share/QM-7K4PX-2XNAQ']) {
       expect(safeHostPath(path)).toBe(path)
     }
   })
@@ -15,6 +15,8 @@ describe('safeHostPath', () => {
       '',
       '/',
       '/play/123456',
+      '/share/QM-7K4PX-2XNAQ/../../evil',
+      '/share/x?next=//evil.example',
       '/hostile',
       'host/users',
       'https://evil.example/host/users',

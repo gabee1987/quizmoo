@@ -1,6 +1,21 @@
 # Changelog
 
-## Unreleased
+## 1.13.0 – 2026-11-12
+
+### Tours, help and patch notes for the new features
+- The tours cover the new features: the quiz list points at the question library and "Enter a code", the editor at "Select questions" (and mentions Add from library), the host's lobby and running game at the reaction controls, the players' lobby at "Who's here". The question library has a tour of its own (`library` in `hostTourIds`, so it is remembered on the account like the others).
+- The help page has a "Question library and sharing" section (the library, linked copies, selecting questions, share codes, entering a code) with a link to the library.
+- What's new for 1.13.0.
+
+### Player reactions and "Who's here" (phase 58)
+- Players send emoji reactions (👏 😂 😮 👍 ❤️ 🐮) between questions: in the lobby, round intros, the reveal, the scoreboard and at the end, never while a question runs or counts down. They float up to the top of the projector and the other phones with the sender's name (at most 12 at once; a quiet row of counts with reduced motion). A player's own tap floats at once; the bar then rests for 2 seconds.
+- The server takes at most 3 reactions per player in 6 seconds, drops the rest silently without disconnecting, and sends what it collected at most every 750 ms (`player:react`, `game:reactions`). Reactions are not game state: nothing about them is stored.
+- The phone's waiting screen has a "Who's here" list, folded by default, grouped by team in a team game; while it is open a reaction pops up beside its sender's name.
+- A new Game flow setting, "Emoji reactions" (on by default; batch edit and My settings too). The host mutes and allows them live from the running game's top bar (with the last minute's count) or the lobby's switch; the mute survives a restart (`reactionsMuted`, `muteReactions` command). "Show reactions" in the phone's game menu hides other players' reactions on that device (`quizmoo.reactions`, listed on the cookies page).
+- The help page explains reactions and the player list for players and hosts.
+
+### App dialogs instead of browser prompts
+- Removing a player, removing a team, closing a game from the lobby and leaving a library question with unsaved changes now ask in the app's own confirmation dialog (`confirmAction` in `lib/confirm.ts`, shown by `ConfirmHost` in the root layout) instead of the browser's. Only closing the tab with unsaved changes keeps the browser's prompt, which a page cannot replace.
 
 ### Partial credit for multiple choice (phase 59)
 - A multiple-choice question can give part of its points: each right answer picked earns its share, each wrong one cancels a right one, never below zero (`partialCredit`). With 2 right answers, 1 of them earns half; a right and a wrong pick earn nothing. The speed bonus applies on top.
@@ -9,6 +24,33 @@
 - In a majority team (and when a captain does not confirm) a partial-credit question is decided per option: an option is in the team's answer when most of the team picked it.
 - The phone's question screen explains the rule; the help page's multiple choice and points entries too.
 - Spreadsheets have a 14th column, scoring (`partial`/`részleges` or `all`/`mind`); an empty cell and older files mean all or nothing. Batch edit has a "Multiple-choice scoring" group. Quizmoo files carry the setting with no format change.
+
+### Copy questions to another quiz (phase 64, part 1)
+- The editor's question list has a select mode ("Select questions"): a checkbox on every question, and on every round to tick all of its questions, with Select all, Done (or Escape) and a bar of actions. Dragging is off while selecting. On a phone it works in the list's sheet.
+- "Copy to quiz" (in the select mode's bar and in a question's More actions menu) copies the questions to the end of another of the host's quizzes, picked in a dialog with a search; the copies get fresh ids and leave their round behind, and editing one never changes the other. A quiz they would take past 200 questions cannot be picked. A toast confirms and opens the quiz. New route `POST /api/quizzes/:id/questions`: all or nothing, the 200-question limit checked in the same update (`errors.tooManyQuestions`).
+- Deleting several ticked questions at once, with one Undo for all of them.
+- Saving a quiz now checks that every picture on its questions, options and rounds belongs to the host (`errors.imageNotFound`); pictures already in the stored quiz are let through, so an older quiz never stops saving. Before, only the logo was checked.
+
+### Question library (phase 64, part 2)
+- A question library ("Kérdéstár") per host account: questions kept outside any quiz, with free-form tags (up to 10, 1–30 characters, the same tag in another case counts once). Up to 2000 questions (`errors.bankFull`, checked under a per-host lock). New table `bank_questions` (migrations `0020_bank_questions` and `0021_bank_auto_sync`, additive), deleted with the account.
+- Routes: `GET /api/bank` (search in the text, options and accepted answers without accents, type and tag filters, 50 per page), `GET /api/bank/:id`, `POST /api/bank` (copies with fresh ids, no round, not switched off; pictures must be the host's), `PUT /api/bank/:id`, `POST /api/bank/delete`, `POST /api/bank/restore` (Undo, under the old id), `GET /api/bank/tags`, `GET /api/bank/:id/uses` and `POST /api/bank/:id/sync`.
+- Linked copies: a question added from the library, or saved to it, keeps a link in its quiz (`Question.bank`: the library id and a `questionHash` of the content at that moment). Editing a library question then offers "Update the quizzes too?" with the quizzes holding an older version; a copy changed in its own quiz is marked "Changed in this quiz" and starts unticked. Updating keeps each copy's id, place, round, switch and colour. The question's page lists every quiz using it (up to date, older version, changed there).
+- "Update the quizzes automatically" per library question (off by default): every save then brings the new version to the copies not changed in their quiz, in the same transaction; changed copies still wait for "Update quizzes". Changes go one way only: an edit in a quiz reaches the library only through "Save changes to the library" (a linked question's More actions menu, shown once it was changed there), which replaces the library's version after a confirmation.
+- Editor: "Save to library…" in a question's More actions menu (or "Open in question library" for a linked one) and in the select mode's bar, with a tag field that offers the host's tags; "Add from library" under the question types opens a picker with search, type and tag filters, a preview and multi-select. The copies go after the selected question, into its round, keeping their own time and points.
+- A "Question library" page (`/host/library`, in the sidebar under Quizzes and in the quiz list's header) lists the questions with their answer and tags, two columns on wide screens, more loading while scrolling. "New question" and each question open a page laid out like the editor (`/host/library/new`, `/host/library/$questionId`): the editor's workspace with its top bar (no sidebar or app bar), the tags and the quizzes using it where the editor has its question list, the question form in the middle and the docked phone preview on the right. The page saves as it is edited, like the quiz editor; a new question is created by its first valid save and its address becomes the question's own (masked route, so the form is not remounted while typing). Delete has a confirmation and Undo; "Import from spreadsheet" reads the quiz template into the library (rounds left out).
+- The account overview counts library questions before deletion, "Download my data" includes them, and the daily image clean-up keeps pictures a library question uses.
+
+### Share codes (phase 64, part 3)
+- A host shares a question, a selection of questions or a whole quiz through a code like `QM-7K4PX-2XNAQ` and its link (`/share/<code>`), with a QR code. "Share…" is in a question's More actions menu, the editor's select bar, each library question and each quiz card's menu. A code works for 7 days, 30 days (the default) or without expiry.
+- Codes use 31 characters without 0, O, 1, I and L (about 49 bits) and are read in any case, with or without the dashes or the `QM` prefix, or from a pasted link (`normaliseShareCode`). "Enter a code" is on the quiz list and the question library.
+- Anyone with the code sees the questions without their answers (`GET /api/share/:code`, `toPublicQuestion`, an ordering question shuffled), without logging in; 20 lookups a minute per address. A wrong, expired or revoked code gives the same answer (`errors.shareCodeNotFound`).
+- A logged-in host adds a shared quiz to their quizzes ("Add to my quizzes": a copy with its rounds, settings and description; the sharer's logo and event name stay behind), and shared questions to their question library or the end of one of their quizzes. A shared quiz never goes into the library or another quiz, and loose questions never become a quiz of their own. `POST /api/share/:code/redeem`: fresh ids, no library links, nothing switched off in the library or an existing quiz, the pictures copied into the receiver's account (so the sharer's later changes never break the copy), all in one transaction; the 200-question, 2000-library-question and 1000-picture limits apply; 30 redeems an hour per account.
+- Sharing the same quiz, or the same questions, again gives the same code: its copy is brought up to date and its expiry starts again from the new choice; the dialog says so.
+- Copy code and Copy link work on plain http (a laptop on the venue LAN) too: the fallback copy now runs inside the open dialog, whose focus trap had made it copy nothing while reporting success.
+- Each code keeps its own copy of the questions, taken when it was made (or last shared again). The library's new "My share codes" tab lists the live codes with their question count, uses, dates, Copy link, the QR code and Revoke (after a confirmation), which deletes the code and its copy at once. Expired codes are deleted by the daily job, and the image clean-up keeps pictures a live code uses. At most 100 live codes per host (`errors.tooManyShareCodes`).
+- New table `share_codes` (migration `0022_share_codes`, additive), deleted with the account; counted in the account overview and included in "Download my data". Nothing about the people who open or use a code is stored beyond a use count.
+- The terms say that anyone with a code sees the shared questions and that the sharer is responsible for what they share; the privacy notice lists library questions and share codes and how long they are kept. The terms version is now 2026-11-12, so every host accepts them again at the next login.
+- Logging in from a share page returns to it.
 
 ### Fixed
 - The front page and the other public pages no longer log a 401 error in the browser for every visitor: the logo asks the new `GET /api/auth/session` (always 200) whether a host is logged in, instead of `/api/auth/me` (a 1.12.0 regression that failed seven e2e specs).

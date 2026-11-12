@@ -203,7 +203,8 @@
     "removeItem": "Remove {{name}}",
     "close": "Close",
     "actions": "Actions",
-    "typoAccepted": "Typo accepted"
+    "typoAccepted": "Typo accepted",
+    "done": "Done"
   },
   "auth": {
     "title": "Host login",
@@ -389,7 +390,8 @@
       "moveTo": "Move to",
       "renameTeam": "Rename {{team}}",
       "removeTeam": "Remove {{team}}",
-      "confirmRemoveTeam": "Remove {{team}}? Its players pick another team on their phones.",
+      "confirmRemoveTeam": "Remove {{team}}?",
+      "confirmRemoveTeamBody": "Its players pick another team on their phones.",
       "addTeam": "Add team",
       "withoutTeam": "Without a team",
       "withoutTeamHelp": "Their team was removed. They pick another one on their phones, or you move them. The game starts once everyone has a team.",
@@ -521,7 +523,8 @@
       "podiumHeldHelp": "The game ends here; you release the podium to the projector and the phones when you are ready.",
       "close": "Close the game",
       "closeHelp": "Ends at once with no podium. Every phone and the projector learn the game is over and disconnect. The results stay in your history.",
-      "confirmClose": "Close the game for everyone? Every phone and the projector are disconnected."
+      "confirmClose": "Close the game for everyone?",
+      "confirmCloseBody": "Every phone and the projector are disconnected."
     },
     "lock": {
       "button": "Lock screen",
@@ -612,6 +615,9 @@
       },
       "lateJoin": "Players can join late",
       "lateJoinHelp": "New players can still join after the start; they get no points for earlier questions.",
+      "reactions": "Emoji reactions",
+      "reactionsHelp": "Players send emoji between questions, and the projector shows them. Never while a question runs.",
+      "reactionsOff": "No reactions",
       "soloPlayers": "Players may play on their own",
       "soloPlayersHelp": "Players can also pick “On my own” when joining; they are ranked with the teams by their own points.",
       "speedBonus": "Speed bonus",
@@ -861,6 +867,10 @@
     "yourTeamLabel": "Your team",
     "solo": "You're playing on your own",
     "soloGroup": "Solo players",
+    "who": {
+      "title": "Who's here ({{count}})",
+      "you": "(you)"
+    },
     "soloRank": "Among the teams: rank {{rank}}",
     "mixedLeaderboard": "Teams and solo players",
     "leave": {
@@ -1327,6 +1337,33 @@
     "moveToTop": "Move to top",
     "moveToBottom": "Move to bottom",
     "questionDuplicated": "Question duplicated",
+    "select": {
+      "start": "Select questions",
+      "help": "Tap the questions to select them, or a round to select all of its questions.",
+      "bar": "Selected questions",
+      "list": "Questions to select",
+      "done": "Done",
+      "questionN": "Select question {{n}}",
+      "groupN": "Select every question in round {{n}}: {{title}}",
+      "deleted_one": "{{count}} question deleted",
+      "deleted_other": "{{count}} questions deleted"
+    },
+    "copy": {
+      "menu": "Copy to quiz…",
+      "action": "Copy to quiz",
+      "title_one": "Copy {{count}} question to a quiz",
+      "title_other": "Copy {{count}} questions to a quiz",
+      "description": "The copies go to the end of the quiz you pick, outside any round. Changing them later does not change these.",
+      "search": "Search your quizzes",
+      "target": "Quiz to copy to",
+      "noOtherQuiz": "You have no other quiz yet.",
+      "full": "No room: a quiz holds at most 200 questions",
+      "submit": "Copy",
+      "done_one": "{{count}} question copied to {{title}}",
+      "done_other": "{{count}} questions copied to {{title}}",
+      "open": "Open",
+      "fixFirst": "Fix the marked questions first, then copy them."
+    },
     "questionDeleted": "Question {{n}} deleted",
     "groupN": "Round {{n}}",
     "groupNOfCount": "Round {{n}} of {{count}}",
@@ -1433,6 +1470,177 @@
       "outside": "{{item}} is outside the list.",
       "dropped": "{{item}} dropped at position {{position}} of {{count}}.",
       "cancelled": "Reordering cancelled, {{item}} is back in place."
+    }
+  },
+  "share": {
+    "action": "Share",
+    "menu": "Share…",
+    "title_one": "Share the question",
+    "title_other": "Share {{count}} questions",
+    "titleQuiz": "Share “{{title}}”",
+    "fromQuiz_one": "{{count}} question from {{title}}",
+    "fromQuiz_other": "{{count}} questions from {{title}}",
+    "description": "Anyone with the code or its link sees the questions without the answers. Hosts can copy them into their own library or quizzes.",
+    "responsibility": "Share only what you have the right to share: you are responsible for it.",
+    "expiry": "How long should the code work?",
+    "expiries": { "7d": "7 days", "30d": "30 days", "never": "No expiry" },
+    "create": "Create code",
+    "readyTitle": "Your share code",
+    "readyBody": "Send the code or the link. Anyone with it sees “{{title}}” without the answers.",
+    "code": "Share code",
+    "link": "Link",
+    "reused": "You shared this before, so it keeps its code. The code now holds the current version and works for the time you chose.",
+    "copyLink": "Copy link",
+    "copyCode": "Copy code",
+    "linkCopied": "Link copied",
+    "codeCopied": "Code copied",
+    "validUntil": "Works until {{date}}",
+    "noExpiry": "No expiry",
+    "myCodes": "My share codes",
+    "enter": {
+      "open": "Enter a code",
+      "title": "Enter a share code",
+      "description": "Type the code you were sent, or paste its link.",
+      "submit": "Open",
+      "invalid": "That is not a share code. Codes look like QM-7K4PX-2XNAQ."
+    },
+    "list": {
+      "empty": "You have no live share codes. Share a question from the editor or the library, or a whole quiz from the quiz list.",
+      "kindQuiz": "Quiz",
+      "kindQuestions": "Questions",
+      "questions": "Questions",
+      "uses": "Used",
+      "created": "Created",
+      "expires": "Expires",
+      "show": "Show code and QR",
+      "revoke": "Revoke",
+      "revokeTitle": "Revoke {{code}}?",
+      "revokeBody": "The code and its link stop working at once. Copies people already made stay theirs.",
+      "revoked": "Code revoked"
+    },
+    "page": {
+      "questions": "Questions",
+      "questionNumber": "Question {{number}}",
+      "answersHidden": "The answers are hidden. You see the questions as players would.",
+      "loginHint": "Log in as a host to copy these questions into your question library or one of your quizzes.",
+      "loginHintQuiz": "Log in as a host to add this quiz to your quizzes.",
+      "login": "Log in",
+      "quizHelp": "Adds a copy of this quiz, with its rounds and settings, to your quizzes. Change it as you like: the original stays as it is.",
+      "addQuiz": "Add to my quizzes",
+      "quizAdded": "The quiz is in your quizzes now",
+      "questionsHelp_one": "Copy the question into your question library, or add it to the end of one of your quizzes.",
+      "questionsHelp_other": "Copy the {{count}} questions into your question library, or add them to the end of one of your quizzes.",
+      "toLibrary": "Add to my question library",
+      "toQuiz": "Add to one of my quizzes…",
+      "addedToLibrary_one": "Question added to your library",
+      "addedToLibrary_other": "{{count}} questions added to your library",
+      "openLibrary": "Open library",
+      "notFoundTitle": "We can't find this code",
+      "notFoundBody": "It may be mistyped, or it has expired or been revoked. Ask whoever sent it for a new one."
+    }
+  },
+  "bank": {
+    "title": "Question library",
+    "help": "Questions you keep for later. Add them to any quiz from the editor.",
+    "tabs": { "questions": "Questions" },
+    "page": {
+      "newTitle": "New question",
+      "editTitle": "Edit question",
+      "details": "Tags and quizzes",
+      "back": "Back to the question library",
+      "missing": "This question is no longer in your library. It may have been deleted.",
+      "usedIn_one": "Used in {{count}} quiz",
+      "usedIn_other": "Used in {{count}} quizzes",
+      "notUsed": "No quiz uses this question yet. Add it from a quiz's editor with Add from library.",
+      "updateQuizzes": "Update quizzes",
+      "upToDate": "Up to date",
+      "older": "Older version",
+      "changedThere": "Changed in this quiz",
+      "autoSync": "Update the quizzes automatically",
+      "autoSyncHelp": "Every change here goes to the quizzes at once. A question you changed in a quiz waits for you to update it."
+    },
+    "sync": {
+      "title": "Update the quizzes too?",
+      "description": "These quizzes have an older version of the question. Each keeps the question in its place, round and switch.",
+      "list": "Quizzes with an older version",
+      "changedNote": "Changed in this quiz. Updating replaces those changes.",
+      "submit_one": "Update {{count}} quiz",
+      "submit_other": "Update {{count}} quizzes",
+      "done_one": "Updated in {{count}} quiz",
+      "done_other": "Updated in {{count}} quizzes"
+    },
+    "tags": {
+      "label": "Tags",
+      "placeholder": "e.g. geography",
+      "suggestions": "Your tags"
+    },
+    "filters": {
+      "search": "Search questions and answers",
+      "type": "Question type",
+      "anyType": "Any type",
+      "tag": "Tag",
+      "anyTag": "Any tag"
+    },
+    "card": {
+      "options": "Options"
+    },
+    "list": {
+      "empty": "Your library is empty. Write a question here, import a spreadsheet, or choose Save to library in a question's menu in the editor.",
+      "noMatches": "No questions match these filters.",
+      "count_one": "{{count}} question of {{max}}",
+      "count_other": "{{count}} questions of {{max}}",
+      "matches_one": "{{count}} question found",
+      "matches_other": "{{count}} questions found",
+      "edit": "Edit question",
+      "deleted": "Question deleted from the library",
+      "deleteTitle": "Delete this question from your library?",
+      "deleteBody": "Quizzes that use it keep their copy, but can no longer be updated from the library."
+    },
+    "save": {
+      "menu": "Save to library…",
+      "openLinked": "Open in question library",
+      "push": "Save changes to the library",
+      "pushTitle": "Replace the library's version?",
+      "pushBody": "The question in your library takes this quiz's version. If its quizzes are updated automatically, the other quizzes get it too; otherwise you can update them from the library.",
+      "pushSubmit": "Replace",
+      "pushed": "Library question updated",
+      "action": "Save to library",
+      "title_one": "Save the question to your library",
+      "title_other": "Save {{count}} questions to your library",
+      "description": "The library keeps a copy, linked to this quiz: later changes in the library can be brought here. Tags help you find it again.",
+      "submit": "Save",
+      "done_one": "Question saved to your library",
+      "done_other": "{{count}} questions saved to your library",
+      "open": "Open library"
+    },
+    "add": {
+      "open": "Add from library",
+      "title": "Add from your question library",
+      "description": "Pick questions. Copies go after the selected question.",
+      "list_one": "{{count}} library question",
+      "list_other": "{{count}} library questions",
+      "pick": "Pick: {{text}}",
+      "preview": "Preview",
+      "previewHint": "Click a question to see it here.",
+      "seconds_one": "{{count}} second",
+      "seconds_other": "{{count}} seconds",
+      "tooMany_one": "Only {{count}} more question fits this quiz.",
+      "tooMany_other": "Only {{count}} more questions fit this quiz.",
+      "manage": "Open library",
+      "submit_one": "Add question",
+      "submit_other": "Add {{count}} questions",
+      "done_one": "Question added from your library",
+      "done_other": "{{count}} questions added from your library"
+    },
+    "import": {
+      "open": "Import from spreadsheet",
+      "title": "Import questions into your library",
+      "help": "Fill in the quiz template and choose the file. Every question goes into your library.",
+      "fileTypes": "CSV or TSV, as saved from Excel, Numbers or Google Sheets",
+      "sheetOnly": "This is a Quizmoo quiz file. Import it as a quiz from the quiz list, then save its questions to the library.",
+      "noRounds": "Rounds are left out: library questions do not belong to a round.",
+      "done_one": "{{count}} question imported into your library",
+      "done_other": "{{count}} questions imported into your library"
     }
   },
   "nicknames": {
@@ -1607,6 +1815,11 @@
     "termsOutdated": "The terms changed in the meantime. Reload the page and read the new version.",
     "tooManyGames": "You can have at most 20 open games at once. End an older one (End game), then try again.",
     "tooManyImages": "You reached the image limit (1000). Delete old quizzes; unused images are cleaned up daily.",
+    "imageNotFound": "A picture in these questions is not one of yours. Upload it again.",
+    "tooManyQuestions": "That would take the quiz over 200 questions, so nothing was added.",
+    "bankFull": "Your question library can hold 2000 questions. Delete a few first.",
+    "shareCodeNotFound": "We can't find this code. It may be mistyped, expired or revoked.",
+    "tooManyShareCodes": "You have 100 live share codes. Revoke one in My share codes first.",
     "imageTooBig": "This picture has too many pixels (50 megapixels at most). Make it smaller and upload it again.",
     "usernameTaken": "This username is already taken.",
     "notOnYourself": "You can't do this to your own account. Change your password in My settings.",
@@ -1646,6 +1859,54 @@
     "releasedOn": "Released {{date}}",
     "fixed": "Fixed",
     "releases": {
+      "1_13_0": {
+        "title": "Question library, sharing and reactions",
+        "intro": "Keep your best questions in a library, share questions and whole quizzes with a code, give partial credit on multiple choice, and let players react with emoji between questions.",
+        "sections": [
+          {
+            "title": "Question library",
+            "items": [
+              "The new Question library keeps questions outside any quiz, with tags. You find it in the sidebar under Quizzes.",
+              "Save a question to it from the editor's More actions menu, write new ones on its own page, or import a spreadsheet. In the editor, Add from library (under the question types) brings them into any quiz.",
+              "Questions added from the library stay linked to it: when you change one there, you can update the quizzes that use it, or let them update automatically. A copy you changed in a quiz is never overwritten without asking."
+            ]
+          },
+          {
+            "title": "Copying and sharing",
+            "items": [
+              "Select questions in the editor to copy them to another quiz, save them to the library, share or delete them at once.",
+              "Share a question, a selection or a whole quiz with a code, its link or its QR code, for 7 days, 30 days or for good. Anyone with it sees the questions without the answers; another host can add them to their own quizzes or library.",
+              "Enter a code on the quiz list or in the library. My share codes, in the library, lists your codes with their uses, and you can revoke any of them.",
+              "The terms of use now cover sharing, so you accept them once more at your next login."
+            ]
+          },
+          {
+            "title": "Partial credit",
+            "items": [
+              "A multiple-choice question can give partial credit: each right answer picked earns its share, each wrong one cancels a right one. New questions start with it; questions you made before keep scoring all or nothing.",
+              "A partly right answer shows as \"Partly right\" on the phones, the projector, your board and the results."
+            ]
+          },
+          {
+            "title": "Reactions",
+            "items": [
+              "Players send emoji between questions, never while a question runs. They float up on the projector and the phones with the player's name.",
+              "Mute them from the running game's top bar or the lobby, or switch them off for a quiz under Game flow.",
+              "The players' waiting screen shows who else has joined."
+            ]
+          },
+          {
+            "title": "Tours and help",
+            "items": [
+              "The tours show the new features, and the question library has a tour of its own. To see them again: My settings, Account, \"Show all tours again\".",
+              "The help page explains the question library, sharing and reactions."
+            ]
+          }
+        ],
+        "fixed": [
+          "Removing a player or a team, closing a game from the lobby and leaving a page with unsaved changes ask in Quizmoo's own dialog instead of the browser's."
+        ]
+      },
       "1_12_0": {
         "title": "Tours, help and tooltips",
         "intro": "Quizmoo now shows you around: a short tour on every main page, a help page that explains everything, and a tooltip on every button that shows only an icon.",
@@ -2198,6 +2459,10 @@
         "body": "These go for good and can't be brought back:",
         "quizzes_one": "{{count}} quiz",
         "quizzes_other": "{{count}} quizzes",
+        "bankQuestions_one": "{{count}} question in your question library",
+        "bankQuestions_other": "{{count}} questions in your question library",
+        "shareCodes_one": "{{count}} share code (it stops working)",
+        "shareCodes_other": "{{count}} share codes (they stop working)",
         "games_one": "{{count}} finished game with its results",
         "games_other": "{{count}} finished games with their results",
         "images_one": "{{count}} image",
@@ -2208,6 +2473,25 @@
         "done": "Your account is deleted"
       }
     }
+  },
+  "reactions": {
+    "bar": "Reactions",
+    "names": {
+      "clap": "Applause",
+      "laugh": "Laughing",
+      "wow": "Surprised",
+      "thumbsUp": "Thumbs up",
+      "heart": "Heart",
+      "cow": "Moo"
+    },
+    "showOthers": "Show reactions",
+    "mute": "Mute reactions",
+    "unmute": "Allow reactions",
+    "switch": "Reactions",
+    "openHelp": "Players can send emoji between questions, and the projector shows them.",
+    "mutedHelp": "Muted: players can't send reactions now.",
+    "recent_one": "{{count}} reaction in the last minute",
+    "recent_other": "{{count}} reactions in the last minute"
   },
   "branding": {
     "logo": "Organiser's logo"
@@ -2388,7 +2672,8 @@
             "Your username, and your password only as a one-way hash that nobody can turn back into the password.",
             "When you last logged in (shown only to the administrator, to see which accounts are still in use), and which version of the terms you accepted and when (as a record of our agreement).",
             "Your logins: a random code per browser, stored as a hash, for up to {{sessionDays}} days.",
-            "Your quizzes, the pictures you upload, your settings, and the games you ran with their results.",
+            "Your quizzes, your question library, the pictures you upload, your settings, and the games you ran with their results.",
+            "Your share codes, each with its own copy of the shared questions and a count of how often it was used. Nothing about the people who open or use a code is stored.",
             "Administrators only, if they enter one: an e-mail address for notices about new sign-ups. It is used for nothing else and is deleted when the administrator removes it or is no longer an administrator."
           ],
           "paragraphs": [
@@ -2415,7 +2700,8 @@
           "items": [
             "Finished games, with the players' nicknames and answers, are deleted {{days}} days after the game at the latest, and only the newest 200 games are kept for each host.",
             "Unfinished games are closed after 12 hours and then deleted in the same way as finished ones.",
-            "Pictures that no quiz, setting or game uses any more are deleted within two days.",
+            "Pictures that no quiz, library question, share code, setting or game uses any more are deleted within two days.",
+            "A share code and its copy are deleted when you revoke it, and daily once it has expired.",
             "Expired logins are deleted daily. A sign-up the admin does not approve within {{signupDays}} days is deleted.",
             "A player's seat stored in the browser is removed when they leave the game. Otherwise it expires after {{seatDays}} days and is removed the next time Quizmoo is opened on that device.",
             "Host accounts, with their quizzes and pictures, stay until the host or the admin deletes them.",
@@ -2498,7 +2784,8 @@
             "Not allowed: anything illegal, hate speech, harassment, sexual content, content that sexualises minors, glorification of violence, and other people's personal data without a legal basis.",
             "No advertising, spam or links to harmful sites.",
             "Nicknames must not be offensive or pretend to be someone else. Hosts can remove players from their games.",
-            "You keep the rights to what you create. You allow the operator to store and display it only as far as needed to provide the service to you, for example on the screens and phones of your games."
+            "You keep the rights to what you create. You allow the operator to store and display it only as far as needed to provide the service to you, for example on the screens and phones of your games.",
+            "Share codes: anyone who has a code or its link can see the shared questions without their answers, and other hosts can copy them. You are responsible for what you share; share only what you have the right to pass on. Revoke a code to stop it at once. Copies made before that stay with whoever made them."
           ]
         },
         {
@@ -2569,6 +2856,7 @@
         "draft": "What you filled in while waiting for a scheduled game. Removed when you join or leave.",
         "dismissed": "The host message you dismissed. Until you close the tab.",
         "picksOpen": "Whether your team's picks are open. Until you close the tab.",
+        "reactions": "That you switched other players' reactions off on this device. Until you switch them back on or clear your browser data.",
         "lang": "Your language. Until you change it or clear your browser data.",
         "mode": "Light, dark or system look. Until you change it or clear your browser data.",
         "seasonal": "That you switched the seasonal look off on this device. Until you switch it back on or clear your browser data.",
@@ -2623,6 +2911,7 @@
     "links": {
       "join": "Join a game",
       "quizzes": "Open your quizzes",
+      "library": "Open the question library",
       "games": "Open your games",
       "settings": "Open My settings",
       "tours": "Show the tours again",
@@ -2648,7 +2937,9 @@
           "pin": { "term": "PIN or QR code", "text": "Type the 6-digit PIN shown on the projector, or scan the QR code with your phone's camera." },
           "name": { "term": "Name and avatar", "text": "Type a name, or press Surprise me, and pick an avatar. Use a nickname, not your full name." },
           "team": { "term": "Team", "text": "In a team game, join a team or start one. If the host allows it, you can also play on your own." },
-          "wait": { "term": "Lobby", "text": "Wait there until the host starts the game, and keep the page open." }
+          "wait": { "term": "Lobby", "text": "Wait there until the host starts the game, and keep the page open." },
+          "who": { "term": "Who's here", "text": "Open the list in the lobby to see everyone who has joined, by team in a team game." },
+          "react": { "term": "Reactions", "text": "Between questions, tap an emoji to send it: it floats up on the projector and the other phones with your name. In the lobby, while the player list is open, it pops up next to your name there. You can switch other players' reactions off on your phone in the game menu." }
         }
       },
       "answering": {
@@ -2727,6 +3018,16 @@
           "keys": { "term": "Limits and shortcuts", "text": "A quiz holds up to 200 questions. On a laptop, press ? to see the keyboard shortcuts." }
         }
       },
+      "library": {
+        "heading": "Question library and sharing",
+        "items": {
+          "library": { "text": "Keep questions outside any quiz, with tags. Write new ones there, import a spreadsheet, or save a quiz's question from its More actions menu. In the editor, Add from library (under the question types) brings them into a quiz." },
+          "linked": { "term": "Linked copies", "text": "A question added from the library stays linked to it. When you change it there, you can update the quizzes too, or let them update automatically. A copy you changed in a quiz is never overwritten without asking." },
+          "select": { "text": "In the editor, tick several questions to copy them to another quiz, save them to the library, share or delete them at once." },
+          "share": { "term": "Share codes", "text": "Share a question, a selection or a whole quiz with a code like QM-7K4PX-2XNAQ, its link or its QR code, for 7 days, 30 days or for good. Anyone with it sees the questions without the answers; another host can add them to their own quizzes or library. My share codes lists your codes, and you can revoke any of them." },
+          "enterCode": { "text": "Type or paste a code you got, in any case and with or without the dashes, to see what it holds and add it." }
+        }
+      },
       "game-settings": {
         "heading": "Game settings",
         "paragraphs": [
@@ -2760,6 +3061,7 @@
           "board": { "term": "Player board", "text": "Shows who answered what, as it comes in." },
           "hide": { "text": "Hides the answers on your screen when it is on show." },
           "message": { "term": "Messages", "text": "Send a message to every phone and the projector: type one, or pick one of your quick messages." },
+          "reactions": { "text": "Players send emoji between questions, never while a question runs, and the projector shows them; the button counts the last minute's. Press it to mute them, again to allow them. Switch them off for a whole quiz under Game flow (Emoji reactions)." },
           "grading": { "term": "Grading", "text": "Free-text questions without accepted answers are graded by you after the question." },
           "lock": { "text": "Locks your host pages until your lock code or password is typed, if you have to step away." },
           "keys": { "term": "Keyboard", "text": "If the projector view runs in your browser, Space or the right arrow key moves the game on from there." },
@@ -2858,12 +3160,22 @@
       "import": { "title": "Bring questions in", "body": "Add the starter quiz to see an example, or import questions from a spreadsheet or a Quizmoo file." },
       "search": { "title": "Find a quiz", "body": "Search and sort your quizzes. Select lets you change the settings of several at once, or delete them." },
       "card": { "title": "Edit or play", "body": "Edit opens the editor. Play starts a new game: you check its settings, then share the PIN with the players." },
-      "more": { "title": "More actions", "body": "Duplicate a quiz, download it as a spreadsheet or a Quizmoo file, or delete it." }
+      "more": { "title": "More actions", "body": "Duplicate a quiz, share it with a code, download it as a spreadsheet or a Quizmoo file, or delete it." },
+      "library": { "title": "Question library", "body": "Keep your best questions outside any quiz, with tags, and add them to any quiz later." },
+      "enterCode": { "title": "Enter a code", "body": "Got a share code from another host? Type it here to see the questions and add them to your own." }
+    },
+    "library": {
+      "welcome": { "title": "Your question library", "body": "Questions kept outside any quiz, found by search, type and tag. Quizzes that use one can be updated when you change it." },
+      "new": { "title": "New question", "body": "Write a question here; it saves as you type." },
+      "import": { "title": "Import from a spreadsheet", "body": "Bring in many questions at once with the quiz template." },
+      "tabs": { "title": "My share codes", "body": "The codes you shared: who can still use them, how often they were used, and Revoke." },
+      "enterCode": { "title": "Enter a code", "body": "Type a share code you got to add its questions to your library or a quiz." }
     },
     "editor": {
       "title": { "title": "Give it a name", "body": "Players see the title when they join. Everything you change is saved by itself." },
       "list": { "title": "Your questions", "body": "Pick a question to edit it, drag it to move it. Rounds group questions under a title of their own." },
-      "add": { "title": "Add questions", "body": "Add a question or a round. You pick the question type first: choice, true or false, typed answer, number or ordering." },
+      "add": { "title": "Add questions", "body": "Add a question or a round. You pick the question type first: choice, true or false, typed answer, number or ordering. Add from library brings in questions you kept." },
+      "select": { "title": "Select questions", "body": "Tick several questions to copy them to another quiz, save them to your library, share them with a code or delete them at once." },
       "inGame": { "title": "In the game or not", "body": "Switch a question off to leave it out of the next game without deleting it." },
       "save": { "title": "Saved by itself", "body": "This shows whether everything is saved. When something needs fixing, a button here takes you to it." },
       "preview": { "title": "See it on a phone", "body": "This is how players see the question. You can play the whole quiz through here." },
@@ -2880,6 +3192,7 @@
       "projector": { "title": "Show it big", "body": "Opens the projector view in a new window: move it to the projector or the TV. It shows the PIN, then the questions." },
       "lock": { "title": "Close the door", "body": "Lock joining when everyone is in, so nobody else can join." },
       "players": { "title": "Who is here", "body": "Players show up here as they join. When everyone is in, press Start." },
+      "reactions": { "title": "Reactions", "body": "Players can send emoji between questions, and the projector shows them with their names. Mute them here if it gets too much." },
       "message": { "title": "Talk to everyone", "body": "Send a short message to every phone and the projector, for example about a break." }
     },
     "running": {
@@ -2887,6 +3200,7 @@
       "controls": { "title": "Need more time?", "body": "Pause the question, add 30 seconds, or skip it." },
       "board": { "title": "Who answered what", "body": "Every player's answer shows up here as it comes in. Hide the answers when your screen is on show." },
       "panels": { "title": "Side panels", "body": "Standings, messages, players and the questions, at hand while the game runs." },
+      "reactions": { "title": "Reactions", "body": "How many emoji the players sent in the last minute. Press to mute them, again to allow them." },
       "end": { "title": "End the game", "body": "Show the podium now, or close the game without one." }
     },
     "results": {
@@ -2901,6 +3215,7 @@
     },
     "playerLobby": {
       "card": { "title": "You're in!", "body": "Wait here until the host starts the game. Keep this page open." },
+      "who": { "title": "Who's here", "body": "Open it to see who else joined. Tap an emoji to react: it floats up on the projector with your name." },
       "team": { "title": "Your team", "body": "Your team and who is in it. Your answers count for your team too." },
       "about": { "title": "About the game", "body": "How many questions there are, how long you have for each, and how points are given." },
       "answering": { "title": "How to play", "body": "Each question appears on your phone. Tap your answer before the time runs out: a right answer brings points, a fast one even more." },

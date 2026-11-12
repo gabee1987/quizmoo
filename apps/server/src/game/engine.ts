@@ -358,6 +358,21 @@ export function setJoinLocked(state: GameState, locked: boolean): GameState {
   return { ...state, joinLocked: locked }
 }
 
+/** The host mutes (or un-mutes) the players' reactions, at any point of the game. */
+export function setReactionsMuted(state: GameState, muted: boolean): GameState {
+  if ((state.reactionsMuted ?? false) === muted) return state
+  return { ...state, reactionsMuted: muted }
+}
+
+/**
+ * Whether a reaction may be sent now: the game has them on, the host has not muted them, and no
+ * question is running or about to open (answering comes first).
+ */
+export function reactionsOpen(state: GameState): boolean {
+  if (state.settings.reactions === false || state.reactionsMuted) return false
+  return state.phase !== 'question' && state.phase !== 'countdown'
+}
+
 export function startGame(state: GameState, now: number): GameState {
   if (state.phase !== 'lobby') throw new EngineError('errors.gameAlreadyStarted')
   if (Object.keys(state.players).length === 0 || state.quiz.questions.length === 0) {

@@ -1,6 +1,6 @@
 # Phase 64: Question bank and share codes
 
-**Branch:** `feature/question-bank` (from `develop`). Delivered in three commits, one per part below; each part is usable on its own.
+**Branch:** `feature/question-bank-and-reactions` (from `develop`), shared with phase 58 (the user wants two or three features per branch, 5 November 2026). Delivered in three commits, one per part below; each part is usable on its own.
 
 ## Goal
 
@@ -13,9 +13,20 @@ Questions stop being locked into one quiz. A host copies questions to another of
 - **Share codes:** anyone with the code can **preview** the questions without an account (answers hidden); adding them to a bank or a quiz needs a host login. Default expiry 30 days, with 7 days and "never" as the other choices.
 - **Selecting several questions:** a "Select" mode in the editor's question list with checkboxes and an action bar, as on the quiz list page.
 
+## Decisions after testing part 2 (10 November 2026)
+
+- **Name:** "Question library" / "Kérdéstár" in the UI, route `/host/library`. "Bank" sounded corporate, and the farm-themed names were too playful. The code, routes and table keep `bank`. The public quiz library (phase 66) needs a name that cannot be confused with it (for example "Quiz library" / "Kvíztár").
+- **A question has its own page**, laid out like the editor (form, tags, the quizzes using it, phone preview), not a dialog. New questions are written there too (`/host/library/new`).
+- **Linked copies, with an offered update** (replaces "Copies, not links" below for the library): a copy added from the library or saved to it keeps `Question.bank = { id, hash }`. After a library edit the host is offered "Update the quizzes too?" with the quizzes holding an older version; nothing changes without asking. A copy changed in its own quiz since it was linked is marked "Changed in this quiz" and starts unticked; ticking it replaces those changes. `questionHash` leaves out ids, round, switch, colour and the link, so moving or switching a copy off does not count as a change.
+- **Undo of a delete keeps the id** (`POST /api/bank/restore`), so the quizzes' links survive it.
+- **Deleting asks first** (a confirmation naming the question), and Undo stays.
+- **The question page autosaves**, like everything else in the editor; there is no Save button. A new question is created by its first valid save, and the address then shows `/host/library/<id>` through a route mask, because a real navigation would remount the form while the host is typing.
+- **"Update the quizzes automatically"**, a switch per library question, **off by default** (the user agreed). On, every save brings the new version to the copies that were not changed in their quiz; changed copies keep waiting for "Update quizzes".
+- **Changes go one way, library to quizzes.** The user asked whether a quiz edit should flow back when the switch is on. No: a tweak for one event would silently rewrite the library and every other quiz, two quizzes could overwrite each other, and the editor saves on every keystroke. Instead a linked question changed in its quiz offers **"Save changes to the library"** in its More actions menu, behind a confirmation; with the switch on the other unchanged copies then follow (user's choice, 10 November 2026).
+
 ## Decided in this plan
 
-- **Copies, not links.** Adding a question to a quiz, the bank or another account always copies it with fresh ids. Editing one copy never changes another. The roadmap's "a newer version is in the bank" note is left for later: it needs version tracking that nothing else uses yet.
+- **Copies, not links.** Adding a question to a quiz, the bank or another account always copies it with fresh ids. Editing one copy never changes another. (For the library, changed on 10 November 2026: see above. Share codes still copy without a link: another account's library ids mean nothing to the receiver.)
 - **Pictures:** within one account a copy reuses the same image ids (as "Duplicate" does today). Redeeming a code copies the image bytes into the receiver's account, so the sharer deleting a picture never breaks the copy. The receiver's image quota (1000) applies; over it, the redeem fails with `errors.tooManyImages` and nothing is added.
 - **Codes:** `QM-` followed by 10 characters in two blocks of five (`QM-7K4PX-2XNAQ`) from a 31-character alphabet without 0, O, 1, I and L: about 49 bits, unguessable with the rate limits below. Codes are matched case-insensitively and with or without the dashes. A link carries the code: `/share/<code>`.
 - **Frozen copy:** a code stores its own copy of the questions (or the quiz with its settings and groups) when it is created. Revoking deletes the code and its copy at once; expired codes are deleted by the daily job.
@@ -49,6 +60,18 @@ Questions stop being locked into one quiz. A host copies questions to another of
 - Retention: expired codes are deleted daily; the image clean-up keeps pictures that a live code uses.
 - Legal texts: the terms say the sharer is responsible for what they share and that anyone with the code can see the questions; the privacy notice lists bank questions and share codes and says nothing about the receiver is stored beyond a use count.
 
+### Part 3 as built (12 November 2026)
+
+- **Where it lives:** "My share codes" is a second tab of the question library (`/host/library?tab=codes`); "Enter a code" is in the library's and the quiz list's header. There is no `/host/bank` page (renamed in part 2).
+- **A shared quiz only becomes a quiz; shared questions only go to the library or a quiz** (user's decision after testing, 12 November 2026: "Add to my library" and "Add to a quiz" made no sense for a whole quiz, and "Make my own copy" was unclear). The page offers "Add to my quizzes" for a quiz, and "Add to my question library" / "Add to one of my quizzes…" for questions, each with a line saying what happens; the server refuses the other targets.
+- **One code per shared thing** (user, 12 November 2026: sharing the same quiz twice should not make two codes): sharing a quiz again reuses its live code (`content.quizId`), and the same questions find theirs by equal content. The code's copy is brought up to date and its expiry restarts from the new choice; the frozen copy is now "as of the last share".
+- **The sharer's branding stays behind:** a shared quiz carries its rounds, settings, question defaults and description, not the logo or event name.
+- **Nothing arrives switched off** in the library or an existing quiz; a new quiz keeps the original's switches.
+- **The sharer's own redeem keeps the same pictures** instead of copying them, so it does not use up the picture quota.
+- **Terms version raised to 2026-11-12** (the terms gained the sharing rules), so every host accepts them again at the next login.
+- **Login returns to a share page:** `safeHostPath` also accepts `/share/<code>`.
+- **No select mode on the library page:** a library question is shared one at a time from its card; several at once from a quiz's select bar.
+
 Out of scope: community banks (after 62), public question collections (66), a "newer version in the bank" note, difficulty.
 
 ## Files (from the code survey)
@@ -67,6 +90,12 @@ Out of scope: community banks (after 62), public question collections (66), a "n
 6. **Part 3 server:** migration, share routes, redeem with picture copy, retention, rate limits. Check: tests for the code format and normaliser, preview without answers, the single error for wrong / expired / revoked, redeem into bank / quiz / new quiz, picture copies under the receiver, quota, use count, rate limits, account deletion removing codes.
 7. **Part 3 web:** Share dialog, `/share/$code`, My share codes, legal texts. Check: screenshots of the preview logged out and logged in; e2e with two host accounts: share a quiz, redeem it as the other host, revoke, the code stops working.
 8. **Docs:** a `question-bank` feature skill (decisions above), the `server-api` route table, the `database` skill, backlog and CHANGELOG. Check: read the diff.
+
+## Results (12 November 2026)
+
+- All three parts delivered; the decisions and deviations are in the `question-library` skill, so this file can be deleted once the branch is merged.
+- Checked: `pnpm typecheck`; tests: shared 71, web 384, server 673 (16 share-code tests); e2e `share-codes`, `copy-to-quiz`, `question-library` and `legal` against the production build; screenshots at 390 and 1440 px in both modes, the share dialog also through the LAN address.
+- Fixed after the user's test: duplicate codes for the same quiz, unclear add actions, a shared quiz offered for the library, no navigation after "Enter a code", Copy code copying nothing on plain http, and the share dialog overflowing on the LAN address.
 
 ## Done when
 

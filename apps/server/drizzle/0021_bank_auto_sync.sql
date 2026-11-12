@@ -1,0 +1,1 @@
+ALTER TABLE "bank_questions" ADD COLUMN "auto_sync" boolean DEFAULT false NOT NULL;

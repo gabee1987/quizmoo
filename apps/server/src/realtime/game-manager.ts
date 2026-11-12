@@ -1,4 +1,14 @@
-import { gameSettingsSchema, type GameBranding, type GameSettings, type QuickMessage } from '@quizmoo/shared'
+import {
+  REACTION_BURST,
+  REACTION_FLUSH_MS,
+  REACTION_WINDOW_MS,
+  gameSettingsSchema,
+  type GameBranding,
+  type GameSettings,
+  type QuickMessage,
+  type Reaction,
+  type ReactionBatch,
+} from '@quizmoo/shared'
 import {
   EngineError,
   countdownTimeUp,
@@ -9,6 +19,7 @@ import {
   expireAnnouncement,
   hostLocked,
   introTimeUp,
+  reactionsOpen,
   resultsPending,
   schedule,
   type GameQuiz,
@@ -16,6 +27,7 @@ import {
   type TeamSeed,
 } from '../game/index.js'
 import { generatePin } from './pin.js'
+import { createRateLimiter } from './rate-limit.js'
 
 export interface ManagedGame {
   state: GameState
@@ -35,6 +47,24 @@ interface Logger {
 /** `seq` is the game's broadcast counter for the snapshots of this transition. */
 type Listener = (game: ManagedGame, seq: number) => void
 
+/** What a game's reactions add up to since the last flush: everyone's, and each player's without their own. */
+export interface ReactionFlush {
+  pin: string
+  all: ReactionBatch
+  /** Null when nothing is left once the player's own reactions are taken out. */
+  forPlayer(playerId: string): ReactionBatch | null
+}
+type ReactionListener = (flush: ReactionFlush) => void
+
+/** Reactions collected since the last flush. Never game state: not persisted, gone on a restart. */
+interface ReactionBuffer {
+  /** Per player: how many of each reaction. */
+  byPlayer: Map<string, Map<Reaction, number>>
+  /** In order: each float names its sender. */
+  senders: { playerId: string; reaction: Reaction }[]
+  timer: ReturnType<typeof setTimeout>
+}
+
 interface Entry {
   game: ManagedGame
   timer: ReturnType<typeof setTimeout> | null
@@ -42,6 +72,10 @@ interface Entry {
   messageTimer: ReturnType<typeof setTimeout> | null
   /** Moves the projector's end pages on in automatic mode. */
   pageTimer: ReturnType<typeof setTimeout> | null
+  /** Reactions waiting for the next flush; null while there are none. */
+  reactions?: ReactionBuffer | null
+  /** Per player, so a second phone does not double the allowance. */
+  reactionLimits?: Map<string, ReturnType<typeof createRateLimiter>>
   saving: Promise<void>
   /** A save is queued behind `saving` and has not started; it writes the latest state when it does. */
   saveQueued?: boolean
@@ -64,6 +98,7 @@ export const PENDING_RELEASE_TTL_MS = 12 * 60 * 60 * 1000
 export class GameManager {
   private readonly games = new Map<string, Entry>()
   private readonly listeners = new Set<Listener>()
+  private readonly reactionListeners = new Set<ReactionListener>()
   private stopped = false
 
   constructor(
@@ -119,6 +154,39 @@ export class GameManager {
   subscribe(listener: Listener): () => void {
     this.listeners.add(listener)
     return () => this.listeners.delete(listener)
+  }
+
+  /** Called with every flush of a game's reactions. */
+  subscribeReactions(listener: ReactionListener): () => void {
+    this.reactionListeners.add(listener)
+    return () => this.reactionListeners.delete(listener)
+  }
+
+  /**
+   * A player's reaction, collected for the next flush (at most one per `REACTION_FLUSH_MS` and game).
+   * False when it was dropped: reactions are not open now, the player is unknown or left, or they
+   * sent more than `REACTION_BURST` within `REACTION_WINDOW_MS`.
+   */
+  react(pin: string, playerId: string, reaction: Reaction): boolean {
+    const entry = this.games.get(pin)
+    if (!entry || this.stopped) return false
+    const { state } = entry.game
+    const player = state.players[playerId]
+    if (!player || player.left || !reactionsOpen(state)) return false
+    entry.reactionLimits ??= new Map()
+    let limiter = entry.reactionLimits.get(playerId)
+    if (!limiter) entry.reactionLimits.set(playerId, (limiter = createRateLimiter(REACTION_BURST, REACTION_WINDOW_MS)))
+    if (!limiter.hit(this.now())) return false
+    entry.reactions ??= {
+      byPlayer: new Map(),
+      senders: [],
+      timer: setTimeout(() => this.flushReactions(pin, entry), REACTION_FLUSH_MS),
+    }
+    const own = entry.reactions.byPlayer.get(playerId) ?? new Map<Reaction, number>()
+    own.set(reaction, (own.get(reaction) ?? 0) + 1)
+    entry.reactions.byPlayer.set(playerId, own)
+    entry.reactions.senders.push({ playerId, reaction })
+    return true
   }
 
   /** With `scheduledAt` joining opens then (may throw EngineError `errors.invalidSchedule`). */
@@ -229,6 +297,7 @@ export class GameManager {
     for (const [pin, entry] of this.games) {
       if (entry.game.state.id !== gameId) continue
       this.clearTimers(entry)
+      this.dropReactions(entry)
       this.games.delete(pin)
       await entry.saving
     }
@@ -247,7 +316,10 @@ export class GameManager {
    */
   async stop(): Promise<void> {
     this.stopped = true
-    for (const entry of this.games.values()) this.clearTimers(entry)
+    for (const entry of this.games.values()) {
+      this.clearTimers(entry)
+      this.dropReactions(entry)
+    }
     await this.flush()
     this.games.clear()
   }
@@ -258,8 +330,58 @@ export class GameManager {
   }
 
   close() {
-    for (const entry of this.games.values()) this.clearTimers(entry)
+    for (const entry of this.games.values()) {
+      this.clearTimers(entry)
+      this.dropReactions(entry)
+    }
     this.games.clear()
+  }
+
+  private dropReactions(entry: Entry) {
+    if (entry.reactions) clearTimeout(entry.reactions.timer)
+    entry.reactions = null
+  }
+
+  /**
+   * Hands the collected reactions to the listeners. Reactions that closed in the meantime (a
+   * question opened, the host muted them) are dropped, so none appear while players answer.
+   */
+  private flushReactions(pin: string, entry: Entry) {
+    const buffer = entry.reactions
+    entry.reactions = null
+    if (!buffer || this.games.get(pin) !== entry) return
+    const { state } = entry.game
+    if (!reactionsOpen(state)) return
+    const batch = (without?: string): ReactionBatch => {
+      const counts = new Map<string, { reaction: Reaction; teamId: string | null; count: number }>()
+      for (const [playerId, own] of buffer.byPlayer) {
+        if (playerId === without) continue
+        const teamId = state.players[playerId]?.teamId ?? null
+        for (const [reaction, count] of own) {
+          const key = `${reaction}:${teamId ?? ''}`
+          const item = counts.get(key)
+          if (item) item.count += count
+          else counts.set(key, { reaction, teamId, count })
+        }
+      }
+      return { counts: [...counts.values()], senders: buffer.senders.filter((s) => s.playerId !== without) }
+    }
+    const flush: ReactionFlush = {
+      pin,
+      all: batch(),
+      forPlayer(playerId) {
+        if (!buffer.byPlayer.has(playerId)) return flush.all
+        const own = batch(playerId)
+        return own.counts.length > 0 ? own : null
+      },
+    }
+    for (const listener of this.reactionListeners) {
+      try {
+        listener(flush)
+      } catch (error) {
+        this.log.error(error, 'reaction listener failed')
+      }
+    }
   }
 
   private clearTimers(entry: Entry) {

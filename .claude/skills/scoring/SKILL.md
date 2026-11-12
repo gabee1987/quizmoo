@@ -25,6 +25,7 @@ Let `P` = question points, `T` = time limit in ms, `t` = the answer's stored `ti
 - Partly right is its own category everywhere (user's choice): `partialCount` next to `correctCount` in `RevealInfo`, `QuestionStat`, `ResultQuestion`, `ResultPlayer`; "share right", awards and the easiest / hardest question count fully right answers only. `PlayerPublic.correctCount` (standings) stays fully right only, to keep snapshots small. The tone is the `warning` colour with `PartialIcon` (a half disc carrying its own colours); never let a truthy check on `correct` show it as right.
 - Teams: a majority team (and a captain team's fallback) decides a partial-credit question per option: an option is in when more than half of the votes picked it; with no such option the most common whole answer counts (`majorityAnswer(votes, { perOption })`). All-or-nothing questions keep the whole-answer majority. The phone's team summary then says "Every option most of you picked" instead of a vote count.
 - Spreadsheet: column 14, `partial`/`részleges` or `all`/`mind`; empty (and older 13-column files) is all or nothing; a question without the field is written with an empty cell, so files round-trip exactly. Batch edit has its own "Multiple-choice scoring" group (`multipleScoring` in `PATCH /api/quizzes/batch`), applied to multiple-choice questions only.
+- Left out on purpose: partial credit for ordering questions (a separate idea), negative points, and changes to the CSV results export (its points already show the part).
 
 ## Correctness per type
 
