@@ -120,6 +120,7 @@ export const tours: Record<TourId, Tour> = {
     steps: [
       { id: 'card', anchor: 'player-card' },
       { id: 'who', anchor: 'player-list' },
+      { id: 'react', anchor: 'reaction-button' },
       { id: 'team', anchor: 'player-team' },
       { id: 'about', anchor: 'game-info' },
       { id: 'answering' },

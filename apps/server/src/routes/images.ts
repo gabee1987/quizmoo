@@ -3,6 +3,7 @@ import type { FastifyInstance } from 'fastify'
 import { nanoid } from 'nanoid'
 import sharp, { type OutputInfo } from 'sharp'
 import { requireSession } from '../auth/require-session.js'
+import { overBudget } from '../budgets.js'
 import type { Db } from '../db/index.js'
 import { images } from '../db/schema.js'
 
@@ -87,6 +88,8 @@ export async function imageRoutes(app: FastifyInstance, { db }: { db: Db }) {
     if (typeof output === 'string') return reply.code(400).send({ error: output })
 
     const row = imageRow(request.user!.id, output)
+    const over = await overBudget(db, request.user!.id, { storageBytes: row.data.length })
+    if (over) return reply.code(409).send({ error: over })
     await db.insert(images).values(row)
     return reply.code(201).send({ id: row.id, width: row.width, height: row.height, bytes: row.data.length, mime: row.mime })
   })

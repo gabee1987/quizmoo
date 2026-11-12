@@ -5,12 +5,14 @@ import type { Db } from '../src/db/index.js'
 import { images, quizzes, users } from '../src/db/schema.js'
 import { STARTER_IMAGE_COUNT } from '../src/starter/add-starter-quiz.js'
 import { buildTestApp, sessionCookie, testConfig } from './helpers/app.js'
+import { fakeMailer, signUp } from './helpers/mail.js'
 import { describeDb, withTestDb } from './helpers/test-db.js'
 
 describeDb('the starter quiz (database)', () => {
   let db: Db
   let cleanup: () => Promise<void>
   let built: Awaited<ReturnType<typeof buildTestApp>>
+  const mailer = fakeMailer()
   let admin: string
   let ip = 0
 
@@ -22,7 +24,7 @@ describeDb('the starter quiz (database)', () => {
 
   beforeAll(async () => {
     ;({ db, cleanup } = await withTestDb())
-    built = await buildTestApp(db, undefined, { ...testConfig, REGISTRATION_OPEN: true })
+    built = await buildTestApp(db, undefined, { ...testConfig, REGISTRATION_OPEN: true }, mailer)
     await createUser(db, 'test_admin', 'test-password-123', 'admin')
     admin = sessionCookie(await login('test_admin', 'test-password-123'))
   })
@@ -32,12 +34,7 @@ describeDb('the starter quiz (database)', () => {
   })
 
   it('comes with a sign-up, in the sign-up page language, with its pictures as the owner’s images', async () => {
-    const res = await built.app.inject({
-      method: 'POST',
-      url: '/api/auth/register',
-      payload: { username: 'test_newcomer', password: 'test-password-123', acceptTerms: true, lang: 'en' },
-      remoteAddress: '192.0.2.1',
-    })
+    const res = await signUp(built.app, mailer, { username: 'test_newcomer', lang: 'en' })
     expect(res.statusCode).toBe(201)
     const owner = await idOf('test_newcomer')
     const [quiz] = await quizzesOf(owner)

@@ -1,7 +1,10 @@
 import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link, useNavigate } from '@tanstack/react-router'
+import type { Budget, Usage } from '@quizmoo/shared'
 import {
+  AtSignIcon,
   FileDownIcon,
+  GaugeIcon,
   KeyRoundIcon,
   LockIcon,
   LogOutIcon,
@@ -28,9 +31,12 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { languages, setLanguage, type Language } from '@/i18n'
 import { apiFetch } from '@/lib/api'
 import { modes, setMode, useMode } from '@/lib/mode'
+import { useSiteInfo } from '@/lib/site'
 import { toastError } from '@/lib/toast'
+import { UsageBars } from '../budgets/usage-bars'
 import { resetTours } from '../tour/use-tour'
 import { timeAgo } from '../users/format'
+import { EmailForm } from './email-form'
 import { LockCodeForm } from './lock-code-form'
 import { PasswordForm } from './password-form'
 import { SettingsSection } from './settings-section'
@@ -39,6 +45,10 @@ import { SignupEmailForm } from './signup-email-form'
 
 export interface Account {
   username: string
+  /** The login address; null for an account from before e-mail login. */
+  email: string | null
+  /** Logs in with a password (admins, accounts from before e-mail login); otherwise with codes only. */
+  hasPassword: boolean
   role: 'admin' | 'editor'
   createdAt: string
   lastLoginAt: string | null
@@ -66,8 +76,15 @@ export function AccountPanel() {
   const { t, i18n } = useTranslation()
   const queryClient = useQueryClient()
   const account = useQuery(accountQueryOptions)
+  const usage = useQuery({
+    queryKey: ['usage'],
+    queryFn: () => apiFetch<{ usage: Usage; budget: Budget }>('/api/me/usage'),
+    enabled: account.data?.role === 'editor',
+  })
+  const site = useSiteInfo()
   const { mode } = useMode()
   const [deleting, setDeleting] = useState(false)
+  const [changingEmail, setChangingEmail] = useState(false)
 
   const logoutOthers = useMutation({
     mutationFn: () => apiFetch<void>('/api/me/account/logout-others', { method: 'POST' }),
@@ -114,6 +131,39 @@ export function AccountPanel() {
         )}
       </SettingsSection>
 
+      {site.data?.emailLogin && (
+        <SettingsSection icon={AtSignIcon} title={t('settings.account.email.title')} help={t('settings.account.email.help')}>
+          {changingEmail ? (
+            <EmailForm
+              confirmLabel={t('auth.emailStep.confirm')}
+              onCancel={() => setChangingEmail(false)}
+              onDone={() => {
+                setChangingEmail(false)
+                toast.success(t('settings.account.email.saved'))
+              }}
+            />
+          ) : (
+            <>
+              {account.data ? (
+                <p className="font-semibold break-all">{account.data.email ?? t('settings.account.email.none')}</p>
+              ) : (
+                <Skeleton className="h-6 rounded-lg" />
+              )}
+              <Button variant="outline" className="self-start" disabled={!account.data} onClick={() => setChangingEmail(true)}>
+                <AtSignIcon aria-hidden="true" />
+                {t('settings.account.email.change')}
+              </Button>
+            </>
+          )}
+        </SettingsSection>
+      )}
+
+      {account.data?.role === 'editor' && (
+        <SettingsSection icon={GaugeIcon} title={t('budgets.title')} help={t('budgets.help')}>
+          {usage.data ? <UsageBars usage={usage.data.usage} budget={usage.data.budget} /> : <Skeleton className="h-32 rounded-xl" />}
+        </SettingsSection>
+      )}
+
       <SettingsSection icon={SmartphoneIcon} title={t('settings.account.device.title')} help={t('settings.account.device.help')}>
         <ChoiceCards
           legend={t('app.language')}
@@ -144,15 +194,18 @@ export function AccountPanel() {
         </Button>
       </SettingsSection>
 
-      <SettingsSection icon={KeyRoundIcon} title={t('auth.passwordChange.title')}>
-        <PasswordForm
-          onDone={() => {
-            toast.success(t('settings.passwordSaved'))
-            // A new password logs out the other logins.
-            void queryClient.invalidateQueries({ queryKey: accountQueryOptions.queryKey })
-          }}
-        />
-      </SettingsSection>
+      {/* Accounts that log in with codes have no password to change. */}
+      {account.data?.hasPassword && (
+        <SettingsSection icon={KeyRoundIcon} title={t('auth.passwordChange.title')}>
+          <PasswordForm
+            onDone={() => {
+              toast.success(t('settings.passwordSaved'))
+              // A new password logs out the other logins.
+              void queryClient.invalidateQueries({ queryKey: accountQueryOptions.queryKey })
+            }}
+          />
+        </SettingsSection>
+      )}
 
       <SettingsSection icon={LockIcon} title={t('settings.lockCode.title')} help={t('settings.lockCode.help')}>
         <LockCodeForm />
@@ -230,14 +283,26 @@ export function DownloadDataButton() {
   )
 }
 
-/** Deleting takes everything the account owns, so the password is asked again (an open laptop is not enough). */
+/**
+ * Deleting takes everything the account owns, so the password is asked again (an open laptop is not
+ * enough); an account without one confirms with a code mailed to its address.
+ */
 export function DeleteAccountDialog({ account, onClose }: { account: Account; onClose: () => void }) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const queryClient = useQueryClient()
   const navigate = useNavigate()
   const [password, setPassword] = useState('')
+  const [code, setCode] = useState('')
+  const byCode = !account.hasPassword
+  const sendCode = useMutation({
+    mutationFn: () => apiFetch('/api/me/account/code', { method: 'POST', body: JSON.stringify({ lang: i18n.language }) }),
+    onSuccess: () => toast.success(t('settings.account.delete.codeSent', { email: account.email })),
+    onError: toastError,
+  })
+  const secret = byCode ? code.replace(/\D/g, '') : password
   const remove = useMutation({
-    mutationFn: () => apiFetch<void>('/api/me/account', { method: 'DELETE', body: JSON.stringify({ password }) }),
+    mutationFn: () =>
+      apiFetch<void>('/api/me/account', { method: 'DELETE', body: JSON.stringify(byCode ? { code: secret } : { password }) }),
     onSuccess: () => {
       queryClient.clear()
       toast.success(t('settings.account.delete.done'))
@@ -263,18 +328,35 @@ export function DeleteAccountDialog({ account, onClose }: { account: Account; on
       submitLabel={t('settings.account.delete.submit')}
       danger
       pending={remove.isPending}
-      disabled={!password}
+      disabled={byCode ? secret.length !== 6 : !password}
       error={remove.error}
       onCancel={onClose}
-      onSubmit={() => password && remove.mutate()}
+      onSubmit={() => (byCode ? secret.length === 6 : password) && remove.mutate()}
     >
-      <TextField
-        label={t('settings.account.delete.password')}
-        type="password"
-        autoComplete="current-password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
+      {byCode ? (
+        <div className="flex flex-col gap-3">
+          <Button type="button" variant="outline" className="self-start" disabled={sendCode.isPending} onClick={() => sendCode.mutate()}>
+            <MailIcon aria-hidden="true" />
+            {sendCode.isSuccess ? t('auth.code.resend') : t('auth.code.send')}
+          </Button>
+          <TextField
+            label={t('auth.code.label')}
+            inputMode="numeric"
+            autoComplete="one-time-code"
+            maxLength={7}
+            value={code}
+            onChange={(e) => setCode(e.target.value.replace(/[^\d ]/g, ''))}
+          />
+        </div>
+      ) : (
+        <TextField
+          label={t('settings.account.delete.password')}
+          type="password"
+          autoComplete="current-password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+      )}
     </FormDialog>
   )
 }

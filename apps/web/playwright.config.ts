@@ -33,6 +33,8 @@ export default defineConfig({
           localStorage: [
             { name: 'quizmoo.storageNotice', value: 'seen' },
             { name: 'quizmoo.tours', value: 'off' },
+            // The specs log the E2E admin in with the password; the code login has its own spec (signup.e2e.ts).
+            { name: 'quizmoo.loginWith', value: 'password' },
           ],
         },
       ],

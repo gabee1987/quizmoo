@@ -1,4 +1,5 @@
 import { and, eq, lt, sql } from 'drizzle-orm'
+import { deleteExpiredCodes } from './auth/email-codes.js'
 import type { Db } from './db/index.js'
 import { bankQuestions, games, hostSettings, images, quizzes, sessions, shareCodes, users } from './db/schema.js'
 
@@ -119,6 +120,8 @@ export function scheduleRetention(
       if (expiredSessions > 0) log.info({ deleted: expiredSessions }, 'deleted expired logins')
       const expiredCodes = await deleteExpiredShareCodes(db, now())
       if (expiredCodes > 0) log.info({ deleted: expiredCodes }, 'deleted expired share codes')
+      const loginCodes = await deleteExpiredCodes(db, now())
+      if (loginCodes > 0) log.info({ deleted: loginCodes }, 'deleted expired e-mail codes')
       // After the games: an image used only by a game deleted above is unused now.
       const unusedImages = await deleteUnusedImages(db, now())
       if (unusedImages > 0) log.info({ deleted: unusedImages }, 'deleted unused images')

@@ -1,6 +1,6 @@
 ---
 name: hosting-and-releases
-description: Why Quizmoo is hosted and released the way it is (phase 26 beta deploy, phase 37 fixes in the patch notes): Railway, host sign-up with approval, trusted proxies, no IP addresses, site settings from the environment, deploying only with no game running, additive migrations, versions and the What's new notes. Load before changing deployment, configuration, sign-up, the privacy page, the release routine or the patch notes.
+description: Why Quizmoo is hosted and released the way it is (phase 26 beta deploy, phase 37 fixes in the patch notes): Railway, host sign-up (with approval until phase 71, see host-accounts), trusted proxies, no IP addresses, site settings from the environment, deploying only with no game running, additive migrations, versions and the What's new notes. Load before changing deployment, configuration, sign-up, the privacy page, the release routine or the patch notes.
 ---
 
 # Hosting and releases (history and reasons)
@@ -20,7 +20,7 @@ How to deploy is in `DEPLOYMENT.md` (Railway step by step) and `docs/deploy.md` 
 - **`TRUST_PROXY` is a hop count**, applied through a trust function. `trustProxy: true` was unsafe: without a proxy any client could fake its address, and behind one `true` takes the client-written first address. Fastify 5 ignores a numeric `trustProxy`, hence the function.
 - **No IP addresses anywhere:** request logs leave out the client's address (the privacy page promises it). Rate limits use the address in memory only.
 - **Site details from the environment:** the operator's name and contact, the retention days and the Feedback link come from variables (`OPERATOR_NAME`, `OPERATOR_EMAIL`, `FEEDBACK_URL`, …) through the public `GET /api/site`, so the repository holds no personal contact details and every install shows its own.
-- **Host sign-up with admin approval** (changed before the first deploy): `/register` creates a `pending` user (`users.status`) who cannot log in until an admin approves. No e-mail address is collected, so a forgotten password is reset by the admin. Off unless `REGISTRATION_OPEN=true`, so a venue laptop never offers it. Spam protection without a third-party CAPTCHA: a per-IP limit, a honeypot field and a cap on pending accounts; rejected sign-ups are deleted at once, unapproved ones after 7 days by the daily retention job.
+- **Host sign-up with admin approval** (changed before the first deploy, replaced in phase 71): `/register` created a `pending` user who could not log in until an admin approved, and no e-mail address was collected. The approval e-mail could not say who signed up, so phase 71 switched to a confirmed e-mail address, code login and budgets instead of approval (`host-accounts`). Still off unless `REGISTRATION_OPEN=true`, and it needs e-mail, so a venue laptop never offers it.
 - **Feedback** goes to a GitHub issue form (the repository is public), not to a third-party widget.
 - **Smoke test** after every deploy: `scripts/smoke.mjs <url>` (health, SPA fallback, manifest, service worker, HSTS over https, a login, a socket round trip); it deletes what it creates.
 

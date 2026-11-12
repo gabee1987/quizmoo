@@ -6,6 +6,8 @@ declare module 'fastify' {
   interface FastifyInstance {
     /** Screen lock: the host locked their screens, so only `allowLocked` routes answer. */
     hostLocked: (userId: string) => boolean
+    /** E-mail is configured: hosts log in with codes, and accounts without an address must add one. */
+    emailLogin: boolean
   }
   interface FastifyRequest {
     user: SessionUser | null
@@ -17,6 +19,8 @@ declare module 'fastify' {
 interface Options {
   /** Allow users who still have to change their initial password (me, logout, password change). */
   allowPendingPasswordChange?: boolean
+  /** Allow accounts that still have to add an e-mail address (adding it). */
+  allowPendingEmail?: boolean
   /**
    * Allow users who have not accepted the current terms (accepting them, downloading their data,
    * deleting their account): someone who refuses new terms can still take their data and leave.
@@ -31,18 +35,29 @@ interface Options {
 /** preHandler: loads the session user onto `request.user`, or answers 401 / 403 / 423. */
 export function requireSession(
   db: Db,
-  { allowPendingPasswordChange = false, allowPendingTerms = false, admin = false, allowLocked = false }: Options = {},
+  {
+    allowPendingPasswordChange = false,
+    allowPendingEmail = false,
+    allowPendingTerms = false,
+    admin = false,
+    allowLocked = false,
+  }: Options = {},
 ) {
   return async (request: FastifyRequest, reply: FastifyReply) => {
     const token = request.sessionToken
-    const user = token ? await verifySession(db, token) : null
-    if (!user) return reply.code(401).send({ error: 'errors.unauthorized' })
+    const verified = token ? await verifySession(db, token) : null
+    if (!verified) return reply.code(401).send({ error: 'errors.unauthorized' })
+    // Without e-mail there is no code to confirm an address with, so nobody is asked for one.
+    const user = { ...verified, mustAddEmail: verified.mustAddEmail && request.server.emailLogin }
     // Enforced here, not only in the UI: an initial password must be replaced before anything else,
-    // then the terms accepted.
+    // then an e-mail address added, then the terms accepted.
     if (user.mustChangePassword && !allowPendingPasswordChange) {
       return reply.code(403).send({ error: 'errors.passwordChangeRequired' })
     }
-    if (user.mustAcceptTerms && !allowPendingTerms && !allowPendingPasswordChange) {
+    if (user.mustAddEmail && !allowPendingEmail && !allowPendingPasswordChange) {
+      return reply.code(403).send({ error: 'errors.emailRequired' })
+    }
+    if (user.mustAcceptTerms && !allowPendingTerms && !allowPendingPasswordChange && !allowPendingEmail) {
       return reply.code(403).send({ error: 'errors.termsRequired' })
     }
     if (admin && user.role !== 'admin') return reply.code(403).send({ error: 'errors.forbidden' })

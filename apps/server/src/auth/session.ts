@@ -1,6 +1,6 @@
 import { createHash, randomBytes } from 'node:crypto'
 import { TERMS_VERSION } from '@quizmoo/shared'
-import { and, eq, ne } from 'drizzle-orm'
+import { and, eq, ne, sql } from 'drizzle-orm'
 import type { FastifyReply } from 'fastify'
 import type { Db } from '../db/index.js'
 import { sessions, users } from '../db/schema.js'
@@ -18,7 +18,13 @@ export interface SessionUser {
   id: string
   username: string
   role: 'admin' | 'editor'
+  /** The account's e-mail address (its login), or null for an account from before e-mail login. */
+  email: string | null
+  /** Has a password (admins, accounts from before e-mail login, installs without e-mail); otherwise codes only. */
+  hasPassword: boolean
   mustChangePassword: boolean
+  /** An account from before e-mail login: must add and confirm an address first (only while e-mail is configured; see `requireSession`). */
+  mustAddEmail: boolean
   /** Never accepted the terms, or accepted an older version than `TERMS_VERSION`. */
   mustAcceptTerms: boolean
 }
@@ -43,7 +49,10 @@ export async function verifySession(db: Db, token: string, now = Date.now()): Pr
       id: users.id,
       username: users.username,
       role: users.role,
+      email: users.email,
+      hasPassword: sql<boolean>`exists (select 1 from "local_credentials" c where c."user_id" = ${users.id})`,
       mustChangePassword: users.mustChangePassword,
+      mustAddEmail: users.mustAddEmail,
       termsVersion: users.termsVersion,
     })
     .from(sessions)
@@ -59,7 +68,10 @@ export async function verifySession(db: Db, token: string, now = Date.now()): Pr
     id: row.id,
     username: row.username,
     role: row.role,
+    email: row.email,
+    hasPassword: row.hasPassword,
     mustChangePassword: row.mustChangePassword,
+    mustAddEmail: row.mustAddEmail,
     mustAcceptTerms: row.termsVersion !== TERMS_VERSION,
   }
 }

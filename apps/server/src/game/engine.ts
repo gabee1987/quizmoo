@@ -133,7 +133,9 @@ export function joinPlayer(state: GameState, input: JoinInput, now?: number): Ga
   if (!isNameAllowed(name)) throw new EngineError('errors.nameNotAllowed')
   const key = nameKey(name)
   if (Object.values(state.players).some((p) => nameKey(p.name) === key)) throw new EngineError('errors.nameTaken')
-  if (Object.keys(state.players).length >= MAX_PLAYERS) throw new EngineError('errors.gameFull')
+  if (Object.keys(state.players).length >= Math.min(state.playerLimit ?? MAX_PLAYERS, MAX_PLAYERS)) {
+    throw new EngineError('errors.gameFull')
+  }
 
   let teamId: string | null = null
   let joined = state

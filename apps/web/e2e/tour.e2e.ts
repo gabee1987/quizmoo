@@ -19,7 +19,19 @@ async function toursOn(browser: Browser, options: Parameters<Browser['newContext
   return browser.newContext({
     locale: 'en-US',
     ...options,
-    storageState: { cookies: [], origins: [{ origin, localStorage: [{ name: 'quizmoo.storageNotice', value: 'seen' }] }] },
+    storageState: {
+      cookies: [],
+      origins: [
+        {
+          origin,
+          localStorage: [
+            { name: 'quizmoo.storageNotice', value: 'seen' },
+            // The E2E admin logs in with the password, as in the config's default storage.
+            { name: 'quizmoo.loginWith', value: 'password' },
+          ],
+        },
+      ],
+    },
   })
 }
 

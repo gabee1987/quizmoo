@@ -18,7 +18,7 @@ import { Question } from '../features/play/question'
 import { Reveal } from '../features/play/reveal'
 import { PhoneRoundIntro } from '../features/play/round-intro'
 import { Scoreboard } from '../features/play/scoreboard'
-import { ReactionBar } from '../features/reactions/reaction-bar'
+import { ReactionButton } from '../features/reactions/reaction-button'
 import { ReactionFloats } from '../features/reactions/reaction-floats'
 import { reactionsOpen } from '../features/reactions/reactions'
 import { lostCaptaincy, movedTo, newCaptaincy, newTeammates, teamSeat, type TeamSeat } from '../features/play/team-moved'
@@ -88,12 +88,9 @@ function PlayPage() {
           </div>
           <NextRound snapshot={player} pin={pin} />
           <PhaseView snapshot={player} clockOffset={clockOffset} />
-          {/* The lobby has its bar in the player list; elsewhere it stays at the bottom, in the flow so it never covers the end of a page. */}
-          {player.phase !== 'lobby' && reactionsOpen(player) && (
-            <div className="sticky bottom-[max(0.5rem,env(safe-area-inset-bottom))] z-30 mx-auto mt-4 w-full max-w-sm">
-              <ReactionBar snapshot={player} />
-            </div>
-          )}
+          {/* Room below the page's end, so the reaction button in the corner never covers it. */}
+          {reactionsOpen(player) && <div aria-hidden="true" className="h-20 shrink-0" />}
+          <ReactionButton snapshot={player} />
           <ReactionFloats size="phone" players={player.players} />
         </>
       )}

@@ -22,6 +22,7 @@ import { and, count, desc, eq, gt, inArray, isNull, or, sql } from 'drizzle-orm'
 import type { FastifyInstance, FastifyReply } from 'fastify'
 import { nanoid } from 'nanoid'
 import { requireSession } from '../auth/require-session.js'
+import { jsonBytes, overBudget } from '../budgets.js'
 import type { Db } from '../db/index.js'
 import { bankQuestions, images, quizzes, shareCodes, type ShareContent } from '../db/schema.js'
 import { createRateLimiter } from '../realtime/rate-limit.js'
@@ -148,6 +149,9 @@ export async function shareRoutes(app: FastifyInstance, { db }: { db: Db }) {
         .from(shareCodes)
         .where(and(eq(shareCodes.ownerId, userId), live(now)))
       if ((held?.n ?? 0) >= MAX_SHARE_CODES) return null
+      // A code keeps its own copy, so it counts towards storage too.
+      const over = await overBudget(db, userId, { shareCodes: 1, storageBytes: jsonBytes(content) })
+      if (over) return { over }
       // A clash is all but impossible at 49 bits; try a few codes before giving up.
       for (let attempt = 0; attempt < 5; attempt++) {
         const rows = await tx
@@ -160,6 +164,7 @@ export async function shareRoutes(app: FastifyInstance, { db }: { db: Db }) {
       throw new Error('no free share code')
     })
     if (!created) return reply.code(409).send({ error: 'errors.tooManyShareCodes' })
+    if ('over' in created) return reply.code(409).send({ error: created.over })
     return reply.code(created.reused ? 200 : 201).send({ share: toSummary(created.row), reused: created.reused })
   })
 
@@ -238,6 +243,21 @@ export async function shareRoutes(app: FastifyInstance, { db }: { db: Db }) {
     if (!row) return notFound(reply)
     // A shared quiz becomes a quiz of the receiver's; shared questions go to the library or a quiz.
     if ((body.target === 'newQuiz') !== (row.kind === 'quiz')) return reply.code(400).send({ error: 'errors.invalidInput' })
+    // What the copy will take: the questions and, from someone else's code, their pictures.
+    const sharedPictures = pictureIds(row.content.questions, row.content.groups ?? [])
+    const [pictures] =
+      row.ownerId === userId || sharedPictures.length === 0
+        ? [{ bytes: 0 }]
+        : await db
+            .select({ bytes: sql<number>`coalesce(sum(octet_length(${images.data})), 0)::float8` })
+            .from(images)
+            .where(and(inArray(images.id, sharedPictures), eq(images.ownerId, row.ownerId)))
+    const over = await overBudget(db, userId, {
+      storageBytes: jsonBytes(row.content.questions) + Number(pictures?.bytes ?? 0),
+      ...(body.target === 'newQuiz' && { quizzes: 1 }),
+      ...(body.target === 'bank' && { bankQuestions: row.content.questions.length }),
+    })
+    if (over) return reply.code(409).send({ error: over })
 
     try {
       const result = await db.transaction(async (tx): Promise<ShareRedeemResult> => {

@@ -1,10 +1,22 @@
 import { randomBytes } from 'node:crypto'
 import postgres from 'postgres'
 import { describe } from 'vitest'
+import type { Budget } from '@quizmoo/shared'
+import { saveBudgetDefaults } from '../../src/budgets.js'
 import { createDb, type Db } from '../../src/db/index.js'
 import { runMigrations } from '../../src/migrate.js'
 
 const adminUrl = process.env.TEST_DATABASE_URL
+
+export const NO_BUDGET: Budget = {
+  storageMb: null,
+  quizzes: null,
+  bankQuestions: null,
+  shareCodes: null,
+  openGames: null,
+  gamesPerMonth: null,
+  playersPerGame: null,
+}
 
 /** `describe` when TEST_DATABASE_URL is set, otherwise a visibly skipped suite. */
 export const describeDb = adminUrl ? describe : describe.skip
@@ -26,6 +38,8 @@ export async function withTestDb(): Promise<{ db: Db; cleanup: () => Promise<voi
   url.pathname = `/${name}`
   const { db, close } = createDb(url.toString())
   await runMigrations(db)
+  // No budgets unless a test sets them (budgets.test.ts): the other suites test their own limits.
+  await saveBudgetDefaults(db, NO_BUDGET)
 
   return {
     db,

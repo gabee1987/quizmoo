@@ -1,8 +1,9 @@
 import { expect, test } from '@playwright/test'
 
 /**
- * The admin's Users page: add an account, change its role, set a new password (which logs the
- * account out and must be changed), log it out everywhere and delete it after typing its name.
+ * The admin's Users page: add an account (by e-mail address when the server sends e-mail, else with an
+ * initial password), set its budget, change its role, set a new password (which logs the account out
+ * and must be changed), log it out everywhere and delete it after typing its name.
  * The admin's own card has no actions. Anything left behind is deleted at the end. Then the admin's
  * sign-up e-mail address in My settings, put back as it was afterwards.
  */
@@ -27,6 +28,7 @@ test('an admin manages a host account from the Users page', async ({ browser, pa
   await page.getByRole('button', { name: 'Log in' }).click()
   await expect(page).toHaveURL(/\/host$/)
   const before = ((await (await page.request.get('/api/me/signup-email')).json()) as { email: string | null }).email
+  const { emailLogin } = (await (await page.request.get('/api/site')).json()) as { emailLogin: boolean }
 
   try {
     await test.step('the admin pages sit in their own group and the own card has no actions', async () => {
@@ -41,14 +43,38 @@ test('an admin manages a host account from the Users page', async ({ browser, pa
       await page.getByRole('button', { name: 'Add user' }).click()
       const dialog = page.getByRole('dialog')
       await dialog.getByLabel('Username').fill(host)
-      await dialog.getByLabel('Initial password').fill('short')
-      await dialog.getByRole('button', { name: 'Create' }).click()
-      await expect(dialog.getByText('At least 10 characters.')).toBeVisible()
-      await dialog.getByLabel('Initial password').fill('e2e-initial-pass-1')
-      await dialog.getByRole('button', { name: 'Create' }).click()
-      await expect(page.getByText(`Account ${host} created.`)).toBeVisible()
-      await expect(card.getByText('Password not changed yet')).toBeVisible()
+      if (emailLogin) {
+        // The person logs in with codes sent to the address; the admin knows no password.
+        await dialog.getByLabel('E-mail address').fill('not-an-address')
+        await dialog.getByRole('button', { name: 'Create' }).click()
+        await expect(dialog.getByText('Enter a valid e-mail address.')).toBeVisible()
+        await dialog.getByLabel('E-mail address').fill(`${host}@example.test`)
+        await dialog.getByRole('button', { name: 'Create' }).click()
+        await expect(page.getByText(`Account ${host} created.`)).toBeVisible()
+        await expect(card.getByText(`${host}@example.test`)).toBeVisible()
+        await expect(card.getByText('(not confirmed yet)')).toBeVisible()
+      } else {
+        await dialog.getByLabel('Initial password').fill('short')
+        await dialog.getByRole('button', { name: 'Create' }).click()
+        await expect(dialog.getByText('At least 10 characters.')).toBeVisible()
+        await dialog.getByLabel('Initial password').fill('e2e-initial-pass-1')
+        await dialog.getByRole('button', { name: 'Create' }).click()
+        await expect(page.getByText(`Account ${host} created.`)).toBeVisible()
+        await expect(card.getByText('Password not changed yet')).toBeVisible()
+      }
       await expect(card.getByText('never logged in')).toBeVisible()
+    })
+
+    await test.step('the admin gives the account its own budget', async () => {
+      await action('Edit budget')
+      const dialog = page.getByRole('dialog')
+      await dialog.getByRole('combobox', { name: 'Limit for Quizzes' }).click()
+      await page.getByRole('option', { name: 'Own value' }).click()
+      await dialog.getByRole('spinbutton', { name: 'Quizzes' }).fill('2')
+      await dialog.getByRole('button', { name: 'Save' }).click()
+      await expect(page.getByText(`Budget saved for ${host}`)).toBeVisible()
+      await card.getByText('Usage and limits').click()
+      await expect(card.getByRole('meter', { name: 'Quizzes' })).toHaveAttribute('aria-valuetext', /of 2$/)
     })
 
     await test.step('the role changes both ways', async () => {
@@ -63,16 +89,18 @@ test('an admin manages a host account from the Users page', async ({ browser, pa
     })
 
     await test.step('a new password logs the account out and must be changed', async () => {
-      expect((await login('e2e-initial-pass-1')).status()).toBe(200)
-      await page.reload()
-      await expect(card.getByText(/last login/)).toBeVisible()
+      if (!emailLogin) {
+        expect((await login('e2e-initial-pass-1')).status()).toBe(200)
+        await page.reload()
+        await expect(card.getByText(/last login/)).toBeVisible()
+      }
       await action('Set a new password')
       const dialog = page.getByRole('dialog')
       await dialog.getByLabel('New password').fill('e2e-reset-pass-1')
       await dialog.getByRole('button', { name: 'Set password' }).click()
       await expect(page.getByText(`New password set for ${host}.`)).toBeVisible()
       expect((await guest.request.get('/api/auth/me')).status()).toBe(401)
-      expect((await login('e2e-initial-pass-1')).status()).toBe(401)
+      if (!emailLogin) expect((await login('e2e-initial-pass-1')).status()).toBe(401)
       const fresh = await login('e2e-reset-pass-1')
       expect(((await fresh.json()) as { user: { mustChangePassword: boolean } }).user.mustChangePassword).toBe(true)
     })

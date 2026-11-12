@@ -19,6 +19,7 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as HostIndexRouteImport } from './routes/host/index'
+import { Route as HostEmailRouteImport } from './routes/host/email'
 import { Route as HostNicknamesRouteImport } from './routes/host/nicknames'
 import { Route as HostPasswordRouteImport } from './routes/host/password'
 import { Route as HostSettingsRouteImport } from './routes/host/settings'
@@ -85,6 +86,11 @@ const TermsRoute = TermsRouteImport.update({
 const HostIndexRoute = HostIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => HostRouteRoute,
+} as any)
+const HostEmailRoute = HostEmailRouteImport.update({
+  id: '/email',
+  path: '/email',
   getParentRoute: () => HostRouteRoute,
 } as any)
 const HostNicknamesRoute = HostNicknamesRouteImport.update({
@@ -183,6 +189,7 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/register': typeof RegisterRoute
   '/terms': typeof TermsRoute
+  '/host/email': typeof HostEmailRoute
   '/host/nicknames': typeof HostNicknamesRoute
   '/host/password': typeof HostPasswordRoute
   '/host/settings': typeof HostSettingsRoute
@@ -211,6 +218,7 @@ export interface FileRoutesByTo {
   '/privacy': typeof PrivacyRoute
   '/register': typeof RegisterRoute
   '/terms': typeof TermsRoute
+  '/host/email': typeof HostEmailRoute
   '/host/nicknames': typeof HostNicknamesRoute
   '/host/password': typeof HostPasswordRoute
   '/host/settings': typeof HostSettingsRoute
@@ -241,6 +249,7 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/register': typeof RegisterRoute
   '/terms': typeof TermsRoute
+  '/host/email': typeof HostEmailRoute
   '/host/nicknames': typeof HostNicknamesRoute
   '/host/password': typeof HostPasswordRoute
   '/host/settings': typeof HostSettingsRoute
@@ -272,6 +281,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/register'
     | '/terms'
+    | '/host/email'
     | '/host/nicknames'
     | '/host/password'
     | '/host/settings'
@@ -300,6 +310,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/register'
     | '/terms'
+    | '/host/email'
     | '/host/nicknames'
     | '/host/password'
     | '/host/settings'
@@ -329,6 +340,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/register'
     | '/terms'
+    | '/host/email'
     | '/host/nicknames'
     | '/host/password'
     | '/host/settings'
@@ -434,6 +446,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/host/'
       preLoaderRoute: typeof HostIndexRouteImport
+      parentRoute: typeof HostRouteRoute
+    }
+    '/host/email': {
+      id: '/host/email'
+      path: '/email'
+      fullPath: '/host/email'
+      preLoaderRoute: typeof HostEmailRouteImport
       parentRoute: typeof HostRouteRoute
     }
     '/host/nicknames': {
@@ -559,6 +578,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface HostRouteRouteChildren {
+  HostEmailRoute: typeof HostEmailRoute
   HostNicknamesRoute: typeof HostNicknamesRoute
   HostPasswordRoute: typeof HostPasswordRoute
   HostSettingsRoute: typeof HostSettingsRoute
@@ -577,6 +597,7 @@ interface HostRouteRouteChildren {
 }
 
 const HostRouteRouteChildren: HostRouteRouteChildren = {
+  HostEmailRoute: HostEmailRoute,
   HostNicknamesRoute: HostNicknamesRoute,
   HostPasswordRoute: HostPasswordRoute,
   HostSettingsRoute: HostSettingsRoute,

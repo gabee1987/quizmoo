@@ -36,8 +36,14 @@ Error shape everywhere: `{ error: '<i18n key>' }`. Status codes: 400 invalid inp
 | `POST /api/auth/logout` | session | clears cookie |
 | `GET /api/auth/me` | session (also while locked) | `{ user }` with `screenLocked`, or 401 |
 | `GET /api/auth/session` | - | `{ loggedIn }`, always 200: the public pages' logo (`useHomePath`) asks this, since a 401 from `me` is a console error on every visit |
-| `POST /api/auth/register` | - | `{ username, password, website? }` (honeypot) -> 201 `{ pending: true }`, no session; 403 `errors.registrationClosed` unless `REGISTRATION_OPEN`, 503 `errors.registrationsFull` at 20 pending, 5 per hour per IP |
-| `POST /api/users/:id/approve` / `reject` | admin | pending sign-ups only (404 otherwise); reject deletes the account |
+| `POST /api/auth/register` | - | `{ email, username, acceptTerms, lang, website? }` (honeypot) -> 202 `{ sent: true }`, mails a sign-up code (or a login code to an address with an account); 403 `errors.registrationClosed` unless `REGISTRATION_OPEN` and e-mail, 409 `errors.usernameTaken`, 503 `errors.registrationsFull` at 30 new accounts a day, 5 per hour per IP |
+| `POST /api/auth/code` | - | `{ email, lang }` -> 202 always; mails a login code to an active account (see `host-accounts`); 403 `errors.codeLoginOff` without e-mail |
+| `POST /api/auth/code/verify` | - | `{ email, code }` -> `{ user }` + session (201 for a new sign-up); 400 `errors.invalidCode` |
+| `POST /api/me/email/code` / `verify` | session (also during the e-mail step) | add or change the own address with a `link` code; 409 `errors.emailTaken`; confirming ends an editor's password and other sessions |
+| `POST /api/me/account/code`, `POST /api/me/unlock/code` | session | mail a `confirm` (deleting) or `unlock` code to an account without a password |
+| `GET /api/me/usage` | session | `{ usage, budget }` |
+| `GET /api/budgets`, `PUT /api/budgets/defaults`, `PUT /api/budgets/database`, `PUT /api/users/:id/budget` | admin | budget defaults, the database limit and size, one editor's own values (see `host-accounts`) |
+| `POST /api/users/:id/approve` / `reject` | admin | waiting sign-ups from before e-mail login only (404 otherwise); reject deletes the account |
 | `POST /api/users/:id/password` | admin | `{ password }`: new password, `mustChangePassword` set, every session ended |
 | `POST /api/users/:id/role` | admin | `{ role }` |
 | `POST /api/users/:id/logout` | admin | ends every session of the account |

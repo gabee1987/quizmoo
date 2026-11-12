@@ -205,10 +205,13 @@ export class GameManager {
     teams?: readonly TeamSeed[] | undefined
     /** Hash of the game's screen lock code (the new game dialog's, else the host's default). */
     lockCodeHash?: string | null | undefined
+    /** The host's players-per-game budget; null or missing: `MAX_PLAYERS`. */
+    playerLimit?: number | null | undefined
   }) {
     const now = this.now()
     const pin = generatePin((candidate) => this.games.has(candidate))
-    const game = createGame(input.quiz, input.settings, pin, input.id, now, Math.random, input.teams)
+    const created0 = createGame(input.quiz, input.settings, pin, input.id, now, Math.random, input.teams)
+    const game = input.playerLimit ? { ...created0, playerLimit: input.playerLimit } : created0
     const branded = { ...game, branding: input.branding ?? null }
     const created = input.lockCodeHash ? { ...branded, lock: { codeHash: input.lockCodeHash, locked: false } } : branded
     const withMessages = input.quickMessages ? { ...created, quickMessages: input.quickMessages } : created

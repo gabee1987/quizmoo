@@ -11,8 +11,10 @@ export interface SiteInfo {
   termsVersion: string
   feedbackUrl: string | null
   retentionDays: number
-  /** Whether hosts may sign up on /register (`REGISTRATION_OPEN`). */
+  /** Whether hosts may sign up on /register (`REGISTRATION_OPEN`, and e-mail configured). */
   registrationOpen: boolean
+  /** Hosts log in with e-mail codes; false on an install without e-mail (username and password). */
+  emailLogin: boolean
   /** The e-mail provider for sign-up notices and where it keeps data (`MAIL_PROVIDER`). */
   mailProvider: string | null
 }

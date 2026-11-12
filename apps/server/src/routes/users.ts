@@ -1,9 +1,11 @@
 import { and, asc, eq, sql, type SQL } from 'drizzle-orm'
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
+import { emailSchema } from '@quizmoo/shared'
 import { z } from 'zod'
 import { MIN_PASSWORD_LENGTH, hashPassword } from '../auth/password.js'
 import { requireSession } from '../auth/require-session.js'
 import { createUser } from '../auth/users.js'
+import { usageColumns } from '../budgets.js'
 import type { Db } from '../db/index.js'
 import { hostSettings, localCredentials, sessions, users } from '../db/schema.js'
 import { endGame } from '../game/engine.js'
@@ -11,7 +13,7 @@ import type { GameManager } from '../realtime/game-manager.js'
 import { addStarterQuizSafely, starterLanguageSchema } from '../starter/add-starter-quiz.js'
 import { parseOr400 } from './http.js'
 
-// Login names only: no e-mail addresses or other personal data in usernames.
+// Login names only: the e-mail address has its own field, so none in usernames.
 export const usernameSchema = z
   .string()
   .trim()
@@ -22,13 +24,17 @@ export const usernameSchema = z
 const roleSchema = z.enum(['admin', 'editor'])
 const passwordSchema = z.string().min(MIN_PASSWORD_LENGTH).max(200)
 
-const createUserSchema = z.object({
-  username: usernameSchema,
-  password: passwordSchema,
-  role: roleSchema.default('editor'),
-  /** The admin's page language; the new account's starter quiz is written in it. */
-  lang: starterLanguageSchema,
-})
+/** An e-mail address (the person logs in with codes) or, on installs without e-mail, an initial password. */
+const createUserSchema = z
+  .object({
+    username: usernameSchema,
+    email: emailSchema.optional(),
+    password: passwordSchema.optional(),
+    role: roleSchema.default('editor'),
+    /** The admin's page language; the new account's starter quiz is written in it. */
+    lang: starterLanguageSchema,
+  })
+  .refine((body) => (body.email === undefined) !== (body.password === undefined))
 
 const userIdParams = z.object({ id: z.string().min(1).max(40) })
 
@@ -60,12 +66,19 @@ export async function userRoutes(app: FastifyInstance, { db, manager }: { db: Db
       .select({
         id: users.id,
         username: users.username,
+        email: users.email,
+        emailVerified: sql<boolean>`${users.emailVerifiedAt} is not null`,
+        mustAddEmail: users.mustAddEmail,
+        hasPassword: sql<boolean>`exists (select 1 from "local_credentials" c where c."user_id" = "users"."id")`,
         role: users.role,
         mustChangePassword: users.mustChangePassword,
         status: users.status,
         createdAt: users.createdAt,
         lastLoginAt: users.lastLoginAt,
+        /** The account's own budget values (a missing key follows the defaults). */
+        budget: users.budget,
         ...figures,
+        usage: { ...usageColumns(Date.now()) },
       })
       .from(users)
       .orderBy(asc(users.username))
@@ -75,12 +88,21 @@ export async function userRoutes(app: FastifyInstance, { db, manager }: { db: Db
   app.post('/api/users', adminOnly, async (request, reply) => {
     const body = parseOr400(createUserSchema, request.body, reply)
     if (!body) return reply
+    if (body.email && !app.emailLogin) return reply.code(400).send({ error: 'errors.codeLoginOff' })
+    if (body.email) {
+      const owner = await db.select({ id: users.id }).from(users).where(eq(users.email, body.email))
+      if (owner.length > 0) return reply.code(409).send({ error: 'errors.emailTaken' })
+    }
     try {
-      // The initial password is known to the admin, so the new user must replace it.
-      // Made for someone else: its owner changes the password and accepts the terms at the first login.
-      const user = await createUser(db, body.username, body.password, body.role, { mustChangePassword: true, termsVersion: null })
+      // Made for someone else: its owner accepts the terms at the first login, and replaces an
+      // initial password the admin knows.
+      const user = await createUser(db, body.username, body.password ?? null, body.role, {
+        mustChangePassword: true,
+        termsVersion: null,
+        email: body.email ?? null,
+      })
       await addStarterQuizSafely(db, user.id, body.lang, request.log)
-      return reply.code(201).send({ user: { ...user, mustChangePassword: true } })
+      return reply.code(201).send({ user: { ...user, mustChangePassword: body.password !== undefined } })
     } catch (error) {
       if (isUniqueViolation(error)) return reply.code(409).send({ error: 'errors.usernameTaken' })
       throw error
@@ -141,7 +163,11 @@ export async function userRoutes(app: FastifyInstance, { db, manager }: { db: Db
     if (!body) return reply
     const passwordHash = await hashPassword(body.password)
     await db.transaction(async (tx) => {
-      await tx.update(localCredentials).set({ passwordHash, updatedAt: new Date() }).where(eq(localCredentials.userId, id))
+      // Also for an account that logs in with codes (e.g. e-mail stopped working on this install).
+      await tx
+        .insert(localCredentials)
+        .values({ userId: id, passwordHash })
+        .onConflictDoUpdate({ target: localCredentials.userId, set: { passwordHash, updatedAt: new Date() } })
       await tx.update(users).set({ mustChangePassword: true }).where(eq(users.id, id))
       await tx.delete(sessions).where(eq(sessions.userId, id))
     })

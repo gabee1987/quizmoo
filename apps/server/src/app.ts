@@ -14,11 +14,13 @@ import fastifyStatic from '@fastify/static'
 import { Server as SocketServer } from 'socket.io'
 import type { Config } from './config.js'
 import type { Db } from './db/index.js'
+import { createEmailCodes } from './auth/email-codes.js'
 import { createMailer, type Mailer } from './mail.js'
 import type { GameManager } from './realtime/game-manager.js'
 import { registerSocketHandlers, type AppSocketServer } from './realtime/handlers.js'
 import { accountRoutes } from './routes/account.js'
 import { authRoutes } from './routes/auth.js'
+import { budgetRoutes } from './routes/budgets.js'
 import { bankRoutes } from './routes/bank.js'
 import { gameRoutes } from './routes/games.js'
 import { imageRoutes } from './routes/images.js'
@@ -95,6 +97,8 @@ export async function buildApp(config: Config, { db, manager, webDist: webDistOv
   // other name (one planted without the __Host- prefix) is never read.
   const sessionCookie = sessionCookieName(secureCookies)
   app.decorate('hostLocked', (userId: string) => manager.hostLocked(userId))
+  const mail = mailer ?? createMailer(config)
+  app.decorate('emailLogin', mail.configured)
   app.decorateRequest('sessionToken', undefined)
   app.addHook('onRequest', async (request) => {
     request.sessionToken = request.cookies[sessionCookie]
@@ -144,23 +148,35 @@ export async function buildApp(config: Config, { db, manager, webDist: webDistOv
     termsVersion: TERMS_VERSION,
     feedbackUrl: config.FEEDBACK_URL ?? null,
     retentionDays: config.RESULTS_RETENTION_DAYS,
-    registrationOpen: config.REGISTRATION_OPEN,
+    // Sign-up confirms the address with a code, so it needs e-mail.
+    registrationOpen: config.REGISTRATION_OPEN && mail.configured,
+    // Hosts log in with e-mail codes; without e-mail, with a username and password.
+    emailLogin: mail.configured,
     mailProvider: config.MAIL_PROVIDER ?? null,
   }))
-  const signupNotifier = createSignupNotifier({ db, mailer: mailer ?? createMailer(config), appOrigin: config.APP_ORIGIN, log: app.log })
+  const signupNotifier = createSignupNotifier({ db, mailer: mail, appOrigin: config.APP_ORIGIN, log: app.log })
   app.addHook('onClose', async () => {
     signupNotifier.close()
     await signupNotifier.flush()
   })
-  await app.register(authRoutes, { db, secureCookies, registrationOpen: config.REGISTRATION_OPEN, onSignup: signupNotifier.notify })
+  const codes = createEmailCodes(db, config.SESSION_SECRET)
+  await app.register(authRoutes, {
+    db,
+    secureCookies,
+    registrationOpen: config.REGISTRATION_OPEN,
+    mailer: mail,
+    codes,
+    onSignup: signupNotifier.notify,
+  })
   await app.register(multipart)
   await app.register(quizRoutes, { db })
   await app.register(imageRoutes, { db })
   await app.register(bankRoutes, { db })
   await app.register(shareRoutes, { db })
   await app.register(userRoutes, { db, manager })
-  await app.register(meRoutes, { db, manager, signupNotifier })
-  await app.register(accountRoutes, { db, manager, secureCookies })
+  await app.register(budgetRoutes, { db })
+  await app.register(meRoutes, { db, manager, signupNotifier, mailer: mail, codes })
+  await app.register(accountRoutes, { db, manager, secureCookies, mailer: mail, codes })
   await app.register(gameRoutes, { db, manager, appOrigin: config.APP_ORIGIN, pinGuard })
   await app.register(resultRoutes, {
     db,

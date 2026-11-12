@@ -5,8 +5,14 @@ export interface User {
   id: string
   username: string
   role: 'admin' | 'editor'
+  /** The login address; null for an account from before e-mail login. */
+  email: string | null
+  /** Has a password (admins, older accounts, installs without e-mail); otherwise logs in with codes only. */
+  hasPassword: boolean
   /** Created by an admin with an initial password: must change it before anything else. */
   mustChangePassword: boolean
+  /** An account from before e-mail login: must add and confirm an address first (after a password change). */
+  mustAddEmail: boolean
   /** Has not accepted the terms of use in force: must before anything else (after a password change). */
   mustAcceptTerms: boolean
   /** Screen lock: the host locked their screens; every host page shows the lock screen. Only from `/api/auth/me`. */

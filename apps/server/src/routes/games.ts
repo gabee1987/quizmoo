@@ -17,6 +17,7 @@ import { nanoid } from 'nanoid'
 import { z } from 'zod'
 import { hashPassword } from '../auth/password.js'
 import { requireSession } from '../auth/require-session.js'
+import { budgetOf, countGame, overBudget } from '../budgets.js'
 import type { Db } from '../db/index.js'
 import { quizzes } from '../db/schema.js'
 import { EngineError, quickMessagesOf, setNextGame } from '../game/index.js'
@@ -72,6 +73,8 @@ export async function gameRoutes(app: FastifyInstance, { db, manager, appOrigin,
     const quiz = (await db.select().from(quizzes).where(eq(quizzes.id, body.quizId)))[0]
     if (!quiz) return reply.code(404).send({ error: 'errors.notFound' })
     if (quiz.ownerId !== request.user!.id) return reply.code(403).send({ error: 'errors.forbidden' })
+    const over = await overBudget(db, request.user!.id, { openGames: 1, gamesPerMonth: 1 })
+    if (over) return reply.code(409).send({ error: over })
     // Parsed again so fields added later get defaults; a team quiz still needs its teams for a game.
     const quizSettings = newGameSettingsSchema.safeParse(quiz.settings)
     const settings = body.settings ?? (quizSettings.success ? quizSettings.data : null)
@@ -99,11 +102,13 @@ export async function gameRoutes(app: FastifyInstance, { db, manager, appOrigin,
         quickMessages: host.quickMessages,
         branding,
         lockCodeHash,
+        playerLimit: (await budgetOf(db, request.user!.id)).playersPerGame,
       })
     } catch (error) {
       if (error instanceof EngineError) return reply.code(400).send({ error: error.code })
       throw error
     }
+    await countGame(db, request.user!.id)
     // The next game's dialog starts with the event name used now, unless it is this quiz's own.
     if (choice && !quizBranding.eventName && choice.eventName !== host.eventName) await rememberEventName(db, request.user!.id, choice.eventName)
     return reply.code(201).send({ pin: game.state.pin })
@@ -121,6 +126,8 @@ export async function gameRoutes(app: FastifyInstance, { db, manager, appOrigin,
     const existing = old.state.nextPin ? manager.get(old.state.nextPin) : undefined
     if (existing) return reply.code(200).send({ pin: existing.state.pin })
     if (tooManyOpen(old.hostId)) return reply.code(409).send({ error: 'errors.tooManyGames' })
+    const over = await overBudget(db, old.hostId, { openGames: 1, gamesPerMonth: 1 })
+    if (over) return reply.code(409).send({ error: over })
 
     const game = await manager.create({
       id: nanoid(12),
@@ -136,7 +143,9 @@ export async function gameRoutes(app: FastifyInstance, { db, manager, appOrigin,
       teams: Object.values(old.state.teams)
         .filter((t) => !t.solo)
         .map((t) => ({ id: t.id, name: t.name, byPlayer: t.byPlayer })),
+      playerLimit: (await budgetOf(db, old.hostId)).playersPerGame,
     })
+    await countGame(db, old.hostId)
     manager.apply(old.state.pin, (state) => setNextGame(state, game.state.pin))
     return reply.code(201).send({ pin: game.state.pin })
   })

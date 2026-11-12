@@ -14,13 +14,18 @@ import { eq, sql } from 'drizzle-orm'
 import type { FastifyInstance } from 'fastify'
 import { nanoid } from 'nanoid'
 import { z } from 'zod'
+import { codeMessage } from '../auth/code-mail.js'
+import type { EmailCodes } from '../auth/email-codes.js'
 import { hashPassword, verifyPassword } from '../auth/password.js'
 import { requireSession } from '../auth/require-session.js'
+import type { SessionUser } from '../auth/session.js'
 import type { Db } from '../db/index.js'
 import { hostSettings, localCredentials } from '../db/schema.js'
 import { hostLocked, unlockHost } from '../game/index.js'
+import type { Mailer } from '../mail.js'
 import type { GameManager } from '../realtime/game-manager.js'
 import type { SignupNotifier } from '../signup-notify.js'
+import { starterLanguageSchema } from '../starter/add-starter-quiz.js'
 import { parseOr400 } from './http.js'
 import { ownsImage } from './images.js'
 
@@ -118,9 +123,11 @@ async function saveToursSeen(db: Db, userId: string, toursSeen: HostTourId[]) {
 
 /**
  * Screen lock: true when `secret` is the lock code of one of the host's locked games, their default
- * lock code or their account password. Codes are checked only when the secret looks like one.
+ * lock code, their account password, or (an account without a password) an unlock code mailed to
+ * their address. Codes are checked only when the secret looks like one.
  */
-async function unlocks(db: Db, manager: GameManager, userId: string, secret: string): Promise<boolean> {
+async function unlocks(db: Db, manager: GameManager, codes: EmailCodes, user: SessionUser, secret: string): Promise<boolean> {
+  const userId = user.id
   if (lockCodeSchema.safeParse(secret).success) {
     const gameHashes = manager.hostedBy(userId).flatMap((game) => (hostLocked(game.state) && game.state.lock?.codeHash) || [])
     const defaultHash = await readLockCodeHash(db, userId)
@@ -131,7 +138,10 @@ async function unlocks(db: Db, manager: GameManager, userId: string, secret: str
   const credentials = (
     await db.select({ hash: localCredentials.passwordHash }).from(localCredentials).where(eq(localCredentials.userId, userId))
   )[0]
-  return !!credentials && (await verifyPassword(credentials.hash, secret))
+  if (credentials) return verifyPassword(credentials.hash, secret)
+  if (!user.email || !/^\d{6}$/.test(secret)) return false
+  const confirmed = await codes.confirm(user.email, secret)
+  return confirmed?.purpose === 'unlock' && confirmed.userId === userId
 }
 
 /** Keeps the event name a game was created with for the next one; merged in, so the other settings stay as stored. */
@@ -151,7 +161,13 @@ export async function rememberEventName(db: Db, userId: string, eventName: strin
  */
 export async function meRoutes(
   app: FastifyInstance,
-  { db, manager, signupNotifier }: { db: Db; manager: GameManager; signupNotifier: SignupNotifier },
+  {
+    db,
+    manager,
+    signupNotifier,
+    mailer,
+    codes,
+  }: { db: Db; manager: GameManager; signupNotifier: SignupNotifier; mailer: Mailer; codes: EmailCodes },
 ) {
   const auth = { preHandler: requireSession(db) }
   const adminOnly = { preHandler: requireSession(db, { admin: true }) }
@@ -258,7 +274,29 @@ export async function meRoutes(
     },
   )
 
-  // Screen lock: the lock code or the password unlocks every game of the host. Limited like login.
+  // Screen lock without a password: a code to the account's own address unlocks too.
+  app.post(
+    '/api/me/unlock/code',
+    { preHandler: requireSession(db, { allowLocked: true }), config: { rateLimit: { max: 5, timeWindow: '15 minutes' } } },
+    async (request, reply) => {
+      const body = parseOr400(z.object({ lang: starterLanguageSchema }), request.body ?? {}, reply)
+      if (!body) return reply
+      const user = request.user!
+      if (!mailer.configured || !user.email) return reply.code(409).send({ error: 'errors.codeLoginOff' })
+      const code = await codes.issue({ email: user.email, purpose: 'unlock', userId: user.id })
+      if (code) {
+        try {
+          await mailer.send(codeMessage(user.email, code, 'unlock', body.lang))
+        } catch (error) {
+          request.log.error({ reason: (error as Error).message }, 'code e-mail failed')
+          return reply.code(502).send({ error: 'errors.mailFailed' })
+        }
+      }
+      return reply.code(202).send({ sent: true })
+    },
+  )
+
+  // Screen lock: the lock code or the password (or an unlock code) unlocks every game of the host. Limited like login.
   app.post(
     '/api/me/unlock',
     { preHandler: requireSession(db, { allowLocked: true }), config: { rateLimit: { max: 5, timeWindow: '1 minute' } } },
@@ -266,7 +304,9 @@ export async function meRoutes(
       const body = parseOr400(unlockSchema, request.body, reply)
       if (!body) return reply
       const userId = request.user!.id
-      if (!(await unlocks(db, manager, userId, body.secret))) return reply.code(400).send({ error: 'errors.wrongUnlockSecret' })
+      if (!(await unlocks(db, manager, codes, request.user!, body.secret))) {
+        return reply.code(400).send({ error: 'errors.wrongUnlockSecret' })
+      }
       for (const game of manager.hostedBy(userId)) {
         if (hostLocked(game.state)) manager.apply(game.state.pin, unlockHost)
       }

@@ -26,20 +26,27 @@ function fakeMailer(configured = true) {
 const quiet = { info: () => {}, error: () => {} }
 const pause = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
+const host = (username: string) => ({ username, email: `${username}@example.test` })
+const codeIn = (message: MailMessage) => /\b(\d{6})\b/.exec(message.text)![1]!
+
 describe('signupMessage', () => {
-  it('gives the number waiting and the Users page link in both languages, nothing else', () => {
-    const one = signupMessage('admin@example.test', 'https://quiz.example.test', 1)
+  it('names the new hosts with their address and links the Users page, in both languages', () => {
+    const one = signupMessage('admin@example.test', 'https://quiz.example.test', [host('test_anna')])
     expect(one.to).toBe('admin@example.test')
-    expect(one.text).toContain('1 regisztráció vár a jóváhagyásodra.')
-    expect(one.text).toContain('1 sign-up is waiting for your approval.')
+    expect(one.text).toContain('1 új játékvezető regisztrált:')
+    expect(one.text).toContain('1 new host signed up:')
+    expect(one.text).toContain('test_anna <test_anna@example.test>')
     expect(one.text).toContain('https://quiz.example.test/host/users')
     expect(one.html).toContain('<a href="https://quiz.example.test/host/users">')
-    expect(signupMessage('a@example.test', 'https://quiz.example.test', 3).text).toContain('3 sign-ups are waiting')
+    expect(signupMessage('a@example.test', 'https://quiz.example.test', [host('a'), host('b'), host('c')]).text).toContain(
+      '3 new hosts signed up',
+    )
   })
 
-  it('escapes the link in the HTML part', () => {
-    const message = signupMessage('a@example.test', 'https://quiz.example.test/"><script>', 1)
+  it('escapes the link and what the hosts typed in the HTML part', () => {
+    const message = signupMessage('a@example.test', 'https://quiz.example.test/"><script>', [{ username: '<b>x', email: 'x@example.test' }])
     expect(message.html).not.toContain('<script>')
+    expect(message.html).not.toContain('<b>x')
     expect(message.html).toContain('&quot;&gt;&lt;script&gt;')
   })
 })
@@ -71,13 +78,20 @@ describeDb('sign-up e-mails (database)', () => {
     )
   const req = (cookie: string, method: 'GET' | 'PUT' | 'POST' | 'DELETE', url: string, payload?: object, app = built.app) =>
     app.inject({ method, url, headers: { cookie }, ...(payload ? { payload } : {}) })
-  const register = (username: string, app = built.app) =>
-    app.inject({
+  /** A whole sign-up: the form, then the code from the e-mail. */
+  const register = async (username: string, app = built.app, sink = mailer) => {
+    const email = `${username}@example.test`
+    const asked = await app.inject({
       method: 'POST',
       url: '/api/auth/register',
-      payload: { username, password: 'test-password-123', acceptTerms: true },
+      payload: { email, username, acceptTerms: true, lang: 'en' },
       remoteAddress: `192.0.2.${++ip}`,
     })
+    expect(asked.statusCode).toBe(202)
+    await vi.waitFor(() => expect(sink.sent.some((m) => m.to === email)).toBe(true))
+    const code = codeIn(sink.sent.find((m) => m.to === email)!)
+    return app.inject({ method: 'POST', url: '/api/auth/code/verify', payload: { email, code }, remoteAddress: `192.0.2.${++ip}` })
+  }
 
   beforeAll(async () => {
     ;({ db, cleanup } = await withTestDb())
@@ -167,24 +181,25 @@ describeDb('sign-up e-mails (database)', () => {
     expect(await readSignupEmail(db, id)).toBeNull()
   })
 
-  it('e-mails every admin with an address once per sign-up, separately, without the username', async () => {
+  it('e-mails every admin with an address once per sign-up, separately, naming the host', async () => {
     await saveSignupEmail(db, adminId, 'admin@example.test')
     await saveSignupEmail(db, otherAdminId, 'other@example.test')
     // An editor's address (from before this phase's rules) is never used.
     await saveSignupEmail(db, editorId, 'editor@example.test')
 
+    const notices = () => mailer.sent.filter((m) => m.subject.includes('New sign-up'))
     expect((await register('test_newcomer')).statusCode).toBe(201)
-    await vi.waitFor(() => expect(mailer.sent).toHaveLength(2))
-    expect(mailer.sent.map((m) => m.to).sort()).toEqual(['admin@example.test', 'other@example.test'])
-    for (const message of mailer.sent) {
-      expect(message.text).toContain('1 sign-up is waiting')
-      expect(message.text + message.html).not.toContain('test_newcomer')
+    await vi.waitFor(() => expect(notices()).toHaveLength(2))
+    expect(notices().map((m) => m.to).sort()).toEqual(['admin@example.test', 'other@example.test'])
+    for (const message of notices()) {
+      expect(message.text).toContain('1 new host signed up')
+      expect(message.text).toContain('test_newcomer <test_newcomer@example.test>')
     }
 
     // A second sign-up within 15 minutes sends nothing now.
     expect((await register('test_second_one')).statusCode).toBe(201)
     await pause(200)
-    expect(mailer.sent).toHaveLength(2)
+    expect(notices()).toHaveLength(2)
     await saveSignupEmail(db, adminId, null)
     await saveSignupEmail(db, otherAdminId, null)
     await saveSignupEmail(db, editorId, null)
@@ -192,36 +207,40 @@ describeDb('sign-up e-mails (database)', () => {
 
   it('still accepts the sign-up when the provider fails', async () => {
     await saveSignupEmail(db, adminId, 'admin@example.test')
-    expect((await register('test_unlucky', failingApp.app)).statusCode).toBe(201)
-    expect(await db.select().from(users).where(eq(users.username, 'test_unlucky'))).toHaveLength(1)
+    // The provider fails only for the notice, not for the code.
+    const flaky = fakeMailer()
+    const send = flaky.send.bind(flaky)
+    flaky.send = async (message) => {
+      if (message.subject.includes('New sign-up')) throw new Error('mail provider answered 500')
+      return send(message)
+    }
+    const app = await buildTestApp(db, undefined, { ...testConfig, REGISTRATION_OPEN: true }, flaky)
+    try {
+      expect((await register('test_unlucky', app.app, flaky)).statusCode).toBe(201)
+      expect(await db.select().from(users).where(eq(users.username, 'test_unlucky'))).toHaveLength(1)
+    } finally {
+      await app.app.close()
+    }
     await saveSignupEmail(db, adminId, null)
   })
 
-  it('gathers sign-ups within the interval into one e-mail with the count at its end', async () => {
+  it('gathers sign-ups within the interval into one e-mail listing them all', async () => {
     await saveSignupEmail(db, adminId, 'admin@example.test')
     const own = fakeMailer()
     const notifier = createSignupNotifier({ db, mailer: own, appOrigin: 'https://quiz.example.test', log: quiet, intervalMs: 300 })
     try {
-      await createUser(db, 'test_wave1', 'test-password-123', 'editor', { status: 'pending' })
-      notifier.notify()
+      notifier.notify(host('test_wave1'))
       await notifier.flush()
       expect(own.sent).toHaveLength(1)
 
-      await createUser(db, 'test_wave2', 'test-password-123', 'editor', { status: 'pending' })
-      notifier.notify()
-      await createUser(db, 'test_wave3', 'test-password-123', 'editor', { status: 'pending' })
-      notifier.notify()
+      notifier.notify(host('test_wave2'))
+      notifier.notify(host('test_wave3'))
       await pause(50)
       expect(own.sent).toHaveLength(1)
       await vi.waitFor(() => expect(own.sent).toHaveLength(2), { timeout: 2000 })
-      expect(own.sent[1]!.text).toContain('3 sign-ups are waiting')
-
-      // Handled in the meantime: the gathered e-mail is not sent.
-      notifier.notify()
-      await db.delete(users).where(eq(users.status, 'pending'))
-      await pause(500)
-      await notifier.flush()
-      expect(own.sent).toHaveLength(2)
+      expect(own.sent[1]!.text).toContain('2 new hosts signed up')
+      expect(own.sent[1]!.text).toContain('test_wave2 <test_wave2@example.test>')
+      expect(own.sent[1]!.text).toContain('test_wave3 <test_wave3@example.test>')
     } finally {
       notifier.close()
       await saveSignupEmail(db, adminId, null)

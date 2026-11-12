@@ -1,14 +1,18 @@
+import { effectiveBudget, type Budget } from '@quizmoo/shared'
 import {
+  ChevronRightIcon,
   EllipsisVerticalIcon,
   GamepadIcon,
   ImageIcon,
   KeyRoundIcon,
   LayoutGridIcon,
   LogOutIcon,
+  MailIcon,
   MonitorSmartphoneIcon,
   RadioIcon,
   ShieldIcon,
   ShieldOffIcon,
+  SlidersHorizontalIcon,
   Trash2Icon,
   UsersIcon,
 } from 'lucide-react'
@@ -25,6 +29,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/cn'
+import { NEAR_FULL, UsageBars, fullest } from '../budgets/usage-bars'
 import { formatBytes, timeAgo } from './format'
 import type { UserAction, UserRow } from './user-row'
 
@@ -33,6 +38,7 @@ export function UserCard({
   user,
   self,
   now,
+  defaults,
   style,
   onAction,
 }: {
@@ -40,6 +46,8 @@ export function UserCard({
   /** The admin's own account: no actions (they are refused for it anyway). */
   self: boolean
   now: number
+  /** The default budget, for the usage bars of a host (admins have no limits). */
+  defaults: Budget | undefined
   style?: CSSProperties | undefined
   onAction: (action: UserAction) => void
 }) {
@@ -48,6 +56,8 @@ export function UserCard({
   const number = new Intl.NumberFormat(locale)
   const date = new Intl.DateTimeFormat(locale, { dateStyle: 'medium' })
   const admin = user.role === 'admin'
+  // Admins have no limits; a host's budget is their own values on the defaults.
+  const budget = !admin && defaults ? effectiveBudget(defaults, user.budget, false) : null
 
   const figures: { icon: ComponentType<{ className?: string }>; label: string; value: string; live?: boolean }[] = [
     { icon: LayoutGridIcon, label: t('users.figures.quizzes'), value: number.format(user.quizzes) },
@@ -83,7 +93,19 @@ export function UserCard({
             </Badge>
             {self && <Badge variant="outline">{t('users.you')}</Badge>}
             {user.mustChangePassword && <Badge className="bg-warning text-warning-foreground">{t('users.pendingPassword')}</Badge>}
+            {budget && fullest(user.usage, budget) >= NEAR_FULL && (
+              <Badge className="bg-warning text-warning-foreground">{t('budgets.nearLimit')}</Badge>
+            )}
           </div>
+          <p className="flex items-start gap-2 text-sm font-semibold">
+            <MailIcon className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
+            <span className="min-w-0 break-all">
+              {user.email ?? <span className="font-normal text-muted-foreground">{t('users.noEmail')}</span>}
+              {user.email && !user.emailVerified && (
+                <span className="font-normal break-normal text-muted-foreground"> ({t('users.emailNotConfirmed')})</span>
+              )}
+            </span>
+          </p>
           <p className="text-sm text-muted-foreground">
             {t('users.joined', { date: date.format(new Date(user.createdAt)) })}
             {' · '}
@@ -102,6 +124,12 @@ export function UserCard({
               </Hint>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="min-w-56">
+              {!admin && (
+                <DropdownMenuItem className="min-h-11" onSelect={() => onAction('budget')}>
+                  <SlidersHorizontalIcon />
+                  {t('budgets.edit')}
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem className="min-h-11" onSelect={() => onAction('password')}>
                 <KeyRoundIcon />
                 {t('users.actions.resetPassword')}
@@ -140,6 +168,15 @@ export function UserCard({
           </div>
         ))}
       </dl>
+      {budget && (
+        <details className="group rounded-xl border px-3 py-2">
+          <summary className="flex min-h-9 cursor-pointer items-center gap-2 text-sm font-bold outline-none focus-visible:ring-[3px] focus-visible:ring-ring">
+            <ChevronRightIcon className="size-4 transition-transform group-open:rotate-90" aria-hidden="true" />
+            {t('budgets.usageTitle')}
+          </summary>
+          <UsageBars usage={user.usage} budget={budget} className="pt-2 pb-1" />
+        </details>
+      )}
     </li>
   )
 }

@@ -5,25 +5,42 @@ import { toast } from 'sonner'
 import { FormDialog } from '@/components/form-dialog'
 import { SelectField } from '@/components/select-field'
 import { TextField } from '@/components/text-field'
+import { looksLikeEmail } from '@/features/auth/code-step'
 import { apiFetch } from '@/lib/api'
+import { useSiteInfo } from '@/lib/site'
 import type { UserRow } from './user-row'
 
 const MIN_PASSWORD = 10
 const usernamePattern = /^[a-zA-Z0-9._-]{3,40}$/
 
+/**
+ * A new account: with e-mail set up, its address (the person logs in with a code sent there);
+ * without, an initial password the person replaces at the first login.
+ */
 export function AddUserDialog({ onClose }: { onClose: () => void }) {
   const { t, i18n } = useTranslation()
   const queryClient = useQueryClient()
+  const byEmail = useSiteInfo().data?.emailLogin ?? false
   const [username, setUsername] = useState('')
+  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [role, setRole] = useState<'editor' | 'admin'>('editor')
   const [submitted, setSubmitted] = useState(false)
   const usernameValid = usernamePattern.test(username.trim())
+  const secretValid = byEmail ? looksLikeEmail(email) : password.length >= MIN_PASSWORD
 
   const create = useMutation({
     // The new account's starter quiz comes in the admin's language.
     mutationFn: () =>
-      apiFetch('/api/users', { method: 'POST', body: JSON.stringify({ username: username.trim(), password, role, lang: i18n.language }) }),
+      apiFetch('/api/users', {
+        method: 'POST',
+        body: JSON.stringify({
+          username: username.trim(),
+          ...(byEmail ? { email: email.trim().toLowerCase() } : { password }),
+          role,
+          lang: i18n.language,
+        }),
+      }),
     onSuccess: () => {
       toast.success(t('users.created', { name: username.trim() }))
       void queryClient.invalidateQueries({ queryKey: ['users'] })
@@ -34,14 +51,14 @@ export function AddUserDialog({ onClose }: { onClose: () => void }) {
   return (
     <FormDialog
       title={t('users.add')}
-      description={t('users.initialPasswordHint')}
+      description={t(byEmail ? 'users.addEmailHint' : 'users.initialPasswordHint')}
       submitLabel={t('users.addSubmit')}
       pending={create.isPending}
       error={create.error}
       onCancel={onClose}
       onSubmit={() => {
         setSubmitted(true)
-        if (usernameValid && password.length >= MIN_PASSWORD) create.mutate()
+        if (usernameValid && secretValid) create.mutate()
       }}
     >
       <TextField
@@ -52,14 +69,26 @@ export function AddUserDialog({ onClose }: { onClose: () => void }) {
         onChange={(e) => setUsername(e.target.value)}
         error={submitted && !usernameValid ? t('users.usernameRules') : undefined}
       />
-      <TextField
-        label={t('users.initialPassword')}
-        type="password"
-        autoComplete="new-password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        error={submitted && password.length < MIN_PASSWORD ? t('auth.passwordChange.tooShort', { count: MIN_PASSWORD }) : undefined}
-      />
+      {byEmail ? (
+        <TextField
+          label={t('auth.email')}
+          type="email"
+          autoComplete="off"
+          autoCapitalize="none"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          error={submitted && !secretValid ? t('auth.emailInvalid') : undefined}
+        />
+      ) : (
+        <TextField
+          label={t('users.initialPassword')}
+          type="password"
+          autoComplete="new-password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          error={submitted && !secretValid ? t('auth.passwordChange.tooShort', { count: MIN_PASSWORD }) : undefined}
+        />
+      )}
       <SelectField
         label={t('users.roleLabel')}
         value={role}

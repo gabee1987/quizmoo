@@ -4,8 +4,12 @@ import { CheckIcon, SearchIcon, UserPlusIcon, XIcon } from 'lucide-react'
 import { useId, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
+import type { BudgetOverride } from '@quizmoo/shared'
 import { ConfirmDialog } from '@/components/dialog'
 import { FormAlert } from '@/components/form-alert'
+import { SelectField } from '@/components/select-field'
+import { BudgetDialog } from '@/features/budgets/budget-dialog'
+import { BudgetOverview, budgetsQueryOptions } from '@/features/budgets/budget-overview'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -21,7 +25,10 @@ export const Route = createFileRoute('/host/users')({
   component: UsersPage,
 })
 
-/** Admin only (the API enforces it): the host accounts, sign-ups waiting for approval, and what an admin can do with them. */
+/**
+ * Admin only (the API enforces it): the database against the hosting plan, the host accounts with
+ * their addresses, usage and budgets, sign-ups from before e-mail login still waiting, and the admin's actions.
+ */
 function UsersPage() {
   const { t, i18n } = useTranslation()
   const searchId = useId()
@@ -32,7 +39,9 @@ function UsersPage() {
     queryFn: async () => (await apiFetch<{ users: UserRow[] }>('/api/users')).users,
     retry: false,
   })
+  const overview = useQuery(budgetsQueryOptions)
   const [query, setQuery] = useState('')
+  const [sort, setSort] = useState<'name' | 'storage' | 'activity'>('name')
   const [adding, setAdding] = useState(false)
   const [open, setOpen] = useState<{ action: UserAction | 'reject'; user: UserRow } | null>(null)
   // "Last login 5 minutes ago" is measured from when the list arrived.
@@ -63,6 +72,11 @@ function UsersPage() {
     onSuccess: (_, user) => done('users.logout.done', user),
     onError: toastError,
   })
+  const saveBudget = useMutation({
+    mutationFn: ({ user, budget }: { user: UserRow; budget: BudgetOverride }) =>
+      apiFetch(`/api/users/${user.id}/budget`, { method: 'PUT', body: JSON.stringify({ budget }) }),
+    onSuccess: (_, { user }) => done('budgets.savedFor', user),
+  })
 
   if (users.isError) {
     return (
@@ -79,7 +93,16 @@ function UsersPage() {
   const pending = users.data?.filter((user) => user.status === 'pending') ?? []
   const active = users.data?.filter((user) => user.status === 'active') ?? []
   const needle = query.trim().toLocaleLowerCase()
-  const shown = needle ? active.filter((user) => user.username.toLocaleLowerCase().includes(needle)) : active
+  const matching = needle
+    ? active.filter((user) => user.username.toLocaleLowerCase().includes(needle) || user.email?.includes(needle))
+    : active
+  const shown = [...matching].sort((a, b) =>
+    sort === 'storage'
+      ? b.usage.storageBytes - a.usage.storageBytes
+      : sort === 'activity'
+        ? (b.lastLoginAt ?? '').localeCompare(a.lastLoginAt ?? '')
+        : a.username.localeCompare(b.username, i18n.language),
+  )
   const admins = active.filter((user) => user.role === 'admin').length
 
   return (
@@ -106,7 +129,10 @@ function UsersPage() {
           <ul className="flex flex-col divide-y">
             {pending.map((user) => (
               <li key={user.id} className="flex flex-wrap items-center gap-x-3 gap-y-2 px-4 py-3">
-                <span className="min-w-0 flex-1 font-bold wrap-break-word">{user.username}</span>
+                <span className="min-w-0 flex-1 font-bold wrap-break-word">
+                  {user.username}
+                  {user.email && <span className="block text-sm font-normal break-all text-muted-foreground">{user.email}</span>}
+                </span>
                 <span className="text-sm text-muted-foreground">{date.format(new Date(user.createdAt))}</span>
                 <div className="flex gap-2">
                   <Button size="sm" variant="success" disabled={decide.isPending} onClick={() => decide.mutate({ user, action: 'approve' })}>
@@ -124,26 +150,42 @@ function UsersPage() {
         </section>
       )}
 
+      <BudgetOverview />
+
       <section aria-labelledby="accounts-title" className="flex flex-col gap-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 id="accounts-title" className="text-xl font-extrabold">
             {t('users.accounts', { count: active.length })}
             <span className="ml-2 text-base font-semibold text-muted-foreground">{t('users.admins', { count: admins })}</span>
           </h2>
-          <div className="relative w-full sm:w-64">
-            <label htmlFor={searchId} className="sr-only">
-              {t('users.search')}
-            </label>
-            <SearchIcon className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
-            <Input
-              id={searchId}
-              type="search"
-              value={query}
-              placeholder={t('users.search')}
-              autoComplete="off"
-              className="pl-9"
-              onChange={(e) => setQuery(e.target.value)}
+          <div className="flex w-full flex-wrap items-end gap-3 sm:w-auto">
+            <SelectField
+              label={t('budgets.sort.label')}
+              hideLabel
+              className="w-full sm:w-52"
+              value={sort}
+              onChange={setSort}
+              options={[
+                { value: 'name' as const, label: t('budgets.sort.name') },
+                { value: 'storage' as const, label: t('budgets.sort.storage') },
+                { value: 'activity' as const, label: t('budgets.sort.activity') },
+              ]}
             />
+            <div className="relative w-full sm:w-64">
+              <label htmlFor={searchId} className="sr-only">
+                {t('users.search')}
+              </label>
+              <SearchIcon className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+              <Input
+                id={searchId}
+                type="search"
+                value={query}
+                placeholder={t('users.search')}
+                autoComplete="off"
+                className="pl-9"
+                onChange={(e) => setQuery(e.target.value)}
+              />
+            </div>
           </div>
         </div>
         {users.isPending ? (
@@ -158,6 +200,7 @@ function UsersPage() {
                 user={user}
                 self={user.id === me.data?.id}
                 now={now}
+                defaults={overview.data?.defaults}
                 style={stagger(index, 50)}
                 onAction={(action) => setOpen({ action, user })}
               />
@@ -169,6 +212,21 @@ function UsersPage() {
       {adding && <AddUserDialog onClose={() => setAdding(false)} />}
       {open?.action === 'password' && <ResetPasswordDialog user={open.user} onClose={() => setOpen(null)} />}
       {open?.action === 'delete' && <DeleteUserDialog user={open.user} onClose={() => setOpen(null)} />}
+      {open?.action === 'budget' && overview.data && (
+        <BudgetDialog
+          title={t('budgets.editTitle', { name: open.user.username })}
+          description={t('budgets.editHelp')}
+          initial={open.user.budget}
+          defaults={overview.data.defaults}
+          pending={saveBudget.isPending}
+          error={saveBudget.error}
+          onSave={(budget) => saveBudget.mutate({ user: open.user, budget })}
+          onClose={() => {
+            setOpen(null)
+            saveBudget.reset()
+          }}
+        />
+      )}
       {open?.action === 'role' && (
         <ConfirmDialog
           title={t(open.user.role === 'admin' ? 'users.role.hostTitle' : 'users.role.adminTitle', { name: open.user.username })}

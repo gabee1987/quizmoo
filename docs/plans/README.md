@@ -77,6 +77,7 @@ Finished plans are deleted once their branch is merged: `CHANGELOG.md` records w
 | 68 | [More party games](platform-roadmap.md#68-more-party-games) | to decide | draft |
 | 69 | [Opening the platform](platform-roadmap.md#69-opening-the-platform) | to decide | draft |
 | 70 | [More than one server process](platform-roadmap.md#70-more-than-one-server-process) | to decide | draft |
+| 71 | [E-mail code login, open sign-up and host budgets](phase-71-email-login-and-budgets.md) | `feature/email-login-and-budgets` | done |
 | later | [Hosting without an account](later-guest-hosting.md) | `feature/guest-hosting` | planned, after the MVP |
 
 ## Conventions every plan follows
