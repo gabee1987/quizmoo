@@ -1859,6 +1859,54 @@
     "releasedOn": "Released {{date}}",
     "fixed": "Fixed",
     "releases": {
+      "1_13_0": {
+        "title": "Question library, sharing and reactions",
+        "intro": "Keep your best questions in a library, share questions and whole quizzes with a code, give partial credit on multiple choice, and let players react with emoji between questions.",
+        "sections": [
+          {
+            "title": "Question library",
+            "items": [
+              "The new Question library keeps questions outside any quiz, with tags. You find it in the sidebar under Quizzes.",
+              "Save a question to it from the editor's More actions menu, write new ones on its own page, or import a spreadsheet. In the editor, Add from library (under the question types) brings them into any quiz.",
+              "Questions added from the library stay linked to it: when you change one there, you can update the quizzes that use it, or let them update automatically. A copy you changed in a quiz is never overwritten without asking."
+            ]
+          },
+          {
+            "title": "Copying and sharing",
+            "items": [
+              "Select questions in the editor to copy them to another quiz, save them to the library, share or delete them at once.",
+              "Share a question, a selection or a whole quiz with a code, its link or its QR code, for 7 days, 30 days or for good. Anyone with it sees the questions without the answers; another host can add them to their own quizzes or library.",
+              "Enter a code on the quiz list or in the library. My share codes, in the library, lists your codes with their uses, and you can revoke any of them.",
+              "The terms of use now cover sharing, so you accept them once more at your next login."
+            ]
+          },
+          {
+            "title": "Partial credit",
+            "items": [
+              "A multiple-choice question can give partial credit: each right answer picked earns its share, each wrong one cancels a right one. New questions start with it; questions you made before keep scoring all or nothing.",
+              "A partly right answer shows as \"Partly right\" on the phones, the projector, your board and the results."
+            ]
+          },
+          {
+            "title": "Reactions",
+            "items": [
+              "Players send emoji between questions, never while a question runs. They float up on the projector and the phones with the player's name.",
+              "Mute them from the running game's top bar or the lobby, or switch them off for a quiz under Game flow.",
+              "The players' waiting screen shows who else has joined."
+            ]
+          },
+          {
+            "title": "Tours and help",
+            "items": [
+              "The tours show the new features, and the question library has a tour of its own. To see them again: My settings, Account, \"Show all tours again\".",
+              "The help page explains the question library, sharing and reactions."
+            ]
+          }
+        ],
+        "fixed": [
+          "Removing a player or a team, closing a game from the lobby and leaving a page with unsaved changes ask in Quizmoo's own dialog instead of the browser's."
+        ]
+      },
       "1_12_0": {
         "title": "Tours, help and tooltips",
         "intro": "Quizmoo now shows you around: a short tour on every main page, a help page that explains everything, and a tooltip on every button that shows only an icon.",
@@ -2863,6 +2911,7 @@
     "links": {
       "join": "Join a game",
       "quizzes": "Open your quizzes",
+      "library": "Open the question library",
       "games": "Open your games",
       "settings": "Open My settings",
       "tours": "Show the tours again",
@@ -2967,6 +3016,16 @@
           "rounds": { "term": "Rounds", "text": "Group questions under a title. A round can have an intro screen, a colour, its own order and its own rules." },
           "preview": { "term": "Phone preview", "text": "Shows each question as players see it, and can play the whole quiz through." },
           "keys": { "term": "Limits and shortcuts", "text": "A quiz holds up to 200 questions. On a laptop, press ? to see the keyboard shortcuts." }
+        }
+      },
+      "library": {
+        "heading": "Question library and sharing",
+        "items": {
+          "library": { "text": "Keep questions outside any quiz, with tags. Write new ones there, import a spreadsheet, or save a quiz's question from its More actions menu. In the editor, Add from library (under the question types) brings them into a quiz." },
+          "linked": { "term": "Linked copies", "text": "A question added from the library stays linked to it. When you change it there, you can update the quizzes too, or let them update automatically. A copy you changed in a quiz is never overwritten without asking." },
+          "select": { "text": "In the editor, tick several questions to copy them to another quiz, save them to the library, share or delete them at once." },
+          "share": { "term": "Share codes", "text": "Share a question, a selection or a whole quiz with a code like QM-7K4PX-2XNAQ, its link or its QR code, for 7 days, 30 days or for good. Anyone with it sees the questions without the answers; another host can add them to their own quizzes or library. My share codes lists your codes, and you can revoke any of them." },
+          "enterCode": { "text": "Type or paste a code you got, in any case and with or without the dashes, to see what it holds and add it." }
         }
       },
       "game-settings": {
@@ -3101,12 +3160,22 @@
       "import": { "title": "Bring questions in", "body": "Add the starter quiz to see an example, or import questions from a spreadsheet or a Quizmoo file." },
       "search": { "title": "Find a quiz", "body": "Search and sort your quizzes. Select lets you change the settings of several at once, or delete them." },
       "card": { "title": "Edit or play", "body": "Edit opens the editor. Play starts a new game: you check its settings, then share the PIN with the players." },
-      "more": { "title": "More actions", "body": "Duplicate a quiz, download it as a spreadsheet or a Quizmoo file, or delete it." }
+      "more": { "title": "More actions", "body": "Duplicate a quiz, share it with a code, download it as a spreadsheet or a Quizmoo file, or delete it." },
+      "library": { "title": "Question library", "body": "Keep your best questions outside any quiz, with tags, and add them to any quiz later." },
+      "enterCode": { "title": "Enter a code", "body": "Got a share code from another host? Type it here to see the questions and add them to your own." }
+    },
+    "library": {
+      "welcome": { "title": "Your question library", "body": "Questions kept outside any quiz, found by search, type and tag. Quizzes that use one can be updated when you change it." },
+      "new": { "title": "New question", "body": "Write a question here; it saves as you type." },
+      "import": { "title": "Import from a spreadsheet", "body": "Bring in many questions at once with the quiz template." },
+      "tabs": { "title": "My share codes", "body": "The codes you shared: who can still use them, how often they were used, and Revoke." },
+      "enterCode": { "title": "Enter a code", "body": "Type a share code you got to add its questions to your library or a quiz." }
     },
     "editor": {
       "title": { "title": "Give it a name", "body": "Players see the title when they join. Everything you change is saved by itself." },
       "list": { "title": "Your questions", "body": "Pick a question to edit it, drag it to move it. Rounds group questions under a title of their own." },
-      "add": { "title": "Add questions", "body": "Add a question or a round. You pick the question type first: choice, true or false, typed answer, number or ordering." },
+      "add": { "title": "Add questions", "body": "Add a question or a round. You pick the question type first: choice, true or false, typed answer, number or ordering. Add from library brings in questions you kept." },
+      "select": { "title": "Select questions", "body": "Tick several questions to copy them to another quiz, save them to your library, share them with a code or delete them at once." },
       "inGame": { "title": "In the game or not", "body": "Switch a question off to leave it out of the next game without deleting it." },
       "save": { "title": "Saved by itself", "body": "This shows whether everything is saved. When something needs fixing, a button here takes you to it." },
       "preview": { "title": "See it on a phone", "body": "This is how players see the question. You can play the whole quiz through here." },
@@ -3123,6 +3192,7 @@
       "projector": { "title": "Show it big", "body": "Opens the projector view in a new window: move it to the projector or the TV. It shows the PIN, then the questions." },
       "lock": { "title": "Close the door", "body": "Lock joining when everyone is in, so nobody else can join." },
       "players": { "title": "Who is here", "body": "Players show up here as they join. When everyone is in, press Start." },
+      "reactions": { "title": "Reactions", "body": "Players can send emoji between questions, and the projector shows them with their names. Mute them here if it gets too much." },
       "message": { "title": "Talk to everyone", "body": "Send a short message to every phone and the projector, for example about a break." }
     },
     "running": {
@@ -3130,6 +3200,7 @@
       "controls": { "title": "Need more time?", "body": "Pause the question, add 30 seconds, or skip it." },
       "board": { "title": "Who answered what", "body": "Every player's answer shows up here as it comes in. Hide the answers when your screen is on show." },
       "panels": { "title": "Side panels", "body": "Standings, messages, players and the questions, at hand while the game runs." },
+      "reactions": { "title": "Reactions", "body": "How many emoji the players sent in the last minute. Press to mute them, again to allow them." },
       "end": { "title": "End the game", "body": "Show the podium now, or close the game without one." }
     },
     "results": {
@@ -3144,6 +3215,7 @@
     },
     "playerLobby": {
       "card": { "title": "You're in!", "body": "Wait here until the host starts the game. Keep this page open." },
+      "who": { "title": "Who's here", "body": "Open it to see who else joined. Tap an emoji to react: it floats up on the projector with your name." },
       "team": { "title": "Your team", "body": "Your team and who is in it. Your answers count for your team too." },
       "about": { "title": "About the game", "body": "How many questions there are, how long you have for each, and how points are given." },
       "answering": { "title": "How to play", "body": "Each question appears on your phone. Tap your answer before the time runs out: a right answer brings points, a fast one even more." },

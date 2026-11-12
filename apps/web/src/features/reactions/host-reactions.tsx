@@ -22,6 +22,7 @@ export function ReactionsMuteButton({ host, onCommand }: { host: HostSnapshot; o
         size="sm"
         aria-pressed={muted}
         data-testid="mute-reactions"
+        data-tour="mute-reactions"
         onClick={() => onCommand({ type: 'muteReactions', muted: !muted })}
       >
         <SmileIcon aria-hidden="true" className={muted ? 'opacity-60' : undefined} />
@@ -42,11 +43,13 @@ export function ReactionsSwitch({ host, onCommand }: { host: HostSnapshot; onCom
   const { t } = useTranslation()
   if (host.settings.reactions === false) return null
   return (
-    <SwitchRow
-      label={t('reactions.switch')}
-      description={host.reactionsMuted ? t('reactions.mutedHelp') : t('reactions.openHelp')}
-      checked={!host.reactionsMuted}
-      onChange={(allowed) => onCommand({ type: 'muteReactions', muted: !allowed })}
-    />
+    <div data-tour="lobby-reactions">
+      <SwitchRow
+        label={t('reactions.switch')}
+        description={host.reactionsMuted ? t('reactions.mutedHelp') : t('reactions.openHelp')}
+        checked={!host.reactionsMuted}
+        onChange={(allowed) => onCommand({ type: 'muteReactions', muted: !allowed })}
+      />
+    </div>
   )
 }

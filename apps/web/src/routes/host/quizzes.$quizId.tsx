@@ -802,6 +802,7 @@ function Editor({ quiz }: { quiz: Quiz }) {
                 size="icon-sm"
                 className={size}
                 aria-label={t('editor.select.start')}
+                data-tour="select-questions"
                 onClick={() => {
                   setQuery('')
                   setSelecting(true)

@@ -1859,6 +1859,54 @@
     "releasedOn": "Megjelent: {{date}}",
     "fixed": "Javítva",
     "releases": {
+      "1_13_0": {
+        "title": "Kérdéstár, megosztás és reakciók",
+        "intro": "Tartsd a legjobb kérdéseidet kérdéstárban, oszd meg kérdéseidet és egész kvízeidet kóddal, adj részpontot a feleletválasztós kérdésekre, és hagyd, hogy a játékosok emojival reagáljanak a kérdések között.",
+        "sections": [
+          {
+            "title": "Kérdéstár",
+            "items": [
+              "Az új Kérdéstár a kvízeiden kívül tartja a kérdéseket, címkékkel. Az oldalsávban találod, a Kvízek alatt.",
+              "A szerkesztő További műveletek menüjéből mentheted bele a kérdést, a saját oldalán újat írhatsz, vagy táblázatot tölthetsz be. A szerkesztőben a Hozzáadás a kérdéstárból (a kérdéstípusok alatt) bármelyik kvízbe behozza őket.",
+              "A tárból hozzáadott kérdések kapcsolatban maradnak vele: ha ott módosítasz egyet, frissítheted az azt használó kvízeket, vagy hagyhatod, hogy maguktól frissüljenek. Egy kvízben átírt másolatot sosem írunk felül kérdezés nélkül."
+            ]
+          },
+          {
+            "title": "Másolás és megosztás",
+            "items": [
+              "Jelölj ki kérdéseket a szerkesztőben, és egyszerre másold át őket egy másik kvízbe, mentsd a kérdéstárba, oszd meg vagy töröld őket.",
+              "Ossz meg egy kérdést, több kérdést vagy egy egész kvízt kóddal, linkkel vagy QR-kóddal, 7 vagy 30 napra, vagy lejárat nélkül. Aki megkapja, a válaszok nélkül látja a kérdéseket; egy másik játékvezető hozzáadhatja őket a saját kvízeihez vagy kérdéstárához.",
+              "Kódot a kvízlistán vagy a kérdéstárban írhatsz be. A kérdéstár Megosztási kódjaim lapján látod a kódjaidat és a használatukat, és bármelyiket visszavonhatod.",
+              "A felhasználási feltételek már a megosztásra is kitérnek, ezért a következő belépéskor még egyszer el kell fogadnod őket."
+            ]
+          },
+          {
+            "title": "Részpontszám",
+            "items": [
+              "A feleletválasztós kérdés adhat részpontot: minden eltalált jó válasz hozza a maga részét, minden rossz kiolt egy jót. Az új kérdések így indulnak; a korábbi kérdéseid továbbra is mindent vagy semmit alapon pontoznak.",
+              "A részben jó válasz „Részben helyes” jelzéssel látszik a telefonokon, a kivetítőn, a táblán és az eredményekben."
+            ]
+          },
+          {
+            "title": "Reakciók",
+            "items": [
+              "A játékosok a kérdések között emojit küldhetnek, kérdés közben soha. A kivetítőn és a telefonokon a játékos nevével együtt úsznak fel.",
+              "A futó játék felső sávjában vagy a váróteremben elnémíthatod őket, egy kvízre pedig a Játékmenetben kapcsolhatod ki.",
+              "A játékosok várakozó képernyőjén látszik, ki csatlakozott még."
+            ]
+          },
+          {
+            "title": "Bemutatók és súgó",
+            "items": [
+              "A bemutatók megmutatják az újdonságokat, és a kérdéstárnak saját bemutatója van. Újra megnézheted őket: Beállításaim, Fiók, „Minden bemutató újra”.",
+              "A súgó elmagyarázza a kérdéstárat, a megosztást és a reakciókat."
+            ]
+          }
+        ],
+        "fixed": [
+          "Egy játékos vagy csapat eltávolításakor, a játék váróteremből való lezárásakor és egy nem mentett oldal elhagyásakor a Quizmoo saját ablaka kérdez, nem a böngészőé."
+        ]
+      },
       "1_12_0": {
         "title": "Bemutatók, súgó és buboréktippek",
         "intro": "A Quizmoo most körbevezet: minden fő oldalon van egy rövid bemutató, a Súgó mindent elmagyaráz, és minden csak ikonos gombnak van buboréktippje.",
@@ -2863,6 +2911,7 @@
     "links": {
       "join": "Csatlakozom egy játékhoz",
       "quizzes": "A kvízeid",
+      "library": "A kérdéstárad",
       "games": "A játékaid",
       "settings": "Beállításaim",
       "tours": "Bemutatók újra",
@@ -2967,6 +3016,16 @@
           "rounds": { "term": "Körök", "text": "Saját cím alá gyűjtik a kérdéseket. Egy körnek lehet nyitóképernyője, színe, saját sorrendje és saját szabályai." },
           "preview": { "term": "Telefonos előnézet", "text": "Úgy mutatja a kérdést, ahogy a játékosok látják, és végig is játszhatod vele az egész kvízt." },
           "keys": { "term": "Korlátok és billentyűk", "text": "Egy kvízben legfeljebb 200 kérdés lehet. Laptopon a ? megnyomásával látod a billentyűparancsokat." }
+        }
+      },
+      "library": {
+        "heading": "Kérdéstár és megosztás",
+        "items": {
+          "library": { "text": "Tarts kérdéseket a kvízeiden kívül, címkékkel. Írj ott újat, tölts be táblázatot, vagy mentsd el egy kvíz kérdését a További műveletek menüből. A szerkesztőben a Hozzáadás a kérdéstárból (a kérdéstípusok alatt) hozza be őket egy kvízbe." },
+          "linked": { "term": "Összekapcsolt másolatok", "text": "A tárból hozzáadott kérdés kapcsolatban marad vele. Ha a tárban módosítod, a kvízeket is frissítheted, vagy hagyhatod, hogy maguktól frissüljenek. Egy kvízben átírt másolatot sosem írunk felül kérdezés nélkül." },
+          "select": { "text": "A szerkesztőben jelölj ki több kérdést, és egyszerre másold át őket egy másik kvízbe, mentsd a tárba, oszd meg vagy töröld őket." },
+          "share": { "term": "Megosztási kódok", "text": "Ossz meg egy kérdést, több kérdést vagy egy egész kvízt egy QM-7K4PX-2XNAQ-hoz hasonló kóddal, a linkjével vagy a QR-kódjával, 7 vagy 30 napra, vagy lejárat nélkül. Aki megkapja, a válaszok nélkül látja a kérdéseket; egy másik játékvezető hozzáadhatja őket a saját kvízeihez vagy kérdéstárához. A Megosztási kódjaim lapon látod a kódjaidat, és bármelyiket visszavonhatod." },
+          "enterCode": { "text": "Írd be vagy illeszd be a kapott kódot, akár kis- vagy nagybetűvel, kötőjellel vagy anélkül, és megnézheted, mi van benne, majd hozzáadhatod." }
         }
       },
       "game-settings": {
@@ -3101,12 +3160,22 @@
       "import": { "title": "Hozz kérdéseket", "body": "Add hozzá a próbakvízt, hogy lásd, hogy néz ki egy kész kvíz, vagy importálj kérdéseket táblázatból vagy Quizmoo-fájlból." },
       "search": { "title": "Keresd meg", "body": "Keress és rendezz a kvízeid között. A Kijelöléssel egyszerre többnek is átállíthatod a beállításait, vagy törölheted őket." },
       "card": { "title": "Szerkeszd vagy indítsd", "body": "A Szerkesztés megnyitja a szerkesztőt. Az Indítás új játékot kezd: átnézed a beállításait, aztán megosztod a PIN-t a játékosokkal." },
-      "more": { "title": "További műveletek", "body": "Másold le a kvízt, töltsd le táblázatként vagy Quizmoo-fájlként, vagy töröld." }
+      "more": { "title": "További műveletek", "body": "Másold le a kvízt, oszd meg kóddal, töltsd le táblázatként vagy Quizmoo-fájlként, vagy töröld." },
+      "library": { "title": "Kérdéstár", "body": "Tartsd meg a legjobb kérdéseidet a kvízeiden kívül, címkékkel, és később bármelyik kvízbe betöltheted őket." },
+      "enterCode": { "title": "Kód beírása", "body": "Megosztási kódot kaptál egy másik játékvezetőtől? Írd be itt, nézd meg a kérdéseket, és add hozzá a sajátjaidhoz." }
+    },
+    "library": {
+      "welcome": { "title": "A kérdéstárad", "body": "A kvízeiden kívül tartott kérdések, kereséssel, típussal és címkével. Ha módosítasz egyet, az azt használó kvízeket is frissítheted." },
+      "new": { "title": "Új kérdés", "body": "Írj itt egy kérdést; gépelés közben mentjük." },
+      "import": { "title": "Betöltés táblázatból", "body": "A kvízsablonnal egyszerre sok kérdést hozhatsz be." },
+      "tabs": { "title": "Megosztási kódjaim", "body": "A kódok, amiket megosztottál: meddig érvényesek, hányszor használták őket, és visszavonhatod őket." },
+      "enterCode": { "title": "Kód beírása", "body": "Írd be a kapott megosztási kódot, és add hozzá a kérdéseit a kérdéstáradhoz vagy egy kvízhez." }
     },
     "editor": {
       "title": { "title": "Adj neki nevet", "body": "A játékosok csatlakozáskor látják a címet. Minden változtatást magától mentünk." },
       "list": { "title": "A kérdéseid", "body": "Válassz ki egy kérdést, hogy szerkeszd, vagy húzd arrébb. A körök saját cím alá gyűjtik a kérdéseket." },
-      "add": { "title": "Adj hozzá kérdéseket", "body": "Adj hozzá kérdést vagy kört. Először a kérdés típusát választod ki: feleletválasztós, igaz-hamis, beírós, szám vagy sorrend." },
+      "add": { "title": "Adj hozzá kérdéseket", "body": "Adj hozzá kérdést vagy kört. Először a kérdés típusát választod ki: feleletválasztós, igaz-hamis, beírós, szám vagy sorrend. A kérdéstárból is behozhatsz kérdéseket." },
+      "select": { "title": "Jelölj ki kérdéseket", "body": "Jelölj ki több kérdést, és egyszerre másold át őket egy másik kvízbe, mentsd a kérdéstáradba, oszd meg kóddal vagy töröld őket." },
       "inGame": { "title": "Játékban vagy sem", "body": "Kapcsold ki a kérdést, és a következő játékból kimarad, törölni sem kell." },
       "save": { "title": "Magától ment", "body": "Itt látod, hogy minden el van-e mentve. Ha valamit javítani kell, innen egy gombbal odaugorhatsz." },
       "preview": { "title": "Nézd meg telefonon", "body": "Így látják a játékosok a kérdést. Itt végig is játszhatod az egész kvízt." },
@@ -3123,6 +3192,7 @@
       "projector": { "title": "Mutasd nagyban", "body": "Új ablakban nyitja meg a kivetítős nézetet: húzd át a kivetítőre vagy a tévére. Először a PIN-t mutatja, aztán a kérdéseket." },
       "lock": { "title": "Csukd be az ajtót", "body": "Ha mindenki bent van, zárd le a csatlakozást, és senki más nem léphet be." },
       "players": { "title": "Ki van itt", "body": "Ahogy csatlakoznak, itt jelennek meg a játékosok. Ha mindenki bent van, nyomd meg a Startot." },
+      "reactions": { "title": "Reakciók", "body": "A játékosok a kérdések között emojit küldhetnek, a kivetítő a nevükkel együtt mutatja. Ha túl sok, itt elnémíthatod őket." },
       "message": { "title": "Szólj mindenkinek", "body": "Küldj rövid üzenetet minden telefonra és a kivetítőre, például a szünetről." }
     },
     "running": {
@@ -3130,6 +3200,7 @@
       "controls": { "title": "Kell még idő?", "body": "Állítsd meg a kérdést, adj hozzá 30 másodpercet, vagy hagyd ki." },
       "board": { "title": "Ki mit válaszolt", "body": "Itt jelenik meg minden játékos válasza, ahogy beérkezik. Rejtsd el a válaszokat, ha a képernyőd ki van vetítve." },
       "panels": { "title": "Oldalsó panelek", "body": "Állás, üzenetek, játékosok és a kérdések, kéznél a játék alatt." },
+      "reactions": { "title": "Reakciók", "body": "Hány emojit küldtek a játékosok az elmúlt percben. Egy kattintással elnémítod őket, még eggyel újra engeded." },
       "end": { "title": "Játék vége", "body": "Mutasd meg most a dobogót, vagy zárd le a játékot nélküle." }
     },
     "results": {
@@ -3144,6 +3215,7 @@
     },
     "playerLobby": {
       "card": { "title": "Bent vagy!", "body": "Várj itt, amíg a játékvezető elindítja a játékot. Hagyd nyitva ezt az oldalt." },
+      "who": { "title": "Kik vannak itt", "body": "Nyisd le, és látod, ki csatlakozott még. Koppints egy emojira: a neveddel együtt felúszik a kivetítőn." },
       "team": { "title": "A csapatod", "body": "A csapatod és a tagjai. A válaszaid a csapatodnak is számítanak." },
       "about": { "title": "A játékról", "body": "Hány kérdés lesz, mennyi időd van egy-egyre, és hogyan jár a pont." },
       "answering": { "title": "Így játszol", "body": "A kérdések a telefonodon jelennek meg. Koppints a válaszodra, mielőtt lejár az idő: a jó válasz pontot ér, a gyors még többet." },

@@ -81,7 +81,7 @@ export const brandingChoiceSchema = z.object({
 export type BrandingChoice = z.infer<typeof brandingChoiceSchema>
 
 /** The host pages' tutorial tours, one per page; which ones a host has seen is kept on the account. */
-export const hostTourIds = ['home', 'quizzes', 'editor', 'newGame', 'lobby', 'running', 'results', 'settings'] as const
+export const hostTourIds = ['home', 'quizzes', 'editor', 'newGame', 'lobby', 'running', 'results', 'settings', 'library'] as const
 export const hostTourIdSchema = z.enum(hostTourIds)
 export type HostTourId = z.infer<typeof hostTourIdSchema>
 

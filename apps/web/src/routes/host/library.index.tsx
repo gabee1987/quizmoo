@@ -21,6 +21,7 @@ import { useBankList } from '@/features/bank/use-bank-list'
 import { EnterCodeDialog } from '@/features/share/enter-code-dialog'
 import { ShareCodesList } from '@/features/share/share-codes-list'
 import { ShareDialog, shareTitle } from '@/features/share/share-dialog'
+import { usePageTour } from '@/features/tour/use-tour'
 import { toastError } from '@/lib/toast'
 
 export const Route = createFileRoute('/host/library/')({
@@ -47,6 +48,7 @@ function BankPage() {
   const filtered = filters.q.trim() !== '' || filters.type !== null || filters.tag !== null
   const number = new Intl.NumberFormat(i18n.language)
   const refresh = () => void queryClient.invalidateQueries({ queryKey: ['bank'] })
+  usePageTour('library', list.isSuccess)
 
   // Undo brings it back under its old id, so quizzes linked to it stay linked.
   const restore = useMutation({
@@ -76,15 +78,15 @@ function BankPage() {
           <p className="text-muted-foreground">{t('bank.help')}</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button variant="outline" onClick={() => setEntering(true)}>
+          <Button variant="outline" data-tour="enter-code" onClick={() => setEntering(true)}>
             <KeyRoundIcon aria-hidden="true" />
             {t('share.enter.open')}
           </Button>
-          <Button variant="outline" onClick={() => setImporting(true)}>
+          <Button variant="outline" data-tour="library-import" onClick={() => setImporting(true)}>
             <UploadIcon aria-hidden="true" />
             {t('bank.import.open')}
           </Button>
-          <Button asChild>
+          <Button asChild data-tour="library-new">
             <Link to="/host/library/new">
               <PlusIcon aria-hidden="true" />
               {t('bank.page.newTitle')}
@@ -94,7 +96,7 @@ function BankPage() {
       </div>
 
       <Tabs value={tab} onValueChange={(value) => void navigate({ search: { tab: value === 'codes' ? 'codes' : undefined }, replace: true })}>
-        <TabsList aria-label={t('bank.title')} className="self-start">
+        <TabsList aria-label={t('bank.title')} className="self-start" data-tour="library-tabs">
           <TabsTrigger value="questions">
             <LibraryIcon aria-hidden="true" />
             {t('bank.tabs.questions')}

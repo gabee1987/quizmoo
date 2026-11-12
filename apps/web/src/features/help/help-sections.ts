@@ -13,6 +13,10 @@ import {
   HourglassIcon,
   ImageIcon,
   KeyboardIcon,
+  KeyRoundIcon,
+  LibraryIcon,
+  Link2Icon,
+  Share2Icon,
   LayersIcon,
   LayoutGridIcon,
   ListChecksIcon,
@@ -59,7 +63,7 @@ import { typeIcons } from '@/features/editor/type-picker'
  * does. The section ids are anchors: the tours' last bubbles link to them (`tours.ts`).
  */
 
-export type HelpLinkTarget = '/' | '/host/quizzes' | '/host/games' | '/host/settings' | '/host/users' | '/host/nicknames'
+export type HelpLinkTarget = '/' | '/host/quizzes' | '/host/library' | '/host/games' | '/host/settings' | '/host/users' | '/host/nicknames'
 
 export interface HelpItem {
   id: string
@@ -175,6 +179,17 @@ export const helpGroups: HelpGroupDef[] = [
           { id: 'keys', icon: KeyboardIcon },
         ],
         links: [quizzesLink],
+      },
+      {
+        id: 'library',
+        items: [
+          { id: 'library', icon: LibraryIcon, termKey: 'bank.title' },
+          { id: 'linked', icon: Link2Icon },
+          { id: 'select', icon: ListChecksIcon, termKey: 'editor.select.start' },
+          { id: 'share', icon: Share2Icon },
+          { id: 'enterCode', icon: KeyRoundIcon, termKey: 'share.enter.open' },
+        ],
+        links: [{ to: '/host/library', label: 'library' }],
       },
       {
         id: 'game-settings',

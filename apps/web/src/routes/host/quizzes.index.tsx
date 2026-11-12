@@ -190,11 +190,11 @@ function QuizList() {
               {t('quizFile.import')}
             </Button>
           </div>
-          <Button variant="outline" onClick={() => setEntering(true)}>
+          <Button variant="outline" data-tour="enter-code" onClick={() => setEntering(true)}>
             <KeyRoundIcon aria-hidden="true" />
             <span className="max-sm:sr-only">{t('share.enter.open')}</span>
           </Button>
-          <Button variant="outline" asChild>
+          <Button variant="outline" asChild data-tour="quiz-library">
             <Link to="/host/library">
               <LibraryIcon aria-hidden="true" />
               {/* Icon only on phones, like the starter quiz button. */}

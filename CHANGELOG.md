@@ -1,6 +1,11 @@
 # Changelog
 
-## Unreleased
+## 1.13.0 – 2026-11-12
+
+### Tours, help and patch notes for the new features
+- The tours cover the new features: the quiz list points at the question library and "Enter a code", the editor at "Select questions" (and mentions Add from library), the host's lobby and running game at the reaction controls, the players' lobby at "Who's here". The question library has a tour of its own (`library` in `hostTourIds`, so it is remembered on the account like the others).
+- The help page has a "Question library and sharing" section (the library, linked copies, selecting questions, share codes, entering a code) with a link to the library.
+- What's new for 1.13.0.
 
 ### Player reactions and "Who's here" (phase 58)
 - Players send emoji reactions (👏 😂 😮 👍 ❤️ 🐮) between questions: in the lobby, round intros, the reveal, the scoreboard and at the end, never while a question runs or counts down. They float up to the top of the projector and the other phones with the sender's name (at most 12 at once; a quiet row of counts with reduced motion). A player's own tap floats at once; the bar then rests for 2 seconds.
