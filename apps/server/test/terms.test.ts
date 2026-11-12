@@ -5,12 +5,14 @@ import { createUser } from '../src/auth/users.js'
 import type { Db } from '../src/db/index.js'
 import { users } from '../src/db/schema.js'
 import { buildTestApp, sessionCookie, testConfig } from './helpers/app.js'
+import { fakeMailer, signUp } from './helpers/mail.js'
 import { describeDb, withTestDb } from './helpers/test-db.js'
 
 describeDb('accepting the terms of use (database)', () => {
   let db: Db
   let cleanup: () => Promise<void>
   let built: Awaited<ReturnType<typeof buildTestApp>>
+  const mailer = fakeMailer()
 
   // Each request from its own address, so the login and sign-up limits never trip.
   let ip = 0
@@ -30,7 +32,7 @@ describeDb('accepting the terms of use (database)', () => {
 
   beforeAll(async () => {
     ;({ db, cleanup } = await withTestDb())
-    built = await buildTestApp(db, undefined, { ...testConfig, REGISTRATION_OPEN: true })
+    built = await buildTestApp(db, undefined, { ...testConfig, REGISTRATION_OPEN: true }, mailer)
   })
   afterAll(async () => {
     await built.app.close()
@@ -40,11 +42,11 @@ describeDb('accepting the terms of use (database)', () => {
   it('refuses a sign-up without the ticked box and records the version with one', async () => {
     const register = (payload: object) =>
       built.app.inject({ method: 'POST', url: '/api/auth/register', payload, remoteAddress: `10.0.3.${++ip}` })
-    expect((await register({ username: 'test_unticked', password: 'test-password-123' })).statusCode).toBe(400)
-    expect((await register({ username: 'test_unticked', password: 'test-password-123', acceptTerms: false })).statusCode).toBe(400)
+    expect((await register({ username: 'test_unticked', email: 'unticked@example.test' })).statusCode).toBe(400)
+    expect((await register({ username: 'test_unticked', email: 'unticked@example.test', acceptTerms: false })).statusCode).toBe(400)
     expect(await termsOf('test_unticked')).toBeUndefined()
 
-    expect((await register({ username: 'test_ticked', password: 'test-password-123', acceptTerms: true })).statusCode).toBe(201)
+    expect((await signUp(built.app, mailer, { username: 'test_ticked' })).statusCode).toBe(201)
     const recorded = await termsOf('test_ticked')
     expect(recorded?.version).toBe(TERMS_VERSION)
     expect(Date.now() - recorded!.at!.getTime()).toBeLessThan(60_000)

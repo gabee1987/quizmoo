@@ -1,5 +1,30 @@
 # Changelog
 
+## 1.14.0 – 2026-11-13
+
+### E-mail code login, open sign-up and host budgets (phase 71)
+- Hosts log in with a 6-digit code sent to their e-mail address instead of a password (10 minutes, once, 5 tries). Admins keep their password ("Use a password instead", remembered per device in `quizmoo.loginWith`). Without e-mail configured the app keeps username and password logins.
+- Sign-up asks for an e-mail address and a username, confirmed with a code, and needs no approval any more; at most 30 new accounts a day. The admins' notice now names each new host with their address.
+- Accounts from before add and confirm an address at their next login (an editor's password ends then); waiting sign-ups from before become active the same way. Admins create accounts by e-mail address.
+- My settings → Account: the e-mail address (change it with a code), usage against the account's limits, and the password only for accounts that have one. Deleting an account and unlocking the screens work with an e-mailed code for accounts without a password.
+- Budgets per account, enforced by the server: picture and content storage, quizzes, library questions, share codes, open games, games a month and players per game. Admins set the defaults and each account's own values on the Users page, which also shows every account's address and usage, sorts by storage, and compares the database size with the hosting plan's limit. Nothing saved is deleted by a budget.
+- Migration `0023_email_login` (additive): `users.email`, `email_verified_at`, `must_add_email`, `budget`, `games_month`, `games_month_count`, tables `email_codes` and `app_settings`. Rolling back to 1.13.0 works, but accounts whose password ended can then only get in after the admin sets a new password.
+- `pnpm load-test --games N` runs several games at once, for sizing the hosting plan. For testing, `MAILPIT_URL` hands e-mails to a local Mailpit (`pnpm mail:up`, inbox on http://localhost:8025) instead of sending them.
+- Privacy notice, terms, cookies page, records of processing and help updated. `TERMS_VERSION` raised to 2026-11-13: every host accepts the updated terms once.
+
+### Admin area, host avatars and a welcoming home page (phase 72)
+- Admin section with three pages: Users (a compact list with search, filters for hosts, admins, near a limit and suspended, and sorting), Limits (the database against the hosting plan, the default budget, sign-up on or off and its daily maximum, stored in `app_settings.signup`) and Names. Each account has its own page (`/host/users/$userId`) with Overview, Budget, Permissions and Content tabs.
+- Per-account permissions: role, suspend and reactivate (`users.status = 'suspended'`: sessions end, running games end, logins refused with `errors.accountSuspended`, content kept), log out everywhere, and feature switches for pictures, share codes, the question library and scheduled games (`users.permissions`, refused with `errors.featureOff`). The admin's own account is never changed from these pages.
+- Host avatars from the players' set: picked in My settings, changeable by the admin, a stable one per account until then; shown in the list, the account page, the sidebar and the home page.
+- The home page: a greeting for the time of day with the cow, confetti once on the first visit (`host_settings.welcomed_at`), a getting-started checklist ticked from the host's own data (`GET /api/me/home`), quick actions (new quiz, play again, import, enter a code), the best-attended game and the fullest limit.
+- Tours for the Users list, the account page and Limits; the home tour covers the checklist and quick actions; help updated.
+- Fixed: the tail of tooltips that open to the side; Add user offered a password form in a tab opened before e-mail was switched on (site settings are read again after a minute); dialogs with many fields scroll as a whole on phones only.
+- Migration `0024_admin_area` (additive): `users.avatar`, `users.permissions`, `host_settings.welcomed_at`, `host_settings.checklist_dismissed`; hosts from before are marked welcomed.
+
+### Player reactions
+- The six emoji are no longer always on screen: a round button in the phone's bottom left corner opens them as a column, bubble by bubble, and folds them away after sending, on Escape or on a tap elsewhere. The player lobby tour points at it.
+- After a reaction the button rests for 5 seconds (was 2), shown by a ring on the button's edge running out.
+
 ## 1.13.0 – 2026-11-12
 
 ### Tours, help and patch notes for the new features

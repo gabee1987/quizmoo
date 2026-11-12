@@ -4,7 +4,8 @@
  *   $env:LOAD_TEST_USERNAME="admin"; $env:LOAD_TEST_PASSWORD="..."
  *   pnpm --filter @quizmoo/server exec tsx scripts/load-test.ts --players 60
  *
- * Options: --url (default http://localhost:3000), --players 60, --questions 5, --seconds 12,
+ * Options: --url (default http://localhost:3000), --games 1 (that many games at once, each with
+ * its own quiz and players, run as separate processes; for sizing a hosting plan), --players 60, --questions 5, --seconds 12,
  * --groups 0 (splits the questions into that many rounds, each with an intro the host starts),
  * --flap 0.2 (share of players that drop and reconnect during each question), --keep (keep the
  * quiz and game afterwards). The host account needs no other setup: the script creates its own
@@ -20,6 +21,7 @@
  * snapshot with a lower `seq` than the one before; after two host messages in a row every
  * player shows the second. Exits 1 on failure.
  */
+import { spawn } from 'node:child_process'
 import { parseArgs } from 'node:util'
 import type { ClientToServerEvents, HostCommand, HostSnapshot, PlayerSnapshot, ServerToClientEvents } from '@quizmoo/shared'
 import { io, type Socket } from 'socket.io-client'
@@ -29,6 +31,7 @@ type AppSocket = Socket<ServerToClientEvents, ClientToServerEvents>
 const { values: args } = parseArgs({
   options: {
     url: { type: 'string', default: 'http://localhost:3000' },
+    games: { type: 'string', default: '1' },
     players: { type: 'string', default: '60' },
     questions: { type: 'string', default: '5' },
     seconds: { type: 'string', default: '12' },
@@ -38,6 +41,31 @@ const { values: args } = parseArgs({
     keep: { type: 'boolean', default: false },
   },
 })
+// Several games at once: this script once per game, side by side, each printing with its game number.
+const gameCount = Number(args.games)
+if (gameCount > 1) {
+  const rest = process.argv.slice(2).filter((arg, i, all) => arg !== '--games' && all[i - 1] !== '--games' && !arg.startsWith('--games='))
+  const started = Date.now()
+  const codes = await Promise.all(
+    Array.from(
+      { length: gameCount },
+      (_, i) =>
+        new Promise<number>((resolve) => {
+          const child = spawn(process.execPath, [...process.execArgv, process.argv[1]!, ...rest], { stdio: ['ignore', 'pipe', 'pipe'] })
+          const prefix = `[game ${i + 1}] `
+          const forward = (stream: NodeJS.ReadableStream, out: NodeJS.WriteStream) =>
+            stream.on('data', (chunk: Buffer) => out.write(chunk.toString().replace(/^(?=.)/gm, prefix)))
+          forward(child.stdout!, process.stdout)
+          forward(child.stderr!, process.stderr)
+          child.on('exit', (code) => resolve(code ?? 1))
+        }),
+    ),
+  )
+  const failed = codes.filter((code) => code !== 0).length
+  console.log(`\n${gameCount} games in ${Math.round((Date.now() - started) / 1000)} s: ${gameCount - failed} passed, ${failed} failed.`)
+  process.exit(failed > 0 ? 1 : 0)
+}
+
 const url = args.url!.replace(/\/$/, '')
 const playerCount = Number(args.players)
 const questionCount = Number(args.questions)

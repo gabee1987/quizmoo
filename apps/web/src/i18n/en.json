@@ -215,6 +215,29 @@
     "submit": "Log in",
     "logout": "Log out",
     "required": "Fill this in.",
+    "email": "E-mail address",
+    "emailInvalid": "Enter a valid e-mail address.",
+    "emailIntro": "Enter your e-mail address and we'll send you a code to log in. No password needed.",
+    "withPassword": "Use a password instead",
+    "withCode": "Use an e-mail code instead",
+    "code": {
+      "send": "Send code",
+      "sentTo": "We sent a 6-digit code to {{email}}. It works for 10 minutes.",
+      "label": "Code from the e-mail",
+      "invalid": "Enter the 6 digits from the e-mail.",
+      "login": "Log in",
+      "resend": "Send a new code",
+      "resendIn": "New code in {{count}} s",
+      "otherEmail": "Use another address",
+      "spam": "Nothing yet? Check the spam folder too.",
+      "resent": "New code sent"
+    },
+    "emailStep": {
+      "title": "Add your e-mail address",
+      "intro": "Quizmoo now logs you in with a code sent by e-mail, so you don't need a password. Add your address once; after that your password is no longer used.",
+      "introAdmin": "Add an address for logging in with a code. You keep your password too.",
+      "confirm": "Save address"
+    },
     "passwordChange": {
       "title": "Change password",
       "mustChange": "Replace the initial password before you continue.",
@@ -228,12 +251,11 @@
     },
     "register": {
       "title": "Sign up",
-      "intro": "Pick a username and a password. The admin approves new accounts, then you can log in.",
-      "repeat": "Password again",
+      "intro": "Enter your e-mail address and a username. We'll send you a code to confirm the address; you won't need a password.",
+      "usernameHelp": "Others see this name. Letters, digits, dot, dash and underscore.",
       "website": "Leave this empty",
-      "submit": "Sign up",
-      "doneTitle": "Thanks!",
-      "done": "Your account {{name}} is waiting for the admin's approval. Once it is approved, log in with your password.",
+      "submit": "Send code",
+      "confirm": "Finish sign-up",
       "closed": "Sign-up is closed on this site. Ask the admin for an account.",
       "toLogin": "Go to login",
       "haveAccount": "Already have an account? Log in"
@@ -529,15 +551,18 @@
     "lock": {
       "button": "Lock screen",
       "title": "Screen locked",
-      "body": "The game keeps running on the projector and the phones. Type your lock code or your password to get back to it.",
+      "body": "The game keeps running on the projector and the phones. Type your lock code, your password or a code we e-mail you to get back to it.",
       "code": "Lock code",
       "password": "Password",
+      "emailCode": "Code from the e-mail",
       "unlock": "Unlock",
       "usePassword": "Use my password",
+      "useEmail": "E-mail me a code",
+      "emailSent": "We sent a code to {{email}}.",
       "useCode": "Use my lock code",
       "logout": "Log out",
       "dialogTitle": "Lock the screen?",
-      "dialogHelp": "Until you unlock it, nobody sees answers, scores or your quizzes on any device you're logged in on. Choose a code to unlock it quickly, or leave it empty and unlock with your password.",
+      "dialogHelp": "Until you unlock it, nobody sees answers, scores or your quizzes on any device you're logged in on. Choose a code to unlock it quickly, or leave it empty and unlock with your password or a code we e-mail you.",
       "newCode": "Lock code for this game (optional)",
       "codeRule": "Use 4 to 8 digits.",
       "lockWithCode": "Lock with this code",
@@ -794,7 +819,7 @@
       "startsAt": "Start time",
       "laterHelp": "The PIN and the link are yours now, ready to share. Players can join from that time on; you start the game.",
       "lockCode": "Lock code for this game (optional)",
-      "lockCodeHelp": "Unlocks the host screen when you lock it during the game. Left empty, your lock code from My settings or your password unlocks it.",
+      "lockCodeHelp": "Unlocks the host screen when you lock it during the game. Left empty, your lock code from My settings, your password or a code we e-mail you unlocks it.",
       "scheduleSubmit": "Schedule"
     },
     "newQuiz": "New quiz",
@@ -1692,9 +1717,77 @@
       "empty": "Neither list can be empty."
     }
   },
+  "limits": {
+    "nav": "Limits",
+    "title": "Limits",
+    "intro": "Limits for the whole site: the database against your hosting plan, the budget every host starts with, and sign-up.",
+    "signup": {
+      "title": "Sign-up",
+      "help": "Whether people can make a host account themselves on the sign-up page, and how many a day at most.",
+      "unavailable": "Sign-up is off on this server (REGISTRATION_OPEN, or no e-mail set up), so these settings do nothing now.",
+      "open": "People can sign up",
+      "openOn": "The sign-up page is open.",
+      "openOff": "Closed: only you can add accounts, on the Users page.",
+      "perDay": "New accounts a day at most",
+      "saved": "Sign-up settings saved"
+    }
+  },
   "users": {
     "title": "Users",
-    "intro": "Every host account on this site: what each one does and what you can change.",
+    "intro": "Every host account on this site. Open one to see what it uses and to change its budget, features and access.",
+    "status": { "suspended": "Suspended" },
+    "list": {
+      "filter": "Show",
+      "filters": { "all": "All", "hosts": "Hosts", "admins": "Admins", "near": "Near a limit", "suspended": "Suspended" },
+      "newest": "Newest first",
+      "columns": { "account": "Account", "role": "Role", "usage": "Fullest limit", "lastLogin": "Last login" },
+      "noLimits": "No limits",
+      "empty": "No accounts here."
+    },
+    "page": {
+      "back": "All users",
+      "tabsLabel": "About this account",
+      "tabs": { "overview": "Overview", "budget": "Budget", "permissions": "Permissions", "content": "Content" },
+      "adminNoLimits": "Admins have no limits.",
+      "avatar": "Avatar",
+      "avatarOf": "{{name}}'s avatar",
+      "avatarHelp": "The host picks their own in My settings; you can change it here so you tell accounts apart.",
+      "selfNote": "This is your own account: change it in My settings. Nobody can suspend, demote or delete it here.",
+      "role": "Role",
+      "access": "Access"
+    },
+    "features": {
+      "title": "Features",
+      "help": "Switch a feature off for this account only. What it already made stays.",
+      "adminHelp": "Admins always have every feature.",
+      "saved": "Features saved",
+      "keys": { "images": "Pictures", "shareCodes": "Share codes", "library": "Question library", "scheduling": "Scheduled games" },
+      "hints": {
+        "images": "Uploading pictures to questions and logos.",
+        "shareCodes": "Sharing questions and quizzes with a code.",
+        "library": "Saving and editing questions in the library.",
+        "scheduling": "Creating games for a later date."
+      }
+    },
+    "suspend": {
+      "title": "Suspend or delete",
+      "help": "A suspended account can't log in and is logged out everywhere; its quizzes and results stay. Deleting removes everything.",
+      "action": "Suspend",
+      "confirmTitle": "Suspend {{name}}?",
+      "confirmBody": "They're logged out on every device and can't log in until you reactivate the account. Nothing is deleted.",
+      "done": "{{name}} is suspended.",
+      "banner": "This account is suspended: it can't log in.",
+      "reactivate": "Reactivate",
+      "reactivated": "{{name}} can log in again."
+    },
+    "content": {
+      "title_one": "{{count}} quiz",
+      "title_other": "{{count}} quizzes",
+      "help": "What this host made, read-only. Quizmoo never opens another host's quizzes for you.",
+      "none": "No quizzes yet.",
+      "line_one": "{{count}} question · {{size}} · {{date}}",
+      "line_other": "{{count}} questions · {{size}} · {{date}}"
+    },
     "add": "Add user",
     "addSubmit": "Create",
     "roleLabel": "Role",
@@ -1704,12 +1797,15 @@
     },
     "initialPassword": "Initial password",
     "initialPasswordHint": "Share the initial password privately. They must change it when they first log in.",
+    "addEmailHint": "They log in with a code we send to this address; no password needed.",
+    "noEmail": "No e-mail address yet",
+    "emailNotConfirmed": "not confirmed yet",
     "usernameRules": "3–40 characters: letters, digits, dot, dash, underscore. No e-mail addresses.",
     "pendingPassword": "Password not changed yet",
     "created": "Account {{name}} created.",
     "pending": {
       "title": "Waiting for approval",
-      "hint": "People who signed up on the sign-up page. Only approve names you recognise; unapproved sign-ups are deleted after 7 days.",
+      "hint": "Sign-ups from before e-mail login. Each one is activated once its owner logs in and confirms an e-mail address, or when you approve it; the rest are deleted after 7 days.",
       "approve": "Approve",
       "reject": "Reject",
       "approved": "{{name}} can log in now.",
@@ -1721,7 +1817,7 @@
     "accounts_other": "{{count}} accounts",
     "admins_one": "{{count}} admin",
     "admins_other": "{{count}} admins",
-    "search": "Search by name",
+    "search": "Search by name or e-mail",
     "noMatch": "No user called “{{query}}”.",
     "you": "You",
     "joined": "Here since {{date}}",
@@ -1775,6 +1871,8 @@
     }
   },
   "errors": {
+    "featureOff": "The admin turned this off for your account.",
+    "accountSuspended": "This account is suspended. Ask the admin.",
     "gameNotFound": "No such game. Check the PIN.",
     "gameFull": "The game is full.",
     "gameAlreadyStarted": "The game has already started.",
@@ -1826,7 +1924,18 @@
     "lastAdmin": "You're the only admin. Make someone else an admin first.",
     "accountPending": "Your account is waiting for the admin's approval.",
     "registrationClosed": "Sign-up is closed. Ask the admin for an account.",
-    "registrationsFull": "Too many sign-ups are waiting for approval. Try again in a few days.",
+    "registrationsFull": "Too many new accounts today. Try again tomorrow.",
+    "emailRequired": "Add your e-mail address first.",
+    "codeLoginOff": "Logging in with an e-mail code is not available on this site.",
+    "invalidCode": "This code is wrong or has expired. Check it, or ask for a new one.",
+    "emailTaken": "This e-mail address belongs to another account.",
+    "sameEmail": "This is already your address.",
+    "budgetStorage": "Your storage is full. Delete some pictures or quizzes, or ask the admin for more.",
+    "budgetQuizzes": "You've reached your quiz limit. Delete a quiz, or ask the admin for more.",
+    "budgetBankQuestions": "You've reached your question library limit. Delete a few questions, or ask the admin for more.",
+    "budgetShareCodes": "You've reached your share code limit. Revoke one in My share codes, or ask the admin for more.",
+    "budgetOpenGames": "You have as many open games as your account allows. End or delete one first.",
+    "budgetGamesPerMonth": "You've used this month's games. Ask the admin for more, or wait for next month.",
     "wrongCurrentPassword": "The current password is wrong.",
     "samePassword": "The new password must differ from the current one.",
     "gameNotFinished": "End the game first.",
@@ -1859,6 +1968,59 @@
     "releasedOn": "Released {{date}}",
     "fixed": "Fixed",
     "releases": {
+      "1_14_0": {
+        "title": "E-mail login and account limits",
+        "intro": "Log in with a code sent to your e-mail address instead of a password, start from a new home page, see what your account uses, and react from a single button on the phone.",
+        "sections": [
+          {
+            "title": "Logging in with an e-mail code",
+            "items": [
+              "You log in with your e-mail address: Quizmoo sends a 6-digit code that works for 10 minutes. No password to remember.",
+              "If your account has no e-mail address yet, Quizmoo asks you to add and confirm one at your next login. After that you log in with codes.",
+              "Signing up takes an e-mail address and a username, with no approval to wait for: the account is ready as soon as you enter the code.",
+              "Change your address in My settings, Account. Deleting your account and unlocking a locked screen also work with a code we e-mail you.",
+              "The privacy notice and the terms of use now cover your e-mail address, so you accept them once more at your next login."
+            ]
+          },
+          {
+            "title": "What your account uses",
+            "items": [
+              "My settings, Account shows what your account uses against its limits: storage, quizzes, library questions, share codes, open games, games this month and players per game.",
+              "When something would go over a limit, Quizmoo tells you which one. Nothing you saved is ever deleted; ask the admin if you need more."
+            ]
+          },
+          {
+            "title": "A home page to start from",
+            "items": [
+              "The home page greets you with your avatar and the cow, and welcomes new hosts with confetti.",
+              "\"Your first steps\" lists five things to try, each ticked off by itself once you've done it. Close it whenever you like.",
+              "Quick start: a new quiz, play your latest quiz again, import a file or enter a share code, one tap each. Your best-attended game and your fullest limit are there too.",
+              "Pick your avatar in My settings, Account."
+            ]
+          },
+          {
+            "title": "For admins",
+            "items": [
+              "Admin now has three pages: Users, Limits and Names.",
+              "Users is a compact list of every account with its avatar, address, role, fullest limit and last login. Filter, sort and search, and open an account for its own page.",
+              "An account's page: what it uses, its own budget, its role, features you can switch off for it (pictures, share codes, the question library, scheduled games), log out everywhere, a new password, suspend or reactivate, delete, and its quizzes.",
+              "A suspended account can't log in and its running games end; nothing it made is deleted.",
+              "Limits: the database against your hosting plan, the default budget, and sign-up on or off with a daily maximum.",
+              "Add user asks for the e-mail address; the person logs in with a code. The e-mail about a new sign-up names the host and their address. Admins keep their password and can log in either way."
+            ]
+          },
+          {
+            "title": "Reactions",
+            "items": [
+              "Players react from a round button in the bottom left corner of their phone: tapping it opens the emoji. After a reaction the button rests for 5 seconds."
+            ]
+          }
+        ],
+        "fixed": [
+          "Tooltips that open beside a button (like \"Signed in as\") point at it cleanly again.",
+          "Dialogs with many fields use the width of the screen instead of scrolling inside."
+        ]
+      },
       "1_13_0": {
         "title": "Question library, sharing and reactions",
         "intro": "Keep your best questions in a library, share questions and whole quizzes with a code, give partial credit on multiple choice, and let players react with emoji between questions.",
@@ -2336,9 +2498,9 @@
     },
     "lockCode": {
       "title": "Screen lock code",
-      "help": "Unlocks your screens when you lock them during a game (\"Lock screen\"). New games use it unless you give one when you start them. Your password always unlocks too.",
+      "help": "Unlocks your screens when you lock them during a game (\"Lock screen\"). New games use it unless you give one when you start them. Your password, or a code we e-mail you, always unlocks too.",
       "set": "You have a lock code.",
-      "none": "No lock code yet: your password unlocks your screens.",
+      "none": "No lock code yet: your password or a code we e-mail you unlocks your screens.",
       "new": "New lock code (4 to 8 digits)",
       "change": "Change it (4 to 8 digits)",
       "submit": "Save code",
@@ -2367,7 +2529,7 @@
     },
     "signupEmail": {
       "title": "Sign-up e-mails",
-      "help": "When someone signs up as a host, we e-mail this address with a link to the Users page, where you approve or reject them. The e-mail says only how many are waiting, never who. At most one e-mail every 15 minutes.",
+      "help": "When someone signs up as a host, we e-mail this address with their username and e-mail address and a link to the Users page. At most one e-mail every 15 minutes.",
       "set": "Sign-up e-mails go to {{email}}.",
       "none": "No address yet: you see new sign-ups only on the Users page.",
       "notConfigured": "E-mail is not set up on this server, so nothing is sent. Whoever runs it needs to add a Brevo API key and a sender address (see the deploy guide).",
@@ -2434,6 +2596,13 @@
       "title": "Your account",
       "joined": "Here since {{date}}",
       "lastLogin": "last logged in {{when}}",
+      "email": {
+        "title": "E-mail address",
+        "help": "You log in with codes sent to this address. Only you and the admins see it.",
+        "none": "No address yet",
+        "change": "Change address",
+        "saved": "E-mail address saved. Your other logins were logged out."
+      },
       "logins": {
         "title": "Logins",
         "body_one": "This browser is your only active login.",
@@ -2469,9 +2638,60 @@
         "images_other": "{{count}} images",
         "running": "Any games still running end right away.",
         "password": "Your password",
+        "codeSent": "We sent a code to {{email}}.",
         "submit": "Delete for good",
         "done": "Your account is deleted"
       }
+    }
+  },
+  "budgets": {
+    "title": "Usage and limits",
+    "help": "What your account uses, against the limits the admin set. Ask the admin if you need more.",
+    "usageTitle": "Usage and limits",
+    "keys": {
+      "storageMb": "Storage",
+      "quizzes": "Quizzes",
+      "bankQuestions": "Question library",
+      "shareCodes": "Share codes",
+      "openGames": "Open games",
+      "gamesPerMonth": "Games this month",
+      "playersPerGame": "Players per game"
+    },
+    "of": "{{used}} of {{limit}}",
+    "unlimited": "{{used}} · no limit",
+    "noLimit": "No limit",
+    "nearFull": "almost full",
+    "full": "full",
+    "nearLimit": "Near a limit",
+    "edit": "Edit budget",
+    "editTitle": "Budget for {{name}}",
+    "editHelp": "Limits for this account. Lowering one deletes nothing; the host just can't add more until they are under it.",
+    "editDefaults": "Default budget",
+    "defaultsTitle": "Default budget",
+    "defaultsHelp": "For every host without their own values. Admins have no limits.",
+    "modeLabel": "Limit for {{name}}",
+    "modes": {
+      "default": "Default ({{value}})",
+      "custom": "Own value",
+      "none": "No limit"
+    },
+    "range": "A whole number from {{min}} to {{max}}.",
+    "saved": "Budget saved",
+    "savedFor": "Budget saved for {{name}}",
+    "sort": {
+      "label": "Sort accounts",
+      "name": "By name",
+      "storage": "By storage used",
+      "activity": "By last login"
+    },
+    "overview": {
+      "title": "Database",
+      "help": "The size of the whole database against the limit of your hosting plan.",
+      "size": "Database size",
+      "noBudget": "{{used}} · enter your plan's limit",
+      "hosts": "Hosts' content (pictures, quizzes, library, share codes): {{size}}",
+      "budgetLabel": "Hosting plan limit (MB)",
+      "budgetPlaceholder": "No limit set"
     }
   },
   "reactions": {
@@ -2495,6 +2715,59 @@
   },
   "branding": {
     "logo": "Organiser's logo"
+  },
+  "hostHome": {
+    "welcome": "Welcome to Quizmoo, {{name}}!",
+    "firstLine": "Moo! Your starter quiz is ready. Play it with a friend to see how it works.",
+    "greeting": {
+      "morning": "Good morning, {{name}}!",
+      "afternoon": "Good afternoon, {{name}}!",
+      "evening": "Good evening, {{name}}!",
+      "night": "Up late, {{name}}?"
+    },
+    "lines": [
+      "Moo! What are we playing today?",
+      "Fresh questions make happy players.",
+      "A picture says more than four answers.",
+      "Teams make every quiz louder. Try it!",
+      "Your players are warming up. Are you?",
+      "Short rounds, big cheers."
+    ],
+    "steps": {
+      "title": "Your first steps",
+      "allDone": "All done. You're a Quizmoo pro!",
+      "progress_one": "{{done}} of {{count}} done",
+      "progress_other": "{{done}} of {{count}} done",
+      "dismiss": "Hide the first steps",
+      "doneLabel": "Done",
+      "todoLabel": "Not done yet",
+      "starterPlayed": { "title": "Play the starter quiz", "hint": "Start a game with it and join from your phone.", "action": "Quizzes" },
+      "ownQuiz": { "title": "Make a quiz of your own", "hint": "A title and a few questions are enough.", "action": "New quiz" },
+      "picture": { "title": "Add a picture to a question", "hint": "Drop, paste or pick one in the editor.", "action": "Quizzes" },
+      "gameWithPlayers": { "title": "Run a game with friends", "hint": "Finish a game with at least two players." },
+      "library": { "title": "Save a question to your library", "hint": "Keep your best questions for later quizzes.", "action": "Library" }
+    },
+    "quick": {
+      "label": "Quick start",
+      "new": "New quiz",
+      "newHint": "Start from scratch.",
+      "play": "Play again",
+      "playNone": "Make a quiz first.",
+      "import": "Import a file",
+      "importHint": "A spreadsheet or a Quizmoo file.",
+      "code": "Enter a code",
+      "codeHint": "Questions or a quiz someone shared."
+    },
+    "best": {
+      "label": "Best turnout",
+      "value_one": "{{title}}: {{count}} player",
+      "value_other": "{{title}}: {{count}} players",
+      "untitled": "A game"
+    },
+    "usage": {
+      "label": "Your fullest limit: {{name}}",
+      "more": "See all your usage"
+    }
   },
   "dashboard": {
     "greeting": "Hi, {{name}}!",
@@ -2669,11 +2942,12 @@
         {
           "heading": "If you host",
           "items": [
-            "Your username, and your password only as a one-way hash that nobody can turn back into the password.",
+            "Your username and your e-mail address. You log in with one-time codes sent to that address; administrators (and installs without e-mail) also have a password, stored only as a one-way hash that nobody can turn back into the password.",
             "When you last logged in (shown only to the administrator, to see which accounts are still in use), and which version of the terms you accepted and when (as a record of our agreement).",
             "Your logins: a random code per browser, stored as a hash, for up to {{sessionDays}} days.",
             "Your quizzes, your question library, the pictures you upload, your settings, and the games you ran with their results.",
             "Your share codes, each with its own copy of the shared questions and a count of how often it was used. Nothing about the people who open or use a code is stored.",
+            "The limits the administrator set for your account (storage, quizzes, games) and how much of them you use.",
             "Administrators only, if they enter one: an e-mail address for notices about new sign-ups. It is used for nothing else and is deleted when the administrator removes it or is no longer an administrator."
           ],
           "paragraphs": [
@@ -2702,7 +2976,7 @@
             "Unfinished games are closed after 12 hours and then deleted in the same way as finished ones.",
             "Pictures that no quiz, library question, share code, setting or game uses any more are deleted within two days.",
             "A share code and its copy are deleted when you revoke it, and daily once it has expired.",
-            "Expired logins are deleted daily. A sign-up the admin does not approve within {{signupDays}} days is deleted.",
+            "Expired logins are deleted daily. A login code works for 10 minutes and is removed from the database within a day. A sign-up from before e-mail login that is not completed within {{signupDays}} days is deleted.",
             "A player's seat stored in the browser is removed when they leave the game. Otherwise it expires after {{seatDays}} days and is removed the next time Quizmoo is opened on that device.",
             "Host accounts, with their quizzes and pictures, stay until the host or the admin deletes them.",
             "The hosting provider's backups may retain deleted data for up to 30 days, after which it is overwritten."
@@ -2712,7 +2986,7 @@
           "heading": "Who else gets your data",
           "paragraphs": [
             "Nobody receives it for their own purposes. The service runs at a hosting provider ({{hosting}}), which stores and processes the data only to run the service, as a processor under its data processing terms. If the provider or its parent company is outside the EU/EEA, transfers rely on the safeguards the GDPR requires: an adequacy decision such as the EU–US Data Privacy Framework, or standard contractual clauses.",
-            "When an administrator has entered an address for sign-up notices, those e-mails are sent through an e-mail provider ({{mail}}), also acting as a processor. It receives the administrator's address and the notice, which states only how many sign-ups are awaiting approval.",
+            "E-mails are sent through an e-mail provider ({{mail}}), also acting as a processor: login codes to the host's own address and, when an administrator has entered an address for sign-up notices, a notice naming each new host (username and e-mail address).",
             "There are no analytics, advertising or social media tools, and the app loads nothing from other sites. The Feedback link for hosts leads to GitHub, a separate service with its own privacy policy; using it is optional."
           ]
         },
@@ -2766,14 +3040,14 @@
           "items": [
             "Players join a game with its PIN and a nickname; they need no account.",
             "Hosts need an account, must be at least {{age}} years old and must use it themselves: an account is for one person only and may not be shared or transferred.",
-            "Sign-ups wait for the administrator's approval. The administrator may decline a sign-up without giving a reason."
+            "You sign up with your e-mail address, which you confirm with a code. The administrator may set limits for your account (storage, quizzes, games) and may delete an account that breaks these terms."
           ]
         },
         {
           "heading": "Your account",
           "items": [
-            "Keep your password secret and do not use it for any other service.",
-            "If you think someone else has used your account, change your password and sign out of your other devices in My settings, and inform the operator.",
+            "Keep your e-mail account secure, and your password secret if you have one: anyone who can read your e-mail can log in to Quizmoo as you.",
+            "If you think someone else has used your account, sign out of your other devices in My settings, secure your e-mail account (and change your password if you have one), and inform the operator.",
             "You can delete your account at any time on My settings → Account."
           ]
         },
@@ -2857,6 +3131,7 @@
         "dismissed": "The host message you dismissed. Until you close the tab.",
         "picksOpen": "Whether your team's picks are open. Until you close the tab.",
         "reactions": "That you switched other players' reactions off on this device. Until you switch them back on or clear your browser data.",
+        "loginWith": "That you log in with a password rather than an e-mail code on this device. Until you switch back or clear your browser data.",
         "lang": "Your language. Until you change it or clear your browser data.",
         "mode": "Light, dark or system look. Until you change it or clear your browser data.",
         "seasonal": "That you switched the seasonal look off on this device. Until you switch it back on or clear your browser data.",
@@ -2939,7 +3214,7 @@
           "team": { "term": "Team", "text": "In a team game, join a team or start one. If the host allows it, you can also play on your own." },
           "wait": { "term": "Lobby", "text": "Wait there until the host starts the game, and keep the page open." },
           "who": { "term": "Who's here", "text": "Open the list in the lobby to see everyone who has joined, by team in a team game." },
-          "react": { "term": "Reactions", "text": "Between questions, tap an emoji to send it: it floats up on the projector and the other phones with your name. In the lobby, while the player list is open, it pops up next to your name there. You can switch other players' reactions off on your phone in the game menu." }
+          "react": { "term": "Reactions", "text": "Between questions, tap the round button in the bottom left corner and pick an emoji: it floats up on the projector and the other phones with your name. In the lobby, while the player list is open, it pops up next to your name there. You can switch other players' reactions off on your phone in the game menu." }
         }
       },
       "answering": {
@@ -3063,7 +3338,7 @@
           "message": { "term": "Messages", "text": "Send a message to every phone and the projector: type one, or pick one of your quick messages." },
           "reactions": { "text": "Players send emoji between questions, never while a question runs, and the projector shows them; the button counts the last minute's. Press it to mute them, again to allow them. Switch them off for a whole quiz under Game flow (Emoji reactions)." },
           "grading": { "term": "Grading", "text": "Free-text questions without accepted answers are graded by you after the question." },
-          "lock": { "text": "Locks your host pages until your lock code or password is typed, if you have to step away." },
+          "lock": { "text": "Locks your host pages until your lock code, your password or a code we e-mail you is typed, if you have to step away." },
           "keys": { "term": "Keyboard", "text": "If the projector view runs in your browser, Space or the right arrow key moves the game on from there." },
           "end": { "text": "Shows the podium, or closes the game without one." }
         }
@@ -3086,13 +3361,14 @@
           "games": { "text": "The settings, time limit and points every new quiz starts with." },
           "messages": { "text": "Your quick messages for games." },
           "branding": { "text": "Your logo and event name." },
-          "account": { "text": "Language and look on this device, password, screen lock code, tours, logins, downloading your data and deleting your account." }
+          "account": { "text": "Your avatar, your e-mail address, your usage and limits, language and look on this device, password (if you have one), screen lock code, tours, logins, downloading your data and deleting your account." }
         }
       },
       "admin": {
         "heading": "For administrators",
         "items": {
-          "users": { "text": "Add hosts, approve or reject sign-ups, and manage accounts." },
+          "users": { "text": "Every account in one list: filter, sort and search, and open an account for its usage, its own budget, its role and features, suspending or deleting it, and what it made." },
+          "limits": { "text": "The database against your hosting plan, the default budget every host starts with, and whether people can sign up (and how many a day)." },
           "names": { "text": "The lists Surprise me picks player names from, one per language." }
         }
       }
@@ -3150,9 +3426,11 @@
     "home": {
       "welcome": { "title": "Welcome to Quizmoo!", "body": "A quick look around: what you can do here and where things are. Close it whenever you like; the ? button brings it back." },
       "newQuiz": { "title": "Make a quiz", "body": "Start a new quiz here. Questions, rounds, pictures: everything is in the editor." },
+      "steps": { "title": "Your first steps", "body": "Five things to try first. Each ticks itself off when you've done it; close the list whenever you like." },
+      "quick": { "title": "Quick start", "body": "A new quiz, playing your latest quiz again, importing a file, or a code someone shared with you." },
       "recent": { "title": "Your quizzes", "body": "The quizzes you edited last. Open one to edit it, or press Play to start a game with it." },
       "nav": { "title": "Find your way", "body": "Your quizzes, your games and their results are always one click away here." },
-      "account": { "title": "Your settings", "body": "Game defaults, quick messages, your logo, and what is new in Quizmoo." },
+      "account": { "title": "Your settings", "body": "Game defaults, quick messages, your logo, your account with your e-mail address and what it uses, and what is new in Quizmoo." },
       "help": { "title": "Need a hand?", "body": "This button shows the tour of any page again, and opens Help, where everything is explained." }
     },
     "quizzes": {
@@ -3209,13 +3487,26 @@
       "export": { "title": "Take it with you", "body": "Download the results as a spreadsheet." }
     },
     "settings": {
-      "tabs": { "title": "Your settings", "body": "Game defaults, quick messages, your branding and your account, each on its own tab." },
+      "tabs": { "title": "Your settings", "body": "Game defaults, quick messages, your branding and your account (your e-mail address and what your account uses), each on its own tab." },
       "defaults": { "title": "Game defaults", "body": "Every new quiz starts with these settings. Each quiz can still change them." },
       "questions": { "title": "New questions", "body": "The time limit and points new questions start with." }
     },
+    "users": {
+      "list": { "title": "Every account", "body": "One row per account with its fullest limit. Filter, sort or search, and open an account to manage it." },
+      "add": { "title": "Add someone", "body": "Make an account by e-mail address: they log in with a code we send there." }
+    },
+    "account": {
+      "tabs": { "title": "One account", "body": "What it uses, its own budget, its role and features, suspending it, and what it made, each on its own tab." }
+    },
+    "limits": {
+      "database": { "title": "Your database", "body": "Its size against your hosting plan. Enter the plan's limit to see how full it is." },
+      "defaults": { "title": "Default budget", "body": "What every host may use unless you give them their own values." },
+      "signup": { "title": "Sign-up", "body": "Open or close the sign-up page, and how many new accounts a day at most." }
+    },
     "playerLobby": {
       "card": { "title": "You're in!", "body": "Wait here until the host starts the game. Keep this page open." },
-      "who": { "title": "Who's here", "body": "Open it to see who else joined. Tap an emoji to react: it floats up on the projector with your name." },
+      "who": { "title": "Who's here", "body": "Open it to see who else joined." },
+      "react": { "title": "React", "body": "Tap here and pick an emoji: it floats up on the projector with your name. Between questions only." },
       "team": { "title": "Your team", "body": "Your team and who is in it. Your answers count for your team too." },
       "about": { "title": "About the game", "body": "How many questions there are, how long you have for each, and how points are given." },
       "answering": { "title": "How to play", "body": "Each question appears on your phone. Tap your answer before the time runs out: a right answer brings points, a fast one even more." },

@@ -162,6 +162,20 @@
       "when": 1794478711789,
       "tag": "0022_share_codes",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1794491619985,
+      "tag": "0023_email_login",
+      "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1794499361873,
+      "tag": "0024_admin_area",
+      "breakpoints": true
     }
   ]
 }

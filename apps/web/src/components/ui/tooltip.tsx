@@ -46,7 +46,7 @@ function TooltipContent({
             bubble to cover the border there, and only the two slanted sides are stroked. */}
         <TooltipPrimitive.Arrow asChild>
           <svg className="tooltip-tail" width={18} height={11} viewBox="0 0 18 11" aria-hidden="true">
-            <path d="M0 0H18V2L9 10L0 2Z" />
+            <path d="M0 -3H18V2L9 10L0 2Z" />
             <path d="M0 2L9 10L18 2" />
           </svg>
         </TooltipPrimitive.Arrow>

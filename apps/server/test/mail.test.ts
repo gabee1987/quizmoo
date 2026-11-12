@@ -34,6 +34,24 @@ describe('createMailer', () => {
     })
   })
 
+  it('hands every e-mail to the local Mailpit when it is set, also over a Brevo key', async () => {
+    const fetchImpl = vi.fn(async () => new Response('{"ID":"x"}', { status: 200 }))
+    const mailer = createMailer({ BREVO_API_KEY: 'test-key', MAILPIT_URL: 'http://localhost:8025' }, fetchImpl)
+    expect(mailer.configured).toBe(true)
+    await mailer.send(message)
+
+    const [url, init] = fetchImpl.mock.calls[0] as unknown as [string, RequestInit]
+    expect(url).toBe('http://localhost:8025/api/v1/send')
+    expect(init.headers).not.toHaveProperty('api-key')
+    expect(JSON.parse(init.body as string)).toEqual({
+      From: { Name: 'Quizmoo', Email: 'quizmoo@localhost.test' },
+      To: [{ Email: 'admin@example.test' }],
+      Subject: 'Hello',
+      Text: 'Plain',
+      HTML: '<p>Plain</p>',
+    })
+  })
+
   it('fails with the status only, never the address the provider answered with', async () => {
     const fetchImpl = vi.fn(async () => new Response('{"message":"invalid email admin@example.test"}', { status: 400 }))
     const mailer = createMailer({ BREVO_API_KEY: 'test-key', MAIL_FROM: 'quizmoo@example.test' }, fetchImpl)

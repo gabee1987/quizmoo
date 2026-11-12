@@ -115,8 +115,8 @@ OPERATOR_EMAIL=<contact address for privacy requests>
 Optional:
 
 - `FEEDBACK_URL=https://github.com/<owner>/quizmoo/issues/new?template=feedback.yml`
-- `REGISTRATION_OPEN=true` to let friends request host accounts (an admin approves them).
-- `BREVO_API_KEY`, `MAIL_FROM`, `MAIL_PROVIDER` for sign-up e-mails (a further third-party processor; see [docs/deploy.md](docs/deploy.md)).
+- `BREVO_API_KEY`, `MAIL_FROM`, `MAIL_PROVIDER` for login codes by e-mail and sign-up notices (a further third-party processor; see [docs/deploy.md](docs/deploy.md)).
+- `REGISTRATION_OPEN=true` to let friends sign up with an e-mail code, without approval (needs the e-mail variables). Set budgets and the database limit on the Users page.
 
 Never add `SEED_ADMIN_USERNAME` or `SEED_ADMIN_PASSWORD` here; step 7 passes them inline.
 

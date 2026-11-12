@@ -1,6 +1,5 @@
 import { useMutation } from '@tanstack/react-query'
 import { Link, createFileRoute } from '@tanstack/react-router'
-import { CircleCheckIcon } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { FloatingShapes } from '@/components/floating-shapes'
@@ -10,7 +9,10 @@ import { LegalLinks } from '@/components/legal-links'
 import { Spinner } from '@/components/spinner'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { CodeStep, looksLikeEmail } from '@/features/auth/code-step'
+import { useAfterLogin } from '@/features/auth/login-form'
 import { apiFetch, errorCode } from '@/lib/api'
+import type { User } from '@/lib/auth'
 import { useSiteInfo } from '@/lib/site'
 import { TextField } from '../components/text-field'
 import { TermsCheckbox } from '../features/legal/terms-checkbox'
@@ -19,60 +21,67 @@ export const Route = createFileRoute('/register')({
   component: RegisterPage,
 })
 
-const MIN_PASSWORD = 10
-
-/** Host self sign-up. The account waits for an admin's approval before it can log in. */
+/**
+ * Host self sign-up: an e-mail address and a username, then the code mailed to the address. The
+ * account is made when the code is confirmed, with no approval, and logged in at once.
+ */
 function RegisterPage() {
   const { t, i18n } = useTranslation()
   const site = useSiteInfo()
+  const afterLogin = useAfterLogin()
+  const [email, setEmail] = useState('')
   const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
-  const [repeat, setRepeat] = useState('')
   const [website, setWebsite] = useState('')
   const [accepted, setAccepted] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  const [sentTo, setSentTo] = useState<string | null>(null)
 
-  const register = useMutation({
-    mutationFn: () =>
-      apiFetch('/api/auth/register', {
-        method: 'POST',
-        body: JSON.stringify({
-          username: username.trim(),
-          password,
-          acceptTerms: accepted,
-          // The starter quiz comes in the language of this page.
-          lang: i18n.language,
-          ...(website ? { website } : {}),
-        }),
+  const ask = () =>
+    apiFetch('/api/auth/register', {
+      method: 'POST',
+      body: JSON.stringify({
+        email: email.trim(),
+        username: username.trim(),
+        acceptTerms: accepted,
+        // The code e-mail and the starter quiz come in the language of this page.
+        lang: i18n.language,
+        ...(website ? { website } : {}),
       }),
+    })
+  const register = useMutation({ mutationFn: ask, onSuccess: () => setSentTo(email.trim()) })
+  const confirm = useMutation({
+    mutationFn: (code: string) =>
+      apiFetch<{ user: User }>('/api/auth/code/verify', { method: 'POST', body: JSON.stringify({ email: sentTo, code }) }),
+    onSuccess: ({ user }) => afterLogin(user),
   })
 
+  const emailValid = looksLikeEmail(email)
   const usernameValid = /^[a-zA-Z0-9._-]{3,40}$/.test(username.trim())
-  const passwordValid = password.length >= MIN_PASSWORD
-  const repeatValid = repeat === password
 
   function onSubmit(e: FormEvent) {
     e.preventDefault()
     setSubmitted(true)
-    if (!usernameValid || !passwordValid || !repeatValid || !accepted) return
+    if (!emailValid || !usernameValid || !accepted) return
     register.mutate()
   }
 
   let content
   if (!site.data) {
     content = site.isError ? <FormAlert>{t('errors.internal')}</FormAlert> : <Spinner />
-  } else if (register.isSuccess) {
+  } else if (sentTo) {
     content = (
-      <div className="flex flex-col items-center gap-4 text-center" role="status">
-        <CircleCheckIcon aria-hidden="true" className="size-12 text-success" />
-        <p className="text-xl font-extrabold">{t('auth.register.doneTitle')}</p>
-        <p className="text-muted-foreground">{t('auth.register.done', { name: username.trim() })}</p>
-        <Button asChild size="lg" className="w-full">
-          <Link to="/" search={{ side: 'host' }}>
-            {t('auth.register.toLogin')}
-          </Link>
-        </Button>
-      </div>
+      <CodeStep
+        email={sentTo}
+        confirmLabel={t('auth.register.confirm')}
+        onConfirm={(code) => confirm.mutate(code)}
+        confirming={confirm.isPending}
+        error={confirm.error}
+        onResend={ask}
+        onBack={() => {
+          setSentTo(null)
+          confirm.reset()
+        }}
+      />
     )
   } else if (!site.data.registrationOpen) {
     content = (
@@ -90,35 +99,29 @@ function RegisterPage() {
       <form className="flex flex-col gap-4" onSubmit={onSubmit} noValidate>
         <p className="text-sm text-muted-foreground">{t('auth.register.intro')}</p>
         <TextField
-          label={t('auth.username')}
-          name="username"
-          autoComplete="username"
+          label={t('auth.email')}
+          name="email"
+          type="email"
+          autoComplete="email"
           autoCapitalize="none"
           enterKeyHint="next"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          error={submitted && !usernameValid ? t('users.usernameRules') : undefined}
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          error={submitted && !emailValid ? t('auth.emailInvalid') : undefined}
         />
-        <TextField
-          label={t('auth.password')}
-          name="password"
-          type="password"
-          autoComplete="new-password"
-          enterKeyHint="next"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          error={submitted && !passwordValid ? t('auth.passwordChange.tooShort', { count: MIN_PASSWORD }) : undefined}
-        />
-        <TextField
-          label={t('auth.register.repeat')}
-          name="repeat"
-          type="password"
-          autoComplete="new-password"
-          enterKeyHint="go"
-          value={repeat}
-          onChange={(e) => setRepeat(e.target.value)}
-          error={submitted && passwordValid && !repeatValid ? t('auth.passwordChange.mismatch') : undefined}
-        />
+        <div className="flex flex-col gap-1.5">
+          <TextField
+            label={t('auth.username')}
+            name="username"
+            autoComplete="username"
+            autoCapitalize="none"
+            enterKeyHint="next"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            error={submitted && !usernameValid ? t('users.usernameRules') : undefined}
+          />
+          {!(submitted && !usernameValid) && <p className="text-sm text-muted-foreground">{t('auth.register.usernameHelp')}</p>}
+        </div>
         <TermsCheckbox checked={accepted} onChange={setAccepted} error={submitted && !accepted} />
         {/* Honeypot: off screen and out of the tab order, so only form-filling bots fill it in. */}
         <div aria-hidden="true" className="absolute left-[-9999px] size-px overflow-hidden">

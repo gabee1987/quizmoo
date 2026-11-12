@@ -4,14 +4,13 @@ import { useId, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { PlayerAvatar } from '@/components/player-avatar'
 import { lobbyGroups } from '@/features/host/lobby-groups'
-import { ReactionBar } from '@/features/reactions/reaction-bar'
 import { useReactions, useRowsShown } from '@/features/reactions/reaction-store'
 import { cn } from '@/lib/cn'
 
 /**
  * Who else is here: everyone who joined, grouped by team in team mode, folded away until the
  * player opens it so the waiting screen stays calm. While it is open, a reaction also pops beside
- * its sender's name, besides floating up. The reaction bar sits below.
+ * its sender's name, besides floating up. Reactions are sent from the round button in the corner.
  */
 export function LobbyPlayers({ snapshot, className }: { snapshot: PlayerSnapshot; className?: string }) {
   const { t } = useTranslation()
@@ -72,7 +71,6 @@ export function LobbyPlayers({ snapshot, className }: { snapshot: PlayerSnapshot
           ))}
         </div>
       )}
-      <ReactionBar snapshot={snapshot} />
     </section>
   )
 }

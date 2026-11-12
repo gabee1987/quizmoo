@@ -36,8 +36,14 @@ Error shape everywhere: `{ error: '<i18n key>' }`. Status codes: 400 invalid inp
 | `POST /api/auth/logout` | session | clears cookie |
 | `GET /api/auth/me` | session (also while locked) | `{ user }` with `screenLocked`, or 401 |
 | `GET /api/auth/session` | - | `{ loggedIn }`, always 200: the public pages' logo (`useHomePath`) asks this, since a 401 from `me` is a console error on every visit |
-| `POST /api/auth/register` | - | `{ username, password, website? }` (honeypot) -> 201 `{ pending: true }`, no session; 403 `errors.registrationClosed` unless `REGISTRATION_OPEN`, 503 `errors.registrationsFull` at 20 pending, 5 per hour per IP |
-| `POST /api/users/:id/approve` / `reject` | admin | pending sign-ups only (404 otherwise); reject deletes the account |
+| `POST /api/auth/register` | - | `{ email, username, acceptTerms, lang, website? }` (honeypot) -> 202 `{ sent: true }`, mails a sign-up code (or a login code to an address with an account); 403 `errors.registrationClosed` unless `REGISTRATION_OPEN` and e-mail, 409 `errors.usernameTaken`, 503 `errors.registrationsFull` at 30 new accounts a day, 5 per hour per IP |
+| `POST /api/auth/code` | - | `{ email, lang }` -> 202 always; mails a login code to an active account (see `host-accounts`); 403 `errors.codeLoginOff` without e-mail |
+| `POST /api/auth/code/verify` | - | `{ email, code }` -> `{ user }` + session (201 for a new sign-up); 400 `errors.invalidCode` |
+| `POST /api/me/email/code` / `verify` | session (also during the e-mail step) | add or change the own address with a `link` code; 409 `errors.emailTaken`; confirming ends an editor's password and other sessions |
+| `POST /api/me/account/code`, `POST /api/me/unlock/code` | session | mail a `confirm` (deleting) or `unlock` code to an account without a password |
+| `GET /api/me/usage` | session | `{ usage, budget }` |
+| `GET /api/budgets`, `PUT /api/budgets/defaults`, `PUT /api/budgets/database`, `PUT /api/users/:id/budget` | admin | budget defaults, the database limit and size, one editor's own values (see `host-accounts`) |
+| `POST /api/users/:id/approve` / `reject` | admin | waiting sign-ups from before e-mail login only (404 otherwise); reject deletes the account |
 | `POST /api/users/:id/password` | admin | `{ password }`: new password, `mustChangePassword` set, every session ended |
 | `POST /api/users/:id/role` | admin | `{ role }` |
 | `POST /api/users/:id/logout` | admin | ends every session of the account |
@@ -98,6 +104,12 @@ Error shape everywhere: `{ error: '<i18n key>' }`. Status codes: 400 invalid inp
 | `GET /api/games/:gameId/results` | owner | full results JSON |
 | `GET /api/games/:gameId/results.csv?lang=hu\|en` | owner | CSV export |
 | `DELETE /api/games/:gameId` | owner | delete a finished game and its results, or call off a scheduled game before joining opens |
+| `GET /api/users/:id` | admin | one account (as on the list) and its quizzes (title, questions, bytes, date) |
+| `PUT /api/users/:id/permissions` | admin | `{ permissions }`: features switched off (`errors.featureOff` on use) |
+| `POST /api/users/:id/suspend` / `reactivate` | admin | suspend (sessions and running games end) or allow again; never the admin's own |
+| `PUT /api/users/:id/avatar`, `PUT /api/me/avatar` | admin / session | `{ avatar }` from the players' set |
+| `PUT /api/budgets/signup` | admin | `{ signup: { open, perDay } }` (Limits page) |
+| `GET /api/me/home`, `POST /api/me/welcomed`, `PUT /api/me/checklist` | session | the home page's checklist, welcome and figures |
 
 The UI calls the bank the "Question library" / "Kérdéstár" (`/host/library`); routes, table and code keep `bank`.
 
@@ -120,4 +132,4 @@ Quiz question ids and option ids are generated server-side with `nanoid(8)` when
 
 ## E-mail
 
-One provider, Brevo's HTTPS API, in `src/mail.ts` (`createMailer`, plain `fetch`, 10 s timeout; a no-op without `BREVO_API_KEY` and `MAIL_FROM`). Railway's Hobby plan blocks outbound SMTP, so no SMTP. Errors name the status only, never the provider's answer (it can repeat the address); log lines never contain an address. Sign-up notices live in `src/signup-notify.ts`: one e-mail per admin (no shared `to`), the count and a link only, never a username (stranger-chosen text), throttled to one per 15 minutes with a trailing send. `buildApp` takes a `mailer` so tests pass a fake. Any further e-mail use is a third-party data flow: note the compliance review.
+One provider, Brevo's HTTPS API, in `src/mail.ts` (`createMailer`, plain `fetch`, 10 s timeout; a no-op without `BREVO_API_KEY` and `MAIL_FROM`). For local testing `MAILPIT_URL` (localhost only) sends to Mailpit's API instead. Railway's Hobby plan blocks outbound SMTP, so no SMTP. Errors name the status only, never the provider's answer (it can repeat the address); log lines never contain an address. Sign-up notices live in `src/signup-notify.ts`: one e-mail per admin (no shared `to`), the count and a link only, never a username (stranger-chosen text), throttled to one per 15 minutes with a trailing send. `buildApp` takes a `mailer` so tests pass a fake. Any further e-mail use is a third-party data flow: note the compliance review.

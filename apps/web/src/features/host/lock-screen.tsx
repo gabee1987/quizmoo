@@ -1,24 +1,36 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
-import { KeyRoundIcon, LockIcon, LogOutIcon, LockOpenIcon } from 'lucide-react'
+import { KeyRoundIcon, LockIcon, LogOutIcon, LockOpenIcon, MailIcon } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
+import { toast } from 'sonner'
 import { FormAlert } from '@/components/form-alert'
 import { TextField } from '@/components/text-field'
 import { Button } from '@/components/ui/button'
 import { apiFetch, errorCode } from '@/lib/api'
+import { meQueryOptions } from '@/lib/auth'
 import { screenLockChanged, unlockScreens } from '@/lib/screen-lock'
+import { toastError } from '@/lib/toast'
 
 /**
  * Stands in for every host page while the host's screens are locked. The server sends nothing of
- * the account until the lock code or the password is typed here; logging out stays possible.
+ * the account until the lock code, the password or (an account without one) a code mailed to its
+ * address is typed here; logging out stays possible.
  */
 export function LockScreen() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const queryClient = useQueryClient()
   const navigate = useNavigate()
+  const me = useQuery(meQueryOptions).data
+  // The other way in: the password, or for an account without one a code mailed to its address.
+  const byEmail = me ? !me.hasPassword && !!me.email : false
   const [usePassword, setUsePassword] = useState(false)
   const [secret, setSecret] = useState('')
+  const sendCode = useMutation({
+    mutationFn: () => apiFetch('/api/me/unlock/code', { method: 'POST', body: JSON.stringify({ lang: i18n.language }) }),
+    onSuccess: () => toast.success(t('host.lock.emailSent', { email: me?.email })),
+    onError: toastError,
+  })
 
   const unlock = useMutation({
     mutationFn: () => unlockScreens(secret),
@@ -58,7 +70,24 @@ export function LockScreen() {
           </h1>
           <p className="text-muted-foreground">{t('host.lock.body')}</p>
         </div>
-        {usePassword ? (
+        {usePassword && byEmail ? (
+          <div className="flex flex-col gap-3">
+            <Button type="button" variant="outline" className="self-start" disabled={sendCode.isPending} onClick={() => sendCode.mutate()}>
+              <MailIcon aria-hidden="true" />
+              {sendCode.isSuccess ? t('auth.code.resend') : t('host.lock.useEmail')}
+            </Button>
+            <TextField
+              key="email-code"
+              label={t('host.lock.emailCode')}
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              enterKeyHint="done"
+              maxLength={6}
+              value={secret}
+              onChange={(e) => setSecret(e.target.value.replace(/\D/g, ''))}
+            />
+          </div>
+        ) : usePassword ? (
           <TextField
             key="password"
             label={t('host.lock.password')}
@@ -99,8 +128,8 @@ export function LockScreen() {
               unlock.reset()
             }}
           >
-            <KeyRoundIcon aria-hidden="true" />
-            {usePassword ? t('host.lock.useCode') : t('host.lock.usePassword')}
+            {byEmail && !usePassword ? <MailIcon aria-hidden="true" /> : <KeyRoundIcon aria-hidden="true" />}
+            {usePassword ? t('host.lock.useCode') : byEmail ? t('host.lock.useEmail') : t('host.lock.usePassword')}
           </Button>
           <Button type="button" variant="ghost" size="sm" disabled={logout.isPending} onClick={() => logout.mutate()}>
             <LogOutIcon aria-hidden="true" />

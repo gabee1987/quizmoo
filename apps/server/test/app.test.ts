@@ -132,6 +132,7 @@ describe('app', () => {
       feedbackUrl: null,
       retentionDays: 90,
       registrationOpen: false,
+      emailLogin: false,
       mailProvider: null,
     })
     const site = await buildApp(
@@ -154,6 +155,7 @@ describe('app', () => {
       feedbackUrl: 'https://example.test/feedback',
       retentionDays: 90,
       registrationOpen: false,
+      emailLogin: false,
       mailProvider: 'Example Mail, EU',
     })
     await site.app.close()
@@ -190,6 +192,14 @@ describe('app', () => {
     expect(loadConfig({ ...env, REGISTRATION_OPEN: 'false' }).REGISTRATION_OPEN).toBe(false)
     expect(loadConfig({ ...env, REGISTRATION_OPEN: '' }).REGISTRATION_OPEN).toBe(false)
     expect(() => loadConfig({ ...env, REGISTRATION_OPEN: 'yes' })).toThrow(/REGISTRATION_OPEN/)
+  })
+
+  it('takes a Mailpit only on this computer, and never next to Brevo in production', () => {
+    const env = { DATABASE_URL: 'postgres://test:test@localhost:5432/test', SESSION_SECRET: 'x'.repeat(32) }
+    expect(loadConfig({ ...env, MAILPIT_URL: 'http://localhost:8025' }).MAILPIT_URL).toBe('http://localhost:8025')
+    expect(loadConfig({ ...env, MAILPIT_URL: 'http://127.0.0.1:8025', BREVO_API_KEY: 'key' }).MAILPIT_URL).toBe('http://127.0.0.1:8025')
+    expect(() => loadConfig({ ...env, MAILPIT_URL: 'http://mail.example.test:8025' })).toThrow(/MAILPIT_URL/)
+    expect(() => loadConfig({ ...env, NODE_ENV: 'production', MAILPIT_URL: 'http://localhost:8025', BREVO_API_KEY: 'key' })).toThrow(/MAILPIT_URL/)
   })
 
   it('accepts only an https feedback link and a valid operator e-mail', () => {

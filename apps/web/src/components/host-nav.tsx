@@ -2,6 +2,7 @@ import { Link, useRouterState } from '@tanstack/react-router'
 import {
   DicesIcon,
   ExternalLinkIcon,
+  GaugeIcon,
   HistoryIcon,
   HouseIcon,
   LayoutGridIcon,
@@ -18,7 +19,9 @@ import {
 } from 'lucide-react'
 import { useEffect, useLayoutEffect, useRef, useState, type ComponentType, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import { allowed } from '@quizmoo/shared'
 import { Hint } from '@/components/hint'
+import { PlayerAvatar } from '@/components/player-avatar'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -34,7 +37,7 @@ import { useSiteInfo } from '@/lib/site'
 import { useLogout } from '@/lib/use-logout'
 import { useUnseenRelease } from '../features/whats-new/use-release-seen'
 
-type To = '/host' | '/host/quizzes' | '/host/library' | '/host/games' | '/host/users' | '/host/nicknames'
+type To = '/host' | '/host/quizzes' | '/host/library' | '/host/games' | '/host/users' | '/host/limits' | '/host/nicknames'
 
 interface Item {
   to: To
@@ -55,13 +58,15 @@ export function HostNav({ user }: { user: User }) {
   const main: Item[] = [
     { to: '/host', label: t('nav.home'), icon: HouseIcon, exact: true },
     { to: '/host/quizzes', label: t('nav.quizzes'), icon: LayoutGridIcon, exact: false },
-    { to: '/host/library', label: t('bank.title'), icon: LibraryIcon, exact: false, sidebarOnly: true },
+    // Hidden when the admin switched the library off for this account.
+    ...(allowed(user, 'library') ? [{ to: '/host/library' as const, label: t('bank.title'), icon: LibraryIcon, exact: false, sidebarOnly: true }] : []),
     { to: '/host/games', label: t('nav.games'), icon: HistoryIcon, exact: true },
   ]
   const admin: Item[] =
     user.role === 'admin'
       ? [
           { to: '/host/users', label: t('users.title'), icon: UsersIcon, exact: false },
+          { to: '/host/limits', label: t('limits.nav'), icon: GaugeIcon, exact: false },
           { to: '/host/nicknames', label: t('nicknames.nav'), icon: DicesIcon, exact: false },
         ]
       : []
@@ -100,8 +105,8 @@ export function HostNav({ user }: { user: User }) {
         </SlidingItems>
         <div data-tour="host-account" className="mt-4 flex flex-col gap-1 border-t pt-4">
           <Hint label={t('nav.signedInAs')} side="right">
-            <p className="flex items-center gap-2 px-3 pb-1 text-sm text-muted-foreground">
-              <UserRoundIcon className="size-4" aria-hidden="true" />
+            <p className="flex items-center gap-2 px-3 pb-1 text-sm font-semibold text-muted-foreground">
+              <PlayerAvatar avatar={user.avatar} size="sm" />
               <span className="truncate">{user.username}</span>
             </p>
           </Hint>
@@ -172,8 +177,11 @@ export function HostNav({ user }: { user: User }) {
                 {t('nav.account')}
               </DropdownMenuTrigger>
               <DropdownMenuContent side="top" align="end" className="min-w-52">
-                <DropdownMenuLabel className="truncate">
-                  {t('nav.signedInAs')}: {user.username}
+                <DropdownMenuLabel className="flex items-center gap-2">
+                  <PlayerAvatar avatar={user.avatar} size="sm" />
+                  <span className="truncate">
+                    {t('nav.signedInAs')}: {user.username}
+                  </span>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 {admin.length > 0 && (

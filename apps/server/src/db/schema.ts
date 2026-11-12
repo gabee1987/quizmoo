@@ -1,21 +1,38 @@
 import { pgTable, text, timestamp, jsonb, integer, boolean, customType, index } from 'drizzle-orm/pg-core'
 import { sql } from 'drizzle-orm'
-import type { GameSettings, HostSettings, Question, QuestionDefaults, QuestionGroup, QuizBranding } from '@quizmoo/shared'
+import { userStatuses, type BudgetOverride, type GameSettings, type HostSettings, type Permissions, type Question, type QuestionDefaults, type QuestionGroup, type QuizBranding } from '@quizmoo/shared'
 import type { GameState } from '../game/types.js'
 import { foldSql } from './search.js'
 
 const bytea = customType<{ data: Buffer }>({ dataType: () => 'bytea' })
 
-// Users hold no personal data beyond a login name. Credentials live in a
-// separate table so an SSO identity table can be added later without touching users.
+// Users hold a login name and, since phase 71, a verified e-mail address (the login, and who the
+// account belongs to). Passwords live in a separate table: only admins and installs without e-mail keep one.
 export const users = pgTable('users', {
   id: text('id').primaryKey(),
   username: text('username').notNull().unique(),
+  /** Lower-cased; set only once confirmed with a code. Visible to the account itself and to admins. */
+  email: text('email').unique(),
+  emailVerifiedAt: timestamp('email_verified_at', { withTimezone: true }),
+  /** Accounts from before e-mail login: must add and confirm an address at the next login (while e-mail is configured). */
+  mustAddEmail: boolean('must_add_email').notNull().default(false),
   role: text('role', { enum: ['admin', 'editor'] }).notNull().default('editor'),
   /** Set for users created by an admin with an initial password; cleared on first password change. */
   mustChangePassword: boolean('must_change_password').notNull().default(false),
-  /** `pending` after self sign-up: cannot log in until an admin approves the account. */
-  status: text('status', { enum: ['active', 'pending'] }).notNull().default('active'),
+  /**
+   * `pending`: a self sign-up from before phase 71, waiting for approval or for its e-mail address.
+   * `suspended`: blocked by an admin (no login, no sessions); its content stays.
+   */
+  status: text('status', { enum: userStatuses }).notNull().default('active'),
+  /** The host's avatar (one of the players' `avatars`); null: `fallbackAvatar(id)`. */
+  avatar: text('avatar'),
+  /** Features the admin switched off for this account; a missing key means allowed. */
+  permissions: jsonb('permissions').$type<Permissions>().notNull().default({}),
+  /** The admin's limits for this account; a missing key follows the defaults (`app_settings`), null is no limit. */
+  budget: jsonb('budget').$type<BudgetOverride>().notNull().default({}),
+  /** Games created in `gamesMonth` (`YYYY-MM`, UTC), for the monthly budget; deleting games gives nothing back. */
+  gamesMonth: text('games_month'),
+  gamesMonthCount: integer('games_month_count').notNull().default(0),
   /** Set on each successful login; shown to admins only, deleted with the account. */
   lastLoginAt: timestamp('last_login_at', { withTimezone: true }),
   /** The terms of use version the host accepted (`TERMS_VERSION`), and when: proof of acceptance. Null: never accepted. */
@@ -40,6 +57,37 @@ export const sessions = pgTable('sessions', {
     .references(() => users.id, { onDelete: 'cascade' }),
   expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
+/** What a sign-up code creates once confirmed. */
+export interface SignupDraft {
+  username: string
+  lang: 'hu' | 'en'
+  termsVersion: string
+}
+
+// One-time e-mail codes, one live code per address. Only an HMAC of the code is stored; rows go
+// when used, after too many wrong tries, and (expired) in the daily job.
+export const emailCodes = pgTable('email_codes', {
+  email: text('email').primaryKey(),
+  /**
+   * `login`: an existing account; `signup`: creates `signup`'s account; `link`: sets `user_id`'s address;
+   * `confirm`: deleting `user_id`; `unlock`: unlocking `user_id`'s screens.
+   */
+  purpose: text('purpose', { enum: ['login', 'signup', 'link', 'confirm', 'unlock'] }).notNull(),
+  codeHash: text('code_hash').notNull(),
+  userId: text('user_id').references(() => users.id, { onDelete: 'cascade' }),
+  signup: jsonb('signup').$type<SignupDraft>(),
+  tries: integer('tries').notNull().default(0),
+  sentAt: timestamp('sent_at', { withTimezone: true }).notNull(),
+  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+})
+
+// Install-wide settings the admin edits in the app: `budgetDefaults` (Budget), `databaseBudgetMb` (number or null).
+export const appSettings = pgTable('app_settings', {
+  key: text('key').primaryKey(),
+  value: jsonb('value').notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 })
 
 export const quizzes = pgTable('quizzes', {
@@ -210,5 +258,9 @@ export const hostSettings = pgTable('host_settings', {
   seenRelease: text('seen_release'),
   /** The tutorial tours the host has seen or closed. Outside `settings`, so saving My settings never brings them back. */
   toursSeen: jsonb('tours_seen').$type<string[]>().notNull().default([]),
+  /** When the home page first welcomed the host (confetti once); null: not yet. */
+  welcomedAt: timestamp('welcomed_at', { withTimezone: true }),
+  /** The host closed the home page's getting-started checklist. */
+  checklistDismissed: boolean('checklist_dismissed').notNull().default(false),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 })

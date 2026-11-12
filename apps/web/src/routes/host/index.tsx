@@ -1,3 +1,4 @@
+import type { Budget, Usage } from '@quizmoo/shared'
 import { useQuery } from '@tanstack/react-query'
 import { Link, createFileRoute } from '@tanstack/react-router'
 import {
@@ -22,11 +23,17 @@ import { FormAlert } from '@/components/form-alert'
 import { Hint } from '@/components/hint'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
+import { GettingStarted, QuickActions, WelcomeHero, useHome } from '@/features/home/home-parts'
 import { CreateGameDialog } from '@/features/host/create-game-dialog'
+import { ImportQuizDialog } from '@/features/host/import-quiz-dialog'
+import { EnterCodeDialog } from '@/features/share/enter-code-dialog'
 import { dashboardGames } from '@/features/host/dashboard'
 import { gameSummaryQueryOptions, quizzesQueryOptions, type QuizSummary } from '@/features/host/queries'
 import { useNewQuiz, useStartGame } from '@/features/host/quiz-actions'
 import { usePageTour } from '@/features/tour/use-tour'
+import { NEAR_FULL, fullestOf } from '@/features/budgets/usage-bars'
+import { apiFetch } from '@/lib/api'
+import type { User } from '@/lib/auth'
 import { cn } from '@/lib/cn'
 import { quizMinutes } from '@/lib/game-length'
 import { stagger } from '@/lib/motion'
@@ -47,26 +54,40 @@ function HostHome() {
   const create = useNewQuiz()
   const play = useStartGame()
   const [creating, setCreating] = useState<QuizSummary | null>(null)
+  const [importing, setImporting] = useState(false)
+  const [entering, setEntering] = useState(false)
+  const home = useHome()
 
   const dateFormat = new Intl.DateTimeFormat(i18n.language, { dateStyle: 'medium', timeStyle: 'short' })
   const date = (iso: string) => dateFormat.format(new Date(iso))
   const sorted = games.data ? dashboardGames(games.data, Date.now()) : null
   const recentQuizzes = (quizzes.data ?? []).slice(0, 4)
+  // "Play again": the latest edited quiz that has questions to play.
+  const lastQuiz = (quizzes.data ?? []).find((quiz) => quiz.questionCount - quiz.offCount > 0) ?? null
   const loading = quizzes.isPending || games.isPending
   usePageTour('home', !loading)
 
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-5">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div className="flex min-w-0 flex-col gap-1">
-          <h1 className="text-3xl font-black tracking-tight wrap-break-word">{t('dashboard.greeting', { name: user.username })}</h1>
-          <p className="text-muted-foreground">{t('dashboard.subtitle')}</p>
-        </div>
-        <Button data-tour="new-quiz" onClick={() => create.mutate()} disabled={create.isPending}>
-          <PlusIcon aria-hidden="true" />
-          {t('host.newQuiz')}
-        </Button>
-      </div>
+      <WelcomeHero
+        user={user}
+        home={home.data}
+        action={
+          <Button data-tour="new-quiz" className="w-full sm:w-auto" onClick={() => create.mutate()} disabled={create.isPending}>
+            <PlusIcon aria-hidden="true" />
+            {t('host.newQuiz')}
+          </Button>
+        }
+      />
+      {home.data && <GettingStarted user={user} home={home.data} onNewQuiz={() => create.mutate()} />}
+      <QuickActions
+        lastQuiz={lastQuiz}
+        busy={create.isPending}
+        onNewQuiz={() => create.mutate()}
+        onPlay={() => lastQuiz && setCreating(lastQuiz)}
+        onImport={() => setImporting(true)}
+        onEnterCode={() => setEntering(true)}
+      />
 
       {(quizzes.isError || games.isError) && <FormAlert>{t('errors.internal')}</FormAlert>}
       {loading && (
@@ -87,6 +108,7 @@ function HostHome() {
             <Figure index={1} icon={HistoryIcon} tone="accent" value={sorted.played} label={t('dashboard.played', { count: sorted.played })} />
             <Figure index={2} icon={UsersIcon} tone="success" value={sorted.players} label={t('dashboard.players', { count: sorted.players })} />
           </ul>
+          <HomeExtras user={user} best={home.data?.figures.bestGame ?? null} />
 
           {sorted.live.length > 0 && (
             <Section icon={RadioIcon} title={t('dashboard.live')} highlight>
@@ -190,6 +212,8 @@ function HostHome() {
         </>
       )}
 
+      {importing && <ImportQuizDialog onClose={() => setImporting(false)} />}
+      {entering && <EnterCodeDialog onClose={() => setEntering(false)} />}
       {creating && (
         <CreateGameDialog
           quizTitle={creating.title}
@@ -207,6 +231,63 @@ function HostHome() {
             play.reset()
           }}
         />
+      )}
+    </div>
+  )
+}
+
+/**
+ * The best-attended game (a link to its results) and, for hosts, the fullest of their limits with
+ * a link to the full usage in My settings.
+ */
+function HomeExtras({ user, best }: { user: User; best: { gameId: string; title: string | null; players: number } | null }) {
+  const { t } = useTranslation()
+  const usage = useQuery({
+    queryKey: ['usage'],
+    queryFn: () => apiFetch<{ usage: Usage; budget: Budget }>('/api/me/usage'),
+    enabled: user.role === 'editor',
+  })
+  const fill = usage.data ? fullestOf(usage.data.usage, usage.data.budget) : null
+  if (!best && !fill) return null
+  const percent = fill ? Math.min(100, Math.round(fill.share * 100)) : 0
+  return (
+    <div className="grid gap-3 sm:grid-cols-2">
+      {best && (
+        <Link
+          to="/host/results/$gameId"
+          params={{ gameId: best.gameId }}
+          className="group flex animate-fade-up items-center gap-3 rounded-2xl border bg-card p-4 shadow-soft outline-none hover:bg-muted focus-visible:ring-[3px] focus-visible:ring-ring"
+        >
+          <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-warning text-warning-foreground">
+            <TrophyIcon className="size-5 transition-transform duration-500 ease-spring group-hover:scale-115 group-hover:-rotate-8" aria-hidden="true" />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-sm font-bold text-muted-foreground">{t('hostHome.best.label')}</span>
+            <span className="block font-extrabold wrap-break-word">
+              {t('hostHome.best.value', { title: best.title ?? t('hostHome.best.untitled'), count: best.players })}
+            </span>
+          </span>
+          <ArrowRightIcon className="size-5 text-muted-foreground transition-transform group-hover:translate-x-1" aria-hidden="true" />
+        </Link>
+      )}
+      {fill && (
+        <Link
+          to="/host/settings"
+          search={{ tab: 'account' }}
+          className="group flex animate-fade-up flex-col justify-center gap-2 rounded-2xl border bg-card p-4 shadow-soft outline-none hover:bg-muted focus-visible:ring-[3px] focus-visible:ring-ring"
+        >
+          <span className="flex items-baseline justify-between gap-2">
+            <span className="text-sm font-bold text-muted-foreground">{t('hostHome.usage.label', { name: t(`budgets.keys.${fill.key}`) })}</span>
+            <span className="font-black tabular-nums">{percent}%</span>
+          </span>
+          <span className="h-2.5 overflow-hidden rounded-full bg-muted group-hover:bg-background">
+            <span
+              className={cn('block h-full rounded-full', fill.share >= 1 ? 'bg-destructive' : fill.share >= NEAR_FULL ? 'bg-warning' : 'bg-primary')}
+              style={{ width: `${Math.max(percent, 3)}%` }}
+            />
+          </span>
+          <span className="text-sm text-muted-foreground">{t('hostHome.usage.more')}</span>
+        </Link>
       )}
     </div>
   )

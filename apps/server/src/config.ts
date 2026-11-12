@@ -41,6 +41,19 @@ const envSchema = z.object({
   MAIL_FROM: emptyAsUnset(z.string().trim().email().max(200).optional()),
   /** The e-mail provider and where it keeps data, named on the privacy page as a processor. */
   MAIL_PROVIDER: emptyAsUnset(z.string().trim().min(1).max(200).optional()),
+  /**
+   * Testing only: hand every e-mail to a Mailpit on this computer (`docker compose up -d mailpit`,
+   * inbox on http://localhost:8025) instead of sending it. Wins over Brevo in development; refused
+   * together with `BREVO_API_KEY` in production. Only a local address, so codes never leave the machine.
+   */
+  MAILPIT_URL: emptyAsUnset(
+    z
+      .string()
+      .trim()
+      .url()
+      .refine((v) => ['localhost', '127.0.0.1', '[::1]'].includes(new URL(v).hostname), 'must be a local address (localhost)')
+      .optional(),
+  ),
 })
 
 export type Config = z.infer<typeof envSchema>
@@ -56,6 +69,9 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
   // would quietly drop the Secure cookie flag and HSTS. Only a venue laptop (no proxy) runs on http.
   if (config.NODE_ENV === 'production' && config.TRUST_PROXY > 0 && !config.APP_ORIGIN.startsWith('https://')) {
     throw new Error('Invalid environment:\nAPP_ORIGIN: must start with https:// in production behind a proxy (TRUST_PROXY > 0)')
+  }
+  if (config.MAILPIT_URL && config.BREVO_API_KEY && config.NODE_ENV === 'production') {
+    throw new Error('Invalid environment:\nMAILPIT_URL: only for testing, never together with BREVO_API_KEY in production')
   }
   return config
 }

@@ -99,7 +99,8 @@ for (const mode of modes) {
     let pin: string | null = null
     try {
       await host.reload()
-      await expect(host.getByText(title)).toBeVisible()
+      // On the home page twice: in "Play again" and in the recently edited list.
+      await expect(host.getByText(title).first()).toBeVisible()
       await expectAccessible(host, 'host home')
       await host.goto('/host/quizzes')
       await expect(host.getByText(title)).toBeVisible()

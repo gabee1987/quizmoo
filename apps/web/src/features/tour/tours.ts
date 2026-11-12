@@ -27,6 +27,8 @@ export const tours: Record<TourId, Tour> = {
     steps: [
       { id: 'welcome' },
       { id: 'newQuiz', anchor: 'new-quiz' },
+      { id: 'steps', anchor: 'getting-started' },
+      { id: 'quick', anchor: 'quick-actions' },
       { id: 'recent', anchor: 'recent-quizzes' },
       { id: 'nav', anchor: 'host-nav' },
       { id: 'account', anchor: 'host-account' },
@@ -115,11 +117,31 @@ export const tours: Record<TourId, Tour> = {
       { id: 'questions', anchor: 'question-defaults' },
     ],
   },
+  users: {
+    help: 'admin',
+    steps: [
+      { id: 'list', anchor: 'user-list' },
+      { id: 'add', anchor: 'add-user' },
+    ],
+  },
+  account: {
+    help: 'admin',
+    steps: [{ id: 'tabs', anchor: 'account-tabs' }],
+  },
+  limits: {
+    help: 'admin',
+    steps: [
+      { id: 'database', anchor: 'database' },
+      { id: 'defaults', anchor: 'default-budget' },
+      { id: 'signup', anchor: 'signup-settings' },
+    ],
+  },
   playerLobby: {
     help: 'players',
     steps: [
       { id: 'card', anchor: 'player-card' },
       { id: 'who', anchor: 'player-list' },
+      { id: 'react', anchor: 'reaction-button' },
       { id: 'team', anchor: 'player-team' },
       { id: 'about', anchor: 'game-info' },
       { id: 'answering' },
