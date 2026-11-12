@@ -1717,9 +1717,77 @@
       "empty": "Egyik lista sem lehet üres."
     }
   },
+  "limits": {
+    "nav": "Keretek",
+    "title": "Keretek",
+    "intro": "Az egész oldal keretei: az adatbázis a tárhelycsomagodhoz képest, a keret, amivel minden játékvezető indul, és a regisztráció.",
+    "signup": {
+      "title": "Regisztráció",
+      "help": "Regisztrálhatnak-e maguktól játékvezetői fiókot az emberek, és naponta legfeljebb hányan.",
+      "unavailable": "Ezen a szerveren ki van kapcsolva a regisztráció (REGISTRATION_OPEN, vagy nincs beállítva e-mail), ezért ezek a beállítások most nem hatnak.",
+      "open": "Lehet regisztrálni",
+      "openOn": "A regisztrációs oldal nyitva van.",
+      "openOff": "Zárva: fiókot csak te adhatsz hozzá, a Felhasználók oldalon.",
+      "perDay": "Legfeljebb ennyi új fiók naponta",
+      "saved": "A regisztráció beállításai elmentve"
+    }
+  },
   "users": {
     "title": "Felhasználók",
-    "intro": "Itt látod a játékvezetői fiókokat: mit csinál mindegyik, és mit állíthatsz rajtuk.",
+    "intro": "Az oldal összes játékvezetői fiókja. Nyiss meg egyet, és látod, mennyit használ, és állíthatod a keretét, a funkcióit és a hozzáférését.",
+    "status": { "suspended": "Felfüggesztve" },
+    "list": {
+      "filter": "Mutasd",
+      "filters": { "all": "Mind", "hosts": "Játékvezetők", "admins": "Adminok", "near": "Kerethez közel", "suspended": "Felfüggesztve" },
+      "newest": "A legújabbak elöl",
+      "columns": { "account": "Fiók", "role": "Szerep", "usage": "A legtelibb keret", "lastLogin": "Utolsó belépés" },
+      "noLimits": "Nincs keret",
+      "empty": "Itt nincs fiók."
+    },
+    "page": {
+      "back": "Az összes felhasználó",
+      "tabsLabel": "A fiókról",
+      "tabs": { "overview": "Áttekintés", "budget": "Keret", "permissions": "Jogok", "content": "Tartalom" },
+      "adminNoLimits": "Az adminoknak nincs kerete.",
+      "avatar": "Avatár",
+      "avatarOf": "{{name}} avatárja",
+      "avatarHelp": "A játékvezető a Beállításaimban választja ki a sajátját; itt átállíthatod, hogy könnyebben megkülönböztesd a fiókokat.",
+      "selfNote": "Ez a saját fiókod: a Beállításaimban módosíthatod. Itt senki sem függesztheti fel, fokozhatja le vagy törölheti.",
+      "role": "Szerep",
+      "access": "Hozzáférés"
+    },
+    "features": {
+      "title": "Funkciók",
+      "help": "Csak ennek a fióknak kapcsolhatsz ki egy funkciót. Ami már elkészült, megmarad.",
+      "adminHelp": "Az adminok minden funkciót használhatnak.",
+      "saved": "A funkciók elmentve",
+      "keys": { "images": "Képek", "shareCodes": "Megosztási kódok", "library": "Kérdéstár", "scheduling": "Ütemezett játékok" },
+      "hints": {
+        "images": "Képek feltöltése a kérdésekhez és logóként.",
+        "shareCodes": "Kérdések és kvízek megosztása kóddal.",
+        "library": "Kérdések mentése és szerkesztése a kérdéstárban.",
+        "scheduling": "Játékok létrehozása későbbi időpontra."
+      }
+    },
+    "suspend": {
+      "title": "Felfüggesztés vagy törlés",
+      "help": "A felfüggesztett fiók nem tud belépni, és minden eszközön kijelentkezik; a kvízei és az eredményei megmaradnak. A törlés mindent eltávolít.",
+      "action": "Felfüggesztés",
+      "confirmTitle": "Felfüggeszted {{name}} fiókját?",
+      "confirmBody": "Minden eszközén kijelentkezik, és addig nem tud belépni, amíg újra nem engedélyezed a fiókot. Semmi sem törlődik.",
+      "done": "{{name}} fiókja felfüggesztve.",
+      "banner": "Ez a fiók fel van függesztve: nem tud belépni.",
+      "reactivate": "Újraengedélyezés",
+      "reactivated": "{{name}} újra be tud lépni."
+    },
+    "content": {
+      "title_one": "{{count}} kvíz",
+      "title_other": "{{count}} kvíz",
+      "help": "Amit ez a játékvezető készített, csak megtekintésre. A Quizmoo sosem nyitja meg neked más kvízeit.",
+      "none": "Még nincs kvíze.",
+      "line_one": "{{count}} kérdés · {{size}} · {{date}}",
+      "line_other": "{{count}} kérdés · {{size}} · {{date}}"
+    },
     "add": "Új felhasználó",
     "addSubmit": "Létrehozás",
     "roleLabel": "Szerepkör",
@@ -1803,6 +1871,8 @@
     }
   },
   "errors": {
+    "featureOff": "Ezt az admin kikapcsolta a fiókodban.",
+    "accountSuspended": "Ez a fiók fel van függesztve. Kérdezd az admint.",
     "gameNotFound": "Nincs ilyen játék. Ellenőrizd a PIN-t.",
     "gameFull": "A játék megtelt.",
     "gameAlreadyStarted": "A játék már elindult.",
@@ -1900,7 +1970,7 @@
     "releases": {
       "1_14_0": {
         "title": "Belépés e-mail-kóddal és fiókkeretek",
-        "intro": "Jelszó helyett az e-mail-címedre küldött kóddal lépsz be, látod, mennyit használ a fiókod, a telefonon pedig egyetlen gombbal reagálhatsz.",
+        "intro": "Jelszó helyett az e-mail-címedre küldött kóddal lépsz be, új kezdőoldalról indulsz, látod, mennyit használ a fiókod, a telefonon pedig egyetlen gombbal reagálhatsz.",
         "sections": [
           {
             "title": "Belépés e-mail-kóddal",
@@ -1920,11 +1990,23 @@
             ]
           },
           {
+            "title": "Kezdőoldal, ahonnan indulhatsz",
+            "items": [
+              "A kezdőoldal az avatároddal és a tehénnel köszönt, az új játékvezetőket pedig konfettivel fogadja.",
+              "Az „Az első lépéseid” öt dolgot sorol fel, amit érdemes kipróbálni; mindegyik magától kipipálódik, ha megcsináltad. Bármikor bezárhatod.",
+              "Gyors indítás: új kvíz, a legutóbbi kvízed újrajátszása, fájl importálása vagy megosztási kód beírása, mind egy koppintással. Ott látod a legnépesebb játékodat és a legtelibb keretedet is.",
+              "Az avatárodat a Beállításaim, Fiók fülön választod ki."
+            ]
+          },
+          {
             "title": "Adminoknak",
             "items": [
-              "A Felhasználók oldalon látod minden fiók e-mail-címét és hogy mennyit használ, és tárhely szerint is rendezheted. Egy fiók kereteit a „Keret szerkesztése” gombbal állítod, mindenkiét az alapértékekkel.",
-              "Add meg ott a tárhelycsomagod adatbázis-méretét, és látod, mennyire telt meg az adatbázis.",
-              "Az új regisztrációról szóló e-mail már megnevezi a játékvezetőt és a címét. Az adminok megtartják a jelszavukat, és mindkét módon beléphetnek."
+              "Az Admin résznek most három oldala van: Felhasználók, Keretek és Nevek.",
+              "A Felhasználók egy tömör lista minden fiókról az avatárjával, címével, szerepével, a legtelibb keretével és az utolsó belépéssel. Szűrd, rendezd és keress, majd nyiss meg egy fiókot a saját oldalán.",
+              "Egy fiók oldala: mennyit használ, a saját kerete, a szerepe, a neki kikapcsolható funkciók (képek, megosztási kódok, kérdéstár, ütemezett játékok), kijelentkeztetés mindenhonnan, új jelszó, felfüggesztés vagy újraengedélyezés, törlés, és a kvízei.",
+              "A felfüggesztett fiók nem tud belépni, és a futó játékai véget érnek; semmi sem törlődik, amit készített.",
+              "Keretek: az adatbázis a tárhelycsomagodhoz képest, az alap keret, és a regisztráció ki-be kapcsolása napi maximummal.",
+              "Az Új felhasználó az e-mail-címet kéri; a gazdája kóddal lép be. Az új regisztrációról szóló e-mail megnevezi a játékvezetőt és a címét. Az adminok megtartják a jelszavukat, és mindkét módon beléphetnek."
             ]
           },
           {
@@ -1933,6 +2015,10 @@
               "A játékosok a telefonjuk bal alsó sarkában lévő kerek gombbal reagálnak: koppintásra kinyílnak az emojik. Egy reakció után a gomb 5 másodpercig pihen."
             ]
           }
+        ],
+        "fixed": [
+          "A gomb mellé nyíló súgóbuborékok (például a „Belépve mint”) újra pontosan a gombra mutatnak.",
+          "A sok mezős ablakok kihasználják a képernyő szélességét, ahelyett hogy belül görgetnének."
         ]
       },
       "1_13_0": {
@@ -2630,6 +2716,59 @@
   "branding": {
     "logo": "A szervező logója"
   },
+  "hostHome": {
+    "welcome": "Üdv a Quizmoo-ban, {{name}}!",
+    "firstLine": "Múú! Kész a kezdő kvízed. Játszd le egy baráttal, és máris látod, hogy megy.",
+    "greeting": {
+      "morning": "Jó reggelt, {{name}}!",
+      "afternoon": "Szia, {{name}}!",
+      "evening": "Jó estét, {{name}}!",
+      "night": "Még fent vagy, {{name}}?"
+    },
+    "lines": [
+      "Múú! Mit játszunk ma?",
+      "Friss kérdés, boldog játékos.",
+      "Egy kép többet mond négy válasznál.",
+      "Csapatokban minden kvíz hangosabb. Próbáld ki!",
+      "A játékosaid már bemelegítenek. És te?",
+      "Rövid körök, nagy ováció."
+    ],
+    "steps": {
+      "title": "Az első lépéseid",
+      "allDone": "Mind kész. Igazi Quizmoo-profi vagy!",
+      "progress_one": "{{done}}/{{count}} kész",
+      "progress_other": "{{done}}/{{count}} kész",
+      "dismiss": "Az első lépések elrejtése",
+      "doneLabel": "Kész",
+      "todoLabel": "Még nincs kész",
+      "starterPlayed": { "title": "Játszd le a kezdő kvízt", "hint": "Indíts vele egy játékot, és csatlakozz a telefonodról.", "action": "Kvízek" },
+      "ownQuiz": { "title": "Készíts egy saját kvízt", "hint": "Egy cím és pár kérdés elég.", "action": "Új kvíz" },
+      "picture": { "title": "Tegyél képet egy kérdéshez", "hint": "Húzd be, illeszd be vagy válaszd ki a szerkesztőben.", "action": "Kvízek" },
+      "gameWithPlayers": { "title": "Játssz a barátaiddal", "hint": "Fejezz be egy játékot legalább két játékossal." },
+      "library": { "title": "Ments egy kérdést a kérdéstáradba", "hint": "Tartsd meg a legjobb kérdéseidet a későbbi kvízekhez.", "action": "Kérdéstár" }
+    },
+    "quick": {
+      "label": "Gyors indítás",
+      "new": "Új kvíz",
+      "newHint": "Kezdd a nulláról.",
+      "play": "Játszd újra",
+      "playNone": "Előbb készíts egy kvízt.",
+      "import": "Fájl importálása",
+      "importHint": "Táblázat vagy Quizmoo-fájl.",
+      "code": "Kód beírása",
+      "codeHint": "Kérdések vagy kvíz, amit valaki megosztott."
+    },
+    "best": {
+      "label": "A legnépesebb játék",
+      "value_one": "{{title}}: {{count}} játékos",
+      "value_other": "{{title}}: {{count}} játékos",
+      "untitled": "Egy játék"
+    },
+    "usage": {
+      "label": "A legtelibb kereted: {{name}}",
+      "more": "Nézd meg a teljes használatot"
+    }
+  },
   "dashboard": {
     "greeting": "Szia, {{name}}!",
     "subtitle": "Mit játszunk ma?",
@@ -3222,13 +3361,14 @@
           "games": { "text": "A beállítások, az időkorlát és a pontszám, amivel minden új kvíz indul." },
           "messages": { "text": "A gyors üzeneteid a játékokhoz." },
           "branding": { "text": "A logód és az esemény neve." },
-          "account": { "text": "Az e-mail-címed, a használatod és a kereteid, a nyelv és a megjelenés ezen az eszközön, jelszó (ha van), zárkód, bemutatók, bejelentkezések, az adataid letöltése és a fiókod törlése." }
+          "account": { "text": "Az avatárod, az e-mail-címed, a használatod és a kereteid, a nyelv és a megjelenés ezen az eszközön, jelszó (ha van), zárkód, bemutatók, bejelentkezések, az adataid letöltése és a fiókod törlése." }
         }
       },
       "admin": {
         "heading": "Adminisztrátoroknak",
         "items": {
-          "users": { "text": "Játékvezetők felvétele, a fiókok e-mail-címe, használata és kerete, keretek és az adatbázis-korlát beállítása, fiókok kezelése." },
+          "users": { "text": "Az összes fiók egy listában: szűrd, rendezd és keress, majd nyiss meg egy fiókot, és látod, mennyit használ, állíthatod a saját keretét, a szerepét és a funkcióit, felfüggesztheted vagy törölheted, és megnézheted, mit készített." },
+          "limits": { "text": "Az adatbázis a tárhelycsomagodhoz képest, az alap keret, amivel minden játékvezető indul, és hogy lehet-e regisztrálni (és naponta hányan)." },
           "names": { "text": "A listák, amikből a Lepj meg! gomb nevet választ a játékosoknak, nyelvenként egy." }
         }
       }
@@ -3286,6 +3426,8 @@
     "home": {
       "welcome": { "title": "Üdv a Quizmoo-ban!", "body": "Egy gyors körbevezetés: mit csinálhatsz itt, és mit hol találsz. Bármikor bezárhatod, a ? gombbal újra előhozod." },
       "newQuiz": { "title": "Készíts kvízt", "body": "Itt kezdhetsz új kvízt. Kérdések, körök, képek: minden a szerkesztőben van." },
+      "steps": { "title": "Az első lépéseid", "body": "Öt dolog, amit érdemes elsőként kipróbálni. Mindegyik magától kipipálódik, ha megcsináltad; a listát bármikor bezárhatod." },
+      "quick": { "title": "Gyors indítás", "body": "Új kvíz, a legutóbbi kvízed újrajátszása, fájl importálása, vagy egy kód, amit valaki megosztott veled." },
       "recent": { "title": "A kvízeid", "body": "Amiket legutóbb szerkesztettél. Nyisd meg, hogy szerkeszd, vagy nyomd meg az Indítást, és játssz vele." },
       "nav": { "title": "Itt mindent megtalálsz", "body": "A kvízeid, a játékaid és az eredményeik mindig egy kattintásra vannak." },
       "account": { "title": "A beállításaid", "body": "Alap játékbeállítások, gyors üzenetek, a logód, a fiókod az e-mail-címeddel és azzal, hogy mennyit használ, és hogy mi újság a Quizmoo-ban." },
@@ -3348,6 +3490,18 @@
       "tabs": { "title": "A beállításaid", "body": "Alap játékbeállítások, gyors üzenetek, a saját arculatod és a fiókod (az e-mail-címed és hogy mennyit használ a fiókod), mind külön fülön." },
       "defaults": { "title": "Alap játékbeállítások", "body": "Minden új kvíz ezekkel a beállításokkal indul. Kvízenként még átírhatod őket." },
       "questions": { "title": "Új kérdések", "body": "Az időkorlát és a pontszám, amivel az új kérdések indulnak." }
+    },
+    "users": {
+      "list": { "title": "Az összes fiók", "body": "Fiókonként egy sor a legtelibb keretével. Szűrd, rendezd vagy keress, és nyiss meg egy fiókot a kezeléséhez." },
+      "add": { "title": "Új felhasználó", "body": "Fiókot e-mail-címmel hozol létre: a gazdája egy oda küldött kóddal lép be." }
+    },
+    "account": {
+      "tabs": { "title": "Egy fiók", "body": "Mennyit használ, a saját kerete, a szerepe és a funkciói, a felfüggesztés, és amit készített, mind külön fülön." }
+    },
+    "limits": {
+      "database": { "title": "Az adatbázisod", "body": "A mérete a tárhelycsomagodhoz képest. Add meg a csomag korlátját, és látod, mennyire telt meg." },
+      "defaults": { "title": "Alap keret", "body": "Ennyit használhat minden játékvezető, hacsak nem adsz neki saját értékeket." },
+      "signup": { "title": "Regisztráció", "body": "Nyisd ki vagy zárd be a regisztrációs oldalt, és add meg, naponta legfeljebb hány új fiók jöhet." }
     },
     "playerLobby": {
       "card": { "title": "Bent vagy!", "body": "Várj itt, amíg a játékvezető elindítja a játékot. Hagyd nyitva ezt az oldalt." },

@@ -20,7 +20,9 @@ const usernamePattern = /^[a-zA-Z0-9._-]{3,40}$/
 export function AddUserDialog({ onClose }: { onClose: () => void }) {
   const { t, i18n } = useTranslation()
   const queryClient = useQueryClient()
-  const byEmail = useSiteInfo().data?.emailLogin ?? false
+  // Undecided until the site settings arrive: never offer a password form on an install with e-mail.
+  const site = useSiteInfo()
+  const byEmail = site.data?.emailLogin ?? false
   const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -48,6 +50,8 @@ export function AddUserDialog({ onClose }: { onClose: () => void }) {
     },
   })
 
+  // Opens once the site settings are known (a moment at most: the Users page has loaded them).
+  if (!site.data) return null
   return (
     <FormDialog
       title={t('users.add')}
@@ -141,7 +145,7 @@ export function ResetPasswordDialog({ user, onClose }: { user: UserRow; onClose:
 }
 
 /** Deleting takes everything the account owns, so the admin types its name first. */
-export function DeleteUserDialog({ user, onClose }: { user: UserRow; onClose: () => void }) {
+export function DeleteUserDialog({ user, onClose, onDeleted }: { user: UserRow; onClose: () => void; onDeleted?: () => void }) {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
   const [typed, setTyped] = useState('')
@@ -150,6 +154,7 @@ export function DeleteUserDialog({ user, onClose }: { user: UserRow; onClose: ()
     onSuccess: () => {
       toast.success(t('users.delete.done', { name: user.username }))
       void queryClient.invalidateQueries({ queryKey: ['users'] })
+      onDeleted?.()
       onClose()
     },
   })

@@ -19,6 +19,7 @@ description: The Quizmoo look: shadcn primitives, semantic colour tokens, light 
 
 ## Look
 
+- **Tooltip tails on the side:** Radix rotates the arrow for left and right placements and it lands about 2 px outside the bubble, so the tail's fill reaches 3 px into the bubble (`ui/tooltip.tsx`). Check side tooltips at 4× when touching the tail.
 - **No scroll box inside a dialog** (user, 12 November 2026, on the budget dialog): use the width first, fields in columns (`FormDialog wide`, two columns from `sm`); only a phone may scroll, and then the whole dialog (`FormDialog` caps it at the viewport), never a `max-h` box inside it.
 - **Round icon buttons on the same screen share one size** (user, 12 November 2026): on game screens that is the game menu's `size-11` with a `size-5` icon (the reaction button in the opposite corner matches it). Before adding a floating or corner icon button, look up the size of the ones already on that screen and reuse it.
 

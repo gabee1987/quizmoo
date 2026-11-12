@@ -1,11 +1,14 @@
 import {
   DEFAULT_BUDGET,
+  SIGNUPS_PER_DAY_DEFAULT,
   budgetErrors,
   budgetOverrideSchema,
   budgetSchema,
   effectiveBudget,
+  signupSettingsSchema,
   type Budget,
   type BudgetKey,
+  type SignupSettings,
   type Usage,
 } from '@quizmoo/shared'
 import { eq, sql, type SQL } from 'drizzle-orm'
@@ -84,6 +87,21 @@ export async function saveDatabaseBudgetMb(db: Db, mb: number | null) {
     .insert(appSettings)
     .values({ key: 'databaseBudgetMb', value: mb })
     .onConflictDoUpdate({ target: appSettings.key, set: { value: mb, updatedAt: new Date() } })
+}
+
+/** Sign-up as the admin set it on the Limits page: open, and at most this many new accounts a day. */
+export async function readSignupSettings(db: Db): Promise<SignupSettings> {
+  const [row] = await db.select({ value: appSettings.value }).from(appSettings).where(eq(appSettings.key, 'signup'))
+  const parsed = signupSettingsSchema.safeParse(row?.value)
+  return parsed.success ? parsed.data : { open: true, perDay: SIGNUPS_PER_DAY_DEFAULT }
+}
+
+export async function saveSignupSettings(db: Db, settings: SignupSettings) {
+  const value = signupSettingsSchema.parse(settings)
+  await db
+    .insert(appSettings)
+    .values({ key: 'signup', value })
+    .onConflictDoUpdate({ target: appSettings.key, set: { value, updatedAt: new Date() } })
 }
 
 /** The account's effective budget: its overrides on the defaults; admins have none. */

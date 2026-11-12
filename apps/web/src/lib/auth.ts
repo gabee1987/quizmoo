@@ -1,3 +1,4 @@
+import type { Avatar, Permissions } from '@quizmoo/shared'
 import { queryOptions, useQuery } from '@tanstack/react-query'
 import { apiFetch } from './api'
 
@@ -17,6 +18,10 @@ export interface User {
   mustAcceptTerms: boolean
   /** Screen lock: the host locked their screens; every host page shows the lock screen. Only from `/api/auth/me`. */
   screenLocked?: boolean
+  /** The host's avatar (picked, or a stable one per account). */
+  avatar: Avatar
+  /** Features the admin switched off; check with `allowed(user, feature)`. */
+  permissions: Permissions
 }
 
 export const meQueryOptions = queryOptions({

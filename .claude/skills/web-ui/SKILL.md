@@ -25,6 +25,8 @@ Topic skills: `game-screens` (phone, projector, host control and results layouts
 | `/host/games/$pin` | hosts | control view (phone or laptop) |
 | `/host/games` | hosts | game history |
 | `/host/results/$gameId` | hosts | results summary and export |
+| `/host/users`, `/host/users/$userId` | admins | the account list and one account's page (tabs) |
+| `/host/limits` | admins | database, default budget, sign-up |
 | `/screen/$pin` | projector | public read-only big-screen view; `?preview=1` (the host's live preview frame) attaches as a public screen even when logged in |
 | `/privacy`, `/terms`, `/cookies`, `/imprint` | everyone | legal pages through `LegalPage` (`features/legal/`): texts in `legal.*` as heading/paragraphs/items sections, operator details from `/api/site` |
 | `/host/terms` | hosts | accepting the terms (the host layout redirects there while `user.mustAcceptTerms`), with download, delete and log out as ways out |

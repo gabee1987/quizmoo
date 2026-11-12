@@ -1,6 +1,6 @@
 import { pgTable, text, timestamp, jsonb, integer, boolean, customType, index } from 'drizzle-orm/pg-core'
 import { sql } from 'drizzle-orm'
-import type { BudgetOverride, GameSettings, HostSettings, Question, QuestionDefaults, QuestionGroup, QuizBranding } from '@quizmoo/shared'
+import { userStatuses, type BudgetOverride, type GameSettings, type HostSettings, type Permissions, type Question, type QuestionDefaults, type QuestionGroup, type QuizBranding } from '@quizmoo/shared'
 import type { GameState } from '../game/types.js'
 import { foldSql } from './search.js'
 
@@ -19,8 +19,15 @@ export const users = pgTable('users', {
   role: text('role', { enum: ['admin', 'editor'] }).notNull().default('editor'),
   /** Set for users created by an admin with an initial password; cleared on first password change. */
   mustChangePassword: boolean('must_change_password').notNull().default(false),
-  /** `pending`: a self sign-up from before phase 71, waiting for approval or for its e-mail address. */
-  status: text('status', { enum: ['active', 'pending'] }).notNull().default('active'),
+  /**
+   * `pending`: a self sign-up from before phase 71, waiting for approval or for its e-mail address.
+   * `suspended`: blocked by an admin (no login, no sessions); its content stays.
+   */
+  status: text('status', { enum: userStatuses }).notNull().default('active'),
+  /** The host's avatar (one of the players' `avatars`); null: `fallbackAvatar(id)`. */
+  avatar: text('avatar'),
+  /** Features the admin switched off for this account; a missing key means allowed. */
+  permissions: jsonb('permissions').$type<Permissions>().notNull().default({}),
   /** The admin's limits for this account; a missing key follows the defaults (`app_settings`), null is no limit. */
   budget: jsonb('budget').$type<BudgetOverride>().notNull().default({}),
   /** Games created in `gamesMonth` (`YYYY-MM`, UTC), for the monthly budget; deleting games gives nothing back. */
@@ -251,5 +258,9 @@ export const hostSettings = pgTable('host_settings', {
   seenRelease: text('seen_release'),
   /** The tutorial tours the host has seen or closed. Outside `settings`, so saving My settings never brings them back. */
   toursSeen: jsonb('tours_seen').$type<string[]>().notNull().default([]),
+  /** When the home page first welcomed the host (confetti once); null: not yet. */
+  welcomedAt: timestamp('welcomed_at', { withTimezone: true }),
+  /** The host closed the home page's getting-started checklist. */
+  checklistDismissed: boolean('checklist_dismissed').notNull().default(false),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 })

@@ -104,6 +104,12 @@ Error shape everywhere: `{ error: '<i18n key>' }`. Status codes: 400 invalid inp
 | `GET /api/games/:gameId/results` | owner | full results JSON |
 | `GET /api/games/:gameId/results.csv?lang=hu\|en` | owner | CSV export |
 | `DELETE /api/games/:gameId` | owner | delete a finished game and its results, or call off a scheduled game before joining opens |
+| `GET /api/users/:id` | admin | one account (as on the list) and its quizzes (title, questions, bytes, date) |
+| `PUT /api/users/:id/permissions` | admin | `{ permissions }`: features switched off (`errors.featureOff` on use) |
+| `POST /api/users/:id/suspend` / `reactivate` | admin | suspend (sessions and running games end) or allow again; never the admin's own |
+| `PUT /api/users/:id/avatar`, `PUT /api/me/avatar` | admin / session | `{ avatar }` from the players' set |
+| `PUT /api/budgets/signup` | admin | `{ signup: { open, perDay } }` (Limits page) |
+| `GET /api/me/home`, `POST /api/me/welcomed`, `PUT /api/me/checklist` | session | the home page's checklist, welcome and figures |
 
 The UI calls the bank the "Question library" / "Kérdéstár" (`/host/library`); routes, table and code keep `bank`.
 
@@ -126,4 +132,4 @@ Quiz question ids and option ids are generated server-side with `nanoid(8)` when
 
 ## E-mail
 
-One provider, Brevo's HTTPS API, in `src/mail.ts` (`createMailer`, plain `fetch`, 10 s timeout; a no-op without `BREVO_API_KEY` and `MAIL_FROM`). Railway's Hobby plan blocks outbound SMTP, so no SMTP. Errors name the status only, never the provider's answer (it can repeat the address); log lines never contain an address. Sign-up notices live in `src/signup-notify.ts`: one e-mail per admin (no shared `to`), the count and a link only, never a username (stranger-chosen text), throttled to one per 15 minutes with a trailing send. `buildApp` takes a `mailer` so tests pass a fake. Any further e-mail use is a third-party data flow: note the compliance review.
+One provider, Brevo's HTTPS API, in `src/mail.ts` (`createMailer`, plain `fetch`, 10 s timeout; a no-op without `BREVO_API_KEY` and `MAIL_FROM`). For local testing `MAILPIT_URL` (localhost only) sends to Mailpit's API instead. Railway's Hobby plan blocks outbound SMTP, so no SMTP. Errors name the status only, never the provider's answer (it can repeat the address); log lines never contain an address. Sign-up notices live in `src/signup-notify.ts`: one e-mail per admin (no shared `to`), the count and a link only, never a username (stranger-chosen text), throttled to one per 15 minutes with a trailing send. `buildApp` takes a `mailer` so tests pass a fake. Any further e-mail use is a third-party data flow: note the compliance review.

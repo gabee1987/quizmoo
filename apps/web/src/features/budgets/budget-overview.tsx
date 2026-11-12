@@ -1,4 +1,4 @@
-import type { Budget } from '@quizmoo/shared'
+import type { Budget, SignupSettings } from '@quizmoo/shared'
 import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { DatabaseIcon, SlidersHorizontalIcon } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
@@ -21,6 +21,10 @@ export interface BudgetOverviewData {
   databaseBytes: number
   /** What hosts store (pictures, quizzes, library, share codes), part of the database size. */
   hostsBytes: number
+  /** Sign-up as the admin set it (Limits page). */
+  signup: SignupSettings
+  /** `REGISTRATION_OPEN` and e-mail are on: only then does the sign-up switch do anything. */
+  signupAvailable: boolean
 }
 
 export const budgetsQueryOptions = queryOptions({
@@ -28,7 +32,7 @@ export const budgetsQueryOptions = queryOptions({
   queryFn: () => apiFetch<BudgetOverviewData>('/api/budgets'),
 })
 
-/** The admin's view on the Users page: the database against the hosting plan's limit, and the default budget. */
+/** The admin's view on the Limits page: the database against the hosting plan's limit, and the default budget. */
 export function BudgetOverview() {
   const { t, i18n } = useTranslation()
   const queryClient = useQueryClient()

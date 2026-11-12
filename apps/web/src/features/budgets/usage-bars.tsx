@@ -26,6 +26,18 @@ export function fullest(usage: Usage, budget: Budget): number {
   }))
 }
 
+/** The fullest budget and its share (the Users list's one bar); null when nothing is limited. */
+export function fullestOf(usage: Usage, budget: Budget): { key: Metered; share: number } | null {
+  let best: { key: Metered; share: number } | null = null
+  for (const key of metered) {
+    const limit = limitOf(budget, key)
+    if (limit === null) continue
+    const share = limit === 0 ? (used(usage, key) > 0 ? Infinity : 1) : used(usage, key) / limit
+    if (!best || share > best.share) best = { key, share }
+  }
+  return best
+}
+
 /** What an account uses against its budget: one labelled bar per budget, warning from 80 %, full at 100 %. */
 export function UsageBars({ usage, budget, className }: { usage: Usage; budget: Budget; className?: string }) {
   const { t, i18n } = useTranslation()

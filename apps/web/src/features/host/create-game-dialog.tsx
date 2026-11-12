@@ -1,4 +1,4 @@
-import { lockCodeSchema, type BrandingChoice, type GameLength, type GameSettings, type QuizBranding } from '@quizmoo/shared'
+import { allowed, lockCodeSchema, type BrandingChoice, type GameLength, type GameSettings, type QuizBranding } from '@quizmoo/shared'
 import { useQuery } from '@tanstack/react-query'
 import { CalendarClockIcon, ClockIcon, EyeOffIcon, PlayIcon, RotateCcwIcon } from 'lucide-react'
 import { useId, useState, type FormEvent } from 'react'
@@ -10,6 +10,7 @@ import { Hint } from '@/components/hint'
 import { TextField } from '@/components/text-field'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { meQueryOptions } from '@/lib/auth'
 import { cn } from '@/lib/cn'
 import { quizMinutes } from '@/lib/game-length'
 import { defaultStart, latestStart, scheduleError } from '@/lib/schedule'
@@ -75,6 +76,8 @@ export function CreateGameDialog({
   const [defaults] = useState(() => newGameSettings(quizSettings))
   const [settings, setSettings] = useState(defaults)
   const [active, setActive] = useState<SettingsSection>('flow')
+  const me = useQuery(meQueryOptions).data
+  const canSchedule = !me || allowed(me, 'scheduling')
   const [later, setLater] = useState(false)
   const [scheduledAt, setScheduledAt] = useState(() => defaultStart(Date.now()))
   const timeError = later ? scheduleError(scheduledAt, Date.now()) : null
@@ -272,6 +275,8 @@ export function CreateGameDialog({
               <p className="text-sm font-semibold text-destructive">{shownError && t(shownError)}</p>
             </Collapse>
             <div className="flex items-center gap-3 md:gap-4">
+              {/* Without scheduling (switched off by the admin) every game starts now. */}
+              {canSchedule && (
               <fieldset className="flex items-center md:flex-1">
                 <legend className="sr-only">{t('host.create.when')}</legend>
                 {/* One primary pill springs between Now and Later, like the sidebar's highlight. */}
@@ -302,7 +307,8 @@ export function CreateGameDialog({
                   })}
                 </div>
               </fieldset>
-              <div className="flex flex-1 gap-2 md:flex-none">
+              )}
+              <div className={cn('flex flex-1 gap-2', canSchedule ? 'md:flex-none' : 'md:justify-end')}>
                 <Button type="button" variant="secondary" className="max-md:hidden" onClick={onCancel}>
                   {t('common.cancel')}
                 </Button>

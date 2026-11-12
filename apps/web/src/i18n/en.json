@@ -1717,9 +1717,77 @@
       "empty": "Neither list can be empty."
     }
   },
+  "limits": {
+    "nav": "Limits",
+    "title": "Limits",
+    "intro": "Limits for the whole site: the database against your hosting plan, the budget every host starts with, and sign-up.",
+    "signup": {
+      "title": "Sign-up",
+      "help": "Whether people can make a host account themselves on the sign-up page, and how many a day at most.",
+      "unavailable": "Sign-up is off on this server (REGISTRATION_OPEN, or no e-mail set up), so these settings do nothing now.",
+      "open": "People can sign up",
+      "openOn": "The sign-up page is open.",
+      "openOff": "Closed: only you can add accounts, on the Users page.",
+      "perDay": "New accounts a day at most",
+      "saved": "Sign-up settings saved"
+    }
+  },
   "users": {
     "title": "Users",
-    "intro": "Every host account on this site: what each one does and what you can change.",
+    "intro": "Every host account on this site. Open one to see what it uses and to change its budget, features and access.",
+    "status": { "suspended": "Suspended" },
+    "list": {
+      "filter": "Show",
+      "filters": { "all": "All", "hosts": "Hosts", "admins": "Admins", "near": "Near a limit", "suspended": "Suspended" },
+      "newest": "Newest first",
+      "columns": { "account": "Account", "role": "Role", "usage": "Fullest limit", "lastLogin": "Last login" },
+      "noLimits": "No limits",
+      "empty": "No accounts here."
+    },
+    "page": {
+      "back": "All users",
+      "tabsLabel": "About this account",
+      "tabs": { "overview": "Overview", "budget": "Budget", "permissions": "Permissions", "content": "Content" },
+      "adminNoLimits": "Admins have no limits.",
+      "avatar": "Avatar",
+      "avatarOf": "{{name}}'s avatar",
+      "avatarHelp": "The host picks their own in My settings; you can change it here so you tell accounts apart.",
+      "selfNote": "This is your own account: change it in My settings. Nobody can suspend, demote or delete it here.",
+      "role": "Role",
+      "access": "Access"
+    },
+    "features": {
+      "title": "Features",
+      "help": "Switch a feature off for this account only. What it already made stays.",
+      "adminHelp": "Admins always have every feature.",
+      "saved": "Features saved",
+      "keys": { "images": "Pictures", "shareCodes": "Share codes", "library": "Question library", "scheduling": "Scheduled games" },
+      "hints": {
+        "images": "Uploading pictures to questions and logos.",
+        "shareCodes": "Sharing questions and quizzes with a code.",
+        "library": "Saving and editing questions in the library.",
+        "scheduling": "Creating games for a later date."
+      }
+    },
+    "suspend": {
+      "title": "Suspend or delete",
+      "help": "A suspended account can't log in and is logged out everywhere; its quizzes and results stay. Deleting removes everything.",
+      "action": "Suspend",
+      "confirmTitle": "Suspend {{name}}?",
+      "confirmBody": "They're logged out on every device and can't log in until you reactivate the account. Nothing is deleted.",
+      "done": "{{name}} is suspended.",
+      "banner": "This account is suspended: it can't log in.",
+      "reactivate": "Reactivate",
+      "reactivated": "{{name}} can log in again."
+    },
+    "content": {
+      "title_one": "{{count}} quiz",
+      "title_other": "{{count}} quizzes",
+      "help": "What this host made, read-only. Quizmoo never opens another host's quizzes for you.",
+      "none": "No quizzes yet.",
+      "line_one": "{{count}} question · {{size}} · {{date}}",
+      "line_other": "{{count}} questions · {{size}} · {{date}}"
+    },
     "add": "Add user",
     "addSubmit": "Create",
     "roleLabel": "Role",
@@ -1803,6 +1871,8 @@
     }
   },
   "errors": {
+    "featureOff": "The admin turned this off for your account.",
+    "accountSuspended": "This account is suspended. Ask the admin.",
     "gameNotFound": "No such game. Check the PIN.",
     "gameFull": "The game is full.",
     "gameAlreadyStarted": "The game has already started.",
@@ -1900,7 +1970,7 @@
     "releases": {
       "1_14_0": {
         "title": "E-mail login and account limits",
-        "intro": "Log in with a code sent to your e-mail address instead of a password, see what your account uses, and react from a single button on the phone.",
+        "intro": "Log in with a code sent to your e-mail address instead of a password, start from a new home page, see what your account uses, and react from a single button on the phone.",
         "sections": [
           {
             "title": "Logging in with an e-mail code",
@@ -1920,11 +1990,23 @@
             ]
           },
           {
+            "title": "A home page to start from",
+            "items": [
+              "The home page greets you with your avatar and the cow, and welcomes new hosts with confetti.",
+              "\"Your first steps\" lists five things to try, each ticked off by itself once you've done it. Close it whenever you like.",
+              "Quick start: a new quiz, play your latest quiz again, import a file or enter a share code, one tap each. Your best-attended game and your fullest limit are there too.",
+              "Pick your avatar in My settings, Account."
+            ]
+          },
+          {
             "title": "For admins",
             "items": [
-              "The Users page shows every account's e-mail address and what it uses, and sorts by storage. Set limits for one account with \"Edit budget\", or the defaults for everyone.",
-              "Enter your hosting plan's database size there to see how full the database is.",
-              "The e-mail about a new sign-up now names the host and their address. Admins keep their password and can log in either way."
+              "Admin now has three pages: Users, Limits and Names.",
+              "Users is a compact list of every account with its avatar, address, role, fullest limit and last login. Filter, sort and search, and open an account for its own page.",
+              "An account's page: what it uses, its own budget, its role, features you can switch off for it (pictures, share codes, the question library, scheduled games), log out everywhere, a new password, suspend or reactivate, delete, and its quizzes.",
+              "A suspended account can't log in and its running games end; nothing it made is deleted.",
+              "Limits: the database against your hosting plan, the default budget, and sign-up on or off with a daily maximum.",
+              "Add user asks for the e-mail address; the person logs in with a code. The e-mail about a new sign-up names the host and their address. Admins keep their password and can log in either way."
             ]
           },
           {
@@ -1933,6 +2015,10 @@
               "Players react from a round button in the bottom left corner of their phone: tapping it opens the emoji. After a reaction the button rests for 5 seconds."
             ]
           }
+        ],
+        "fixed": [
+          "Tooltips that open beside a button (like \"Signed in as\") point at it cleanly again.",
+          "Dialogs with many fields use the width of the screen instead of scrolling inside."
         ]
       },
       "1_13_0": {
@@ -2630,6 +2716,59 @@
   "branding": {
     "logo": "Organiser's logo"
   },
+  "hostHome": {
+    "welcome": "Welcome to Quizmoo, {{name}}!",
+    "firstLine": "Moo! Your starter quiz is ready. Play it with a friend to see how it works.",
+    "greeting": {
+      "morning": "Good morning, {{name}}!",
+      "afternoon": "Good afternoon, {{name}}!",
+      "evening": "Good evening, {{name}}!",
+      "night": "Up late, {{name}}?"
+    },
+    "lines": [
+      "Moo! What are we playing today?",
+      "Fresh questions make happy players.",
+      "A picture says more than four answers.",
+      "Teams make every quiz louder. Try it!",
+      "Your players are warming up. Are you?",
+      "Short rounds, big cheers."
+    ],
+    "steps": {
+      "title": "Your first steps",
+      "allDone": "All done. You're a Quizmoo pro!",
+      "progress_one": "{{done}} of {{count}} done",
+      "progress_other": "{{done}} of {{count}} done",
+      "dismiss": "Hide the first steps",
+      "doneLabel": "Done",
+      "todoLabel": "Not done yet",
+      "starterPlayed": { "title": "Play the starter quiz", "hint": "Start a game with it and join from your phone.", "action": "Quizzes" },
+      "ownQuiz": { "title": "Make a quiz of your own", "hint": "A title and a few questions are enough.", "action": "New quiz" },
+      "picture": { "title": "Add a picture to a question", "hint": "Drop, paste or pick one in the editor.", "action": "Quizzes" },
+      "gameWithPlayers": { "title": "Run a game with friends", "hint": "Finish a game with at least two players." },
+      "library": { "title": "Save a question to your library", "hint": "Keep your best questions for later quizzes.", "action": "Library" }
+    },
+    "quick": {
+      "label": "Quick start",
+      "new": "New quiz",
+      "newHint": "Start from scratch.",
+      "play": "Play again",
+      "playNone": "Make a quiz first.",
+      "import": "Import a file",
+      "importHint": "A spreadsheet or a Quizmoo file.",
+      "code": "Enter a code",
+      "codeHint": "Questions or a quiz someone shared."
+    },
+    "best": {
+      "label": "Best turnout",
+      "value_one": "{{title}}: {{count}} player",
+      "value_other": "{{title}}: {{count}} players",
+      "untitled": "A game"
+    },
+    "usage": {
+      "label": "Your fullest limit: {{name}}",
+      "more": "See all your usage"
+    }
+  },
   "dashboard": {
     "greeting": "Hi, {{name}}!",
     "subtitle": "What are we playing today?",
@@ -3222,13 +3361,14 @@
           "games": { "text": "The settings, time limit and points every new quiz starts with." },
           "messages": { "text": "Your quick messages for games." },
           "branding": { "text": "Your logo and event name." },
-          "account": { "text": "Your e-mail address, your usage and limits, language and look on this device, password (if you have one), screen lock code, tours, logins, downloading your data and deleting your account." }
+          "account": { "text": "Your avatar, your e-mail address, your usage and limits, language and look on this device, password (if you have one), screen lock code, tours, logins, downloading your data and deleting your account." }
         }
       },
       "admin": {
         "heading": "For administrators",
         "items": {
-          "users": { "text": "Add hosts, see each account's e-mail address, usage and limits, set budgets and the database limit, and manage accounts." },
+          "users": { "text": "Every account in one list: filter, sort and search, and open an account for its usage, its own budget, its role and features, suspending or deleting it, and what it made." },
+          "limits": { "text": "The database against your hosting plan, the default budget every host starts with, and whether people can sign up (and how many a day)." },
           "names": { "text": "The lists Surprise me picks player names from, one per language." }
         }
       }
@@ -3286,6 +3426,8 @@
     "home": {
       "welcome": { "title": "Welcome to Quizmoo!", "body": "A quick look around: what you can do here and where things are. Close it whenever you like; the ? button brings it back." },
       "newQuiz": { "title": "Make a quiz", "body": "Start a new quiz here. Questions, rounds, pictures: everything is in the editor." },
+      "steps": { "title": "Your first steps", "body": "Five things to try first. Each ticks itself off when you've done it; close the list whenever you like." },
+      "quick": { "title": "Quick start", "body": "A new quiz, playing your latest quiz again, importing a file, or a code someone shared with you." },
       "recent": { "title": "Your quizzes", "body": "The quizzes you edited last. Open one to edit it, or press Play to start a game with it." },
       "nav": { "title": "Find your way", "body": "Your quizzes, your games and their results are always one click away here." },
       "account": { "title": "Your settings", "body": "Game defaults, quick messages, your logo, your account with your e-mail address and what it uses, and what is new in Quizmoo." },
@@ -3348,6 +3490,18 @@
       "tabs": { "title": "Your settings", "body": "Game defaults, quick messages, your branding and your account (your e-mail address and what your account uses), each on its own tab." },
       "defaults": { "title": "Game defaults", "body": "Every new quiz starts with these settings. Each quiz can still change them." },
       "questions": { "title": "New questions", "body": "The time limit and points new questions start with." }
+    },
+    "users": {
+      "list": { "title": "Every account", "body": "One row per account with its fullest limit. Filter, sort or search, and open an account to manage it." },
+      "add": { "title": "Add someone", "body": "Make an account by e-mail address: they log in with a code we send there." }
+    },
+    "account": {
+      "tabs": { "title": "One account", "body": "What it uses, its own budget, its role and features, suspending it, and what it made, each on its own tab." }
+    },
+    "limits": {
+      "database": { "title": "Your database", "body": "Its size against your hosting plan. Enter the plan's limit to see how full it is." },
+      "defaults": { "title": "Default budget", "body": "What every host may use unless you give them their own values." },
+      "signup": { "title": "Sign-up", "body": "Open or close the sign-up page, and how many new accounts a day at most." }
     },
     "playerLobby": {
       "card": { "title": "You're in!", "body": "Wait here until the host starts the game. Keep this page open." },

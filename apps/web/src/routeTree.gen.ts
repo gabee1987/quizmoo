@@ -20,11 +20,11 @@ import { Route as RegisterRouteImport } from './routes/register'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as HostIndexRouteImport } from './routes/host/index'
 import { Route as HostEmailRouteImport } from './routes/host/email'
+import { Route as HostLimitsRouteImport } from './routes/host/limits'
 import { Route as HostNicknamesRouteImport } from './routes/host/nicknames'
 import { Route as HostPasswordRouteImport } from './routes/host/password'
 import { Route as HostSettingsRouteImport } from './routes/host/settings'
 import { Route as HostTermsRouteImport } from './routes/host/terms'
-import { Route as HostUsersRouteImport } from './routes/host/users'
 import { Route as HostWhatsNewRouteImport } from './routes/host/whats-new'
 import { Route as PlayPinRouteImport } from './routes/play.$pin'
 import { Route as ScreenPinRouteImport } from './routes/screen.$pin'
@@ -37,6 +37,8 @@ import { Route as HostLibraryNewRouteImport } from './routes/host/library.new'
 import { Route as HostQuizzesIndexRouteImport } from './routes/host/quizzes.index'
 import { Route as HostQuizzesQuizIdRouteImport } from './routes/host/quizzes.$quizId'
 import { Route as HostResultsGameIdRouteImport } from './routes/host/results.$gameId'
+import { Route as HostUsersIndexRouteImport } from './routes/host/users.index'
+import { Route as HostUsersUserIdRouteImport } from './routes/host/users.$userId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -93,6 +95,11 @@ const HostEmailRoute = HostEmailRouteImport.update({
   path: '/email',
   getParentRoute: () => HostRouteRoute,
 } as any)
+const HostLimitsRoute = HostLimitsRouteImport.update({
+  id: '/limits',
+  path: '/limits',
+  getParentRoute: () => HostRouteRoute,
+} as any)
 const HostNicknamesRoute = HostNicknamesRouteImport.update({
   id: '/nicknames',
   path: '/nicknames',
@@ -111,11 +118,6 @@ const HostSettingsRoute = HostSettingsRouteImport.update({
 const HostTermsRoute = HostTermsRouteImport.update({
   id: '/terms',
   path: '/terms',
-  getParentRoute: () => HostRouteRoute,
-} as any)
-const HostUsersRoute = HostUsersRouteImport.update({
-  id: '/users',
-  path: '/users',
   getParentRoute: () => HostRouteRoute,
 } as any)
 const HostWhatsNewRoute = HostWhatsNewRouteImport.update({
@@ -178,6 +180,16 @@ const HostResultsGameIdRoute = HostResultsGameIdRouteImport.update({
   path: '/results/$gameId',
   getParentRoute: () => HostRouteRoute,
 } as any)
+const HostUsersIndexRoute = HostUsersIndexRouteImport.update({
+  id: '/users/',
+  path: '/users/',
+  getParentRoute: () => HostRouteRoute,
+} as any)
+const HostUsersUserIdRoute = HostUsersUserIdRouteImport.update({
+  id: '/users/$userId',
+  path: '/users/$userId',
+  getParentRoute: () => HostRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -190,11 +202,11 @@ export interface FileRoutesByFullPath {
   '/register': typeof RegisterRoute
   '/terms': typeof TermsRoute
   '/host/email': typeof HostEmailRoute
+  '/host/limits': typeof HostLimitsRoute
   '/host/nicknames': typeof HostNicknamesRoute
   '/host/password': typeof HostPasswordRoute
   '/host/settings': typeof HostSettingsRoute
   '/host/terms': typeof HostTermsRoute
-  '/host/users': typeof HostUsersRoute
   '/host/whats-new': typeof HostWhatsNewRoute
   '/play/$pin': typeof PlayPinRoute
   '/screen/$pin': typeof ScreenPinRoute
@@ -205,9 +217,11 @@ export interface FileRoutesByFullPath {
   '/host/library/new': typeof HostLibraryNewRoute
   '/host/quizzes/$quizId': typeof HostQuizzesQuizIdRoute
   '/host/results/$gameId': typeof HostResultsGameIdRoute
+  '/host/users/$userId': typeof HostUsersUserIdRoute
   '/host/games/': typeof HostGamesIndexRoute
   '/host/library/': typeof HostLibraryIndexRoute
   '/host/quizzes/': typeof HostQuizzesIndexRoute
+  '/host/users/': typeof HostUsersIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -219,11 +233,11 @@ export interface FileRoutesByTo {
   '/register': typeof RegisterRoute
   '/terms': typeof TermsRoute
   '/host/email': typeof HostEmailRoute
+  '/host/limits': typeof HostLimitsRoute
   '/host/nicknames': typeof HostNicknamesRoute
   '/host/password': typeof HostPasswordRoute
   '/host/settings': typeof HostSettingsRoute
   '/host/terms': typeof HostTermsRoute
-  '/host/users': typeof HostUsersRoute
   '/host/whats-new': typeof HostWhatsNewRoute
   '/play/$pin': typeof PlayPinRoute
   '/screen/$pin': typeof ScreenPinRoute
@@ -234,9 +248,11 @@ export interface FileRoutesByTo {
   '/host/library/new': typeof HostLibraryNewRoute
   '/host/quizzes/$quizId': typeof HostQuizzesQuizIdRoute
   '/host/results/$gameId': typeof HostResultsGameIdRoute
+  '/host/users/$userId': typeof HostUsersUserIdRoute
   '/host/games': typeof HostGamesIndexRoute
   '/host/library': typeof HostLibraryIndexRoute
   '/host/quizzes': typeof HostQuizzesIndexRoute
+  '/host/users': typeof HostUsersIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -250,11 +266,11 @@ export interface FileRoutesById {
   '/register': typeof RegisterRoute
   '/terms': typeof TermsRoute
   '/host/email': typeof HostEmailRoute
+  '/host/limits': typeof HostLimitsRoute
   '/host/nicknames': typeof HostNicknamesRoute
   '/host/password': typeof HostPasswordRoute
   '/host/settings': typeof HostSettingsRoute
   '/host/terms': typeof HostTermsRoute
-  '/host/users': typeof HostUsersRoute
   '/host/whats-new': typeof HostWhatsNewRoute
   '/play/$pin': typeof PlayPinRoute
   '/screen/$pin': typeof ScreenPinRoute
@@ -265,9 +281,11 @@ export interface FileRoutesById {
   '/host/library/new': typeof HostLibraryNewRoute
   '/host/quizzes/$quizId': typeof HostQuizzesQuizIdRoute
   '/host/results/$gameId': typeof HostResultsGameIdRoute
+  '/host/users/$userId': typeof HostUsersUserIdRoute
   '/host/games/': typeof HostGamesIndexRoute
   '/host/library/': typeof HostLibraryIndexRoute
   '/host/quizzes/': typeof HostQuizzesIndexRoute
+  '/host/users/': typeof HostUsersIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -282,11 +300,11 @@ export interface FileRouteTypes {
     | '/register'
     | '/terms'
     | '/host/email'
+    | '/host/limits'
     | '/host/nicknames'
     | '/host/password'
     | '/host/settings'
     | '/host/terms'
-    | '/host/users'
     | '/host/whats-new'
     | '/play/$pin'
     | '/screen/$pin'
@@ -297,9 +315,11 @@ export interface FileRouteTypes {
     | '/host/library/new'
     | '/host/quizzes/$quizId'
     | '/host/results/$gameId'
+    | '/host/users/$userId'
     | '/host/games/'
     | '/host/library/'
     | '/host/quizzes/'
+    | '/host/users/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -311,11 +331,11 @@ export interface FileRouteTypes {
     | '/register'
     | '/terms'
     | '/host/email'
+    | '/host/limits'
     | '/host/nicknames'
     | '/host/password'
     | '/host/settings'
     | '/host/terms'
-    | '/host/users'
     | '/host/whats-new'
     | '/play/$pin'
     | '/screen/$pin'
@@ -326,9 +346,11 @@ export interface FileRouteTypes {
     | '/host/library/new'
     | '/host/quizzes/$quizId'
     | '/host/results/$gameId'
+    | '/host/users/$userId'
     | '/host/games'
     | '/host/library'
     | '/host/quizzes'
+    | '/host/users'
   id:
     | '__root__'
     | '/'
@@ -341,11 +363,11 @@ export interface FileRouteTypes {
     | '/register'
     | '/terms'
     | '/host/email'
+    | '/host/limits'
     | '/host/nicknames'
     | '/host/password'
     | '/host/settings'
     | '/host/terms'
-    | '/host/users'
     | '/host/whats-new'
     | '/play/$pin'
     | '/screen/$pin'
@@ -356,9 +378,11 @@ export interface FileRouteTypes {
     | '/host/library/new'
     | '/host/quizzes/$quizId'
     | '/host/results/$gameId'
+    | '/host/users/$userId'
     | '/host/games/'
     | '/host/library/'
     | '/host/quizzes/'
+    | '/host/users/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -455,6 +479,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HostEmailRouteImport
       parentRoute: typeof HostRouteRoute
     }
+    '/host/limits': {
+      id: '/host/limits'
+      path: '/limits'
+      fullPath: '/host/limits'
+      preLoaderRoute: typeof HostLimitsRouteImport
+      parentRoute: typeof HostRouteRoute
+    }
     '/host/nicknames': {
       id: '/host/nicknames'
       path: '/nicknames'
@@ -481,13 +512,6 @@ declare module '@tanstack/react-router' {
       path: '/terms'
       fullPath: '/host/terms'
       preLoaderRoute: typeof HostTermsRouteImport
-      parentRoute: typeof HostRouteRoute
-    }
-    '/host/users': {
-      id: '/host/users'
-      path: '/users'
-      fullPath: '/host/users'
-      preLoaderRoute: typeof HostUsersRouteImport
       parentRoute: typeof HostRouteRoute
     }
     '/host/whats-new': {
@@ -574,16 +598,30 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HostResultsGameIdRouteImport
       parentRoute: typeof HostRouteRoute
     }
+    '/host/users/': {
+      id: '/host/users/'
+      path: '/users'
+      fullPath: '/host/users/'
+      preLoaderRoute: typeof HostUsersIndexRouteImport
+      parentRoute: typeof HostRouteRoute
+    }
+    '/host/users/$userId': {
+      id: '/host/users/$userId'
+      path: '/users/$userId'
+      fullPath: '/host/users/$userId'
+      preLoaderRoute: typeof HostUsersUserIdRouteImport
+      parentRoute: typeof HostRouteRoute
+    }
   }
 }
 
 interface HostRouteRouteChildren {
   HostEmailRoute: typeof HostEmailRoute
+  HostLimitsRoute: typeof HostLimitsRoute
   HostNicknamesRoute: typeof HostNicknamesRoute
   HostPasswordRoute: typeof HostPasswordRoute
   HostSettingsRoute: typeof HostSettingsRoute
   HostTermsRoute: typeof HostTermsRoute
-  HostUsersRoute: typeof HostUsersRoute
   HostWhatsNewRoute: typeof HostWhatsNewRoute
   HostIndexRoute: typeof HostIndexRoute
   HostGamesPinRoute: typeof HostGamesPinRoute
@@ -591,18 +629,20 @@ interface HostRouteRouteChildren {
   HostLibraryNewRoute: typeof HostLibraryNewRoute
   HostQuizzesQuizIdRoute: typeof HostQuizzesQuizIdRoute
   HostResultsGameIdRoute: typeof HostResultsGameIdRoute
+  HostUsersUserIdRoute: typeof HostUsersUserIdRoute
   HostGamesIndexRoute: typeof HostGamesIndexRoute
   HostLibraryIndexRoute: typeof HostLibraryIndexRoute
   HostQuizzesIndexRoute: typeof HostQuizzesIndexRoute
+  HostUsersIndexRoute: typeof HostUsersIndexRoute
 }
 
 const HostRouteRouteChildren: HostRouteRouteChildren = {
   HostEmailRoute: HostEmailRoute,
+  HostLimitsRoute: HostLimitsRoute,
   HostNicknamesRoute: HostNicknamesRoute,
   HostPasswordRoute: HostPasswordRoute,
   HostSettingsRoute: HostSettingsRoute,
   HostTermsRoute: HostTermsRoute,
-  HostUsersRoute: HostUsersRoute,
   HostWhatsNewRoute: HostWhatsNewRoute,
   HostIndexRoute: HostIndexRoute,
   HostGamesPinRoute: HostGamesPinRoute,
@@ -610,9 +650,11 @@ const HostRouteRouteChildren: HostRouteRouteChildren = {
   HostLibraryNewRoute: HostLibraryNewRoute,
   HostQuizzesQuizIdRoute: HostQuizzesQuizIdRoute,
   HostResultsGameIdRoute: HostResultsGameIdRoute,
+  HostUsersUserIdRoute: HostUsersUserIdRoute,
   HostGamesIndexRoute: HostGamesIndexRoute,
   HostLibraryIndexRoute: HostLibraryIndexRoute,
   HostQuizzesIndexRoute: HostQuizzesIndexRoute,
+  HostUsersIndexRoute: HostUsersIndexRoute,
 }
 
 const HostRouteRouteWithChildren = HostRouteRoute._addFileChildren(

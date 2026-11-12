@@ -19,6 +19,10 @@ export interface SiteInfo {
   mailProvider: string | null
 }
 
+/**
+ * Read again after a minute when the tab gets focus: a server restarted with other settings (e-mail
+ * switched on, sign-up opened) must not leave an open tab on the old ones until it is reloaded.
+ */
 export function useSiteInfo() {
-  return useQuery({ queryKey: ['site'], queryFn: () => apiFetch<SiteInfo>('/api/site'), staleTime: Infinity })
+  return useQuery({ queryKey: ['site'], queryFn: () => apiFetch<SiteInfo>('/api/site'), staleTime: 60_000 })
 }

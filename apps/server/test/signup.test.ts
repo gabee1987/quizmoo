@@ -5,7 +5,7 @@ import type { Db } from '../src/db/index.js'
 import { emailCodes, localCredentials, quizzes, users } from '../src/db/schema.js'
 import type { MailMessage, Mailer } from '../src/mail.js'
 import { DAY_MS, deleteExpiredSignups } from '../src/retention.js'
-import { MAX_SIGNUPS_PER_DAY } from '../src/routes/auth.js'
+import { SIGNUPS_PER_DAY_DEFAULT as MAX_SIGNUPS_PER_DAY } from '@quizmoo/shared'
 import { buildTestApp, sessionCookie, testConfig } from './helpers/app.js'
 import { describeDb, withTestDb } from './helpers/test-db.js'
 

@@ -6,6 +6,7 @@ import { requireSession } from '../auth/require-session.js'
 import { overBudget } from '../budgets.js'
 import type { Db } from '../db/index.js'
 import { images } from '../db/schema.js'
+import { featureOff } from './http.js'
 
 export const MAX_IMAGE_BYTES = 5 * 1024 * 1024
 /**
@@ -72,6 +73,7 @@ export function imageRow(ownerId: string, output: { data: Buffer; info: OutputIn
 
 export async function imageRoutes(app: FastifyInstance, { db }: { db: Db }) {
   app.post('/api/images', { preHandler: requireSession(db) }, async (request, reply) => {
+    if (featureOff(request, reply, 'images')) return reply
     const file = await request.file({ limits: { fileSize: MAX_IMAGE_BYTES, files: 1 } })
     if (!file) return reply.code(400).send({ error: 'errors.invalidInput' })
     if (!ALLOWED_MIME.has(file.mimetype)) {

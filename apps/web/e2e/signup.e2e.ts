@@ -51,6 +51,11 @@ test('a host signs up and logs in with e-mail codes, and the admin sees who it i
       await phone.getByLabel('Code from the e-mail').fill(code)
       await phone.getByRole('button', { name: 'Finish sign-up' }).click()
       await expect(phone).toHaveURL(/\/host$/)
+      // The first visit welcomes, once; the first steps start with nothing done.
+      await expect(phone.getByRole('heading', { name: `Welcome to Quizmoo, ${newcomer}!` })).toBeVisible()
+      await expect(phone.getByText('0 of 5 done')).toBeVisible()
+      await phone.reload()
+      await expect(phone.getByRole('heading', { name: new RegExp(`${newcomer}`), level: 1 })).not.toHaveText(/Welcome/)
     })
 
     await test.step('logging out and back in takes a new code, no password', async () => {
@@ -75,9 +80,12 @@ test('a host signs up and logs in with e-mail codes, and the admin sees who it i
       await page.getByRole('button', { name: 'Log in' }).click()
       await expect(page).toHaveURL(/\/host$/)
       await page.goto('/host/users')
-      const card = page.getByRole('listitem').filter({ has: page.getByRole('heading', { name: newcomer, exact: true }) })
-      await expect(card.getByText(email)).toBeVisible()
-      await expect(card.getByText('(not confirmed yet)')).toHaveCount(0)
+      const row = page.getByRole('link', { name: new RegExp(newcomer) })
+      await expect(row).toContainText(email)
+      await row.click()
+      await expect(page.getByRole('heading', { name: newcomer, level: 1 })).toBeVisible()
+      await expect(page.getByText(email, { exact: true })).toBeVisible()
+      await expect(page.getByText('(not confirmed yet)')).toHaveCount(0)
     })
   } finally {
     // The account (with its starter quiz) goes, so the dev database keeps no test account.

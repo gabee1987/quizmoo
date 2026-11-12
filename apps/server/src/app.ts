@@ -15,12 +15,14 @@ import { Server as SocketServer } from 'socket.io'
 import type { Config } from './config.js'
 import type { Db } from './db/index.js'
 import { createEmailCodes } from './auth/email-codes.js'
+import { readSignupSettings } from './budgets.js'
 import { createMailer, type Mailer } from './mail.js'
 import type { GameManager } from './realtime/game-manager.js'
 import { registerSocketHandlers, type AppSocketServer } from './realtime/handlers.js'
 import { accountRoutes } from './routes/account.js'
 import { authRoutes } from './routes/auth.js'
 import { budgetRoutes } from './routes/budgets.js'
+import { homeRoutes } from './routes/home.js'
 import { bankRoutes } from './routes/bank.js'
 import { gameRoutes } from './routes/games.js'
 import { imageRoutes } from './routes/images.js'
@@ -148,8 +150,8 @@ export async function buildApp(config: Config, { db, manager, webDist: webDistOv
     termsVersion: TERMS_VERSION,
     feedbackUrl: config.FEEDBACK_URL ?? null,
     retentionDays: config.RESULTS_RETENTION_DAYS,
-    // Sign-up confirms the address with a code, so it needs e-mail.
-    registrationOpen: config.REGISTRATION_OPEN && mail.configured,
+    // Sign-up confirms the address with a code, so it needs e-mail; the admin may close it on Limits.
+    registrationOpen: config.REGISTRATION_OPEN && mail.configured && (await readSignupSettings(db)).open,
     // Hosts log in with e-mail codes; without e-mail, with a username and password.
     emailLogin: mail.configured,
     mailProvider: config.MAIL_PROVIDER ?? null,
@@ -174,7 +176,8 @@ export async function buildApp(config: Config, { db, manager, webDist: webDistOv
   await app.register(bankRoutes, { db })
   await app.register(shareRoutes, { db })
   await app.register(userRoutes, { db, manager })
-  await app.register(budgetRoutes, { db })
+  await app.register(budgetRoutes, { db, signupAvailable: config.REGISTRATION_OPEN && mail.configured })
+  await app.register(homeRoutes, { db })
   await app.register(meRoutes, { db, manager, signupNotifier, mailer: mail, codes })
   await app.register(accountRoutes, { db, manager, secureCookies, mailer: mail, codes })
   await app.register(gameRoutes, { db, manager, appOrigin: config.APP_ORIGIN, pinGuard })

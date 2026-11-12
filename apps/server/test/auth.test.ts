@@ -1,3 +1,4 @@
+import { fallbackAvatar } from '@quizmoo/shared'
 import { eq } from 'drizzle-orm'
 import { afterAll, beforeAll, expect, it } from 'vitest'
 import { hashPassword, verifyPassword } from '../src/auth/password.js'
@@ -79,6 +80,8 @@ describeDb('auth (database)', () => {
         mustChangePassword: false,
         mustAddEmail: false,
         mustAcceptTerms: false,
+        avatar: fallbackAvatar(userId),
+        permissions: {},
       },
     })
     const cookie = res.cookies.find((c) => c.name === 'quizmoo_session')!

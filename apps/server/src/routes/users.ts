@@ -1,13 +1,14 @@
-import { and, asc, eq, sql, type SQL } from 'drizzle-orm'
+import { and, asc, desc, eq, inArray, sql, type SQL } from 'drizzle-orm'
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
-import { emailSchema } from '@quizmoo/shared'
+import { avatarSchema, emailSchema, permissionsSchema } from '@quizmoo/shared'
 import { z } from 'zod'
 import { MIN_PASSWORD_LENGTH, hashPassword } from '../auth/password.js'
 import { requireSession } from '../auth/require-session.js'
+import { hostAvatar } from '../auth/session.js'
 import { createUser } from '../auth/users.js'
 import { usageColumns } from '../budgets.js'
 import type { Db } from '../db/index.js'
-import { hostSettings, localCredentials, sessions, users } from '../db/schema.js'
+import { hostSettings, localCredentials, quizzes, sessions, users } from '../db/schema.js'
 import { endGame } from '../game/engine.js'
 import type { GameManager } from '../realtime/game-manager.js'
 import { addStarterQuizSafely, starterLanguageSchema } from '../starter/add-starter-quiz.js'
@@ -61,28 +62,50 @@ export const figures = {
 export async function userRoutes(app: FastifyInstance, { db, manager }: { db: Db; manager: GameManager }) {
   const adminOnly = { preHandler: requireSession(db, { admin: true }) }
 
+  const accountColumns = () => ({
+    id: users.id,
+    username: users.username,
+    avatar: users.avatar,
+    permissions: users.permissions,
+    email: users.email,
+    emailVerified: sql<boolean>`${users.emailVerifiedAt} is not null`,
+    mustAddEmail: users.mustAddEmail,
+    hasPassword: sql<boolean>`exists (select 1 from "local_credentials" c where c."user_id" = "users"."id")`,
+    role: users.role,
+    mustChangePassword: users.mustChangePassword,
+    status: users.status,
+    createdAt: users.createdAt,
+    lastLoginAt: users.lastLoginAt,
+    /** The account's own budget values (a missing key follows the defaults). */
+    budget: users.budget,
+    ...figures,
+    usage: { ...usageColumns(Date.now()) },
+  })
+  const withAvatar = <T extends { id: string; avatar: string | null }>(row: T) => ({ ...row, avatar: hostAvatar(row.id, row.avatar) })
+
   app.get('/api/users', adminOnly, async () => {
-    const rows = await db
+    const rows = await db.select(accountColumns()).from(users).orderBy(asc(users.username))
+    return { users: rows.map(withAvatar) }
+  })
+
+  // One account's page: everything on the list, plus its quizzes (read-only: titles, sizes, dates).
+  app.get('/api/users/:id', adminOnly, async (request, reply) => {
+    const params = parseOr400(userIdParams, request.params, reply)
+    if (!params) return reply
+    const [row] = await db.select(accountColumns()).from(users).where(eq(users.id, params.id))
+    if (!row) return reply.code(404).send({ error: 'errors.notFound' })
+    const quizRows = await db
       .select({
-        id: users.id,
-        username: users.username,
-        email: users.email,
-        emailVerified: sql<boolean>`${users.emailVerifiedAt} is not null`,
-        mustAddEmail: users.mustAddEmail,
-        hasPassword: sql<boolean>`exists (select 1 from "local_credentials" c where c."user_id" = "users"."id")`,
-        role: users.role,
-        mustChangePassword: users.mustChangePassword,
-        status: users.status,
-        createdAt: users.createdAt,
-        lastLoginAt: users.lastLoginAt,
-        /** The account's own budget values (a missing key follows the defaults). */
-        budget: users.budget,
-        ...figures,
-        usage: { ...usageColumns(Date.now()) },
+        id: quizzes.id,
+        title: quizzes.title,
+        questionCount: sql<number>`jsonb_array_length(${quizzes.questions})::int`,
+        bytes: sql<number>`octet_length(row_to_json(${quizzes})::text)::int`,
+        updatedAt: quizzes.updatedAt,
       })
-      .from(users)
-      .orderBy(asc(users.username))
-    return { users: rows }
+      .from(quizzes)
+      .where(eq(quizzes.ownerId, params.id))
+      .orderBy(desc(quizzes.updatedAt))
+    return { user: withAvatar(row), quizzes: quizRows }
   })
 
   app.post('/api/users', adminOnly, async (request, reply) => {
@@ -147,7 +170,7 @@ export async function userRoutes(app: FastifyInstance, { db, manager }: { db: Db
     const found = await db
       .select({ id: users.id })
       .from(users)
-      .where(and(eq(users.id, params.id), eq(users.status, 'active')))
+      .where(and(eq(users.id, params.id), inArray(users.status, ['active', 'suspended'])))
     if (found.length === 0) {
       reply.code(404).send({ error: 'errors.notFound' })
       return null
@@ -190,6 +213,49 @@ export async function userRoutes(app: FastifyInstance, { db, manager }: { db: Db
     const id = await target(request, reply)
     if (!id) return reply
     await db.delete(sessions).where(eq(sessions.userId, id))
+    return reply.code(204).send()
+  })
+
+  // Features switched off for one account (a missing key: allowed). Admins have them all anyway.
+  app.put('/api/users/:id/permissions', adminOnly, async (request, reply) => {
+    const id = await target(request, reply)
+    if (!id) return reply
+    const body = parseOr400(z.object({ permissions: permissionsSchema }), request.body, reply)
+    if (!body) return reply
+    await db.update(users).set({ permissions: body.permissions }).where(eq(users.id, id))
+    return reply.code(204).send()
+  })
+
+  /**
+   * Blocks the account without deleting anything: its sessions end, its running games end (the
+   * phones see the end), and it cannot log in until reactivated. Never the admin's own account, so
+   * an active admin always remains.
+   */
+  app.post('/api/users/:id/suspend', adminOnly, async (request, reply) => {
+    const id = await target(request, reply)
+    if (!id) return reply
+    await db.update(users).set({ status: 'suspended' }).where(eq(users.id, id))
+    await db.delete(sessions).where(eq(sessions.userId, id))
+    for (const game of manager.hostedBy(id)) {
+      if (game.state.phase !== 'finished') manager.apply(game.state.pin, endGame)
+    }
+    return reply.code(204).send()
+  })
+
+  app.post('/api/users/:id/reactivate', adminOnly, async (request, reply) => {
+    const id = await target(request, reply)
+    if (!id) return reply
+    await db.update(users).set({ status: 'active' }).where(and(eq(users.id, id), eq(users.status, 'suspended')))
+    return reply.code(204).send()
+  })
+
+  // The admin changes another host's avatar (the host picks their own in My settings).
+  app.put('/api/users/:id/avatar', adminOnly, async (request, reply) => {
+    const id = await target(request, reply)
+    if (!id) return reply
+    const body = parseOr400(z.object({ avatar: avatarSchema }), request.body, reply)
+    if (!body) return reply
+    await db.update(users).set({ avatar: body.avatar }).where(eq(users.id, id))
     return reply.code(204).send()
   })
 

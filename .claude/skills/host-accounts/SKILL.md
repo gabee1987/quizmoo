@@ -1,6 +1,6 @@
 ---
 name: host-accounts
-description: Why host accounts work the way they do (phase 71): e-mail code login without passwords, sign-up without approval, the move of older accounts and waiting sign-ups, code purposes, the screen lock and account deletion without a password, per-account budgets enforced on the server, the database overview, and testing with Mailpit. Load before changing login, sign-up, e-mail codes, the Users page, budgets or what an account may store.
+description: Why host accounts work the way they do (phases 71 and 72): the admin area (Users list, account pages, Limits), suspending, feature switches, host avatars, the welcoming home page, e-mail code login without passwords, sign-up without approval, the move of older accounts and waiting sign-ups, code purposes, the screen lock and account deletion without a password, per-account budgets enforced on the server, the database overview, and testing with Mailpit. Load before changing login, sign-up, e-mail codes, the Users page, budgets or what an account may store.
 ---
 
 # Host accounts (phase 71, decided 12 November 2026)
@@ -36,6 +36,15 @@ Players are not affected: PIN and nickname only, no account.
 - Checked in: images upload, quiz create / starter / import / save / duplicate / append questions, library add / save / restore, share create and redeem, game create and "Play again". Each budget has its own error key (`budgetErrors`).
 - CPU and memory cannot be measured per account in one process; the game budgets limit what drives them. Size them with `pnpm load-test --games N` against the live address.
 - The Users page shows the database size (`pg_database_size`) against a limit the admin enters for the hosting plan (`app_settings.databaseBudgetMb`), hosts' content, each account's usage bars (warning from 80 %) and the budget dialog. Hosts see their own bars in My settings → Account.
+
+## Admin area (phase 72, decided 12 November 2026)
+
+- The user found the card-per-account Users page cramped. Now an Admin section with Users (compact list: avatar, name, address, role and status, the fullest limit as one bar, last login; filters all / hosts / admins / near a limit / suspended; sort; search), Limits (database, default budget, sign-up switch and daily cap) and Names. A row opens `/host/users/$userId` with Overview, Budget (inline `BudgetForm`), Permissions and Content (read-only quiz list: the admin never opens another host's quizzes).
+- **Suspend** (`status: 'suspended'`): sessions deleted, running games ended, `verifySession` refuses it, password login answers `errors.accountSuspended` (only to someone who knows the password); code logins already need `active`. Content stays. `target()` in `routes/users.ts` refuses the admin's own account, so an active admin always remains.
+- **Feature switches** (`users.permissions`, a missing key is allowed, `allowed(user, feature)` in shared, `featureOff()` in `routes/http.ts`): `images` (upload), `shareCodes` (create), `library` (save, edit, restore, sync; read and delete stay), `scheduling` (a game with `scheduledAt`). Admins have all.
+- **Sign-up switch** (`app_settings.signup` = `{ open, perDay }`, default open and 30): `REGISTRATION_OPEN` stays the master switch; `/api/site` and `/api/auth/register` read it.
+- **Avatars:** the players' emoji set; `users.avatar`, `hostAvatar(id, picked)` falls back to `fallbackAvatar(id)`. The host picks in My settings, the admin may change it.
+- **Home page** (`GET /api/me/home`): checklist ticked from data (starter quiz played: a finished game titled like the starter quiz; own quiz; pictures beyond the starter's drawings; a finished game with 2+ players; a library question), never from clicks; `welcomed_at` gives confetti once (existing hosts were marked welcomed by the migration); `checklist_dismissed` hides it for good.
 
 ## Testing
 

@@ -7,6 +7,7 @@ import type { CodePurpose, EmailCodes, IssueInput } from '../auth/email-codes.js
 import { MIN_PASSWORD_LENGTH, dummyHashPromise, hashPassword, verifyPassword } from '../auth/password.js'
 import { requireSession } from '../auth/require-session.js'
 import { createUser } from '../auth/users.js'
+import { readSignupSettings } from '../budgets.js'
 import {
   clearSessionCookie,
   createSession,
@@ -46,9 +47,6 @@ const registerSchema = z.object({
   lang: starterLanguageSchema,
 })
 
-/** New accounts a day at most; beyond this, sign-ups wait until the next day (abuse protection on a small hosting plan). */
-export const MAX_SIGNUPS_PER_DAY = 30
-
 export interface NewHost {
   username: string
   email: string
@@ -76,6 +74,8 @@ export function publicUser(user: SessionUser, emailLogin: boolean) {
     mustChangePassword: user.mustChangePassword,
     mustAddEmail: user.mustAddEmail && emailLogin,
     mustAcceptTerms: user.mustAcceptTerms,
+    avatar: user.avatar,
+    permissions: user.permissions,
   }
 }
 
@@ -131,6 +131,7 @@ export async function authRoutes(app: FastifyInstance, { db, secureCookies, regi
       if (row.status === 'pending' && !(emailLogin && row.mustAddEmail)) {
         return reply.code(403).send({ error: 'errors.accountPending' })
       }
+      if (row.status === 'suspended') return reply.code(403).send({ error: 'errors.accountSuspended' })
       return logIn(row.id, reply)
     },
   )
@@ -194,7 +195,8 @@ export async function authRoutes(app: FastifyInstance, { db, secureCookies, regi
     '/api/auth/register',
     { config: { rateLimit: { max: 5, timeWindow: '1 hour' } } },
     async (request, reply) => {
-      if (!registrationOpen || !emailLogin) return reply.code(403).send({ error: 'errors.registrationClosed' })
+      const signupSettings = await readSignupSettings(db)
+      if (!registrationOpen || !emailLogin || !signupSettings.open) return reply.code(403).send({ error: 'errors.registrationClosed' })
       const body = parseOr400(registerSchema, request.body, reply)
       if (!body) return reply
       // A bot gets the same answer as a person, so it has no reason to try again differently.
@@ -206,7 +208,7 @@ export async function authRoutes(app: FastifyInstance, { db, secureCookies, regi
         .select({ n: count() })
         .from(users)
         .where(gt(users.createdAt, new Date(Date.now() - 24 * 60 * 60_000)))
-      if ((today?.n ?? 0) >= MAX_SIGNUPS_PER_DAY) return reply.code(503).send({ error: 'errors.registrationsFull' })
+      if ((today?.n ?? 0) >= signupSettings.perDay) return reply.code(503).send({ error: 'errors.registrationsFull' })
 
       // An address that already has an account gets a login code: same answer, nothing revealed.
       const account = await accountByEmail(body.email)

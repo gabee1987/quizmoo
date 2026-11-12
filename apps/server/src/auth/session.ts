@@ -1,5 +1,5 @@
 import { createHash, randomBytes } from 'node:crypto'
-import { TERMS_VERSION } from '@quizmoo/shared'
+import { TERMS_VERSION, avatars, fallbackAvatar, type Avatar, type Permissions } from '@quizmoo/shared'
 import { and, eq, ne, sql } from 'drizzle-orm'
 import type { FastifyReply } from 'fastify'
 import type { Db } from '../db/index.js'
@@ -27,6 +27,15 @@ export interface SessionUser {
   mustAddEmail: boolean
   /** Never accepted the terms, or accepted an older version than `TERMS_VERSION`. */
   mustAcceptTerms: boolean
+  /** The picked avatar, or the stable fallback for the account id. */
+  avatar: Avatar
+  /** Features the admin switched off (see `allowed`). */
+  permissions: Permissions
+}
+
+/** The account's avatar: the picked one while it is still in the set, else a stable one per id. */
+export function hostAvatar(id: string, picked: string | null): Avatar {
+  return picked && (avatars as readonly string[]).includes(picked) ? (picked as Avatar) : fallbackAvatar(id)
 }
 
 /** The database only stores the SHA-256 of the cookie token. */
@@ -54,12 +63,17 @@ export async function verifySession(db: Db, token: string, now = Date.now()): Pr
       mustChangePassword: users.mustChangePassword,
       mustAddEmail: users.mustAddEmail,
       termsVersion: users.termsVersion,
+      status: users.status,
+      avatar: users.avatar,
+      permissions: users.permissions,
     })
     .from(sessions)
     .innerJoin(users, eq(users.id, sessions.userId))
     .where(eq(sessions.id, id))
   const row = rows[0]
   if (!row) return null
+  // Suspending deletes the sessions; this also covers one created in the same moment.
+  if (row.status === 'suspended') return null
   if (row.expiresAt.getTime() <= now) {
     await db.delete(sessions).where(eq(sessions.id, id))
     return null
@@ -73,6 +87,8 @@ export async function verifySession(db: Db, token: string, now = Date.now()): Pr
     mustChangePassword: row.mustChangePassword,
     mustAddEmail: row.mustAddEmail,
     mustAcceptTerms: row.termsVersion !== TERMS_VERSION,
+    avatar: hostAvatar(row.id, row.avatar),
+    permissions: row.permissions,
   }
 }
 

@@ -26,7 +26,7 @@ import { jsonBytes, overBudget } from '../budgets.js'
 import type { Db } from '../db/index.js'
 import { bankQuestions, images, quizzes, shareCodes, type ShareContent } from '../db/schema.js'
 import { createRateLimiter } from '../realtime/rate-limit.js'
-import { parseOr400 } from './http.js'
+import { featureOff, parseOr400 } from './http.js'
 import { MAX_IMAGES_PER_HOST, imageCount } from './images.js'
 import { parseLooseQuestions, pictureIds, picturesAllowed, withFreshGroupIds, withFreshIds } from './quizzes.js'
 
@@ -98,6 +98,7 @@ export async function shareRoutes(app: FastifyInstance, { db }: { db: Db }) {
   const redeemLimits = new Map<string, ReturnType<typeof createRateLimiter>>()
 
   app.post('/api/share', auth, async (request, reply) => {
+    if (featureOff(request, reply, 'shareCodes')) return reply
     const userId = request.user!.id
     const body = parseOr400(shareCreateSchema, request.body, reply)
     if (!body) return reply

@@ -1,6 +1,6 @@
 import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link, useNavigate } from '@tanstack/react-router'
-import type { Budget, Usage } from '@quizmoo/shared'
+import type { Avatar, Budget, Usage } from '@quizmoo/shared'
 import {
   AtSignIcon,
   FileDownIcon,
@@ -22,7 +22,9 @@ import {
 import { useState } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
+import { AvatarPicker } from '@/components/avatar-picker'
 import { ChoiceCards } from '@/components/choice-cards'
+import { PlayerAvatar } from '@/components/player-avatar'
 import { FormDialog } from '@/components/form-dialog'
 import { TextField } from '@/components/text-field'
 import { Badge } from '@/components/ui/badge'
@@ -30,6 +32,7 @@ import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { languages, setLanguage, type Language } from '@/i18n'
 import { apiFetch } from '@/lib/api'
+import { meQueryOptions } from '@/lib/auth'
 import { modes, setMode, useMode } from '@/lib/mode'
 import { useSiteInfo } from '@/lib/site'
 import { toastError } from '@/lib/toast'
@@ -95,6 +98,17 @@ export function AccountPanel() {
     onError: toastError,
   })
 
+  const me = useQuery(meQueryOptions)
+  // Shows at once in the header and the sidebar (they read `me`).
+  const pickAvatar = useMutation({
+    mutationFn: (avatar: Avatar) => apiFetch<void>('/api/me/avatar', { method: 'PUT', body: JSON.stringify({ avatar }) }),
+    onMutate: (avatar) => queryClient.setQueryData(meQueryOptions.queryKey, (user) => (user ? { ...user, avatar } : user)),
+    onError: (error) => {
+      toastError(error)
+      void queryClient.invalidateQueries({ queryKey: meQueryOptions.queryKey })
+    },
+  })
+
   const resetAll = useMutation({
     mutationFn: () => resetTours(queryClient),
     onSuccess: () => toast.success(t('settings.tours.done')),
@@ -104,14 +118,10 @@ export function AccountPanel() {
   return (
     <div className="flex flex-col gap-5">
       <SettingsSection icon={UserRoundIcon} title={t('settings.account.title')}>
-        {account.data ? (
+        {account.data && me.data ? (
+          <div className="flex flex-col gap-4">
           <div className="flex items-center gap-4">
-            <span
-              aria-hidden="true"
-              className="grid size-14 shrink-0 place-items-center rounded-2xl bg-primary text-2xl font-black text-primary-foreground uppercase shadow-[0_3px_0_0_var(--primary-edge)]"
-            >
-              {account.data.username.slice(0, 1)}
-            </span>
+            <PlayerAvatar key={me.data.avatar} avatar={me.data.avatar} size="lg" className="animate-pop" />
             <div className="flex min-w-0 flex-col gap-1">
               <p className="flex flex-wrap items-center gap-2">
                 <span className="truncate text-xl font-black">{account.data.username}</span>
@@ -125,6 +135,10 @@ export function AccountPanel() {
                   ` · ${t('settings.account.lastLogin', { when: timeAgo(new Date(account.data.lastLoginAt), Date.now(), i18n.language) })}`}
               </p>
             </div>
+          </div>
+          <div data-tour="avatar-picker">
+            <AvatarPicker value={me.data.avatar} onChange={(avatar) => pickAvatar.mutate(avatar)} />
+          </div>
           </div>
         ) : (
           <Skeleton className="h-14 rounded-2xl" />

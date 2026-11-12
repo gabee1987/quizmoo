@@ -88,3 +88,46 @@ export function effectiveBudget(defaults: Budget, override: BudgetOverride | nul
   }
   return budget
 }
+
+// ---- Permissions (phase 72) -------------------------------------------------
+
+/** Features the admin can switch off for one account. Admins always have every feature. */
+export const featureKeys = ['images', 'shareCodes', 'library', 'scheduling'] as const
+export type FeatureKey = (typeof featureKeys)[number]
+
+/** An account's switches: a missing key means allowed, `false` switched off by the admin. */
+export const permissionsSchema = z
+  .object({
+    images: z.boolean().optional(),
+    shareCodes: z.boolean().optional(),
+    library: z.boolean().optional(),
+    scheduling: z.boolean().optional(),
+  })
+  .strict()
+export type Permissions = z.infer<typeof permissionsSchema>
+
+/** Whether an account may use a feature. */
+export function allowed(user: { role: string; permissions?: Permissions | null | undefined }, feature: FeatureKey): boolean {
+  return user.role === 'admin' || user.permissions?.[feature] !== false
+}
+
+/** `pending`: a waiting sign-up from before phase 71. `suspended`: blocked by an admin, content kept. */
+export const userStatuses = ['active', 'pending', 'suspended'] as const
+export type UserStatus = (typeof userStatuses)[number]
+
+/** Sign-up as the admin set it on the Limits page (only while `REGISTRATION_OPEN` allows it at all). */
+export const SIGNUPS_PER_DAY_DEFAULT = 30
+export const signupSettingsSchema = z.object({
+  open: z.boolean(),
+  perDay: z.number().int().min(1).max(500),
+})
+export type SignupSettings = z.infer<typeof signupSettingsSchema>
+
+/** The home page's getting-started checklist, ticked from the host's own data. */
+export interface Progress {
+  starterPlayed: boolean
+  ownQuiz: boolean
+  picture: boolean
+  gameWithPlayers: boolean
+  library: boolean
+}

@@ -23,7 +23,7 @@ import { quizzes } from '../db/schema.js'
 import { EngineError, quickMessagesOf, setNextGame } from '../game/index.js'
 import type { GameManager, ManagedGame } from '../realtime/game-manager.js'
 import type { PinGuard } from '../realtime/pin-guard.js'
-import { parseOr400 } from './http.js'
+import { featureOff, parseOr400 } from './http.js'
 import { readHostSettings, readLockCodeHash, rememberEventName } from './me.js'
 import { parseQuizBranding } from './quizzes.js'
 
@@ -69,6 +69,7 @@ export async function gameRoutes(app: FastifyInstance, { db, manager, appOrigin,
   app.post('/api/games', auth, async (request, reply) => {
     const body = parseOr400(createGameSchema, request.body, reply)
     if (!body) return reply
+    if (body.scheduledAt && featureOff(request, reply, 'scheduling')) return reply
     if (tooManyOpen(request.user!.id)) return reply.code(409).send({ error: 'errors.tooManyGames' })
     const quiz = (await db.select().from(quizzes).where(eq(quizzes.id, body.quizId)))[0]
     if (!quiz) return reply.code(404).send({ error: 'errors.notFound' })

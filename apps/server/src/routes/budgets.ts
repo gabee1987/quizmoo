@@ -1,4 +1,4 @@
-import { budgetOverrideSchema, budgetSchema } from '@quizmoo/shared'
+import { budgetOverrideSchema, budgetSchema, signupSettingsSchema } from '@quizmoo/shared'
 import { and, eq, sql } from 'drizzle-orm'
 import type { FastifyInstance } from 'fastify'
 import { z } from 'zod'
@@ -7,8 +7,10 @@ import {
   budgetOf,
   readBudgetDefaults,
   readDatabaseBudgetMb,
+  readSignupSettings,
   saveBudgetDefaults,
   saveDatabaseBudgetMb,
+  saveSignupSettings,
   storageBytesSql,
   usageOf,
 } from '../budgets.js'
@@ -18,7 +20,17 @@ import { parseOr400 } from './http.js'
 
 const userIdParams = z.object({ id: z.string().min(1).max(40) })
 
-export async function budgetRoutes(app: FastifyInstance, { db }: { db: Db }) {
+export async function budgetRoutes(
+  app: FastifyInstance,
+  {
+    db,
+    signupAvailable,
+  }: {
+    db: Db
+    /** `REGISTRATION_OPEN` and e-mail configured: only then can the admin open sign-up at all. */
+    signupAvailable: boolean
+  },
+) {
   const auth = { preHandler: requireSession(db) }
   const adminOnly = { preHandler: requireSession(db, { admin: true }) }
 
@@ -39,7 +51,17 @@ export async function budgetRoutes(app: FastifyInstance, { db }: { db: Db }) {
       databaseBudgetMb: await readDatabaseBudgetMb(db),
       databaseBytes: Number(size?.bytes ?? 0),
       hostsBytes: Number(stored?.bytes ?? 0),
+      signup: await readSignupSettings(db),
+      signupAvailable,
     }
+  })
+
+  // Sign-up on or off and the daily cap (the Limits page); `REGISTRATION_OPEN` stays the master switch.
+  app.put('/api/budgets/signup', adminOnly, async (request, reply) => {
+    const body = parseOr400(z.object({ signup: signupSettingsSchema }), request.body, reply)
+    if (!body) return reply
+    await saveSignupSettings(db, body.signup)
+    return reply.code(204).send()
   })
 
   app.put('/api/budgets/defaults', adminOnly, async (request, reply) => {

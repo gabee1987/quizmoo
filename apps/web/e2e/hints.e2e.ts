@@ -76,7 +76,8 @@ test('every control without visible text has a tooltip', async ({ page, browser 
       const at = (name: string) => `${name} @${width}`
 
       await page.goto('/host')
-      await expect(page.getByText(title)).toBeVisible()
+      // On the home page twice: in "Play again" and in the recently edited list.
+      await expect(page.getByText(title).first()).toBeVisible()
       await check(page, at('host home'))
       await page.goto('/host/quizzes')
       await expect(page.getByText(title)).toBeVisible()
