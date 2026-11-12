@@ -7,6 +7,7 @@ Candidate features and fixes not planned yet. Pick the ones wanted and a phase p
 | Feature | Why | Effort | Notes |
 |---|---|---|---|
 | Practice mode (self-paced) | Training use, no host needed | L | Different flow: player advances alone, no projector; engine mostly reusable |
+| Explanation after a question | Players learn why an answer is right; the host can clear up a disputed or surprising question | M | Requested 12 November 2026. Each question can carry an optional explanation in the editor: a text (clarification, background, a source) and pictures. The host decides per quiz or game when it shows: right after the question's reveal (on the projector and the phones) or only after the game (in the phone review cards and the results). Questions have no such field today. To decide in the plan: per-question override of the timing, whether the host can skip it live, its place in spreadsheet and Quizmoo files, and picture limits within the account's budget. Fits the "Source" line planned for ready-made quizzes (Platform). |
 
 ## Platform
 
