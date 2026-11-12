@@ -13,6 +13,7 @@ import {
   EllipsisVerticalIcon,
   LayersIcon,
   LibraryIcon,
+  Share2Icon,
   Trash2Icon,
 } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
@@ -43,6 +44,7 @@ export function QuestionToolbar({
   onCopyToQuiz,
   onSaveToBank,
   onSaveChangesToBank,
+  onShare,
 }: {
   question: Question
   index: number
@@ -62,6 +64,8 @@ export function QuestionToolbar({
   onSaveToBank: () => void
   /** "Save changes to the library": a linked question changed here replaces the library's version. */
   onSaveChangesToBank: () => void
+  /** "Share…": a share code for this question. */
+  onShare: () => void
 }) {
   const { t } = useTranslation()
   const Icon = typeIcons[question.type]
@@ -117,6 +121,10 @@ export function QuestionToolbar({
             <DropdownMenuItem className="min-h-11" onSelect={onCopyToQuiz}>
               <CopyPlusIcon aria-hidden="true" />
               {t('editor.copy.menu')}
+            </DropdownMenuItem>
+            <DropdownMenuItem className="min-h-11" onSelect={onShare}>
+              <Share2Icon aria-hidden="true" />
+              {t('share.menu')}
             </DropdownMenuItem>
             {question.bank ? (
               <>

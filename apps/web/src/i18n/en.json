@@ -203,7 +203,8 @@
     "removeItem": "Remove {{name}}",
     "close": "Close",
     "actions": "Actions",
-    "typoAccepted": "Typo accepted"
+    "typoAccepted": "Typo accepted",
+    "done": "Done"
   },
   "auth": {
     "title": "Host login",
@@ -1464,9 +1465,77 @@
       "cancelled": "Reordering cancelled, {{item}} is back in place."
     }
   },
+  "share": {
+    "action": "Share",
+    "menu": "Share…",
+    "title_one": "Share the question",
+    "title_other": "Share {{count}} questions",
+    "titleQuiz": "Share “{{title}}”",
+    "fromQuiz_one": "{{count}} question from {{title}}",
+    "fromQuiz_other": "{{count}} questions from {{title}}",
+    "description": "Anyone with the code or its link sees the questions without the answers. Hosts can copy them into their own library or quizzes.",
+    "responsibility": "Share only what you have the right to share: you are responsible for it.",
+    "expiry": "How long should the code work?",
+    "expiries": { "7d": "7 days", "30d": "30 days", "never": "No expiry" },
+    "create": "Create code",
+    "readyTitle": "Your share code",
+    "readyBody": "Send the code or the link. Anyone with it sees “{{title}}” without the answers.",
+    "code": "Share code",
+    "link": "Link",
+    "reused": "You shared this before, so it keeps its code. The code now holds the current version and works for the time you chose.",
+    "copyLink": "Copy link",
+    "copyCode": "Copy code",
+    "linkCopied": "Link copied",
+    "codeCopied": "Code copied",
+    "validUntil": "Works until {{date}}",
+    "noExpiry": "No expiry",
+    "myCodes": "My share codes",
+    "enter": {
+      "open": "Enter a code",
+      "title": "Enter a share code",
+      "description": "Type the code you were sent, or paste its link.",
+      "submit": "Open",
+      "invalid": "That is not a share code. Codes look like QM-7K4PX-2XNAQ."
+    },
+    "list": {
+      "empty": "You have no live share codes. Share a question from the editor or the library, or a whole quiz from the quiz list.",
+      "kindQuiz": "Quiz",
+      "kindQuestions": "Questions",
+      "questions": "Questions",
+      "uses": "Used",
+      "created": "Created",
+      "expires": "Expires",
+      "show": "Show code and QR",
+      "revoke": "Revoke",
+      "revokeTitle": "Revoke {{code}}?",
+      "revokeBody": "The code and its link stop working at once. Copies people already made stay theirs.",
+      "revoked": "Code revoked"
+    },
+    "page": {
+      "questions": "Questions",
+      "questionNumber": "Question {{number}}",
+      "answersHidden": "The answers are hidden. You see the questions as players would.",
+      "loginHint": "Log in as a host to copy these questions into your question library or one of your quizzes.",
+      "loginHintQuiz": "Log in as a host to add this quiz to your quizzes.",
+      "login": "Log in",
+      "quizHelp": "Adds a copy of this quiz, with its rounds and settings, to your quizzes. Change it as you like: the original stays as it is.",
+      "addQuiz": "Add to my quizzes",
+      "quizAdded": "The quiz is in your quizzes now",
+      "questionsHelp_one": "Copy the question into your question library, or add it to the end of one of your quizzes.",
+      "questionsHelp_other": "Copy the {{count}} questions into your question library, or add them to the end of one of your quizzes.",
+      "toLibrary": "Add to my question library",
+      "toQuiz": "Add to one of my quizzes…",
+      "addedToLibrary_one": "Question added to your library",
+      "addedToLibrary_other": "{{count}} questions added to your library",
+      "openLibrary": "Open library",
+      "notFoundTitle": "We can't find this code",
+      "notFoundBody": "It may be mistyped, or it has expired or been revoked. Ask whoever sent it for a new one."
+    }
+  },
   "bank": {
     "title": "Question library",
     "help": "Questions you keep for later. Add them to any quiz from the editor.",
+    "tabs": { "questions": "Questions" },
     "page": {
       "newTitle": "New question",
       "editTitle": "Edit question",
@@ -1742,6 +1811,8 @@
     "imageNotFound": "A picture in these questions is not one of yours. Upload it again.",
     "tooManyQuestions": "That would take the quiz over 200 questions, so nothing was added.",
     "bankFull": "Your question library can hold 2000 questions. Delete a few first.",
+    "shareCodeNotFound": "We can't find this code. It may be mistyped, expired or revoked.",
+    "tooManyShareCodes": "You have 100 live share codes. Revoke one in My share codes first.",
     "imageTooBig": "This picture has too many pixels (50 megapixels at most). Make it smaller and upload it again.",
     "usernameTaken": "This username is already taken.",
     "notOnYourself": "You can't do this to your own account. Change your password in My settings.",
@@ -2335,6 +2406,8 @@
         "quizzes_other": "{{count}} quizzes",
         "bankQuestions_one": "{{count}} question in your question library",
         "bankQuestions_other": "{{count}} questions in your question library",
+        "shareCodes_one": "{{count}} share code (it stops working)",
+        "shareCodes_other": "{{count}} share codes (they stop working)",
         "games_one": "{{count}} finished game with its results",
         "games_other": "{{count}} finished games with their results",
         "images_one": "{{count}} image",
@@ -2525,7 +2598,8 @@
             "Your username, and your password only as a one-way hash that nobody can turn back into the password.",
             "When you last logged in (shown only to the administrator, to see which accounts are still in use), and which version of the terms you accepted and when (as a record of our agreement).",
             "Your logins: a random code per browser, stored as a hash, for up to {{sessionDays}} days.",
-            "Your quizzes, the pictures you upload, your settings, and the games you ran with their results.",
+            "Your quizzes, your question library, the pictures you upload, your settings, and the games you ran with their results.",
+            "Your share codes, each with its own copy of the shared questions and a count of how often it was used. Nothing about the people who open or use a code is stored.",
             "Administrators only, if they enter one: an e-mail address for notices about new sign-ups. It is used for nothing else and is deleted when the administrator removes it or is no longer an administrator."
           ],
           "paragraphs": [
@@ -2552,7 +2626,8 @@
           "items": [
             "Finished games, with the players' nicknames and answers, are deleted {{days}} days after the game at the latest, and only the newest 200 games are kept for each host.",
             "Unfinished games are closed after 12 hours and then deleted in the same way as finished ones.",
-            "Pictures that no quiz, setting or game uses any more are deleted within two days.",
+            "Pictures that no quiz, library question, share code, setting or game uses any more are deleted within two days.",
+            "A share code and its copy are deleted when you revoke it, and daily once it has expired.",
             "Expired logins are deleted daily. A sign-up the admin does not approve within {{signupDays}} days is deleted.",
             "A player's seat stored in the browser is removed when they leave the game. Otherwise it expires after {{seatDays}} days and is removed the next time Quizmoo is opened on that device.",
             "Host accounts, with their quizzes and pictures, stay until the host or the admin deletes them.",
@@ -2635,7 +2710,8 @@
             "Not allowed: anything illegal, hate speech, harassment, sexual content, content that sexualises minors, glorification of violence, and other people's personal data without a legal basis.",
             "No advertising, spam or links to harmful sites.",
             "Nicknames must not be offensive or pretend to be someone else. Hosts can remove players from their games.",
-            "You keep the rights to what you create. You allow the operator to store and display it only as far as needed to provide the service to you, for example on the screens and phones of your games."
+            "You keep the rights to what you create. You allow the operator to store and display it only as far as needed to provide the service to you, for example on the screens and phones of your games.",
+            "Share codes: anyone who has a code or its link can see the shared questions without their answers, and other hosts can copy them. You are responsible for what you share; share only what you have the right to pass on. Revoke a code to stop it at once. Copies made before that stay with whoever made them."
           ]
         },
         {

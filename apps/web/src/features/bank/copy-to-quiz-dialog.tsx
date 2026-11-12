@@ -12,11 +12,26 @@ import { quizzesQueryOptions } from '@/features/host/queries'
 import { apiFetch } from '@/lib/api'
 import { cn } from '@/lib/cn'
 
+/** Copies questions to the end of a quiz (fresh ids, without their round). */
+export const appendToQuiz = (quizId: string, questions: Question[]) =>
+  apiFetch<{ added: number }>(`/api/quizzes/${quizId}/questions`, { method: 'POST', body: JSON.stringify({ questions }) })
+
 /**
- * Copies questions to the end of another of the host's quizzes (fresh ids, without their round). The
- * list leaves out `fromQuizId`, and a quiz they would take past the question limit cannot be picked.
+ * Picks one of the host's quizzes and copies `count` questions to its end through `copy` (the editor's
+ * questions, or a share code's). The list leaves out `fromQuizId`, and a quiz they would take past the
+ * question limit cannot be picked.
  */
-export function CopyToQuizDialog({ questions, fromQuizId, onClose }: { questions: Question[]; fromQuizId: string; onClose: (copied: boolean) => void }) {
+export function CopyToQuizDialog({
+  count,
+  fromQuizId,
+  copy: copyTo,
+  onClose,
+}: {
+  count: number
+  fromQuizId?: string | undefined
+  copy: (quizId: string) => Promise<{ added: number }>
+  onClose: (copied: boolean) => void
+}) {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
@@ -29,12 +44,12 @@ export function CopyToQuizDialog({ questions, fromQuizId, onClose }: { questions
   }, [quizzes.data, fromQuizId, search, i18n.language])
 
   const copy = useMutation({
-    mutationFn: (quizId: string) =>
-      apiFetch<{ added: number; title: string }>(`/api/quizzes/${quizId}/questions`, { method: 'POST', body: JSON.stringify({ questions }) }),
+    mutationFn: copyTo,
     onSuccess: (result, quizId) => {
       void queryClient.invalidateQueries({ queryKey: ['quizzes'] })
       void queryClient.invalidateQueries({ queryKey: ['quiz', quizId] })
-      toast.success(t('editor.copy.done', { count: result.added, title: result.title }), {
+      const title = quizzes.data?.find((q) => q.id === quizId)?.title ?? ''
+      toast.success(t('editor.copy.done', { count: result.added, title }), {
         action: { label: t('editor.copy.open'), onClick: () => void navigate({ to: '/host/quizzes/$quizId', params: { quizId } }) },
       })
       onClose(true)
@@ -43,7 +58,7 @@ export function CopyToQuizDialog({ questions, fromQuizId, onClose }: { questions
 
   return (
     <FormDialog
-      title={t('editor.copy.title', { count: questions.length })}
+      title={t('editor.copy.title', { count })}
       description={t('editor.copy.description')}
       submitLabel={t('editor.copy.submit')}
       pending={copy.isPending}
@@ -77,7 +92,7 @@ export function CopyToQuizDialog({ questions, fromQuizId, onClose }: { questions
             className="flex max-h-72 flex-col gap-1.5 overflow-y-auto p-0.5"
           >
             {others.map((quiz) => {
-              const full = quiz.questionCount + questions.length > MAX_QUESTIONS
+              const full = quiz.questionCount + count > MAX_QUESTIONS
               return (
                 <label
                   key={quiz.id}

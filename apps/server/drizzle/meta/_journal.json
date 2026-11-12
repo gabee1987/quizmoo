@@ -155,6 +155,13 @@
       "when": 1794318393695,
       "tag": "0021_bank_auto_sync",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1794478711789,
+      "tag": "0022_share_codes",
+      "breakpoints": true
     }
   ]
 }

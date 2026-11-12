@@ -27,6 +27,7 @@ import { Route as HostUsersRouteImport } from './routes/host/users'
 import { Route as HostWhatsNewRouteImport } from './routes/host/whats-new'
 import { Route as PlayPinRouteImport } from './routes/play.$pin'
 import { Route as ScreenPinRouteImport } from './routes/screen.$pin'
+import { Route as ShareCodeRouteImport } from './routes/share.$code'
 import { Route as HostGamesIndexRouteImport } from './routes/host/games.index'
 import { Route as HostGamesPinRouteImport } from './routes/host/games.$pin'
 import { Route as HostLibraryIndexRouteImport } from './routes/host/library.index'
@@ -126,6 +127,11 @@ const ScreenPinRoute = ScreenPinRouteImport.update({
   path: '/screen/$pin',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ShareCodeRoute = ShareCodeRouteImport.update({
+  id: '/share/$code',
+  path: '/share/$code',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HostGamesIndexRoute = HostGamesIndexRouteImport.update({
   id: '/games/',
   path: '/games/',
@@ -185,6 +191,7 @@ export interface FileRoutesByFullPath {
   '/host/whats-new': typeof HostWhatsNewRoute
   '/play/$pin': typeof PlayPinRoute
   '/screen/$pin': typeof ScreenPinRoute
+  '/share/$code': typeof ShareCodeRoute
   '/host/': typeof HostIndexRoute
   '/host/games/$pin': typeof HostGamesPinRoute
   '/host/library/$questionId': typeof HostLibraryQuestionIdRoute
@@ -212,6 +219,7 @@ export interface FileRoutesByTo {
   '/host/whats-new': typeof HostWhatsNewRoute
   '/play/$pin': typeof PlayPinRoute
   '/screen/$pin': typeof ScreenPinRoute
+  '/share/$code': typeof ShareCodeRoute
   '/host': typeof HostIndexRoute
   '/host/games/$pin': typeof HostGamesPinRoute
   '/host/library/$questionId': typeof HostLibraryQuestionIdRoute
@@ -241,6 +249,7 @@ export interface FileRoutesById {
   '/host/whats-new': typeof HostWhatsNewRoute
   '/play/$pin': typeof PlayPinRoute
   '/screen/$pin': typeof ScreenPinRoute
+  '/share/$code': typeof ShareCodeRoute
   '/host/': typeof HostIndexRoute
   '/host/games/$pin': typeof HostGamesPinRoute
   '/host/library/$questionId': typeof HostLibraryQuestionIdRoute
@@ -271,6 +280,7 @@ export interface FileRouteTypes {
     | '/host/whats-new'
     | '/play/$pin'
     | '/screen/$pin'
+    | '/share/$code'
     | '/host/'
     | '/host/games/$pin'
     | '/host/library/$questionId'
@@ -298,6 +308,7 @@ export interface FileRouteTypes {
     | '/host/whats-new'
     | '/play/$pin'
     | '/screen/$pin'
+    | '/share/$code'
     | '/host'
     | '/host/games/$pin'
     | '/host/library/$questionId'
@@ -326,6 +337,7 @@ export interface FileRouteTypes {
     | '/host/whats-new'
     | '/play/$pin'
     | '/screen/$pin'
+    | '/share/$code'
     | '/host/'
     | '/host/games/$pin'
     | '/host/library/$questionId'
@@ -349,6 +361,7 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   PlayPinRoute: typeof PlayPinRoute
   ScreenPinRoute: typeof ScreenPinRoute
+  ShareCodeRoute: typeof ShareCodeRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -479,6 +492,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ScreenPinRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/share/$code': {
+      id: '/share/$code'
+      path: '/share/$code'
+      fullPath: '/share/$code'
+      preLoaderRoute: typeof ShareCodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/host/games/': {
       id: '/host/games/'
       path: '/games'
@@ -590,6 +610,7 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   PlayPinRoute: PlayPinRoute,
   ScreenPinRoute: ScreenPinRoute,
+  ShareCodeRoute: ShareCodeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

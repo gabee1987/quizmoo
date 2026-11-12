@@ -203,7 +203,8 @@
     "removeItem": "{{name}} törlése",
     "close": "Bezárás",
     "actions": "Műveletek",
-    "typoAccepted": "Elírás, de jó"
+    "typoAccepted": "Elírás, de jó",
+    "done": "Kész"
   },
   "auth": {
     "title": "Lépj be!",
@@ -1464,8 +1465,76 @@
       "cancelled": "Átrendezés visszavonva, {{item}} a helyén maradt."
     }
   },
+  "share": {
+    "action": "Megosztás",
+    "menu": "Megosztás…",
+    "title_one": "Oszd meg a kérdést",
+    "title_other": "Oszd meg a kijelölt {{count}} kérdést",
+    "titleQuiz": "Oszd meg: „{{title}}”",
+    "fromQuiz_one": "{{count}} kérdés innen: {{title}}",
+    "fromQuiz_other": "{{count}} kérdés innen: {{title}}",
+    "description": "Aki megkapja a kódot vagy a linkjét, válaszok nélkül látja a kérdéseket. Más játékvezetők átmásolhatják őket a saját kérdéstárukba vagy kvízeikbe.",
+    "responsibility": "Csak olyat ossz meg, amihez jogod van: a megosztott tartalomért te felelsz.",
+    "expiry": "Meddig működjön a kód?",
+    "expiries": { "7d": "7 napig", "30d": "30 napig", "never": "Nem jár le" },
+    "create": "Kód készítése",
+    "readyTitle": "Kész a megosztási kódod",
+    "readyBody": "Küldd el a kódot vagy a linket. Aki megkapja, válaszok nélkül látja ezt: „{{title}}”.",
+    "code": "Megosztási kód",
+    "link": "Link",
+    "reused": "Ezt már megosztottad, ezért megmarad a kódja. A kód most az aktuális változatot tartalmazza, és a most választott ideig működik.",
+    "copyLink": "Link másolása",
+    "copyCode": "Kód másolása",
+    "linkCopied": "Kimásoltuk a linket",
+    "codeCopied": "Kimásoltuk a kódot",
+    "validUntil": "Eddig működik: {{date}}",
+    "noExpiry": "Nem jár le",
+    "myCodes": "Megosztási kódjaim",
+    "enter": {
+      "open": "Kód beírása",
+      "title": "Írd be a megosztási kódot",
+      "description": "Írd be a kódot, amit kaptál, vagy illeszd be a linkjét.",
+      "submit": "Megnyitás",
+      "invalid": "Ez nem megosztási kód. A kódok így néznek ki: QM-7K4PX-2XNAQ."
+    },
+    "list": {
+      "empty": "Nincs élő megosztási kódod. Kérdést a szerkesztőből vagy a kérdéstárból, egész kvízt a kvízlistáról oszthatsz meg.",
+      "kindQuiz": "Kvíz",
+      "kindQuestions": "Kérdések",
+      "questions": "Kérdések",
+      "uses": "Felhasználva",
+      "created": "Készült",
+      "expires": "Lejár",
+      "show": "Kód és QR-kód mutatása",
+      "revoke": "Visszavonás",
+      "revokeTitle": "Visszavonod: {{code}}?",
+      "revokeBody": "A kód és a linkje azonnal megszűnik. Akik már átmásolták a kérdéseket, megtartják a másolatukat.",
+      "revoked": "Visszavontuk a kódot"
+    },
+    "page": {
+      "questions": "Kérdések",
+      "questionNumber": "{{number}}. kérdés",
+      "answersHidden": "A válaszokat nem mutatjuk: úgy látod a kérdéseket, ahogy a játékosok.",
+      "loginHint": "Lépj be játékvezetőként, és átmásolhatod ezeket a kérdéseket a kérdéstáradba vagy valamelyik kvízedbe.",
+      "loginHintQuiz": "Lépj be játékvezetőként, és hozzáadhatod ezt a kvízt a kvízeidhez.",
+      "login": "Belépés",
+      "quizHelp": "A kvíz egy másolata a köreivel és beállításaival a kvízeid közé kerül. Szabadon módosíthatod: az eredeti nem változik.",
+      "addQuiz": "Hozzáadás a kvízeimhez",
+      "quizAdded": "A kvíz már a kvízeid között van",
+      "questionsHelp_one": "Másold a kérdést a kérdéstáradba, vagy tedd valamelyik kvízed végére.",
+      "questionsHelp_other": "Másold a {{count}} kérdést a kérdéstáradba, vagy tedd őket valamelyik kvízed végére.",
+      "toLibrary": "Hozzáadás a kérdéstáramhoz",
+      "toQuiz": "Hozzáadás egy kvízemhez…",
+      "addedToLibrary_one": "Hozzáadtuk a kérdést a kérdéstáradhoz",
+      "addedToLibrary_other": "Hozzáadtunk {{count}} kérdést a kérdéstáradhoz",
+      "openLibrary": "Kérdéstár megnyitása",
+      "notFoundTitle": "Nem találjuk ezt a kódot",
+      "notFoundBody": "Lehet, hogy elírtad, vagy már lejárt, esetleg visszavonták. Kérj újat attól, aki küldte."
+    }
+  },
   "bank": {
     "title": "Kérdéstár",
+    "tabs": { "questions": "Kérdések" },
     "help": "Későbbre félretett kérdéseid. A szerkesztőből bármelyik kvízbe beteheted őket.",
     "page": {
       "newTitle": "Új kérdés",
@@ -1742,6 +1811,8 @@
     "imageNotFound": "Az egyik kép ezekben a kérdésekben nem a tiéd. Töltsd fel újra.",
     "tooManyQuestions": "Így a kvíz 200 kérdésnél több lenne, ezért nem adtunk hozzá semmit.",
     "bankFull": "A kérdéstáradban 2000 kérdés fér el. Előbb törölj párat.",
+    "shareCodeNotFound": "Nem találjuk ezt a kódot. Lehet, hogy elírtad, lejárt vagy visszavonták.",
+    "tooManyShareCodes": "Már 100 élő megosztási kódod van. Előbb vonj vissza egyet a Megosztási kódjaim között.",
     "imageTooBig": "Ez a kép túl nagy felbontású (legfeljebb 50 megapixel). Kicsinyítsd le, és töltsd fel újra.",
     "usernameTaken": "Ez a felhasználónév már foglalt.",
     "notOnYourself": "A saját fiókoddal ezt nem teheted meg. A jelszavadat a Beállításaimban cserélheted le.",
@@ -2335,6 +2406,8 @@
         "quizzes_other": "{{count}} kvíz",
         "bankQuestions_one": "{{count}} kérdés a kérdéstáradban",
         "bankQuestions_other": "{{count}} kérdés a kérdéstáradban",
+        "shareCodes_one": "{{count}} megosztási kód (megszűnik)",
+        "shareCodes_other": "{{count}} megosztási kód (megszűnnek)",
         "games_one": "{{count}} befejezett játék az eredményeivel",
         "games_other": "{{count}} befejezett játék az eredményeikkel",
         "images_one": "{{count}} kép",
@@ -2525,7 +2598,8 @@
             "A felhasználóneved, a jelszavad pedig csak egyirányú hash-ként, amelyből senki nem tudja visszafejteni a jelszót.",
             "Mikor léptél be utoljára (ezt csak az adminisztrátor látja, hogy tudja, mely fiókokat használják még), és hogy a feltételek melyik változatát mikor fogadtad el (a megállapodásunk igazolására).",
             "A belépéseid: böngészőnként egy véletlenszerű kód, hash-ként, legfeljebb {{sessionDays}} napig.",
-            "A kvízeid, a feltöltött képeid, a beállításaid és a játékaid az eredményeikkel.",
+            "A kvízeid, a kérdéstárad, a feltöltött képeid, a beállításaid és a játékaid az eredményeikkel.",
+            "A megosztási kódjaid, mindegyik a megosztott kérdések saját másolatával és azzal, hányszor használták. Azokról, akik megnyitnak vagy felhasználnak egy kódot, semmit nem tárolunk.",
             "Csak adminisztrátorok esetében, ha megadják: egy e-mail-cím az új regisztrációkról szóló értesítésekhez. Másra nem használjuk, és töröljük, ha az adminisztrátor eltávolítja, vagy megszűnik az adminisztrátori szerepköre."
           ],
           "paragraphs": [
@@ -2552,7 +2626,8 @@
           "items": [
             "A befejezett játékokat a játékosok becenevével és válaszaival együtt legkésőbb {{days}} nappal a játék után töröljük, és minden játékvezetőnek legfeljebb a 200 legutóbbi marad meg.",
             "A be nem fejezett játékokat 12 óra után lezárjuk, aztán ugyanúgy töröljük, mint a befejezetteket.",
-            "Azokat a képeket, amelyeket már egy kvíz, beállítás vagy játék sem használ, két napon belül töröljük.",
+            "Azokat a képeket, amelyeket már egy kvíz, kérdéstárbeli kérdés, megosztási kód, beállítás vagy játék sem használ, két napon belül töröljük.",
+            "A megosztási kódot és a másolatát a visszavonásakor töröljük, lejárat után pedig a napi takarításkor.",
             "A lejárt belépéseket naponta töröljük. Ha az adminisztrátor {{signupDays}} napon belül nem hagy jóvá egy regisztrációt, töröljük.",
             "A játékos helye a böngészőben törlődik, amikor kilép a játékból. Ha nem lép ki, {{seatDays}} nap után lejár, és a Quizmoo következő megnyitásakor törlődik az adott eszközön.",
             "A játékvezetői fiók a kvízekkel és képekkel együtt addig marad, amíg a játékvezető vagy az adminisztrátor nem törli.",
@@ -2635,7 +2710,8 @@
             "Tilos: bármi jogellenes, gyűlöletkeltés, zaklatás, szexuális tartalom, kiskorúakat szexualizáló tartalom, az erőszak dicsőítése, és mások személyes adatai jogalap nélkül.",
             "Tilos a reklám, a spam és a káros oldalakra mutató link.",
             "A becenév nem lehet sértő, és nem adhatod ki magad másnak. A játékvezető eltávolíthat játékosokat a játékából.",
-            "Amit létrehozol, annak jogai nálad maradnak. Az üzemeltetőnek kizárólag arra adsz engedélyt, hogy a tartalmat a szolgáltatás számodra történő nyújtásához szükséges mértékben tárolja és megjelenítse, például a játékaid kijelzőin és telefonjain."
+            "Amit létrehozol, annak jogai nálad maradnak. Az üzemeltetőnek kizárólag arra adsz engedélyt, hogy a tartalmat a szolgáltatás számodra történő nyújtásához szükséges mértékben tárolja és megjelenítse, például a játékaid kijelzőin és telefonjain.",
+            "Megosztási kódok: aki megkapja a kódot vagy a linkjét, válaszok nélkül látja a megosztott kérdéseket, és más játékvezetők át is másolhatják őket. A megosztott tartalomért te felelsz; csak olyat ossz meg, amit jogod van továbbadni. A kódot visszavonással azonnal leállíthatod; a korábban készült másolatok annál maradnak, aki elkészítette őket."
           ]
         },
         {

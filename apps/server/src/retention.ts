@@ -1,6 +1,6 @@
 import { and, eq, lt, sql } from 'drizzle-orm'
 import type { Db } from './db/index.js'
-import { bankQuestions, games, hostSettings, images, quizzes, sessions, users } from './db/schema.js'
+import { bankQuestions, games, hostSettings, images, quizzes, sessions, shareCodes, users } from './db/schema.js'
 
 export const DAY_MS = 24 * 60 * 60 * 1000
 
@@ -52,6 +52,12 @@ export async function deleteExpiredSessions(db: Db, now: number): Promise<number
   return deleted.length
 }
 
+/** Share codes past their expiry, with their copies. Lookups already treat them as missing. Returns how many. */
+export async function deleteExpiredShareCodes(db: Db, now: number): Promise<number> {
+  const deleted = await db.delete(shareCodes).where(lt(shareCodes.expiresAt, new Date(now))).returning({ id: shareCodes.id })
+  return deleted.length
+}
+
 /** Uploads younger than this are kept even when unused: the editor may not have saved the quiz yet. */
 export const UNUSED_IMAGE_GRACE_MS = DAY_MS
 
@@ -59,7 +65,7 @@ export const UNUSED_IMAGE_GRACE_MS = DAY_MS
  * Data minimisation: deletes images nothing refers to any more (a removed question image, a
  * replaced logo, a deleted quiz). They can show people, and stayed public by their address until
  * the account was deleted. An image counts as used while a quiz (questions, options, branding),
- * a bank question, the host's settings (logo) or a stored game (its quiz copy and branding) of the same owner names
+ * a bank question, a share code, the host's settings (logo) or a stored game (its quiz copy and branding) of the same owner names
  * it. Image ids are long random strings, so a text search of the JSON finds exactly those uses.
  */
 export async function deleteUnusedImages(db: Db, now: number): Promise<number> {
@@ -71,6 +77,7 @@ export async function deleteUnusedImages(db: Db, now: number): Promise<number> {
         lt(images.createdAt, cutoff),
         sql`not exists (select 1 from ${quizzes} q where q.owner_id = ${images.ownerId} and (strpos(q.questions::text, ${images.id}) > 0 or strpos(q.groups::text, ${images.id}) > 0 or strpos(q.branding::text, ${images.id}) > 0))`,
         sql`not exists (select 1 from ${bankQuestions} b where b.owner_id = ${images.ownerId} and strpos(b.question::text, ${images.id}) > 0)`,
+        sql`not exists (select 1 from ${shareCodes} c where c.owner_id = ${images.ownerId} and strpos(c.content::text, ${images.id}) > 0)`,
         sql`not exists (select 1 from ${hostSettings} s where s.user_id = ${images.ownerId} and strpos(s.settings::text, ${images.id}) > 0)`,
         sql`not exists (select 1 from ${games} g where g.host_id = ${images.ownerId} and strpos(g.state::text, ${images.id}) > 0)`,
       ),
@@ -110,6 +117,8 @@ export function scheduleRetention(
       if (signups > 0) log.info({ deleted: signups }, 'deleted unapproved sign-ups')
       const expiredSessions = await deleteExpiredSessions(db, now())
       if (expiredSessions > 0) log.info({ deleted: expiredSessions }, 'deleted expired logins')
+      const expiredCodes = await deleteExpiredShareCodes(db, now())
+      if (expiredCodes > 0) log.info({ deleted: expiredCodes }, 'deleted expired share codes')
       // After the games: an image used only by a game deleted above is unused now.
       const unusedImages = await deleteUnusedImages(db, now())
       if (unusedImages > 0) log.info({ deleted: unusedImages }, 'deleted unused images')

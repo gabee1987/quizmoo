@@ -37,6 +37,7 @@ import {
   PlayIcon,
   PlusIcon,
   Settings2Icon,
+  Share2Icon,
   Trash2Icon,
   XIcon,
 } from 'lucide-react'
@@ -102,9 +103,10 @@ import { QuestionDefaultsFields } from '../../features/editor/question-defaults-
 import { SearchField, SearchResults } from '../../features/editor/question-search'
 import { SelectList } from '../../features/editor/select-list'
 import { AddFromBankDialog } from '../../features/bank/add-from-bank-dialog'
-import { CopyToQuizDialog } from '../../features/bank/copy-to-quiz-dialog'
+import { CopyToQuizDialog, appendToQuiz } from '../../features/bank/copy-to-quiz-dialog'
 import { updateBankQuestion } from '../../features/bank/queries'
 import { SaveToBankDialog } from '../../features/bank/save-to-bank-dialog'
+import { ShareDialog, shareTitle } from '../../features/share/share-dialog'
 import { PhonePreview } from '../../features/editor/phone-preview'
 import { ProblemsMenu, listProblems, problemLabel, type Problem } from '../../features/editor/problems-menu'
 import { QuestionForm } from '../../features/editor/question-form'
@@ -245,6 +247,8 @@ function Editor({ quiz }: { quiz: Quiz }) {
   const [copying, setCopying] = useState<Question[] | null>(null)
   // The questions waiting in the Save to bank dialog, and whether Add from bank is open.
   const [banking, setBanking] = useState<Question[] | null>(null)
+  // The questions waiting for a share code.
+  const [sharing, setSharing] = useState<Question[] | null>(null)
   const [fromBank, setFromBank] = useState(false)
   // The linked question changed here that waits for "Replace the library's version?".
   const [pushing, setPushing] = useState<Question | null>(null)
@@ -508,6 +512,8 @@ function Editor({ quiz }: { quiz: Quiz }) {
   }
   /** Opens Copy to quiz for these questions. */
   const copyToQuiz = (list: Question[]) => complete(list) && setCopying(list)
+  /** Opens Share for these questions. */
+  const share = (list: Question[]) => complete(list) && setSharing(list)
   /** Opens Save to bank for these questions. */
   const saveToBank = (list: Question[]) => complete(list) && setBanking(list)
   /**
@@ -844,11 +850,12 @@ function Editor({ quiz }: { quiz: Quiz }) {
             {t('editor.select.done')}
           </Button>
         </div>
-        <div className="flex gap-1.5">
+        {/* Two by two: four labels in one row of the narrow list would all be cut short. */}
+        <div className="grid grid-cols-2 gap-1.5">
           <Button
             variant="outline"
             size="sm"
-            className={cn('min-w-0 flex-auto gap-1 px-2!', height)}
+            className={cn('min-w-0 gap-1 px-2!', height)}
             disabled={tickedQuestions.length === 0}
             onClick={() => copyToQuiz(tickedQuestions)}
           >
@@ -858,7 +865,7 @@ function Editor({ quiz }: { quiz: Quiz }) {
           <Button
             variant="outline"
             size="sm"
-            className={cn('min-w-0 flex-auto gap-1 px-2!', height)}
+            className={cn('min-w-0 gap-1 px-2!', height)}
             disabled={tickedQuestions.length === 0}
             onClick={() => saveToBank(tickedQuestions)}
           >
@@ -866,9 +873,19 @@ function Editor({ quiz }: { quiz: Quiz }) {
             <span className="truncate">{t('bank.save.action')}</span>
           </Button>
           <Button
+            variant="outline"
+            size="sm"
+            className={cn('min-w-0 gap-1 px-2!', height)}
+            disabled={tickedQuestions.length === 0}
+            onClick={() => share(tickedQuestions)}
+          >
+            <Share2Icon aria-hidden="true" />
+            <span className="truncate">{t('share.action')}</span>
+          </Button>
+          <Button
             variant="destructive"
             size="sm"
-            className={cn('min-w-0 flex-auto gap-1 px-2!', height)}
+            className={cn('min-w-0 gap-1 px-2!', height)}
             disabled={tickedQuestions.length === 0}
             onClick={deleteTicked}
           >
@@ -1263,6 +1280,7 @@ function Editor({ quiz }: { quiz: Quiz }) {
                   onCopyToQuiz={() => copyToQuiz([selected])}
                   onSaveToBank={() => saveToBank([selected])}
                   onSaveChangesToBank={() => setPushing(selected)}
+                  onShare={() => share([selected])}
                 />
                 {selected.off && <OffNotice kind="question" onSwitchOn={() => switchItem(selected.id, true)} />}
                 <QuestionForm
@@ -1508,11 +1526,26 @@ function Editor({ quiz }: { quiz: Quiz }) {
 
         {copying && (
           <CopyToQuizDialog
-            questions={copying}
+            count={copying.length}
             fromQuizId={quiz.id}
+            copy={(quizId) => appendToQuiz(quizId, copying)}
             onClose={(copied) => {
               setCopying(null)
               if (copied) stopSelecting()
+            }}
+          />
+        )}
+
+        {sharing && (
+          <ShareDialog
+            request={{
+              kind: 'questions',
+              title: sharing.length === 1 ? shareTitle(sharing[0]!.text) : shareTitle(t('share.fromQuiz', { count: sharing.length, title: draft.title })),
+              questions: sharing,
+            }}
+            onClose={() => {
+              setSharing(null)
+              stopSelecting()
             }}
           />
         )}

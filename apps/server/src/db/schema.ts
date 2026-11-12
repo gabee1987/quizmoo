@@ -90,6 +90,41 @@ export const bankQuestions = pgTable(
   (table) => [index('bank_questions_owner_idx').on(table.ownerId, table.createdAt.desc(), table.id.desc())],
 )
 
+/** What a share code holds: its own frozen copy, taken when the code was made. */
+export interface ShareContent {
+  /** The shared quiz, so sharing it again finds its code; missing for loose questions. */
+  quizId?: string
+  questions: Question[]
+  /** A shared quiz's rounds, settings and the rest; empty or missing for loose questions. */
+  groups?: QuestionGroup[]
+  description?: string
+  settings?: Partial<GameSettings>
+  questionDefaults?: Partial<QuestionDefaults>
+}
+
+// Share codes: anyone with the code sees the questions without answers; a host can copy them. The
+// code keeps its own copy (with the sharer's picture ids, so the image clean-up keeps those), deleted
+// on revoke, at expiry (daily job) and with the account. Nothing about the receivers but a use count.
+export const shareCodes = pgTable(
+  'share_codes',
+  {
+    id: text('id').primaryKey(),
+    /** `QM-XXXXX-XXXXX`, stored in this form; lookups normalise what was typed first. */
+    code: text('code').notNull().unique(),
+    ownerId: text('owner_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    kind: text('kind', { enum: ['questions', 'quiz'] }).notNull(),
+    title: text('title').notNull(),
+    content: jsonb('content').$type<ShareContent>().notNull(),
+    /** Null: never. */
+    expiresAt: timestamp('expires_at', { withTimezone: true }),
+    uses: integer('uses').notNull().default(0),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [index('share_codes_owner_idx').on(table.ownerId, table.createdAt.desc())],
+)
+
 // Question images, resized server-side and stored inline. Keeps the deployment
 // to a single Postgres dependency; sizes are small at quiz scale.
 export const images = pgTable('images', {

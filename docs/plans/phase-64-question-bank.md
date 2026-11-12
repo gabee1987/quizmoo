@@ -60,6 +60,18 @@ Questions stop being locked into one quiz. A host copies questions to another of
 - Retention: expired codes are deleted daily; the image clean-up keeps pictures that a live code uses.
 - Legal texts: the terms say the sharer is responsible for what they share and that anyone with the code can see the questions; the privacy notice lists bank questions and share codes and says nothing about the receiver is stored beyond a use count.
 
+### Part 3 as built (12 November 2026)
+
+- **Where it lives:** "My share codes" is a second tab of the question library (`/host/library?tab=codes`); "Enter a code" is in the library's and the quiz list's header. There is no `/host/bank` page (renamed in part 2).
+- **A shared quiz only becomes a quiz; shared questions only go to the library or a quiz** (user's decision after testing, 12 November 2026: "Add to my library" and "Add to a quiz" made no sense for a whole quiz, and "Make my own copy" was unclear). The page offers "Add to my quizzes" for a quiz, and "Add to my question library" / "Add to one of my quizzes…" for questions, each with a line saying what happens; the server refuses the other targets.
+- **One code per shared thing** (user, 12 November 2026: sharing the same quiz twice should not make two codes): sharing a quiz again reuses its live code (`content.quizId`), and the same questions find theirs by equal content. The code's copy is brought up to date and its expiry restarts from the new choice; the frozen copy is now "as of the last share".
+- **The sharer's branding stays behind:** a shared quiz carries its rounds, settings, question defaults and description, not the logo or event name.
+- **Nothing arrives switched off** in the library or an existing quiz; a new quiz keeps the original's switches.
+- **The sharer's own redeem keeps the same pictures** instead of copying them, so it does not use up the picture quota.
+- **Terms version raised to 2026-11-12** (the terms gained the sharing rules), so every host accepts them again at the next login.
+- **Login returns to a share page:** `safeHostPath` also accepts `/share/<code>`.
+- **No select mode on the library page:** a library question is shared one at a time from its card; several at once from a quiz's select bar.
+
 Out of scope: community banks (after 62), public question collections (66), a "newer version in the bank" note, difficulty.
 
 ## Files (from the code survey)
