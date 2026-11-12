@@ -1,6 +1,6 @@
 import type { Question, TeamAnswerPublic, TeamPublic } from '@quizmoo/shared'
 import { useTranslation } from 'react-i18next'
-import { CheckIcon, CrossIcon } from '../../components/icons'
+import { CheckIcon, CrossIcon, PartialIcon } from '../../components/icons'
 import { formatAnswer } from '../questions/format-answer'
 
 /**
@@ -23,6 +23,12 @@ export function TeamAnswerList({ entries, teams, question }: { entries: TeamAnsw
             <span className="text-success">
               <CheckIcon className="size-4" />
               <span className="sr-only">{t('play.correct')}</span>
+            </span>
+          )}
+          {entry.correct === 'partial' && (
+            <span>
+              <PartialIcon className="size-4" />
+              <span className="sr-only">{t('play.partlyRight')}</span>
             </span>
           )}
           {entry.correct === false && (

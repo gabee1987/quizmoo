@@ -56,6 +56,7 @@ export function toResults(state: GameState): GameResults {
     score: p.score,
     rank: p.rank,
     correctCount: asked.filter((q) => p.answers[q.id]?.correct === true).length,
+    partialCount: asked.filter((q) => p.answers[q.id]?.correct === 'partial').length,
     points: asked.map((q) => p.answers[q.id]?.points ?? null),
   }))
   const teams = denseRank(rankedTeams(state)).map((t) => ({

@@ -35,6 +35,7 @@ Error shape everywhere: `{ error: '<i18n key>' }`. Status codes: 400 invalid inp
 | `POST /api/auth/login` | - | `{ username, password }` -> sets session cookie, returns `{ user }` |
 | `POST /api/auth/logout` | session | clears cookie |
 | `GET /api/auth/me` | session (also while locked) | `{ user }` with `screenLocked`, or 401 |
+| `GET /api/auth/session` | - | `{ loggedIn }`, always 200: the public pages' logo (`useHomePath`) asks this, since a 401 from `me` is a console error on every visit |
 | `POST /api/auth/register` | - | `{ username, password, website? }` (honeypot) -> 201 `{ pending: true }`, no session; 403 `errors.registrationClosed` unless `REGISTRATION_OPEN`, 503 `errors.registrationsFull` at 20 pending, 5 per hour per IP |
 | `POST /api/users/:id/approve` / `reject` | admin | pending sign-ups only (404 otherwise); reject deletes the account |
 | `POST /api/users/:id/password` | admin | `{ password }`: new password, `mustChangePassword` set, every session ended |
@@ -53,6 +54,21 @@ Error shape everywhere: `{ error: '<i18n key>' }`. Status codes: 400 invalid inp
 | `PUT /api/quizzes/:id` | owner | replace from `quizInputSchema` |
 | `DELETE /api/quizzes/:id` | owner | |
 | `POST /api/quizzes/starter` | session | `{ lang: 'hu' \| 'en' }` -> `{ id }`: a fresh copy of the starter quiz (`src/starter/`), its drawings stored as the host's images; sign-up and `POST /api/users` add one too (their `lang`), and a failure there is only logged |
+| `POST /api/quizzes/:id/questions` | owner | `{ questions }` (1–200) -> `{ added, title, questionIds }`: copies appended with fresh ids and no `groupId`; pictures must be the host's (`errors.imageNotFound`); 409 `errors.tooManyQuestions` and nothing added past 200 (checked inside the UPDATE) |
+| `GET /api/bank?q=&type=&tag=&offset=` | session | own bank questions, newest first, 50 per page: `{ questions, total, next }`; `q` searches the folded `search_text` (text, options, accepted answers) |
+| `GET /api/bank/tags` | session | `{ tags: [{ tag, count }] }`, one per tag ignoring case, most used first |
+| `POST /api/bank` | session | `{ questions (1–200), tags }` -> 201 `{ questions }`: copies with fresh ids, no `groupId`, no `off`; picture check; 409 `errors.bankFull` past 2000 (per-host advisory lock) |
+| `PUT /api/bank/:id` | owner | `{ question, tags?, autoSync? }` -> `{ question, synced }` (left-out fields kept); with `autoSync` on, the copies not changed in their quiz take the new version in the same transaction (`synced`: those quizzes); 404 for another host's; pictures already stored are let through |
+| `POST /api/bank/delete` | owner | `{ ids }` -> `{ deleted }`; others' ids are skipped |
+| `POST /api/bank/restore` | session | `{ id, question, tags, autoSync?, createdAt }`: Undo of a delete under the old id (linked quizzes stay linked); 409 if the id is taken |
+| `GET /api/bank/:id` | owner | `{ question }`; 404 for another host's |
+| `GET /api/bank/:id/uses` | owner | `{ quizzes: [{ id, title, copies, changed, outdated }] }`: own quizzes with `questions @> [{ bank: { id } }]`; `changed`: a copy's `questionHash` differs from its `bank.hash`; `outdated`: it differs from the library's |
+| `POST /api/bank/:id/sync` | owner | `{ quizIds }` -> `{ updated }`: the library version replaces the linked copies (id, `groupId`, `off`, `color` kept, `bank.hash` renewed); others' and unlinked quizzes skipped |
+| `POST /api/share` | session | `{ kind: 'questions', title, questions, expiry }` or `{ kind: 'quiz', quizId, expiry }` (`shareCreateSchema`, expiry `7d` / `30d` / `never`) -> 201 `{ share, reused: false }`, or 200 `{ share, reused: true }` when a live code already holds that quiz (`content->>'quizId'`) or equal questions: its copy is refreshed and its expiry restarts; picture check; 409 `errors.tooManyShareCodes` past 100 live codes (per-host advisory lock) |
+| `GET /api/share` | session | `{ shares }`: own live codes (`ShareCodeSummary`), newest first |
+| `DELETE /api/share/:id` | owner | revoke: deletes the code and its copy (204); 404 for another host's |
+| `GET /api/share/:code` | - | `SharePreview`: title, kind, count and the questions through `toPublicQuestion` (no answers, no library links), `Cache-Control: no-store`; 20 a minute per IP; wrong, expired and revoked codes all 404 `errors.shareCodeNotFound` |
+| `POST /api/share/:code/redeem` | session | `{ target: 'bank' }`, `{ target: 'quiz', quizId }` or `{ target: 'newQuiz' }` -> `ShareRedeemResult`; a quiz code allows only `newQuiz`, a questions code only the other two (400); one transaction: fresh ids, pictures copied to the receiver (the sharer's own redeem reuses them), `uses` raised; quiz, library and picture limits apply; 30 an hour per account |
 | `POST /api/quizzes/batch-delete` | owner of all | `{ ids }` -> `{ deleted }`; 404 and nothing deleted if any id is missing or not owned |
 | `GET /api/me/settings` | session | the host's own settings (`hostSettingsSchema`, defaults when never saved): `{ settings, hasLockCode }` |
 | `PUT /api/me/lock-code` / `DELETE /api/me/lock-code` | session | the default screen lock code `{ code }` (4 to 8 digits), stored only as an argon2 hash in `host_settings.lock_code_hash`, never sent back |
@@ -82,6 +98,8 @@ Error shape everywhere: `{ error: '<i18n key>' }`. Status codes: 400 invalid inp
 | `GET /api/games/:gameId/results` | owner | full results JSON |
 | `GET /api/games/:gameId/results.csv?lang=hu\|en` | owner | CSV export |
 | `DELETE /api/games/:gameId` | owner | delete a finished game and its results, or call off a scheduled game before joining opens |
+
+The UI calls the bank the "Question library" / "Kérdéstár" (`/host/library`); routes, table and code keep `bank`.
 
 Quiz question ids and option ids are generated server-side with `nanoid(8)` when missing, so the editor can send new questions without ids.
 

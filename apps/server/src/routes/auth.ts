@@ -11,6 +11,7 @@ import {
   destroyOtherSessions,
   destroySession,
   setSessionCookie,
+  verifySession,
 } from '../auth/session.js'
 import type { Db } from '../db/index.js'
 import { localCredentials, users } from '../db/schema.js'
@@ -134,6 +135,12 @@ export async function authRoutes(app: FastifyInstance, { db, secureCookies, regi
 
   app.get('/api/auth/me', lockedOk, async (request) => ({
     user: { ...request.user!, screenLocked: app.hostLocked(request.user!.id) },
+  }))
+
+  // Whether this browser has a live host session, for the public pages' logo (the host's home or the
+  // join page). Always 200, so a logged-out visitor's browser logs no 401; nothing about the user.
+  app.get('/api/auth/session', async (request) => ({
+    loggedIn: request.sessionToken ? (await verifySession(db, request.sessionToken)) !== null : false,
   }))
 
   // Accepting the terms in force. The version the page showed is sent, so terms that changed while

@@ -3,6 +3,7 @@ import { BrandingMark } from '@/components/branding-mark'
 import { usePageTour } from '@/features/tour/use-tour'
 import { useMediaQuery } from '@/lib/use-media-query'
 import { GameInfoCard, PinCard, PlayerCard } from './lobby-parts'
+import { LobbyPlayers } from './lobby-players'
 import { PickTeam } from './pick-team'
 import { TeamCard } from './team-card'
 
@@ -53,6 +54,7 @@ function PhoneLobby({ snapshot, team }: LayoutProps) {
           </div>
         )}
         <PlayerCard snapshot={snapshot} team={team} />
+        <LobbyPlayers snapshot={snapshot} />
         <PinCard pin={snapshot.pin} />
         <TeamPart snapshot={snapshot} team={team} />
         <GameInfoCard snapshot={snapshot} />
@@ -76,6 +78,7 @@ function DesktopLobby({ snapshot, team }: LayoutProps) {
       <div className="grid grid-cols-[minmax(0,2fr)_minmax(0,3fr)] items-start gap-6">
         <div className="sticky top-6 flex flex-col gap-4">
           <PlayerCard snapshot={snapshot} team={team} />
+          <LobbyPlayers snapshot={snapshot} />
           <PinCard pin={snapshot.pin} />
         </div>
         <div className="flex flex-col gap-4">

@@ -3,6 +3,7 @@ import {
   fallbackAvatar,
   isCorrect,
   isNearMiss,
+  partialCredit,
   playableQuiz,
   pointsFor,
   settingsFor,
@@ -13,6 +14,7 @@ import {
   type PlayerSnapshot,
   type Question,
   type QuestionGroup,
+  type Verdict,
 } from '@quizmoo/shared'
 
 /** What the play-through needs of the draft. */
@@ -37,7 +39,7 @@ export interface PreviewPlay {
   revealed: boolean
   answer: Answer | null
   timeMs: number | null
-  correct: boolean | null
+  correct: Verdict
   nearMiss: boolean
   points: number
   bonus: number
@@ -105,12 +107,14 @@ export function reveal(quiz: PreviewQuiz, play: PreviewPlay, answer: Answer | nu
     timeMs,
     correct,
     nearMiss: correct === true && answer !== null && isNearMiss(question, answer, quiz.settings.typoTolerance === true),
-    points: pointsFor(question.points, correct, timeMs ?? limitMs, limitMs, rules.speedBonus) + bonus,
+    points:
+      pointsFor(question.points, correct, timeMs ?? limitMs, limitMs, rules.speedBonus, answer ? partialCredit(question, answer) : 0) +
+      bonus,
     bonus,
   }
 }
 
-/** Streak after the question: a correct answer extends it, a wrong or missing one resets it; polls and ungraded text leave it. */
+/** Streak after the question: a correct answer extends it, a wrong or missing one resets it; polls, ungraded text and partly right answers leave it. */
 function streakAfter(quiz: PreviewQuiz, play: PreviewPlay): number {
   if (!play.revealed) return play.streakBefore
   if (play.correct === true) return play.streakBefore + 1
@@ -209,6 +213,7 @@ export function revealSnapshot(quiz: PreviewQuiz, play: PreviewPlay, now: number
     serverNow: now,
     scheduledAt: null,
     joinLocked: false,
+    reactionsMuted: false,
     answeredCount: play.answer ? 1 : 0,
     players: [me],
     teams: [],
@@ -216,6 +221,7 @@ export function revealSnapshot(quiz: PreviewQuiz, play: PreviewPlay, now: number
       question,
       distribution: {},
       correctCount: play.correct === true ? 1 : 0,
+      partialCount: play.correct === 'partial' ? 1 : 0,
       answeredCount: play.answer ? 1 : 0,
       correctKeys: [],
       nearKeys: [],

@@ -1,4 +1,4 @@
-import type { PlayerSnapshot, TeamLive } from '@quizmoo/shared'
+import { isPartialScoring, type PlayerSnapshot, type TeamLive } from '@quizmoo/shared'
 import { useTranslation } from 'react-i18next'
 import { stagger } from '../../lib/motion'
 import { formatAnswer } from '../questions/format-answer'
@@ -39,7 +39,10 @@ export function TeamSummary({ snapshot, team }: { snapshot: PlayerSnapshot; team
               ? by.id === snapshot.me.id
                 ? t('play.team.confirmedByMe')
                 : t('play.team.confirmedByName', { name: by.name })
-              : t('play.team.votesFor', { count: votes, total: voters })}
+              : // Partial credit: the majority is taken per option, so the answer may be nobody's whole pick.
+                question && isPartialScoring(question)
+                ? t('play.team.perOption')
+                : t('play.team.votesFor', { count: votes, total: voters })}
           </p>
         </>
       )}

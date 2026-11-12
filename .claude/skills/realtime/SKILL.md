@@ -49,6 +49,10 @@ Every `apply` broadcasts: `game:host` to the host and screen rooms, and one `gam
 
 A freshly attached socket receives its snapshot in the ack path immediately after joining the room, so reconnection needs no extra event.
 
+## Reactions (the one exception to "everything is a snapshot")
+
+`player:react` (no ack) goes to `manager.react`, which drops it silently unless `reactionsOpen(state)` (setting on, not `reactionsMuted`, not `question` / `countdown`) and the player's own limiter allows it (`REACTION_BURST` 3 per `REACTION_WINDOW_MS` 6 s, per player, not per socket). The entry's `reactions` buffer is flushed `REACTION_FLUSH_MS` (750 ms) after its first reaction to the `subscribeReactions` listeners: one `game:reactions` batch to the host and screen rooms, and one per player without their own reactions (`forPlayer`, null when nothing is left). A flush after reactions closed (a question opened, a mute) is dropped. `senders` lists every reaction with its sender (the floats show the names). Never persisted, never in a snapshot or results, no `seq`; the timer is cleared in `discard`, `stop` and `close`. Only the mute (`reactionsMuted`) is game state. Reactions still count towards the socket's 10-a-second flood guard; the phone's 2 s cooldown keeps a real player far below it.
+
 ## Payload validation
 
 Every incoming event body is parsed with the shared Zod schema first. Parse failures ack `{ error: 'errors.invalidInput' }`. `EngineError` acks `{ error: code }`. Anything else is logged and acked `{ error: 'errors.internal' }`. Handlers never throw into Socket.IO.

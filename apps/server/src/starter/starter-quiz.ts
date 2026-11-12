@@ -132,6 +132,7 @@ export function starterQuiz(language: StarterLanguage): QuizInput {
         text: t.mammals.text,
         options: mammals,
         correctOptionIds: [mammals[0]!.id, mammals[1]!.id, mammals[3]!.id, mammals[5]!.id],
+        scoring: 'partial',
         timeLimitSec: 30,
       },
       { id: q(), groupId: round1, type: 'number', text: t.octopus, correct: 3, tolerance: 0 },
@@ -153,6 +154,7 @@ export function starterQuiz(language: StarterLanguage): QuizInput {
         text: t.palindromes.text,
         options: palindromes,
         correctOptionIds: [palindromes[0]!.id, palindromes[2]!.id],
+        scoring: 'partial',
       },
 
       // The finale, after the rounds.

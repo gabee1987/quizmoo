@@ -19,12 +19,14 @@ import type { GameManager } from './realtime/game-manager.js'
 import { registerSocketHandlers, type AppSocketServer } from './realtime/handlers.js'
 import { accountRoutes } from './routes/account.js'
 import { authRoutes } from './routes/auth.js'
+import { bankRoutes } from './routes/bank.js'
 import { gameRoutes } from './routes/games.js'
 import { imageRoutes } from './routes/images.js'
 import { meRoutes } from './routes/me.js'
 import { quizRoutes } from './routes/quizzes.js'
 import { nicknameRoutes } from './routes/nicknames.js'
 import { seasonRoutes } from './routes/seasons.js'
+import { shareRoutes } from './routes/share.js'
 import { resultRoutes } from './routes/results.js'
 import { userRoutes } from './routes/users.js'
 import { createSignupNotifier } from './signup-notify.js'
@@ -154,6 +156,8 @@ export async function buildApp(config: Config, { db, manager, webDist: webDistOv
   await app.register(multipart)
   await app.register(quizRoutes, { db })
   await app.register(imageRoutes, { db })
+  await app.register(bankRoutes, { db })
+  await app.register(shareRoutes, { db })
   await app.register(userRoutes, { db, manager })
   await app.register(meRoutes, { db, manager, signupNotifier })
   await app.register(accountRoutes, { db, manager, secureCookies })

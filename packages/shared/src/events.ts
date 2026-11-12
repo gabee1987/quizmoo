@@ -11,6 +11,7 @@ import {
 import type { HostSnapshot, PlayerSnapshot } from './game.js'
 import { lockCodeSchema, ownQuickMessageSchema } from './host.js'
 import { MAX_QUESTIONS, teamAnswerModes, teamNameSchema } from './quiz.js'
+import type { PlayerReact, ReactionBatch } from './reactions.js'
 
 // ---- Client -> server payloads (validated with zod on the server) --------
 
@@ -135,6 +136,8 @@ export const hostCommandSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('openJoining') }),
   /** Closes the game to new players, or opens it again; players already in can always come back. */
   z.object({ type: z.literal('lockJoining'), locked: z.boolean() }),
+  /** Mutes the players' reactions until un-muted (games with reactions on). */
+  z.object({ type: z.literal('muteReactions'), muted: z.boolean() }),
   /** The end of the game, once the projector shows the results: puts a page on it. */
   z.object({ type: z.literal('endPage'), page: z.enum(endShowPages) }),
   /** The end of the game: the next or previous page (in the recap, the next or previous question). */
@@ -165,10 +168,14 @@ export interface ClientToServerEvents {
   'host:command': (data: HostCommand, ack: (res: { ok: true } | ErrorPayload) => void) => void
   'screen:attach': (data: { pin: string }, ack: (res: { ok: true } | ErrorPayload) => void) => void  /** Round-trip check from the host control; no server state. */
   'host:ping': (data: Record<string, never>, ack: (res: { ok: true } | ErrorPayload) => void) => void
+  /** An emoji reaction; no ack, and dropped silently when not allowed or too fast. Not game state. */
+  'player:react': (data: PlayerReact) => void
 }
 
 export interface ServerToClientEvents {
   'game:player': (snapshot: PlayerSnapshot) => void
   'game:host': (snapshot: HostSnapshot) => void
   'game:closed': (reason: ErrorPayload) => void
+  /** The reactions collected over the last moment (at most one batch every `REACTION_FLUSH_MS`). */
+  'game:reactions': (batch: ReactionBatch) => void
 }

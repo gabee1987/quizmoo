@@ -1,5 +1,6 @@
 import type { Answer, Question, TeamAnswerMode } from '@quizmoo/shared'
 import { normalise } from './normalise.js'
+import { isPartialScoring } from './scoring.js'
 import type { GameState, Player, PlayerAnswerRecord, Team, TeamAnswerRecord } from './types.js'
 
 // Team answer modes (team mode only): who leads a team, how a team's one answer comes about,
@@ -102,9 +103,28 @@ export function voteTally(votes: readonly Vote[]): { answer: Answer; votes: Vote
  * gave wins, a tie goes to the one given first. Number questions take the median vote (with an
  * even count the lower middle one), so the answer is always one a member gave. The time is the
  * median time of the votes for the winning answer.
+ *
+ * `perOption` (a partial-credit multiple-choice question): an option is in the team's answer when
+ * more than half of the votes picked it, so the team can be partly right together. When no option
+ * gets there, the most common whole answer counts as above. The time is then the median of all votes.
  */
-export function majorityAnswer(votes: readonly Vote[]): { answer: Answer; at: number; timeMs: number } | null {
+export function majorityAnswer(
+  votes: readonly Vote[],
+  { perOption = false }: { perOption?: boolean } = {},
+): { answer: Answer; at: number; timeMs: number } | null {
   if (votes.length === 0) return null
+  if (perOption) {
+    const counts = new Map<string, number>()
+    for (const vote of votes) {
+      if (vote.record.answer.type !== 'multiple') continue
+      for (const id of new Set(vote.record.answer.optionIds)) counts.set(id, (counts.get(id) ?? 0) + 1)
+    }
+    const optionIds = [...counts].filter(([, count]) => count > votes.length / 2).map(([id]) => id)
+    if (optionIds.length > 0) {
+      const timed = lowerMedian([...votes].sort((a, b) => a.record.timeMs - b.record.timeMs))!
+      return { answer: { type: 'multiple', optionIds }, at: timed.record.at, timeMs: timed.record.timeMs }
+    }
+  }
   let winners: Vote[]
   if (votes[0]!.record.answer.type === 'number') {
     const value = (v: Vote) => (v.record.answer.type === 'number' ? v.record.answer.value : 0)
@@ -131,7 +151,9 @@ export function teamAnswerNow(state: GameState, team: Team, questionId: string):
   if (!answersAsOne(team)) return null
   const stored = team.answers?.[questionId]
   if (stored) return stored
-  const majority = majorityAnswer(votesOf(state, team.id, questionId))
+  const question = state.quiz.questions.find((q) => q.id === questionId)
+  const perOption = question !== undefined && isPartialScoring(question)
+  const majority = majorityAnswer(votesOf(state, team.id, questionId), { perOption })
   return majority && { ...majority, byPlayerId: null, fallback: needsConfirmation(state, team), points: 0, correct: null }
 }
 

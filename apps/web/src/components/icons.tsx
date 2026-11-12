@@ -64,6 +64,20 @@ export function CheckIcon({ className = 'size-6', drawn = false }: { className?:
   )
 }
 
+/**
+ * Partly right (partial credit): a half-filled disc on the warning colour, between the check and
+ * the cross. It carries its own colours, so it reads on any background.
+ */
+export function PartialIcon({ className = 'size-6' }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className={className}>
+      <circle cx="12" cy="12" r="10.5" fill="var(--warning)" />
+      <path d="M12 5.5 A6.5 6.5 0 0 0 12 18.5 Z" fill="var(--warning-foreground)" />
+      <circle cx="12" cy="12" r="6.5" fill="none" stroke="var(--warning-foreground)" strokeWidth="2" />
+    </svg>
+  )
+}
+
 export function CrossIcon({ className = 'size-6' }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true" className={className} fill="none" stroke="currentColor" strokeWidth="3">

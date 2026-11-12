@@ -1,4 +1,4 @@
-import { count, eq, sql } from 'drizzle-orm'
+import { and, count, eq, inArray, sql } from 'drizzle-orm'
 import type { FastifyInstance } from 'fastify'
 import { nanoid } from 'nanoid'
 import sharp, { type OutputInfo } from 'sharp'
@@ -23,6 +23,17 @@ const ALLOWED_FORMATS = new Set(['jpeg', 'png', 'webp'])
 export async function ownsImage(db: Db, userId: string, imageId: string) {
   const row = (await db.select({ ownerId: images.ownerId }).from(images).where(eq(images.id, imageId)))[0]
   return row?.ownerId === userId
+}
+
+/** Which of these image ids belong to the user. */
+export async function ownedImageIds(db: Db, userId: string, imageIds: readonly string[]): Promise<Set<string>> {
+  const unique = [...new Set(imageIds)]
+  if (unique.length === 0) return new Set()
+  const rows = await db
+    .select({ id: images.id })
+    .from(images)
+    .where(and(inArray(images.id, unique), eq(images.ownerId, userId)))
+  return new Set(rows.map((row) => row.id))
 }
 
 /**

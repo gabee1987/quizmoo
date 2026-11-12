@@ -28,6 +28,7 @@ import { PlayerBoard } from '../../features/host/player-board'
 import { QuestionStrip } from '../../features/host/question-strip'
 import { QuickMessageMenu } from '../../features/host/quick-message-menu'
 import { RoundTripBadge } from '../../features/host/round-trip-badge'
+import { ReactionsMuteButton } from '../../features/reactions/host-reactions'
 import { settingsLine } from '../../features/host/settings-line'
 import { RankList } from '../../features/play/scoreboard'
 import { ApiError, apiFetch } from '../../lib/api'
@@ -296,6 +297,7 @@ function TopBar({
             </Button>
           </Hint>
         )}
+        <ReactionsMuteButton host={host} onCommand={(command) => void send(command)} />
         {/* Locks every host page of the account until the lock code or the password is typed. */}
         <Hint label={t('host.lock.button')} side="bottom">
           <Button variant="secondary" size="sm" onClick={onLock}>

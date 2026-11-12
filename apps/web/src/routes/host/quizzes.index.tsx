@@ -12,12 +12,15 @@ import {
   FileDownIcon,
   GiftIcon,
   FileSpreadsheetIcon,
+  KeyRoundIcon,
+  LibraryIcon,
   ListChecksIcon,
   PencilIcon,
   PlayIcon,
   PlusIcon,
   SearchIcon,
   Settings2Icon,
+  Share2Icon,
   SparklesIcon,
   Trash2Icon,
   UploadIcon,
@@ -51,6 +54,8 @@ import { BatchEditDialog, type BatchPatch } from '../../features/host/batch-edit
 import { CreateGameDialog } from '../../features/host/create-game-dialog'
 import { ImportQuizDialog } from '../../features/host/import-quiz-dialog'
 import { exportQuiz } from '../../features/host/quiz-files'
+import { EnterCodeDialog } from '../../features/share/enter-code-dialog'
+import { ShareDialog } from '../../features/share/share-dialog'
 import { usePageTour } from '../../features/tour/use-tour'
 import { apiFetch } from '../../lib/api'
 
@@ -75,6 +80,8 @@ function QuizList() {
   const [batchDeleting, setBatchDeleting] = useState(false)
   const [batchEditing, setBatchEditing] = useState(false)
   const [importing, setImporting] = useState(false)
+  const [sharing, setSharing] = useState<QuizSummary | null>(null)
+  const [entering, setEntering] = useState(false)
   const refresh = () => void queryClient.invalidateQueries({ queryKey: ['quizzes'] })
   const stopSelecting = () => {
     setSelecting(false)
@@ -183,6 +190,17 @@ function QuizList() {
               {t('quizFile.import')}
             </Button>
           </div>
+          <Button variant="outline" data-tour="enter-code" onClick={() => setEntering(true)}>
+            <KeyRoundIcon aria-hidden="true" />
+            <span className="max-sm:sr-only">{t('share.enter.open')}</span>
+          </Button>
+          <Button variant="outline" asChild data-tour="quiz-library">
+            <Link to="/host/library">
+              <LibraryIcon aria-hidden="true" />
+              {/* Icon only on phones, like the starter quiz button. */}
+              <span className="max-sm:sr-only">{t('bank.title')}</span>
+            </Link>
+          </Button>
           <Button data-tour="new-quiz" onClick={() => create.mutate()} disabled={create.isPending}>
             <PlusIcon aria-hidden="true" />
             {t('host.newQuiz')}
@@ -332,6 +350,10 @@ function QuizList() {
                       <CopyIcon aria-hidden="true" />
                       {t('host.duplicate')}
                     </DropdownMenuItem>
+                    <DropdownMenuItem className="min-h-11" onSelect={() => setSharing(quiz)}>
+                      <Share2Icon aria-hidden="true" />
+                      {t('share.menu')}
+                    </DropdownMenuItem>
                     <DropdownMenuItem className="min-h-11" disabled={download.isPending} onSelect={() => download.mutate({ quiz, kind: 'csv' })}>
                       <FileSpreadsheetIcon aria-hidden="true" />
                       {t('quizFile.exportCsv')}
@@ -426,6 +448,8 @@ function QuizList() {
           {t('host.deleteBody', { title: deleting.title })}
         </ConfirmDialog>
       )}
+      {sharing && <ShareDialog request={{ kind: 'quiz', quizId: sharing.id, title: sharing.title }} onClose={() => setSharing(null)} />}
+      {entering && <EnterCodeDialog onClose={() => setEntering(false)} />}
       {batchDeleting && (
         <ConfirmDialog
           title={t('host.batch.deleteTitle', { count: chosen.length })}

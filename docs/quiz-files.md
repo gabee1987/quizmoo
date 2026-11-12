@@ -5,7 +5,7 @@ Quizmoo reads and writes two kinds of quiz file. Both are made and read in the a
 | | Spreadsheet (`.csv`) | Quizmoo file (`.quizmoo.json`) |
 |---|---|---|
 | Purpose | Writing and editing questions by hand, anywhere | A full copy of a quiz, for another install or person |
-| Holds | The questions (type, text, answers, correct answer, time, points, tolerance, colour) and their groups (title, info, time, points, colour) | Everything: questions, groups with their own rules, description, game settings, branding, pictures |
+| Holds | The questions (type, text, answers, correct answer, time, points, tolerance, colour, multiple-choice scoring) and their groups (title, info, time, points, colour) | Everything: questions, groups with their own rules, description, game settings, branding, pictures |
 | Edited with | Excel, LibreOffice, Google Sheets, Numbers, any text editor | Not meant for hand editing |
 | Import | New quiz with the host's default game settings, titled after the file name (editable in the dialog) | New quiz, a full copy, title editable in the dialog |
 
@@ -26,6 +26,7 @@ The template (**Import > Download template**) explains every column in its first
 | 11 points | 0 to 5000; empty means 1000 |
 | 12 tolerance | Number questions only: how far from the right number still counts; empty means exact |
 | 13 colour | The question's (or group's) colour tag in the editor: `red`/`piros`, `orange`/`narancs`, `yellow`/`sárga`, `green`/`zöld`, `teal`/`türkiz`, `blue`/`kék`, `purple`/`lila`, `pink`/`rózsaszín`; empty means none. Files without this column read as before. |
+| 14 scoring | Multiple only: `partial`/`részleges` (each right answer picked earns its share, each wrong one cancels a right one) or `all`/`mind` (points only for exactly the right answers). Empty, and files without this column, mean `all`, so an older export keeps its scoring. Ignored for other types. |
 
 - **Groups.** A row of type `group`/`csoport` starts a group (a round): column 2 holds its title (1 to 120 characters), column 3 its info (up to 500), and columns 10 and 11 the time and points its new questions get in the editor (empty: none). The questions below it belong to it, up to the next `group` row or a `group-end`/`csoport-vége` row (the rest of that row is ignored); questions after a group end are ungrouped. A group without questions is a problem. At most 50 groups. A group's colour goes in column 13 like a question's; its own rules and picture are not in the spreadsheet; the Quizmoo file keeps them.
 

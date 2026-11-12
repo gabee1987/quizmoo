@@ -81,11 +81,17 @@ export function StatsPage({ facts, results, questionCount }: { facts: MyEndFacts
   const { t, i18n } = useTranslation()
   const seconds = new Intl.NumberFormat(i18n.language, { maximumFractionDigits: 1 })
   const right = results.filter((r) => r.correct === true).length
+  const partly = results.filter((r) => r.correct === 'partial').length
   return (
     <div className="flex flex-col gap-5">
       <h1 className="text-center text-3xl font-black">{t('play.end.statsTitle')}</h1>
       <div className="grid grid-cols-2 gap-3">
-        <Tile icon={CheckCheckIcon} label={t('play.end.rightAnswers')} index={0}>
+        <Tile
+          icon={CheckCheckIcon}
+          label={t('play.end.rightAnswers')}
+          note={partly > 0 ? t('play.end.partlyRight', { count: partly }) : undefined}
+          index={0}
+        >
           {t('play.end.ofCount', { value: right, count: questionCount })}
         </Tile>
         <Tile icon={FlameIcon} label={t('play.end.bestStreak')} index={1}>

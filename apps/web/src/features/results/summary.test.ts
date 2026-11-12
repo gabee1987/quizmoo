@@ -12,6 +12,7 @@ function question(q: Question, index: number, correctCount: number, answeredCoun
     index,
     distribution: {},
     correctCount,
+    partialCount: 0,
     answeredCount,
     correctKeys: q.type === 'poll' ? [] : ['true'],
     nearKeys: [],
@@ -29,6 +30,7 @@ function results(questions: ResultQuestion[], players = 4): GameResults {
     score: 0,
     rank: 1,
     correctCount: 0,
+    partialCount: 0,
     points: [],
   }))
   return {

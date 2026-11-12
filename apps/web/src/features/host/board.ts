@@ -1,4 +1,4 @@
-import type { CurrentAnswer, HostSnapshot, PlayerPublic, TeamPublic } from '@quizmoo/shared'
+import type { CurrentAnswer, HostSnapshot, PlayerPublic, TeamPublic, Verdict } from '@quizmoo/shared'
 
 /** How the board orders its players: by name (nobody moves), rank, answer time, or the missing ones first. */
 export const boardSorts = ['name', 'rank', 'answer', 'waiting'] as const
@@ -18,7 +18,7 @@ export interface BoardEntry {
   status: TileStatus
   answer: CurrentAnswer | null
   /** The verdict so far while the question runs, the result afterwards; null for polls and ungraded text. */
-  correct: boolean | null
+  correct: Verdict
 }
 
 /** A team's players in team mode (`team` null: the players on their own); one group of everyone otherwise. */

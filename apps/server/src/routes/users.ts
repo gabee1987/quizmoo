@@ -42,6 +42,8 @@ const perUser = (expression: string, table: string, column: string, where = '', 
 // A handful of hosts, so a few small subqueries per row are fine.
 export const figures = {
   quizzes: perUser('count(*)', 'quizzes', 'owner_id') as SQL<number>,
+  bankQuestions: perUser('count(*)', 'bank_questions', 'owner_id') as SQL<number>,
+  shareCodes: perUser('count(*)', 'share_codes', 'owner_id') as SQL<number>,
   gamesPlayed: perUser('count(*)', 'games', 'host_id', `t.phase = 'finished'`) as SQL<number>,
   playersReached: perUser('coalesce(sum(t.player_count), 0)', 'games', 'host_id', `t.phase = 'finished'`) as SQL<number>,
   gamesActive: perUser('count(*)', 'games', 'host_id', `t.phase <> 'finished'`) as SQL<number>,

@@ -12,10 +12,13 @@ import { GameSettingsForm, gameOnlySettings, settingsError, settingsSections, ty
 export interface BatchPatch {
   settings: Partial<GameSettings>
   questions: { timeLimitSec?: number; points?: number }
+  /** Set on the multiple-choice questions only. */
+  multipleScoring?: MultipleScoring
 }
 
-type Group = SettingsSection | 'questions'
-const groups: Group[] = ['look', 'scoring', 'flow', 'questions']
+type MultipleScoring = 'all' | 'partial'
+type Group = SettingsSection | 'questions' | 'multipleScoring'
+const groups: Group[] = ['look', 'scoring', 'flow', 'questions', 'multipleScoring']
 
 /**
  * Sets the same values on several quizzes. Only the groups that are ticked change; everything else
@@ -39,6 +42,7 @@ export function BatchEditDialog({
   const [settings, setSettings] = useState(initialSettings)
   const [timeLimitSec, setTimeLimitSec] = useState(20)
   const [points, setPoints] = useState(1000)
+  const [multipleScoring, setMultipleScoring] = useState<MultipleScoring>('partial')
   const invalid = enabled.size === 0 || (enabled.has('flow') && settingsError(settings) !== null)
 
   const toggle = (group: Group, on: boolean) =>
@@ -55,6 +59,7 @@ export function BatchEditDialog({
     const patch: BatchPatch = { settings: {}, questions: {} }
     for (const group of enabled) {
       if (group === 'questions') patch.questions = { timeLimitSec, points }
+      else if (group === 'multipleScoring') patch.multipleScoring = multipleScoring
       else {
         // A quiz's saved team names (from before teams were set per game) stay as they are.
         const keys = settingsSections[group].filter((key) => !(gameOnlySettings as readonly string[]).includes(key))
@@ -95,6 +100,16 @@ export function BatchEditDialog({
                     options={POINTS.map((p) => ({ value: p, label: t('editor.pointsValue', { count: p }) }))}
                     onChange={setPoints}
                   />
+                </div>
+              ) : group === 'multipleScoring' ? (
+                <div className="flex flex-col gap-1">
+                  <SelectField
+                    label={t('editor.scoring')}
+                    value={multipleScoring}
+                    options={(['partial', 'all'] as const).map((value) => ({ value, label: t(`editor.scoringOptions.${value}`) }))}
+                    onChange={setMultipleScoring}
+                  />
+                  <p className="text-sm text-muted-foreground">{t(`editor.scoringHelp.${multipleScoring}`)}</p>
                 </div>
               ) : (
                 <GameSettingsForm value={settings} onChange={setSettings} sections={[group]} />

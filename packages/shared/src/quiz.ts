@@ -28,6 +28,12 @@ const baseQuestion = z.object({
   color: tagColorSchema.optional(),
   /** Switched off: kept in the quiz, but new games leave it out (`playableQuiz`). Missing: on. */
   off: z.boolean().optional(),
+  /**
+   * The question library question this one was copied from or saved to, and the `questionHash` of its
+   * content at that moment: the copy is "changed in this quiz" when its own hash differs, and out of date
+   * when the library question's differs. Missing: not linked.
+   */
+  bank: z.object({ id: z.string().min(1).max(40), hash: z.string().min(1).max(20) }).optional(),
 })
 
 /** What new questions start with, set per quiz and as the host's default for new quizzes. */
@@ -60,6 +66,11 @@ export const multipleChoiceQuestionSchema = baseQuestion.extend({
   type: z.literal('multiple'),
   options: z.array(optionSchema).min(2).max(6),
   correctOptionIds: z.array(z.string().min(1)).min(1),
+  /**
+   * `all`: only the exact set of right options scores. `partial`: each right pick counts and each
+   * wrong pick takes one back (`partialCredit`). Missing: `all`, as every question before phase 59.
+   */
+  scoring: z.enum(['all', 'partial']).optional(),
 })
 
 export const trueFalseQuestionSchema = baseQuestion.extend({
@@ -248,6 +259,8 @@ export const gameSettingsSchema = z
     soloPlayers: z.boolean().default(false),
     /** New players may join a game that has started (classic and team mode). */
     lateJoin: z.boolean().default(false),
+    /** Players may send emoji reactions between questions; the projector shows them. */
+    reactions: z.boolean().default(true),
     /** Team mode: every team's starting mode when teams choose, otherwise the mode of every team. */
     teamAnswer: teamAnswerModeSchema.default('captain'),
     /** Each team's captain may pick the team's answer mode in the lobby. */

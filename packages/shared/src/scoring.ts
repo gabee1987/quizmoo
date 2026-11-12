@@ -1,4 +1,4 @@
-import type { Answer, PublicQuestion } from './game.js'
+import type { Answer, PublicQuestion, Verdict } from './game.js'
 import type { GameSettings, Question, QuestionGroup } from './quiz.js'
 
 // Scoring rules shared by the server's game engine (the authority in real games) and the editor's
@@ -62,17 +62,53 @@ export function isNearMiss(question: Question, answer: Answer, typos: boolean): 
   return question.type === 'text' && answer.type === 'text' && textMatch(question.acceptedAnswers, answer.value, typos) === 'near'
 }
 
+/** A multiple-choice question scored with partial credit. Missing `scoring` is all or nothing. */
+export function isPartialScoring(question: Question | PublicQuestion): boolean {
+  return question.type === 'multiple' && question.scoring === 'partial'
+}
+
+/**
+ * The share of a multiple-choice question's points an answer earns under partial credit: right
+ * picks minus wrong picks, over the number of right options, never below 0. Subtracting wrong
+ * picks is what makes "tick everything" worthless. 0 for anything that is not a multiple answer.
+ */
+export function partialCredit(question: Question, answer: Answer): number {
+  if (question.type !== 'multiple' || answer.type !== 'multiple') return 0
+  const right = new Set(question.correctOptionIds)
+  if (right.size === 0) return 0
+  let hits = 0
+  let misses = 0
+  for (const id of new Set(answer.optionIds)) {
+    if (right.has(id)) hits++
+    else misses++
+  }
+  return Math.max(0, hits - misses) / right.size
+}
+
+/** How many of a multiple-choice question's right options an answer picked, for "Partly right: 2 of 3". */
+export function rightPicks(question: Question, answer: Answer): { right: number; of: number } {
+  if (question.type !== 'multiple' || answer.type !== 'multiple') return { right: 0, of: 0 }
+  const picked = new Set(answer.optionIds)
+  return { right: question.correctOptionIds.filter((id) => picked.has(id)).length, of: question.correctOptionIds.length }
+}
+
 /**
  * Whether `answer` is correct for `question`. `null` means "not graded":
  * polls always, and text questions without accepted answers (host grades).
- * An answer of the wrong type is never correct. `typos`: the game accepts small typos in text answers.
+ * `'partial'`: a partial-credit multiple-choice answer worth more than nothing but less than
+ * full marks. An answer of the wrong type is never correct. `typos`: the game accepts small typos
+ * in text answers.
  */
-export function isCorrect(question: Question, answer: Answer, typos = false): boolean | null {
+export function isCorrect(question: Question, answer: Answer, typos = false): Verdict {
   switch (question.type) {
     case 'single':
       return answer.type === 'single' && answer.optionId === question.correctOptionId
     case 'multiple': {
       if (answer.type !== 'multiple') return false
+      if (isPartialScoring(question)) {
+        const credit = partialCredit(question, answer)
+        return credit >= 1 ? true : credit <= 0 ? false : 'partial'
+      }
       const given = new Set(answer.optionIds)
       const expected = new Set(question.correctOptionIds)
       return given.size === expected.size && [...given].every((id) => expected.has(id))
@@ -100,19 +136,22 @@ export function isCorrect(question: Question, answer: Answer, typos = false): bo
 
 /**
  * Points for one answer. `elapsedMs` is answer time minus question start,
- * `limitMs` the question time limit; elapsed is clamped to [0, limit].
+ * `limitMs` the question time limit; elapsed is clamped to [0, limit]. A partly right answer
+ * scores `credit` (from `partialCredit`) of the points, the speed bonus applied on top.
  */
 export function pointsFor(
   points: number,
-  correct: boolean | null,
+  correct: Verdict,
   elapsedMs: number,
   limitMs: number,
   speedBonus: boolean,
+  credit = 1,
 ): number {
-  if (correct !== true) return 0
-  if (!speedBonus || limitMs <= 0) return points
+  const share = correct === true ? 1 : correct === 'partial' ? credit : 0
+  if (share <= 0) return 0
+  if (!speedBonus || limitMs <= 0) return Math.round(points * share)
   const t = Math.min(Math.max(elapsedMs, 0), limitMs)
-  return Math.round(points * (1 - t / limitMs / 2))
+  return Math.round(points * share * (1 - t / limitMs / 2))
 }
 
 /**

@@ -1,5 +1,5 @@
 // The scoring rules live in the shared package, so the editor's play-through preview counts the same way.
-export { isCorrect, isNearMiss, pointsFor, textMatch, typoDistance, typosAllowed } from '@quizmoo/shared'
+export { isCorrect, isNearMiss, isPartialScoring, partialCredit, pointsFor, textMatch, typoDistance, typosAllowed } from '@quizmoo/shared'
 
 /** Dense ranking by score descending (ties share a rank), sorted stably by name within a score. */
 export function denseRank<T extends { score: number; name: string }>(items: readonly T[]): (T & { rank: number })[] {

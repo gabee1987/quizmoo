@@ -17,6 +17,7 @@ export function ScreenReveal({ host }: { host: HostSnapshot }) {
   const stats = [
     t('results.answered', { answered: reveal.answeredCount, count: host.players.length }),
     scored ? t('screen.correctCount', { correct: reveal.correctCount, count: reveal.answeredCount }) : null,
+    scored && reveal.partialCount > 0 ? t('results.partlyRightCount', { count: reveal.partialCount }) : null,
     scored && host.players.length > 0
       ? t('results.correctPercent', { percent: Math.round((reveal.correctCount / host.players.length) * 100) })
       : null,

@@ -368,6 +368,7 @@ function buildBaseSnapshot(state: GameState, now: number, audience: ResultsAudie
     nextPin: state.nextPin ?? null,
     scheduledAt: state.scheduledAt ?? null,
     joinLocked: state.joinLocked ?? false,
+    reactionsMuted: state.reactionsMuted ?? false,
     branding: brandingFor(state, audience),
     endFacts: phase === 'finished' && !answersHidden(state, audience) ? endFacts(state) : null,
   }
@@ -485,6 +486,7 @@ export function revealInfo(state: GameState, question: Question): RevealInfo {
   const players = Object.values(state.players)
   const answeredCount = players.filter((p) => p.answers[question.id]).length
   const correctCount = players.filter((p) => p.answers[question.id]?.correct === true).length
+  const partialCount = players.filter((p) => p.answers[question.id]?.correct === 'partial').length
   const correctKeys = new Set<string>(staticCorrectKeys(question))
   const nearKeys = new Set<string>()
   // The bars count a one-answer team's answer once.
@@ -501,7 +503,7 @@ export function revealInfo(state: GameState, question: Question): RevealInfo {
       if (record.nearMiss) for (const key of keys) nearKeys.add(key)
     }
   }
-  return { question, distribution, correctCount, answeredCount, correctKeys: [...correctKeys], nearKeys: [...nearKeys] }
+  return { question, distribution, correctCount, partialCount, answeredCount, correctKeys: [...correctKeys], nearKeys: [...nearKeys] }
 }
 
 function staticCorrectKeys(question: Question): string[] {
@@ -536,6 +538,7 @@ function questionStats(state: GameState): QuestionStat[] {
       groupId: question.groupId ?? null,
       answeredCount: records.length,
       correctCount: records.filter((r) => r.correct === true).length,
+      partialCount: records.filter((r) => r.correct === 'partial').length,
       averageTimeMs: records.length > 0 ? Math.round(totalTime / records.length) : null,
     }
   })

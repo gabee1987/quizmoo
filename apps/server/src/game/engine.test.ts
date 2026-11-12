@@ -17,6 +17,8 @@ import {
   reconnectPlayer,
   releaseResults,
   setJoinLocked,
+  setReactionsMuted,
+  reactionsOpen,
   resultsPending,
   resultsPendingFor,
   showScoreboard,
@@ -166,6 +168,30 @@ describe('lobby commands', () => {
     expectCode(() => join(state, 2), 'errors.joiningLocked')
     expect(Object.keys(join(setJoinLocked(state, false), 2).players)).toEqual(['p1', 'p2'])
     expectCode(() => setJoinLocked(endGame(state, T0), false), 'errors.invalidTransition')
+  })
+
+  it('mutes and un-mutes reactions, kept through a JSON round trip', () => {
+    let state = setReactionsMuted(withPlayers(1), true)
+    expect(state.reactionsMuted).toBe(true)
+    expect(JSON.parse(JSON.stringify(state))).toEqual(state)
+    expect(setReactionsMuted(state, true)).toBe(state)
+    expect(reactionsOpen(state)).toBe(false)
+    state = setReactionsMuted(state, false)
+    expect(reactionsOpen(state)).toBe(true)
+  })
+
+  it('opens reactions outside a question and the countdown, with the setting on', () => {
+    const lobby = withPlayers(1, { countdownSec: 3 })
+    expect(reactionsOpen(lobby)).toBe(true)
+    const countdown = startGame(lobby, T0)
+    expect(countdown.phase).toBe('countdown')
+    expect(reactionsOpen(countdown)).toBe(false)
+    const question = startGame(withPlayers(1), T0)
+    expect(question.phase).toBe('question')
+    expect(reactionsOpen(question)).toBe(false)
+    expect(reactionsOpen(endQuestion(question))).toBe(true)
+    expect(reactionsOpen(endGame(question, T0))).toBe(true)
+    expect(reactionsOpen(withPlayers(1, { reactions: false }))).toBe(false)
   })
 
   it('rejects a new join after start but lets a known token back in', () => {

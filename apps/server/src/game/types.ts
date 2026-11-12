@@ -11,6 +11,7 @@ import type {
   QuestionGroup,
   QuickMessage,
   TeamAnswerMode,
+  Verdict,
 } from '@quizmoo/shared'
 
 export { MAX_PLAYERS } from '@quizmoo/shared'
@@ -24,8 +25,8 @@ export interface PlayerAnswerRecord {
   points: number
   /** The streak bonus within `points`. Missing in games saved before it existed. */
   bonus?: number
-  /** null for polls and for host-graded text until `gradeText`. */
-  correct: boolean | null
+  /** null for polls and for host-graded text until `gradeText`; `'partial'` for a partly right partial-credit answer. */
+  correct: Verdict
   /** Correct only thanks to the typo allowance. Missing when not (and in games saved before it existed). */
   nearMiss?: boolean
 }
@@ -67,7 +68,7 @@ export interface TeamAnswerRecord {
   picks?: { playerId: string; answer: Answer }[]
   points: number
   bonus?: number
-  correct: boolean | null
+  correct: Verdict
   nearMiss?: boolean
 }
 
@@ -156,6 +157,8 @@ export interface GameState {
   scheduledAt?: number | null
   /** The host closed the game to new players (token rejoins still work). Missing in games saved before it existed. */
   joinLocked?: boolean
+  /** The host muted reactions for now. Missing in games saved before reactions existed. */
+  reactionsMuted?: boolean
   /**
    * The message box's quick messages, copied from the host's settings at creation. Missing in games
    * saved before they existed; `{ hidden, own }` in games saved before built-in and own were one list.

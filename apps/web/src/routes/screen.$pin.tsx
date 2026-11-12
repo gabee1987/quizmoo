@@ -17,6 +17,7 @@ import { ScreenQuestion } from '../features/screen/question'
 import { ScreenReveal } from '../features/screen/reveal'
 import { ScreenRoundIntro } from '../features/screen/round-intro'
 import { ScreenScoreboard } from '../features/screen/scoreboard'
+import { ReactionFloats } from '../features/reactions/reaction-floats'
 import { apiFetch } from '../lib/api'
 import { meQueryOptions } from '../lib/auth'
 import { closeSession, emitAck, startSession, useGameStore } from '../lib/socket'
@@ -112,6 +113,7 @@ function ScreenPage() {
         joinUrl={info.data?.joinUrl ?? null}
         onCommand={isHost && !host.locked ? (command) => void emitAck('host:command', command) : undefined}
       />
+      <ReactionFloats size="screen" players={host.players} />
       {/* The host's next step, for a projector driven with a mouse; the keyboard shortcut still works. */}
       {action && (
         <Button
