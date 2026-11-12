@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### App dialogs instead of browser prompts
+- Removing a player, removing a team, closing a game from the lobby and leaving a library question with unsaved changes now ask in the app's own confirmation dialog (`confirmAction` in `lib/confirm.ts`, shown by `ConfirmHost` in the root layout) instead of the browser's. Only closing the tab with unsaved changes keeps the browser's prompt, which a page cannot replace.
+
 ### Partial credit for multiple choice (phase 59)
 - A multiple-choice question can give part of its points: each right answer picked earns its share, each wrong one cancels a right one, never below zero (`partialCredit`). With 2 right answers, 1 of them earns half; a right and a wrong pick earn nothing. The speed bonus applies on top.
 - Each multiple-choice question chooses its scoring in the editor, "Partial credit" or "All or nothing", next to its points. New questions start on Partial credit; every question saved before keeps scoring all or nothing (`scoring` missing), so old quizzes, games and files score exactly as before. The starter quiz's two multiple-choice questions use partial credit.

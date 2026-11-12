@@ -1,6 +1,7 @@
 import { useQuery, type QueryClient } from '@tanstack/react-query'
 import { Outlet, createRootRouteWithContext, useRouterState } from '@tanstack/react-router'
 import { AppHeader } from '@/components/app-header'
+import { ConfirmHost } from '@/components/confirm-host'
 import { Backdrop } from '@/components/backdrop'
 import { GameBar } from '@/components/game-bar'
 import { SeasonLayer } from '@/components/season-layer'
@@ -61,6 +62,7 @@ function RootLayout() {
       {/* Not over a phone's answers or on the projector: players see it on the join page first. */}
       {!inGame && !pathname.startsWith('/screen/') && <StorageNotice />}
       <TourLayer />
+      <ConfirmHost />
       <Toaster position="top-center" />
     </TooltipProvider>
   )

@@ -389,7 +389,8 @@
       "moveTo": "Move to",
       "renameTeam": "Rename {{team}}",
       "removeTeam": "Remove {{team}}",
-      "confirmRemoveTeam": "Remove {{team}}? Its players pick another team on their phones.",
+      "confirmRemoveTeam": "Remove {{team}}?",
+      "confirmRemoveTeamBody": "Its players pick another team on their phones.",
       "addTeam": "Add team",
       "withoutTeam": "Without a team",
       "withoutTeamHelp": "Their team was removed. They pick another one on their phones, or you move them. The game starts once everyone has a team.",
@@ -521,7 +522,8 @@
       "podiumHeldHelp": "The game ends here; you release the podium to the projector and the phones when you are ready.",
       "close": "Close the game",
       "closeHelp": "Ends at once with no podium. Every phone and the projector learn the game is over and disconnect. The results stay in your history.",
-      "confirmClose": "Close the game for everyone? Every phone and the projector are disconnected."
+      "confirmClose": "Close the game for everyone?",
+      "confirmCloseBody": "Every phone and the projector are disconnected."
     },
     "lock": {
       "button": "Lock screen",
@@ -1470,7 +1472,6 @@
       "editTitle": "Edit question",
       "details": "Tags and quizzes",
       "back": "Back to the question library",
-      "leave": "Leave without saving your changes?",
       "missing": "This question is no longer in your library. It may have been deleted.",
       "usedIn_one": "Used in {{count}} quiz",
       "usedIn_other": "Used in {{count}} quizzes",

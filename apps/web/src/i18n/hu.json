@@ -389,7 +389,8 @@
       "moveTo": "Melyik csapatba?",
       "renameTeam": "{{team}} átnevezése",
       "removeTeam": "{{team}} törlése",
-      "confirmRemoveTeam": "Törlöd ezt a csapatot: {{team}}? A tagjai a telefonjukon választanak másikat.",
+      "confirmRemoveTeam": "Törlöd ezt a csapatot: {{team}}?",
+      "confirmRemoveTeamBody": "A tagjai a telefonjukon választanak másikat.",
       "addTeam": "Új csapat",
       "withoutTeam": "Csapat nélkül",
       "withoutTeamHelp": "A csapatukat törölted. A telefonjukon választanak másikat, vagy áthelyezed őket. A játék akkor indulhat, ha mindenkinek van csapata.",
@@ -521,7 +522,8 @@
       "podiumHeldHelp": "A játék itt véget ér; a dobogót akkor engeded ki a kivetítőre és a telefonokra, amikor készen állsz.",
       "close": "Lezárom a játékot",
       "closeHelp": "Azonnal véget ér, dobogó nélkül. Minden telefon és a kivetítő megtudja, hogy vége, és lecsatlakozik. Az eredmények megmaradnak az előzményeid között.",
-      "confirmClose": "Lezárod a játékot mindenkinek? Minden telefon és a kivetítő lecsatlakozik."
+      "confirmClose": "Lezárod a játékot mindenkinek?",
+      "confirmCloseBody": "Minden telefon és a kivetítő lecsatlakozik."
     },
     "lock": {
       "button": "Képernyő zárolása",
@@ -1470,7 +1472,6 @@
       "editTitle": "Kérdés szerkesztése",
       "details": "Címkék és kvízek",
       "back": "Vissza a kérdéstárba",
-      "leave": "Mentés nélkül lépsz ki?",
       "missing": "Ez a kérdés már nincs a kérdéstáradban. Lehet, hogy törölted.",
       "usedIn_one": "{{count}} kvízben szerepel",
       "usedIn_other": "{{count}} kvízben szerepel",

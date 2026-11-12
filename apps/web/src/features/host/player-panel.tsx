@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { Hint } from '@/components/hint'
 import { PlayerAvatar } from '../../components/player-avatar'
 import { useNow } from '../../lib/clock'
+import { confirmKick } from './confirm-kick'
 import { MovePlayerMenu } from './move-player-menu'
 
 /**
@@ -106,9 +107,7 @@ export function PlayerPanel({
                   <button
                     type="button"
                     className="min-h-10 rounded-lg px-2 text-sm font-semibold text-destructive underline underline-offset-4 outline-none hover:bg-destructive/10 focus-visible:ring-[3px] focus-visible:ring-ring"
-                    onClick={() => {
-                      if (window.confirm(t('host.game.confirmKick', { name: player.name }))) onKick(player.id)
-                    }}
+                    onClick={() => void confirmKick(t, player.name).then((ok) => ok && onKick(player.id))}
                   >
                     {t('host.game.kick')}
                   </button>

@@ -5,6 +5,7 @@ import { ArrowLeftIcon, EyeIcon, RefreshCwIcon, TriangleAlertIcon } from 'lucide
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AppMenu } from '@/components/app-menu'
+import { ConfirmDialog } from '@/components/dialog'
 import { Hint } from '@/components/hint'
 import { Button } from '@/components/ui/button'
 import { newQuestion } from '@/features/editor/draft'
@@ -96,9 +97,11 @@ export function LibraryQuestionEditor({ item }: { item: BankQuestion | null }) {
     },
   })
 
-  useBlocker({
-    shouldBlockFn: () => UNSAVABLE.includes(status) && !window.confirm(t('bank.page.leave')),
+  // Closing the tab cannot wait for a save, so only there the browser asks; inside the app, our dialog.
+  const blocker = useBlocker({
+    shouldBlockFn: () => UNSAVABLE.includes(status),
     enableBeforeUnload: () => status !== 'saved',
+    withResolver: true,
   })
 
   const pick = (type: QuestionType) => setQuestion(newQuestion(type, EMPTY_QUIZ.questionDefaults))
@@ -202,6 +205,11 @@ export function LibraryQuestionEditor({ item }: { item: BankQuestion | null }) {
       </div>
 
       {syncing && id && uses.data && <SyncQuizzesDialog bankId={id} uses={uses.data} onClose={() => setSyncing(false)} />}
+      {blocker.status === 'blocked' && (
+        <ConfirmDialog title={t('editor.leaveTitle')} confirmLabel={t('editor.leave')} danger onConfirm={blocker.proceed} onCancel={blocker.reset}>
+          {t(`editor.leaveBody.${status as 'invalid' | 'offline' | 'error'}`)}
+        </ConfirmDialog>
+      )}
     </div>
   )
 }
