@@ -259,6 +259,8 @@ export const gameSettingsSchema = z
     soloPlayers: z.boolean().default(false),
     /** New players may join a game that has started (classic and team mode). */
     lateJoin: z.boolean().default(false),
+    /** Players may send emoji reactions between questions; the projector shows them. */
+    reactions: z.boolean().default(true),
     /** Team mode: every team's starting mode when teams choose, otherwise the mode of every team. */
     teamAnswer: teamAnswerModeSchema.default('captain'),
     /** Each team's captain may pick the team's answer mode in the lobby. */

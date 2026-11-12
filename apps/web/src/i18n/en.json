@@ -615,6 +615,9 @@
       },
       "lateJoin": "Players can join late",
       "lateJoinHelp": "New players can still join after the start; they get no points for earlier questions.",
+      "reactions": "Emoji reactions",
+      "reactionsHelp": "Players send emoji between questions, and the projector shows them. Never while a question runs.",
+      "reactionsOff": "No reactions",
       "soloPlayers": "Players may play on their own",
       "soloPlayersHelp": "Players can also pick “On my own” when joining; they are ranked with the teams by their own points.",
       "speedBonus": "Speed bonus",
@@ -864,6 +867,10 @@
     "yourTeamLabel": "Your team",
     "solo": "You're playing on your own",
     "soloGroup": "Solo players",
+    "who": {
+      "title": "Who's here ({{count}})",
+      "you": "(you)"
+    },
     "soloRank": "Among the teams: rank {{rank}}",
     "mixedLeaderboard": "Teams and solo players",
     "leave": {
@@ -2419,6 +2426,25 @@
       }
     }
   },
+  "reactions": {
+    "bar": "Reactions",
+    "names": {
+      "clap": "Applause",
+      "laugh": "Laughing",
+      "wow": "Surprised",
+      "thumbsUp": "Thumbs up",
+      "heart": "Heart",
+      "cow": "Moo"
+    },
+    "showOthers": "Show reactions",
+    "mute": "Mute reactions",
+    "unmute": "Allow reactions",
+    "switch": "Reactions",
+    "openHelp": "Players can send emoji between questions, and the projector shows them.",
+    "mutedHelp": "Muted: players can't send reactions now.",
+    "recent_one": "{{count}} reaction in the last minute",
+    "recent_other": "{{count}} reactions in the last minute"
+  },
   "branding": {
     "logo": "Organiser's logo"
   },
@@ -2782,6 +2808,7 @@
         "draft": "What you filled in while waiting for a scheduled game. Removed when you join or leave.",
         "dismissed": "The host message you dismissed. Until you close the tab.",
         "picksOpen": "Whether your team's picks are open. Until you close the tab.",
+        "reactions": "That you switched other players' reactions off on this device. Until you switch them back on or clear your browser data.",
         "lang": "Your language. Until you change it or clear your browser data.",
         "mode": "Light, dark or system look. Until you change it or clear your browser data.",
         "seasonal": "That you switched the seasonal look off on this device. Until you switch it back on or clear your browser data.",
@@ -2861,7 +2888,9 @@
           "pin": { "term": "PIN or QR code", "text": "Type the 6-digit PIN shown on the projector, or scan the QR code with your phone's camera." },
           "name": { "term": "Name and avatar", "text": "Type a name, or press Surprise me, and pick an avatar. Use a nickname, not your full name." },
           "team": { "term": "Team", "text": "In a team game, join a team or start one. If the host allows it, you can also play on your own." },
-          "wait": { "term": "Lobby", "text": "Wait there until the host starts the game, and keep the page open." }
+          "wait": { "term": "Lobby", "text": "Wait there until the host starts the game, and keep the page open." },
+          "who": { "term": "Who's here", "text": "Open the list in the lobby to see everyone who has joined, by team in a team game." },
+          "react": { "term": "Reactions", "text": "Between questions, tap an emoji to send it: it floats up on the projector and the other phones with your name. In the lobby, while the player list is open, it pops up next to your name there. You can switch other players' reactions off on your phone in the game menu." }
         }
       },
       "answering": {
@@ -2973,6 +3002,7 @@
           "board": { "term": "Player board", "text": "Shows who answered what, as it comes in." },
           "hide": { "text": "Hides the answers on your screen when it is on show." },
           "message": { "term": "Messages", "text": "Send a message to every phone and the projector: type one, or pick one of your quick messages." },
+          "reactions": { "text": "Players send emoji between questions, never while a question runs, and the projector shows them; the button counts the last minute's. Press it to mute them, again to allow them. Switch them off for a whole quiz under Game flow (Emoji reactions)." },
           "grading": { "term": "Grading", "text": "Free-text questions without accepted answers are graded by you after the question." },
           "lock": { "text": "Locks your host pages until your lock code or password is typed, if you have to step away." },
           "keys": { "term": "Keyboard", "text": "If the projector view runs in your browser, Space or the right arrow key moves the game on from there." },

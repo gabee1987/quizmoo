@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { QrCode } from '@/components/qr-code'
 import { Button } from '@/components/ui/button'
+import { ReactionsSwitch } from '@/features/reactions/host-reactions'
 import { usePageTour } from '@/features/tour/use-tour'
 import { useTimeReached } from '@/lib/clock'
 import { cn } from '@/lib/cn'
@@ -190,6 +191,7 @@ function JoinStage({
           checked={host.joinLocked}
           onChange={(locked) => void send({ type: 'lockJoining', locked })}
         />
+        <ReactionsSwitch host={host} onCommand={(command) => void send(command)} />
       </div>
     </section>
   )

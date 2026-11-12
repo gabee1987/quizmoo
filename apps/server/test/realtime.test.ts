@@ -1,4 +1,11 @@
-import type { HostSnapshot, PlayerSnapshot } from '@quizmoo/shared'
+import {
+  REACTION_COOLDOWN_MS,
+  REACTION_FLUSH_MS,
+  REACTION_WINDOW_MS,
+  type HostSnapshot,
+  type PlayerSnapshot,
+  type ReactionBatch,
+} from '@quizmoo/shared'
 import { eq } from 'drizzle-orm'
 import { io as ioClient, type Socket } from 'socket.io-client'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -9,6 +16,7 @@ import {
   END_PAGE_MS,
   announce,
   endGame,
+  endQuestion,
   extendTime,
   joinPlayer,
   pause,
@@ -16,6 +24,7 @@ import {
   releaseResults,
   resume,
   setEndAuto,
+  setReactionsMuted,
   startGame,
   submitAnswer,
   unlockHost,
@@ -27,6 +36,7 @@ import {
   PENDING_RELEASE_TTL_MS,
   type GameStore,
   type ManagedGame,
+  type ReactionFlush,
 } from '../src/realtime/game-manager.js'
 import { RESTORE_WINDOW_MS, createGameStore } from '../src/realtime/persist.js'
 import { generatePin } from '../src/realtime/pin.js'
@@ -233,6 +243,130 @@ describe('GameManager', () => {
     vi.advanceTimersByTime(END_PAGE_MS - 4_000)
     expect(page(restored)).toBe('facts')
     restored.close()
+  })
+
+  describe('reactions', () => {
+    async function lobby(settings = fixtureSettings()) {
+      const manager = new GameManager(memoryStore(), quietLog)
+      const { state } = await manager.create({ ...createInput, settings })
+      const pin = state.pin
+      const flushes: ReactionFlush[] = []
+      manager.subscribeReactions((flush) => flushes.push(flush))
+      return { manager, pin, flushes }
+    }
+
+    it('collects reactions and flushes them once, counting each and naming each sender', async () => {
+      const { manager, pin, flushes } = await lobby()
+      manager.apply(pin, (s) => joinPlayer(s, { id: 'p1', name: 'Anna', token: 't1' }))
+      manager.apply(pin, (s) => joinPlayer(s, { id: 'p2', name: 'Bea', token: 't2' }))
+      expect(manager.react(pin, 'p1', 'thumbsUp')).toBe(true)
+      expect(manager.react(pin, 'p2', 'thumbsUp')).toBe(true)
+      expect(manager.react(pin, 'p2', 'clap')).toBe(true)
+      expect(flushes).toHaveLength(0)
+      vi.advanceTimersByTime(REACTION_FLUSH_MS)
+      expect(flushes).toHaveLength(1)
+      const flush = flushes[0]!
+      expect(flush.all.counts).toEqual([
+        { reaction: 'thumbsUp', teamId: null, count: 2 },
+        { reaction: 'clap', teamId: null, count: 1 },
+      ])
+      expect(flush.all.senders.map((x) => x.playerId)).toEqual(['p1', 'p2', 'p2'])
+      // Each player's own reactions are left out of their batch.
+      expect(flush.forPlayer('p1')!.counts).toEqual([
+        { reaction: 'thumbsUp', teamId: null, count: 1 },
+        { reaction: 'clap', teamId: null, count: 1 },
+      ])
+      expect(flush.forPlayer('p1')!.senders.map((x) => x.playerId)).toEqual(['p2', 'p2'])
+      vi.advanceTimersByTime(REACTION_FLUSH_MS * 4)
+      expect(flushes).toHaveLength(1)
+      manager.close()
+    })
+
+    it('gives a player with nothing left once their own are taken out no batch', async () => {
+      const { manager, pin, flushes } = await lobby()
+      manager.apply(pin, (s) => joinPlayer(s, { id: 'p1', name: 'Anna', token: 't1' }))
+      manager.react(pin, 'p1', 'wow')
+      vi.advanceTimersByTime(REACTION_FLUSH_MS)
+      expect(flushes[0]!.forPlayer('p1')).toBeNull()
+      expect(flushes[0]!.forPlayer('someone-else')!.counts).toHaveLength(1)
+      manager.close()
+    })
+
+    it('takes a burst of 3 per player, then more once the 6 s window moves on', async () => {
+      const { manager, pin } = await lobby()
+      manager.apply(pin, (s) => joinPlayer(s, { id: 'p1', name: 'Anna', token: 't1' }))
+      const taps = [0, 1, 2, 3].map(() => manager.react(pin, 'p1', 'clap'))
+      expect(taps).toEqual([true, true, true, false])
+      vi.advanceTimersByTime(REACTION_WINDOW_MS)
+      expect(manager.react(pin, 'p1', 'clap')).toBe(true)
+      manager.close()
+    })
+
+    it('never drops one tap every 2 s, the pace the phone allows', async () => {
+      const { manager, pin } = await lobby()
+      manager.apply(pin, (s) => joinPlayer(s, { id: 'p1', name: 'Anna', token: 't1' }))
+      for (let i = 0; i < 10; i++) {
+        expect(manager.react(pin, 'p1', 'clap')).toBe(true)
+        vi.advanceTimersByTime(REACTION_COOLDOWN_MS)
+      }
+      manager.close()
+    })
+
+    it('drops reactions during a question, with the setting off, while muted and from unknown players', async () => {
+      const { manager, pin, flushes } = await lobby()
+      manager.apply(pin, (s) => joinPlayer(s, { id: 'p1', name: 'Anna', token: 't1' }))
+      expect(manager.react(pin, 'nobody', 'clap')).toBe(false)
+      manager.apply(pin, (s) => setReactionsMuted(s, true))
+      expect(manager.react(pin, 'p1', 'clap')).toBe(false)
+      manager.apply(pin, (s) => setReactionsMuted(s, false))
+      manager.apply(pin, startGame)
+      expect(manager.react(pin, 'p1', 'clap')).toBe(false)
+      const off = await lobby({ ...fixtureSettings(), reactions: false })
+      off.manager.apply(off.pin, (s) => joinPlayer(s, { id: 'p1', name: 'Anna', token: 't1' }))
+      expect(off.manager.react(off.pin, 'p1', 'clap')).toBe(false)
+      vi.advanceTimersByTime(REACTION_FLUSH_MS)
+      expect(flushes).toHaveLength(0)
+      expect(off.flushes).toHaveLength(0)
+      manager.close()
+      off.manager.close()
+    })
+
+    it('drops collected reactions when a question opens before the flush', async () => {
+      const { manager, pin, flushes } = await lobby()
+      manager.apply(pin, (s) => joinPlayer(s, { id: 'p1', name: 'Anna', token: 't1' }))
+      manager.react(pin, 'p1', 'clap')
+      manager.apply(pin, startGame)
+      vi.advanceTimersByTime(REACTION_FLUSH_MS)
+      expect(flushes).toHaveLength(0)
+      manager.close()
+    })
+
+    it('counts per team, and names the senders outside the lobby too', async () => {
+      const { manager, pin, flushes } = await lobby({ ...fixtureSettings(), mode: 'team', teamNames: ['Red', 'Blue'] })
+      manager.apply(pin, (s) => joinPlayer(s, { id: 'p1', name: 'Anna', teamId: 'team-1', token: 't1' }))
+      manager.apply(pin, (s) => joinPlayer(s, { id: 'p2', name: 'Bea', teamId: 'team-2', token: 't2' }))
+      manager.apply(pin, (s) => joinPlayer(s, { id: 'p3', name: 'Cili', teamId: 'team-2', token: 't3' }))
+      manager.apply(pin, startGame)
+      manager.apply(pin, endQuestion)
+      for (const id of ['p1', 'p2', 'p3']) manager.react(pin, id, 'heart')
+      vi.advanceTimersByTime(REACTION_FLUSH_MS)
+      expect(flushes[0]!.all.counts).toEqual([
+        { reaction: 'heart', teamId: 'team-1', count: 1 },
+        { reaction: 'heart', teamId: 'team-2', count: 2 },
+      ])
+      expect(flushes[0]!.all.senders.map((x) => x.playerId)).toEqual(['p1', 'p2', 'p3'])
+      manager.close()
+    })
+
+    it('stops the flush timer when the game is discarded', async () => {
+      const { manager, pin, flushes } = await lobby()
+      manager.apply(pin, (s) => joinPlayer(s, { id: 'p1', name: 'Anna', token: 't1' }))
+      manager.react(pin, 'p1', 'clap')
+      await manager.discard('game-1')
+      expect(vi.getTimerCount()).toBe(0)
+      vi.advanceTimersByTime(REACTION_FLUSH_MS)
+      expect(flushes).toHaveLength(0)
+    })
   })
 
   describe('group intros', () => {
@@ -658,6 +792,48 @@ describeDb('sockets (database)', () => {
     expect(await back.emitWithAck('player:join', { pin, name: 'Anna', token: anna.ack.token })).toMatchObject({ token: anna.ack.token })
     expect(await command(hostSocket, { type: 'lockJoining', locked: false })).toEqual({ ok: true })
     expect((await player(pin, 'Bea')).ack.token).toEqual(expect.any(String))
+  })
+
+  it('passes reactions to the host, the projector and the other players, never back to the sender, and keeps a fast tapper connected', async () => {
+    const pin = await newGame()
+    const hostSocket = await host(pin)
+    const screen = await connect()
+    expect(await screen.emitWithAck('screen:attach', { pin })).toEqual({ ok: true })
+    const anna = await player(pin, 'Anna')
+    const bea = await player(pin, 'Bea')
+    const annaGot: ReactionBatch[] = []
+    anna.socket.on('game:reactions', (batch: ReactionBatch) => annaGot.push(batch))
+    const toScreen = new Promise<ReactionBatch>((resolve) => screen.once('game:reactions', resolve))
+    const toHost = new Promise<ReactionBatch>((resolve) => hostSocket.once('game:reactions', resolve))
+    const toBea = new Promise<ReactionBatch>((resolve) => bea.socket.once('game:reactions', resolve))
+    // Eight taps at once: three get through, and the socket stays.
+    for (let i = 0; i < 8; i++) anna.socket.emit('player:react', { reaction: 'thumbsUp' })
+    const batch = await toScreen
+    expect(batch.counts).toEqual([{ reaction: 'thumbsUp', teamId: null, count: 3 }])
+    expect(batch.senders).toHaveLength(3)
+    expect((await toHost).counts).toEqual(batch.counts)
+    expect((await toBea).senders.every((x) => x.playerId === anna.snapshot.me.id)).toBe(true)
+    expect(annaGot).toEqual([])
+    expect(anna.socket.connected).toBe(true)
+  })
+
+  it('drops reactions while a question runs and while the host has muted them', async () => {
+    const pin = await newGame()
+    const hostSocket = await host(pin)
+    const anna = await player(pin, 'Anna')
+    const got: ReactionBatch[] = []
+    hostSocket.on('game:reactions', (batch: ReactionBatch) => got.push(batch))
+    const muted = nextSnapshot<PlayerSnapshot>(anna.socket, 'game:player', (s) => s.reactionsMuted)
+    expect(await command(hostSocket, { type: 'muteReactions', muted: true })).toEqual({ ok: true })
+    await muted
+    anna.socket.emit('player:react', { reaction: 'clap' })
+    expect(await command(hostSocket, { type: 'muteReactions', muted: false })).toEqual({ ok: true })
+    expect(await command(hostSocket, { type: 'start' })).toEqual({ ok: true })
+    anna.socket.emit('player:react', { reaction: 'clap' })
+    anna.socket.emit('player:react', { reaction: 'nonsense' })
+    await new Promise((resolve) => setTimeout(resolve, REACTION_FLUSH_MS + 300))
+    expect(got).toEqual([])
+    expect(anna.socket.connected).toBe(true)
   })
 
   it("copies the host's quick messages into a new game, which keeps its own copy through a restart", async () => {

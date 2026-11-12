@@ -615,6 +615,9 @@
       },
       "lateJoin": "Késve is be lehet szállni",
       "lateJoinHelp": "Kezdés után is csatlakozhatnak új játékosok; a korábbi kérdésekre nem kapnak pontot.",
+      "reactions": "Emoji-reakciók",
+      "reactionsHelp": "A játékosok a kérdések között emojit küldenek, és a kivetítő megmutatja. Kérdés közben soha.",
+      "reactionsOff": "Nincs reakció",
       "soloPlayers": "Egyedül is lehet játszani",
       "soloPlayersHelp": "Csatlakozáskor az „Egyedül” is választható; az egyéni játékosok a saját pontjaikkal versenyeznek a csapatokkal.",
       "speedBonus": "Gyorsasági bónusz",
@@ -864,6 +867,10 @@
     "yourTeamLabel": "A csapatod",
     "solo": "Egyedül játszol",
     "soloGroup": "Egyéni játékosok",
+    "who": {
+      "title": "Kik vannak itt ({{count}})",
+      "you": "(te)"
+    },
     "soloRank": "A csapatok között: {{rank}}. hely",
     "mixedLeaderboard": "Csapatok és egyéni játékosok",
     "leave": {
@@ -2419,6 +2426,25 @@
       }
     }
   },
+  "reactions": {
+    "bar": "Reakciók",
+    "names": {
+      "clap": "Taps",
+      "laugh": "Nevetés",
+      "wow": "Meglepődés",
+      "thumbsUp": "Tetszik",
+      "heart": "Szív",
+      "cow": "Mú"
+    },
+    "showOthers": "Mutasd a reakciókat",
+    "mute": "Reakciók némítása",
+    "unmute": "Reakciók engedése",
+    "switch": "Reakciók",
+    "openHelp": "A játékosok a kérdések között emojit küldhetnek, és a kivetítő megmutatja.",
+    "mutedHelp": "Némítva: a játékosok most nem küldhetnek reakciót.",
+    "recent_one": "{{count}} reakció az elmúlt percben",
+    "recent_other": "{{count}} reakció az elmúlt percben"
+  },
   "branding": {
     "logo": "A szervező logója"
   },
@@ -2782,6 +2808,7 @@
         "draft": "Amit egy ütemezett játékra várva kitöltöttél. Törlődik, amikor csatlakozol vagy kilépsz.",
         "dismissed": "A játékvezető üzenete, amelyet bezártál. Amíg be nem zárod a lapot.",
         "picksOpen": "Hogy nyitva vannak-e a csapatod tippjei. Amíg be nem zárod a lapot.",
+        "reactions": "Hogy ezen az eszközön kikapcsoltad a többiek reakcióit. Amíg vissza nem kapcsolod, vagy nem törlöd a böngészőadatokat.",
         "lang": "A nyelved. Amíg át nem állítod, vagy nem törlöd a böngészőadatokat.",
         "mode": "Világos, sötét vagy rendszer szerinti megjelenés. Amíg át nem állítod, vagy nem törlöd a böngészőadatokat.",
         "seasonal": "Hogy ezen az eszközön kikapcsoltad az ünnepi megjelenést. Amíg vissza nem kapcsolod, vagy nem törlöd a böngészőadatokat.",
@@ -2861,7 +2888,9 @@
           "pin": { "term": "PIN vagy QR-kód", "text": "Írd be a kivetítőn látható 6 jegyű PIN-t, vagy olvasd be a QR-kódot a telefonod kamerájával." },
           "name": { "term": "Név és avatar", "text": "Írj be egy nevet, vagy nyomd meg a Lepj meg! gombot, és válassz avatart. Becenevet adj meg, ne a teljes neved." },
           "team": { "term": "Csapat", "text": "Csapatjátékban lépj be egy csapatba, vagy alapíts újat. Ha a játékvezető engedi, egyedül is játszhatsz." },
-          "wait": { "term": "Váróterem", "text": "Itt várj, amíg a játékvezető elindítja a játékot, és hagyd nyitva az oldalt." }
+          "wait": { "term": "Váróterem", "text": "Itt várj, amíg a játékvezető elindítja a játékot, és hagyd nyitva az oldalt." },
+          "who": { "term": "Kik vannak itt", "text": "Nyisd le a listát a váróteremben, és látod, ki csatlakozott már; csapatjátékban csapatonként." },
+          "react": { "term": "Reakciók", "text": "A kérdések között koppints egy emojira: a neveddel együtt felúszik a kivetítőn és a többiek telefonján. A váróteremben, ha nyitva van a játékoslista, ott a neved mellett ugrik fel. A többiek reakcióit a játékmenüben kikapcsolhatod a telefonodon." }
         }
       },
       "answering": {
@@ -2973,6 +3002,7 @@
           "board": { "term": "Játékostábla", "text": "Mutatja, ki mit válaszolt, ahogy beérkezik." },
           "hide": { "text": "Elrejti a válaszokat a képernyődön, ha az ki van vetítve." },
           "message": { "term": "Üzenetek", "text": "Küldj üzenetet minden telefonra és a kivetítőre: írj egyet, vagy válassz a gyors üzeneteid közül." },
+          "reactions": { "text": "A játékosok a kérdések között emojit küldenek, kérdés közben soha, és a kivetítő megmutatja őket; a gomb az elmúlt perc reakcióit számolja. Egy kattintással némítod, még eggyel újra engeded őket. Egy egész kvízre a Játékmenetben kapcsolhatod ki (Emoji-reakciók)." },
           "grading": { "term": "Értékelés", "text": "A szöveges kérdéseket, amiknek nincs elfogadott válasza, a kérdés után te értékeled." },
           "lock": { "text": "Lezárja a játékvezetői oldalaidat, amíg be nem írod a zárkódot vagy a jelszavad, ha el kell lépned a géptől." },
           "keys": { "term": "Billentyűzet", "text": "Ha a kivetítős nézet a te böngésződben fut, onnan a szóközzel vagy a jobbra nyíllal léptetheted a játékot." },

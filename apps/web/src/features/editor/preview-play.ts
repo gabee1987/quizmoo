@@ -213,6 +213,7 @@ export function revealSnapshot(quiz: PreviewQuiz, play: PreviewPlay, now: number
     serverNow: now,
     scheduledAt: null,
     joinLocked: false,
+    reactionsMuted: false,
     answeredCount: play.answer ? 1 : 0,
     players: [me],
     teams: [],

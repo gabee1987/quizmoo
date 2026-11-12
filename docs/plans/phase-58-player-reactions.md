@@ -8,10 +8,15 @@ Players send a quick emoji reaction that everyone sees on the projector, without
 
 ## Decisions (asked 5 November 2026)
 
-- **Six fixed emoji:** 👏 😂 😮 🔥 ❤️ 🐮. No free text, so nothing to moderate.
+- **Six fixed emoji:** 👏 😂 😮 👍 ❤️ 🐮. No free text, so nothing to moderate.
 - **Own reaction at once:** a player's own tap floats up on their phone immediately.
 - **Team colour:** in team mode, each floating emoji on the projector gets a ring in its team's colour.
 - **Not while answering:** reactions are off while a question runs and during the 3-2-1 countdown.
+
+## Decisions (asked 12 November 2026)
+
+- **The waiting screen's player list is built in this phase too** (the backlog's "Who else is here"): an expandable list under the player count, collapsed by default, grouped by team in team mode, live from the snapshot. The reaction bar sits with it.
+- **In the lobby a reaction floats from its sender's row** in that list, so the players see who reacted. This is the one place a reaction carries its sender: in the lobby only, `game:reactions` also lists the senders' player ids (names come from the snapshot the phones already hold). Everywhere else phones and the projector get counts only.
 
 ## Decided in this plan
 
@@ -23,6 +28,15 @@ Players send a quick emoji reaction that everyone sees on the projector, without
 - **Broadcast:** the manager collects counts per game (per emoji, and per team in team mode) and emits one `game:reactions` event every 750 ms while there is anything to send, to the host and screen rooms and to the players. Players receive counts only, never who reacted.
 - **Projector:** emoji float up from the bottom edge, away from the question and the bars, at most 12 on screen at once; a count over 1 draws a bigger emoji. Reduced motion: a static row of the counts that fades after 3 seconds.
 - **Host:** a mute button in the running game's top bar (next to the join lock), a mute switch in the lobby, and a small counter of recent reactions on the host page.
+
+## Deviations (12 November 2026)
+
+- **Reactions still count towards the socket's 10-a-second flood guard**, instead of a limiter of their own outside it: exempting them would give a modified client an unlimited event channel, and the phone's 2 s cooldown keeps a real player far below 10 a second.
+- **The cooldown is a bar draining along the reaction bar's bottom edge**, not a ring: a transform-only animation, and one indicator for the whole bar.
+- **A player's own reactions are left out of their batch on the server** (`forPlayer`), so the float shown at once never shows twice.
+- **Reduced motion on the projector shows the row of counts at the top**: at the bottom it covered the between-questions cards.
+- **After testing (user, 12 November): no team colours, every float names its sender, and floats rise for 5 s to near the top.** This replaces the team rings, the counts-only rule outside the lobby and the bigger float for a count.
+- **The host's counter is on the mute button** (the last minute's reactions), not a separate element.
 
 ## Scope
 
@@ -71,7 +85,7 @@ $env:E2E_BASE_URL="http://localhost:3999"; $env:E2E_USERNAME="admin"; $env:E2E_P
 1. Start a game with the projector open and two phones joined. In the lobby, tap 👏 on one phone: it floats up on that phone at once and on the projector within a second.
 2. Tap quickly ten times: the bar shows its cooldown ring; the projector shows only a few, and the phone stays connected.
 3. Start the first question: the bar disappears on both phones until the reveal.
-4. In the reveal, both phones tap 🔥 at the same moment: the projector shows one bigger 🔥.
+4. In the reveal, both phones tap 👍 at the same moment: the projector shows two 👍 with their names.
 5. Team game with two teams: the floats have rings in two different colours of the answer palette.
 6. Host page: press the mute button. The phones' bars disappear; un-mute brings them back.
 7. Phone game menu: switch off "Show reactions". Other players' reactions stop floating on that phone; its own bar still works.

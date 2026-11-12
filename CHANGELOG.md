@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### Player reactions and "Who's here" (phase 58)
+- Players send emoji reactions (👏 😂 😮 👍 ❤️ 🐮) between questions: in the lobby, round intros, the reveal, the scoreboard and at the end, never while a question runs or counts down. They float up to the top of the projector and the other phones with the sender's name (at most 12 at once; a quiet row of counts with reduced motion). A player's own tap floats at once; the bar then rests for 2 seconds.
+- The server takes at most 3 reactions per player in 6 seconds, drops the rest silently without disconnecting, and sends what it collected at most every 750 ms (`player:react`, `game:reactions`). Reactions are not game state: nothing about them is stored.
+- The phone's waiting screen has a "Who's here" list, folded by default, grouped by team in a team game; while it is open a reaction pops up beside its sender's name.
+- A new Game flow setting, "Emoji reactions" (on by default; batch edit and My settings too). The host mutes and allows them live from the running game's top bar (with the last minute's count) or the lobby's switch; the mute survives a restart (`reactionsMuted`, `muteReactions` command). "Show reactions" in the phone's game menu hides other players' reactions on that device (`quizmoo.reactions`, listed on the cookies page).
+- The help page explains reactions and the player list for players and hosts.
+
 ### App dialogs instead of browser prompts
 - Removing a player, removing a team, closing a game from the lobby and leaving a library question with unsaved changes now ask in the app's own confirmation dialog (`confirmAction` in `lib/confirm.ts`, shown by `ConfirmHost` in the root layout) instead of the browser's. Only closing the tab with unsaved changes keeps the browser's prompt, which a page cannot replace.
 

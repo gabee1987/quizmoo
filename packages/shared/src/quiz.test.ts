@@ -18,6 +18,11 @@ describe('team settings', () => {
     })
   })
 
+  it('reads settings saved before reactions with reactions on', () => {
+    expect(gameSettingsSchema.parse({}).reactions).toBe(true)
+    expect(gameSettingsSchema.parse({ reactions: false }).reactions).toBe(false)
+  })
+
   it('lets quizzes keep team mode without team names', () => {
     expect(gameSettingsSchema.safeParse({ mode: 'team' }).success).toBe(true)
   })

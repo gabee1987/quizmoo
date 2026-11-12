@@ -61,6 +61,7 @@ export const settingsSections = {
     'teamAnswer',
     'teamsChoose',
     'lateJoin',
+    'reactions',
     'shuffleQuestions',
     'revealAnswers',
     'scoreboard',
@@ -94,6 +95,8 @@ export function sectionSummary(settings: GameSettings, section: SettingsSection,
       settings.mode === 'team' ? teamAnswerLabel(settings, t) : null,
       settings.mode === 'team' && settings.soloPlayers ? t('host.create.soloPlayers') : null,
       settings.lateJoin ? t('host.create.lateJoin') : null,
+      // Only when off: on is the usual case.
+      settings.reactions ? null : t('host.create.reactionsOff'),
       settings.shuffleQuestions ? t('host.create.shuffleQuestions') : null,
       `${t('host.create.revealAnswers')}: ${t(`host.create.revealAnswersOptions.${settings.revealAnswers}`)}`,
       settings.revealAnswers === 'afterQuestion'
@@ -371,6 +374,12 @@ export function GameSettingsForm({
             description={t('host.create.lateJoinHelp')}
             checked={value.lateJoin}
             onChange={(lateJoin) => set({ lateJoin })}
+          />
+          <SwitchRow
+            label={t('host.create.reactions')}
+            description={t('host.create.reactionsHelp')}
+            checked={value.reactions}
+            onChange={(reactions) => set({ reactions })}
           />
           <SwitchRow
             label={t('host.create.shuffleQuestions')}

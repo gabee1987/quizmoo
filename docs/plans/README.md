@@ -64,7 +64,7 @@ Finished plans are deleted once their branch is merged: `CHANGELOG.md` records w
 | 55 | [A starter quiz for every new host](phase-55-starter-quiz.md) | `feature/texts-and-starter-quiz` | done (1.11.0) |
 | 56 | Small fixes found along the way | `feature/texts-and-starter-quiz` | in progress |
 | 57 | [Tooltips in the app's own look](phase-57-tooltips.md) | `feature/tooltips-and-tutorial` | done |
-| 58 | [Player reactions](phase-58-player-reactions.md) (third) | `feature/question-bank-and-reactions` | planned |
+| 58 | [Player reactions](phase-58-player-reactions.md) (third) | `feature/question-bank-and-reactions` | done |
 | 59 | Partial credit for multiple choice | `feature/partial-credit` | done |
 | 60 | [Certificates and a results report as PDF](phase-60-certificates.md) (fourth) | `feature/certificates` | planned |
 | 61 | [Platform metrics and statistics](phase-61-metrics.md) (fifth) | `feature/platform-metrics` | planned |
