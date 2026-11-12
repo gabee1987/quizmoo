@@ -1898,6 +1898,43 @@
     "releasedOn": "Released {{date}}",
     "fixed": "Fixed",
     "releases": {
+      "1_14_0": {
+        "title": "E-mail login and account limits",
+        "intro": "Log in with a code sent to your e-mail address instead of a password, see what your account uses, and react from a single button on the phone.",
+        "sections": [
+          {
+            "title": "Logging in with an e-mail code",
+            "items": [
+              "You log in with your e-mail address: Quizmoo sends a 6-digit code that works for 10 minutes. No password to remember.",
+              "If your account has no e-mail address yet, Quizmoo asks you to add and confirm one at your next login. After that you log in with codes.",
+              "Signing up takes an e-mail address and a username, with no approval to wait for: the account is ready as soon as you enter the code.",
+              "Change your address in My settings, Account. Deleting your account and unlocking a locked screen also work with a code we e-mail you.",
+              "The privacy notice and the terms of use now cover your e-mail address, so you accept them once more at your next login."
+            ]
+          },
+          {
+            "title": "What your account uses",
+            "items": [
+              "My settings, Account shows what your account uses against its limits: storage, quizzes, library questions, share codes, open games, games this month and players per game.",
+              "When something would go over a limit, Quizmoo tells you which one. Nothing you saved is ever deleted; ask the admin if you need more."
+            ]
+          },
+          {
+            "title": "For admins",
+            "items": [
+              "The Users page shows every account's e-mail address and what it uses, and sorts by storage. Set limits for one account with \"Edit budget\", or the defaults for everyone.",
+              "Enter your hosting plan's database size there to see how full the database is.",
+              "The e-mail about a new sign-up now names the host and their address. Admins keep their password and can log in either way."
+            ]
+          },
+          {
+            "title": "Reactions",
+            "items": [
+              "Players react from a round button in the bottom left corner of their phone: tapping it opens the emoji. After a reaction the button rests for 5 seconds."
+            ]
+          }
+        ]
+      },
       "1_13_0": {
         "title": "Question library, sharing and reactions",
         "intro": "Keep your best questions in a library, share questions and whole quizzes with a code, give partial credit on multiple choice, and let players react with emoji between questions.",
@@ -3251,7 +3288,7 @@
       "newQuiz": { "title": "Make a quiz", "body": "Start a new quiz here. Questions, rounds, pictures: everything is in the editor." },
       "recent": { "title": "Your quizzes", "body": "The quizzes you edited last. Open one to edit it, or press Play to start a game with it." },
       "nav": { "title": "Find your way", "body": "Your quizzes, your games and their results are always one click away here." },
-      "account": { "title": "Your settings", "body": "Game defaults, quick messages, your logo, and what is new in Quizmoo." },
+      "account": { "title": "Your settings", "body": "Game defaults, quick messages, your logo, your account with your e-mail address and what it uses, and what is new in Quizmoo." },
       "help": { "title": "Need a hand?", "body": "This button shows the tour of any page again, and opens Help, where everything is explained." }
     },
     "quizzes": {
@@ -3308,7 +3345,7 @@
       "export": { "title": "Take it with you", "body": "Download the results as a spreadsheet." }
     },
     "settings": {
-      "tabs": { "title": "Your settings", "body": "Game defaults, quick messages, your branding and your account, each on its own tab." },
+      "tabs": { "title": "Your settings", "body": "Game defaults, quick messages, your branding and your account (your e-mail address and what your account uses), each on its own tab." },
       "defaults": { "title": "Game defaults", "body": "Every new quiz starts with these settings. Each quiz can still change them." },
       "questions": { "title": "New questions", "body": "The time limit and points new questions start with." }
     },

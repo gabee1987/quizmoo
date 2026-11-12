@@ -1898,6 +1898,43 @@
     "releasedOn": "Megjelent: {{date}}",
     "fixed": "Javítva",
     "releases": {
+      "1_14_0": {
+        "title": "Belépés e-mail-kóddal és fiókkeretek",
+        "intro": "Jelszó helyett az e-mail-címedre küldött kóddal lépsz be, látod, mennyit használ a fiókod, a telefonon pedig egyetlen gombbal reagálhatsz.",
+        "sections": [
+          {
+            "title": "Belépés e-mail-kóddal",
+            "items": [
+              "Az e-mail-címeddel lépsz be: a Quizmoo küld egy 6 jegyű kódot, ami 10 percig érvényes. Nem kell jelszót megjegyezned.",
+              "Ha a fiókodhoz még nincs e-mail-cím, a következő belépéskor a Quizmoo megkér, hogy add meg és erősítsd meg. Utána kóddal lépsz be.",
+              "Regisztrálni egy e-mail-címmel és egy felhasználónévvel tudsz, jóváhagyásra várni nem kell: a fiókod kész, amint beírod a kódot.",
+              "A címedet a Beállításaim, Fiók fülön módosíthatod. A fiókod törlése és a zárolt képernyő feloldása is működik egy e-mailben küldött kóddal.",
+              "Az adatkezelési tájékoztató és a felhasználási feltételek már az e-mail-címedre is kiterjednek, ezért a következő belépéskor még egyszer elfogadod őket."
+            ]
+          },
+          {
+            "title": "Mennyit használ a fiókod",
+            "items": [
+              "A Beállításaim, Fiók fülön látod, mennyit használ a fiókod a keretekhez képest: tárhely, kvízek, kérdéstár, megosztási kódok, nyitott játékok, a havi játékok és a játékosok száma játékonként.",
+              "Ha valami túllépné a keretet, a Quizmoo megmondja, melyiket. Semmi mentett nem törlődik; ha több kell, szólj az adminnak."
+            ]
+          },
+          {
+            "title": "Adminoknak",
+            "items": [
+              "A Felhasználók oldalon látod minden fiók e-mail-címét és hogy mennyit használ, és tárhely szerint is rendezheted. Egy fiók kereteit a „Keret szerkesztése” gombbal állítod, mindenkiét az alapértékekkel.",
+              "Add meg ott a tárhelycsomagod adatbázis-méretét, és látod, mennyire telt meg az adatbázis.",
+              "Az új regisztrációról szóló e-mail már megnevezi a játékvezetőt és a címét. Az adminok megtartják a jelszavukat, és mindkét módon beléphetnek."
+            ]
+          },
+          {
+            "title": "Reakciók",
+            "items": [
+              "A játékosok a telefonjuk bal alsó sarkában lévő kerek gombbal reagálnak: koppintásra kinyílnak az emojik. Egy reakció után a gomb 5 másodpercig pihen."
+            ]
+          }
+        ]
+      },
       "1_13_0": {
         "title": "Kérdéstár, megosztás és reakciók",
         "intro": "Tartsd a legjobb kérdéseidet kérdéstárban, oszd meg kérdéseidet és egész kvízeidet kóddal, adj részpontot a feleletválasztós kérdésekre, és hagyd, hogy a játékosok emojival reagáljanak a kérdések között.",
@@ -3251,7 +3288,7 @@
       "newQuiz": { "title": "Készíts kvízt", "body": "Itt kezdhetsz új kvízt. Kérdések, körök, képek: minden a szerkesztőben van." },
       "recent": { "title": "A kvízeid", "body": "Amiket legutóbb szerkesztettél. Nyisd meg, hogy szerkeszd, vagy nyomd meg az Indítást, és játssz vele." },
       "nav": { "title": "Itt mindent megtalálsz", "body": "A kvízeid, a játékaid és az eredményeik mindig egy kattintásra vannak." },
-      "account": { "title": "A beállításaid", "body": "Alap játékbeállítások, gyors üzenetek, a logód, és hogy mi újság a Quizmoo-ban." },
+      "account": { "title": "A beállításaid", "body": "Alap játékbeállítások, gyors üzenetek, a logód, a fiókod az e-mail-címeddel és azzal, hogy mennyit használ, és hogy mi újság a Quizmoo-ban." },
       "help": { "title": "Elakadtál?", "body": "Ezzel a gombbal bármelyik oldal bemutatóját újra megnézheted, és itt nyílik a Súgó is, ahol mindent elmagyarázunk." }
     },
     "quizzes": {
@@ -3308,7 +3345,7 @@
       "export": { "title": "Vidd magaddal", "body": "Töltsd le az eredményeket táblázatként." }
     },
     "settings": {
-      "tabs": { "title": "A beállításaid", "body": "Alap játékbeállítások, gyors üzenetek, a saját arculatod és a fiókod, mind külön fülön." },
+      "tabs": { "title": "A beállításaid", "body": "Alap játékbeállítások, gyors üzenetek, a saját arculatod és a fiókod (az e-mail-címed és hogy mennyit használ a fiókod), mind külön fülön." },
       "defaults": { "title": "Alap játékbeállítások", "body": "Minden új kvíz ezekkel a beállításokkal indul. Kvízenként még átírhatod őket." },
       "questions": { "title": "Új kérdések", "body": "Az időkorlát és a pontszám, amivel az új kérdések indulnak." }
     },

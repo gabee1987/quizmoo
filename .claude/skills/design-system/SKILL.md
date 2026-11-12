@@ -19,6 +19,7 @@ description: The Quizmoo look: shadcn primitives, semantic colour tokens, light 
 
 ## Look
 
+- **No scroll box inside a dialog** (user, 12 November 2026, on the budget dialog): use the width first, fields in columns (`FormDialog wide`, two columns from `sm`); only a phone may scroll, and then the whole dialog (`FormDialog` caps it at the viewport), never a `max-h` box inside it.
 - **Round icon buttons on the same screen share one size** (user, 12 November 2026): on game screens that is the game menu's `size-11` with a `size-5` icon (the reaction button in the opposite corner matches it). Before adding a floating or corner icon button, look up the size of the ones already on that screen and reuse it.
 
 Nunito (self-hosted via `@fontsource-variable/nunito`, never a font CDN), headings `font-black`/`font-extrabold`, 12 to 24 px radii (`rounded-xl` to `rounded-2xl`), `shadow-soft` on cards, solid buttons with a darker bottom edge that sink when pressed. Cards that carry a status get a visible identity: a solid tinted header and border, not a faint transparent wash.

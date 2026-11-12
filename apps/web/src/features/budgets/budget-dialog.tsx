@@ -95,14 +95,16 @@ export function BudgetDialog({
       error={error}
       onCancel={onClose}
       onSubmit={save}
+      wide
     >
-      <div className="-mx-1 flex max-h-[50dvh] flex-col gap-4 overflow-y-auto px-1">
+      {/* Two columns from sm, so all seven limits fit without scrolling. */}
+      <div className="grid gap-x-5 gap-y-4 sm:grid-cols-2">
         {budgetKeys.map((key) => {
           const row = rows[key]
           return (
-            <fieldset key={key} className="flex flex-col gap-2">
-              <legend className="mb-1 text-sm font-bold">{t(`budgets.keys.${key}`)}</legend>
-              <div className="grid grid-cols-[minmax(0,1fr)_7rem] items-end gap-2">
+            <fieldset key={key} className="flex min-w-0 flex-col gap-1.5">
+              <legend className="mb-1.5 text-sm font-bold">{t(`budgets.keys.${key}`)}</legend>
+              <div className={row.mode === 'custom' ? 'grid grid-cols-[minmax(0,1fr)_8rem] items-end gap-2' : 'grid'}>
                 <SelectField
                   label={t('budgets.modeLabel', { name: t(`budgets.keys.${key}`) })}
                   hideLabel

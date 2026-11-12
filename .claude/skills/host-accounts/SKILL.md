@@ -44,4 +44,4 @@ Players are not affected: PIN and nickname only, no account.
 
 ## Compliance
 
-The address is personal data of hosts (privacy notice, records of processing, "Download my data", deleted with the account). Brevo now mails every host and keeps send logs: a compliance review (data processing agreement, log retention) before any client or government use. `TERMS_VERSION` must be raised when this ships, since the terms and privacy notice changed.
+The address is personal data of hosts (privacy notice, records of processing, "Download my data", deleted with the account). Brevo now mails every host and keeps send logs: a compliance review (data processing agreement, log retention) before any client or government use. `TERMS_VERSION` was raised to 2026-11-13 for 1.14.0 (1.13.0 had used 2026-11-12, the day this was built: a same-day date would not have asked anyone again).
